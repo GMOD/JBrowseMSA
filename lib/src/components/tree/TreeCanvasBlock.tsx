@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTheme } from '@mui/material'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import RBush from 'rbush'
+import Flatbush from 'flatbush'
 
 import TreeBranchMenu from './TreeBranchMenu'
 import TreeNodeMenu from './TreeNodeMenu'
@@ -28,6 +28,46 @@ interface ClickEntry {
   maxY: number
 }
 
+class ClickMapIndex {
+  private flatbush: Flatbush | null = null
+  private entries: ClickEntry[] = []
+
+  clear() {
+    this.flatbush = null
+    this.entries = []
+  }
+
+  insert(entry: ClickEntry) {
+    this.entries.push(entry)
+  }
+
+  finish() {
+    if (this.entries.length === 0) {
+      this.flatbush = null
+      return
+    } else {
+      this.flatbush = new Flatbush(this.entries.length)
+      for (const entry of this.entries) {
+        this.flatbush.add(entry.minX, entry.minY, entry.maxX, entry.maxY)
+      }
+      this.flatbush.finish()
+    }
+  }
+
+  search(box: {
+    minX: number
+    maxX: number
+    minY: number
+    maxY: number
+  }): ClickEntry[] {
+    return (
+      this.flatbush
+        ?.search(box.minX, box.minY, box.maxX, box.maxY)
+        .map(i => this.entries[i]!) ?? []
+    )
+  }
+}
+
 const TreeCanvasBlock = observer(function ({
   model,
   offsetY,
@@ -37,7 +77,7 @@ const TreeCanvasBlock = observer(function ({
 }) {
   const theme = useTheme()
   const ref = useRef<HTMLCanvasElement>(null)
-  const clickMap = useRef(new RBush<ClickEntry>())
+  const clickMap = useRef(new ClickMapIndex())
   const mouseoverRef = useRef<HTMLCanvasElement>(null)
   const [branchMenu, setBranchMenu] = useState<TooltipData>()
   const [toggleNodeMenu, setToggleNodeMenu] = useState<TooltipData>()

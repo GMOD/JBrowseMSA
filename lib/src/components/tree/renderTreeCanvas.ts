@@ -1,6 +1,5 @@
 import type { MsaViewModel } from '../../model'
 import type { Theme } from '@mui/material'
-import type RBush from 'rbush'
 
 export const padding = 600
 
@@ -16,6 +15,18 @@ interface ClickEntry {
   maxX: number
   minY: number
   maxY: number
+}
+
+interface ClickMapIndex {
+  clear(): void
+  insert(entry: ClickEntry): void
+  finish(): void
+  search(box: {
+    minX: number
+    maxX: number
+    minY: number
+    maxY: number
+  }): ClickEntry[]
 }
 
 export function renderTree({
@@ -75,7 +86,7 @@ export function renderNodeBubbles({
   blockSizeYOverride,
 }: {
   ctx: CanvasRenderingContext2D
-  clickMap?: RBush<ClickEntry>
+  clickMap?: ClickMapIndex
   offsetY: number
   model: MsaViewModel
   theme: Theme
@@ -133,7 +144,7 @@ export function renderTreeLabels({
   model: MsaViewModel
   offsetY: number
   ctx: CanvasRenderingContext2D
-  clickMap?: RBush<ClickEntry>
+  clickMap?: ClickMapIndex
   theme: Theme
   blockSizeYOverride?: number
 }) {
@@ -239,12 +250,14 @@ export function renderTreeCanvas({
   model: MsaViewModel
   offsetY: number
   ctx: CanvasRenderingContext2D
-  clickMap?: RBush<ClickEntry>
+  clickMap?: ClickMapIndex
   theme: Theme
   highResScaleFactorOverride?: number
   blockSizeYOverride?: number
 }) {
   clickMap?.clear()
+
+  // Defer the finish call until after all inserts are done
   const {
     noTree,
     drawTree,
@@ -306,4 +319,7 @@ export function renderTreeCanvas({
       blockSizeYOverride,
     })
   }
+
+  // Finish the index so it's ready for queries
+  clickMap?.finish()
 }

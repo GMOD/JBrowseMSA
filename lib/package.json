@@ -54,7 +54,7 @@
     "emf-js": "^2.0.0",
     "file-saver": "^2.0.5",
     "pako": "^2.1.0",
-    "rbush": "^3.0.1",
+    "flatbush": "^4.4.0",
     "stockholm-js": "^1.0.10",
     "svgcanvas": "^2.5.0"
   }
