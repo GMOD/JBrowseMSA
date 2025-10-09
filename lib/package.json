@@ -1,7 +1,7 @@
 {
   "name": "react-msaview",
   "author": "Colin",
-  "version": "4.4.4",
+  "version": "4.4.5",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -53,8 +53,8 @@
     "d3-hierarchy": "^3.1.2",
     "emf-js": "^2.0.0",
     "file-saver": "^2.0.5",
-    "pako": "^2.1.0",
     "flatbush": "^4.4.0",
+    "pako": "^2.1.0",
     "stockholm-js": "^1.0.10",
     "svgcanvas": "^2.5.0"
   }
