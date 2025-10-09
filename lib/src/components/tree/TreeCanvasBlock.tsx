@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useTheme } from '@mui/material'
+import Flatbush from 'flatbush'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import Flatbush from 'flatbush'
 
 import TreeBranchMenu from './TreeBranchMenu'
 import TreeNodeMenu from './TreeNodeMenu'
