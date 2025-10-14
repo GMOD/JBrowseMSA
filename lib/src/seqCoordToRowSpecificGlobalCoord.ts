@@ -9,12 +9,17 @@ export function seqCoordToRowSpecificGlobalCoord({
 }) {
   let k = 0
   let i = 0
-  for (; k < position; i++) {
+  // Find the position-th non-gap character
+  while (i < row.length) {
     if (!isBlank(row[i])) {
+      if (k === position) {
+        return i
+      }
       k++
-    } else if (k >= position) {
-      break
     }
+    i++
   }
-  return i
+  // If position is 0 and we didn't find any non-gap character, return 0
+  // Otherwise return i (which is row.length at this point)
+  return position === 0 ? 0 : i
 }

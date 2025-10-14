@@ -19,13 +19,13 @@ describe('seqCoordToRowSpecificGlobalCoord', () => {
     expect(seqCoordToRowSpecificGlobalCoord({ row, position: 0 })).toBe(0)
 
     // Position 1 (T after first gap) -> Global index 2
-    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 1 })).toBe(1)
+    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 1 })).toBe(2)
 
     // Position 3 (C after second gap) -> Global index 5
-    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 3 })).toBe(4)
+    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 3 })).toBe(5)
 
     // Position 5 (T after third gap) -> Global index 8
-    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 5 })).toBe(7)
+    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 5 })).toBe(8)
 
     // Position 8 (end of sequence) -> Global index 11
     expect(seqCoordToRowSpecificGlobalCoord({ row, position: 8 })).toBe(11)
@@ -46,8 +46,8 @@ describe('seqCoordToRowSpecificGlobalCoord', () => {
     // Sequence positions: A(0) G(1) C(2)
 
     expect(seqCoordToRowSpecificGlobalCoord({ row, position: 0 })).toBe(0)
-    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 1 })).toBe(1)
-    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 2 })).toBe(4)
-    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 3 })).toBe(6)
+    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 1 })).toBe(3)
+    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 2 })).toBe(5)
+    expect(seqCoordToRowSpecificGlobalCoord({ row, position: 3 })).toBe(7)
   })
 })

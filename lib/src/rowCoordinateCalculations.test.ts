@@ -90,11 +90,24 @@ test('with gaps in sequence', () => {
   expect(globalCoordToRowSpecificCoord(sequence, 0)).toBe(0)
   expect(globalCoordToRowSpecificCoord(sequence, 1)).toBe(1)
   expect(globalCoordToRowSpecificCoord(sequence, 2)).toBe(2)
-  // Position 3 in global coordinates is after the gap
+  // Position 2 is a gap, so count before it is 2
   expect(globalCoordToRowSpecificCoord(sequence, 3)).toBe(2)
   expect(globalCoordToRowSpecificCoord(sequence, 4)).toBe(3)
   expect(globalCoordToRowSpecificCoord(sequence, 5)).toBe(4)
-  // Position 6 in global coordinates is after the gap
+  // Position 5 is a gap, so count before it is 4
+  expect(globalCoordToRowSpecificCoord(sequence, 6)).toBe(4)
+})
+
+test('with mixed gap characters (- and .)', () => {
+  const sequence = 'AC.GT-A'
+  expect(globalCoordToRowSpecificCoord(sequence, 0)).toBe(0)
+  expect(globalCoordToRowSpecificCoord(sequence, 1)).toBe(1)
+  // Position 2 is a gap (.), so count before it is 2
+  expect(globalCoordToRowSpecificCoord(sequence, 2)).toBe(2)
+  expect(globalCoordToRowSpecificCoord(sequence, 3)).toBe(2)
+  expect(globalCoordToRowSpecificCoord(sequence, 4)).toBe(3)
+  // Position 5 is a gap (-), so count before it is 4
+  expect(globalCoordToRowSpecificCoord(sequence, 5)).toBe(4)
   expect(globalCoordToRowSpecificCoord(sequence, 6)).toBe(4)
 })
 

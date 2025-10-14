@@ -38,12 +38,8 @@ export function globalCoordToRowSpecificCoord(seq: string, position: number) {
   // Iterate until we reach the target position or end of sequence
   while (currentPosition < position && currentPosition < sequenceLength) {
     // If current character is not a gap, increment the non-gap counter
-    if (seq[currentPosition] !== '-') {
+    if (!isBlank(seq[currentPosition])) {
       nonGapCount++
-    }
-    // If we've reached the target position in non-gap coordinates, break
-    else if (nonGapCount >= position) {
-      break
     }
     currentPosition++
   }
