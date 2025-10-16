@@ -8,7 +8,7 @@ See [user guide](docs/user_guide.md)
 
 ## Demo
 
-See https://gmod.github.io/react-msaview
+See http://gmod.org/JBrowseMSA/
 
 This page is a deployment of the `app` directory in this repo, which uses the
 `react-msaview` NPM package, and additionally adds the 3-D structure viewer
