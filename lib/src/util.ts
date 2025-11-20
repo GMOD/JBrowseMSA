@@ -44,16 +44,16 @@ export function colorContrast(
 }
 
 export function skipBlanks(blanks: number[], arg: string | string[]) {
-  let s = ''
+  const result = []
   let b = 0
   for (let j = 0, l = arg.length; j < l; j++) {
     if (j === blanks[b]) {
       b++
     } else {
-      s += arg[j]
+      result.push(arg[j])
     }
   }
-  return s
+  return result.join('')
 }
 
 // basically same as setRadius from https://observablehq.com/@d3/tree-of-life

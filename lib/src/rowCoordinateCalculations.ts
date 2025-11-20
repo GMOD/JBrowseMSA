@@ -12,6 +12,8 @@ export function mouseOverCoordToGlobalCoord(
   // Iterate until we reach the target mouse position
   while (mousePosition < position) {
     // Skip any blank positions in the sequence
+    // Check if the next position (globalPosition + 1) is blank by comparing
+    // blanks[blankArrayIndex] - 1 with current globalPosition
     while (
       blankArrayIndex < blanksLen &&
       blanks[blankArrayIndex]! - 1 === globalPosition

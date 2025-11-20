@@ -497,7 +497,7 @@ function stateModelFactory() {
       /**
        * #action
        */
-      toggleCollapsed2(node: string) {
+      toggleCollapsedLeaf(node: string) {
         if (self.collapsedLeaves.includes(node)) {
           self.collapsedLeaves.remove(node)
         } else {
@@ -1105,20 +1105,6 @@ function stateModelFactory() {
         return self.MSA?.seqConsensus
       },
 
-      /**
-       * #getter
-       */
-      get conservation() {
-        if (self.columns2d.length) {
-          for (let i = 0; i < self.columns2d[0]!.length; i++) {
-            const col = []
-            for (const column of self.columns2d) {
-              col.push(column[i])
-            }
-          }
-        }
-        return ['a']
-      },
 
       /**
        * #getter
