@@ -1,2 +1,0 @@
-import{R as e}from"./index-vwVwjhbE.js";import{C as a}from"./Checkbox-Bm3_KbZV.js";import{F as l}from"./FormControlLabel-CDmqg1mS.js";function c(o){return e.createElement("div",null,e.createElement(l,{...o}))}function b({checked:o,label:r,disabled:t,onChange:n}){return e.createElement(c,{control:e.createElement(a,{disabled:t,checked:o,onChange:n}),label:r})}export{b as C};
-//# sourceMappingURL=Checkbox2-4gXTtbd4.js.map
