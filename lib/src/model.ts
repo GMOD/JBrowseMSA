@@ -774,16 +774,18 @@ function stateModelFactory() {
             .filter(notEmpty)
           if (strs.length) {
             const s0len = strs[0]!.length
+            const numRows = strs.length
+            const threshold = Math.ceil((realAllowedGappyness / 100) * numRows)
             for (let i = 0; i < s0len; i++) {
               let counter = 0
-              const l = strs.length
-              for (let j = 0; j < l; j++) {
+              for (let j = 0; j < numRows; j++) {
                 if (isBlank(strs[j]![i])) {
                   counter++
+                  if (counter >= threshold) {
+                    blanks.push(i)
+                    break
+                  }
                 }
-              }
-              if (counter / l >= realAllowedGappyness / 100) {
-                blanks.push(i)
               }
             }
           }

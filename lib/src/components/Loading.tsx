@@ -10,6 +10,40 @@ import ImportForm from './import/ImportForm'
 
 import type { MsaViewModel } from '../model'
 
+function LoadingSpinner() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 20 }}>
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <style>
+          {`@keyframes spinner { to { transform: rotate(360deg); } }`}
+        </style>
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="#ccc"
+          strokeWidth="3"
+          fill="none"
+        />
+        <path
+          d="M12 2a10 10 0 0 1 10 10"
+          stroke="#1976d2"
+          strokeWidth="3"
+          fill="none"
+          strokeLinecap="round"
+          style={{ animation: 'spinner 1s linear infinite', transformOrigin: 'center' }}
+        />
+      </svg>
+      <Typography variant="h6">Loading...</Typography>
+    </div>
+  )
+}
+
 const Reset = observer(function ({
   model,
   error,
@@ -44,12 +78,12 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
       >
         {dataInitialized ? (
           isLoading ? (
-            <Typography variant="h4">Loading...</Typography>
+            <LoadingSpinner />
           ) : (
             <MSAView model={model} />
           )
         ) : hasPendingFilehandle || isLoading ? (
-          <Typography variant="h4">Loading...</Typography>
+          <LoadingSpinner />
         ) : (
           <ImportForm model={model} />
         )}
