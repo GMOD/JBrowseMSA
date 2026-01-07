@@ -385,7 +385,7 @@ function stateModelFactory() {
         self.loadingMSA = arg
       },
       /**
-       * #volatile
+       * #action
        */
       setShowZoomStar(arg: boolean) {
         self.showZoomStar = arg
@@ -438,8 +438,8 @@ function stateModelFactory() {
         }
 
         // Find the node in the hierarchy
-        const node = (self as any).hierarchy.find(
-          (n: any) => n.data.id === nodeId,
+        const node = (self as MsaViewModel).hierarchy.find(
+          n => n.data.id === nodeId,
         )
         if (!node) {
           self.hoveredTreeNode = undefined
@@ -741,7 +741,7 @@ function stateModelFactory() {
         ;[...self.collapsed, ...self.collapsedLeaves]
           .map(collapsedId => hier.find(node => node.data.id === collapsedId))
           .filter(notEmpty)
-          .map(node => {
+          .forEach(node => {
             collapse(node)
           })
 
@@ -767,27 +767,32 @@ function stateModelFactory() {
        */
       get blanks() {
         const { hideGaps, realAllowedGappyness } = self
-        const blanks = []
-        if (hideGaps) {
-          const strs = this.leaves
-            .map(leaf => this.MSA?.getRow(leaf.data.name))
-            .filter(notEmpty)
-          if (strs.length) {
-            const s0len = strs[0]!.length
-            const numRows = strs.length
-            const threshold = Math.ceil((realAllowedGappyness / 100) * numRows)
-            for (let i = 0; i < s0len; i++) {
-              let counter = 0
-              for (let j = 0; j < numRows; j++) {
-                if (isBlank(strs[j]![i])) {
-                  counter++
-                  if (counter >= threshold) {
-                    blanks.push(i)
-                    break
-                  }
-                }
-              }
+        if (!hideGaps) {
+          return []
+        }
+        const strs = this.leaves
+          .map(leaf => this.MSA?.getRow(leaf.data.name))
+          .filter(notEmpty)
+        if (strs.length === 0) {
+          return []
+        }
+        const numCols = strs[0]!.length
+        const numRows = strs.length
+        const threshold = Math.ceil((realAllowedGappyness / 100) * numRows)
+        const blankCounts = new Uint16Array(numCols)
+        for (let j = 0; j < numRows; j++) {
+          const str = strs[j]!
+          for (let i = 0; i < numCols; i++) {
+            // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
+            if ((str.charCodeAt(i) - 45) >>> 0 <= 1) {
+              blankCounts[i]!++
             }
+          }
+        }
+        const blanks = []
+        for (let i = 0; i < numCols; i++) {
+          if (blankCounts[i]! >= threshold) {
+            blanks.push(i)
           }
         }
         return blanks
@@ -1128,7 +1133,6 @@ function stateModelFactory() {
       get seqConsensus() {
         return self.MSA?.seqConsensus
       },
-
 
       /**
        * #getter

@@ -46,11 +46,13 @@ export default class ClustalMSA {
       id: 'root',
       name: 'root',
       noTree: true,
-      children: this.getNames().map(name => ({
-        id: name,
-        name,
-        children: [],
-      })),
+      children: this.getNames()
+        .filter((name): name is string => name !== undefined)
+        .map(name => ({
+          id: name,
+          name,
+          children: [],
+        })),
     }
   }
 

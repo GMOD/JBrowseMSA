@@ -1,26 +1,26 @@
 import type { NodeWithIds } from '../types'
 
-function parseSmallFasta(text: string) {
-  return text
-    .split('>')
-    .filter(t => /\S/.test(t))
-    .map(entryText => {
-      const [defLine, ...seqLines] = entryText.split('\n')
-      const [id, ...description] = defLine!.split(' ')
-      const descriptionStr = description.join(' ')
-      const seqLinesStr = seqLines.join('')
-      const sequence = seqLinesStr.replaceAll(/\s/g, '')
-      return { id, description: descriptionStr, sequence }
-    })
-}
 export default class FastaMSA {
   private MSA: { seqdata: Record<string, string> }
+
   constructor(text: string) {
-    this.MSA = {
-      seqdata: Object.fromEntries(
-        parseSmallFasta(text).map(m => [m.id, m.sequence]),
-      ),
+    const seqdata: Record<string, string> = {}
+    for (const entry of text.split('>')) {
+      if (!/\S/.test(entry)) {
+        continue
+      }
+      const newlineIdx = entry.indexOf('\n')
+      if (newlineIdx === -1) {
+        continue
+      }
+      const defLine = entry.slice(0, newlineIdx)
+      const spaceIdx = defLine.indexOf(' ')
+      const id = spaceIdx === -1 ? defLine : defLine.slice(0, spaceIdx)
+      if (id) {
+        seqdata[id] = entry.slice(newlineIdx + 1).replaceAll(/\s/g, '')
+      }
     }
+    this.MSA = { seqdata }
   }
 
   getMSA() {
