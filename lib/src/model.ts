@@ -579,9 +579,19 @@ function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
+       * hideGaps only takes effect when there are collapsed rows
+       */
+      get hideGapsEffective() {
+        return (
+          self.hideGaps &&
+          (self.collapsed.length > 0 || self.collapsedLeaves.length > 0)
+        )
+      },
+      /**
+       * #getter
        */
       get realAllowedGappyness() {
-        return self.hideGaps ? self.allowedGappyness : 100
+        return this.hideGapsEffective ? self.allowedGappyness : 100
       },
       /**
        * #getter
@@ -766,8 +776,8 @@ function stateModelFactory() {
        * #getter
        */
       get blanks() {
-        const { hideGaps, realAllowedGappyness } = self
-        if (!hideGaps) {
+        const { hideGapsEffective, realAllowedGappyness } = self
+        if (!hideGapsEffective) {
           return []
         }
         const strs = this.leaves
@@ -839,10 +849,10 @@ function stateModelFactory() {
        * #getter
        */
       get columns2d() {
-        const { hideGaps } = self
+        const { hideGapsEffective } = self
         return this.rows
           .map(r => r[1])
-          .map(str => (hideGaps ? skipBlanks(this.blanks, str) : str))
+          .map(str => (hideGapsEffective ? skipBlanks(this.blanks, str) : str))
       },
       /**
        * #getter
@@ -1138,13 +1148,13 @@ function stateModelFactory() {
        * #getter
        */
       get adapterTrackModels(): BasicTrack[] {
-        const { rowHeight, MSA, hideGaps, blanks } = self
+        const { rowHeight, MSA, hideGapsEffective, blanks } = self
         return (
           MSA?.tracks.map(t => ({
             model: {
               ...t,
               data: t.data
-                ? hideGaps
+                ? hideGapsEffective
                   ? skipBlanks(blanks, t.data)
                   : t.data
                 : undefined,
