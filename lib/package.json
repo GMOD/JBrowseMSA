@@ -23,7 +23,7 @@
     "watch": "yarn build:esm --watch",
     "format": "prettier --write .",
     "prebuild": "npm run clean",
-    "prepublishOnly": "node output-version.js > src/version.ts && git add -A src && git commit -m '[skip ci] Bump version.ts'",
+    "preversion": "node output-version.js > src/version.ts && git add -A src && git commit -m '[skip ci] Bump version.ts'",
     "build:esm": "tsc",
     "build:bundle": "webpack",
     "build": "npm run build:esm && npm run build:bundle",
