@@ -21,6 +21,30 @@ import Stockholm from 'stockholm-js'
 import { blocksX, blocksY } from './calculateBlocks'
 import colorSchemes from './colorSchemes'
 import TextTrack from './components/TextTrack'
+import {
+  defaultAllowedGappyness,
+  defaultBgColor,
+  defaultColWidth,
+  defaultColorSchemeName,
+  defaultContrastLettering,
+  defaultCurrentAlignment,
+  defaultDrawLabels,
+  defaultDrawMsaLetters,
+  defaultDrawNodeBubbles,
+  defaultDrawTree,
+  defaultHeight,
+  defaultHideGaps,
+  defaultLabelsAlignRight,
+  defaultRowHeight,
+  defaultScrollX,
+  defaultScrollY,
+  defaultShowBranchLen,
+  defaultShowDomains,
+  defaultSubFeatureRows,
+  defaultTreeAreaWidth,
+  defaultTreeWidth,
+  defaultTreeWidthMatchesArea,
+} from './constants'
 import { flatToTree } from './flatToTree'
 import palettes from './ggplotPalettes'
 import { measureTextCanvas } from './measureTextCanvas'
@@ -63,8 +87,6 @@ import type { Theme } from '@mui/material'
 import type { HierarchyNode } from 'd3-hierarchy'
 import type { Instance } from 'mobx-state-tree'
 
-const defaultRowHeight = 16
-const defaultColWidth = 12
 const showZoomStarKey = 'msa-showZoomStar'
 
 /**
@@ -90,24 +112,24 @@ function stateModelFactory() {
         /**
          * #property
          */
-        showDomains: false,
+        showDomains: defaultShowDomains,
         /**
          * #property
          */
-        hideGaps: true,
+        hideGaps: defaultHideGaps,
         /**
          * #property
          */
-        allowedGappyness: 100,
+        allowedGappyness: defaultAllowedGappyness,
         /**
          * #property
          */
-        contrastLettering: true,
+        contrastLettering: defaultContrastLettering,
 
         /**
          * #property
          */
-        subFeatureRows: false,
+        subFeatureRows: defaultSubFeatureRows,
 
         /**
          * #property
@@ -118,13 +140,13 @@ function stateModelFactory() {
         /**
          * #property
          */
-        drawMsaLetters: true,
+        drawMsaLetters: defaultDrawMsaLetters,
 
         /**
          * #property
          * height of the div containing the view, px
          */
-        height: types.optional(types.number, 550),
+        height: types.optional(types.number, defaultHeight),
 
         /**
          * #property
@@ -136,13 +158,13 @@ function stateModelFactory() {
          * #property
          * scroll position, Y-offset, px
          */
-        scrollY: 0,
+        scrollY: defaultScrollY,
 
         /**
          * #property
          * scroll position, X-offset, px
          */
-        scrollX: 0,
+        scrollX: defaultScrollX,
 
         /**
          * #property
@@ -173,7 +195,7 @@ function stateModelFactory() {
          * #property
          *
          */
-        currentAlignment: 0,
+        currentAlignment: defaultCurrentAlignment,
 
         /**
          * #property
@@ -1542,88 +1564,100 @@ function stateModelFactory() {
       const snap = result as Omit<typeof result, symbol>
       const {
         data: { tree, msa, treeMetadata },
+        // Main model properties
+        showDomains,
+        hideGaps,
+        allowedGappyness,
+        contrastLettering,
+        subFeatureRows,
+        drawMsaLetters,
+        height,
+        rowHeight,
+        scrollY,
+        scrollX,
+        colWidth,
+        currentAlignment,
+        collapsed,
+        collapsedLeaves,
+        showOnly,
+        turnedOffTracks,
+        featureFilters,
+        relativeTo,
+        // MSA model properties
+        bgColor,
+        colorSchemeName,
+        // Tree model properties
+        drawLabels,
+        labelsAlignRight,
+        treeAreaWidth,
+        treeWidth,
+        treeWidthMatchesArea,
+        showBranchLen,
+        drawTree,
+        drawNodeBubbles,
+        // Always include
         ...rest
       } = snap
-
-      // Default values to filter out
-      const defaults = {
-        // Main model defaults
-        showDomains: false,
-        hideGaps: true,
-        allowedGappyness: 100,
-        contrastLettering: true,
-        subFeatureRows: false,
-        drawMsaLetters: true,
-        height: 550,
-        rowHeight: defaultRowHeight,
-        scrollY: 0,
-        scrollX: 0,
-        colWidth: defaultColWidth,
-        currentAlignment: 0,
-        // MSA model defaults
-        bgColor: true,
-        colorSchemeName: 'maeditor',
-        // Tree model defaults
-        drawLabels: true,
-        labelsAlignRight: false,
-        treeAreaWidth: 400,
-        treeWidth: 300,
-        treeWidthMatchesArea: true,
-        showBranchLen: true,
-        drawTree: true,
-        drawNodeBubbles: true,
-      }
-
-      // Properties that should always be included even if they match defaults
-      const alwaysInclude = new Set(['id', 'type', 'relativeTo'])
-
-      // Filter out properties that match default values
-      function filterDefaults(obj: Record<string, any>): Record<string, any> {
-        const filtered: Record<string, any> = {}
-        for (const [key, value] of Object.entries(obj)) {
-          // Always include essential properties
-          if (alwaysInclude.has(key)) {
-            filtered[key] = value
-            continue
-          }
-
-          // Skip if value matches default
-          if (defaults[key as keyof typeof defaults] === value) {
-            continue
-          }
-
-          // Handle nested objects
-          if (value && typeof value === 'object' && !Array.isArray(value)) {
-            const filteredNested = filterDefaults(value)
-            // Only include nested object if it has non-default properties
-            if (Object.keys(filteredNested).length > 0) {
-              filtered[key] = filteredNested
-            }
-          } else if (Array.isArray(value)) {
-            // Only include arrays that aren't empty
-            if (value.length > 0) {
-              filtered[key] = value
-            }
-          } else {
-            // Include non-default primitives
-            filtered[key] = value
-          }
-        }
-        return filtered
-      }
-
-      const filteredRest = filterDefaults(rest)
 
       // remove the MSA/tree data from the tree if the filehandle available in
       // which case it can be reloaded on refresh
       return {
+        ...rest,
         data: {
           ...(result.treeFilehandle ? {} : { tree }),
           ...(result.msaFilehandle ? {} : { msa }),
           ...(result.treeMetadataFilehandle ? {} : { treeMetadata }),
         },
-        ...filteredRest,
-      }
+        // Main model - only include non-default values
+        ...(showDomains !== defaultShowDomains ? { showDomains } : {}),
+        ...(hideGaps !== defaultHideGaps ? { hideGaps } : {}),
+        ...(allowedGappyness !== defaultAllowedGappyness
+          ? { allowedGappyness }
+          : {}),
+        ...(contrastLettering !== defaultContrastLettering
+          ? { contrastLettering }
+          : {}),
+        ...(subFeatureRows !== defaultSubFeatureRows ? { subFeatureRows } : {}),
+        ...(drawMsaLetters !== defaultDrawMsaLetters ? { drawMsaLetters } : {}),
+        ...(height !== defaultHeight ? { height } : {}),
+        ...(rowHeight !== defaultRowHeight ? { rowHeight } : {}),
+        ...(scrollY !== defaultScrollY ? { scrollY } : {}),
+        ...(scrollX !== defaultScrollX ? { scrollX } : {}),
+        ...(colWidth !== defaultColWidth ? { colWidth } : {}),
+        ...(currentAlignment !== defaultCurrentAlignment
+          ? { currentAlignment }
+          : {}),
+        ...(collapsed?.length ? { collapsed } : {}),
+        ...(collapsedLeaves?.length ? { collapsedLeaves } : {}),
+        ...(showOnly !== undefined ? { showOnly } : {}),
+        ...(turnedOffTracks && Object.keys(turnedOffTracks).length > 0
+          ? { turnedOffTracks }
+          : {}),
+        ...(featureFilters && Object.keys(featureFilters).length > 0
+          ? { featureFilters }
+          : {}),
+        ...(relativeTo !== undefined ? { relativeTo } : {}),
+        // MSA model - only include non-default values
+        ...(bgColor !== defaultBgColor ? { bgColor } : {}),
+        ...(colorSchemeName !== defaultColorSchemeName
+          ? { colorSchemeName }
+          : {}),
+        // Tree model - only include non-default values
+        ...(drawLabels !== defaultDrawLabels ? { drawLabels } : {}),
+        ...(labelsAlignRight !== defaultLabelsAlignRight
+          ? { labelsAlignRight }
+          : {}),
+        ...(treeAreaWidth !== defaultTreeAreaWidth ? { treeAreaWidth } : {}),
+        ...(treeWidth !== defaultTreeWidth ? { treeWidth } : {}),
+        ...(treeWidthMatchesArea !== defaultTreeWidthMatchesArea
+          ? { treeWidthMatchesArea }
+          : {}),
+        ...(showBranchLen !== defaultShowBranchLen ? { showBranchLen } : {}),
+        ...(drawTree !== defaultDrawTree ? { drawTree } : {}),
+        ...(drawNodeBubbles !== defaultDrawNodeBubbles
+          ? { drawNodeBubbles }
+          : {}),
+      } as typeof snap
     })
 }
 

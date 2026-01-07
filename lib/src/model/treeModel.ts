@@ -1,5 +1,16 @@
 import { types } from 'mobx-state-tree'
 
+import {
+  defaultDrawLabels,
+  defaultDrawNodeBubbles,
+  defaultDrawTree,
+  defaultLabelsAlignRight,
+  defaultShowBranchLen,
+  defaultTreeAreaWidth,
+  defaultTreeWidth,
+  defaultTreeWidthMatchesArea,
+} from '../constants'
+
 /**
  * #stateModel Tree
  */
@@ -11,30 +22,30 @@ export function TreeModelF() {
       /**
        * #property
        */
-      drawLabels: true,
+      drawLabels: defaultDrawLabels,
       /**
        * #property
        * right-align the labels
        */
-      labelsAlignRight: false,
+      labelsAlignRight: defaultLabelsAlignRight,
 
       /**
        * #property
        * width of the area the tree is drawn in, px
        */
-      treeAreaWidth: types.optional(types.number, 400),
+      treeAreaWidth: types.optional(types.number, defaultTreeAreaWidth),
 
       /**
        * #property
        * width of the tree within the treeArea, px
        */
-      treeWidth: types.optional(types.number, 300),
+      treeWidth: types.optional(types.number, defaultTreeWidth),
 
       /**
        * #getter
        * synchronization that matches treeWidth to treeAreaWidth
        */
-      treeWidthMatchesArea: true,
+      treeWidthMatchesArea: defaultTreeWidthMatchesArea,
 
       /**
        * #property
@@ -42,19 +53,19 @@ export function TreeModelF() {
        * lengths. if false, the layout is a "cladogram" that does not take into
        * account evolutionary distances
        */
-      showBranchLen: true,
+      showBranchLen: defaultShowBranchLen,
 
       /**
        * #property
        * draw tree, boolean
        */
-      drawTree: true,
+      drawTree: defaultDrawTree,
 
       /**
        * #property
        * draw clickable node bubbles on the tree
        */
-      drawNodeBubbles: true,
+      drawNodeBubbles: defaultDrawNodeBubbles,
     })
     .actions(self => ({
       /**

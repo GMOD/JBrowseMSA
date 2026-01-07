@@ -1,5 +1,7 @@
 import { types } from 'mobx-state-tree'
 
+import { defaultBgColor, defaultColorSchemeName } from '../constants'
+
 /**
  * #stateModel MSAModel
  */
@@ -12,13 +14,13 @@ export function MSAModelF() {
        * #property
        * draw MSA tiles with a background color
        */
-      bgColor: true,
+      bgColor: defaultBgColor,
 
       /**
        * #property
        * default color scheme name
        */
-      colorSchemeName: 'maeditor',
+      colorSchemeName: defaultColorSchemeName,
     })
     .actions(self => ({
       /**

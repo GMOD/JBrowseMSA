@@ -34,7 +34,8 @@ const Reset = observer(function ({
 })
 
 const Loading = observer(function ({ model }: { model: MsaViewModel }) {
-  const { isLoading, dataInitialized } = model
+  const { isLoading, dataInitialized, msaFilehandle, treeFilehandle } = model
+  const hasPendingFilehandle = !!(msaFilehandle || treeFilehandle)
 
   return (
     <div>
@@ -47,6 +48,8 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
           ) : (
             <MSAView model={model} />
           )
+        ) : hasPendingFilehandle || isLoading ? (
+          <Typography variant="h4">Loading...</Typography>
         ) : (
           <ImportForm model={model} />
         )}
