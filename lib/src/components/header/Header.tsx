@@ -5,6 +5,7 @@ import Help from '@mui/icons-material/Help'
 import { IconButton } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import GappynessSlider from './GappynessSlider'
 import HeaderInfoArea from './HeaderInfoArea'
 import HeaderMenu from './HeaderMenu'
 import HeaderStatusArea from './HeaderStatusArea'
@@ -30,6 +31,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <ZoomControls model={model} />
       {model.showZoomStar ? <ZoomStar model={model} /> : null}
       <ZoomMenu model={model} />
+      <GappynessSlider model={model} />
       <div style={{ margin: 'auto' }}>
         <MultiAlignmentSelector model={model} />
       </div>

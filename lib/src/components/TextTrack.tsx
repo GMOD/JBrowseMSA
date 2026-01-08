@@ -106,6 +106,9 @@ const AnnotationTrack = observer(function ({
   model: MsaViewModel
 }) {
   const { blocksX, msaAreaWidth, rowHeight } = model
+  if (!track.model.data) {
+    return null
+  }
   return (
     <div
       style={{

@@ -1194,18 +1194,16 @@ function stateModelFactory() {
       get adapterTrackModels(): BasicTrack[] {
         const { rowHeight, MSA, hideGapsEffective, blanks } = self
         return (
-          MSA?.tracks.map(t => ({
-            model: {
-              ...t,
-              data: t.data
-                ? hideGapsEffective
-                  ? skipBlanks(blanks, t.data)
-                  : t.data
-                : undefined,
-              height: rowHeight,
-            } as TextTrackModel,
-            ReactComponent: TextTrack,
-          })) || []
+          MSA?.tracks
+            .filter(t => t.data)
+            .map(t => ({
+              model: {
+                ...t,
+                data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
+                height: rowHeight,
+              } as TextTrackModel,
+              ReactComponent: TextTrack,
+            })) || []
         )
       },
 

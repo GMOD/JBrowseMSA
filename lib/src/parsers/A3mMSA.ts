@@ -1,5 +1,23 @@
 import type { NodeWithIds } from '../types'
 
+// Char code helpers for fast character classification
+const CODE_A = 65 // 'A'
+const CODE_Z = 90 // 'Z'
+const CODE_a = 97 // 'a'
+const CODE_z = 122 // 'z'
+const CODE_DASH = 45 // '-'
+const CODE_DOT = 46 // '.'
+
+function isUpperOrGap(code: number): boolean {
+  return (
+    (code >= CODE_A && code <= CODE_Z) || code === CODE_DASH || code === CODE_DOT
+  )
+}
+
+function isLower(code: number): boolean {
+  return code >= CODE_a && code <= CODE_z
+}
+
 /**
  * A3M format parser
  *
@@ -14,11 +32,13 @@ import type { NodeWithIds } from '../types'
  */
 export default class A3mMSA {
   private MSA: { seqdata: Record<string, string> }
+  private orderedNames: string[]
 
   constructor(text: string) {
-    const rawSeqs: Record<string, string> = {}
+    const rawSeqs: string[] = []
+    const names: string[] = []
 
-    // First pass: parse sequences (like FASTA)
+    // First pass: parse sequences (like FASTA), preserving order
     for (const entry of text.split('>')) {
       if (!/\S/.test(entry)) {
         continue
@@ -31,12 +51,13 @@ export default class A3mMSA {
       const spaceIdx = defLine.indexOf(' ')
       const id = spaceIdx === -1 ? defLine : defLine.slice(0, spaceIdx)
       if (id) {
-        rawSeqs[id] = entry.slice(newlineIdx + 1).replaceAll(/\s/g, '')
+        rawSeqs.push(entry.slice(newlineIdx + 1).replaceAll(/\s/g, ''))
+        names.push(id)
       }
     }
 
-    // Expand the A3M alignment
-    this.MSA = { seqdata: this.expandA3M(rawSeqs) }
+    this.orderedNames = names
+    this.MSA = { seqdata: this.expandA3M(rawSeqs, names) }
   }
 
   /**
@@ -66,24 +87,38 @@ export default class A3mMSA {
       return false
     }
 
-    // Check for lowercase letters (inserts) in the sequences
-    const hasLowercase = seqs.some(seq => /[a-z]/.test(seq))
-    if (!hasLowercase) {
-      return false
+    // Check for lowercase and compute lengths in single pass per sequence
+    let hasLowercase = false
+    let firstMatchLen = -1
+    let firstRawLen = -1
+    let sameMatchLength = true
+    let differentRawLengths = false
+
+    for (const seq of seqs) {
+      let matchLen = 0
+      for (let i = 0; i < seq.length; i++) {
+        const code = seq.charCodeAt(i)
+        if (isLower(code)) {
+          hasLowercase = true
+        } else {
+          matchLen++
+        }
+      }
+
+      if (firstMatchLen === -1) {
+        firstMatchLen = matchLen
+        firstRawLen = seq.length
+      } else {
+        if (matchLen !== firstMatchLen) {
+          sameMatchLength = false
+        }
+        if (seq.length !== firstRawLen) {
+          differentRawLengths = true
+        }
+      }
     }
 
-    // Check if sequences have different lengths (after removing lowercase,
-    // they should be the same length in A3M)
-    const matchLengths = seqs.map(seq => seq.replaceAll(/[a-z]/g, '').length)
-    const firstLen = matchLengths[0]
-    const sameMatchLength = matchLengths.every(len => len === firstLen)
-
-    // In A3M, the "match length" (uppercase + gaps) should be consistent
-    // but the raw lengths differ due to lowercase inserts
-    const rawLengths = seqs.map(seq => seq.length)
-    const differentRawLengths = !rawLengths.every(len => len === rawLengths[0])
-
-    return sameMatchLength && differentRawLengths
+    return hasLowercase && sameMatchLength && differentRawLengths
   }
 
   /**
@@ -91,106 +126,131 @@ export default class A3mMSA {
    *
    * In A3M, lowercase characters are insertions that implicitly introduce
    * gaps in sequences that don't have an insert at that position.
-   *
-   * Algorithm:
-   * 1. Parse each sequence into "match positions" - each match position
-   *    consists of a match character (uppercase, -, .) followed by zero
-   *    or more insert characters (lowercase)
-   * 2. For each match position, find the maximum number of inserts
-   *    across all sequences
-   * 3. Expand each sequence by padding insert runs with '.' to match
-   *    the maximum
    */
-  private expandA3M(rawSeqs: Record<string, string>): Record<string, string> {
-    const names = Object.keys(rawSeqs)
-    if (names.length === 0) {
-      return rawSeqs
+  private expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
+    const numSeqs = names.length
+    if (numSeqs === 0) {
+      return {}
     }
 
-    // Parse each sequence into match positions with trailing inserts
-    const parsed = new Map<string, { match: string; inserts: string }[]>()
+    // Parse sequences into parallel arrays: matchChars and insertLengths
+    // matchChars[seqIdx] = string of match characters for that sequence
+    // insertLengths[seqIdx] = array of insert lengths after each match position
+    const matchChars: string[] = []
+    const insertLengths: number[][] = []
 
-    for (const name of names) {
-      const seq = rawSeqs[name]!
-      const positions: { match: string; inserts: string }[] = []
+    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
+      const seq = rawSeqs[seqIdx]!
+      const matches: string[] = []
+      const insLens: number[] = []
       let i = 0
 
       while (i < seq.length) {
-        const char = seq[i]!
+        const code = seq.charCodeAt(i)
 
-        // Check if this is a match character (uppercase, -, .)
-        if (/[A-Z\-.]/.test(char)) {
-          // Collect any following lowercase inserts
-          let inserts = ''
+        if (isUpperOrGap(code)) {
+          matches.push(seq[i]!)
+          // Count following lowercase inserts
+          let insLen = 0
           let j = i + 1
-          while (j < seq.length && /[a-z]/.test(seq[j]!)) {
-            inserts += seq[j]
+          while (j < seq.length && isLower(seq.charCodeAt(j))) {
+            insLen++
             j++
           }
-          positions.push({ match: char, inserts })
+          insLens.push(insLen)
           i = j
-        } else if (/[a-z]/.test(char)) {
-          // Leading insert before first match - add a placeholder
-          let inserts = ''
+        } else if (isLower(code)) {
+          // Leading insert before first match
+          matches.push('')
+          let insLen = 0
           let j = i
-          while (j < seq.length && /[a-z]/.test(seq[j]!)) {
-            inserts += seq[j]
+          while (j < seq.length && isLower(seq.charCodeAt(j))) {
+            insLen++
             j++
           }
-          positions.push({ match: '', inserts })
+          insLens.push(insLen)
           i = j
         } else {
-          // Skip unknown characters
           i++
         }
       }
 
-      parsed.set(name, positions)
+      matchChars.push(matches.join(''))
+      insertLengths.push(insLens)
     }
 
-    // Find the number of match positions
-    const numPositions = Math.max(...[...parsed.values()].map(p => p.length))
+    // Find number of match positions and max inserts at each position
+    let numPositions = 0
+    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
+      const len = insertLengths[seqIdx]!.length
+      if (len > numPositions) {
+        numPositions = len
+      }
+    }
 
-    // Find the maximum number of inserts at each position
-    const maxInserts: number[] = []
-    for (let pos = 0; pos < numPositions; pos++) {
-      let max = 0
-      for (const positions of parsed.values()) {
-        const p = positions[pos]
-        if (p) {
-          max = Math.max(max, p.inserts.length)
+    const maxInserts = new Array<number>(numPositions).fill(0)
+    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
+      const insLens = insertLengths[seqIdx]!
+      for (let pos = 0; pos < insLens.length; pos++) {
+        const len = insLens[pos]!
+        if (len > maxInserts[pos]!) {
+          maxInserts[pos] = len
         }
       }
-      maxInserts.push(max)
     }
 
-    // Expand each sequence
+    // Pre-compute gap strings for common lengths (avoid repeated .repeat())
+    const gapCache: string[] = ['']
+    const maxGap = Math.max(...maxInserts, 0)
+    for (let i = 1; i <= maxGap; i++) {
+      gapCache.push('.'.repeat(i))
+    }
+
+    // Build expanded sequences
     const expanded: Record<string, string> = {}
 
-    for (const name of names) {
-      const positions = parsed.get(name)!
-      let result = ''
+    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
+      const seq = rawSeqs[seqIdx]!
+      const matches = matchChars[seqIdx]!
+      const insLens = insertLengths[seqIdx]!
+      const result: string[] = []
+
+      // Track position in original sequence for extracting inserts
+      let seqPos = 0
 
       for (let pos = 0; pos < numPositions; pos++) {
-        const p = positions[pos]
         const maxIns = maxInserts[pos]!
 
-        if (p) {
-          // Add the match character (or gap if empty)
-          result += p.match || '.'
+        if (pos < insLens.length) {
+          const matchChar = matches[pos]
+          const insLen = insLens[pos]!
 
-          // Add inserts, uppercased, padded with gaps
-          const inserts = p.inserts.toUpperCase()
-          result += inserts
-          result += '.'.repeat(maxIns - inserts.length)
+          // Add match character
+          if (matchChar) {
+            result.push(matchChar)
+            seqPos++
+          } else {
+            result.push('.')
+          }
+
+          // Extract and uppercase inserts from original sequence
+          if (insLen > 0) {
+            result.push(seq.slice(seqPos, seqPos + insLen).toUpperCase())
+            seqPos += insLen
+          }
+
+          // Pad with gaps
+          const padding = maxIns - insLen
+          if (padding > 0) {
+            result.push(gapCache[padding]!)
+          }
         } else {
           // This sequence is shorter - add gaps
-          result += '.'
-          result += '.'.repeat(maxIns)
+          result.push(gapCache[1 + maxIns]!)
         }
       }
 
-      expanded[name] = result
+      expanded[names[seqIdx]!] = result.join('')
     }
 
     return expanded
@@ -205,7 +265,7 @@ export default class A3mMSA {
   }
 
   getNames() {
-    return Object.keys(this.MSA.seqdata)
+    return this.orderedNames
   }
 
   getRow(name: string) {

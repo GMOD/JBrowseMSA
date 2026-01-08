@@ -62,10 +62,13 @@ ACDEFGHIKLMNPQRST
   })
 
   test('handles simple A3M with single insert', () => {
+    // In valid A3M, match columns (uppercase + - + .) must be consistent
+    // seq1 has 5 match columns + 1 insert after D
+    // seq2 has 5 match columns, no inserts
     const simple = `>seq1
 ACDaEF
 >seq2
-ACD-EF
+ACDEF
 `
     const parser = new A3mMSA(simple)
 
@@ -80,10 +83,12 @@ ACD-EF
   })
 
   test('handles multiple inserts at different positions', () => {
+    // seq1: 6 match columns (A,C,D,E,F,I) + inserts (ab after D, gh after F)
+    // seq2: 6 match columns, no inserts
     const multi = `>seq1
 ACDabEFghI
 >seq2
-ACD--EF--I
+ACDEFI
 `
     const parser = new A3mMSA(multi)
 
@@ -92,7 +97,7 @@ ACD--EF--I
 
     expect(seq1.length).toBe(seq2.length)
     // seq1: ACD + ab (inserts) + EF + gh (inserts) + I
-    // seq2: ACD + -- + EF + -- + I -> needs . padding at insert positions
+    // seq2: ACD + EF + I -> needs . padding at insert positions
     expect(seq1).toBe('ACDABEFGHI')
     expect(seq2).toBe('ACD..EF..I')
   })
