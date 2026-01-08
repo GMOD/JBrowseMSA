@@ -1211,7 +1211,7 @@ function stateModelFactory() {
        * #getter
        */
       get tracks(): BasicTrack[] {
-        const conservationTrack = {
+        const conservationTrack: BasicTrack = {
           model: {
             id: 'conservation',
             name: 'Conservation',
@@ -1219,7 +1219,7 @@ function stateModelFactory() {
           },
           ReactComponent: ConservationTrack,
         }
-        return [...this.adapterTrackModels, conservationTrack as BasicTrack]
+        return [...this.adapterTrackModels, conservationTrack]
       },
 
       /**

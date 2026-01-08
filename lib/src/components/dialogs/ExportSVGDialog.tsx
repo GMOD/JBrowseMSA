@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import { Dialog, ErrorMessage } from '@jbrowse/core/ui'
 import {
+  Alert,
   Button,
   DialogActions,
   DialogContent,
@@ -29,6 +30,11 @@ export default function ExportSVGDialog({
   const [exportType, setExportType] = useState('viewport')
   const [error, setError] = useState<unknown>()
   const theme = useTheme()
+  const { totalWidth, totalHeight, treeAreaWidth } = model
+  const entireWidth = totalWidth + treeAreaWidth
+  const entireHeight = totalHeight
+  const isLargeExport =
+    exportType === 'entire' && (entireWidth > 10000 || entireHeight > 10000)
   return (
     <Dialog
       onClose={() => {
@@ -70,6 +76,12 @@ export default function ExportSVGDialog({
             </RadioGroup>
           </FormControl>
         </div>
+        {isLargeExport ? (
+          <Alert severity="warning" style={{ marginTop: 8 }}>
+            The entire MSA is very large ({Math.round(entireWidth)}x
+            {Math.round(entireHeight)} pixels). Export may be slow or fail.
+          </Alert>
+        ) : null}
       </DialogContent>
       <DialogActions>
         <Button
@@ -85,11 +97,11 @@ export default function ExportSVGDialog({
                     exportType === 'entire' ? false : includeMinimap,
                   exportType,
                 })
+                onClose()
               } catch (e) {
                 console.error(e)
                 setError(e)
               }
-              onClose()
             })()
           }}
         >

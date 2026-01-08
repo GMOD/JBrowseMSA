@@ -37,10 +37,10 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
   if (exportType === 'viewport') {
     return render({
       width,
-      height,
+      height: height + (includeMinimap ? model.minimapHeight : 0),
       theme,
       model,
-      offsetY: scrollY,
+      offsetY: -scrollY,
       offsetX: -scrollX,
       includeMinimap,
     })

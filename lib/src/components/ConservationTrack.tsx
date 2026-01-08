@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import { observer } from 'mobx-react'
 
 import type { MsaViewModel } from '../model'
-import type { IConservationTrack } from '../types'
+import type { BasicTrack } from '../types'
 
 const ConservationBlock = observer(function ({
   model,
@@ -75,7 +75,7 @@ const ConservationTrack = observer(function ({
   track,
 }: {
   model: MsaViewModel
-  track: IConservationTrack
+  track: BasicTrack
 }) {
   const { blocksX, msaAreaWidth } = model
   const trackHeight = track.model.height

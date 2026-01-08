@@ -57,7 +57,6 @@ export function renderMSABlock({
       ctx,
       theme,
       offsetX,
-      offsetY,
       xStart,
       xEnd,
       visibleLeaves,
@@ -88,7 +87,6 @@ function drawTiles({
   model: MsaViewModel
   offsetX: number
   theme: Theme
-  offsetY: number
   ctx: CanvasRenderingContext2D
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
