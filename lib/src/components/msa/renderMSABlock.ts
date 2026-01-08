@@ -246,7 +246,6 @@ function drawInsertionIndicators({
     return
   }
 
-  console.log(bgColor)
   ctx.lineWidth = 1
   ctx.strokeStyle = '#f0f'
   drawZigZag({ visibleLeaves, xStart, ctx, model, xEnd, offset: 0 })

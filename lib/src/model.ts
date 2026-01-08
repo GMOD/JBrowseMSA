@@ -754,7 +754,11 @@ function stateModelFactory() {
         }
         const insertion = insertions.find(ins => ins.pos === mouseCol)
         if (insertion) {
-          return { rowName, col: mouseCol, letters: insertion.letters }
+          return {
+            rowName,
+            col: mouseCol,
+            letters: insertion.letters,
+          }
         }
         return undefined
       },
