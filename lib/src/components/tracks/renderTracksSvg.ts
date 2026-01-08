@@ -5,6 +5,7 @@ export function renderConservationTrack({
   model,
   ctx,
   offsetX,
+  offsetY,
   trackHeight,
   blockSizeXOverride,
   highResScaleFactorOverride,
@@ -12,6 +13,7 @@ export function renderConservationTrack({
   model: MsaViewModel
   ctx: CanvasRenderingContext2D
   offsetX: number
+  offsetY: number
   trackHeight: number
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
@@ -22,7 +24,7 @@ export function renderConservationTrack({
 
   ctx.resetTransform()
   ctx.scale(k, k)
-  ctx.translate(-offsetX, 0)
+  ctx.translate(-offsetX, offsetY)
 
   const xStart = Math.max(0, Math.floor(offsetX / colWidth))
   const xEnd = Math.max(0, Math.ceil((offsetX + bx) / colWidth))
@@ -45,6 +47,7 @@ export function renderTextTrack({
   ctx,
   track,
   offsetX,
+  offsetY,
   contrastScheme,
   blockSizeXOverride,
   highResScaleFactorOverride,
@@ -53,6 +56,7 @@ export function renderTextTrack({
   ctx: CanvasRenderingContext2D
   track: BasicTrack
   offsetX: number
+  offsetY: number
   contrastScheme: Record<string, string>
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
@@ -74,7 +78,7 @@ export function renderTextTrack({
 
   ctx.resetTransform()
   ctx.scale(k, k)
-  ctx.translate(-offsetX, 0)
+  ctx.translate(-offsetX, offsetY)
   ctx.textAlign = 'center'
   ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
 
@@ -122,14 +126,12 @@ export function renderAllTracks({
   for (const track of turnedOnTracks) {
     const trackHeight = track.model.height
 
-    ctx.save()
-    ctx.translate(0, currentY)
-
     if (track.model.id === 'conservation') {
       renderConservationTrack({
         model,
         ctx,
         offsetX,
+        offsetY: currentY,
         trackHeight,
         blockSizeXOverride,
         highResScaleFactorOverride,
@@ -140,13 +142,13 @@ export function renderAllTracks({
         ctx,
         track,
         offsetX,
+        offsetY: currentY,
         contrastScheme,
         blockSizeXOverride,
         highResScaleFactorOverride,
       })
     }
 
-    ctx.restore()
     currentY += trackHeight
   }
 }

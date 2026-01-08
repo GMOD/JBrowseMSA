@@ -55,6 +55,7 @@ import { MSAModelF } from './model/msaModel'
 import { TreeModelF } from './model/treeModel'
 import { parseAsn1 } from './parseAsn1'
 import parseNewick from './parseNewick'
+import A3mMSA from './parsers/A3mMSA'
 import ClustalMSA from './parsers/ClustalMSA'
 import EmfMSA from './parsers/EmfMSA'
 import FastaMSA from './parsers/FastaMSA'
@@ -675,6 +676,8 @@ function stateModelFactory() {
         if (text) {
           if (Stockholm.sniff(text)) {
             return new StockholmMSA(text, self.currentAlignment)
+          } else if (A3mMSA.sniff(text)) {
+            return new A3mMSA(text)
           } else if (text.startsWith('>')) {
             return new FastaMSA(text)
           } else if (text.startsWith('SEQ')) {

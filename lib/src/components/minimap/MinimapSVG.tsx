@@ -21,7 +21,8 @@ const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
   const right = left + W
   const s = left * unit
   const e = right * unit
-  const fill = 'rgba(66, 119, 127, 0.3)'
+  const fillColor = 'rgb(66, 119, 127)'
+  const fillOpacity = 0.3
 
   return (
     <>
@@ -38,12 +39,14 @@ const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
         y={0}
         width={e - s}
         height={BAR_HEIGHT}
-        fill={fill}
+        fill={fillColor}
+        fillOpacity={fillOpacity}
         stroke="#555"
       />
       <g transform={`translate(0 ${BAR_HEIGHT})`}>
         <polygon
-          fill={fill}
+          fill={fillColor}
+          fillOpacity={fillOpacity}
           points={[
             [e, 0],
             [s, 0],

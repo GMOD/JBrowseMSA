@@ -86,15 +86,6 @@ async function render({
   return renderToStaticMarkup(
     <SvgWrapper width={width} height={height}>
       <Wrapper model={model}>
-        <CoreRendering
-          Context={Context}
-          model={model}
-          theme={theme}
-          offsetX={offsetX}
-          offsetY={offsetY}
-          width={width}
-          contentHeight={contentHeight}
-        />
         {includeTracks && trackHeight > 0 ? (
           <TrackRendering
             Context={Context}
@@ -102,10 +93,20 @@ async function render({
             theme={theme}
             offsetX={offsetX}
             width={width}
-            contentHeight={contentHeight}
             trackHeight={trackHeight}
           />
         ) : null}
+        <g transform={trackHeight > 0 ? `translate(0 ${trackHeight})` : undefined}>
+          <CoreRendering
+            Context={Context}
+            model={model}
+            theme={theme}
+            offsetX={offsetX}
+            offsetY={offsetY}
+            width={width}
+            contentHeight={contentHeight}
+          />
+        </g>
       </Wrapper>
     </SvgWrapper>,
   )
@@ -195,7 +196,6 @@ function TrackRendering({
   model,
   theme,
   width,
-  contentHeight,
   trackHeight,
   offsetX,
   Context,
@@ -203,7 +203,6 @@ function TrackRendering({
   model: MsaViewModel
   theme: Theme
   width: number
-  contentHeight: number
   trackHeight: number
   offsetX: number
   Context: (
@@ -227,7 +226,7 @@ function TrackRendering({
   })
 
   return (
-    <g transform={`translate(${treeAreaWidth} ${contentHeight})`}>
+    <g transform={`translate(${treeAreaWidth} 0)`}>
       <defs>
         <clipPath id={clipId}>
           <rect x={0} y={0} width={msaAreaWidth} height={trackHeight} />
