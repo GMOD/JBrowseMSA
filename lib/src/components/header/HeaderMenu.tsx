@@ -8,6 +8,7 @@ import MoreVert from '@mui/icons-material/Menu'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Search from '@mui/icons-material/Search'
 import Sort from '@mui/icons-material/Sort'
+import AccountTree from '@mui/icons-material/AccountTree'
 import Visibility from '@mui/icons-material/Visibility'
 import { observer } from 'mobx-react'
 
@@ -93,6 +94,22 @@ const HeaderMenu = observer(({ model }: { model: MsaViewModel }) => {
             ])
           },
         },
+        ...(model.rows.length >= 2
+          ? [
+              {
+                label: 'Calculate neighbor joining tree (BLOSUM62)',
+                icon: AccountTree,
+                onClick: () => {
+                  try {
+                    model.calculateNeighborJoiningTreeFromMSA()
+                  } catch (e) {
+                    console.error('Failed to calculate NJ tree:', e)
+                    model.setError(e)
+                  }
+                },
+              },
+            ]
+          : []),
         {
           label: 'Features/protein domains',
           type: 'subMenu',

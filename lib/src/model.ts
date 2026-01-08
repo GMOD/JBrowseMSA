@@ -735,6 +735,29 @@ function stateModelFactory() {
         const { mouseRow } = self
         return mouseRow === undefined ? undefined : this.rowNames[mouseRow]
       },
+      /**
+       * #getter
+       * Returns insertion info if mouse is hovering over an insertion indicator
+       */
+      get hoveredInsertion() {
+        const { mouseCol, mouseRow } = self
+        if (mouseCol === undefined || mouseRow === undefined) {
+          return undefined
+        }
+        const rowName = this.rowNames[mouseRow]
+        if (!rowName) {
+          return undefined
+        }
+        const insertions = this.insertionPositions.get(rowName)
+        if (!insertions) {
+          return undefined
+        }
+        const insertion = insertions.find(ins => ins.pos === mouseCol)
+        if (insertion) {
+          return { rowName, col: mouseCol, letters: insertion.letters }
+        }
+        return undefined
+      },
 
       /**
        * #getter
@@ -821,32 +844,44 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * Returns a map of row name to array of display positions where
-       * insertions should be shown (hidden columns that had non-gap chars)
+       * Returns a map of row name to array of insertions with display position and letters
        */
       get insertionPositions() {
         const { blanks, rows } = this
         if (blanks.length === 0) {
-          return new Map<string, number[]>()
+          return new Map<string, { pos: number; letters: string }[]>()
         }
-        const result = new Map<string, number[]>()
+        const result = new Map<string, { pos: number; letters: string }[]>()
         for (const [name, seq] of rows) {
-          const positions: number[] = []
+          const insertions: { pos: number; letters: string }[] = []
           let displayPos = 0
           let blankIdx = 0
+          let currentInsertPos = -1
+          let currentLetters = ''
           for (let i = 0; i < seq.length; i++) {
             if (blankIdx < blanks.length && blanks[blankIdx] === i) {
               const char = seq[i]!
               if (char !== '-' && char !== '.') {
-                positions.push(displayPos)
+                if (currentInsertPos === displayPos) {
+                  currentLetters += char
+                } else {
+                  if (currentLetters) {
+                    insertions.push({ pos: currentInsertPos, letters: currentLetters })
+                  }
+                  currentInsertPos = displayPos
+                  currentLetters = char
+                }
               }
               blankIdx++
             } else {
               displayPos++
             }
           }
-          if (positions.length > 0) {
-            result.set(name, positions)
+          if (currentLetters) {
+            insertions.push({ pos: currentInsertPos, letters: currentLetters })
+          }
+          if (insertions.length > 0) {
+            result.set(name, insertions)
           }
         }
         return result

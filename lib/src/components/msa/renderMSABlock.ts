@@ -263,17 +263,31 @@ function drawInsertionIndicators({
   if (!hideGapsEffective) {
     return
   }
-  ctx.fillStyle = '#a855f7'
-  const indicatorWidth = Math.max(2, Math.min(colWidth / 4, 4))
+  ctx.strokeStyle = '#f0f'
+  ctx.lineWidth = 1
+  const zigSize = 2
   for (const node of visibleLeaves) {
     const { name } = node.data
-    const positions = insertionPositions.get(name)
-    if (positions) {
+    const insertions = insertionPositions.get(name)
+    if (insertions) {
       const y = node.x!
-      for (const pos of positions) {
+      for (const { pos } of insertions) {
         if (pos >= xStart && pos < xEnd) {
           const x = pos * colWidth + offsetX - (offsetX % colWidth)
-          ctx.fillRect(x - indicatorWidth / 2, y - rowHeight, indicatorWidth, rowHeight)
+          const top = y - rowHeight
+          const bottom = y
+          ctx.beginPath()
+          ctx.moveTo(x, top)
+          let currentY = top
+          let goRight = true
+          while (currentY < bottom) {
+            const nextY = Math.min(currentY + zigSize, bottom)
+            const nextX = goRight ? x + zigSize : x - zigSize
+            ctx.lineTo(nextX, nextY)
+            currentY = nextY
+            goRight = !goRight
+          }
+          ctx.stroke()
         }
       }
     }

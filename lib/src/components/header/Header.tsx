@@ -32,7 +32,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       {model.showZoomStar ? <ZoomStar model={model} /> : null}
       <ZoomMenu model={model} />
       <GappynessSlider model={model} />
-      <div style={{ margin: 'auto' }}>
+      <div style={{ paddingLeft: 20, margin: 'auto' }}>
         <MultiAlignmentSelector model={model} />
       </div>
       <HeaderInfoArea model={model} />
