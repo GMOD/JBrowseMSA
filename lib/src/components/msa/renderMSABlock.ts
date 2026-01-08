@@ -65,7 +65,6 @@ export function renderMSABlock({
     ctx,
     offsetX,
     contrastScheme,
-    theme,
     xStart,
     xEnd,
     visibleLeaves,
@@ -112,6 +111,10 @@ function drawTiles({
     ? columns[relativeTo]?.slice(xStart, xEnd)
     : null
 
+  const isClustalX = colorSchemeName === 'clustalx_protein_dynamic'
+  const isPercentIdentity = colorSchemeName === 'percent_identity_dynamic'
+  const offsetXAligned = offsetX - (offsetX % colWidth)
+
   for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
     const node = visibleLeaves[i]!
     const {
@@ -120,31 +123,29 @@ function drawTiles({
     const y = node.x!
     const str = columns[name]?.slice(xStart, xEnd)
     if (str) {
-      for (let i = 0, l2 = str.length; i < l2; i++) {
-        const letter = str[i]!
+      for (let j = 0, l2 = str.length; j < l2; j++) {
+        const letter = str[j]!
 
         // Use a muted background for positions that match reference
         const isMatchingReference =
-          referenceSeq && name !== relativeTo && letter === referenceSeq[i]
+          referenceSeq && name !== relativeTo && letter === referenceSeq[j]
 
-        const r1 = colorSchemeName === 'clustalx_protein_dynamic'
-        const r2 = colorSchemeName === 'percent_identity_dynamic'
-        const color = r1
-          ? model.colClustalX[xStart + i]![letter]
-          : r2
+        const color = isClustalX
+          ? model.colClustalX[xStart + j]![letter]
+          : isPercentIdentity
             ? (() => {
-                const consensus = model.colConsensus[xStart + i]!
+                const consensus = model.colConsensus[xStart + j]!
                 return letter === consensus.letter ? consensus.color : undefined
               })()
             : colorScheme[letter.toUpperCase()]
-        if (bgColor || r1 || r2) {
+        if (bgColor || isClustalX || isPercentIdentity) {
           // Use a very light background for matching positions in relative mode
           const finalColor = isMatchingReference
             ? theme.palette.action.hover
             : color || theme.palette.background.default
           ctx.fillStyle = finalColor
           ctx.fillRect(
-            i * colWidth + offsetX - (offsetX % colWidth),
+            j * colWidth + offsetXAligned,
             y - rowHeight,
             colWidth,
             rowHeight,
@@ -167,7 +168,6 @@ function drawText({
   offsetX: number
   model: MsaViewModel
   contrastScheme: Record<string, string>
-  theme: Theme
   ctx: CanvasRenderingContext2D
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
@@ -191,20 +191,24 @@ function drawText({
     : null
 
   if (showMsaLetters) {
+    const offsetXAligned = offsetX - (offsetX % colWidth)
+    const halfColWidth = colWidth / 2
+    const quarterRowHeight = rowHeight / 4
+
     for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
       const node = visibleLeaves[i]!
       const {
         data: { name },
       } = node
-      const y = node.x!
+      const y = node.x! - quarterRowHeight
       const str = columns[name]?.slice(xStart, xEnd)
       if (str) {
-        for (let i = 0, l2 = str.length; i < l2; i++) {
-          const letter = str[i]!
+        for (let j = 0, l2 = str.length; j < l2; j++) {
+          const letter = str[j]!
 
           // Check if this position matches the reference
           const isMatchingReference =
-            referenceSeq && name !== relativeTo && letter === referenceSeq[i]
+            referenceSeq && name !== relativeTo && letter === referenceSeq[j]
 
           // Show dot for matching positions, original letter for differences
           const displayLetter = isMatchingReference ? '.' : letter
@@ -213,7 +217,6 @@ function drawText({
           const contrast = contrastLettering
             ? contrastScheme[letter.toUpperCase()] || 'black'
             : 'black'
-          const x = i * colWidth + offsetX - (offsetX % colWidth)
 
           // note: -rowHeight/4 matches +rowHeight/4 in tree
           ctx.fillStyle = actuallyShowDomains
@@ -221,7 +224,7 @@ function drawText({
             : bgColor
               ? contrast
               : color || 'black'
-          ctx.fillText(displayLetter, x + colWidth / 2, y - rowHeight / 4)
+          ctx.fillText(displayLetter, j * colWidth + offsetXAligned + halfColWidth, y)
         }
       }
     }

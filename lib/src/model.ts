@@ -323,6 +323,12 @@ function stateModelFactory() {
 
       /**
        * #volatile
+       * array of column indices to highlight
+       */
+      highlightedColumns: undefined as number[] | undefined,
+
+      /**
+       * #volatile
        * a dummy variable that is incremented when ref changes so autorun for
        * drawing canvas commands will run
        */
@@ -452,6 +458,13 @@ function stateModelFactory() {
         const descendantNames = node.leaves().map((leaf: any) => leaf.data.name)
 
         self.hoveredTreeNode = { nodeId, descendantNames }
+      },
+      /**
+       * #action
+       * set highlighted columns
+       */
+      setHighlightedColumns(columns?: number[]) {
+        self.highlightedColumns = columns
       },
       /**
        * #action
@@ -1216,6 +1229,14 @@ function stateModelFactory() {
        */
       get allBranchesLength0() {
         return this.hierarchy.links().every(s => !s.source.data.length)
+      },
+
+      /**
+       * #getter
+       * effective showBranchLen accounting for allBranchesLength0
+       */
+      get showBranchLenEffective() {
+        return this.allBranchesLength0 ? false : self.showBranchLen
       },
     }))
     .views(self => ({

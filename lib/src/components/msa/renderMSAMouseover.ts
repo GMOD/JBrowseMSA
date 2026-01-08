@@ -28,6 +28,7 @@ export function renderMouseover({
     relativeTo,
     rowNamesSet,
     hoveredTreeNode,
+    highlightedColumns,
   } = model
   ctx.resetTransform()
   ctx.clearRect(0, 0, width, height)
@@ -49,6 +50,14 @@ export function renderMouseover({
       if (rowIndex !== undefined) {
         ctx.fillRect(0, rowIndex * rowHeight + scrollY, width, rowHeight)
       }
+    }
+  }
+
+  // Highlight multiple columns
+  if (highlightedColumns?.length) {
+    ctx.fillStyle = highlightColor
+    for (const col of highlightedColumns) {
+      ctx.fillRect(col * colWidth + scrollX, 0, colWidth, height)
     }
   }
 

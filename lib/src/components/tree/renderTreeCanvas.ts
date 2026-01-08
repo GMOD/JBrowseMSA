@@ -42,15 +42,9 @@ export function renderTree({
   theme: Theme
   blockSizeYOverride?: number
 }) {
-  const {
-    hierarchy,
-    allBranchesLength0,
-    showBranchLen: showBranchLenPre,
-    blockSize,
-  } = model
+  const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
   const by = blockSizeYOverride || blockSize
   ctx.strokeStyle = theme.palette.text.primary
-  const showBranchLen = allBranchesLength0 ? false : showBranchLenPre
   for (const link of hierarchy.links()) {
     const { source, target } = link
     if (target.height === 0 && !showBranchLen) {
@@ -89,19 +83,16 @@ export function renderNodeBubbles({
   clickMap?: ClickMapIndex
   offsetY: number
   model: MsaViewModel
-  theme: Theme
   blockSizeYOverride?: number
 }) {
   const {
     hierarchy,
-    showBranchLen: showBranchLenPre,
-    allBranchesLength0,
+    showBranchLenEffective: showBranchLen,
     collapsed,
     blockSize,
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride || blockSize
-  const showBranchLen = allBranchesLength0 ? false : showBranchLenPre
   for (const node of hierarchy.descendants()) {
     const val = showBranchLen ? 'len' : 'y'
     // @ts-expect-error
@@ -150,8 +141,7 @@ export function renderTreeLabels({
 }) {
   const {
     fontSize,
-    showBranchLen: showBranchLenPre,
-    allBranchesLength0,
+    showBranchLenEffective: showBranchLen,
     treeMetadata,
     hierarchy,
     collapsed,
@@ -167,13 +157,13 @@ export function renderTreeLabels({
     noTree,
   } = model
   const by = blockSizeYOverride || blockSize
+  const emHeight = ctx.measureText('M').width
   if (labelsAlignRight) {
     ctx.textAlign = 'right'
     ctx.setLineDash([1, 3])
   } else {
     ctx.textAlign = 'start'
   }
-  const showBranchLen = allBranchesLength0 ? false : showBranchLenPre
   for (const node of leaves) {
     const {
       data: { name, id },
@@ -187,28 +177,29 @@ export function renderTreeLabels({
     if (y > offsetY - extendBounds && y < offsetY + by + extendBounds) {
       // note: +rowHeight/4 matches with -rowHeight/4 in msa
       const yp = y + fontSize / 4
-      let xp = (showBranchLen ? len : x) || 0
-      if (
-        !showBranchLen &&
-        !collapsed.includes(id) &&
-        !collapsedLeaves.includes(id)
-      ) {
-        // this subtraction is a hack to compensate for the leafnode rendering
-        // glitch (issue #71). the context is that an extra leaf node is added
-        // so that 'collapsing/hiding leaf nodes is possible' but this causes
-        // weird workarounds
-        xp -= treeWidth / hierarchy.height
+      let xp = 0
+      if (!noTree) {
+        xp = (showBranchLen ? len : x) || 0
+        if (
+          !showBranchLen &&
+          !collapsed.includes(id) &&
+          !collapsedLeaves.includes(id)
+        ) {
+          // this subtraction is a hack to compensate for the leafnode rendering
+          // glitch (issue #71). the context is that an extra leaf node is added
+          // so that 'collapsing/hiding leaf nodes is possible' but this causes
+          // weird workarounds
+          xp -= treeWidth / hierarchy.height
+        }
       }
 
       const { width } = ctx.measureText(displayName)
-      const height = ctx.measureText('M').width // use an 'em' for height
 
       ctx.fillStyle = theme.palette.text.primary
       if (labelsAlignRight) {
         const smallPadding = 2
         const offset = treeAreaWidthMinusMargin - smallPadding
         if (drawTree && !noTree) {
-          const { width } = ctx.measureText(displayName)
           ctx.moveTo(xp + radius + 2, y)
           ctx.lineTo(offset - smallPadding - width, y)
           ctx.stroke()
@@ -217,17 +208,18 @@ export function renderTreeLabels({
         clickMap?.insert({
           minX: treeAreaWidth - width,
           maxX: treeAreaWidth,
-          minY: yp - height,
+          minY: yp - emHeight,
           maxY: yp,
           name,
           id,
         })
       } else {
-        ctx.fillText(displayName, xp + d, yp)
+        const labelX = noTree ? 2 : xp + d
+        ctx.fillText(displayName, labelX, yp)
         clickMap?.insert({
-          minX: xp + d + marginLeft,
-          maxX: xp + d + width + marginLeft,
-          minY: yp - height,
+          minX: labelX + marginLeft,
+          maxX: labelX + width + marginLeft,
+          minY: yp - emHeight,
           maxY: yp,
           name,
           id,
@@ -303,7 +295,6 @@ export function renderTreeCanvas({
         offsetY,
         clickMap,
         model,
-        theme,
         blockSizeYOverride,
       })
     }
