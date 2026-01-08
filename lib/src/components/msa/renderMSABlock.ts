@@ -72,6 +72,14 @@ export function renderMSABlock({
     xEnd,
     visibleLeaves,
   })
+  drawInsertionIndicators({
+    model,
+    ctx,
+    offsetX,
+    xStart,
+    xEnd,
+    visibleLeaves,
+  })
   ctx.resetTransform()
 }
 
@@ -230,6 +238,42 @@ function drawText({
               ? contrast
               : color || 'black'
           ctx.fillText(displayLetter, x + colWidth / 2, y - rowHeight / 4)
+        }
+      }
+    }
+  }
+}
+
+function drawInsertionIndicators({
+  model,
+  ctx,
+  offsetX,
+  visibleLeaves,
+  xStart,
+  xEnd,
+}: {
+  model: MsaViewModel
+  offsetX: number
+  ctx: CanvasRenderingContext2D
+  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
+  xStart: number
+  xEnd: number
+}) {
+  const { colWidth, rowHeight, insertionPositions, hideGapsEffective } = model
+  if (!hideGapsEffective) {
+    return
+  }
+  ctx.fillStyle = '#a855f7'
+  const indicatorWidth = Math.max(2, Math.min(colWidth / 4, 4))
+  for (const node of visibleLeaves) {
+    const { name } = node.data
+    const positions = insertionPositions.get(name)
+    if (positions) {
+      const y = node.x!
+      for (const pos of positions) {
+        if (pos >= xStart && pos < xEnd) {
+          const x = pos * colWidth + offsetX - (offsetX % colWidth)
+          ctx.fillRect(x - indicatorWidth / 2, y - rowHeight, indicatorWidth, rowHeight)
         }
       }
     }

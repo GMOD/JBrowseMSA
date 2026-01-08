@@ -84,20 +84,24 @@ export function renderTextTrack({
 
   const xStart = Math.max(0, Math.floor(offsetX / colWidth))
   const xEnd = Math.max(0, Math.ceil((offsetX + bx) / colWidth))
+  const str = data?.slice(xStart, xEnd)
 
-  if (data) {
-    for (let i = xStart; i < xEnd && i < data.length; i++) {
-      const letter = data[i]!
-      const color = colorScheme[letter.toUpperCase()]
-      if (bgColor) {
-        const x = i * colWidth
-        ctx.fillStyle = color ?? 'white'
-        ctx.fillRect(x, 0, colWidth, rowHeight)
-        if (rowHeight >= 10 && colWidth >= rowHeight / 2) {
-          ctx.fillStyle = contrastScheme[letter.toUpperCase()] ?? 'black'
-          ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
-        }
-      }
+  for (let i = 0; str && i < str.length; i++) {
+    const letter = str[i]!
+    const color = colorScheme[letter.toUpperCase()]
+    const x = i * colWidth + offsetX - (offsetX % colWidth)
+
+    if (bgColor && color) {
+      ctx.fillStyle = color
+      ctx.fillRect(x, 0, colWidth, rowHeight)
+    }
+
+    if (rowHeight >= 10 && colWidth >= rowHeight / 2) {
+      ctx.fillStyle =
+        bgColor && color
+          ? (contrastScheme[letter.toUpperCase()] ?? 'black')
+          : 'black'
+      ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
     }
   }
 

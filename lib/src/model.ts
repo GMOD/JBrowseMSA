@@ -49,6 +49,7 @@ import {
 import { flatToTree } from './flatToTree'
 import palettes from './ggplotPalettes'
 import { measureTextCanvas } from './measureTextCanvas'
+import { calculateNeighborJoiningTree } from './neighborJoining'
 import { DataModelF } from './model/DataModel'
 import { DialogQueueSessionMixin } from './model/DialogQueue'
 import { MSAModelF } from './model/msaModel'
@@ -580,12 +581,14 @@ function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
-       * hideGaps only takes effect when there are collapsed rows
+       * hideGaps takes effect when there are collapsed rows or allowedGappyness < 100
        */
       get hideGapsEffective() {
         return (
           self.hideGaps &&
-          (self.collapsed.length > 0 || self.collapsedLeaves.length > 0)
+          (self.collapsed.length > 0 ||
+            self.collapsedLeaves.length > 0 ||
+            self.allowedGappyness < 100)
         )
       },
       /**
@@ -815,6 +818,38 @@ function stateModelFactory() {
        */
       get blanksSet() {
         return new Set(this.blanks)
+      },
+      /**
+       * #getter
+       * Returns a map of row name to array of display positions where
+       * insertions should be shown (hidden columns that had non-gap chars)
+       */
+      get insertionPositions() {
+        const { blanks, rows } = this
+        if (blanks.length === 0) {
+          return new Map<string, number[]>()
+        }
+        const result = new Map<string, number[]>()
+        for (const [name, seq] of rows) {
+          const positions: number[] = []
+          let displayPos = 0
+          let blankIdx = 0
+          for (let i = 0; i < seq.length; i++) {
+            if (blankIdx < blanks.length && blanks[blankIdx] === i) {
+              const char = seq[i]!
+              if (char !== '-' && char !== '.') {
+                positions.push(displayPos)
+              }
+              blankIdx++
+            } else {
+              displayPos++
+            }
+          }
+          if (positions.length > 0) {
+            result.set(name, positions)
+          }
+        }
+        return result
       },
       /**
        * #getter
@@ -1053,6 +1088,18 @@ function stateModelFactory() {
        */
       setDrawMsaLetters(arg: boolean) {
         self.drawMsaLetters = arg
+      },
+
+      /**
+       * #action
+       * Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances
+       */
+      calculateNeighborJoiningTreeFromMSA() {
+        if (self.rows.length < 2) {
+          throw new Error('Need at least 2 sequences to build a tree')
+        }
+        const newickTree = calculateNeighborJoiningTree(self.rows)
+        self.setTree(newickTree)
       },
 
       /**
