@@ -1,5 +1,3 @@
-import { getClustalXColor } from '../../colorSchemes'
-
 import type { MsaViewModel } from '../../model'
 import type { NodeWithIdsAndLength } from '../../types'
 import type { Theme } from '@mui/material'
@@ -132,15 +130,7 @@ function drawTiles({
         const r1 = colorSchemeName === 'clustalx_protein_dynamic'
         const r2 = colorSchemeName === 'percent_identity_dynamic'
         const color = r1
-          ? getClustalXColor(
-              // use model.colStats dot notation here: delay use of colStats
-              // until absolutely needed
-              model.colStats[xStart + i]!,
-              model.colStatsSums[xStart + i]!,
-              model,
-              name,
-              xStart + i,
-            )
+          ? model.colClustalX[xStart + i]![letter]
           : r2
             ? (() => {
                 const consensus = model.colConsensus[xStart + i]!
@@ -251,13 +241,36 @@ function drawInsertionIndicators({
   xStart: number
   xEnd: number
 }) {
-  const { colWidth, rowHeight, insertionPositions, hideGapsEffective } = model
+  const { bgColor, hideGapsEffective } = model
   if (!hideGapsEffective) {
     return
   }
-  ctx.strokeStyle = '#f0f'
+
+  console.log(bgColor)
   ctx.lineWidth = 1
-  const zigSize = 2
+  ctx.strokeStyle = '#f0f'
+  drawZigZag({ visibleLeaves, xStart, ctx, model, xEnd, offset: 0 })
+  ctx.strokeStyle = !bgColor ? '#000' : '#fff'
+  drawZigZag({ visibleLeaves, xStart, ctx, model, xEnd, offset: -1 })
+}
+
+function drawZigZag({
+  model,
+  ctx,
+  visibleLeaves,
+  xStart,
+  xEnd,
+  offset,
+}: {
+  model: MsaViewModel
+  ctx: CanvasRenderingContext2D
+  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
+  xStart: number
+  xEnd: number
+  offset: number
+}) {
+  const zigSize = 1
+  const { colWidth, rowHeight, insertionPositions } = model
   for (const node of visibleLeaves) {
     const { name } = node.data
     const insertions = insertionPositions.get(name)
@@ -269,13 +282,13 @@ function drawInsertionIndicators({
           const top = y - rowHeight
           const bottom = y
           ctx.beginPath()
-          ctx.moveTo(x, top)
+          ctx.moveTo(x + offset, top + offset)
           let currentY = top
           let goRight = true
           while (currentY < bottom) {
-            const nextY = Math.min(currentY + zigSize, bottom)
+            const nextY = Math.min(currentY + zigSize * 2, bottom)
             const nextX = goRight ? x + zigSize : x - zigSize
-            ctx.lineTo(nextX, nextY)
+            ctx.lineTo(nextX + offset, nextY + offset)
             currentY = nextY
             goRight = !goRight
           }
