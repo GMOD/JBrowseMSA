@@ -1567,6 +1567,32 @@ function stateModelFactory() {
 
       /**
        * #method
+       * Convert a global (full MSA) column index to a visible column index.
+       * Returns undefined if the column is hidden (in blanks).
+       * This is the inverse of mouseOverCoordToGlobalCoord.
+       */
+      globalCoordToVisibleCoord(globalCol: number) {
+        const { blanks, blanksSet, hideGapsEffective } = self
+        if (!hideGapsEffective) {
+          return globalCol
+        }
+        if (blanksSet.has(globalCol)) {
+          return undefined // Column is hidden
+        }
+        // Count blanks before this column
+        let blanksBefore = 0
+        for (const b of blanks) {
+          if (b < globalCol) {
+            blanksBefore++
+          } else {
+            break // blanks is sorted
+          }
+        }
+        return globalCol - blanksBefore
+      },
+
+      /**
+       * #method
        * return a global coordinate given a row-specific sequence coordinate
        * which does not not include gaps
        */
