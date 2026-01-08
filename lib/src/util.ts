@@ -52,14 +52,18 @@ export function skipBlanks(blanks: number[], arg: string | string[]) {
   for (const blankIdx of blanks) {
     if (blankIdx > lastEnd) {
       chunks.push(
-        typeof arg === 'string' ? arg.slice(lastEnd, blankIdx) : arg.slice(lastEnd, blankIdx).join(''),
+        typeof arg === 'string'
+          ? arg.slice(lastEnd, blankIdx)
+          : arg.slice(lastEnd, blankIdx).join(''),
       )
     }
     lastEnd = blankIdx + 1
   }
   if (lastEnd < arg.length) {
     chunks.push(
-      typeof arg === 'string' ? arg.slice(lastEnd) : arg.slice(lastEnd).join(''),
+      typeof arg === 'string'
+        ? arg.slice(lastEnd)
+        : arg.slice(lastEnd).join(''),
     )
   }
   return chunks.join('')

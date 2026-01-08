@@ -12,7 +12,9 @@ import type { MsaViewModel } from '../model'
 
 function LoadingSpinner() {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 20 }}>
+    <div
+      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 20 }}
+    >
       <svg
         width="24"
         height="24"
@@ -36,7 +38,10 @@ function LoadingSpinner() {
           strokeWidth="3"
           fill="none"
           strokeLinecap="round"
-          style={{ animation: 'spinner 1s linear infinite', transformOrigin: 'center' }}
+          style={{
+            animation: 'spinner 1s linear infinite',
+            transformOrigin: 'center',
+          }}
         />
       </svg>
       <Typography variant="h6">Loading...</Typography>

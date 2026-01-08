@@ -1,10 +1,10 @@
 import React, { lazy } from 'react'
 
 import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
+import AccountTree from '@mui/icons-material/AccountTree'
 import Assignment from '@mui/icons-material/Assignment'
 import FilterAlt from '@mui/icons-material/FilterAlt'
 import FolderOpen from '@mui/icons-material/FolderOpen'
-import List from '@mui/icons-material/List'
 import MoreVert from '@mui/icons-material/Menu'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Search from '@mui/icons-material/Search'
@@ -16,7 +16,6 @@ import type { MsaViewModel } from '../../model'
 
 // lazies
 const MetadataDialog = lazy(() => import('../dialogs/MetadataDialog'))
-const TracklistDialog = lazy(() => import('../dialogs/TracklistDialog'))
 const ExportSVGDialog = lazy(() => import('../dialogs/ExportSVGDialog'))
 const FeatureFilterDialog = lazy(() => import('../dialogs/FeatureDialog'))
 const SettingsDialog = lazy(() => import('../dialogs/SettingsDialog'))
@@ -26,7 +25,14 @@ const UserProvidedDomainsDialog = lazy(
 const InterProScanDialog = lazy(() => import('../dialogs/InterProScanDialog'))
 
 const HeaderMenu = observer(({ model }: { model: MsaViewModel }) => {
-  const { showDomains, actuallyShowDomains, subFeatureRows, noDomains } = model
+  const {
+    showDomains,
+    actuallyShowDomains,
+    subFeatureRows,
+    noDomains,
+    tracks,
+    turnedOffTracks,
+  } = model
   return (
     <CascadingMenuButton
       menuItems={[
@@ -63,19 +69,18 @@ const HeaderMenu = observer(({ model }: { model: MsaViewModel }) => {
           },
         },
         {
-          label: 'Extra tracks',
-          icon: List,
-          onClick: () => {
-            model.queueDialog(onClose => [
-              TracklistDialog,
-              {
-                model,
-                onClose,
-              },
-            ])
-          },
+          label: 'Tracks',
+          icon: Visibility,
+          type: 'subMenu',
+          subMenu: tracks.map(track => ({
+            label: track.model.name,
+            type: 'checkbox' as const,
+            checked: !turnedOffTracks.has(track.model.id),
+            onClick: () => {
+              model.toggleTrack(track.model.id)
+            },
+          })),
         },
-
         {
           label: 'Export SVG',
           icon: PhotoCamera,
@@ -89,6 +94,22 @@ const HeaderMenu = observer(({ model }: { model: MsaViewModel }) => {
             ])
           },
         },
+        ...(model.rows.length >= 2
+          ? [
+              {
+                label: 'Calculate neighbor joining tree (BLOSUM62)',
+                icon: AccountTree,
+                onClick: () => {
+                  try {
+                    model.calculateNeighborJoiningTreeFromMSA()
+                  } catch (e) {
+                    console.error('Failed to calculate NJ tree:', e)
+                    model.setError(e)
+                  }
+                },
+              },
+            ]
+          : []),
         {
           label: 'Features/protein domains',
           type: 'subMenu',

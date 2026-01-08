@@ -20,6 +20,7 @@ import Stockholm from 'stockholm-js'
 
 import { blocksX, blocksY } from './calculateBlocks'
 import colorSchemes from './colorSchemes'
+import ConservationTrack from './components/ConservationTrack'
 import TextTrack from './components/TextTrack'
 import {
   defaultAllowedGappyness,
@@ -52,8 +53,10 @@ import { DataModelF } from './model/DataModel'
 import { DialogQueueSessionMixin } from './model/DialogQueue'
 import { MSAModelF } from './model/msaModel'
 import { TreeModelF } from './model/treeModel'
+import { calculateNeighborJoiningTree } from './neighborJoining'
 import { parseAsn1 } from './parseAsn1'
 import parseNewick from './parseNewick'
+import A3mMSA from './parsers/A3mMSA'
 import ClustalMSA from './parsers/ClustalMSA'
 import EmfMSA from './parsers/EmfMSA'
 import FastaMSA from './parsers/FastaMSA'
@@ -67,7 +70,6 @@ import { seqCoordToRowSpecificGlobalCoord } from './seqCoordToRowSpecificGlobalC
 import {
   collapse,
   generateNodeIds,
-  isBlank,
   len,
   maxLength,
   setBrLength,
@@ -579,12 +581,14 @@ function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
-       * hideGaps only takes effect when there are collapsed rows
+       * hideGaps takes effect when there are collapsed rows or allowedGappyness < 100
        */
       get hideGapsEffective() {
         return (
           self.hideGaps &&
-          (self.collapsed.length > 0 || self.collapsedLeaves.length > 0)
+          (self.collapsed.length > 0 ||
+            self.collapsedLeaves.length > 0 ||
+            self.allowedGappyness < 100)
         )
       },
       /**
@@ -675,6 +679,8 @@ function stateModelFactory() {
         if (text) {
           if (Stockholm.sniff(text)) {
             return new StockholmMSA(text, self.currentAlignment)
+          } else if (A3mMSA.sniff(text)) {
+            return new A3mMSA(text)
           } else if (text.startsWith('>')) {
             return new FastaMSA(text)
           } else if (text.startsWith('SEQ')) {
@@ -728,6 +734,29 @@ function stateModelFactory() {
       get mouseOverRowName() {
         const { mouseRow } = self
         return mouseRow === undefined ? undefined : this.rowNames[mouseRow]
+      },
+      /**
+       * #getter
+       * Returns insertion info if mouse is hovering over an insertion indicator
+       */
+      get hoveredInsertion() {
+        const { mouseCol, mouseRow } = self
+        if (mouseCol === undefined || mouseRow === undefined) {
+          return undefined
+        }
+        const rowName = this.rowNames[mouseRow]
+        if (!rowName) {
+          return undefined
+        }
+        const insertions = this.insertionPositions.get(rowName)
+        if (!insertions) {
+          return undefined
+        }
+        const insertion = insertions.find(ins => ins.pos === mouseCol)
+        if (insertion) {
+          return { rowName, col: mouseCol, letters: insertion.letters }
+        }
+        return undefined
       },
 
       /**
@@ -815,6 +844,60 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * Returns a map of row name to array of insertions with display position and letters
+       */
+      get insertionPositions() {
+        const { hideGapsEffective } = self
+        const { blanks, rows } = this
+        const blanksLen = blanks.length
+        if (blanksLen === 0 || !hideGapsEffective) {
+          return new Map<string, { pos: number; letters: string }[]>()
+        }
+        const result = new Map<string, { pos: number; letters: string }[]>()
+        for (const [name, seq] of rows) {
+          const insertions: { pos: number; letters: string }[] = []
+          let displayPos = 0
+          let blankIdx = 0
+          let currentInsertPos = -1
+          let letterChars: string[] = []
+          const seqLen = seq.length
+          for (let i = 0; i < seqLen; i++) {
+            if (blankIdx < blanksLen && blanks[blankIdx] === i) {
+              // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
+              const code = seq.charCodeAt(i)
+              if (!((code - 45) >>> 0 <= 1)) {
+                if (currentInsertPos === displayPos) {
+                  letterChars.push(seq[i]!)
+                } else {
+                  if (letterChars.length > 0) {
+                    insertions.push({
+                      pos: currentInsertPos,
+                      letters: letterChars.join(''),
+                    })
+                  }
+                  currentInsertPos = displayPos
+                  letterChars = [seq[i]!]
+                }
+              }
+              blankIdx++
+            } else {
+              displayPos++
+            }
+          }
+          if (letterChars.length > 0) {
+            insertions.push({
+              pos: currentInsertPos,
+              letters: letterChars.join(''),
+            })
+          }
+          if (insertions.length > 0) {
+            result.set(name, insertions)
+          }
+        }
+        return result
+      },
+      /**
+       * #getter
        */
       get rows() {
         const MSA = this.MSA
@@ -885,6 +968,76 @@ function stateModelFactory() {
        */
       get colStatsSums() {
         return this.colStats.map(val => sum(Object.values(val)))
+      },
+
+      /**
+       * #getter
+       * Pre-computed consensus letter and percent identity color per column.
+       * Used by percent_identity_dynamic color scheme.
+       */
+      get colConsensus() {
+        const { colStats, colStatsSums } = this
+        return colStats.map((stats, i) => {
+          const total = colStatsSums[i]!
+          let maxCount = 0
+          let letter = ''
+          for (const key in stats) {
+            const val = stats[key]!
+            if (val > maxCount && key !== '-' && key !== '.') {
+              maxCount = val
+              letter = key
+            }
+          }
+          const proportion = maxCount / total
+          return {
+            letter,
+            color:
+              proportion > 0.4
+                ? `hsl(240, 30%, ${100 * Math.max(1 - proportion / 3, 0.3)}%)`
+                : undefined,
+          }
+        })
+      },
+
+      /**
+       * #getter
+       * Conservation score per column using Shannon entropy (biojs-msa style).
+       * Conservation = (1 - H/Hmax) * (1 - gapFraction)
+       * Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
+       */
+      get conservation() {
+        const { colStats, colStatsSums } = this
+        const alphabetSize = 20
+        const maxEntropy = Math.log2(alphabetSize)
+
+        return colStats.map((stats, i) => {
+          const total = colStatsSums[i]
+          if (!total) {
+            return 0
+          }
+
+          const gapCount = (stats['-'] || 0) + (stats['.'] || 0)
+          const nonGapTotal = total - gapCount
+          if (nonGapTotal === 0) {
+            return 0
+          }
+
+          let entropy = 0
+          for (const letter of Object.keys(stats)) {
+            if (letter === '-' || letter === '.') {
+              continue
+            }
+            const count = stats[letter]!
+            const freq = count / nonGapTotal
+            if (freq > 0) {
+              entropy -= freq * Math.log2(freq)
+            }
+          }
+
+          const gapFraction = gapCount / total
+          const conservation = Math.max(0, 1 - entropy / maxEntropy)
+          return conservation * (1 - gapFraction)
+        })
       },
       /**
        * #getter
@@ -1009,6 +1162,18 @@ function stateModelFactory() {
        */
       setDrawMsaLetters(arg: boolean) {
         self.drawMsaLetters = arg
+      },
+
+      /**
+       * #action
+       * Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances
+       */
+      calculateNeighborJoiningTreeFromMSA() {
+        if (self.rows.length < 2) {
+          throw new Error('Need at least 2 sequences to build a tree')
+        }
+        const newickTree = calculateNeighborJoiningTree(self.rows)
+        self.setTree(newickTree)
       },
 
       /**
@@ -1150,18 +1315,16 @@ function stateModelFactory() {
       get adapterTrackModels(): BasicTrack[] {
         const { rowHeight, MSA, hideGapsEffective, blanks } = self
         return (
-          MSA?.tracks.map(t => ({
-            model: {
-              ...t,
-              data: t.data
-                ? hideGapsEffective
-                  ? skipBlanks(blanks, t.data)
-                  : t.data
-                : undefined,
-              height: rowHeight,
-            } as TextTrackModel,
-            ReactComponent: TextTrack,
-          })) || []
+          MSA?.tracks
+            .filter(t => t.data)
+            .map(t => ({
+              model: {
+                ...t,
+                data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
+                height: rowHeight,
+              } as TextTrackModel,
+              ReactComponent: TextTrack,
+            })) || []
         )
       },
 
@@ -1169,7 +1332,15 @@ function stateModelFactory() {
        * #getter
        */
       get tracks(): BasicTrack[] {
-        return this.adapterTrackModels
+        const conservationTrack: BasicTrack = {
+          model: {
+            id: 'conservation',
+            name: 'Conservation',
+            height: 40,
+          },
+          ReactComponent: ConservationTrack,
+        }
+        return [...this.adapterTrackModels, conservationTrack]
       },
 
       /**
@@ -1398,6 +1569,7 @@ function stateModelFactory() {
       async exportSVG(opts: {
         theme: Theme
         includeMinimap?: boolean
+        includeTracks?: boolean
         exportType: string
       }) {
         const { renderToSvg } = await import('./renderToSvg')
@@ -1643,12 +1815,16 @@ function stateModelFactory() {
         ...(currentAlignment !== defaultCurrentAlignment
           ? { currentAlignment }
           : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(collapsed?.length ? { collapsed } : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(collapsedLeaves?.length ? { collapsedLeaves } : {}),
         ...(showOnly !== undefined ? { showOnly } : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(turnedOffTracks && Object.keys(turnedOffTracks).length > 0
           ? { turnedOffTracks }
           : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(featureFilters && Object.keys(featureFilters).length > 0
           ? { featureFilters }
           : {}),

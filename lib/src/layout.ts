@@ -63,12 +63,7 @@ export default class Layout {
       return false
     }
 
-    const results = this.flatbush.search(
-      box.minX,
-      box.minY,
-      box.maxX,
-      box.maxY,
-    )
+    const results = this.flatbush.search(box.minX, box.minY, box.maxX, box.maxY)
 
     return results.length > 0
   }

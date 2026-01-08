@@ -1,4 +1,4 @@
-import { getClustalXColor, getPercentIdentityColor } from '../../colorSchemes'
+import { getClustalXColor } from '../../colorSchemes'
 
 import type { MsaViewModel } from '../../model'
 import type { NodeWithIdsAndLength } from '../../types'
@@ -57,7 +57,6 @@ export function renderMSABlock({
       ctx,
       theme,
       offsetX,
-      offsetY,
       xStart,
       xEnd,
       visibleLeaves,
@@ -69,6 +68,13 @@ export function renderMSABlock({
     offsetX,
     contrastScheme,
     theme,
+    xStart,
+    xEnd,
+    visibleLeaves,
+  })
+  drawInsertionIndicators({
+    model,
+    ctx,
     xStart,
     xEnd,
     visibleLeaves,
@@ -88,7 +94,6 @@ function drawTiles({
   model: MsaViewModel
   offsetX: number
   theme: Theme
-  offsetY: number
   ctx: CanvasRenderingContext2D
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
@@ -137,15 +142,10 @@ function drawTiles({
               xStart + i,
             )
           : r2
-            ? getPercentIdentityColor(
-                // use model.colStats dot notation here: delay use of
-                // colStats until absolutely needed
-                model.colStats[xStart + i]!,
-                model.colStatsSums[xStart + i]!,
-                model,
-                name,
-                xStart + i,
-              )
+            ? (() => {
+                const consensus = model.colConsensus[xStart + i]!
+                return letter === consensus.letter ? consensus.color : undefined
+              })()
             : colorScheme[letter.toUpperCase()]
         if (bgColor || r1 || r2) {
           // Use a very light background for matching positions in relative mode
@@ -232,6 +232,54 @@ function drawText({
               ? contrast
               : color || 'black'
           ctx.fillText(displayLetter, x + colWidth / 2, y - rowHeight / 4)
+        }
+      }
+    }
+  }
+}
+
+function drawInsertionIndicators({
+  model,
+  ctx,
+  visibleLeaves,
+  xStart,
+  xEnd,
+}: {
+  model: MsaViewModel
+  ctx: CanvasRenderingContext2D
+  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
+  xStart: number
+  xEnd: number
+}) {
+  const { colWidth, rowHeight, insertionPositions, hideGapsEffective } = model
+  if (!hideGapsEffective) {
+    return
+  }
+  ctx.strokeStyle = '#f0f'
+  ctx.lineWidth = 1
+  const zigSize = 2
+  for (const node of visibleLeaves) {
+    const { name } = node.data
+    const insertions = insertionPositions.get(name)
+    if (insertions) {
+      const y = node.x!
+      for (const { pos } of insertions) {
+        if (pos >= xStart && pos < xEnd) {
+          const x = pos * colWidth
+          const top = y - rowHeight
+          const bottom = y
+          ctx.beginPath()
+          ctx.moveTo(x, top)
+          let currentY = top
+          let goRight = true
+          while (currentY < bottom) {
+            const nextY = Math.min(currentY + zigSize, bottom)
+            const nextX = goRight ? x + zigSize : x - zigSize
+            ctx.lineTo(nextX, nextY)
+            currentY = nextY
+            goRight = !goRight
+          }
+          ctx.stroke()
         }
       }
     }

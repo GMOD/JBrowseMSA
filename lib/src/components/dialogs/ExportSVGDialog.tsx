@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import { Dialog, ErrorMessage } from '@jbrowse/core/ui'
 import {
+  Alert,
   Button,
   DialogActions,
   DialogContent,
@@ -26,9 +27,16 @@ export default function ExportSVGDialog({
   onClose: () => void
 }) {
   const [includeMinimap, setIncludeMinimap] = useState(true)
+  const [includeTracks, setIncludeTracks] = useState(true)
   const [exportType, setExportType] = useState('viewport')
   const [error, setError] = useState<unknown>()
   const theme = useTheme()
+  const { totalWidth, totalHeight, treeAreaWidth, turnedOnTracks } = model
+  const hasTracks = turnedOnTracks.length > 0
+  const entireWidth = totalWidth + treeAreaWidth
+  const entireHeight = totalHeight
+  const isLargeExport =
+    exportType === 'entire' && (entireWidth > 10000 || entireHeight > 10000)
   return (
     <Dialog
       onClose={() => {
@@ -48,6 +56,15 @@ export default function ExportSVGDialog({
             setIncludeMinimap(!includeMinimap)
           }}
         />
+        {hasTracks ? (
+          <Checkbox2
+            label="Include tracks?"
+            checked={includeTracks}
+            onChange={() => {
+              setIncludeTracks(!includeTracks)
+            }}
+          />
+        ) : null}
         <div>
           <FormControl>
             <FormLabel>Export type</FormLabel>
@@ -70,6 +87,12 @@ export default function ExportSVGDialog({
             </RadioGroup>
           </FormControl>
         </div>
+        {isLargeExport ? (
+          <Alert severity="warning" style={{ marginTop: 8 }}>
+            The entire MSA is very large ({Math.round(entireWidth)}x
+            {Math.round(entireHeight)} pixels). Export may be slow or fail.
+          </Alert>
+        ) : null}
       </DialogContent>
       <DialogActions>
         <Button
@@ -83,13 +106,14 @@ export default function ExportSVGDialog({
                   theme,
                   includeMinimap:
                     exportType === 'entire' ? false : includeMinimap,
+                  includeTracks: hasTracks && includeTracks,
                   exportType,
                 })
+                onClose()
               } catch (e) {
                 console.error(e)
                 setError(e)
               }
-              onClose()
             })()
           }}
         >

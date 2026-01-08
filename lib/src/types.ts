@@ -12,15 +12,13 @@ export interface BasicTrackModel {
 
 export interface TextTrackModel extends BasicTrackModel {
   customColorScheme?: Record<string, string>
-  data: string
+  data?: string
 }
 
-export interface ITextTrack {
+export interface BasicTrack {
   ReactComponent: React.FC<any>
   model: TextTrackModel
 }
-
-export type BasicTrack = ITextTrack
 
 export interface Node {
   children?: Node[]

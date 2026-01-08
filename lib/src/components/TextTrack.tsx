@@ -6,14 +6,14 @@ import { observer } from 'mobx-react'
 import { colorContrast } from '../util'
 
 import type { MsaViewModel } from '../model'
-import type { ITextTrack } from '../types'
+import type { BasicTrack } from '../types'
 
 const AnnotationBlock = observer(function ({
   track,
   model,
   offsetX,
 }: {
-  track: ITextTrack
+  track: BasicTrack
   model: MsaViewModel
   offsetX: number
 }) {
@@ -58,7 +58,7 @@ const AnnotationBlock = observer(function ({
 
     const xStart = Math.max(0, Math.floor(offsetX / colWidth))
     const xEnd = Math.max(0, Math.ceil((offsetX + blockSize) / colWidth))
-    const str = data.slice(xStart, xEnd)
+    const str = data?.slice(xStart, xEnd)
     for (let i = 0; str && i < str.length; i++) {
       const letter = str[i]!
       const color = colorScheme[letter.toUpperCase()]
@@ -102,10 +102,13 @@ const AnnotationTrack = observer(function ({
   track,
   model,
 }: {
-  track: ITextTrack
+  track: BasicTrack
   model: MsaViewModel
 }) {
   const { blocksX, msaAreaWidth, rowHeight } = model
+  if (!track.model.data) {
+    return null
+  }
   return (
     <div
       style={{
