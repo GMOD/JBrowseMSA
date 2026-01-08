@@ -7,6 +7,7 @@ import { when } from 'mobx'
 import MinimapSVG from './components/minimap/MinimapSVG'
 import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock'
 import { renderMSABlock } from './components/msa/renderMSABlock'
+import { renderAllTracks } from './components/tracks/renderTracksSvg'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas'
 import { colorContrast } from './util'
 
@@ -16,6 +17,7 @@ import type { Theme } from '@mui/material'
 export interface ExportSvgOptions {
   theme: Theme
   includeMinimap?: boolean
+  includeTracks?: boolean
   exportType: string
 }
 export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
@@ -27,6 +29,7 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
     return render({
       width: model.totalWidth + model.treeAreaWidth,
       height: model.totalHeight,
+      contentHeight: model.totalHeight,
       theme,
       model,
       offsetY: 0,
@@ -38,6 +41,7 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
     return render({
       width,
       height: height + (includeMinimap ? model.minimapHeight : 0),
+      contentHeight: height,
       theme,
       model,
       offsetY: -scrollY,
@@ -51,6 +55,7 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
 async function render({
   width,
   height,
+  contentHeight,
   offsetX,
   offsetY,
   theme,
@@ -59,6 +64,7 @@ async function render({
 }: {
   width: number
   height: number
+  contentHeight: number
   offsetX: number
   offsetY: number
   theme: Theme
@@ -78,7 +84,7 @@ async function render({
           offsetX={offsetX}
           offsetY={offsetY}
           width={width}
-          height={height}
+          contentHeight={contentHeight}
         />
       </Wrapper>
     </SvgWrapper>,
@@ -89,7 +95,7 @@ function CoreRendering({
   model,
   theme,
   width,
-  height,
+  contentHeight,
   offsetX,
   offsetY,
   Context,
@@ -97,7 +103,7 @@ function CoreRendering({
   model: MsaViewModel
   theme: Theme
   width: number
-  height: number
+  contentHeight: number
   offsetX: number
   offsetY: number
   Context: (
@@ -105,18 +111,18 @@ function CoreRendering({
     height: number,
   ) => CanvasRenderingContext2D & { getSvg: () => { innerHTML: string } }
 }) {
-  const clipId1 = 'tree'
-  const clipId2 = 'msa'
-  const { treeAreaWidth, colorScheme } = model
+  const { treeAreaWidth, colorScheme, id } = model
+  const clipId1 = `tree-${id}`
+  const clipId2 = `msa-${id}`
   const contrastScheme = colorContrast(colorScheme, theme)
-  const ctx1 = Context(width, height)
-  const ctx2 = Context(width, height)
+  const ctx1 = Context(width, contentHeight)
+  const ctx2 = Context(width, contentHeight)
   renderBoxFeatureCanvasBlock({
     ctx: ctx2,
     offsetX,
     offsetY,
     model,
-    blockSizeYOverride: height,
+    blockSizeYOverride: contentHeight,
     highResScaleFactorOverride: 1,
   })
   const msaAreaWidth = width - treeAreaWidth
@@ -125,7 +131,7 @@ function CoreRendering({
     offsetY,
     ctx: ctx1,
     theme,
-    blockSizeYOverride: height,
+    blockSizeYOverride: contentHeight,
     highResScaleFactorOverride: 1,
   })
   renderMSABlock({
@@ -136,19 +142,19 @@ function CoreRendering({
     contrastScheme,
     ctx: ctx2,
     blockSizeXOverride: msaAreaWidth,
-    blockSizeYOverride: height,
+    blockSizeYOverride: contentHeight,
     highResScaleFactorOverride: 1,
   })
   return (
     <>
       <defs>
         <clipPath id={clipId1}>
-          <rect x={0} y={0} width={treeAreaWidth} height={height} />
+          <rect x={0} y={0} width={treeAreaWidth} height={contentHeight} />
         </clipPath>
       </defs>
       <defs>
         <clipPath id={clipId2}>
-          <rect x={0} y={0} width={msaAreaWidth} height={height} />
+          <rect x={0} y={0} width={msaAreaWidth} height={contentHeight} />
         </clipPath>
       </defs>
 
