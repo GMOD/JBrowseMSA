@@ -96,7 +96,11 @@ async function render({
             trackHeight={trackHeight}
           />
         ) : null}
-        <g transform={trackHeight > 0 ? `translate(0 ${trackHeight})` : undefined}>
+        <g
+          transform={
+            trackHeight > 0 ? `translate(0 ${trackHeight})` : undefined
+          }
+        >
           <CoreRendering
             Context={Context}
             model={model}

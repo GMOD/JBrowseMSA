@@ -1,4 +1,4 @@
-import { getClustalXColor, getPercentIdentityColor } from '../../colorSchemes'
+import { getClustalXColor } from '../../colorSchemes'
 
 import type { MsaViewModel } from '../../model'
 import type { NodeWithIdsAndLength } from '../../types'
@@ -75,7 +75,6 @@ export function renderMSABlock({
   drawInsertionIndicators({
     model,
     ctx,
-    offsetX,
     xStart,
     xEnd,
     visibleLeaves,
@@ -143,15 +142,10 @@ function drawTiles({
               xStart + i,
             )
           : r2
-            ? getPercentIdentityColor(
-                // use model.colStats dot notation here: delay use of
-                // colStats until absolutely needed
-                model.colStats[xStart + i]!,
-                model.colStatsSums[xStart + i]!,
-                model,
-                name,
-                xStart + i,
-              )
+            ? (() => {
+                const consensus = model.colConsensus[xStart + i]!
+                return letter === consensus.letter ? consensus.color : undefined
+              })()
             : colorScheme[letter.toUpperCase()]
         if (bgColor || r1 || r2) {
           // Use a very light background for matching positions in relative mode
@@ -247,13 +241,11 @@ function drawText({
 function drawInsertionIndicators({
   model,
   ctx,
-  offsetX,
   visibleLeaves,
   xStart,
   xEnd,
 }: {
   model: MsaViewModel
-  offsetX: number
   ctx: CanvasRenderingContext2D
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
@@ -273,7 +265,7 @@ function drawInsertionIndicators({
       const y = node.x!
       for (const { pos } of insertions) {
         if (pos >= xStart && pos < xEnd) {
-          const x = pos * colWidth + offsetX - (offsetX % colWidth)
+          const x = pos * colWidth
           const top = y - rowHeight
           const bottom = y
           ctx.beginPath()

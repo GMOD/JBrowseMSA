@@ -49,11 +49,11 @@ import {
 import { flatToTree } from './flatToTree'
 import palettes from './ggplotPalettes'
 import { measureTextCanvas } from './measureTextCanvas'
-import { calculateNeighborJoiningTree } from './neighborJoining'
 import { DataModelF } from './model/DataModel'
 import { DialogQueueSessionMixin } from './model/DialogQueue'
 import { MSAModelF } from './model/msaModel'
 import { TreeModelF } from './model/treeModel'
+import { calculateNeighborJoiningTree } from './neighborJoining'
 import { parseAsn1 } from './parseAsn1'
 import parseNewick from './parseNewick'
 import A3mMSA from './parsers/A3mMSA'
@@ -847,8 +847,10 @@ function stateModelFactory() {
        * Returns a map of row name to array of insertions with display position and letters
        */
       get insertionPositions() {
+        const { hideGapsEffective } = self
         const { blanks, rows } = this
-        if (blanks.length === 0) {
+        const blanksLen = blanks.length
+        if (blanksLen === 0 || !hideGapsEffective) {
           return new Map<string, { pos: number; letters: string }[]>()
         }
         const result = new Map<string, { pos: number; letters: string }[]>()
@@ -857,19 +859,24 @@ function stateModelFactory() {
           let displayPos = 0
           let blankIdx = 0
           let currentInsertPos = -1
-          let currentLetters = ''
-          for (let i = 0; i < seq.length; i++) {
-            if (blankIdx < blanks.length && blanks[blankIdx] === i) {
-              const char = seq[i]!
-              if (char !== '-' && char !== '.') {
+          let letterChars: string[] = []
+          const seqLen = seq.length
+          for (let i = 0; i < seqLen; i++) {
+            if (blankIdx < blanksLen && blanks[blankIdx] === i) {
+              // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
+              const code = seq.charCodeAt(i)
+              if (!((code - 45) >>> 0 <= 1)) {
                 if (currentInsertPos === displayPos) {
-                  currentLetters += char
+                  letterChars.push(seq[i]!)
                 } else {
-                  if (currentLetters) {
-                    insertions.push({ pos: currentInsertPos, letters: currentLetters })
+                  if (letterChars.length > 0) {
+                    insertions.push({
+                      pos: currentInsertPos,
+                      letters: letterChars.join(''),
+                    })
                   }
                   currentInsertPos = displayPos
-                  currentLetters = char
+                  letterChars = [seq[i]!]
                 }
               }
               blankIdx++
@@ -877,8 +884,11 @@ function stateModelFactory() {
               displayPos++
             }
           }
-          if (currentLetters) {
-            insertions.push({ pos: currentInsertPos, letters: currentLetters })
+          if (letterChars.length > 0) {
+            insertions.push({
+              pos: currentInsertPos,
+              letters: letterChars.join(''),
+            })
           }
           if (insertions.length > 0) {
             result.set(name, insertions)
@@ -958,6 +968,35 @@ function stateModelFactory() {
        */
       get colStatsSums() {
         return this.colStats.map(val => sum(Object.values(val)))
+      },
+
+      /**
+       * #getter
+       * Pre-computed consensus letter and percent identity color per column.
+       * Used by percent_identity_dynamic color scheme.
+       */
+      get colConsensus() {
+        const { colStats, colStatsSums } = this
+        return colStats.map((stats, i) => {
+          const total = colStatsSums[i]!
+          let maxCount = 0
+          let letter = ''
+          for (const key in stats) {
+            const val = stats[key]!
+            if (val > maxCount && key !== '-' && key !== '.') {
+              maxCount = val
+              letter = key
+            }
+          }
+          const proportion = maxCount / total
+          return {
+            letter,
+            color:
+              proportion > 0.4
+                ? `hsl(240, 30%, ${100 * Math.max(1 - proportion / 3, 0.3)}%)`
+                : undefined,
+          }
+        })
       },
 
       /**

@@ -10,7 +10,9 @@ const CODE_DOT = 46 // '.'
 
 function isUpperOrGap(code: number): boolean {
   return (
-    (code >= CODE_A && code <= CODE_Z) || code === CODE_DASH || code === CODE_DOT
+    (code >= CODE_A && code <= CODE_Z) ||
+    code === CODE_DASH ||
+    code === CODE_DOT
   )
 }
 
@@ -127,7 +129,10 @@ export default class A3mMSA {
    * In A3M, lowercase characters are insertions that implicitly introduce
    * gaps in sequences that don't have an insert at that position.
    */
-  private expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
+  private expandA3M(
+    rawSeqs: string[],
+    names: string[],
+  ): Record<string, string> {
     const numSeqs = names.length
     if (numSeqs === 0) {
       return {}

@@ -24,10 +24,11 @@ export default function SequenceTextArea({ str }: { str: [string, string][] }) {
   const [showGaps, setShowGaps] = useState(false)
   const [showEmpty, setShowEmpty] = useState(false)
 
+  const removeGaps = (s: string) => s.replaceAll('-', '').replaceAll('.', '')
   const disp = str
-    .map(([s1, s2]) => [s1, showGaps ? s2 : s2.replaceAll('-', '')] as const)
+    .map(([s1, s2]) => [s1, showGaps ? s2 : removeGaps(s2)] as const)
     .filter(f => (showEmpty ? true : !!f[1]))
-    .map(([s1, s2]) => `>${s1}\n${showGaps ? s2 : s2.replaceAll('-', '')}`)
+    .map(([s1, s2]) => `>${s1}\n${showGaps ? s2 : removeGaps(s2)}`)
     .join('\n')
   return (
     <>

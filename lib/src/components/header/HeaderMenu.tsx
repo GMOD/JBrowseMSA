@@ -1,6 +1,7 @@
 import React, { lazy } from 'react'
 
 import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
+import AccountTree from '@mui/icons-material/AccountTree'
 import Assignment from '@mui/icons-material/Assignment'
 import FilterAlt from '@mui/icons-material/FilterAlt'
 import FolderOpen from '@mui/icons-material/FolderOpen'
@@ -8,7 +9,6 @@ import MoreVert from '@mui/icons-material/Menu'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Search from '@mui/icons-material/Search'
 import Sort from '@mui/icons-material/Sort'
-import AccountTree from '@mui/icons-material/AccountTree'
 import Visibility from '@mui/icons-material/Visibility'
 import { observer } from 'mobx-react'
 

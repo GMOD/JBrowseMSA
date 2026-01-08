@@ -25,7 +25,7 @@ const GappynessSlider = observer(function GappynessSlider({
         max={100}
         value={allowedGappyness}
         onChange={(_, val) => {
-          model.setAllowedGappyness(val as number)
+          model.setAllowedGappyness(val)
         }}
       />
     </div>

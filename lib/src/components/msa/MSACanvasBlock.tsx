@@ -136,8 +136,13 @@ const MSACanvasBlock = observer(function ({
         }}
       />
       {hoveredInsertion && mousePosition ? (
-        <BaseTooltip clientPoint={{ x: mousePosition.x, y: mousePosition.y + 15 }}>
-          Insertion ({hoveredInsertion.letters.length}bp): {hoveredInsertion.letters}
+        <BaseTooltip
+          clientPoint={{ x: mousePosition.x, y: mousePosition.y + 15 }}
+        >
+          Insertion ({hoveredInsertion.letters.length}bp):{' '}
+          {hoveredInsertion.letters.length > 20
+            ? `${hoveredInsertion.letters.slice(0, 20)}...`
+            : hoveredInsertion.letters}
         </BaseTooltip>
       ) : null}
     </>

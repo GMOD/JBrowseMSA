@@ -2,7 +2,7 @@ import { blue, green, orange, red } from '@mui/material/colors'
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
 
-import { isBlank, transform } from './util'
+import { transform } from './util'
 
 extend([namesPlugin])
 
@@ -501,33 +501,3 @@ export function getClustalXColor(
   return undefined
 }
 
-// info http://www.jalview.org/help/html/colourSchemes/clustal.html
-// modifications:
-// reference to clustalX source code scheme modifies what the jalview.org
-// scheme says there the jalview.org colorscheme says WLVIMAFCHP but it should
-// be WLVIMAFCHPY, colprot.xml says e.g. %#ACFHILMVWYPp" which has Y
-export function getPercentIdentityColor(
-  stats: Record<string, number>,
-  total: number,
-  model: { columns: Record<string, string> },
-  row: string,
-  col: number,
-) {
-  const l = model.columns[row]![col]!
-  const entries = Object.entries(stats)
-  let ent = 0
-  let letter = ''
-  for (const entry of entries) {
-    if (entry[1] > ent && !isBlank(entry[0])) {
-      letter = entry[0]
-      ent = entry[1]
-    }
-  }
-  const proportion = ent / total
-  const thresh = `hsl(240, 30%, ${100 * Math.max(1 - ent / total / 3, 0.3)}%)`
-  if (proportion > 0.4) {
-    if (l === letter) {
-      return thresh
-    }
-  }
-}
