@@ -20,6 +20,7 @@ import Stockholm from 'stockholm-js'
 
 import { blocksX, blocksY } from './calculateBlocks'
 import colorSchemes from './colorSchemes'
+import ConservationTrack from './components/ConservationTrack'
 import TextTrack from './components/TextTrack'
 import {
   defaultAllowedGappyness,
@@ -886,6 +887,47 @@ function stateModelFactory() {
       get colStatsSums() {
         return this.colStats.map(val => sum(Object.values(val)))
       },
+
+      /**
+       * #getter
+       * Conservation score per column using Shannon entropy (biojs-msa style).
+       * Conservation = (1 - H/Hmax) * (1 - gapFraction)
+       * Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
+       */
+      get conservation() {
+        const { colStats, colStatsSums } = this
+        const alphabetSize = 20
+        const maxEntropy = Math.log2(alphabetSize)
+
+        return colStats.map((stats, i) => {
+          const total = colStatsSums[i]
+          if (!total) {
+            return 0
+          }
+
+          const gapCount = (stats['-'] || 0) + (stats['.'] || 0)
+          const nonGapTotal = total - gapCount
+          if (nonGapTotal === 0) {
+            return 0
+          }
+
+          let entropy = 0
+          for (const letter of Object.keys(stats)) {
+            if (letter === '-' || letter === '.') {
+              continue
+            }
+            const count = stats[letter]!
+            const freq = count / nonGapTotal
+            if (freq > 0) {
+              entropy -= freq * Math.log2(freq)
+            }
+          }
+
+          const gapFraction = gapCount / total
+          const conservation = Math.max(0, 1 - entropy / maxEntropy)
+          return conservation * (1 - gapFraction)
+        })
+      },
       /**
        * #getter
        * generates a new tree that is clustered with x,y positions
@@ -1169,7 +1211,15 @@ function stateModelFactory() {
        * #getter
        */
       get tracks(): BasicTrack[] {
-        return this.adapterTrackModels
+        const conservationTrack = {
+          model: {
+            id: 'conservation',
+            name: 'Conservation',
+            height: 40,
+          },
+          ReactComponent: ConservationTrack,
+        }
+        return [...this.adapterTrackModels, conservationTrack as BasicTrack]
       },
 
       /**

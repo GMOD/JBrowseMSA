@@ -3,7 +3,6 @@ import React, { lazy, useEffect, useRef, useState } from 'react'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { IconButton, Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
-import normalizeWheel from 'normalize-wheel'
 import { makeStyles } from 'tss-react/mui'
 
 import type { MsaViewModel } from '../model'
@@ -28,8 +27,7 @@ export const TrackLabel = observer(function ({
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>()
   const { drawLabels, rowHeight, treeAreaWidth: width } = model
   const {
-    height,
-    model: { name },
+    model: { name, height },
   } = track
   const { classes } = useStyles()
   const trackLabelHeight = Math.max(8, rowHeight - 8)
@@ -101,7 +99,7 @@ const Track = observer(function ({
 
   track: any
 }) {
-  const { resizeHandleWidth } = model
+  const { resizeHandleWidth, colWidth, scrollX, numColumns } = model
   const {
     model: { height, error },
   } = track
@@ -113,9 +111,8 @@ const Track = observer(function ({
     if (!curr) {
       return
     }
-    function onWheel(origEvent: WheelEvent) {
-      const event = normalizeWheel(origEvent)
-      deltaX.current += event.pixelX
+    function onWheel(event: WheelEvent) {
+      deltaX.current += event.deltaX
 
       if (!scheduled.current) {
         scheduled.current = true
@@ -125,18 +122,37 @@ const Track = observer(function ({
           scheduled.current = false
         })
       }
-      origEvent.preventDefault()
+      event.preventDefault()
     }
     curr.addEventListener('wheel', onWheel)
     return () => {
       curr.removeEventListener('wheel', onWheel)
     }
   }, [model])
+
   return (
     <div key={track.id} style={{ display: 'flex', height }}>
       <TrackLabel model={model} track={track} />
       <div style={{ width: resizeHandleWidth, flexShrink: 0 }} />
-      <div ref={ref}>
+      <div
+        ref={ref}
+        onMouseMove={event => {
+          if (!ref.current) {
+            return
+          }
+          const { left } = ref.current.getBoundingClientRect()
+          const mouseX = event.clientX - left - scrollX
+          const col = Math.floor(mouseX / colWidth)
+          if (col >= 0 && col < numColumns) {
+            model.setMousePos(col, undefined)
+          } else {
+            model.setMousePos(undefined, undefined)
+          }
+        }}
+        onMouseLeave={() => {
+          model.setMousePos(undefined, undefined)
+        }}
+      >
         {error ? (
           <div style={{ color: 'red', fontSize: 10 }}>{`${error}`}</div>
         ) : (

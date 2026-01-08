@@ -20,7 +20,14 @@ export interface ITextTrack {
   model: TextTrackModel
 }
 
-export type BasicTrack = ITextTrack
+export interface ConservationTrackModel extends BasicTrackModel {}
+
+export interface IConservationTrack {
+  ReactComponent: React.FC<any>
+  model: ConservationTrackModel
+}
+
+export type BasicTrack = ITextTrack | IConservationTrack
 
 export interface Node {
   children?: Node[]
