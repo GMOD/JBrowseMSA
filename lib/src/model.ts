@@ -68,7 +68,6 @@ import { seqCoordToRowSpecificGlobalCoord } from './seqCoordToRowSpecificGlobalC
 import {
   collapse,
   generateNodeIds,
-  isBlank,
   len,
   maxLength,
   setBrLength,
@@ -1448,6 +1447,7 @@ function stateModelFactory() {
       async exportSVG(opts: {
         theme: Theme
         includeMinimap?: boolean
+        includeTracks?: boolean
         exportType: string
       }) {
         const { renderToSvg } = await import('./renderToSvg')
@@ -1693,12 +1693,16 @@ function stateModelFactory() {
         ...(currentAlignment !== defaultCurrentAlignment
           ? { currentAlignment }
           : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(collapsed?.length ? { collapsed } : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(collapsedLeaves?.length ? { collapsedLeaves } : {}),
         ...(showOnly !== undefined ? { showOnly } : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(turnedOffTracks && Object.keys(turnedOffTracks).length > 0
           ? { turnedOffTracks }
           : {}),
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(featureFilters && Object.keys(featureFilters).length > 0
           ? { featureFilters }
           : {}),

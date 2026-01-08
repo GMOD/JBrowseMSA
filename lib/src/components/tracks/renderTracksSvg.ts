@@ -1,6 +1,5 @@
 import type { MsaViewModel } from '../../model'
-import type { BasicTrack, TextTrackModel } from '../../types'
-import type { Theme } from '@mui/material'
+import type { BasicTrack } from '../../types'
 
 export function renderConservationTrack({
   model,
@@ -68,7 +67,7 @@ export function renderTextTrack({
     highResScaleFactor,
   } = model
 
-  const { customColorScheme, data } = track.model as TextTrackModel
+  const { customColorScheme, data } = track.model
   const colorScheme = customColorScheme ?? modelColorScheme
   const bx = blockSizeXOverride ?? blockSize
   const k = highResScaleFactorOverride ?? highResScaleFactor
@@ -105,7 +104,6 @@ export function renderTextTrack({
 export function renderAllTracks({
   model,
   ctx,
-  theme,
   offsetX,
   contrastScheme,
   blockSizeXOverride,
@@ -113,7 +111,6 @@ export function renderAllTracks({
 }: {
   model: MsaViewModel
   ctx: CanvasRenderingContext2D
-  theme: Theme
   offsetX: number
   contrastScheme: Record<string, string>
   blockSizeXOverride?: number

@@ -22,31 +22,36 @@ export interface ExportSvgOptions {
 }
 export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
   await when(() => !!model.dataInitialized)
-  const { width, height, scrollX, scrollY } = model
-  const { exportType, theme, includeMinimap } = opts
+  const { width, height, scrollX, scrollY, totalTrackAreaHeight } = model
+  const { exportType, theme, includeMinimap, includeTracks } = opts
+  const trackHeight = includeTracks ? totalTrackAreaHeight : 0
 
   if (exportType === 'entire') {
     return render({
       width: model.totalWidth + model.treeAreaWidth,
-      height: model.totalHeight,
+      height: model.totalHeight + trackHeight,
       contentHeight: model.totalHeight,
+      trackHeight,
       theme,
       model,
       offsetY: 0,
       offsetX: 0,
       includeMinimap,
+      includeTracks,
     })
   }
   if (exportType === 'viewport') {
     return render({
       width,
-      height: height + (includeMinimap ? model.minimapHeight : 0),
+      height: height + (includeMinimap ? model.minimapHeight : 0) + trackHeight,
       contentHeight: height,
+      trackHeight,
       theme,
       model,
       offsetY: -scrollY,
       offsetX: -scrollX,
       includeMinimap,
+      includeTracks,
     })
   }
   throw new Error('unknown export type')
@@ -56,20 +61,24 @@ async function render({
   width,
   height,
   contentHeight,
+  trackHeight,
   offsetX,
   offsetY,
   theme,
   model,
   includeMinimap,
+  includeTracks,
 }: {
   width: number
   height: number
   contentHeight: number
+  trackHeight: number
   offsetX: number
   offsetY: number
   theme: Theme
   model: MsaViewModel
   includeMinimap?: boolean
+  includeTracks?: boolean
 }) {
   const { Context } = await import('svgcanvas')
   const Wrapper = includeMinimap ? MinimapWrapper : NullWrapper
@@ -86,6 +95,17 @@ async function render({
           width={width}
           contentHeight={contentHeight}
         />
+        {includeTracks && trackHeight > 0 ? (
+          <TrackRendering
+            Context={Context}
+            model={model}
+            theme={theme}
+            offsetX={offsetX}
+            width={width}
+            contentHeight={contentHeight}
+            trackHeight={trackHeight}
+          />
+        ) : null}
       </Wrapper>
     </SvgWrapper>,
   )
@@ -168,6 +188,56 @@ function CoreRendering({
         dangerouslySetInnerHTML={{ __html: ctx2.getSvg().innerHTML }}
       />
     </>
+  )
+}
+
+function TrackRendering({
+  model,
+  theme,
+  width,
+  contentHeight,
+  trackHeight,
+  offsetX,
+  Context,
+}: {
+  model: MsaViewModel
+  theme: Theme
+  width: number
+  contentHeight: number
+  trackHeight: number
+  offsetX: number
+  Context: (
+    width: number,
+    height: number,
+  ) => CanvasRenderingContext2D & { getSvg: () => { innerHTML: string } }
+}) {
+  const { treeAreaWidth, colorScheme, id } = model
+  const clipId = `tracks-${id}`
+  const contrastScheme = colorContrast(colorScheme, theme)
+  const msaAreaWidth = width - treeAreaWidth
+  const ctx = Context(msaAreaWidth, trackHeight)
+
+  renderAllTracks({
+    model,
+    ctx,
+    offsetX,
+    contrastScheme,
+    blockSizeXOverride: msaAreaWidth,
+    highResScaleFactorOverride: 1,
+  })
+
+  return (
+    <g transform={`translate(${treeAreaWidth} ${contentHeight})`}>
+      <defs>
+        <clipPath id={clipId}>
+          <rect x={0} y={0} width={msaAreaWidth} height={trackHeight} />
+        </clipPath>
+      </defs>
+      <g
+        clipPath={`url(#${clipId})`}
+        dangerouslySetInnerHTML={{ __html: ctx.getSvg().innerHTML }}
+      />
+    </g>
   )
 }
 

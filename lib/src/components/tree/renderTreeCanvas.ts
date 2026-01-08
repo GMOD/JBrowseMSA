@@ -107,7 +107,7 @@ export function renderNodeBubbles({
     // @ts-expect-error
     const { [val]: x, data } = node
     const y = node.x!
-    const { id = '', name = '' } = data
+    const { id, name } = data
     if (
       node.height > 1 &&
       y > offsetY - extendBounds &&

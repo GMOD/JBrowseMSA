@@ -27,10 +27,12 @@ export default function ExportSVGDialog({
   onClose: () => void
 }) {
   const [includeMinimap, setIncludeMinimap] = useState(true)
+  const [includeTracks, setIncludeTracks] = useState(true)
   const [exportType, setExportType] = useState('viewport')
   const [error, setError] = useState<unknown>()
   const theme = useTheme()
-  const { totalWidth, totalHeight, treeAreaWidth } = model
+  const { totalWidth, totalHeight, treeAreaWidth, turnedOnTracks } = model
+  const hasTracks = turnedOnTracks.length > 0
   const entireWidth = totalWidth + treeAreaWidth
   const entireHeight = totalHeight
   const isLargeExport =
@@ -54,6 +56,15 @@ export default function ExportSVGDialog({
             setIncludeMinimap(!includeMinimap)
           }}
         />
+        {hasTracks ? (
+          <Checkbox2
+            label="Include tracks?"
+            checked={includeTracks}
+            onChange={() => {
+              setIncludeTracks(!includeTracks)
+            }}
+          />
+        ) : null}
         <div>
           <FormControl>
             <FormLabel>Export type</FormLabel>
@@ -95,6 +106,7 @@ export default function ExportSVGDialog({
                   theme,
                   includeMinimap:
                     exportType === 'entire' ? false : includeMinimap,
+                  includeTracks: hasTracks && includeTracks,
                   exportType,
                 })
                 onClose()
