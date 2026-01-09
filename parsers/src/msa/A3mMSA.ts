@@ -1,5 +1,27 @@
 import type { NodeWithIds } from '../types'
 
+/**
+ * A3M Format Parser
+ *
+ * The A3M format consists of aligned FASTA, in which alignments are shown with:
+ * - Inserts as lowercase characters
+ * - Matches as uppercase characters
+ * - Deletions as '-'
+ * - Gaps aligned to inserts as '.'
+ *
+ * Note that gaps aligned to inserts can be omitted in the A3M format.
+ *
+ * Example:
+ * >query
+ * ETESMKTVRIREKIKKFLGDRPRNTAEILEHINSTMRHGTTSQQLGNVLSKDKDIVKVGYIKRSGILSGGYDICEWATRNWVAEHCPEWTE
+ * >seq1
+ * ----MRTTRLRQKIKKFLNERGeANTTEILEHVNSTMRHGTTPQQLGNVLSKDKDILKVATTKRGGALSGRYEICVWTLRP-----------
+ *
+ * In the above, 'e' after 'G' in seq1 is a lowercase insert.
+ *
+ * @see https://yanglab.qd.sdu.edu.cn/trRosetta/msa_format.html
+ */
+
 // Char code helpers for fast character classification
 const CODE_A = 65 // 'A'
 const CODE_Z = 90 // 'Z'
@@ -8,30 +30,10 @@ const CODE_z = 122 // 'z'
 const CODE_DASH = 45 // '-'
 const CODE_DOT = 46 // '.'
 
-function isUpperOrGap(code: number): boolean {
-  return (
-    (code >= CODE_A && code <= CODE_Z) ||
-    code === CODE_DASH ||
-    code === CODE_DOT
-  )
-}
-
 function isLower(code: number): boolean {
   return code >= CODE_a && code <= CODE_z
 }
 
-/**
- * A3M format parser
- *
- * The A3M format consists of aligned fasta, in which:
- * - Insertions are shown as lowercase characters
- * - Matches are shown as uppercase characters
- * - Deletions are shown as '-'
- * - Gaps aligned to inserts are shown as '.'
- *
- * The key property is that lowercase letters (inserts) implicitly introduce
- * gaps in all other sequences that don't have an insert at that position.
- */
 export default class A3mMSA {
   private MSA: { seqdata: Record<string, string> }
   private orderedNames: string[]
@@ -90,37 +92,32 @@ export default class A3mMSA {
     }
 
     // Check for lowercase and compute lengths in single pass per sequence
+    // In A3M, only uppercase letters are match columns (not gaps)
     let hasLowercase = false
-    let firstMatchLen = -1
-    let firstRawLen = -1
-    let sameMatchLength = true
-    let differentRawLengths = false
+    let firstUppercaseLen = -1
+    let sameUppercaseLength = true
 
     for (const seq of seqs) {
-      let matchLen = 0
+      let uppercaseLen = 0
       for (let i = 0; i < seq.length; i++) {
         const code = seq.charCodeAt(i)
         if (isLower(code)) {
           hasLowercase = true
-        } else {
-          matchLen++
+        } else if (code >= CODE_A && code <= CODE_Z) {
+          uppercaseLen++
         }
       }
 
-      if (firstMatchLen === -1) {
-        firstMatchLen = matchLen
-        firstRawLen = seq.length
+      if (firstUppercaseLen === -1) {
+        firstUppercaseLen = uppercaseLen
       } else {
-        if (matchLen !== firstMatchLen) {
-          sameMatchLength = false
-        }
-        if (seq.length !== firstRawLen) {
-          differentRawLengths = true
+        if (uppercaseLen !== firstUppercaseLen) {
+          sameUppercaseLength = false
         }
       }
     }
 
-    return hasLowercase && sameMatchLength && differentRawLengths
+    return hasLowercase && sameUppercaseLength
   }
 
   /**
@@ -128,6 +125,8 @@ export default class A3mMSA {
    *
    * In A3M, lowercase characters are insertions that implicitly introduce
    * gaps in sequences that don't have an insert at that position.
+   * Gaps (-) following match columns in sequences without inserts align
+   * with lowercase inserts in other sequences.
    */
   private expandA3M(
     rawSeqs: string[],
@@ -138,120 +137,120 @@ export default class A3mMSA {
       return {}
     }
 
-    // Parse sequences into parallel arrays: matchChars and insertLengths
-    // matchChars[seqIdx] = string of match characters for that sequence
-    // insertLengths[seqIdx] = array of insert lengths after each match position
-    const matchChars: string[] = []
-    const insertLengths: number[][] = []
+    // Parse sequences: extract match chars (uppercase only) and insert content
+    // For each sequence, track: matchChars, insertContent (after each match)
+    const matchChars: string[][] = []
+    const insertContent: string[][] = []
 
     for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
       const seq = rawSeqs[seqIdx]!
       const matches: string[] = []
-      const insLens: number[] = []
+      const inserts: string[] = []
       let i = 0
 
       while (i < seq.length) {
         const code = seq.charCodeAt(i)
 
-        if (isUpperOrGap(code)) {
+        if (code >= CODE_A && code <= CODE_Z) {
+          // Uppercase letter - match column
           matches.push(seq[i]!)
-          // Count following lowercase inserts
-          let insLen = 0
+          // Collect following lowercase/gap characters as insert content
+          let ins = ''
           let j = i + 1
-          while (j < seq.length && isLower(seq.charCodeAt(j))) {
-            insLen++
-            j++
+          while (j < seq.length) {
+            const c = seq.charCodeAt(j)
+            if (isLower(c) || c === CODE_DASH || c === CODE_DOT) {
+              ins += seq[j]!
+              j++
+            } else {
+              break
+            }
           }
-          insLens.push(insLen)
+          inserts.push(ins)
           i = j
+        } else if (code === CODE_DASH || code === CODE_DOT) {
+          // Leading gap before first match - skip
+          i++
         } else if (isLower(code)) {
           // Leading insert before first match
-          matches.push('')
-          let insLen = 0
-          let j = i
-          while (j < seq.length && isLower(seq.charCodeAt(j))) {
-            insLen++
-            j++
+          let ins = ''
+          while (i < seq.length && isLower(seq.charCodeAt(i))) {
+            ins += seq[i]!
+            i++
           }
-          insLens.push(insLen)
-          i = j
+          // Add empty match with this insert
+          matches.push('')
+          inserts.push(ins)
         } else {
           i++
         }
       }
 
-      matchChars.push(matches.join(''))
-      insertLengths.push(insLens)
+      matchChars.push(matches)
+      insertContent.push(inserts)
     }
 
-    // Find number of match positions and max inserts at each position
-    let numPositions = 0
-    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
-      const len = insertLengths[seqIdx]!.length
-      if (len > numPositions) {
-        numPositions = len
-      }
-    }
+    // Find number of match positions (should be same for all valid A3M)
+    const numPositions = Math.max(...matchChars.map(m => m.length), 0)
 
+    // Find max insert length at each position (only count lowercase, not gaps)
     const maxInserts = new Array<number>(numPositions).fill(0)
     for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
-      const insLens = insertLengths[seqIdx]!
-      for (let pos = 0; pos < insLens.length; pos++) {
-        const len = insLens[pos]!
-        if (len > maxInserts[pos]!) {
-          maxInserts[pos] = len
+      const inserts = insertContent[seqIdx]!
+      for (let pos = 0; pos < inserts.length; pos++) {
+        // Count only lowercase characters as actual inserts
+        let lcCount = 0
+        for (const c of inserts[pos]!) {
+          if (isLower(c.charCodeAt(0))) {
+            lcCount++
+          }
+        }
+        if (lcCount > maxInserts[pos]!) {
+          maxInserts[pos] = lcCount
         }
       }
-    }
-
-    // Pre-compute gap strings for common lengths (avoid repeated .repeat())
-    const gapCache: string[] = ['']
-    const maxGap = Math.max(...maxInserts, 0)
-    for (let i = 1; i <= maxGap; i++) {
-      gapCache.push('.'.repeat(i))
     }
 
     // Build expanded sequences
     const expanded: Record<string, string> = {}
 
     for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
-      const seq = rawSeqs[seqIdx]!
       const matches = matchChars[seqIdx]!
-      const insLens = insertLengths[seqIdx]!
+      const inserts = insertContent[seqIdx]!
       const result: string[] = []
-
-      // Track position in original sequence for extracting inserts
-      let seqPos = 0
 
       for (let pos = 0; pos < numPositions; pos++) {
         const maxIns = maxInserts[pos]!
 
-        if (pos < insLens.length) {
-          const matchChar = matches[pos]
-          const insLen = insLens[pos]!
+        if (pos < matches.length) {
+          const matchChar = matches[pos]!
+          const insContent = inserts[pos] || ''
 
-          // Add match character
-          if (matchChar) {
-            result.push(matchChar)
-            seqPos++
-          } else {
-            result.push('.')
+          // Add match character (or gap if empty)
+          result.push(matchChar || '-')
+
+          // Process insert content
+          let lcContent = ''
+          for (const c of insContent) {
+            if (isLower(c.charCodeAt(0))) {
+              lcContent += c.toUpperCase()
+            }
           }
 
-          // Extract and uppercase inserts from original sequence
-          if (insLen > 0) {
-            result.push(seq.slice(seqPos, seqPos + insLen).toUpperCase())
-            seqPos += insLen
-          }
+          // Add the insert content (uppercased)
+          result.push(lcContent)
 
-          // Pad with gaps
-          const padding = maxIns - insLen
+          // Pad with gaps to match max insert length
+          const padding = maxIns - lcContent.length
           if (padding > 0) {
-            result.push(gapCache[padding]!)
+            result.push('.'.repeat(padding))
           }
         } else {
           // This sequence is shorter - add gaps
-          result.push(gapCache[1 + maxIns]!)
+          result.push('-')
+          if (maxIns > 0) {
+            result.push('.'.repeat(maxIns))
+          }
         }
       }
 
