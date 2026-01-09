@@ -1,11 +1,10 @@
-import Stockholm from 'stockholm-js'
-
 import A3mMSA from './A3mMSA'
 import ClustalMSA from './ClustalMSA'
 import EmfMSA from './EmfMSA'
 import FastaMSA from './FastaMSA'
-import StockholmMSA from './StockholmMSA'
+import StockholmMSA, { stockholmSniff } from './StockholmMSA'
 
+export { parseEmfTree } from 'emf-js'
 export { default as parseNewick } from './parseNewick'
 
 export type MSAParserType =
@@ -16,7 +15,7 @@ export type MSAParserType =
   | ClustalMSA
 
 export function parseMSA(text: string, currentAlignment = 0): MSAParserType {
-  if (Stockholm.sniff(text)) {
+  if (stockholmSniff(text)) {
     return new StockholmMSA(text, currentAlignment)
   }
   if (A3mMSA.sniff(text)) {

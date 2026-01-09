@@ -41,6 +41,12 @@ importers:
       '@types/d3':
         specifier: ^7.4.0
         version: 7.4.3
+      '@types/d3-array':
+        specifier: ^3.2.0
+        version: 3.2.2
+      '@types/d3-hierarchy':
+        specifier: ^3.1.0
+        version: 3.1.7
       '@types/file-saver':
         specifier: ^2.0.7
         version: 2.0.7
@@ -264,14 +270,11 @@ importers:
   parsers:
     dependencies:
       clustal-js:
-        specifier: ^2.0.0
-        version: 2.0.11
+        specifier: ^2.0.13
+        version: 2.0.13
       emf-js:
         specifier: ^2.0.0
         version: 2.0.0
-      stockholm-js:
-        specifier: ^1.0.10
-        version: 1.0.13
 
 packages:
 
@@ -1989,6 +1992,9 @@ packages:
 
   clustal-js@2.0.11:
     resolution: {integrity: sha512-cXJ8L2OiDprn6a+/acxx26fL+HpPMjBn3pn6Dr7wWbojWjAYH4BRLVraEtkWAj1s8MNFd+u0DjLxcH0O/6GPjg==}
+
+  clustal-js@2.0.13:
+    resolution: {integrity: sha512-RY76+3tiLLIx9LjooJPfxB0V5WsIflgBCEnwkRcGkm2ROB8aeTfDylbOttJeORix/AuT3HvR8SosX+MCoKXUbQ==}
 
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
@@ -5675,6 +5681,8 @@ snapshots:
   clsx@2.1.1: {}
 
   clustal-js@2.0.11: {}
+
+  clustal-js@2.0.13: {}
 
   color-convert@2.0.1:
     dependencies:

@@ -1,34 +1,18 @@
-import Stockholm from 'stockholm-js'
-
 import parseNewick from './parseNewick'
+import { parseAll } from './stockholmParser'
 import { generateNodeIds } from '../util'
 
 import type { NodeWithIds } from '../types'
-
-interface StockholmEntry {
-  gf: {
-    DE?: string[]
-    NH?: string[]
-  }
-  gs?: {
-    AC: Record<string, string>
-    DR?: Record<string, string>
-  }
-  gc?: {
-    SS_cons?: string
-    seq_cons?: string
-  }
-  seqdata: Record<string, string>
-}
+import type { StockholmData } from './stockholmParser'
 
 export default class StockholmMSA {
-  private data: StockholmEntry[]
-  private MSA: StockholmEntry
+  private data: StockholmData[]
+  private MSA: StockholmData
 
   constructor(text: string, currentAlignment: number) {
-    const res = Stockholm.parseAll(text)
+    const res = parseAll(text)
     this.data = res
-    this.MSA = res[currentAlignment]
+    this.MSA = res[currentAlignment]!
   }
 
   getMSA() {
@@ -45,22 +29,28 @@ export default class StockholmMSA {
   }
 
   get alignmentNames() {
-    return this.data.map((aln, idx) => aln.gf.DE?.[0] || `Alignment ${idx + 1}`)
+    return this.data.map((aln, idx) => aln.gf.DE?.[0] ?? `Alignment ${idx + 1}`)
   }
 
   getHeader() {
+    const acEntries = this.MSA.gs.AC ?? {}
+    const drEntries = this.MSA.gs.DR ?? {}
     return {
       General: this.MSA.gf,
-      Accessions: this.MSA.gs?.AC,
-      Dbxref: this.MSA.gs?.DR,
+      Accessions: Object.fromEntries(
+        Object.entries(acEntries).map(([k, v]) => [k, v[0]]),
+      ),
+      Dbxref: Object.fromEntries(
+        Object.entries(drEntries).map(([k, v]) => [k, v.join('; ')]),
+      ),
     }
   }
 
   getRowData(rowName: string) {
     return {
       name: rowName,
-      accession: this.MSA.gs?.AC[rowName],
-      dbxref: this.MSA.gs?.DR?.[rowName],
+      accession: this.MSA.gs.AC?.[rowName]?.[0],
+      dbxref: this.MSA.gs.DR?.[rowName]?.join('; '),
     }
   }
 
@@ -72,19 +62,27 @@ export default class StockholmMSA {
 
   getStructures() {
     const pdbRegex = /PDB; +(\S+) +(\S); ([0-9]+)-([0-9]+)/
-    const ent = this.MSA
-    const args = Object.entries(ent.gs?.DR || {})
-      .map(([id, dr]) => [id, pdbRegex.exec(dr)] as const)
-      .filter((item): item is [string, RegExpExecArray] => !!item[1])
-      .map(([id, match]) => {
-        const pdb = match[1]!.toLowerCase()
-        const chain = match[2]!
-        const startPos = +match[3]!
-        const endPos = +match[4]!
-        return { id, pdb, chain, startPos, endPos }
-      })
+    const drEntries = this.MSA.gs.DR ?? {}
+    const args = Object.entries(drEntries)
+      .flatMap(([id, drList]) =>
+        drList.map(dr => {
+          const match = pdbRegex.exec(dr)
+          return match ? { id, match } : null
+        }),
+      )
+      .filter((item): item is { id: string; match: RegExpExecArray } => !!item)
+      .map(({ id, match }) => ({
+        id,
+        pdb: match[1]!.toLowerCase(),
+        chain: match[2]!,
+        startPos: +match[3]!,
+        endPos: +match[4]!,
+      }))
 
-    const ret = {} as Record<string, Omit<(typeof args)[0], 'id'>[]>
+    const ret = {} as Record<
+      string,
+      { pdb: string; chain: string; startPos: number; endPos: number }[]
+    >
     for (const entry of args) {
       const { id, ...rest } = entry
       if (!ret[id]) {
@@ -112,10 +110,11 @@ export default class StockholmMSA {
   }
 
   get seqConsensus() {
-    return this.MSA.gc?.seq_cons
+    return this.MSA.gc.seq_cons
   }
+
   get secondaryStructureConsensus() {
-    return this.MSA.gc?.SS_cons
+    return this.MSA.gc.SS_cons
   }
 
   get tracks() {
@@ -138,3 +137,5 @@ export default class StockholmMSA {
     ]
   }
 }
+
+export { sniff as stockholmSniff } from './stockholmParser'

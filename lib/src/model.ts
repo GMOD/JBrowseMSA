@@ -17,13 +17,13 @@ import {
   StockholmMSA,
   generateNodeIds,
   gffToInterProResults,
+  parseEmfTree,
   parseGFF,
   parseNewick,
 } from '@react-msaview/parsers'
 import { colord } from 'colord'
 import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'
-import { parseEmfTree } from 'emf-js'
 import { saveAs } from 'file-saver'
 import { autorun, transaction } from 'mobx'
 import { addDisposer, cast, types } from 'mobx-state-tree'
@@ -794,7 +794,7 @@ function stateModelFactory() {
       get root() {
         let hier = hierarchy(this.tree, d => d.children)
           // todo: investigate whether needed, typescript says children always true
-
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           .sum(d => (d.children ? 0 : 1))
           // eslint-disable-next-line unicorn/no-array-sort
           .sort((a, b) => ascending(a.data.length || 1, b.data.length || 1))
@@ -896,7 +896,7 @@ function stateModelFactory() {
               const code = seq.charCodeAt(i)
               if (!((code - 45) >>> 0 <= 1)) {
                 if (currentInsertPos === displayPos) {
-                  letterChars.push(seq[i])
+                  letterChars.push(seq[i]!)
                 } else {
                   if (letterChars.length > 0) {
                     insertions.push({
@@ -1497,7 +1497,7 @@ function stateModelFactory() {
             .map(t => ({
               model: {
                 ...t,
-                data: hideGapsEffective ? skipBlanks(blanks, t.data) : t.data,
+                data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data!,
                 height: rowHeight,
               } as TextTrackModel,
               ReactComponent: TextTrack,

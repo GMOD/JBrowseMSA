@@ -12,6 +12,7 @@ export {
   FastaMSA,
   StockholmMSA,
   getUngappedSequence,
+  parseEmfTree,
   parseMSA,
   parseNewick,
 } from './msa'

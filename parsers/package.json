@@ -16,8 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "clustal-js": "^2.0.0",
-    "emf-js": "^2.0.0",
-    "stockholm-js": "^1.0.10"
+    "clustal-js": "^2.0.13",
+    "emf-js": "^2.0.0"
   }
 }
