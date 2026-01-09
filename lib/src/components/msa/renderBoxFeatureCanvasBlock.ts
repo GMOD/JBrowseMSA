@@ -69,8 +69,13 @@ function drawTiles({
     if (entry) {
       for (let j = 0, l2 = entry.length; j < l2; j++) {
         const { start, end, accession } = entry[j]!
-        const m1 = model.seqCoordToRowSpecificGlobalCoord(name, start - 1)
-        const m2 = model.seqCoordToRowSpecificGlobalCoord(name, end)
+        // Convert sequence positions to visible column positions
+        // seqPos is 1-based from InterPro, so subtract 1 for 0-based
+        const m1 = model.seqPosToVisibleCol(name, start - 1)
+        const m2 = model.seqPosToVisibleCol(name, end)
+        if (m1 === undefined || m2 === undefined) {
+          continue // Skip if either position is hidden
+        }
         const x = m1 * colWidth
         ctx.fillStyle = fillPalette[accession]!
         ctx.strokeStyle = strokePalette[accession]!
