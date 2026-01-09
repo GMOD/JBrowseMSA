@@ -20,6 +20,7 @@ import {
   parseEmfTree,
   parseGFF,
   parseNewick,
+  stockholmSniff,
 } from '@react-msaview/parsers'
 import { colord } from 'colord'
 import { ascending } from 'd3-array'
@@ -27,7 +28,6 @@ import { cluster, hierarchy } from 'd3-hierarchy'
 import { saveAs } from 'file-saver'
 import { autorun, transaction } from 'mobx'
 import { addDisposer, cast, types } from 'mobx-state-tree'
-import Stockholm from 'stockholm-js'
 
 import { blocksX, blocksY } from './calculateBlocks'
 import colorSchemes from './colorSchemes'
@@ -702,7 +702,7 @@ function stateModelFactory() {
       get MSA() {
         const text = self.data.msa
         if (text) {
-          if (Stockholm.sniff(text)) {
+          if (stockholmSniff(text)) {
             return new StockholmMSA(text, self.currentAlignment)
           } else if (A3mMSA.sniff(text)) {
             return new A3mMSA(text)

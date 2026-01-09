@@ -15,6 +15,7 @@ export {
   parseEmfTree,
   parseMSA,
   parseNewick,
+  stockholmSniff,
 } from './msa'
 export type { MSAParserType } from './msa'
 
