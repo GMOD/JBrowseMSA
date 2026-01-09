@@ -19,8 +19,8 @@ const HeaderInfoArea = observer(function ({ model }: { model: MsaViewModel }) {
   return mouseOverRowName && mouseCol !== undefined ? (
     <Typography className={classes.margin}>
       {mouseOverRowName}:
-      {model.visibleColToSeqPosOneBased(mouseOverRowName, mouseCol)}{' '}
-      ({model.visibleColToRowLetter(mouseOverRowName, mouseCol)})
+      {model.visibleColToSeqPosOneBased(mouseOverRowName, mouseCol)} (
+      {model.visibleColToRowLetter(mouseOverRowName, mouseCol)})
     </Typography>
   ) : null
 })

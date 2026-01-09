@@ -1,0 +1,23 @@
+{
+  "name": "@react-msaview/parsers",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "clustal-js": "^2.0.0",
+    "emf-js": "^2.0.0",
+    "stockholm-js": "^1.0.10"
+  }
+}

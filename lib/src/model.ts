@@ -9,6 +9,17 @@ import {
 } from '@jbrowse/core/util'
 import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
+import {
+  A3mMSA,
+  ClustalMSA,
+  EmfMSA,
+  FastaMSA,
+  StockholmMSA,
+  generateNodeIds,
+  gffToInterProResults,
+  parseGFF,
+  parseNewick,
+} from '@react-msaview/parsers'
 import { colord } from 'colord'
 import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'
@@ -55,12 +66,6 @@ import { MSAModelF } from './model/msaModel'
 import { TreeModelF } from './model/treeModel'
 import { calculateNeighborJoiningTree } from './neighborJoining'
 import { parseAsn1 } from './parseAsn1'
-import parseNewick from './parseNewick'
-import A3mMSA from './parsers/A3mMSA'
-import ClustalMSA from './parsers/ClustalMSA'
-import EmfMSA from './parsers/EmfMSA'
-import FastaMSA from './parsers/FastaMSA'
-import StockholmMSA from './parsers/StockholmMSA'
 import { reparseTree } from './reparseTree'
 import {
   globalColToVisibleCol,
@@ -68,14 +73,7 @@ import {
   visibleColToSeqPosForRow,
 } from './rowCoordinateCalculations'
 import { seqPosToGlobalCol } from './seqPosToGlobalCol'
-import {
-  collapse,
-  generateNodeIds,
-  len,
-  maxLength,
-  setBrLength,
-  skipBlanks,
-} from './util'
+import { collapse, len, maxLength, setBrLength, skipBlanks } from './util'
 
 import type { InterProScanResults } from './launchInterProScan'
 import type {
@@ -193,6 +191,12 @@ function stateModelFactory() {
          * filehandle object for tree metadata
          */
         treeMetadataFilehandle: types.maybe(FileLocation),
+
+        /**
+         * #property
+         * filehandle object for InterProScan GFF file
+         */
+        gffFilehandle: types.maybe(FileLocation),
 
         /**
          * #property
@@ -573,6 +577,13 @@ function stateModelFactory() {
       /**
        * #action
        */
+      setGFFFilehandle(gffFilehandle?: FileLocationType) {
+        self.gffFilehandle = gffFilehandle
+      },
+
+      /**
+       * #action
+       */
       setMSA(result: string) {
         self.data.setMSA(result)
       },
@@ -783,7 +794,7 @@ function stateModelFactory() {
       get root() {
         let hier = hierarchy(this.tree, d => d.children)
           // todo: investigate whether needed, typescript says children always true
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
           .sum(d => (d.children ? 0 : 1))
           // eslint-disable-next-line unicorn/no-array-sort
           .sort((a, b) => ascending(a.data.length || 1, b.data.length || 1))
@@ -885,7 +896,7 @@ function stateModelFactory() {
               const code = seq.charCodeAt(i)
               if (!((code - 45) >>> 0 <= 1)) {
                 if (currentInsertPos === displayPos) {
-                  letterChars.push(seq[i]!)
+                  letterChars.push(seq[i])
                 } else {
                   if (letterChars.length > 0) {
                     insertions.push({
@@ -1486,7 +1497,7 @@ function stateModelFactory() {
             .map(t => ({
               model: {
                 ...t,
-                data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
+                data: hideGapsEffective ? skipBlanks(blanks, t.data) : t.data,
                 height: rowHeight,
               } as TextTrackModel,
               ReactComponent: TextTrack,
@@ -1624,7 +1635,6 @@ function stateModelFactory() {
         const globalCol = this.seqPosToGlobalCol(rowName, seqPos)
         return this.globalColToVisibleCol(globalCol)
       },
-
     }))
 
     .views(self => ({
@@ -1888,6 +1898,31 @@ function stateModelFactory() {
                     openLocation(treeMetadataFilehandle),
                   ),
                 )
+              } catch (e) {
+                console.error(e)
+                self.setError(e)
+              }
+            }
+          }),
+        )
+
+        // autorun opens gffFilehandle for InterProScan domains
+        addDisposer(
+          self,
+          autorun(async () => {
+            const { gffFilehandle } = self
+            if (gffFilehandle) {
+              try {
+                const gffText = await fetchAndMaybeUnzipText(
+                  openLocation(gffFilehandle),
+                )
+                const gffRecords = parseGFF(gffText)
+                const interProResults = gffToInterProResults(gffRecords)
+                self.setInterProAnnotations(interProResults)
+                self.setShowDomains(true)
+                if (gffFilehandle.locationType === 'BlobLocation') {
+                  self.setGFFFilehandle(undefined)
+                }
               } catch (e) {
                 console.error(e)
                 self.setError(e)

@@ -155,6 +155,16 @@ export default tseslint.config(
       ],
 
       'import/no-unresolved': 'off',
+    },
+  },
+  {
+    files: ['cli/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
+    rules: {
       'import/order': [
         'error',
         {
