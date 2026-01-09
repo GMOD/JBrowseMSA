@@ -63,10 +63,11 @@ import FastaMSA from './parsers/FastaMSA'
 import StockholmMSA from './parsers/StockholmMSA'
 import { reparseTree } from './reparseTree'
 import {
-  mouseOverCoordToGapRemovedRowCoord,
-  mouseOverCoordToGlobalCoord,
+  globalColToVisibleCol,
+  visibleColToGlobalCol,
+  visibleColToSeqPosForRow,
 } from './rowCoordinateCalculations'
-import { seqCoordToRowSpecificGlobalCoord } from './seqCoordToRowSpecificGlobalCoord'
+import { seqPosToGlobalCol } from './seqPosToGlobalCol'
 import {
   collapse,
   generateNodeIds,
@@ -1531,22 +1532,30 @@ function stateModelFactory() {
 
       /**
        * #method
-       * return a row-specific letter, or undefined if gap
+       * Return a row-specific letter at a visible column, or undefined if gap.
+       *
+       * @param rowName - The name of the row
+       * @param visibleCol - The visible column index (what the user sees on screen)
+       * @returns The letter at that position, or undefined if it's a gap
        */
-      mouseOverCoordToRowLetter(rowName: string, pos: number) {
+      visibleColToRowLetter(rowName: string, visibleCol: number) {
         const { rowMap, blanks } = self
-        return rowMap.get(rowName)?.[mouseOverCoordToGlobalCoord(blanks, pos)]
+        return rowMap.get(rowName)?.[visibleColToGlobalCol(blanks, visibleCol)]
       },
 
       /**
        * #method
-       * return a row-specific sequence coordinate, skipping gaps, given a
-       * global coordinate
+       * Convert a visible column to a row-specific sequence position (0-based).
+       * Returns undefined if the position is a gap in the sequence.
+       *
+       * @param rowName - The name of the row
+       * @param visibleCol - The visible column index
+       * @returns The sequence position (0-based), or undefined if it's a gap
        */
-      mouseOverCoordToGapRemovedRowCoord(rowName: string, position: number) {
-        return mouseOverCoordToGapRemovedRowCoord({
+      visibleColToSeqPos(rowName: string, visibleCol: number) {
+        return visibleColToSeqPosForRow({
           rowName,
-          position,
+          visibleCol,
           rowMap: self.rowMap,
           blanks: self.blanks,
         })
@@ -1554,32 +1563,68 @@ function stateModelFactory() {
 
       /**
        * #method
-       * return a row-specific sequence coordinate, skipping gaps, given a
-       * global coordinate
+       * Convert a visible column to a row-specific sequence position (1-based).
+       * Returns undefined if the position is a gap in the sequence.
+       *
+       * @param rowName - The name of the row
+       * @param visibleCol - The visible column index
+       * @returns The sequence position (1-based), or undefined if it's a gap
        */
-      mouseOverCoordToGapRemovedRowCoordOneBased(
-        rowName: string,
-        position: number,
-      ) {
-        const val = this.mouseOverCoordToGapRemovedRowCoord(rowName, position)
+      visibleColToSeqPosOneBased(rowName: string, visibleCol: number) {
+        const val = this.visibleColToSeqPos(rowName, visibleCol)
         return val !== undefined ? val + 1 : undefined
       },
 
       /**
        * #method
-       * return a global coordinate given a row-specific sequence coordinate
-       * which does not not include gaps
+       * Convert a global column index to a visible column index.
+       * Returns undefined if the column is hidden (in blanks).
+       * This is the inverse of visibleColToGlobalCol.
+       *
+       * @param globalCol - The global column index in the full MSA
+       * @returns The visible column index, or undefined if the column is hidden
        */
-      seqCoordToRowSpecificGlobalCoord(rowName: string, position: number) {
+      globalColToVisibleCol(globalCol: number) {
+        const { blanks, hideGapsEffective } = self
+        if (!hideGapsEffective) {
+          return globalCol
+        }
+        return globalColToVisibleCol(blanks, globalCol)
+      },
+
+      /**
+       * #method
+       * Convert a sequence position (ungapped) to a global column index.
+       *
+       * @param rowName - The name of the row
+       * @param seqPos - The sequence position (0-based, ungapped)
+       * @returns The global column index in the full MSA
+       */
+      seqPosToGlobalCol(rowName: string, seqPos: number) {
         const { rowNames, rows } = self
         const index = rowNames.indexOf(rowName)
         return index !== -1 && rows[index]
-          ? seqCoordToRowSpecificGlobalCoord({
+          ? seqPosToGlobalCol({
               row: rows[index][1],
-              position,
+              seqPos,
             })
           : 0
       },
+
+      /**
+       * #method
+       * Convert a sequence position (ungapped) directly to a visible column index.
+       * This combines seqPosToGlobalCol and globalColToVisibleCol.
+       *
+       * @param rowName - The name of the row
+       * @param seqPos - The sequence position (0-based, ungapped)
+       * @returns The visible column index, or undefined if the column is hidden
+       */
+      seqPosToVisibleCol(rowName: string, seqPos: number) {
+        const globalCol = this.seqPosToGlobalCol(rowName, seqPos)
+        return this.globalColToVisibleCol(globalCol)
+      },
+
     }))
 
     .views(self => ({
