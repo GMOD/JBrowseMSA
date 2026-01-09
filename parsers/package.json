@@ -1,6 +1,6 @@
 {
-  "name": "@react-msaview/parsers",
-  "version": "1.0.0",
+  "name": "msa-parsers",
+  "version": "1.0.3",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -18,5 +18,8 @@
   "dependencies": {
     "clustal-js": "^2.0.13",
     "emf-js": "^2.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
