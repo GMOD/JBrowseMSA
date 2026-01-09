@@ -20,17 +20,17 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "watch": "yarn build:esm --watch",
+    "watch": "pnpm build:esm --watch",
     "format": "prettier --write .",
-    "prebuild": "yarn clean",
+    "prebuild": "pnpm clean",
     "preversion": "node output-version.js > src/version.ts && git add -A src && git commit -m '[skip ci] Bump version.ts'",
     "build:esm": "tsc",
     "build:bundle": "webpack",
-    "build": "yarn build:esm && yarn build:bundle",
-    "prepack": "yarn build",
+    "build": "pnpm build:esm && pnpm build:bundle",
+    "prepack": "pnpm build",
     "postversion": "git push --follow-tags",
     "statedocs": "rm -rf apidocs && mkdir apidocs && node --experimental-strip-types docgen/generateStateModelDocs.ts",
-    "poststatedocs": "yarn format",
+    "poststatedocs": "pnpm format",
     "test": "vitest"
   },
   "peerDependencies": {
@@ -46,16 +46,14 @@
   "dependencies": {
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
-    "clustal-js": "^2.0.0",
+    "@react-msaview/parsers": "workspace:*",
     "colord": "^2.9.3",
     "copy-to-clipboard": "^3.3.1",
     "d3-array": "^3.2.3",
     "d3-hierarchy": "^3.1.2",
-    "emf-js": "^2.0.0",
     "file-saver": "^2.0.5",
     "flatbush": "^4.4.0",
     "pako": "^2.1.0",
-    "stockholm-js": "^1.0.10",
     "svgcanvas": "^2.5.0"
   }
 }

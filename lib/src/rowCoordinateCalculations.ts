@@ -174,4 +174,3 @@ export function visibleColToSeqPosForRow({
     ? visibleColToSeqPos({ seq, visibleCol, blanks })
     : undefined
 }
-

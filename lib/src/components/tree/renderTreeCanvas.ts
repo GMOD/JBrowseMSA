@@ -52,10 +52,11 @@ export function renderTree({
     }
     const sy = source.x!
     const ty = target.x!
-    // @ts-expect-error
-    const tx = showBranchLen ? target.len : target.y
-    // @ts-expect-error
-    const sx = showBranchLen ? source.len : source.y
+    const tx = showBranchLen ? (target as { len?: number }).len : target.y
+    const sx = showBranchLen ? (source as { len?: number }).len : source.y
+    if (tx === undefined || sx === undefined) {
+      continue
+    }
 
     const y1 = Math.min(sy, ty)
     const y2 = Math.max(sy, ty)
@@ -94,9 +95,11 @@ export function renderNodeBubbles({
   } = model
   const by = blockSizeYOverride || blockSize
   for (const node of hierarchy.descendants()) {
-    const val = showBranchLen ? 'len' : 'y'
-    // @ts-expect-error
-    const { [val]: x, data } = node
+    const x = showBranchLen ? (node as { len?: number }).len : node.y
+    if (x === undefined) {
+      continue
+    }
+    const { data } = node
     const y = node.x!
     const { id, name } = data
     if (
@@ -167,9 +170,8 @@ export function renderTreeLabels({
   for (const node of leaves) {
     const {
       data: { name, id },
-      // @ts-expect-error
-      len,
     } = node
+    const len = (node as { len?: number }).len
     const y = node.x!
     const x = node.y!
 

@@ -1,0 +1,22 @@
+{
+  "name": "@react-msaview/cli",
+  "version": "1.0.0",
+  "license": "MIT",
+  "bin": {
+    "react-msaview-cli": "./dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@react-msaview/parsers": "workspace:*"
+  }
+}

@@ -2,7 +2,7 @@ import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
 import { max } from 'd3-array'
 
-import type { Node, NodeWithIds } from './types'
+import type { NodeWithIds } from './types'
 import type { Theme } from '@mui/material'
 import type { HierarchyNode } from 'd3-hierarchy'
 
@@ -13,24 +13,6 @@ export function transform<T>(
   cb: (arg0: [string, T]) => [string, T],
 ) {
   return Object.fromEntries(Object.entries(obj).map(cb))
-}
-
-export function generateNodeIds(
-  tree: Node,
-  parent = 'node',
-  depth = 0,
-): NodeWithIds {
-  const id = `${parent}-${depth}`
-
-  return {
-    ...tree,
-    id,
-    name: tree.name || id,
-    children:
-      tree.children?.map((b, i) =>
-        generateNodeIds(b, `${id}-${i}`, depth + 1),
-      ) || [],
-  }
 }
 
 export function colorContrast(

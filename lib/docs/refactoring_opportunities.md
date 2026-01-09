@@ -12,7 +12,8 @@ const matchingLeaf = leaves.find(leaf => leaf.data.name === descendantName)
 const matchingLeaf = leaves.find(leaf => leaf.data.name === mouseOverRowName)
 ```
 
-**Solution**: Add a `leavesMap` getter to the model that returns `Map<string, HierarchyNode>` for O(1) lookups:
+**Solution**: Add a `leavesMap` getter to the model that returns
+`Map<string, HierarchyNode>` for O(1) lookups:
 
 ```typescript
 get leavesMap() {
@@ -61,12 +62,16 @@ function hoverBranchClickMap(event: React.MouseEvent) {
     minY: y + offsetY,
     maxY: y + 1 + offsetY,
   })
-  return entry?.branch ? { ...entry, x: event.clientX, y: event.clientY } : undefined
+  return entry?.branch
+    ? { ...entry, x: event.clientX, y: event.clientY }
+    : undefined
 }
 
 function hoverNameClickMap(event: React.MouseEvent) {
   // ... nearly identical search logic
-  return entry && !entry.branch ? { ...entry, x: event.clientX, y: event.clientY } : undefined
+  return entry && !entry.branch
+    ? { ...entry, x: event.clientX, y: event.clientY }
+    : undefined
 }
 ```
 

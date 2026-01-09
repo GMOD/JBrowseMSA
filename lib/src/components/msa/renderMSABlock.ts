@@ -224,7 +224,11 @@ function drawText({
             : bgColor
               ? contrast
               : color || 'black'
-          ctx.fillText(displayLetter, j * colWidth + offsetXAligned + halfColWidth, y)
+          ctx.fillText(
+            displayLetter,
+            j * colWidth + offsetXAligned + halfColWidth,
+            y,
+          )
         }
       }
     }
