@@ -4,12 +4,12 @@ import {
   getUngappedSequence,
   interProResponseToGFF,
   parseMSA,
-} from '@react-msaview/parsers'
+} from 'msa-parsers'
 
 import { runEbiInterProScan } from './ebi-api'
 import { runLocalInterProScan } from './local-runner'
 
-import type { InterProScanResults } from '@react-msaview/parsers'
+import type { InterProScanResults } from 'msa-parsers'
 
 export interface InterProScanOptions {
   inputFile: string

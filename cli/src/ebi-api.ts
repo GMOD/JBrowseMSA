@@ -1,4 +1,4 @@
-import type { InterProScanResults } from '@react-msaview/parsers'
+import type { InterProScanResults } from 'msa-parsers'
 
 const BASE_URL = 'https://www.ebi.ac.uk/Tools/services/rest/iprscan5'
 

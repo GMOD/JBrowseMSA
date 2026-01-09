@@ -17,6 +17,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@react-msaview/parsers": "workspace:*"
+    "msa-parsers": "^1.0.5"
   }
 }

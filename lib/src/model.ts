@@ -21,7 +21,7 @@ import {
   parseGFF,
   parseNewick,
   stockholmSniff,
-} from '@react-msaview/parsers'
+} from 'msa-parsers'
 import { colord } from 'colord'
 import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'

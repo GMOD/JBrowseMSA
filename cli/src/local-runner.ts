@@ -3,7 +3,7 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import path from 'node:path'
 
-import type { InterProScanResults } from '@react-msaview/parsers'
+import type { InterProScanResults } from 'msa-parsers'
 
 interface InterProScanResponse {
   results: InterProScanResults[]
