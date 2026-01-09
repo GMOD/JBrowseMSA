@@ -9,70 +9,70 @@ importers:
   .:
     devDependencies:
       '@babel/core':
-        specifier: ^7.28.0
+        specifier: ^7.28.5
         version: 7.28.5
       '@babel/preset-env':
-        specifier: ^7.27.2
+        specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.5)
       '@babel/preset-react':
-        specifier: ^7.27.1
+        specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.5)
       '@babel/preset-typescript':
-        specifier: ^7.27.1
+        specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.5)
       '@emotion/react':
-        specifier: ^11.13.0
+        specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.7)(react@19.2.3)
       '@eslint/js':
         specifier: ^9.39.2
         version: 9.39.2
       '@jbrowse/core':
-        specifier: ^3.0.1
+        specifier: ^3.7.0
         version: 3.7.0(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3))(@mui/system@7.3.7(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@mui/icons-material':
-        specifier: ^7.0.1
+        specifier: ^7.3.7
         version: 7.3.7(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.7)(react@19.2.3)
       '@mui/material':
-        specifier: ^7.0.1
+        specifier: ^7.3.7
         version: 7.3.7(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@mui/system':
-        specifier: ^7.0.1
+        specifier: ^7.3.7
         version: 7.3.7(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3)
       '@types/d3':
-        specifier: ^7.4.0
+        specifier: ^7.4.3
         version: 7.4.3
       '@types/d3-array':
-        specifier: ^3.2.0
+        specifier: ^3.2.2
         version: 3.2.2
       '@types/d3-hierarchy':
-        specifier: ^3.1.0
+        specifier: ^3.1.7
         version: 3.1.7
       '@types/file-saver':
         specifier: ^2.0.7
         version: 2.0.7
       '@types/node':
-        specifier: ^24.1.0
+        specifier: ^24.10.4
         version: 24.10.4
       '@types/normalize-wheel':
-        specifier: ^1.0.2
+        specifier: ^1.0.4
         version: 1.0.4
       '@types/pako':
-        specifier: ^2.0.3
+        specifier: ^2.0.4
         version: 2.0.4
       '@types/react':
-        specifier: ^19.0.2
+        specifier: ^19.2.7
         version: 19.2.7
       '@types/react-dom':
-        specifier: ^19.0.2
+        specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.7)
       '@typescript-eslint/eslint-plugin':
-        specifier: ^8.0.0
+        specifier: ^8.52.0
         version: 8.52.0(@typescript-eslint/parser@8.52.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3)
       '@typescript-eslint/parser':
-        specifier: ^8.0.0
+        specifier: ^8.52.0
         version: 8.52.0(eslint@9.39.2)(typescript@5.9.3)
       '@vitejs/plugin-react':
-        specifier: ^5.0.2
+        specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@24.10.4)(terser@5.44.1))
       babel-loader:
         specifier: ^10.0.0
@@ -81,73 +81,73 @@ importers:
         specifier: ^7.1.2
         version: 7.1.2(webpack@5.104.1)
       eslint:
-        specifier: ^9.8.0
+        specifier: ^9.39.2
         version: 9.39.2
       eslint-plugin-import:
-        specifier: ^2.31.0
+        specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@8.52.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)
       eslint-plugin-react:
-        specifier: ^7.32.2
+        specifier: ^7.37.5
         version: 7.37.5(eslint@9.39.2)
       eslint-plugin-react-hooks:
-        specifier: ^7.0.0
+        specifier: ^7.0.1
         version: 7.0.1(eslint@9.39.2)
       eslint-plugin-react-refresh:
-        specifier: ^0.4.9
+        specifier: ^0.4.26
         version: 0.4.26(eslint@9.39.2)
       eslint-plugin-unicorn:
         specifier: ^62.0.0
         version: 62.0.0(eslint@9.39.2)
       flatbush:
-        specifier: ^4.4.0
+        specifier: ^4.5.0
         version: 4.5.0
       mobx:
-        specifier: ^6.13.1
+        specifier: ^6.15.0
         version: 6.15.0
       mobx-react:
-        specifier: ^9.1.1
+        specifier: ^9.2.1
         version: 9.2.1(mobx@6.15.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       mobx-state-tree:
-        specifier: ^5.0.1
+        specifier: ^5.4.2
         version: 5.4.2(mobx@6.15.0)
       postcss:
-        specifier: ^8.5.3
+        specifier: ^8.5.6
         version: 8.5.6
       prettier:
-        specifier: ^3.0.3
+        specifier: ^3.7.4
         version: 3.7.4
       react:
-        specifier: ^19.0.0
+        specifier: ^19.2.3
         version: 19.2.3
       react-dom:
-        specifier: ^19.0.0
+        specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       rimraf:
-        specifier: ^6.0.1
+        specifier: ^6.1.2
         version: 6.1.2
       rxjs:
-        specifier: ^7.8.1
+        specifier: ^7.8.2
         version: 7.8.2
       slugify:
         specifier: ^1.6.6
         version: 1.6.6
       tss-react:
-        specifier: ^4.9.12
+        specifier: ^4.9.20
         version: 4.9.20(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.7)(react@19.2.3)
       typescript:
-        specifier: ^5.3.3
+        specifier: ^5.9.3
         version: 5.9.3
       typescript-eslint:
-        specifier: ^8.0.1
+        specifier: ^8.52.0
         version: 8.52.0(eslint@9.39.2)(typescript@5.9.3)
       vite:
-        specifier: ^7.0.0
+        specifier: ^7.3.1
         version: 7.3.1(@types/node@24.10.4)(terser@5.44.1)
       vitest:
-        specifier: ^4.0.3
+        specifier: ^4.0.16
         version: 4.0.16(@types/node@24.10.4)(terser@5.44.1)
       webpack:
-        specifier: ^5.99.9
+        specifier: ^5.104.1
         version: 5.104.1(webpack-cli@6.0.1)
       webpack-cli:
         specifier: ^6.0.1
@@ -1896,8 +1896,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.9.13:
-    resolution: {integrity: sha512-WhtvB2NG2wjr04+h77sg3klAIwrgOqnjS49GGudnUPGFFgg7G17y7Qecqp+2Dr5kUDxNRBca0SK7cG8JwzkWDQ==}
+  baseline-browser-mapping@2.9.14:
+    resolution: {integrity: sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==}
     hasBin: true
 
   brace-expansion@1.1.12:
@@ -5592,7 +5592,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  baseline-browser-mapping@2.9.13: {}
+  baseline-browser-mapping@2.9.14: {}
 
   brace-expansion@1.1.12:
     dependencies:
@@ -5609,7 +5609,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.13
+      baseline-browser-mapping: 2.9.14
       caniuse-lite: 1.0.30001763
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27
