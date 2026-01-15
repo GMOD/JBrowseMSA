@@ -9,6 +9,12 @@ import {
 } from '@jbrowse/core/util'
 import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
+import { colord } from 'colord'
+import { ascending } from 'd3-array'
+import { cluster, hierarchy } from 'd3-hierarchy'
+import { saveAs } from 'file-saver'
+import { autorun, transaction } from 'mobx'
+import { addDisposer, cast, types } from 'mobx-state-tree'
 import {
   A3mMSA,
   ClustalMSA,
@@ -22,12 +28,6 @@ import {
   parseNewick,
   stockholmSniff,
 } from 'msa-parsers'
-import { colord } from 'colord'
-import { ascending } from 'd3-array'
-import { cluster, hierarchy } from 'd3-hierarchy'
-import { saveAs } from 'file-saver'
-import { autorun, transaction } from 'mobx'
-import { addDisposer, cast, types } from 'mobx-state-tree'
 
 import { blocksX, blocksY } from './calculateBlocks'
 import colorSchemes from './colorSchemes'
