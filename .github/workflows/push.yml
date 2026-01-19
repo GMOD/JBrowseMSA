@@ -8,27 +8,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - name: Use Node.js 20.x
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'pnpm'
+          cache: 'yarn'
       - name: Install dependencies
-        run: pnpm install
+        run: yarn install
       - name: Build parsers
-        run: pnpm --filter @react-msaview/parsers build
+        run: yarn workspace @react-msaview/parsers build
       - name: tsc lib
-        run: cd lib && pnpm tsc
+        run: cd lib && yarn tsc
       - name: tsc app
-        run: cd app && pnpm tsc
+        run: cd app && yarn tsc
       - name: Lint
-        run: pnpm lint
+        run: yarn lint
       - name: Test
-        run: pnpm test
+        run: yarn test
   spellcheck:
     name: Spell check
     runs-on: ubuntu-latest
