@@ -1,5 +1,11 @@
 # react-msaview
 
-A multiple sequence alignment viewer
+A React component for viewing multiple sequence alignments.
 
-See https://github.com/GMOD/react-msaview for more details
+## Links
+
+- [Main repository](https://github.com/GMOD/react-msaview)
+- [ProteinBrowser](https://github.com/GMOD/proteinbrowser) - Full suite of protein analysis tools
+- [Usage & embedding guide](../USAGE.md)
+- [CLI tools](../cli/) - Batch InterProScan processing
+- [msa-parsers](../msa-parsers/) - Standalone parsing library

@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Build parsers
-        run: yarn workspace @react-msaview/parsers build
+        run: cd msa-parsers && yarn tsc
       - name: tsc lib
         run: cd lib && yarn tsc
       - name: tsc app

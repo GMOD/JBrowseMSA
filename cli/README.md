@@ -1,14 +1,15 @@
 # @react-msaview/cli
 
-Command-line tools for react-msaview, including batch InterProScan processing
-for multiple sequence alignments.
+Command-line tools for [react-msaview](../) (JBrowseMSA), including batch InterProScan processing for multiple sequence alignments.
+
+Uses [msa-parsers](../msa-parsers/) for file format support.
 
 ## Installation
 
 ```bash
 # From the monorepo root
-pnpm install
-pnpm --filter @react-msaview/cli build
+yarn install
+yarn workspace @react-msaview/cli build
 
 # Or install globally (after publishing)
 npm install -g @react-msaview/cli

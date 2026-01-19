@@ -1,6 +1,6 @@
-# react-msaview
+# react-msaview (JBrowseMSA)
 
-A multiple sequence alignment viewer
+A multiple sequence alignment viewer, also known as JBrowseMSA.
 
 ## Docs
 
@@ -8,33 +8,28 @@ See [user guide](docs/user_guide.md)
 
 ## Demo
 
-See http://gmod.org/JBrowseMSA/
+See [ProteinBrowser](https://github.com/GMOD/proteinbrowser) for a full suite of protein analysis tools.
 
-This page is a deployment of the `app` directory in this repo, which uses the
-`react-msaview` NPM package, and additionally adds the 3-D structure viewer
+## Packages
+
+- [lib](lib/) - Main react-msaview React component
+- [app](app/) - Demo application (deployed at https://gmod.org/JBrowseMSA)
+- [cli](cli/) - Command-line tools (InterProScan batch processing)
+- [msa-parsers](msa-parsers/) - MSA file format parsers
 
 ## Developers
-
-The lib folder contains the NPM package, and the `app` folder contains an
-example usage with additional wiring to use with a 3-D protein structure viewer
 
 ```bash
 git clone https://github.com/GMOD/react-msaview
 cd react-msaview
 ```
 
-In one window, start a watcher for the library
-
 ```bash
-cd lib
-yarn tsc --watch
-```
+# Start lib watcher in one terminal
+cd lib && yarn tsc --watch
 
-In another window, start the app
-
-```bash
-cd app
-yarn dev
+# Start app in another terminal
+cd app && yarn dev
 ```
 
 ## Programmatic usage, embedding, downloading from NPM
