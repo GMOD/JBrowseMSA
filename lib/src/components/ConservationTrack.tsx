@@ -42,8 +42,7 @@ const ConservationBlock = observer(function ({
       const barHeight = value * trackHeight
       const x = i * colWidth
 
-      const hue = value * 120
-      ctx.fillStyle = `hsl(${hue}, 70%, 50%)`
+      ctx.fillStyle = 'gray'
       ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
     }
   }, [

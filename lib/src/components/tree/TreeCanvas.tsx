@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import { isAlive } from 'mobx-state-tree'
+import { isAlive } from '@jbrowse/mobx-state-tree'
 
 import TreeCanvasBlock from './TreeCanvasBlock'
 import { padding } from './renderTreeCanvas'

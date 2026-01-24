@@ -14,7 +14,7 @@ import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'
 import { saveAs } from 'file-saver'
 import { autorun, transaction } from 'mobx'
-import { addDisposer, cast, types } from 'mobx-state-tree'
+import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import {
   A3mMSA,
   ClustalMSA,
@@ -86,7 +86,7 @@ import type {
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Theme } from '@mui/material'
 import type { HierarchyNode } from 'd3-hierarchy'
-import type { Instance } from 'mobx-state-tree'
+import type { Instance } from '@jbrowse/mobx-state-tree'
 
 const showZoomStarKey = 'msa-showZoomStar'
 
@@ -1191,13 +1191,18 @@ function stateModelFactory() {
             return 0
           }
 
-          let entropy = 0
+          const merged: Record<string, number> = {}
           for (const letter of Object.keys(stats)) {
             if (letter === '-' || letter === '.') {
               continue
             }
-            const count = stats[letter]!
-            const freq = count / nonGapTotal
+            const upper = letter.toUpperCase()
+            merged[upper] = (merged[upper] || 0) + stats[letter]!
+          }
+
+          let entropy = 0
+          for (const key of Object.keys(merged)) {
+            const freq = merged[key]! / nonGapTotal
             if (freq > 0) {
               entropy -= freq * Math.log2(freq)
             }

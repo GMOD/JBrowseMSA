@@ -13,7 +13,7 @@
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.10.8",
-    "@jbrowse/core": "^4.0.4",
+    "@jbrowse/core": "^4.1.1",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
     "@mui/system": "^7.0.1",
@@ -22,7 +22,7 @@
     "gh-pages": "^6.0.0",
     "mobx": "^6.9.0",
     "mobx-react": "^9.0.1",
-    "mobx-state-tree": "5.4.2",
+    "@jbrowse/mobx-state-tree": "^5.4.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-msaview": "^4.0.0",
