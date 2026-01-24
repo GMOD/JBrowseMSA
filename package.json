@@ -2,11 +2,6 @@
   "private": true,
   "license": "MIT",
   "workspaces": [
-    "parsers",
-    "cli",
-    "msa-parsers",
-    "lib",
-    "app",
     "packages/*"
   ],
   "scripts": {
