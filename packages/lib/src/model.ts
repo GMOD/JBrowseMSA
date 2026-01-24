@@ -1526,7 +1526,7 @@ function stateModelFactory() {
         const { rowHeight, MSA, hideGapsEffective, blanks } = self
         return (
           MSA?.tracks
-            .filter((t): t is typeof t & { data: string } => !!t.data)
+            .filter(t => t.data)
             .map(t => ({
               model: {
                 ...t,
