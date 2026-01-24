@@ -1,7 +1,7 @@
 {
   "name": "react-msaview",
   "author": "Colin",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "license": "MIT",
   "type": "module",
   "repository": {
@@ -28,16 +28,14 @@
     "node": ">=10"
   },
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "rimraf dist bundle",
     "watch": "pnpm build:esm --watch",
     "format": "prettier --write .",
-    "prebuild": "pnpm clean",
-    "preversion": "node output-version.js > src/version.ts && git add -A src && git commit -m '[skip ci] Bump version.ts'",
     "build:esm": "tsc",
     "build:bundle": "webpack",
-    "build": "pnpm build:esm && pnpm build:bundle",
-    "prepack": "pnpm build",
-    "postversion": "git push --follow-tags",
+    "build": "pnpm clean && pnpm build:esm && pnpm build:bundle",
+    "prepublishOnly": "node scripts/bump-version.js && pnpm build",
+    "postpublish": "node scripts/postpublish.js",
     "statedocs": "rm -rf apidocs && mkdir apidocs && node --experimental-strip-types docgen/generateStateModelDocs.ts",
     "poststatedocs": "pnpm format",
     "test": "vitest"
@@ -53,7 +51,7 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "svgcanvas": "^2.6.0",
+    "@jbrowse/svgcanvas": "workspace:*",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
     "colord": "^2.9.3",

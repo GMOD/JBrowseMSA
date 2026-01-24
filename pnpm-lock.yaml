@@ -218,6 +218,9 @@ importers:
       '@jbrowse/mobx-state-tree':
         specifier: ^5.0.0
         version: 5.5.0(mobx@6.15.0)
+      '@jbrowse/svgcanvas':
+        specifier: workspace:*
+        version: link:../svgcanvas
       '@mui/icons-material':
         specifier: ^7.0.1
         version: 7.3.7(@mui/material@7.3.7(@emotion/react@11.14.0(@types/react@19.2.9)(react@19.2.3))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.9)(react@19.2.3))(@types/react@19.2.9)(react@19.2.3))(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@types/react@19.2.9)(react@19.2.3)
@@ -254,9 +257,6 @@ importers:
       react-dom:
         specifier: '>=16.8.0'
         version: 19.2.3(react@19.2.3)
-      svgcanvas:
-        specifier: ^2.6.0
-        version: 2.6.0
 
   packages/msa-parsers:
     dependencies:
@@ -273,6 +273,8 @@ importers:
       vitest:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@24.10.9)(terser@5.46.0)
+
+  packages/svgcanvas: {}
 
 packages:
 
@@ -3367,9 +3369,6 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
-
-  svgcanvas@2.6.0:
-    resolution: {integrity: sha512-H/2iVTLyuLxbLNYArnTaR8RmCR7fi8Gx7Hul7+lnPcN/b6AXLS56iVzUudgfMmkKrF9+GvXm+YJlT9Tg4eIj3A==}
 
   tabbable@6.4.0:
     resolution: {integrity: sha512-05PUHKSNE8ou2dwIxTngl4EzcnsCDZGJ/iCLtDflR/SHB/ny14rXc+qU5P4mG9JkusiV7EivzY9Mhm55AzAvCg==}
@@ -7189,8 +7188,6 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
-
-  svgcanvas@2.6.0: {}
 
   tabbable@6.4.0: {}
 

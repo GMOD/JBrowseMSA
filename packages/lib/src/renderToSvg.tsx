@@ -13,7 +13,7 @@ import { colorContrast } from './util.ts'
 
 import type { MsaViewModel } from './model.ts'
 import type { Theme } from '@mui/material'
-import type { Context as ContextType } from 'svgcanvas'
+import type { Context as ContextType } from '@jbrowse/svgcanvas'
 
 export interface ExportSvgOptions {
   theme: Theme
@@ -81,7 +81,7 @@ async function render({
   includeMinimap?: boolean
   includeTracks?: boolean
 }) {
-  const { Context } = await import('svgcanvas')
+  const { Context } = await import('@jbrowse/svgcanvas')
   const Wrapper = includeMinimap ? MinimapWrapper : NullWrapper
 
   return renderToStaticMarkup(

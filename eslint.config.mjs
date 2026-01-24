@@ -14,7 +14,7 @@ export default tseslint.config(
       '**/esm/**/*',
       '**/public/**/*',
       '**/bundle/**/*',
-      'packages/lib/output-version.js',
+      'packages/lib/scripts/**',
       'babel.config.js',
       'packages/lib/webpack.config.mjs',
       'packages/lib/vite.config.ts',
