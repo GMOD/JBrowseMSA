@@ -11,6 +11,7 @@ import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
 import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
+import { createPaletteMap } from './createPaletteMap'
 import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'
 import { saveAs } from 'file-saver'
@@ -58,7 +59,6 @@ import {
   defaultTreeWidthMatchesArea,
 } from './constants'
 import { flatToTree } from './flatToTree'
-import palettes from './ggplotPalettes'
 import { measureTextCanvas } from './measureTextCanvas'
 import { DataModelF } from './model/DataModel'
 import { DialogQueueSessionMixin } from './model/DialogQueue'
@@ -460,7 +460,7 @@ function stateModelFactory() {
         }
 
         // Get all descendant leaf names
-        const descendantNames = node.leaves().map((leaf: any) => leaf.data.name)
+        const descendantNames = node.leaves().map(leaf => leaf.data.name)
 
         self.hoveredTreeNode = { nodeId, descendantNames }
       },
@@ -1617,9 +1617,9 @@ function stateModelFactory() {
        * @returns The global column index in the full MSA
        */
       seqPosToGlobalCol(rowName: string, seqPos: number) {
-        const { rowNames, rows } = self
-        const index = rowNames.indexOf(rowName)
-        return index !== -1 && rows[index]
+        const { rows } = self
+        const index = this.rowNamesSet.get(rowName)
+        return index !== undefined && rows[index]
           ? seqPosToGlobalCol({
               row: rows[index][1],
               seqPos,
@@ -1733,15 +1733,7 @@ function stateModelFactory() {
        * #getter
        */
       get fillPalette() {
-        const arr = [...self.tidyInterProAnnotationTypes.keys()]
-        let i = 0
-        const map = {} as Record<string, string>
-        for (const key of arr) {
-          const k = Math.min(arr.length - 1, palettes.length - 1)
-          map[key] = palettes[k]![i]!
-          i++
-        }
-        return map
+        return createPaletteMap([...self.tidyInterProAnnotationTypes.keys()])
       },
       /**
        * #getter
