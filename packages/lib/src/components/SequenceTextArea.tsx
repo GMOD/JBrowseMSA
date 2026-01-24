@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 
 import { Button, TextField } from '@mui/material'
-import copy from '../vendor/copyToClipboard.ts'
 import { makeStyles } from 'tss-react/mui'
 
 import Checkbox2 from './Checkbox2.tsx'
+import copy from '../vendor/copyToClipboard.ts'
 
 const useStyles = makeStyles()({
   textAreaFont: {

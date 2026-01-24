@@ -13,24 +13,50 @@ protein analysis tools.
 
 ## Packages
 
-- [lib](lib/) - Main react-msaview React component
-- [app](app/) - Demo application (deployed at https://gmod.org/JBrowseMSA)
-- [cli](cli/) - Command-line tools (InterProScan batch processing)
-- [msa-parsers](msa-parsers/) - MSA file format parsers
+| Package                                       | Description                                                |
+| --------------------------------------------- | ---------------------------------------------------------- |
+| [packages/lib](packages/lib/)                 | Main react-msaview React component                         |
+| [packages/app](packages/app/)                 | Demo application (deployed at https://gmod.org/JBrowseMSA) |
+| [packages/cli](packages/cli/)                 | Command-line tools (InterProScan batch processing)         |
+| [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                    |
+| [packages/svgcanvas](packages/svgcanvas/)     | SVG canvas rendering (ESM fork of svgcanvas)               |
 
-## Developers
+## Development
 
 ```bash
 git clone https://github.com/GMOD/react-msaview
 cd react-msaview
+pnpm install
 ```
 
-```bash
-# Start lib watcher in one terminal
-cd lib && yarn tsc --watch
+### Run the demo app
 
-# Start app in another terminal
-cd app && yarn dev
+```bash
+pnpm dev
+```
+
+This starts the app with hot module reloading. Changes to `packages/lib/src/`
+will automatically reload.
+
+### Build all packages
+
+```bash
+pnpm build
+```
+
+### Run tests
+
+```bash
+pnpm test
+```
+
+### Other commands
+
+```bash
+pnpm lint        # Run ESLint
+pnpm format      # Format with Prettier
+pnpm typecheck   # Typecheck all packages
+pnpm clean       # Clean all dist folders
 ```
 
 ## Programmatic usage, embedding, downloading from NPM
@@ -40,7 +66,7 @@ To install as a NPM package or CDN style bundle, see [USAGE.md](USAGE.md)
 ## Notes
 
 This repo also supports https://github.com/GMOD/jbrowse-plugin-msaview which is
-a jbrowse 2 plugin for viewing MSAs
+a JBrowse 2 plugin for viewing MSAs.
 
 This repo also builds on abrowse (https://github.com/ihh/abrowse) and
-phylo-react (https://www.npmjs.com/package/phylo-react)
+phylo-react (https://www.npmjs.com/package/phylo-react).

@@ -1,22 +1,8 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "noUncheckedIndexedAccess": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "outDir": "dist/",
-    "jsx": "react",
-    "declaration": true,
-    "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true
+    "jsx": "react"
   },
   "include": ["src"]
 }

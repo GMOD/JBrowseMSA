@@ -2,9 +2,14 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "dev": "pnpm --filter app dev",
+    "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build",
+    "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",
+    "clean": "pnpm -r run clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "pnpm -r exec tsc --noEmit"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",

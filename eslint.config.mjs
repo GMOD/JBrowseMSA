@@ -14,10 +14,10 @@ export default tseslint.config(
       '**/esm/**/*',
       '**/public/**/*',
       '**/bundle/**/*',
-      'lib/output-version.js',
+      'packages/lib/output-version.js',
       'babel.config.js',
-      'lib/webpack.config.js',
-      'lib/vite.config.ts',
+      'packages/lib/webpack.config.mjs',
+      'packages/lib/vite.config.ts',
     ],
   },
   {
@@ -158,7 +158,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['cli/**/*.ts'],
+    files: ['packages/cli/**/*.ts', 'scripts/**/*.ts'],
     rules: {
       'no-console': 'off',
     },

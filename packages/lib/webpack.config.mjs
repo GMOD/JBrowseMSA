@@ -1,12 +1,15 @@
-const path = require('path')
-const webpack = require('webpack')
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-const buildDir = path.resolve('.')
+import webpack from 'webpack'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const buildDir = path.resolve(__dirname)
 const distDir = path.resolve(buildDir, 'bundle')
 
 const mode = process.env.NODE_ENV || 'production'
 
-module.exports = {
+export default {
   mode,
   entry: path.join(buildDir, 'src', 'webpack.ts'),
   devtool: 'source-map',
@@ -63,7 +66,7 @@ module.exports = {
           {
             test: /\.css$/,
             use: {
-              loader: require.resolve('css-loader'),
+              loader: 'css-loader',
             },
           },
         ],

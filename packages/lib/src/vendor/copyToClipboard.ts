@@ -5,7 +5,7 @@
 
 function deselectCurrent() {
   const selection = document.getSelection()
-  if (!selection || !selection.rangeCount) {
+  if (!selection?.rangeCount) {
     return () => {}
   }
   const active = document.activeElement as HTMLElement | null
@@ -81,7 +81,7 @@ export default function copy(text: string, options?: CopyOptions): boolean {
       }
     })
 
-    document.body.appendChild(mark)
+    document.body.append(mark)
     range.selectNodeContents(mark)
     selection?.addRange(range)
 
@@ -92,7 +92,7 @@ export default function copy(text: string, options?: CopyOptions): boolean {
     success = true
   } catch (err) {
     if (debug) {
-      console.error('unable to copy using execCommand: ', err)
+      console.error('unable to copy using execCommand:', err)
     }
     try {
       const clipboardData = (window as unknown as Record<string, DataTransfer>)
@@ -104,7 +104,7 @@ export default function copy(text: string, options?: CopyOptions): boolean {
       }
     } catch (err2) {
       if (debug) {
-        console.error('unable to copy using clipboardData: ', err2)
+        console.error('unable to copy using clipboardData:', err2)
       }
     }
   } finally {
@@ -116,7 +116,7 @@ export default function copy(text: string, options?: CopyOptions): boolean {
       }
     }
     if (mark) {
-      document.body.removeChild(mark)
+      mark.remove()
     }
     reselectPrevious?.()
   }

@@ -2,9 +2,10 @@ import React, { useState } from 'react'
 
 import { Dialog } from '@jbrowse/core/ui'
 import { Button, DialogActions, DialogContent } from '@mui/material'
-import copy from '../../vendor/copyToClipboard.ts'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
+
+import copy from '../../vendor/copyToClipboard.ts'
 
 const useStyles = makeStyles()(theme => ({
   textArea: {

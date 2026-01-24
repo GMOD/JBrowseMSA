@@ -2,7 +2,10 @@ import React, { Suspense } from 'react'
 
 import { observer } from 'mobx-react'
 
-import { HorizontalResizeHandle, VerticalResizeHandle } from './ResizeHandles.tsx'
+import {
+  HorizontalResizeHandle,
+  VerticalResizeHandle,
+} from './ResizeHandles.tsx'
 import Track from './Track.tsx'
 import VerticalScrollbar from './VerticalScrollbar.tsx'
 import Header from './header/Header.tsx'

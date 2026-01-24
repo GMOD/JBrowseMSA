@@ -11,10 +11,8 @@ import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
 import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
-import { createPaletteMap } from './createPaletteMap.ts'
 import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'
-import { saveAs } from './vendor/fileSaver.ts'
 import { autorun, transaction } from 'mobx'
 import {
   A3mMSA,
@@ -58,6 +56,7 @@ import {
   defaultTreeWidth,
   defaultTreeWidthMatchesArea,
 } from './constants.ts'
+import { createPaletteMap } from './createPaletteMap.ts'
 import { flatToTree } from './flatToTree.ts'
 import { measureTextCanvas } from './measureTextCanvas.ts'
 import { DataModelF } from './model/DataModel.ts'
@@ -74,6 +73,7 @@ import {
 } from './rowCoordinateCalculations.ts'
 import { seqPosToGlobalCol } from './seqPosToGlobalCol.ts'
 import { collapse, len, maxLength, setBrLength, skipBlanks } from './util.ts'
+import { saveAs } from './vendor/fileSaver.ts'
 
 import type { InterProScanResults } from './launchInterProScan.ts'
 import type {

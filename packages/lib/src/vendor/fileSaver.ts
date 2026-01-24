@@ -38,16 +38,16 @@ function click(node: HTMLAnchorElement) {
 // Detect WebView inside a native macOS app by ruling out all browsers
 const isMacOSWebView =
   typeof navigator !== 'undefined' &&
-  /Macintosh/.test(navigator.userAgent) &&
-  /AppleWebKit/.test(navigator.userAgent) &&
-  !/Safari/.test(navigator.userAgent)
+  navigator.userAgent.includes('Macintosh') &&
+  navigator.userAgent.includes('AppleWebKit') &&
+  !navigator.userAgent.includes('Safari')
 
 export function saveAs(blob: Blob | string, name?: string) {
   if (typeof window === 'undefined') {
     return
   }
 
-  const URL = window.URL || window.webkitURL
+  const URL = window.URL
   const a = document.createElement('a')
   name = name || (blob instanceof Blob ? 'download' : 'download')
 
@@ -61,8 +61,12 @@ export function saveAs(blob: Blob | string, name?: string) {
       click(a)
     } else {
       a.href = URL.createObjectURL(blob)
-      setTimeout(() => URL.revokeObjectURL(a.href), 40000)
-      setTimeout(() => click(a), 0)
+      setTimeout(() => {
+        URL.revokeObjectURL(a.href)
+      }, 40000)
+      setTimeout(() => {
+        click(a)
+      }, 0)
     }
     return
   }
@@ -74,21 +78,30 @@ export function saveAs(blob: Blob | string, name?: string) {
   }
 
   const isSafari =
-    /constructor/i.test((window as unknown as { HTMLElement: unknown }).HTMLElement?.toString() ?? '') ||
-    !!(window as unknown as { safari?: unknown }).safari
+    /constructor/i.test(
+      (window as unknown as { HTMLElement: unknown }).HTMLElement?.toString() ??
+        '',
+    ) || !!(window as unknown as { safari?: unknown }).safari
   const isChromeIOS = /CriOS\/[\d]+/.test(navigator.userAgent)
 
-  if ((isChromeIOS || isSafari || isMacOSWebView) && typeof FileReader !== 'undefined') {
+  if (
+    (isChromeIOS || isSafari || isMacOSWebView) &&
+    typeof FileReader !== 'undefined'
+  ) {
     const reader = new FileReader()
     reader.onloadend = () => {
       let url = reader.result as string
-      url = isChromeIOS ? url : url.replace(/^data:[^;]*;/, 'data:attachment/file;')
+      url = isChromeIOS
+        ? url
+        : url.replace(/^data:[^;]*;/, 'data:attachment/file;')
       window.open(url, '_blank')
     }
     reader.readAsDataURL(blob)
   } else {
     const url = URL.createObjectURL(blob)
     window.open(url, '_blank')
-    setTimeout(() => URL.revokeObjectURL(url), 40000)
+    setTimeout(() => {
+      URL.revokeObjectURL(url)
+    }, 40000)
   }
 }

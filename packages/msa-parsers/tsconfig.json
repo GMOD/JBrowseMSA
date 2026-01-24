@@ -1,19 +1,8 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "esnext",
     "lib": ["esnext"],
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "noUncheckedIndexedAccess": true,
-    "strict": true,
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "outDir": "dist/",
-    "declaration": true,
-    "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true
+    "outDir": "dist/"
   },
   "include": ["src"],
   "exclude": ["src/**/*.test.ts"]

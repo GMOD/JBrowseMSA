@@ -22,7 +22,9 @@ const SettingsDialog = lazy(() => import('../dialogs/SettingsDialog.tsx'))
 const UserProvidedDomainsDialog = lazy(
   () => import('../dialogs/UserProvidedDomainsDialog.tsx'),
 )
-const InterProScanDialog = lazy(() => import('../dialogs/InterProScanDialog.tsx'))
+const InterProScanDialog = lazy(
+  () => import('../dialogs/InterProScanDialog.tsx'),
+)
 
 const HeaderMenu = observer(({ model }: { model: MsaViewModel }) => {
   const {

@@ -6,7 +6,9 @@ import { observer } from 'mobx-react'
 import type { MsaViewModel } from '../../model.ts'
 
 // lazies
-const TreeNodeInfoDialog = lazy(() => import('./dialogs/TreeNodeInfoDialog.tsx'))
+const TreeNodeInfoDialog = lazy(
+  () => import('./dialogs/TreeNodeInfoDialog.tsx'),
+)
 
 const TreeMenu = observer(function ({
   node,

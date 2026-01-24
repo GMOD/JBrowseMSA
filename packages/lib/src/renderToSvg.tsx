@@ -13,7 +13,7 @@ import { colorContrast } from './util.ts'
 
 import type { MsaViewModel } from './model.ts'
 import type { Theme } from '@mui/material'
-import type { Context as ContextType } from '@jbrowse/svgcanvas'
+import type { Context as ContextType } from 'svgcanvas'
 
 export interface ExportSvgOptions {
   theme: Theme
@@ -81,7 +81,7 @@ async function render({
   includeMinimap?: boolean
   includeTracks?: boolean
 }) {
-  const { Context } = await import('@jbrowse/svgcanvas')
+  const { Context } = await import('svgcanvas')
   const Wrapper = includeMinimap ? MinimapWrapper : NullWrapper
 
   return renderToStaticMarkup(
@@ -138,9 +138,9 @@ function CoreRendering({
   const clipId1 = `tree-${id}`
   const clipId2 = `msa-${id}`
   const contrastScheme = colorContrast(colorScheme, theme)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const ctx1 = new Context(width, contentHeight) as any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const ctx2 = new Context(width, contentHeight) as any
   renderBoxFeatureCanvasBlock({
     ctx: ctx2,
@@ -215,7 +215,7 @@ function TrackRendering({
   const clipId = `tracks-${id}`
   const contrastScheme = colorContrast(colorScheme, theme)
   const msaAreaWidth = width - treeAreaWidth
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const ctx = new Context(msaAreaWidth, trackHeight) as any
 
   renderAllTracks({
