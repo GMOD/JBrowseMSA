@@ -2,13 +2,13 @@
 
 ## Using react-msaview NPM package as a React component
 
-Install react-msaview. There are several peerDependencies also, listed below
+Install react-msaview and its peer dependencies:
 
 ```sh
-yarn add react-msaview @jbrowse/core @mui/material react react-dom @emotion/styled @emotion/react
+npm install react-msaview @jbrowse/core @mui/material react react-dom @emotion/styled @emotion/react
 ```
 
-## Using the react-msaview NPM component, point at remote files
+## Using the react-msaview NPM component with inline data
 
 ```typescript
 import { MSAView, MSAModelF } from 'react-msaview';
@@ -33,10 +33,10 @@ export default function App() {
 }
 ```
 
-example stackblitz here
+Example StackBlitz:
 https://stackblitz.com/edit/vitejs-vite-qb9v874k?file=src%2FApp.tsx
 
-## Using the react-msaview NPM component, point at remote files
+## Using the react-msaview NPM component with remote files
 
 ```typescript
 import { MSAView, MSAModelF } from 'react-msaview';
@@ -61,7 +61,7 @@ export default function App() {
 }
 ```
 
-## Using react-msaview in a plain HTML file with UMD bundle, point at URLs
+## Using react-msaview in a plain HTML file with UMD bundle
 
 ```html
 <html>
@@ -90,22 +90,47 @@ export default function App() {
 </html>
 ```
 
+## Using react-msaview with ESM CDN (esm.sh)
+
+See [example/esm-cdn.html](example/esm-cdn.html) for a complete example using
+native ES modules with esm.sh.
+
+```html
+<script type="module">
+  import React from 'https://esm.sh/react@19'
+  import { createRoot } from 'https://esm.sh/react-dom@19/client'
+  const { MSAView, MSAModelF } =
+    await import('https://esm.sh/react-msaview@5?bundle')
+
+  const model = MSAModelF().create()
+  model.setWidth(window.innerWidth)
+  model.setMSA({
+    msa: '>seq1\nACGT\n>seq2\nACGT',
+    msaFilehandle: { uri: 'example.fa' },
+  })
+
+  createRoot(document.getElementById('root')).render(
+    React.createElement(MSAView, { model }),
+  )
+</script>
+```
+
 ## API
 
-See here for complete auto-generated API docs for the MSA view model
-https://github.com/GMOD/react-msaview/blob/main/lib/apidocs/MsaView.md
+See here for complete auto-generated API docs for the MSA view model:
+https://github.com/GMOD/react-msaview/blob/main/packages/lib/apidocs/MsaView.md
 
-You can also look at lib/src/model.ts for the full model source code
+You can also look at `packages/lib/src/model.ts` for the full model source code.
 
 The React-MSAView package uses this 'model' extensively, instead of a 'prop'
-based API
+based API.
 
 It is helpful to be knowledgeable of the way mobx+react interoperate: you can
 write components that "observe" (by wrapping a component with the mobx-react
 observe function) the state of the model using React and
-@jbrowse/mobx-state-tree
+@jbrowse/mobx-state-tree.
 
 For example, if you wanted to know what base the user was hovering over. You can
 get an intro to basic React and @jbrowse/mobx-state-tree + observer concepts in
-this short tutorial, and the concepts will apply to this codebase as well
+this short tutorial, and the concepts will apply to this codebase as well:
 https://gist.github.com/cmdcolin/94d1cbc285e6319cc3af4b9a8556f03f

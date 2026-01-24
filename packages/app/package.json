@@ -1,0 +1,32 @@
+{
+  "name": "app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.10.8",
+    "@jbrowse/core": "^4.1.1",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
+    "@mui/system": "^7.0.1",
+    "buffer": "^6.0.3",
+    "eslint": "^9.8.0",
+    "gh-pages": "^6.0.0",
+    "mobx": "^6.9.0",
+    "mobx-react": "^9.0.1",
+    "@jbrowse/mobx-state-tree": "^5.4.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-msaview": "workspace:*",
+    "rxjs": "^7.8.1",
+    "tss-react": "^4.9.12"
+  }
+}

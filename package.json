@@ -1,17 +1,15 @@
 {
   "private": true,
   "license": "MIT",
-  "workspaces": [
-    "parsers",
-    "cli",
-    "msa-parsers",
-    "lib",
-    "app"
-  ],
   "scripts": {
+    "dev": "pnpm --filter app dev",
+    "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build",
+    "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",
+    "clean": "pnpm -r run clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "pnpm -r exec tsc --noEmit"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
@@ -27,7 +25,6 @@
     "@types/d3": "^7.4.3",
     "@types/d3-array": "^3.2.2",
     "@types/d3-hierarchy": "^3.1.7",
-    "@types/file-saver": "^2.0.7",
     "@types/node": "^24.10.4",
     "@types/normalize-wheel": "^1.0.4",
     "@types/pako": "^2.0.4",

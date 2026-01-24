@@ -1,0 +1,64 @@
+{
+  "name": "react-msaview",
+  "author": "Colin",
+  "version": "5.0.2",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GMOD/react-msaview.git",
+    "directory": "packages/lib"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "bundle",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "clean": "rimraf dist bundle",
+    "watch": "pnpm build:esm --watch",
+    "format": "prettier --write .",
+    "build:esm": "tsc",
+    "build:bundle": "webpack",
+    "build": "pnpm clean && pnpm build:esm && pnpm build:bundle",
+    "prepublishOnly": "node scripts/bump-version.js && pnpm build",
+    "postpublish": "node scripts/postpublish.js",
+    "statedocs": "rm -rf apidocs && mkdir apidocs && node --experimental-strip-types docgen/generateStateModelDocs.ts",
+    "poststatedocs": "pnpm format",
+    "test": "vitest"
+  },
+  "peerDependencies": {
+    "@jbrowse/core": ">=2.0.0",
+    "@jbrowse/mobx-state-tree": "^5.0.0",
+    "@mui/icons-material": ">=5.0.0",
+    "@mui/material": ">=5.0.0",
+    "mobx": ">=6.0.0",
+    "mobx-react": ">=7.0.0",
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@jbrowse/svgcanvas": "workspace:*",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
+    "colord": "^2.9.3",
+    "d3-array": "^3.2.3",
+    "d3-hierarchy": "^3.1.2",
+    "flatbush": "^4.4.0",
+    "msa-parsers": "workspace:*",
+    "pako": "^2.1.0"
+  }
+}
