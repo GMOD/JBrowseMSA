@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react'
 
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../model'
-import type { BasicTrack } from '../types'
+import type { MsaViewModel } from '../model.ts'
+import type { BasicTrack } from '../types.ts'
 
 const ConservationBlock = observer(function ({
   model,

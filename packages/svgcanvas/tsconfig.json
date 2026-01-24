@@ -5,7 +5,6 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "noUncheckedIndexedAccess": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "module": "esnext",
@@ -13,10 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "outDir": "dist/",
-    "jsx": "react",
-    "declaration": true,
-    "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true
+    "declaration": true
   },
   "include": ["src"]
 }

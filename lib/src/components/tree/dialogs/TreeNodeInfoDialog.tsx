@@ -6,9 +6,9 @@ import { Dialog } from '@jbrowse/core/ui'
 import { DialogContent } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import SequenceTextArea from '../../SequenceTextArea'
+import SequenceTextArea from '../../SequenceTextArea.tsx'
 
-import type { MsaViewModel } from '../../../model'
+import type { MsaViewModel } from '../../../model.ts'
 
 const TreeNodeInfoDialog = observer(function ({
   info,

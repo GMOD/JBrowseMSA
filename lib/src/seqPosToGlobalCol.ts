@@ -1,4 +1,4 @@
-import { isBlank } from './util'
+import { isBlank } from './util.ts'
 
 /**
  * Convert a sequence position (ungapped, 0-based) to a global column index.

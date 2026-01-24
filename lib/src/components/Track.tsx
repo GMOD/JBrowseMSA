@@ -5,10 +5,10 @@ import { IconButton, Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import type { MsaViewModel } from '../model'
+import type { MsaViewModel } from '../model.ts'
 
 // lazies
-const TrackInfoDialog = lazy(() => import('./dialogs/TrackInfoDialog'))
+const TrackInfoDialog = lazy(() => import('./dialogs/TrackInfoDialog.tsx'))
 
 const useStyles = makeStyles()({
   button: {

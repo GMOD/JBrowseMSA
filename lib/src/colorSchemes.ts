@@ -2,7 +2,7 @@ import { blue, green, orange, red } from '@mui/material/colors'
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
 
-import { transform } from './util'
+import { transform } from './util.ts'
 
 extend([namesPlugin])
 

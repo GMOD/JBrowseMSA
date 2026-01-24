@@ -1951,11 +1951,6 @@
   resolved "https://registry.yarnpkg.com/@types/file-saver-es/-/file-saver-es-2.0.3.tgz#c50a00c75aedaddd3183f47fadef0a1bd3af0262"
   integrity sha512-1N7YkjKDfSSlBq9TCbNelivW+CkqEGh6HWzOP2w8znKsyASufdp8ymxnmKs67hyO9r175xMUu1e2w50xfBD4Ew==
 
-"@types/file-saver@^2.0.7":
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/@types/file-saver/-/file-saver-2.0.7.tgz#8dbb2f24bdc7486c54aa854eb414940bbd056f7d"
-  integrity sha512-dNKVfHd/jk0SkR/exKGj2ggkB45MAkzvWCaqLUUgkyjITkGNzH8H+yUwr+BLJUBjZOe9w8X3wgmXhZDRg1ED6A==
-
 "@types/geojson@*":
   version "7946.0.16"
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.16.tgz#8ebe53d69efada7044454e3305c19017d97ced2a"
@@ -4711,6 +4706,23 @@ react-is@^19.2.3:
   version "19.2.3"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-19.2.3.tgz#eec2feb69c7fb31f77d0b5c08c10ae1c88886b29"
   integrity sha512-qJNJfu81ByyabuG7hPFEbXqNcWSU3+eVus+KJs+0ncpGfMyYdvSmxiJxbWR65lYi1I+/0HBcliO029gc4F+PnA==
+
+react-msaview@^4.0.0:
+  version "4.8.1"
+  resolved "https://registry.yarnpkg.com/react-msaview/-/react-msaview-4.8.1.tgz#2fe4b4b91941d9b89e45521ea47109ed5628357e"
+  integrity sha512-EDQvLXb6vmo+eniFnnn2K0qrcJl4RyfP+UKBanXSIT9O3dh/28ph7Fw0phYUqKXR6+Ht3/X0RVeCLCjELk/p/w==
+  dependencies:
+    "@mui/icons-material" "^7.0.1"
+    "@mui/material" "^7.0.1"
+    colord "^2.9.3"
+    copy-to-clipboard "^3.3.1"
+    d3-array "^3.2.3"
+    d3-hierarchy "^3.1.2"
+    file-saver "^2.0.5"
+    flatbush "^4.4.0"
+    msa-parsers "^1.0.5"
+    pako "^2.1.0"
+    svgcanvas "^2.5.0"
 
 react-refresh@^0.18.0:
   version "0.18.0"

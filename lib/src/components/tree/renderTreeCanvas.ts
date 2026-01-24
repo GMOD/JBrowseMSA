@@ -1,4 +1,4 @@
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 import type { Theme } from '@mui/material'
 
 export const padding = 600

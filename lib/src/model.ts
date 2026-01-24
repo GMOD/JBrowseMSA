@@ -11,10 +11,10 @@ import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
 import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
-import { createPaletteMap } from './createPaletteMap'
+import { createPaletteMap } from './createPaletteMap.ts'
 import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'
-import { saveAs } from 'file-saver'
+import { saveAs } from './vendor/fileSaver.ts'
 import { autorun, transaction } from 'mobx'
 import {
   A3mMSA,
@@ -30,10 +30,10 @@ import {
   stockholmSniff,
 } from 'msa-parsers'
 
-import { blocksX, blocksY } from './calculateBlocks'
-import colorSchemes from './colorSchemes'
-import ConservationTrack from './components/ConservationTrack'
-import TextTrack from './components/TextTrack'
+import { blocksX, blocksY } from './calculateBlocks.ts'
+import colorSchemes from './colorSchemes.ts'
+import ConservationTrack from './components/ConservationTrack.tsx'
+import TextTrack from './components/TextTrack.tsx'
 import {
   defaultAllowedGappyness,
   defaultBgColor,
@@ -57,32 +57,32 @@ import {
   defaultTreeAreaWidth,
   defaultTreeWidth,
   defaultTreeWidthMatchesArea,
-} from './constants'
-import { flatToTree } from './flatToTree'
-import { measureTextCanvas } from './measureTextCanvas'
-import { DataModelF } from './model/DataModel'
-import { DialogQueueSessionMixin } from './model/DialogQueue'
-import { MSAModelF } from './model/msaModel'
-import { TreeModelF } from './model/treeModel'
-import { calculateNeighborJoiningTree } from './neighborJoining'
-import { parseAsn1 } from './parseAsn1'
-import { reparseTree } from './reparseTree'
+} from './constants.ts'
+import { flatToTree } from './flatToTree.ts'
+import { measureTextCanvas } from './measureTextCanvas.ts'
+import { DataModelF } from './model/DataModel.ts'
+import { DialogQueueSessionMixin } from './model/DialogQueue.ts'
+import { MSAModelF } from './model/msaModel.ts'
+import { TreeModelF } from './model/treeModel.ts'
+import { calculateNeighborJoiningTree } from './neighborJoining.ts'
+import { parseAsn1 } from './parseAsn1.ts'
+import { reparseTree } from './reparseTree.ts'
 import {
   globalColToVisibleCol,
   visibleColToGlobalCol,
   visibleColToSeqPosForRow,
-} from './rowCoordinateCalculations'
-import { seqPosToGlobalCol } from './seqPosToGlobalCol'
-import { collapse, len, maxLength, setBrLength, skipBlanks } from './util'
+} from './rowCoordinateCalculations.ts'
+import { seqPosToGlobalCol } from './seqPosToGlobalCol.ts'
+import { collapse, len, maxLength, setBrLength, skipBlanks } from './util.ts'
 
-import type { InterProScanResults } from './launchInterProScan'
+import type { InterProScanResults } from './launchInterProScan.ts'
 import type {
   Accession,
   BasicTrack,
   NodeWithIds,
   NodeWithIdsAndLength,
   TextTrackModel,
-} from './types'
+} from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
@@ -1789,7 +1789,7 @@ function stateModelFactory() {
         includeTracks?: boolean
         exportType: string
       }) {
-        const { renderToSvg } = await import('./renderToSvg')
+        const { renderToSvg } = await import('./renderToSvg.tsx')
         const html = await renderToSvg(self as MsaViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, 'image.svg')

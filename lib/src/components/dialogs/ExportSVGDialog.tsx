@@ -15,9 +15,9 @@ import {
   useTheme,
 } from '@mui/material'
 
-import Checkbox2 from '../Checkbox2'
+import Checkbox2 from '../Checkbox2.tsx'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 export default function ExportSVGDialog({
   model,

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { calculateNeighborJoiningTree } from './neighborJoining'
+import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 
 describe('calculateNeighborJoiningTree', () => {
   test('generates valid Newick tree for 2 sequences', () => {

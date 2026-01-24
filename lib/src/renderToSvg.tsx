@@ -4,15 +4,16 @@ import React from 'react'
 import { renderToStaticMarkup } from '@jbrowse/core/util'
 import { when } from 'mobx'
 
-import MinimapSVG from './components/minimap/MinimapSVG'
-import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock'
-import { renderMSABlock } from './components/msa/renderMSABlock'
-import { renderAllTracks } from './components/tracks/renderTracksSvg'
-import { renderTreeCanvas } from './components/tree/renderTreeCanvas'
-import { colorContrast } from './util'
+import MinimapSVG from './components/minimap/MinimapSVG.tsx'
+import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock.ts'
+import { renderMSABlock } from './components/msa/renderMSABlock.ts'
+import { renderAllTracks } from './components/tracks/renderTracksSvg.ts'
+import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
+import { colorContrast } from './util.ts'
 
-import type { MsaViewModel } from './model'
+import type { MsaViewModel } from './model.ts'
 import type { Theme } from '@mui/material'
+import type { Context as ContextType } from '@jbrowse/svgcanvas'
 
 export interface ExportSvgOptions {
   theme: Theme
@@ -80,7 +81,7 @@ async function render({
   includeMinimap?: boolean
   includeTracks?: boolean
 }) {
-  const { Context } = await import('svgcanvas')
+  const { Context } = await import('@jbrowse/svgcanvas')
   const Wrapper = includeMinimap ? MinimapWrapper : NullWrapper
 
   return renderToStaticMarkup(
@@ -131,17 +132,16 @@ function CoreRendering({
   contentHeight: number
   offsetX: number
   offsetY: number
-  Context: (
-    width: number,
-    height: number,
-  ) => CanvasRenderingContext2D & { getSvg: () => { innerHTML: string } }
+  Context: typeof ContextType
 }) {
   const { treeAreaWidth, colorScheme, id } = model
   const clipId1 = `tree-${id}`
   const clipId2 = `msa-${id}`
   const contrastScheme = colorContrast(colorScheme, theme)
-  const ctx1 = Context(width, contentHeight)
-  const ctx2 = Context(width, contentHeight)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ctx1 = new Context(width, contentHeight) as any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ctx2 = new Context(width, contentHeight) as any
   renderBoxFeatureCanvasBlock({
     ctx: ctx2,
     offsetX,
@@ -209,16 +209,14 @@ function TrackRendering({
   width: number
   trackHeight: number
   offsetX: number
-  Context: (
-    width: number,
-    height: number,
-  ) => CanvasRenderingContext2D & { getSvg: () => { innerHTML: string } }
+  Context: typeof ContextType
 }) {
   const { treeAreaWidth, colorScheme, id } = model
   const clipId = `tracks-${id}`
   const contrastScheme = colorContrast(colorScheme, theme)
   const msaAreaWidth = width - treeAreaWidth
-  const ctx = Context(msaAreaWidth, trackHeight)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ctx = new Context(msaAreaWidth, trackHeight) as any
 
   renderAllTracks({
     model,

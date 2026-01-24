@@ -1,4 +1,4 @@
-import { isBlank } from './util'
+import { isBlank } from './util.ts'
 
 /**
  * MSA Coordinate Systems:

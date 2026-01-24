@@ -3,7 +3,7 @@ import React from 'react'
 import { Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 interface Node {
   x: number

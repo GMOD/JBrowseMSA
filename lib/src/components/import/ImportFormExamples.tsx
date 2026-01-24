@@ -3,10 +3,10 @@ import React from 'react'
 import { Link, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { smallMSA, smallMSAOnly, smallTree } from './data/seq2'
-import { load } from './util'
+import { smallMSA, smallMSAOnly, smallTree } from './data/seq2.ts'
+import { load } from './util.ts'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 function ListItem({
   onClick,

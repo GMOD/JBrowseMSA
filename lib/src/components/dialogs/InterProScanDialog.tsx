@@ -5,9 +5,9 @@ import { getSession } from '@jbrowse/core/util'
 import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { launchInterProScan } from '../../launchInterProScan'
+import { launchInterProScan } from '../../launchInterProScan.ts'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const InterProScanDialog = observer(function ({
   handleClose,

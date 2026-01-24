@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { seqPosToGlobalCol } from './seqPosToGlobalCol'
+import { seqPosToGlobalCol } from './seqPosToGlobalCol.ts'
 
 describe('seqPosToGlobalCol', () => {
   test('converts sequence position to global column with no gaps', () => {

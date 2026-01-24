@@ -3,10 +3,10 @@ import React, { useEffect, useMemo, useRef } from 'react'
 import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { colorContrast } from '../util'
+import { colorContrast } from '../util.ts'
 
-import type { MsaViewModel } from '../model'
-import type { BasicTrack } from '../types'
+import type { MsaViewModel } from '../model.ts'
+import type { BasicTrack } from '../types.ts'
 
 const AnnotationBlock = observer(function ({
   track,

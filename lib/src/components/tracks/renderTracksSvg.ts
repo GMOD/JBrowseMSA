@@ -1,5 +1,5 @@
-import type { MsaViewModel } from '../../model'
-import type { BasicTrack } from '../../types'
+import type { MsaViewModel } from '../../model.ts'
+import type { BasicTrack } from '../../types.ts'
 
 export function renderConservationTrack({
   model,

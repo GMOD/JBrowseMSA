@@ -13,10 +13,10 @@ import {
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
-import colorSchemes from '../../colorSchemes'
-import Checkbox2 from '../Checkbox2'
+import colorSchemes from '../../colorSchemes.ts'
+import Checkbox2 from '../Checkbox2.tsx'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const useStyles = makeStyles()(theme => ({
   field: {

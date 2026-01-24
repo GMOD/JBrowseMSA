@@ -3,7 +3,7 @@ import React from 'react'
 import { Dialog } from '@jbrowse/core/ui'
 import { DialogContent, Link, Typography } from '@mui/material'
 
-import { version } from '../../version'
+import { version } from '../../version.ts'
 
 export default function AboutDialog({ onClose }: { onClose: () => void }) {
   return (

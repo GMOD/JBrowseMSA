@@ -12,17 +12,17 @@ import Sort from '@mui/icons-material/Sort'
 import Visibility from '@mui/icons-material/Visibility'
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 // lazies
-const MetadataDialog = lazy(() => import('../dialogs/MetadataDialog'))
-const ExportSVGDialog = lazy(() => import('../dialogs/ExportSVGDialog'))
-const FeatureFilterDialog = lazy(() => import('../dialogs/FeatureDialog'))
-const SettingsDialog = lazy(() => import('../dialogs/SettingsDialog'))
+const MetadataDialog = lazy(() => import('../dialogs/MetadataDialog.tsx'))
+const ExportSVGDialog = lazy(() => import('../dialogs/ExportSVGDialog.tsx'))
+const FeatureFilterDialog = lazy(() => import('../dialogs/FeatureDialog.tsx'))
+const SettingsDialog = lazy(() => import('../dialogs/SettingsDialog.tsx'))
 const UserProvidedDomainsDialog = lazy(
-  () => import('../dialogs/UserProvidedDomainsDialog'),
+  () => import('../dialogs/UserProvidedDomainsDialog.tsx'),
 )
-const InterProScanDialog = lazy(() => import('../dialogs/InterProScanDialog'))
+const InterProScanDialog = lazy(() => import('../dialogs/InterProScanDialog.tsx'))
 
 const HeaderMenu = observer(({ model }: { model: MsaViewModel }) => {
   const {

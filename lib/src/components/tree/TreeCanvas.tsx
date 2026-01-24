@@ -4,10 +4,10 @@ import { isAlive } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
-import TreeCanvasBlock from './TreeCanvasBlock'
-import { padding } from './renderTreeCanvas'
+import TreeCanvasBlock from './TreeCanvasBlock.tsx'
+import { padding } from './renderTreeCanvas.ts'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const ref = useRef<HTMLDivElement>(null)

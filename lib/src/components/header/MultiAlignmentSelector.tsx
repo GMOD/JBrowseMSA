@@ -3,7 +3,7 @@ import React from 'react'
 import { MenuItem, TextField } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const MultiAlignmentSelector = observer(function ({
   model,

@@ -3,11 +3,11 @@ import React, { useState } from 'react'
 import { Dialog } from '@jbrowse/core/ui'
 import { Tab, Tabs } from '@mui/material'
 
-import InterProScanPanel from './InterProScanDialog'
-import TabPanel from './TabPanel'
-import UserProvidedResultPanel from './UserProvidedDomainsDialog'
+import InterProScanPanel from './InterProScanDialog.tsx'
+import TabPanel from './TabPanel.tsx'
+import UserProvidedResultPanel from './UserProvidedDomainsDialog.tsx'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 export default function LaunchDomainViewDialog({
   handleClose,

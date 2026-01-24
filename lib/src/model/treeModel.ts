@@ -9,7 +9,7 @@ import {
   defaultTreeAreaWidth,
   defaultTreeWidth,
   defaultTreeWidthMatchesArea,
-} from '../constants'
+} from '../constants.ts'
 
 /**
  * #stateModel Tree

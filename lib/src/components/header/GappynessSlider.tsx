@@ -3,7 +3,7 @@ import React from 'react'
 import { Slider, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const GappynessSlider = observer(function GappynessSlider({
   model,

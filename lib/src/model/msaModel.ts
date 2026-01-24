@@ -1,6 +1,6 @@
 import { types } from '@jbrowse/mobx-state-tree'
 
-import { defaultBgColor, defaultColorSchemeName } from '../constants'
+import { defaultBgColor, defaultColorSchemeName } from '../constants.ts'
 
 /**
  * #stateModel MSAModel

@@ -5,7 +5,7 @@ import MoreVert from '@mui/icons-material/MoreVert'
 import RestartAlt from '@mui/icons-material/RestartAlt'
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const ZoomMenu = observer(function ({ model }: { model: MsaViewModel }) {
   return (

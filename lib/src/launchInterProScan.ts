@@ -1,8 +1,8 @@
 import { getSession } from '@jbrowse/core/util'
 
-import { jsonfetch, textfetch, timeout } from './fetchUtils'
+import { jsonfetch, textfetch, timeout } from './fetchUtils.ts'
 
-import type { MsaViewModel } from './model'
+import type { MsaViewModel } from './model.ts'
 
 const base = 'https://www.ebi.ac.uk/Tools/services/rest'
 

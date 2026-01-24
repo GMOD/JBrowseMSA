@@ -1,4 +1,4 @@
-import type { NodeWithIds } from './types'
+import type { NodeWithIds } from './types.ts'
 
 // this reparse routine helps to allow the app to hide/collapse a single
 // leafnode

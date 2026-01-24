@@ -4,9 +4,9 @@ import { isAlive } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
-import { renderMouseover } from './renderMSAMouseover'
+import { renderMouseover } from './renderMSAMouseover.ts'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const MSAMouseoverCanvas = observer(function ({
   model,

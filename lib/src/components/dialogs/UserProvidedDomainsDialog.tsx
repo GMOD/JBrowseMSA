@@ -15,10 +15,10 @@ import {
 } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { jsonfetch } from '../../fetchUtils'
+import { jsonfetch } from '../../fetchUtils.ts'
 
-import type { InterProScanResponse } from '../../launchInterProScan'
-import type { MsaViewModel } from '../../model'
+import type { InterProScanResponse } from '../../launchInterProScan.ts'
+import type { MsaViewModel } from '../../model.ts'
 
 const UserProvidedDomainsDialog = observer(function ({
   handleClose,

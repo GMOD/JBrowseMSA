@@ -3,10 +3,10 @@ import React, { lazy } from 'react'
 import { Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 // lazies
-const TreeNodeInfoDialog = lazy(() => import('./dialogs/TreeNodeInfoDialog'))
+const TreeNodeInfoDialog = lazy(() => import('./dialogs/TreeNodeInfoDialog.tsx'))
 
 const TreeMenu = observer(function ({
   node,

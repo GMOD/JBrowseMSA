@@ -1,4 +1,4 @@
-import palettes from './ggplotPalettes'
+import palettes from './ggplotPalettes.ts'
 
 /**
  * Creates a map from keys to colors using ggplot-style palettes.

@@ -2,16 +2,16 @@ import React, { Suspense } from 'react'
 
 import { observer } from 'mobx-react'
 
-import { HorizontalResizeHandle, VerticalResizeHandle } from './ResizeHandles'
-import Track from './Track'
-import VerticalScrollbar from './VerticalScrollbar'
-import Header from './header/Header'
-import Minimap from './minimap/Minimap'
-import MSAPanel from './msa/MSAPanel'
-import TreePanel from './tree/TreePanel'
-import TreeRuler from './tree/TreeRuler'
+import { HorizontalResizeHandle, VerticalResizeHandle } from './ResizeHandles.tsx'
+import Track from './Track.tsx'
+import VerticalScrollbar from './VerticalScrollbar.tsx'
+import Header from './header/Header.tsx'
+import Minimap from './minimap/Minimap.tsx'
+import MSAPanel from './msa/MSAPanel.tsx'
+import TreePanel from './tree/TreePanel.tsx'
+import TreeRuler from './tree/TreeRuler.tsx'
 
-import type { MsaViewModel } from '../model'
+import type { MsaViewModel } from '../model.ts'
 
 const TopArea = observer(function ({ model }: { model: MsaViewModel }) {
   const { showHorizontalScrollbar } = model

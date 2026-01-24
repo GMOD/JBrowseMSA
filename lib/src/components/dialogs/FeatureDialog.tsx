@@ -4,9 +4,9 @@ import { Dialog } from '@jbrowse/core/ui'
 import { Button, DialogContent } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { getPalette } from '../../ggplotPalettes'
+import { getPalette } from '../../ggplotPalettes.ts'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const Toggles = observer(function ({ model }: { model: MsaViewModel }) {
   const { featureFilters } = model

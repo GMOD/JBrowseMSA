@@ -5,19 +5,19 @@ import Help from '@mui/icons-material/Help'
 import { IconButton } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import GappynessSlider from './GappynessSlider'
-import HeaderInfoArea from './HeaderInfoArea'
-import HeaderMenu from './HeaderMenu'
-import HeaderStatusArea from './HeaderStatusArea'
-import MultiAlignmentSelector from './MultiAlignmentSelector'
-import SettingsMenu from './SettingsMenu'
-import ZoomControls from './ZoomControls'
-import ZoomMenu from './ZoomMenu'
-import ZoomStar from './ZoomStar'
+import GappynessSlider from './GappynessSlider.tsx'
+import HeaderInfoArea from './HeaderInfoArea.tsx'
+import HeaderMenu from './HeaderMenu.tsx'
+import HeaderStatusArea from './HeaderStatusArea.tsx'
+import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
+import SettingsMenu from './SettingsMenu.tsx'
+import ZoomControls from './ZoomControls.tsx'
+import ZoomMenu from './ZoomMenu.tsx'
+import ZoomStar from './ZoomStar.tsx'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
-const AboutDialog = lazy(() => import('../dialogs/AboutDialog'))
+const AboutDialog = lazy(() => import('../dialogs/AboutDialog.tsx'))
 
 const Header = observer(function ({ model }: { model: MsaViewModel }) {
   const [ref, { height }] = useMeasure()

@@ -1,4 +1,4 @@
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 const hoverColor = 'rgba(0,0,0,0.15)'
 const highlightColor = 'rgba(128,128,0,0.2)'

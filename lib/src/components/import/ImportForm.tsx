@@ -4,10 +4,10 @@ import { ErrorMessage, FileSelector } from '@jbrowse/core/ui'
 import { Button, Container, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import ImportFormExamples from './ImportFormExamples'
-import { load } from './util'
+import ImportFormExamples from './ImportFormExamples.tsx'
+import { load } from './util.ts'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 import type { FileLocation } from '@jbrowse/core/util/types'
 
 const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {

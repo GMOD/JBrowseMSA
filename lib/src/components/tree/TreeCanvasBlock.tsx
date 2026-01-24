@@ -5,11 +5,11 @@ import Flatbush from 'flatbush'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
-import TreeBranchMenu from './TreeBranchMenu'
-import TreeNodeMenu from './TreeNodeMenu'
-import { padding, renderTreeCanvas } from './renderTreeCanvas'
+import TreeBranchMenu from './TreeBranchMenu.tsx'
+import TreeNodeMenu from './TreeNodeMenu.tsx'
+import { padding, renderTreeCanvas } from './renderTreeCanvas.ts'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 
 interface TooltipData {
   name: string

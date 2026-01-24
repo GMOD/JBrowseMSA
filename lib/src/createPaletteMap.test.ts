@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 
-import { createPaletteMap } from './createPaletteMap'
-import palettes from './ggplotPalettes'
+import { createPaletteMap } from './createPaletteMap.ts'
+import palettes from './ggplotPalettes.ts'
 
 // Original implementation for comparison
 function originalFillPalette(keys: string[]) {

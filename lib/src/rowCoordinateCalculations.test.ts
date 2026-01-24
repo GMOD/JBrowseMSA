@@ -5,7 +5,7 @@ import {
   globalColToVisibleCol,
   visibleColToGlobalCol,
   visibleColToSeqPos,
-} from './rowCoordinateCalculations'
+} from './rowCoordinateCalculations.ts'
 
 // Tests for visibleColToGlobalCol (visible → global)
 test('visibleColToGlobalCol with blanks at positions [2, 5, 8]', () => {

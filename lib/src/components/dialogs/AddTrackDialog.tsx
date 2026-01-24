@@ -11,7 +11,7 @@ import {
 } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import type { MsaViewModel } from '../../model'
+import type { MsaViewModel } from '../../model.ts'
 import type { FileLocation } from '@jbrowse/core/util/types'
 
 const AddTrackDialog = observer(function ({
