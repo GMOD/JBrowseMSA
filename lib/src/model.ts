@@ -1001,6 +1001,34 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * Detects sequence type based on letters present in the alignment.
+       * Returns 'dna', 'rna', or 'amino'.
+       */
+      get sequenceType(): 'dna' | 'rna' | 'amino' {
+        const letters = new Set<string>()
+        for (const stats of this.colStats) {
+          for (const letter of Object.keys(stats)) {
+            const upper = letter.toUpperCase()
+            if (upper !== '-' && upper !== '.') {
+              letters.add(upper)
+            }
+          }
+        }
+        const dna = new Set(['A', 'C', 'G', 'T', 'N'])
+        const rna = new Set(['A', 'C', 'G', 'U', 'N'])
+        const isDna = [...letters].every(l => dna.has(l))
+        const isRna = [...letters].every(l => rna.has(l))
+        if (isDna && !letters.has('U')) {
+          return 'dna'
+        }
+        if (isRna && !letters.has('T')) {
+          return 'rna'
+        }
+        return 'amino'
+      },
+
+      /**
+       * #getter
        * Pre-computed consensus letter and percent identity color per column.
        * Used by percent_identity_dynamic color scheme.
        */
@@ -1175,8 +1203,8 @@ function stateModelFactory() {
        * Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
        */
       get conservation() {
-        const { colStats, colStatsSums } = this
-        const alphabetSize = 20
+        const { colStats, colStatsSums, sequenceType } = this
+        const alphabetSize = sequenceType === 'amino' ? 20 : 4
         const maxEntropy = Math.log2(alphabetSize)
 
         return colStats.map((stats, i) => {
