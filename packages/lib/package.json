@@ -34,8 +34,6 @@
     "build:esm": "tsc",
     "build:bundle": "webpack",
     "build": "pnpm clean && pnpm build:esm && pnpm build:bundle",
-    "prepublishOnly": "node scripts/bump-version.js && pnpm build",
-    "postpublish": "node scripts/postpublish.js",
     "statedocs": "rm -rf apidocs && mkdir apidocs && node --experimental-strip-types docgen/generateStateModelDocs.ts",
     "poststatedocs": "pnpm format",
     "test": "vitest"

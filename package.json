@@ -9,7 +9,11 @@
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
     "test": "vitest",
-    "typecheck": "pnpm -r exec tsc --noEmit"
+    "typecheck": "pnpm -r exec tsc --noEmit",
+    "release": "node scripts/release.js",
+    "release:patch": "node scripts/release.js patch",
+    "release:minor": "node scripts/release.js minor",
+    "release:major": "node scripts/release.js major"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
