@@ -79,4 +79,8 @@ run(`git commit -m "${tag}"`)
 run(`git tag -a "${tag}" -m "${tag}"`)
 run('git push --follow-tags')
 
-console.log(`\n✓ Successfully released ${tag}`)
+// Deploy app to GitHub Pages
+console.log('\nDeploying app to GitHub Pages...')
+run('pnpm deploy', path.join(rootDir, 'packages/app'))
+
+console.log(`\n✓ Successfully released ${tag} and deployed app`)
