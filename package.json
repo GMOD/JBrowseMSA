@@ -14,10 +14,9 @@
     "release:patch": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",
     "release:major": "node scripts/release.js major",
-    "attw": "pnpm -r --filter react-msaview --filter msa-parsers --filter @jbrowse/svgcanvas exec attw --pack . --ignore-rules cjs-resolves-to-esm"
+    "attw": "pnpm -r --filter react-msaview --filter msa-parsers --filter @jbrowse/svgcanvas exec npx @arethetypeswrong/cli --pack . --ignore-rules cjs-resolves-to-esm"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.1",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
