@@ -1,8 +1,8 @@
 import { autorun } from 'mobx'
-import { addDisposer, getSnapshot, types } from 'mobx-state-tree'
+import { addDisposer, getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { MSAModelF } from 'react-msaview'
 
-import type { Instance } from 'mobx-state-tree'
+import type { Instance } from '@jbrowse/mobx-state-tree'
 
 const App = types
   .model({

@@ -3,7 +3,7 @@ id: tree
 title: Tree
 ---
 
-Note: this document is automatically generated from mobx-state-tree objects in
+Note: this document is automatically generated from @jbrowse/mobx-state-tree objects in
 our source code.
 
 ### Source file

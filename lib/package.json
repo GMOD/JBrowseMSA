@@ -1,7 +1,7 @@
 {
   "name": "react-msaview",
   "author": "Colin",
-  "version": "4.8.1",
+  "version": "5.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -35,11 +35,11 @@
   },
   "peerDependencies": {
     "@jbrowse/core": ">=2.0.0",
+    "@jbrowse/mobx-state-tree": "^5.0.0",
     "@mui/icons-material": ">=5.0.0",
     "@mui/material": ">=5.0.0",
     "mobx": ">=6.0.0",
     "mobx-react": ">=7.0.0",
-    "mobx-state-tree": "^5.0.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },

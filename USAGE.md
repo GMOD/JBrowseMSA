@@ -102,9 +102,9 @@ based API
 
 It is helpful to be knowledgeable of the way mobx+react interoperate: you can
 write components that "observe" (by wrapping a component with the mobx-react
-observe function) the state of the model using React and mobx-state-tree
+observe function) the state of the model using React and @jbrowse/mobx-state-tree
 
 For example, if you wanted to know what base the user was hovering over. You can
-get an intro to basic React and mobx-state-tree + observer concepts in this
+get an intro to basic React and @jbrowse/mobx-state-tree + observer concepts in this
 short tutorial, and the concepts will apply to this codebase as well
 https://gist.github.com/cmdcolin/94d1cbc285e6319cc3af4b9a8556f03f
