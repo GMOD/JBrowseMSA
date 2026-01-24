@@ -12,8 +12,8 @@ import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { colorContrast } from './util.ts'
 
 import type { MsaViewModel } from './model.ts'
-import type { Theme } from '@mui/material'
 import type { Context as ContextType } from '@jbrowse/svgcanvas'
+import type { Theme } from '@mui/material'
 
 export interface ExportSvgOptions {
   theme: Theme
