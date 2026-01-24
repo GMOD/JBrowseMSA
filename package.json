@@ -1,9 +1,6 @@
 {
   "private": true,
   "license": "MIT",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",

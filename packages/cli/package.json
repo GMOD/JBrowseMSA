@@ -17,6 +17,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "msa-parsers": "^1.0.5"
+    "msa-parsers": "workspace:*"
   }
 }
