@@ -1,5 +1,5 @@
 {
-  "name": "@react-msaview/cli",
+  "name": "react-msaview-cli",
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
