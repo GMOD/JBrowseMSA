@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 
+import { isAlive } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import { isAlive } from '@jbrowse/mobx-state-tree'
 
 import TreeCanvasBlock from './TreeCanvasBlock'
 import { padding } from './renderTreeCanvas'

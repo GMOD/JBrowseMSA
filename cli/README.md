@@ -1,6 +1,7 @@
 # @react-msaview/cli
 
-Command-line tools for [react-msaview](../) (JBrowseMSA), including batch InterProScan processing for multiple sequence alignments.
+Command-line tools for [react-msaview](../) (JBrowseMSA), including batch
+InterProScan processing for multiple sequence alignments.
 
 Uses [msa-parsers](../msa-parsers/) for file format support.
 

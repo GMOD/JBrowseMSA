@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import useMeasure from '@jbrowse/core/util/useMeasure'
+import { isAlive } from '@jbrowse/mobx-state-tree'
 import { ThemeProvider } from '@mui/material/styles'
 import { observer } from 'mobx-react'
-import { isAlive } from '@jbrowse/mobx-state-tree'
 import { MSAView } from 'react-msaview'
 
 // locals

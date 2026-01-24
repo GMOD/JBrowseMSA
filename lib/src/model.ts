@@ -9,12 +9,12 @@ import {
 } from '@jbrowse/core/util'
 import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
+import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
 import { ascending } from 'd3-array'
 import { cluster, hierarchy } from 'd3-hierarchy'
 import { saveAs } from 'file-saver'
 import { autorun, transaction } from 'mobx'
-import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import {
   A3mMSA,
   ClustalMSA,
@@ -84,9 +84,9 @@ import type {
   TextTrackModel,
 } from './types'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
+import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
 import type { HierarchyNode } from 'd3-hierarchy'
-import type { Instance } from '@jbrowse/mobx-state-tree'
 
 const showZoomStarKey = 'msa-showZoomStar'
 

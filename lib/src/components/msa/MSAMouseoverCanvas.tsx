@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 
+import { isAlive } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import { isAlive } from '@jbrowse/mobx-state-tree'
 
 import { renderMouseover } from './renderMSAMouseover'
 

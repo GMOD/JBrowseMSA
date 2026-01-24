@@ -1,6 +1,7 @@
 # msa-parsers
 
-A TypeScript library for parsing multiple sequence alignment (MSA) files and related formats.
+A TypeScript library for parsing multiple sequence alignment (MSA) files and
+related formats.
 
 Part of [react-msaview](../) (JBrowseMSA).
 

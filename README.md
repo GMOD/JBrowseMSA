@@ -8,7 +8,8 @@ See [user guide](docs/user_guide.md)
 
 ## Demo
 
-See [ProteinBrowser](https://github.com/GMOD/proteinbrowser) for a full suite of protein analysis tools.
+See [ProteinBrowser](https://github.com/GMOD/proteinbrowser) for a full suite of
+protein analysis tools.
 
 ## Packages
 

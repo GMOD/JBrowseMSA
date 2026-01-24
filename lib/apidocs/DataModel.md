@@ -3,8 +3,8 @@ id: datamodel
 title: DataModel
 ---
 
-Note: this document is automatically generated from @jbrowse/mobx-state-tree objects in
-our source code.
+Note: this document is automatically generated from @jbrowse/mobx-state-tree
+objects in our source code.
 
 ### Source file
 
