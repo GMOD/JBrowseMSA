@@ -3,11 +3,10 @@
   "compilerOptions": {
     "outDir": "dist/",
     "jsx": "react",
-    "composite": true
+    "paths": {
+      "msa-parsers": ["../msa-parsers/src/index.ts"],
+      "@jbrowse/svgcanvas": ["../svgcanvas/src/index.ts"]
+    }
   },
-  "include": ["src"],
-  "references": [
-    { "path": "../msa-parsers" },
-    { "path": "../svgcanvas" }
-  ]
+  "include": ["src"]
 }

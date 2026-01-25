@@ -2,11 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "react-msaview": ["../lib/src/index.ts"],
+      "msa-parsers": ["../msa-parsers/src/index.ts"],
+      "@jbrowse/svgcanvas": ["../svgcanvas/src/index.ts"]
+    }
   },
   "include": ["src"],
-  "references": [
-    { "path": "./tsconfig.node.json" },
-    { "path": "../lib" }
-  ]
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

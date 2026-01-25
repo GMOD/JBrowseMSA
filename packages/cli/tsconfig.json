@@ -3,10 +3,9 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "outDir": "dist/",
-    "composite": true
+    "paths": {
+      "msa-parsers": ["../msa-parsers/src/index.ts"]
+    }
   },
-  "include": ["src"],
-  "references": [
-    { "path": "../msa-parsers" }
-  ]
+  "include": ["src"]
 }
