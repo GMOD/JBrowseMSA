@@ -59,9 +59,6 @@ importers:
       '@types/normalize-wheel':
         specifier: ^1.0.4
         version: 1.0.4
-      '@types/pako':
-        specifier: ^2.0.4
-        version: 2.0.4
       '@types/react':
         specifier: ^19.2.9
         version: 19.2.9
@@ -251,9 +248,6 @@ importers:
       msa-parsers:
         specifier: workspace:*
         version: link:../msa-parsers
-      pako:
-        specifier: ^2.1.0
-        version: 2.1.0
       react:
         specifier: '>=16.8.0'
         version: 19.2.3
@@ -1621,9 +1615,6 @@ packages:
 
   '@types/normalize-wheel@1.0.4':
     resolution: {integrity: sha512-iclKEmOclXH2LGVkMkdal0+ffJphB3kbazakec96z1hW/CfJYmsZNFYLAmkpzePxKoKewXp2HSlsN6G4SG0b0g==}
-
-  '@types/pako@2.0.4':
-    resolution: {integrity: sha512-VWDCbrLeVXJM9fihYodcLiIv0ku+AlOa/TQ1SvYOaBuyrSKgEcro95LJyIsJ4vSo6BXIxOKxiJAat04CmST9Fw==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -3096,9 +3087,6 @@ packages:
 
   pako-esm2@2.0.2:
     resolution: {integrity: sha512-bm+PwddAyroj8Ny8tNuLepGW28OUdI2b/PkvhaW2jHBVZ5fgcR1xsrLPiOKwk8LoXyc1az2NdHlvICBN2BjR6Q==}
-
-  pako@2.1.0:
-    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -5373,8 +5361,6 @@ snapshots:
 
   '@types/normalize-wheel@1.0.4': {}
 
-  '@types/pako@2.0.4': {}
-
   '@types/parse-json@4.0.2': {}
 
   '@types/prop-types@15.7.15': {}
@@ -7049,8 +7035,6 @@ snapshots:
   package-json-from-dist@1.0.1: {}
 
   pako-esm2@2.0.2: {}
-
-  pako@2.1.0: {}
 
   parent-module@1.0.1:
     dependencies:
