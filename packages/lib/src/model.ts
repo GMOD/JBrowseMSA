@@ -347,6 +347,11 @@ function stateModelFactory() {
       /**
        * #volatile
        */
+      conservationTrackHeight: 40,
+
+      /**
+       * #volatile
+       */
       marginLeft: 20,
 
       /**
@@ -1546,7 +1551,7 @@ function stateModelFactory() {
           model: {
             id: 'conservation',
             name: 'Conservation',
-            height: 40,
+            height: self.conservationTrackHeight,
           },
           ReactComponent: ConservationTrack,
         }
@@ -1791,6 +1796,12 @@ function stateModelFactory() {
        */
       setHeaderHeight(arg: number) {
         self.headerHeight = arg
+      },
+      /**
+       * #action
+       */
+      setConservationTrackHeight(arg: number) {
+        self.conservationTrackHeight = arg
       },
       /**
        * #action

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 
+import { ResizeHandle } from '@jbrowse/core/ui'
 import { observer } from 'mobx-react'
 
 import { drawConservationBars } from './tracks/renderTracksSvg.ts'
@@ -79,23 +80,37 @@ const ConservationTrack = observer(function ({
   const trackHeight = track.model.height
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        height: trackHeight,
-        width: msaAreaWidth,
-        overflow: 'hidden',
-      }}
-    >
-      {blocksX.map(bx => (
-        <ConservationBlock
-          key={bx}
-          model={model}
-          offsetX={bx}
-          trackHeight={trackHeight}
-        />
-      ))}
-    </div>
+    <>
+      <div
+        style={{
+          position: 'relative',
+          height: trackHeight,
+          width: msaAreaWidth,
+          overflow: 'hidden',
+        }}
+      >
+        {blocksX.map(bx => (
+          <ConservationBlock
+            key={bx}
+            model={model}
+            offsetX={bx}
+            trackHeight={trackHeight}
+          />
+        ))}
+      </div>
+      <ResizeHandle
+        onDrag={delta => {
+          model.setConservationTrackHeight(
+            Math.max(10, model.conservationTrackHeight - delta),
+          )
+          return delta
+        }}
+        style={{
+          height: 3,
+          background: '#ccc',
+        }}
+      />
+    </>
   )
 })
 
