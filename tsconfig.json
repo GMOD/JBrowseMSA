@@ -5,5 +5,12 @@
     "jsx": "react-jsx",
     "allowJs": true
   },
-  "include": ["eslint.config.mjs", "scripts", "*.config.ts"]
+  "include": ["eslint.config.mjs", "scripts", "*.config.ts"],
+  "references": [
+    { "path": "./packages/svgcanvas" },
+    { "path": "./packages/msa-parsers" },
+    { "path": "./packages/lib" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/app" }
+  ]
 }
