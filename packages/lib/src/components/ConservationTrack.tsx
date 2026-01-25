@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react'
 
 import { observer } from 'mobx-react'
 
+import { drawConservationBars } from './tracks/renderTracksSvg.ts'
+
 import type { MsaViewModel } from '../model.ts'
 import type { BasicTrack } from '../types.ts'
 
@@ -34,17 +36,14 @@ const ConservationBlock = observer(function ({
     ctx.clearRect(0, 0, blockSize, trackHeight)
     ctx.translate(-offsetX, 0)
 
-    const xStart = Math.max(0, Math.floor(offsetX / colWidth))
-    const xEnd = Math.max(0, Math.ceil((offsetX + blockSize) / colWidth))
-
-    for (let i = xStart; i < xEnd && i < conservation.length; i++) {
-      const value = conservation[i]!
-      const barHeight = value * trackHeight
-      const x = i * colWidth
-
-      ctx.fillStyle = 'gray'
-      ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
-    }
+    drawConservationBars({
+      ctx,
+      conservation,
+      colWidth,
+      trackHeight,
+      offsetX,
+      blockSize,
+    })
   }, [
     blockSize,
     colWidth,

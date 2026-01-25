@@ -1,6 +1,33 @@
 import type { MsaViewModel } from '../../model.ts'
 import type { BasicTrack } from '../../types.ts'
 
+export function drawConservationBars({
+  ctx,
+  conservation,
+  colWidth,
+  trackHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: CanvasRenderingContext2D
+  conservation: number[]
+  colWidth: number
+  trackHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  const xStart = Math.max(0, Math.floor(offsetX / colWidth))
+  const xEnd = Math.max(0, Math.ceil((offsetX + blockSize) / colWidth))
+
+  ctx.fillStyle = 'gray'
+  for (let i = xStart; i < xEnd && i < conservation.length; i++) {
+    const value = conservation[i]!
+    const barHeight = value * trackHeight
+    const x = i * colWidth
+    ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
+  }
+}
+
 export function renderConservationTrack({
   model,
   ctx,
@@ -26,18 +53,14 @@ export function renderConservationTrack({
   ctx.scale(k, k)
   ctx.translate(-offsetX, offsetY)
 
-  const xStart = Math.max(0, Math.floor(offsetX / colWidth))
-  const xEnd = Math.max(0, Math.ceil((offsetX + bx) / colWidth))
-
-  for (let i = xStart; i < xEnd && i < conservation.length; i++) {
-    const value = conservation[i]!
-    const barHeight = value * trackHeight
-    const x = i * colWidth
-
-    const hue = value * 120
-    ctx.fillStyle = `hsl(${hue}, 70%, 50%)`
-    ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
-  }
+  drawConservationBars({
+    ctx,
+    conservation,
+    colWidth,
+    trackHeight,
+    offsetX,
+    blockSize: bx,
+  })
 
   ctx.resetTransform()
 }
