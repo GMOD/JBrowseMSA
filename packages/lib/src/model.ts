@@ -1530,7 +1530,7 @@ function stateModelFactory() {
             .map(t => ({
               model: {
                 ...t,
-                data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data!,
+                data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
                 height: rowHeight,
               } as TextTrackModel,
               ReactComponent: TextTrack,

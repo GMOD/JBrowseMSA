@@ -3,6 +3,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "pnpm --filter app dev",
+    "watch": "pnpm -r --parallel --filter svgcanvas --filter msa-parsers --filter react-msaview --filter app run '/^(watch|dev)$/'",
     "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build",
     "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",
     "clean": "pnpm -r run clean",
@@ -13,9 +14,11 @@
     "release": "node scripts/release.js",
     "release:patch": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",
-    "release:major": "node scripts/release.js major"
+    "release:major": "node scripts/release.js major",
+    "attw": "pnpm -r --filter react-msaview --filter msa-parsers --filter @jbrowse/svgcanvas exec attw --pack . --ignore-rules cjs-resolves-to-esm"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
@@ -23,6 +26,7 @@
     "@emotion/react": "^11.14.0",
     "@eslint/js": "^9.39.2",
     "@jbrowse/core": "^4.1.1",
+    "@jbrowse/mobx-state-tree": "^5.4.2",
     "@mui/icons-material": "^7.3.7",
     "@mui/material": "^7.3.7",
     "@mui/system": "^7.3.7",
@@ -48,7 +52,6 @@
     "flatbush": "^4.5.0",
     "mobx": "^6.15.0",
     "mobx-react": "^9.2.1",
-    "@jbrowse/mobx-state-tree": "^5.4.2",
     "postcss": "^8.5.6",
     "prettier": "^3.8.1",
     "react": "^19.2.3",

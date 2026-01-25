@@ -679,15 +679,16 @@ export class Context {
     if (
       JSON.stringify([a, b, c, d, e, f]) === JSON.stringify([1, 0, 0, 1, 0, 0])
     ) {
-      if (x === 0 && y === 0 && width === this.width && height === this.height) {
+      if (
+        x === 0 &&
+        y === 0 &&
+        width === this.width &&
+        height === this.height
+      ) {
         this.__clearCanvas()
       }
     }
-    const rect = this.__createElement(
-      'rect',
-      { x, y, width, height },
-      true,
-    )
+    const rect = this.__createElement('rect', { x, y, width, height }, true)
     const parent = this.__closestGroupOrSvg()
     parent.appendChild(rect)
     this.__currentElement = rect
@@ -696,11 +697,7 @@ export class Context {
   }
 
   strokeRect(x: number, y: number, width: number, height: number) {
-    const rect = this.__createElement(
-      'rect',
-      { x, y, width, height },
-      true,
-    )
+    const rect = this.__createElement('rect', { x, y, width, height }, true)
     const parent = this.__closestGroupOrSvg()
     parent.appendChild(rect)
     this.__currentElement = rect
@@ -713,7 +710,12 @@ export class Context {
     if (
       JSON.stringify([a, b, c, d, e, f]) === JSON.stringify([1, 0, 0, 1, 0, 0])
     ) {
-      if (x === 0 && y === 0 && width === this.width && height === this.height) {
+      if (
+        x === 0 &&
+        y === 0 &&
+        width === this.width &&
+        height === this.height
+      ) {
         this.__clearCanvas()
         return
       }
@@ -837,8 +839,8 @@ export class Context {
     endAngle = endAngle % (2 * Math.PI)
     if (startAngle === endAngle) {
       endAngle =
-        ((endAngle + 2 * Math.PI - 0.001 * (counterClockwise ? -1 : 1)) %
-          (2 * Math.PI))
+        (endAngle + 2 * Math.PI - 0.001 * (counterClockwise ? -1 : 1)) %
+        (2 * Math.PI)
     }
     const endX = x + radius * Math.cos(endAngle)
     const endY = y + radius * Math.sin(endAngle)
@@ -967,7 +969,9 @@ export class Context {
   }
 
   transform(a: number, b: number, c: number, d: number, e: number, f: number) {
-    const matrix = this.getTransform().multiply(new DOMMatrix([a, b, c, d, e, f]))
+    const matrix = this.getTransform().multiply(
+      new DOMMatrix([a, b, c, d, e, f]),
+    )
     this.setTransform(matrix)
   }
 
