@@ -80,37 +80,40 @@ const ConservationTrack = observer(function ({
   const trackHeight = track.model.height
 
   return (
-    <>
-      <div
-        style={{
-          position: 'relative',
-          height: trackHeight,
-          width: msaAreaWidth,
-          overflow: 'hidden',
-        }}
-      >
-        {blocksX.map(bx => (
-          <ConservationBlock
-            key={bx}
-            model={model}
-            offsetX={bx}
-            trackHeight={trackHeight}
-          />
-        ))}
-      </div>
+    <div
+      style={{
+        position: 'relative',
+        height: trackHeight,
+        width: msaAreaWidth,
+        overflow: 'hidden',
+      }}
+    >
+      {blocksX.map(bx => (
+        <ConservationBlock
+          key={bx}
+          model={model}
+          offsetX={bx}
+          trackHeight={trackHeight}
+        />
+      ))}
       <ResizeHandle
         onDrag={delta => {
           model.setConservationTrackHeight(
-            Math.max(10, model.conservationTrackHeight - delta),
+            Math.max(10, model.conservationTrackHeight + delta),
           )
           return delta
         }}
         style={{
-          height: 3,
-          background: '#ccc',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          height: 4,
+          width: '100%',
+          zIndex: 1,
+          background: 'rgba(200,200,200,0.5)',
         }}
       />
-    </>
+    </div>
   )
 })
 
