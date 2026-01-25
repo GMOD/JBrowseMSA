@@ -91,33 +91,34 @@ export default class A3mMSA {
       return false
     }
 
-    // Check for lowercase and compute lengths in single pass per sequence
-    // In A3M, only uppercase letters are match columns (not gaps)
+    // Check for lowercase and compute match column lengths in single pass per sequence
+    // In A3M, match columns = uppercase letters + dashes (deletions)
     let hasLowercase = false
-    let firstUppercaseLen = -1
-    let sameUppercaseLength = true
+    let firstMatchLen = -1
+    let sameMatchLength = true
 
     for (const seq of seqs) {
-      let uppercaseLen = 0
+      let matchLen = 0
       for (let i = 0; i < seq.length; i++) {
         const code = seq.charCodeAt(i)
         if (isLower(code)) {
           hasLowercase = true
-        } else if (code >= CODE_A && code <= CODE_Z) {
-          uppercaseLen++
+        } else if (code >= CODE_A && code <= CODE_Z || code === CODE_DASH) {
+          // Uppercase letters and dashes are match columns
+          matchLen++
         }
       }
 
-      if (firstUppercaseLen === -1) {
-        firstUppercaseLen = uppercaseLen
+      if (firstMatchLen === -1) {
+        firstMatchLen = matchLen
       } else {
-        if (uppercaseLen !== firstUppercaseLen) {
-          sameUppercaseLength = false
+        if (matchLen !== firstMatchLen) {
+          sameMatchLength = false
         }
       }
     }
 
-    return hasLowercase && sameUppercaseLength
+    return hasLowercase && sameMatchLength
   }
 
   /**
@@ -151,15 +152,16 @@ export default class A3mMSA {
       while (i < seq.length) {
         const code = seq.charCodeAt(i)
 
-        if (code >= CODE_A && code <= CODE_Z) {
-          // Uppercase letter - match column
+        if (code >= CODE_A && code <= CODE_Z || code === CODE_DASH) {
+          // Uppercase letter or dash - match column (dash = deletion)
           matches.push(seq[i]!)
-          // Collect following lowercase/gap characters as insert content
+          // Collect following lowercase/dot characters as insert content
+          // Note: dash is NOT insert content, it's a match column
           let ins = ''
           let j = i + 1
           while (j < seq.length) {
             const c = seq.charCodeAt(j)
-            if (isLower(c) || c === CODE_DASH || c === CODE_DOT) {
+            if (isLower(c) || c === CODE_DOT) {
               ins += seq[j]!
               j++
             } else {
@@ -168,8 +170,8 @@ export default class A3mMSA {
           }
           inserts.push(ins)
           i = j
-        } else if (code === CODE_DASH || code === CODE_DOT) {
-          // Leading gap before first match - skip
+        } else if (code === CODE_DOT) {
+          // Leading dot (gap aligned to insert) - skip
           i++
         } else if (isLower(code)) {
           // Leading insert before first match
