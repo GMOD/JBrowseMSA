@@ -39,22 +39,34 @@ const TrackColumnIndicator = observer(function ({
     treeAreaWidth,
     resizeHandleWidth,
     totalTrackAreaHeight,
+    msaAreaWidth,
+    verticalScrollbarWidth,
   } = model
 
   const left = treeAreaWidth + resizeHandleWidth
+  const clipWidth = msaAreaWidth - verticalScrollbarWidth
 
   return (
-    <>
+    <div
+      style={{
+        position: 'absolute',
+        left,
+        top: 0,
+        width: clipWidth,
+        height: totalTrackAreaHeight,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+      }}
+    >
       {mouseCol !== undefined ? (
         <div
           style={{
             position: 'absolute',
-            left: left + mouseCol * colWidth + scrollX,
+            left: mouseCol * colWidth + scrollX,
             top: 0,
             width: colWidth,
             height: totalTrackAreaHeight,
             backgroundColor: 'rgba(0,0,0,0.15)',
-            pointerEvents: 'none',
             zIndex: 100,
           }}
         />
@@ -63,17 +75,16 @@ const TrackColumnIndicator = observer(function ({
         <div
           style={{
             position: 'absolute',
-            left: left + mouseClickCol * colWidth + scrollX,
+            left: mouseClickCol * colWidth + scrollX,
             top: 0,
             width: colWidth,
             height: totalTrackAreaHeight,
             backgroundColor: 'rgba(128,128,0,0.2)',
-            pointerEvents: 'none',
             zIndex: 100,
           }}
         />
       ) : null}
-    </>
+    </div>
   )
 })
 

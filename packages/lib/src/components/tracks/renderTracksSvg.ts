@@ -28,6 +28,46 @@ export function drawConservationBars({
   }
 }
 
+export function drawTextTrackContent({
+  ctx,
+  data,
+  colorScheme,
+  contrastScheme,
+  bgColor,
+  colWidth,
+  rowHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: CanvasRenderingContext2D
+  data: string | undefined
+  colorScheme: Record<string, string>
+  contrastScheme: Record<string, string>
+  bgColor: boolean
+  colWidth: number
+  rowHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  const xStart = Math.max(0, Math.floor(offsetX / colWidth))
+  const xEnd = Math.max(0, Math.ceil((offsetX + blockSize) / colWidth))
+  const str = data?.slice(xStart, xEnd)
+
+  for (let i = 0; str && i < str.length; i++) {
+    const letter = str[i]!
+    const color = colorScheme[letter.toUpperCase()]
+    if (bgColor) {
+      const x = i * colWidth + offsetX - (offsetX % colWidth)
+      ctx.fillStyle = color || 'white'
+      ctx.fillRect(x, 0, colWidth, rowHeight)
+      if (rowHeight >= 10 && colWidth >= rowHeight / 2) {
+        ctx.fillStyle = contrastScheme[letter.toUpperCase()] || 'black'
+        ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
+      }
+    }
+  }
+}
+
 export function renderConservationTrack({
   model,
   ctx,
@@ -105,28 +145,17 @@ export function renderTextTrack({
   ctx.textAlign = 'center'
   ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
 
-  const xStart = Math.max(0, Math.floor(offsetX / colWidth))
-  const xEnd = Math.max(0, Math.ceil((offsetX + bx) / colWidth))
-  const str = data?.slice(xStart, xEnd)
-
-  for (let i = 0; str && i < str.length; i++) {
-    const letter = str[i]!
-    const color = colorScheme[letter.toUpperCase()]
-    const x = i * colWidth + offsetX - (offsetX % colWidth)
-
-    if (bgColor && color) {
-      ctx.fillStyle = color
-      ctx.fillRect(x, 0, colWidth, rowHeight)
-    }
-
-    if (rowHeight >= 10 && colWidth >= rowHeight / 2) {
-      ctx.fillStyle =
-        bgColor && color
-          ? (contrastScheme[letter.toUpperCase()] ?? 'black')
-          : 'black'
-      ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
-    }
-  }
+  drawTextTrackContent({
+    ctx,
+    data,
+    colorScheme,
+    contrastScheme,
+    bgColor,
+    colWidth,
+    rowHeight,
+    offsetX,
+    blockSize: bx,
+  })
 
   ctx.resetTransform()
 }

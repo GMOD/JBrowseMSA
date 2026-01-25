@@ -14,7 +14,8 @@ const MSAMouseoverCanvas = observer(function ({
   model: MsaViewModel
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
-  const { height, width } = model
+  const { height, msaAreaWidth, verticalScrollbarWidth } = model
+  const width = msaAreaWidth - verticalScrollbarWidth
   useEffect(() => {
     const ctx = ref.current?.getContext('2d')
     return ctx

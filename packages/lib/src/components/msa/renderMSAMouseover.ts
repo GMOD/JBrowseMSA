@@ -15,7 +15,8 @@ export function renderMouseover({
   const {
     mouseCol,
     colWidth,
-    width,
+    msaAreaWidth,
+    verticalScrollbarWidth,
     height,
     rowHeight,
     scrollX,
@@ -30,6 +31,7 @@ export function renderMouseover({
     hoveredTreeNode,
     highlightedColumns,
   } = model
+  const width = msaAreaWidth - verticalScrollbarWidth
   ctx.resetTransform()
   ctx.clearRect(0, 0, width, height)
 

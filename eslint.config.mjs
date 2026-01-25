@@ -17,7 +17,7 @@ export default defineConfig(
       '**/public/**/*',
       '**/bundle/**/*',
       'packages/lib/scripts/**',
-      'babel.config.js',
+      'babel.config.cjs',
       'packages/lib/webpack.config.mjs',
       'packages/lib/vite.config.ts',
     ],

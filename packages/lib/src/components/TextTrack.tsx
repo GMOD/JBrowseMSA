@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { colorContrast } from '../util.ts'
+import { drawTextTrackContent } from './tracks/renderTracksSvg.ts'
 
 import type { MsaViewModel } from '../model.ts'
 import type { BasicTrack } from '../types.ts'
@@ -48,7 +49,6 @@ const AnnotationBlock = observer(function ({
       return
     }
 
-    // this logic is very similar to MSACanvas
     ctx.resetTransform()
     ctx.scale(highResScaleFactor, highResScaleFactor)
     ctx.clearRect(0, 0, blockSize, rowHeight)
@@ -56,22 +56,17 @@ const AnnotationBlock = observer(function ({
     ctx.textAlign = 'center'
     ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
 
-    const xStart = Math.max(0, Math.floor(offsetX / colWidth))
-    const xEnd = Math.max(0, Math.ceil((offsetX + blockSize) / colWidth))
-    const str = data?.slice(xStart, xEnd)
-    for (let i = 0; str && i < str.length; i++) {
-      const letter = str[i]!
-      const color = colorScheme[letter.toUpperCase()]
-      if (bgColor) {
-        const x = i * colWidth + offsetX - (offsetX % colWidth)
-        ctx.fillStyle = color || 'white'
-        ctx.fillRect(x, 0, colWidth, rowHeight)
-        if (rowHeight >= 10 && colWidth >= rowHeight / 2) {
-          ctx.fillStyle = contrastScheme[letter.toUpperCase()] || 'black'
-          ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1) // +1 to avoid cutoff at height:10
-        }
-      }
-    }
+    drawTextTrackContent({
+      ctx,
+      data,
+      colorScheme,
+      contrastScheme,
+      bgColor,
+      colWidth,
+      rowHeight,
+      offsetX,
+      blockSize,
+    })
   }, [
     fontSize,
     bgColor,
