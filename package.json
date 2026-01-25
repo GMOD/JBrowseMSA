@@ -1,5 +1,6 @@
 {
   "private": true,
+  "type": "module",
   "license": "MIT",
   "scripts": {
     "dev": "pnpm --filter app dev",
