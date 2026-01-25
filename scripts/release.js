@@ -81,6 +81,6 @@ run('git push --follow-tags')
 
 // Deploy app to GitHub Pages
 console.log('\nDeploying app to GitHub Pages...')
-run('pnpm deploy', path.join(rootDir, 'packages/app'))
+run('pnpm run deploy', path.join(rootDir, 'packages/app'))
 
 console.log(`\n✓ Successfully released ${tag} and deployed app`)
