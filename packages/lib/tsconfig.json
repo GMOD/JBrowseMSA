@@ -2,11 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist/",
-    "jsx": "react",
-    "paths": {
-      "msa-parsers": ["../msa-parsers/src/index.ts"],
-      "@jbrowse/svgcanvas": ["../svgcanvas/src/index.ts"]
-    }
+    "jsx": "react"
   },
   "include": ["src"]
 }

@@ -2,10 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["esnext"],
-    "outDir": "dist/",
-    "paths": {
-      "msa-parsers": ["../msa-parsers/src/index.ts"]
-    }
+    "outDir": "dist/"
   },
   "include": ["src"]
 }

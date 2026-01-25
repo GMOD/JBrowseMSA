@@ -3,6 +3,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "pnpm --filter app dev",
+    "watch": "pnpm -r --parallel --filter svgcanvas --filter msa-parsers --filter react-msaview --filter app run '/^(watch|dev)$/'",
     "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build",
     "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",
     "clean": "pnpm -r run clean",
