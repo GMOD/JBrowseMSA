@@ -22,8 +22,8 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const deltaX = useRef(0)
   const deltaY = useRef(0)
   // mouse click-and-drag scrolling
-  const prevX = useRef<number>(0)
-  const prevY = useRef<number>(0)
+  const prevX = useRef(0)
+  const prevY = useRef(0)
   const [mouseDragging, setMouseDragging] = useState(false)
   useEffect(() => {
     const curr = ref.current
@@ -54,46 +54,40 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
   }, [model])
 
   useEffect(() => {
-    let cleanup = () => {}
-
-    function globalMouseMove(event: MouseEvent) {
-      event.preventDefault()
-      const currX = event.clientX
-      const currY = event.clientY
-      const distanceX = currX - prevX.current
-      const distanceY = currY - prevY.current
-      if (distanceX || distanceY) {
-        // use rAF to make it so multiple event handlers aren't fired per-frame
-        // see https://calendar.perfplanet.com/2013/the-runtime-performance-checklist/
-        if (!scheduled.current) {
-          scheduled.current = true
-          window.requestAnimationFrame(() => {
-            model.doScrollX(distanceX)
-            model.doScrollY(distanceY)
-            scheduled.current = false
-            prevX.current = event.clientX
-            prevY.current = event.clientY
-          })
+    if (mouseDragging) {
+      function globalMouseMove(event: MouseEvent) {
+        event.preventDefault()
+        const currX = event.clientX
+        const currY = event.clientY
+        const distanceX = currX - prevX.current
+        const distanceY = currY - prevY.current
+        if (distanceX || distanceY) {
+          if (!scheduled.current) {
+            scheduled.current = true
+            window.requestAnimationFrame(() => {
+              model.doScrollX(distanceX)
+              model.doScrollY(distanceY)
+              scheduled.current = false
+              prevX.current = event.clientX
+              prevY.current = event.clientY
+            })
+          }
         }
       }
-    }
 
-    function globalMouseUp() {
-      prevX.current = 0
-      if (mouseDragging) {
+      function globalMouseUp() {
+        prevX.current = 0
         setMouseDragging(false)
       }
-    }
 
-    if (mouseDragging) {
       window.addEventListener('mousemove', globalMouseMove, true)
       window.addEventListener('mouseup', globalMouseUp, true)
-      cleanup = () => {
+      return () => {
         window.removeEventListener('mousemove', globalMouseMove, true)
         window.removeEventListener('mouseup', globalMouseUp, true)
       }
     }
-    return cleanup
+    return undefined
   }, [model, mouseDragging])
 
   return (

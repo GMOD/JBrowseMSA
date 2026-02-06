@@ -30,7 +30,7 @@
     "clean": "rimraf dist bundle",
     "watch": "pnpm build:esm --watch",
     "format": "prettier --write .",
-    "build:esm": "tsc",
+    "build:esm": "tsc --project tsconfig.build.json",
     "build:bundle": "webpack",
     "build": "pnpm clean && pnpm build:esm && pnpm build:bundle",
     "statedocs": "rm -rf apidocs && mkdir apidocs && node --experimental-strip-types docgen/generateStateModelDocs.ts",
@@ -47,14 +47,17 @@
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  },
   "dependencies": {
     "@jbrowse/svgcanvas": "workspace:*",
-    "@mui/icons-material": "^7.0.1",
-    "@mui/material": "^7.0.1",
+    "@mui/icons-material": "^7.3.9",
+    "@mui/material": "^7.3.9",
     "colord": "^2.9.3",
-    "d3-array": "^3.2.3",
+    "d3-array": "^3.2.4",
     "d3-hierarchy": "^3.1.2",
-    "flatbush": "^4.4.0",
+    "flatbush": "^4.5.1",
     "msa-parsers": "workspace:*"
   }
 }

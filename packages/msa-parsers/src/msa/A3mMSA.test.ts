@@ -2,6 +2,19 @@ import { describe, expect, test } from 'vitest'
 
 import A3mMSA from './A3mMSA.ts'
 
+// A3M format rules (see https://yanglab.qd.sdu.edu.cn/trRosetta/msa_format.html):
+//
+// - Uppercase letters = "match columns" (aligned positions shared by all seqs)
+// - Lowercase letters = insertions (extra residues in one seq, not a match column)
+// - Dashes '-'        = deletions (missing residue at a match column, counts as match)
+// - Dots '.'          = gaps aligned to insertions in other sequences
+//
+// Key constraint: all sequences must have the same number of match columns
+// (uppercase + dashes). Lowercase chars don't count toward this total.
+//
+// When expanded to a standard alignment, lowercase inserts become new columns
+// (uppercased), and sequences without inserts at that position get '.' gaps.
+
 describe('A3mMSA', () => {
   describe('sniff', () => {
     test('returns false for non-FASTA text', () => {
@@ -18,10 +31,13 @@ ACDEFGHIKLMNPQRSTVWY`
     })
 
     test('returns true for A3M format', () => {
+      // seq1: match=ACDEFKLMNPQ (11), insert=ghi (3)
+      // seq2: match=ACDEFKLMNPQ (11)
+      // Same match count + has lowercase → detected as A3M
       const a3m = `>seq1
 ACDEFghiKLMNPQ
 >seq2
-ACDEF---KLMNPQ`
+ACDEFKLMNPQ`
       expect(A3mMSA.sniff(a3m)).toBe(true)
     })
 
@@ -32,11 +48,13 @@ ACDEFghiKLMNPQ`
     })
 
     test('counts dashes as match columns in sniff', () => {
-      // Both sequences have 6 match columns (uppercase + dashes)
+      // seq1: match=ACDEF (5), insert=ghi (3)
+      // seq2: match=AC--F (5, where -- are deletions that count as match columns)
+      // Same match count + has lowercase → detected as A3M
       const a3m = `>seq1
 ACDEFghi
 >seq2
---DEF---`
+AC--F`
       expect(A3mMSA.sniff(a3m)).toBe(true)
     })
 
@@ -54,10 +72,14 @@ ACDEF---`
 
   describe('parsing', () => {
     test('parses simple A3M', () => {
+      // Both have 11 match columns. seq1 has 3 lowercase inserts (ghi) after F.
+      // After expansion, ghi becomes 3 new columns (uppercased in seq1, dots in seq2):
+      //   seq1: ACDEF + GHI + KLMNPQ = ACDEFGHIKLMNPQ (14 chars)
+      //   seq2: ACDEF + ... + KLMNPQ = ACDEF...KLMNPQ (14 chars)
       const a3m = `>seq1
 ACDEFghiKLMNPQ
 >seq2
-ACDEF---KLMNPQ`
+ACDEFKLMNPQ`
       const msa = new A3mMSA(a3m)
 
       expect(msa.getNames()).toEqual(['seq1', 'seq2'])
@@ -174,13 +196,28 @@ A-FG`
     })
 
     test('realistic a3m with insertions and deletions', () => {
-      // Based on trRosetta documentation example pattern
+      // All 3 sequences have 11 match columns (uppercase + dashes).
+      // seq1 has 3 lowercase insertions (ghi) after the 5th match column.
+      // seq2 uses dashes for deletions at match positions 1-2 and 9-10.
+      //
+      // A3M input (match columns marked with ^, inserts unmarked):
+      //   query: A C D E F K L M N P Q
+      //          ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^  = 11 match cols
+      //   seq1:  A C D E F g h i K L M N P Q
+      //          ^ ^ ^ ^ ^       ^ ^ ^ ^ ^ ^  = 11 match cols, ghi = inserts
+      //   seq2:  - - D E F K L M - - Q
+      //          ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^  = 11 match cols (dashes are deletions)
+      //
+      // After expansion (inserts become new columns, '.' fills gaps):
+      //   query: ACDEF...KLMNPQ  (14 chars)
+      //   seq1:  ACDEFGHIKLMNPQ  (14 chars, ghi uppercased)
+      //   seq2:  --DEF...KLM--Q  (14 chars)
       const a3m = `>query
-ACDEFGHIKLMNPQ
+ACDEFKLMNPQ
 >seq1
 ACDEFghiKLMNPQ
 >seq2
---DEF---KLMNPQ`
+--DEFKLM--Q`
       const msa = new A3mMSA(a3m)
 
       const query = msa.getRow('query')
@@ -190,13 +227,9 @@ ACDEFghiKLMNPQ
       expect(query.length).toBe(seq1.length)
       expect(query.length).toBe(seq2.length)
 
-      // seq1 has insert 'ghi' after F, so all sequences get 3 insert columns there
-      // query: ACDEF + ... + GHIKLMNPQ = ACDEF...GHIKLMNPQ
-      // seq1:  ACDEF + GHI + GHIKLMNPQ = ACDEFGHIGHIKLMNPQ
-      // seq2:  --DEF + ... + ---KLMNPQ = --DEF...---KLMNPQ
-      expect(query).toBe('ACDEF...GHIKLMNPQ')
-      expect(seq1).toBe('ACDEFGHIGHIKLMNPQ')
-      expect(seq2).toBe('--DEF...---KLMNPQ')
+      expect(query).toBe('ACDEF...KLMNPQ')
+      expect(seq1).toBe('ACDEFGHIKLMNPQ')
+      expect(seq2).toBe('--DEF...KLM--Q')
     })
 
     test('getWidth returns correct width', () => {

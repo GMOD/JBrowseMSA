@@ -24,6 +24,9 @@
     "watch": "tsc --watch",
     "test": "vitest"
   },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  },
   "dependencies": {
     "msa-parsers": "workspace:*"
   }

@@ -1,10 +1,14 @@
 import type { NodeWithIds } from '../types.ts'
 
 export default class FastaMSA {
-  private MSA: { seqdata: Record<string, string> }
+  private MSA: {
+    seqdata: Record<string, string>
+    colonNormalized: Record<string, string>
+  }
 
   constructor(text: string) {
     const seqdata: Record<string, string> = {}
+    const colonNormalized: Record<string, string> = {}
     for (const entry of text.split('>')) {
       if (!/\S/.test(entry)) {
         continue
@@ -18,9 +22,12 @@ export default class FastaMSA {
       const id = spaceIdx === -1 ? defLine : defLine.slice(0, spaceIdx)
       if (id) {
         seqdata[id] = entry.slice(newlineIdx + 1).replaceAll(/\s/g, '')
+        if (id.includes(':')) {
+          colonNormalized[id.replaceAll(':', '_')] = id
+        }
       }
     }
-    this.MSA = { seqdata }
+    this.MSA = { seqdata, colonNormalized }
   }
 
   getMSA() {
@@ -36,7 +43,11 @@ export default class FastaMSA {
   }
 
   getRow(name: string) {
-    return this.MSA.seqdata[name] || ''
+    return (
+      this.MSA.seqdata[name] ??
+      this.MSA.seqdata[this.MSA.colonNormalized[name] ?? ''] ??
+      ''
+    )
   }
 
   getWidth() {

@@ -103,7 +103,7 @@ export default class A3mMSA {
         const code = seq.charCodeAt(i)
         if (isLower(code)) {
           hasLowercase = true
-        } else if (code >= CODE_A && code <= CODE_Z || code === CODE_DASH) {
+        } else if ((code >= CODE_A && code <= CODE_Z) || code === CODE_DASH) {
           // Uppercase letters and dashes are match columns
           matchLen++
         }
@@ -152,7 +152,7 @@ export default class A3mMSA {
       while (i < seq.length) {
         const code = seq.charCodeAt(i)
 
-        if (code >= CODE_A && code <= CODE_Z || code === CODE_DASH) {
+        if ((code >= CODE_A && code <= CODE_Z) || code === CODE_DASH) {
           // Uppercase letter or dash - match column (dash = deletion)
           matches.push(seq[i]!)
           // Collect following lowercase/dot characters as insert content

@@ -1678,6 +1678,30 @@ function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
+       * Returns information about the currently hovered cell
+       */
+      get hoveredCell() {
+        const { mouseCol, mouseRow } = self
+        if (mouseCol === undefined || mouseRow === undefined) {
+          return undefined
+        }
+        const rowName = self.rowNames[mouseRow]
+        if (!rowName) {
+          return undefined
+        }
+        const seq = self.columns[rowName]
+        const base = seq?.[mouseCol]
+        const seqPos = self.visibleColToSeqPosOneBased(rowName, mouseCol)
+        return {
+          rowName,
+          col: mouseCol,
+          base,
+          seqPos,
+        }
+      },
+
+      /**
+       * #getter
        * widget width minus the tree area gives the space for the MSA
        */
       get msaAreaHeight() {
