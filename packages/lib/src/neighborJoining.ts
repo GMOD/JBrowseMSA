@@ -851,11 +851,9 @@ function nodeToNewick(node: NJNode, branchLength?: number): string {
   let result: string
 
   if (node.name !== undefined && !node.left && !node.right) {
-    // Leaf node - escape special characters in name
-    const escapedName = node.name.replace(/[():,;[\]]/g, '_')
-    result = escapedName
+    const quotedName = node.name.replaceAll("'", "''")
+    result = `'${quotedName}'`
   } else {
-    // Internal node
     const leftNewick = node.left ? nodeToNewick(node.left, node.leftLength) : ''
     const rightNewick = node.right
       ? nodeToNewick(node.right, node.rightLength)

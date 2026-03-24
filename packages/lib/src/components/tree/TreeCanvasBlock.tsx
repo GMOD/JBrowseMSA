@@ -4,12 +4,30 @@ import { useTheme } from '@mui/material'
 import Flatbush from 'flatbush'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
+import { makeStyles } from 'tss-react/mui'
 
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'
 import { padding, renderTreeCanvas } from './renderTreeCanvas.ts'
 
 import type { MsaViewModel } from '../../model.ts'
+
+const useStyles = makeStyles()(theme => ({
+  tooltip: {
+    position: 'fixed',
+    pointerEvents: 'none',
+    zIndex: 10000,
+    backgroundColor: theme.palette.grey[700],
+    color: theme.palette.common.white,
+    padding: '4px 8px',
+    borderRadius: 4,
+    fontSize: 12,
+    whiteSpace: 'nowrap',
+    maxWidth: 300,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+}))
 
 interface TooltipData {
   name: string
@@ -75,6 +93,7 @@ const TreeCanvasBlock = observer(function ({
   model: MsaViewModel
   offsetY: number
 }) {
+  const { classes } = useStyles()
   const theme = useTheme()
   const ref = useRef<HTMLCanvasElement>(null)
   const clickMap = useRef(new ClickMapIndex())
@@ -82,6 +101,11 @@ const TreeCanvasBlock = observer(function ({
   const [branchMenu, setBranchMenu] = useState<TooltipData>()
   const [toggleNodeMenu, setToggleNodeMenu] = useState<TooltipData>()
   const [hoverElt, setHoverElt] = useState<ClickEntry>()
+  const [tooltipInfo, setTooltipInfo] = useState<{
+    name: string
+    x: number
+    y: number
+  }>()
 
   const { scrollY, treeAreaWidth, blockSize, highResScaleFactor } = model
 
@@ -217,6 +241,17 @@ const TreeCanvasBlock = observer(function ({
           ref.current.style.cursor = hoveredAny ? 'pointer' : 'default'
           setHoverElt(hoveredLeaf) // Only show direct hover highlight for leaf nodes
 
+          // Set tooltip info
+          if (hoveredAny) {
+            setTooltipInfo({
+              name: hoveredAny.name,
+              x: event.clientX,
+              y: event.clientY,
+            })
+          } else {
+            setTooltipInfo(undefined)
+          }
+
           // Handle tree node hover for multi-row highlighting
           if (hoveredAny) {
             model.setHoveredTreeNode(hoveredAny.id)
@@ -249,6 +284,7 @@ const TreeCanvasBlock = observer(function ({
         }}
         onMouseLeave={() => {
           setHoverElt(undefined)
+          setTooltipInfo(undefined)
           // Clear all highlighting when leaving tree area
           model.setHoveredTreeNode(undefined)
           model.setMousePos(undefined, undefined)
@@ -265,6 +301,14 @@ const TreeCanvasBlock = observer(function ({
         height={height}
         ref={mouseoverRef}
       />
+      {tooltipInfo ? (
+        <div
+          className={classes.tooltip}
+          style={{ left: tooltipInfo.x + 12, top: tooltipInfo.y + 12 }}
+        >
+          {tooltipInfo.name}
+        </div>
+      ) : null}
     </>
   )
 })

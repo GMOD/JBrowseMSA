@@ -7,7 +7,6 @@ import { makeStyles } from 'tss-react/mui'
 
 import type { MsaViewModel } from '../model.ts'
 
-// lazies
 const TrackInfoDialog = lazy(() => import('./dialogs/TrackInfoDialog.tsx'))
 
 const useStyles = makeStyles()({
@@ -16,12 +15,11 @@ const useStyles = makeStyles()({
   },
 })
 
-export const TrackLabel = observer(function ({
+const TrackLabel = observer(function TrackLabel({
   model,
   track,
 }: {
   model: MsaViewModel
-
   track: any
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>()
@@ -96,7 +94,6 @@ const Track = observer(function ({
   track,
 }: {
   model: MsaViewModel
-
   track: any
 }) {
   const { resizeHandleWidth, colWidth, scrollX, numColumns } = model
@@ -124,7 +121,7 @@ const Track = observer(function ({
       }
       event.preventDefault()
     }
-    curr.addEventListener('wheel', onWheel)
+    curr.addEventListener('wheel', onWheel, { passive: false })
     return () => {
       curr.removeEventListener('wheel', onWheel)
     }

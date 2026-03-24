@@ -60,10 +60,22 @@
 export default function parse(s: string) {
   const ancestors = []
 
+  // Replace single-quoted names with placeholders so ':' inside them isn't tokenized
+  const quotedNames: string[] = []
+  const preprocessed = s.replace(/'((?:[^']|'')*)'/g, (_, inner: string) => {
+    const idx = quotedNames.length
+    quotedNames.push(inner.replaceAll("''", "'"))
+    return `__Q${idx}__`
+  })
+
   let tree = {} as Record<string, any>
-  const tokens = s.split(/\s*(;|\(|\)|,|:)\s*/)
+  const tokens = preprocessed.split(/\s*(;|\(|\)|,|:)\s*/)
   for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i]!
+    const raw = tokens[i]!
+    const token = raw.replace(
+      /^__Q(\d+)__$/,
+      (_, idx: string) => quotedNames[Number(idx)]!,
+    )
     const subtree = {}
     switch (token) {
       case '(': // new children

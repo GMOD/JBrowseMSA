@@ -14,8 +14,8 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const mouseoverRef = useRef<HTMLCanvasElement>(null)
   const scheduled = useRef(false)
   const deltaY = useRef(0)
-  const prevY = useRef<number>(0)
-  const { treeWidth, height, blocksY, treeAreaWidth, scrollY } = model
+  const prevY = useRef(0)
+  const { treeWidth, height, blocksY, treeAreaWidth } = model
   const [mouseDragging, setMouseDragging] = useState(false)
 
   useEffect(() => {
@@ -37,71 +37,75 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
       event.preventDefault()
       event.stopPropagation()
     }
-    curr.addEventListener('wheel', onWheel)
+    curr.addEventListener('wheel', onWheel, { passive: false })
     return () => {
       curr.removeEventListener('wheel', onWheel)
     }
   }, [model])
 
   useEffect(() => {
-    let cleanup = () => {}
-
-    function globalMouseMove(event: MouseEvent) {
-      event.preventDefault()
-      const currY = event.clientY
-      const distanceY = currY - prevY.current
-      if (distanceY) {
-        // use rAF to make it so multiple event handlers aren't fired per-frame
-        // see
-        // https://calendar.perfplanet.com/2013/the-runtime-performance-checklist/
-        if (!scheduled.current) {
-          scheduled.current = true
-          window.requestAnimationFrame(() => {
-            model.doScrollY(distanceY)
-            scheduled.current = false
-            prevY.current = event.clientY
-          })
+    if (mouseDragging) {
+      function globalMouseMove(event: MouseEvent) {
+        event.preventDefault()
+        const currY = event.clientY
+        const distanceY = currY - prevY.current
+        if (distanceY) {
+          if (!scheduled.current) {
+            scheduled.current = true
+            window.requestAnimationFrame(() => {
+              model.doScrollY(distanceY)
+              scheduled.current = false
+              prevY.current = event.clientY
+            })
+          }
         }
       }
-    }
 
-    function globalMouseUp() {
-      prevY.current = 0
-      if (mouseDragging) {
+      function globalMouseUp() {
+        prevY.current = 0
         setMouseDragging(false)
       }
-    }
 
-    if (mouseDragging) {
       window.addEventListener('mousemove', globalMouseMove, true)
       window.addEventListener('mouseup', globalMouseUp, true)
-      cleanup = () => {
+      return () => {
         window.removeEventListener('mousemove', globalMouseMove, true)
         window.removeEventListener('mouseup', globalMouseUp, true)
       }
     }
-    return cleanup
+    return undefined
   }, [model, mouseDragging])
 
-  // Global tree mouseover effect
+  // Global tree mouseover effect. Only [model] is needed in the dependency
+  // array because autorun internally tracks all accessed observables
+  // (treeAreaWidth, height, scrollY, etc.) and re-runs when they change
   useEffect(() => {
     const ctx = mouseoverRef.current?.getContext('2d')
     return ctx
       ? autorun(() => {
           if (isAlive(model)) {
+            const {
+              relativeTo,
+              leaves,
+              rowHeight,
+              hoveredTreeNode,
+              treeAreaWidth: w,
+              height: h,
+              scrollY: sy,
+              mouseOverRowName,
+            } = model
             ctx.resetTransform()
-            ctx.clearRect(0, 0, treeAreaWidth, height)
+            ctx.clearRect(0, 0, w, h)
 
             // Highlight reference row (relativeTo) persistently
-            const { relativeTo, leaves, rowHeight, hoveredTreeNode } = model
             if (relativeTo) {
               const referenceLeaf = leaves.find(
                 leaf => leaf.data.name === relativeTo,
               )
               if (referenceLeaf) {
-                const y = referenceLeaf.x! + scrollY
+                const y = referenceLeaf.x! + sy
                 ctx.fillStyle = 'rgba(0,128,255,0.3)' // Blue highlight for reference row
-                ctx.fillRect(0, y - rowHeight / 2, treeAreaWidth, rowHeight)
+                ctx.fillRect(0, y - rowHeight / 2, w, rowHeight)
               }
             }
 
@@ -113,33 +117,31 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
                   leaf => leaf.data.name === descendantName,
                 )
                 if (matchingLeaf) {
-                  const y = matchingLeaf.x! + scrollY
-                  ctx.fillRect(0, y - rowHeight / 2, treeAreaWidth, rowHeight)
+                  const y = matchingLeaf.x! + sy
+                  ctx.fillRect(0, y - rowHeight / 2, w, rowHeight)
                 }
               }
             }
 
             // Highlight single tree row corresponding to MSA mouseover (if not part of multi-row hover)
-            const { mouseOverRowName } = model
             if (
               mouseOverRowName &&
               mouseOverRowName !== relativeTo &&
               !hoveredTreeNode?.descendantNames.includes(mouseOverRowName)
             ) {
-              // Find the leaf node that matches the hovered row
               const matchingLeaf = leaves.find(
                 leaf => leaf.data.name === mouseOverRowName,
               )
               if (matchingLeaf) {
-                const y = matchingLeaf.x! + scrollY
+                const y = matchingLeaf.x! + sy
                 ctx.fillStyle = 'rgba(255,165,0,0.2)' // Orange highlight for MSA sync
-                ctx.fillRect(0, y - rowHeight / 2, treeAreaWidth, rowHeight)
+                ctx.fillRect(0, y - rowHeight / 2, w, rowHeight)
               }
             }
           }
         })
       : undefined
-  }, [model, treeAreaWidth, height, scrollY])
+  }, [model])
 
   function mouseDown(event: React.MouseEvent) {
     // check if clicking a draggable element or a resize handle

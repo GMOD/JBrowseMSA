@@ -1,3 +1,4 @@
+import { parseNewick } from 'msa-parsers'
 import { describe, expect, test } from 'vitest'
 
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
@@ -80,17 +81,24 @@ describe('calculateNeighborJoiningTree', () => {
     expect(tree).toContain('seq3')
   })
 
-  test('handles special characters in sequence names', () => {
+  test('names with special characters round-trip through Newick parsing', () => {
     const rows: [string, string][] = [
-      ['seq:1', 'MKAA'],
+      ['EU105457.1|chr09:67680268..67675529_LTR/Copia', 'MKAA'],
       ['seq(2)', 'MKAA'],
     ]
-    const tree = calculateNeighborJoiningTree(rows)
+    const newick = calculateNeighborJoiningTree(rows)
+    const tree = parseNewick(newick)
 
-    expect(tree).toMatch(/;$/)
-    // Special characters should be escaped
-    expect(tree).not.toMatch(/seq:1/)
-    expect(tree).not.toMatch(/seq\(2\)/)
+    function getLeafNames(node: Record<string, unknown>): string[] {
+      const children = node.children as Record<string, unknown>[] | undefined
+      if (!children?.length) {
+        return [node.name as string]
+      }
+      return children.flatMap(c => getLeafNames(c))
+    }
+    const names = getLeafNames(tree)
+    expect(names).toContain('EU105457.1|chr09:67680268..67675529_LTR/Copia')
+    expect(names).toContain('seq(2)')
   })
 
   test('identical sequences have zero distance', () => {

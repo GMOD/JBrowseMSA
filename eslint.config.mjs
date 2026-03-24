@@ -76,7 +76,10 @@ export default defineConfig(
         },
       ],
 
-      'react-refresh/only-export-components': 'warn',
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
       'react/no-unescaped-entities': 'off',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
