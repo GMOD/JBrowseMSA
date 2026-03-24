@@ -1,6 +1,6 @@
 {
   "name": "@jbrowse/svgcanvas",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "description": "Draw on SVG using Canvas's 2D Context API - ESM fork of svgcanvas",
   "license": "MIT",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "react-msaview-cli",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "license": "MIT",
   "type": "module",
   "bin": {
