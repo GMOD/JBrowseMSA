@@ -25,7 +25,7 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0"
+    "@types/node": "^25.5.2"
   },
   "dependencies": {
     "msa-parsers": "workspace:*"

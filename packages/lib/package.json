@@ -48,7 +48,7 @@
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0"
+    "@types/node": "^25.5.2"
   },
   "dependencies": {
     "@jbrowse/svgcanvas": "workspace:*",

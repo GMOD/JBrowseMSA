@@ -13,7 +13,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@jbrowse/core": "^4.1.14",
+    "@jbrowse/core": "^4.1.15",
     "@jbrowse/mobx-state-tree": "^5.6.0",
     "@mui/icons-material": "^7.3.9",
     "@mui/material": "^7.3.9",
