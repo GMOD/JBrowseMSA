@@ -11,17 +11,12 @@ import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
 import { autorun, transaction } from 'mobx'
 import {
-  A3mMSA,
-  ClustalMSA,
-  EmfMSA,
-  FastaMSA,
-  StockholmMSA,
   generateNodeIds,
   gffToInterProResults,
   parseEmfTree,
   parseGFF,
+  parseMSA,
   parseNewick,
-  stockholmSniff,
 } from 'msa-parsers'
 
 import { blocksX, blocksY } from './calculateBlocks.ts'
@@ -651,20 +646,9 @@ function stateModelFactory() {
        */
       get MSA() {
         const text = self.data.msa
-        if (text) {
-          if (stockholmSniff(text)) {
-            return new StockholmMSA(text, self.currentAlignment)
-          } else if (A3mMSA.sniff(text)) {
-            return new A3mMSA(text)
-          } else if (text.startsWith('>')) {
-            return new FastaMSA(text)
-          } else if (text.startsWith('SEQ')) {
-            return new EmfMSA(text)
-          } else {
-            return new ClustalMSA(text)
-          }
-        }
-        return null
+        // uses parseMSA so the named MSAParserType return type is portable
+        // to downstream consumers (avoids TS2883 with default exports)
+        return text ? parseMSA(text, self.currentAlignment) : null
       },
       /**
        * #getter
