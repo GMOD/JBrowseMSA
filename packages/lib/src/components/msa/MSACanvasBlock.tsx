@@ -5,7 +5,6 @@ import { useTheme } from '@mui/material'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
-import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
 import { colorContrast } from '../../util.ts'
 
@@ -52,15 +51,6 @@ const MSACanvasBlock = observer(function ({
         blockSize * highResScaleFactor,
         blockSize * highResScaleFactor,
       )
-      const { actuallyShowDomains } = model
-      if (actuallyShowDomains) {
-        renderBoxFeatureCanvasBlock({
-          ctx,
-          offsetX,
-          offsetY,
-          model,
-        })
-      }
       renderMSABlock({
         ctx,
         theme,
@@ -102,7 +92,6 @@ const MSACanvasBlock = observer(function ({
           if (x >= 0 && x < model.numColumns && y >= 0 && y < model.numRows) {
             model.setMousePos(x, y)
           } else {
-            // Clear mouse position when outside bounds
             model.setMousePos(undefined, undefined)
           }
         }}

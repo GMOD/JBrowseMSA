@@ -5,7 +5,6 @@ export async function load(
   model: MsaViewModel,
   msaFile?: FileLocation,
   treeFile?: FileLocation,
-  gffFile?: FileLocation,
 ) {
   model.setError(undefined)
   if (msaFile) {
@@ -13,8 +12,5 @@ export async function load(
   }
   if (treeFile) {
     model.setTreeFilehandle(treeFile)
-  }
-  if (gffFile) {
-    model.setGFFFilehandle(gffFile)
   }
 }

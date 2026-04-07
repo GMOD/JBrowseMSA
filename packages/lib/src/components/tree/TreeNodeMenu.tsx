@@ -24,8 +24,9 @@ const TreeMenu = observer(function ({
   model: MsaViewModel
   onClose: () => void
 }) {
-  const { collapsed, collapsedLeaves } = model
-  const { name } = node
+  const { collapsed } = model
+  const { name, id } = node
+  const isCollapsed = collapsed.includes(id)
   return (
     <Menu
       anchorReference="anchorPosition"
@@ -62,21 +63,11 @@ const TreeMenu = observer(function ({
       <MenuItem
         dense
         onClick={() => {
-          if (collapsed.includes(node.id)) {
-            model.toggleCollapsed(node.id)
-          } else {
-            if (node.id.endsWith('-leafnode')) {
-              model.toggleCollapsedLeaf(node.id)
-            } else {
-              model.toggleCollapsedLeaf(`${node.id}-leafnode`)
-            }
-          }
+          model.toggleCollapsed(id)
           onClose()
         }}
       >
-        {collapsed.includes(node.id) || collapsedLeaves.includes(node.id)
-          ? 'Show node'
-          : 'Hide node'}
+        {isCollapsed ? 'Show node' : 'Hide node'}
       </MenuItem>
       <MenuItem
         dense

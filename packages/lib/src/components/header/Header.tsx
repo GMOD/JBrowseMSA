@@ -13,7 +13,6 @@ import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
 import SettingsMenu from './SettingsMenu.tsx'
 import ZoomControls from './ZoomControls.tsx'
 import ZoomMenu from './ZoomMenu.tsx'
-import ZoomStar from './ZoomStar.tsx'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -29,7 +28,6 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <HeaderMenu model={model} />
       <SettingsMenu model={model} />
       <ZoomControls model={model} />
-      {model.showZoomStar ? <ZoomStar model={model} /> : null}
       <ZoomMenu model={model} />
       <GappynessSlider model={model} />
       <div style={{ paddingLeft: 20, margin: 'auto' }}>

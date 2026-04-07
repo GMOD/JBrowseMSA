@@ -1,16 +1,12 @@
 import {
   clamp,
   fetchAndMaybeUnzipText,
-  groupBy,
-  localStorageGetBoolean,
-  localStorageSetBoolean,
   notEmpty,
   sum,
 } from '@jbrowse/core/util'
 import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
 import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
-import { colord } from 'colord'
 import { autorun, transaction } from 'mobx'
 import {
   A3mMSA,
@@ -19,9 +15,7 @@ import {
   FastaMSA,
   StockholmMSA,
   generateNodeIds,
-  gffToInterProResults,
   parseEmfTree,
-  parseGFF,
   parseNewick,
   stockholmSniff,
 } from 'msa-parsers'
@@ -35,7 +29,6 @@ import {
   defaultBgColor,
   defaultColWidth,
   defaultColorSchemeName,
-  defaultContrastLettering,
   defaultCurrentAlignment,
   defaultDrawLabels,
   defaultDrawMsaLetters,
@@ -48,13 +41,9 @@ import {
   defaultScrollX,
   defaultScrollY,
   defaultShowBranchLen,
-  defaultShowDomains,
-  defaultSubFeatureRows,
   defaultTreeAreaWidth,
   defaultTreeWidth,
-  defaultTreeWidthMatchesArea,
 } from './constants.ts'
-import { createPaletteMap } from './createPaletteMap.ts'
 import { flatToTree } from './flatToTree.ts'
 import {
   clusterLayout,
@@ -75,7 +64,6 @@ import { MSAModelF } from './model/msaModel.ts'
 import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { parseAsn1 } from './parseAsn1.ts'
-import { reparseTree } from './reparseTree.ts'
 import {
   globalColToVisibleCol,
   visibleColToGlobalCol,
@@ -86,7 +74,6 @@ import { len, skipBlanks } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
-import type { InterProScanResults } from './launchInterProScan.ts'
 import type {
   BasicTrack,
   NodeWithIds,
@@ -96,8 +83,6 @@ import type {
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
-
-const showZoomStarKey = 'msa-showZoomStar'
 
 /**
  * #stateModel MsaView
@@ -122,24 +107,11 @@ function stateModelFactory() {
         /**
          * #property
          */
-        showDomains: defaultShowDomains,
-        /**
-         * #property
-         */
         hideGaps: defaultHideGaps,
         /**
          * #property
          */
         allowedGappyness: defaultAllowedGappyness,
-        /**
-         * #property
-         */
-        contrastLettering: defaultContrastLettering,
-
-        /**
-         * #property
-         */
-        subFeatureRows: defaultSubFeatureRows,
 
         /**
          * #property
@@ -203,12 +175,6 @@ function stateModelFactory() {
 
         /**
          * #property
-         * filehandle object for InterProScan GFF file
-         */
-        gffFilehandle: types.maybe(FileLocation),
-
-        /**
-         * #property
          *
          */
         currentAlignment: defaultCurrentAlignment,
@@ -220,12 +186,6 @@ function stateModelFactory() {
          */
         collapsed: types.array(types.string),
 
-        /**
-         * #property
-         * array of tree leaf nodes that are 'collapsed' (just that leaf node
-         * is hidden)
-         */
-        collapsedLeaves: types.array(types.string),
         /**
          * #property
          * focus on particular subtree
@@ -251,10 +211,6 @@ function stateModelFactory() {
         /**
          * #property
          */
-        featureFilters: types.map(types.boolean),
-        /**
-         * #property
-         */
         relativeTo: types.maybe(types.string),
       }),
     )
@@ -274,11 +230,6 @@ function stateModelFactory() {
        */
       highResScaleFactor: 2,
 
-      /**
-       * #volatile
-       * obtained from localStorage
-       */
-      showZoomStar: localStorageGetBoolean(showZoomStarKey, false),
       /**
        * #volatile
        */
@@ -371,14 +322,6 @@ function stateModelFactory() {
       /**
        * #volatile
        */
-      annotPos: undefined as { left: number; right: number } | undefined,
-
-      /**
-       * #volatile
-       */
-      interProAnnotations: undefined as
-        | undefined
-        | Record<string, InterProScanResults>,
     }))
     .actions(self => ({
       /**
@@ -402,20 +345,8 @@ function stateModelFactory() {
       /**
        * #action
        */
-      setContrastLettering(arg: boolean) {
-        self.contrastLettering = arg
-      },
-      /**
-       * #action
-       */
       setLoadingMSA(arg: boolean) {
         self.loadingMSA = arg
-      },
-      /**
-       * #action
-       */
-      setShowZoomStar(arg: boolean) {
-        self.showZoomStar = arg
       },
       /**
        * #action
@@ -486,19 +417,6 @@ function stateModelFactory() {
       },
       /**
        * #action
-       */
-      setShowDomains(arg: boolean) {
-        self.showDomains = arg
-      },
-
-      /**
-       * #action
-       */
-      setSubFeatureRows(arg: boolean) {
-        self.subFeatureRows = arg
-      },
-      /**
-       * #action
        * set mouse click position (row, column) in the MSA
        */
       setMouseClickPos(col?: number, row?: number) {
@@ -552,16 +470,6 @@ function stateModelFactory() {
       /**
        * #action
        */
-      toggleCollapsedLeaf(node: string) {
-        if (self.collapsedLeaves.includes(node)) {
-          self.collapsedLeaves.remove(node)
-        } else {
-          self.collapsedLeaves.push(node)
-        }
-      },
-      /**
-       * #action
-       */
       setShowOnly(node?: string) {
         self.showOnly = node
       },
@@ -585,13 +493,6 @@ function stateModelFactory() {
        */
       setTreeFilehandle(treeFilehandle?: FileLocationType) {
         self.treeFilehandle = treeFilehandle
-      },
-
-      /**
-       * #action
-       */
-      setGFFFilehandle(gffFilehandle?: FileLocationType) {
-        self.gffFilehandle = gffFilehandle
       },
 
       /**
@@ -624,9 +525,7 @@ function stateModelFactory() {
       get hideGapsEffective() {
         return (
           self.hideGaps &&
-          (self.collapsed.length > 0 ||
-            self.collapsedLeaves.length > 0 ||
-            self.allowedGappyness < 100)
+          (self.collapsed.length > 0 || self.allowedGappyness < 100)
         )
       },
       /**
@@ -634,12 +533,6 @@ function stateModelFactory() {
        */
       get realAllowedGappyness() {
         return this.hideGapsEffective ? self.allowedGappyness : 100
-      },
-      /**
-       * #getter
-       */
-      get actuallyShowDomains() {
-        return self.showDomains && !!self.interProAnnotations
       },
       /**
        * #getter
@@ -694,12 +587,6 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      get noDomains() {
-        return !self.interProAnnotations
-      },
-      /**
-       * #getter
-       */
       menuItems() {
         return []
       },
@@ -742,22 +629,20 @@ function stateModelFactory() {
       get tree(): NodeWithIds {
         const text = self.data.tree
 
-        return reparseTree(
-          text
-            ? generateNodeIds(
-                text.startsWith('BioTreeContainer')
-                  ? flatToTree(parseAsn1(text))
-                  : parseNewick(
-                      text.startsWith('SEQ') ? parseEmfTree(text).tree : text,
-                    ),
-              )
-            : this.MSA?.getTree() || {
-                noTree: true,
-                children: [],
-                id: 'empty',
-                name: 'empty',
-              },
-        )
+        return text
+          ? generateNodeIds(
+              text.startsWith('BioTreeContainer')
+                ? flatToTree(parseAsn1(text))
+                : parseNewick(
+                    text.startsWith('SEQ') ? parseEmfTree(text).tree : text,
+                  ),
+            )
+          : this.MSA?.getTree() || {
+              noTree: true,
+              children: [],
+              id: 'empty',
+              name: 'empty',
+            }
       },
 
       /**
@@ -816,12 +701,19 @@ function stateModelFactory() {
           }
         }
 
-        ;[...self.collapsed, ...self.collapsedLeaves]
-          .map(collapsedId => find(hier, node => node.data.id === collapsedId))
-          .filter(notEmpty)
-          .forEach(node => {
+        for (const collapsedId of self.collapsed) {
+          const node = find(hier, n => n.data.id === collapsedId)
+          if (!node) {
+            continue
+          }
+          if (node.children) {
             collapse(node)
-          })
+          } else if (node.parent?.children) {
+            node.parent.children = node.parent.children.filter(
+              c => c.data.id !== collapsedId,
+            )
+          }
+        }
 
         return hier
       },
@@ -1446,13 +1338,6 @@ function stateModelFactory() {
       /**
        * #action
        */
-      setInterProAnnotations(data: Record<string, InterProScanResults>) {
-        self.interProAnnotations = data
-      },
-
-      /**
-       * #action
-       */
       doScrollY(deltaY: number) {
         self.scrollY = clamp(self.scrollY + deltaY, -self.totalHeight + 10, 0)
       },
@@ -1722,53 +1607,6 @@ function stateModelFactory() {
       get totalTrackAreaHeight() {
         return sum(self.turnedOnTracks.map(r => r.model.height))
       },
-      /**
-       * #getter
-       */
-      get tidyInterProAnnotationTypes() {
-        return new Map(
-          this.tidyInterProAnnotations.map(annot => [annot.accession, annot]),
-        )
-      },
-      /**
-       * #getter
-       */
-      get tidyInterProAnnotations() {
-        const { interProAnnotations } = self
-        if (!interProAnnotations) {
-          return []
-        }
-        return Object.entries(interProAnnotations)
-          .flatMap(([id, val]) =>
-            val.matches.flatMap(({ signature, locations }) =>
-              signature.entry
-                ? locations.map(({ start, end }) => ({
-                    id,
-                    name: signature.entry!.name,
-                    accession: signature.entry!.accession,
-                    description: signature.entry!.description,
-                    start,
-                    end,
-                  }))
-                : [],
-            ),
-          )
-          .toSorted((a, b) => len(b) - len(a))
-      },
-      /**
-       * #getter
-       */
-      get tidyFilteredInterProAnnotations() {
-        return this.tidyInterProAnnotations.filter(r =>
-          self.featureFilters.get(r.accession),
-        )
-      },
-      /**
-       * #getter
-       */
-      get tidyFilteredGatheredInterProAnnotations() {
-        return groupBy(this.tidyFilteredInterProAnnotations, r => r.id)
-      },
     }))
     .views(self => ({
       /**
@@ -1784,23 +1622,6 @@ function stateModelFactory() {
        */
       get verticalScrollbarWidth() {
         return self.showVerticalScrollbar ? 20 : 0
-      },
-      /**
-       * #getter
-       */
-      get fillPalette() {
-        return createPaletteMap([...self.tidyInterProAnnotationTypes.keys()])
-      },
-      /**
-       * #getter
-       */
-      get strokePalette() {
-        return Object.fromEntries(
-          Object.entries(this.fillPalette).map(([key, val]) => [
-            key,
-            colord(val).darken(0.1).toHex(),
-          ]),
-        )
       },
 
       /**
@@ -1867,21 +1688,6 @@ function stateModelFactory() {
       /**
        * #action
        */
-      initFilter(arg: string) {
-        const ret = self.featureFilters.get(arg)
-        if (ret === undefined) {
-          self.featureFilters.set(arg, true)
-        }
-      },
-      /**
-       * #action
-       */
-      setFilter(arg: string, flag: boolean) {
-        self.featureFilters.set(arg, flag)
-      },
-      /**
-       * #action
-       */
       fit() {
         self.rowHeight = self.msaAreaHeight / self.numRows
         self.colWidth = self.msaAreaWidth / self.numColumns
@@ -1904,23 +1710,6 @@ function stateModelFactory() {
       },
 
       afterCreate() {
-        addDisposer(
-          self,
-          autorun(() => {
-            for (const key of self.tidyInterProAnnotationTypes.keys()) {
-              this.initFilter(key)
-            }
-          }),
-        )
-
-        // autorun saves local settings
-        addDisposer(
-          self,
-          autorun(() => {
-            localStorageSetBoolean(showZoomStarKey, self.showZoomStar)
-          }),
-        )
-
         // autorun opens treeFilehandle
         addDisposer(
           self,
@@ -1957,31 +1746,6 @@ function stateModelFactory() {
                     openLocation(treeMetadataFilehandle),
                   ),
                 )
-              } catch (e) {
-                console.error(e)
-                self.setError(e)
-              }
-            }
-          }),
-        )
-
-        // autorun opens gffFilehandle for InterProScan domains
-        addDisposer(
-          self,
-          autorun(async () => {
-            const { gffFilehandle } = self
-            if (gffFilehandle) {
-              try {
-                const gffText = await fetchAndMaybeUnzipText(
-                  openLocation(gffFilehandle),
-                )
-                const gffRecords = parseGFF(gffText)
-                const interProResults = gffToInterProResults(gffRecords)
-                self.setInterProAnnotations(interProResults)
-                self.setShowDomains(true)
-                if (gffFilehandle.locationType === 'BlobLocation') {
-                  self.setGFFFilehandle(undefined)
-                }
               } catch (e) {
                 console.error(e)
                 self.setError(e)
@@ -2039,15 +1803,13 @@ function stateModelFactory() {
         // autorun synchronizes treeWidth with treeAreaWidth
         addDisposer(
           self,
-          autorun(async () => {
-            if (self.treeWidthMatchesArea) {
-              self.setTreeWidth(
-                Math.max(
-                  50,
-                  self.treeAreaWidth - self.labelsWidth - 10 - self.marginLeft,
-                ),
-              )
-            }
+          autorun(() => {
+            self.setTreeWidth(
+              Math.max(
+                50,
+                self.treeAreaWidth - self.labelsWidth - 10 - self.marginLeft,
+              ),
+            )
           }),
         )
       },
@@ -2057,11 +1819,8 @@ function stateModelFactory() {
       const {
         data: { tree, msa, treeMetadata },
         // Main model properties
-        showDomains,
         hideGaps,
         allowedGappyness,
-        contrastLettering,
-        subFeatureRows,
         drawMsaLetters,
         height,
         rowHeight,
@@ -2070,10 +1829,8 @@ function stateModelFactory() {
         colWidth,
         currentAlignment,
         collapsed,
-        collapsedLeaves,
         showOnly,
         turnedOffTracks,
-        featureFilters,
         relativeTo,
         // MSA model properties
         bgColor,
@@ -2083,7 +1840,6 @@ function stateModelFactory() {
         labelsAlignRight,
         treeAreaWidth,
         treeWidth,
-        treeWidthMatchesArea,
         showBranchLen,
         drawTree,
         drawNodeBubbles,
@@ -2092,11 +1848,8 @@ function stateModelFactory() {
       } = snap
 
       const defaults: Record<string, unknown> = {
-        showDomains: defaultShowDomains,
         hideGaps: defaultHideGaps,
         allowedGappyness: defaultAllowedGappyness,
-        contrastLettering: defaultContrastLettering,
-        subFeatureRows: defaultSubFeatureRows,
         drawMsaLetters: defaultDrawMsaLetters,
         height: defaultHeight,
         rowHeight: defaultRowHeight,
@@ -2110,7 +1863,6 @@ function stateModelFactory() {
         labelsAlignRight: defaultLabelsAlignRight,
         treeAreaWidth: defaultTreeAreaWidth,
         treeWidth: defaultTreeWidth,
-        treeWidthMatchesArea: defaultTreeWidthMatchesArea,
         showBranchLen: defaultShowBranchLen,
         drawTree: defaultDrawTree,
         drawNodeBubbles: defaultDrawNodeBubbles,
@@ -2132,16 +1884,10 @@ function stateModelFactory() {
         ...nonDefaults,
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(collapsed?.length ? { collapsed } : {}),
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        ...(collapsedLeaves?.length ? { collapsedLeaves } : {}),
         ...(showOnly !== undefined ? { showOnly } : {}),
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(turnedOffTracks && Object.keys(turnedOffTracks).length > 0
           ? { turnedOffTracks }
-          : {}),
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        ...(featureFilters && Object.keys(featureFilters).length > 0
-          ? { featureFilters }
           : {}),
         ...(relativeTo !== undefined ? { relativeTo } : {}),
       } as typeof snap

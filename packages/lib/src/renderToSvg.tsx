@@ -5,7 +5,6 @@ import { renderToStaticMarkup } from '@jbrowse/core/util'
 import { when } from 'mobx'
 
 import MinimapSVG from './components/minimap/MinimapSVG.tsx'
-import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { renderAllTracks } from './components/tracks/renderTracksSvg.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
@@ -142,14 +141,6 @@ function CoreRendering({
   const ctx1 = new Context(width, contentHeight) as any
 
   const ctx2 = new Context(width, contentHeight) as any
-  renderBoxFeatureCanvasBlock({
-    ctx: ctx2,
-    offsetX,
-    offsetY,
-    model,
-    blockSizeYOverride: contentHeight,
-    highResScaleFactorOverride: 1,
-  })
   const msaAreaWidth = width - treeAreaWidth
   renderTreeCanvas({
     model,
