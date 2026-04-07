@@ -512,7 +512,12 @@ function stateModelFactory() {
       /**
        * #action
        */
-      setData(data: { msa?: string; tree?: string; treeMetadata?: string }) {
+      setData(data: {
+        msa?: string
+        tree?: string
+        treeMetadata?: string
+        gff?: string
+      }) {
         self.data = cast(data)
       },
 
@@ -1380,6 +1385,13 @@ function stateModelFactory() {
         self.interProAnnotations = data
       },
 
+      applyGFFText(gffText: string) {
+        const gffRecords = parseGFF(gffText)
+        const interProResults = gffToInterProResults(gffRecords)
+        self.setInterProAnnotations(interProResults)
+        self.setShowDomains(true)
+      },
+
       /**
        * #action
        */
@@ -1746,6 +1758,9 @@ function stateModelFactory() {
         self.setCurrentAlignment(0)
         self.setTreeFilehandle(undefined)
         self.setMSAFilehandle(undefined)
+        self.setGFFFilehandle(undefined)
+        self.setInterProAnnotations({})
+        self.setShowDomains(false)
       },
       /**
        * #action
@@ -1857,6 +1872,22 @@ function stateModelFactory() {
           }),
         )
 
+        // autorun parses inline gff text from data.gff
+        addDisposer(
+          self,
+          autorun(() => {
+            const gffText = self.data?.gff
+            if (gffText) {
+              try {
+                self.applyGFFText(gffText)
+              } catch (e) {
+                console.error(e)
+                self.setError(e)
+              }
+            }
+          }),
+        )
+
         // autorun opens gffFilehandle for InterProScan domains
         addDisposer(
           self,
@@ -1867,10 +1898,7 @@ function stateModelFactory() {
                 const gffText = await fetchAndMaybeUnzipText(
                   openLocation(gffFilehandle),
                 )
-                const gffRecords = parseGFF(gffText)
-                const interProResults = gffToInterProResults(gffRecords)
-                self.setInterProAnnotations(interProResults)
-                self.setShowDomains(true)
+                self.applyGFFText(gffText)
                 if (gffFilehandle.locationType === 'BlobLocation') {
                   self.setGFFFilehandle(undefined)
                 }

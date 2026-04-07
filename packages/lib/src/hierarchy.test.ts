@@ -1,13 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import {
-  collapse,
-  find,
-  hierarchy,
-  leaves,
-  sort,
-  sum,
-} from './hierarchy.ts'
+import { collapse, find, hierarchy, leaves, sort, sum } from './hierarchy.ts'
 
 import type { NodeWithIds } from './types.ts'
 

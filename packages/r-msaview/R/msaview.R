@@ -20,6 +20,13 @@
 #'     \item A \code{treeio::treedata} object
 #'     \item A \code{ggtree} plot object (tree is extracted automatically)
 #'   }
+#' @param gff Domain annotation data. Can be:
+#'   \itemize{
+#'     \item A file path to a GFF3 file
+#'     \item A character string containing GFF3 text
+#'     \item A data frame with columns \code{seqname}, \code{start}, \code{end},
+#'       and optionally \code{name}, \code{description}, \code{signature_desc}
+#'   }
 #' @param color_scheme Color scheme name. Options include \code{"maeditor"}
 #'   (default), \code{"clustal"}, \code{"lesk"}, \code{"cinema"}, \code{"flower"},
 #'   \code{"buried"}, \code{"taylor"}, \code{"hydrophobicity"}, \code{"helix"},
@@ -108,17 +115,19 @@
 #' }
 #'
 #' @export
-msaview <- function(msa = NULL, tree = NULL, color_scheme = NULL,
+msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     show_branch_len = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
   msa_text <- convert_msa(msa)
   tree_text <- convert_tree(tree)
+  gff_text <- convert_gff(gff)
 
   config <- list(type = "MsaView")
-  if (!is.null(msa_text) || !is.null(tree_text)) {
+  if (!is.null(msa_text) || !is.null(tree_text) || !is.null(gff_text)) {
     config$data <- list(
       msa = msa_text %||% "",
-      tree = tree_text %||% ""
+      tree = tree_text %||% "",
+      gff = gff_text %||% NULL
     )
   }
   if (!is.null(color_scheme)) {
@@ -269,6 +278,70 @@ treedata_to_newick <- function(td) {
   }
   phy <- treeio::as.phylo(td)
   ape::write.tree(phy)
+}
+
+convert_gff <- function(gff) {
+  if (is.null(gff)) return(NULL)
+
+  if (is.character(gff) && length(gff) == 1) {
+    if (file.exists(gff)) {
+      return(paste(readLines(gff, warn = FALSE), collapse = "\n"))
+    }
+    return(gff)
+  }
+
+  if (is.data.frame(gff)) {
+    return(df_to_gff3(gff))
+  }
+
+  stop("Unsupported gff input type: ", class(gff)[1],
+       ". Expected a file path, GFF3 string, or data frame.")
+}
+
+df_to_gff3 <- function(df) {
+  if (!("seqname" %in% names(df))) {
+    stop("GFF data frame must have a 'seqname' column")
+  }
+  if (!all(c("start", "end") %in% names(df))) {
+    stop("GFF data frame must have 'start' and 'end' columns")
+  }
+
+  source <- if ("source" %in% names(df)) df$source else rep(".", nrow(df))
+  feature <- if ("feature" %in% names(df)) df$feature else rep("protein_match", nrow(df))
+  score <- if ("score" %in% names(df)) df$score else rep(".", nrow(df))
+  strand <- if ("strand" %in% names(df)) df$strand else rep(".", nrow(df))
+  phase <- if ("phase" %in% names(df)) df$phase else rep(".", nrow(df))
+
+  attr_parts <- list()
+  if ("name" %in% names(df)) {
+    attr_parts[["Name"]] <- utils::URLencode(as.character(df$name), reserved = TRUE)
+  }
+  if ("signature_desc" %in% names(df)) {
+    attr_parts[["signature_desc"]] <- utils::URLencode(
+      as.character(df$signature_desc), reserved = TRUE
+    )
+  }
+  if ("description" %in% names(df)) {
+    attr_parts[["description"]] <- utils::URLencode(
+      as.character(df$description), reserved = TRUE
+    )
+  }
+
+  attributes <- if (length(attr_parts) > 0) {
+    do.call(paste, c(
+      lapply(names(attr_parts), function(k) paste0(k, "=", attr_parts[[k]])),
+      list(sep = ";")
+    ))
+  } else {
+    rep(".", nrow(df))
+  }
+
+  rows <- paste(
+    df$seqname, source, feature, df$start, df$end,
+    score, strand, phase, attributes,
+    sep = "\t"
+  )
+  paste(c("##gff-version 3", rows), collapse = "\n")
 }
 
 extract_tree_from_ggtree <- function(p) {

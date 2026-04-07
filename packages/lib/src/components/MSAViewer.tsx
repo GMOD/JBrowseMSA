@@ -13,8 +13,10 @@ import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 interface MSAViewerProps {
   msa?: string
   tree?: string
+  gff?: string
   msaFilehandle?: FileLocationType
   treeFilehandle?: FileLocationType
+  gffFilehandle?: FileLocationType
   colorScheme?: string
   height?: number
 }
@@ -22,8 +24,10 @@ interface MSAViewerProps {
 export default function MSAViewer({
   msa,
   tree,
+  gff,
   msaFilehandle,
   treeFilehandle,
+  gffFilehandle,
   colorScheme,
   height,
 }: MSAViewerProps) {
@@ -32,9 +36,12 @@ export default function MSAViewer({
     () =>
       MSAModelF().create({
         type: 'MsaView',
-        ...(msa || tree ? { data: { msa: msa ?? '', tree: tree ?? '' } } : {}),
+        ...(msa || tree || gff
+          ? { data: { msa: msa ?? '', tree: tree ?? '', gff } }
+          : {}),
         ...(msaFilehandle ? { msaFilehandle } : {}),
         ...(treeFilehandle ? { treeFilehandle } : {}),
+        ...(gffFilehandle ? { gffFilehandle } : {}),
         ...(colorScheme ? { colorSchemeName: colorScheme } : {}),
         ...(height ? { height } : {}),
       }),

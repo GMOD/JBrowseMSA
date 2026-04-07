@@ -2,8 +2,8 @@
 
 ## Zero-config component (recommended)
 
-The simplest way to use react-msaview in a React app. Handles model
-creation, width measurement, and theming automatically.
+The simplest way to use react-msaview in a React app. Handles model creation,
+width measurement, and theming automatically.
 
 ```sh
 npm install react-msaview @jbrowse/core @mui/material react react-dom @emotion/styled @emotion/react
@@ -25,14 +25,14 @@ export default function App() {
 
 Props:
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `msa` | `string` | Alignment text (FASTA, Stockholm, or Clustal) |
-| `tree` | `string` | Newick tree text |
-| `msaFilehandle` | `FileLocation` | Remote file location for alignment |
-| `treeFilehandle` | `FileLocation` | Remote file location for tree |
-| `colorScheme` | `string` | Color scheme name (see below) |
-| `height` | `number` | Widget height in pixels |
+| Prop             | Type           | Description                                   |
+| ---------------- | -------------- | --------------------------------------------- |
+| `msa`            | `string`       | Alignment text (FASTA, Stockholm, or Clustal) |
+| `tree`           | `string`       | Newick tree text                              |
+| `msaFilehandle`  | `FileLocation` | Remote file location for alignment            |
+| `treeFilehandle` | `FileLocation` | Remote file location for tree                 |
+| `colorScheme`    | `string`       | Color scheme name (see below)                 |
+| `height`         | `number`       | Widget height in pixels                       |
 
 ## Advanced: model-based API
 
@@ -100,8 +100,8 @@ model.fit() // fit both axes
 
 ## R package (msaviewr)
 
-An R htmlwidget package is available in `packages/r-msaview/`. It works
-with ape, Biostrings, ggtree, and treeio objects.
+An R htmlwidget package is available in `packages/r-msaview/`. It works with
+ape, Biostrings, ggtree, and treeio objects.
 
 ```r
 library(msaviewr)
@@ -137,16 +137,15 @@ documentation.
 **Protein:** maeditor, clustal, lesk, cinema, flower, buried, taylor,
 hydrophobicity, helix, strand, turn
 
-**Nucleotide:** nucleotide, purine\_pyrimidine, rainbow\_dna, rainbow\_rna
+**Nucleotide:** nucleotide, purine_pyrimidine, rainbow_dna, rainbow_rna
 
-**Dynamic (per-column):** clustalx\_protein\_dynamic, percent\_identity\_dynamic
+**Dynamic (per-column):** clustalx_protein_dynamic, percent_identity_dynamic
 
 ## API
 
 See the auto-generated API docs:
 [packages/lib/apidocs/MsaView.md](packages/lib/apidocs/MsaView.md)
 
-The model source is in `packages/lib/src/model.ts`. The React-MSAView
-package uses MobX-state-tree models. Components wrapped with `observer`
-from mobx-react automatically re-render when observed model properties
-change.
+The model source is in `packages/lib/src/model.ts`. The React-MSAView package
+uses MobX-state-tree models. Components wrapped with `observer` from mobx-react
+automatically re-render when observed model properties change.

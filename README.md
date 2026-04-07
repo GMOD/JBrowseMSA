@@ -9,7 +9,7 @@ A multiple sequence alignment viewer, also known as JBrowseMSA.
 ```tsx
 import { MSAViewer } from 'react-msaview'
 
-<MSAViewer
+;<MSAViewer
   msa=">human\nMKAA\n>mouse\nMKAG"
   tree="(human:0.1,mouse:0.2);"
   colorScheme="clustal"

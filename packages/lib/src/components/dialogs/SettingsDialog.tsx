@@ -46,8 +46,13 @@ const TreeSettings = observer(function TreeSettings({
 }: {
   model: MsaViewModel
 }) {
-  const { drawTree, drawLabels, drawNodeBubbles, labelsAlignRight, showBranchLen } =
-    model
+  const {
+    drawTree,
+    drawLabels,
+    drawNodeBubbles,
+    labelsAlignRight,
+    showBranchLen,
+  } = model
 
   return (
     <div>

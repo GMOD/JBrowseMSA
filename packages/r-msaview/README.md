@@ -1,8 +1,8 @@
 # msaviewr
 
 Interactive multiple sequence alignment viewer for R, powered by
-[react-msaview](https://github.com/GMOD/react-msaview). Renders as an
-htmlwidget in RStudio, R Markdown, Quarto, and Shiny.
+[react-msaview](https://github.com/GMOD/react-msaview). Renders as an htmlwidget
+in RStudio, R Markdown, Quarto, and Shiny.
 
 ![MSA Viewer screenshot](../../docs/media/image1.png)
 
@@ -116,8 +116,8 @@ msaview(msa = as(aligned, "AAStringSet"))
 
 ### With ggtree
 
-Pass a ggtree plot object directly as the `tree` argument. The
-phylogenetic topology is extracted automatically.
+Pass a ggtree plot object directly as the `tree` argument. The phylogenetic
+topology is extracted automatically.
 
 ```r
 library(ggtree)
@@ -230,15 +230,15 @@ shinyApp(ui, server)
 
 ## Supported inputs
 
-| Parameter | Accepted types |
-|-----------|---------------|
-| `msa` | File path, FASTA/Stockholm/Clustal string, named `character` vector, `DNAStringSet`, `AAStringSet`, `RNAStringSet`, `DNAMultipleAlignment`, `AAMultipleAlignment` |
-| `tree` | File path, Newick string, `ape::phylo`, `treeio::treedata`, `ggtree` plot object |
+| Parameter | Accepted types                                                                                                                                                    |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `msa`     | File path, FASTA/Stockholm/Clustal string, named `character` vector, `DNAStringSet`, `AAStringSet`, `RNAStringSet`, `DNAMultipleAlignment`, `AAMultipleAlignment` |
+| `tree`    | File path, Newick string, `ape::phylo`, `treeio::treedata`, `ggtree` plot object                                                                                  |
 
 ## Color schemes
 
-Protein: `maeditor`, `clustal`, `lesk`, `cinema`, `flower`, `buried`,
-`taylor`, `hydrophobicity`, `helix`, `strand`, `turn`
+Protein: `maeditor`, `clustal`, `lesk`, `cinema`, `flower`, `buried`, `taylor`,
+`hydrophobicity`, `helix`, `strand`, `turn`
 
 Nucleotide: `nucleotide`, `purine_pyrimidine`, `rainbow_dna`, `rainbow_rna`
 

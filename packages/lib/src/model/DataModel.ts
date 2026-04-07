@@ -22,6 +22,10 @@ export function DataModelF() {
        * #property
        */
       treeMetadata: types.maybe(types.string),
+      /**
+       * #property
+       */
+      gff: types.maybe(types.string),
     })
     .actions(self => ({
       /**
@@ -42,15 +46,22 @@ export function DataModelF() {
       setTreeMetadata(treeMetadata?: string) {
         self.treeMetadata = treeMetadata
       },
+      /**
+       * #action
+       */
+      setGFF(gff?: string) {
+        self.gff = gff
+      },
     }))
     .postProcessSnapshot(snap => {
-      const { tree, msa, treeMetadata } = snap
+      const { tree, msa, treeMetadata, gff } = snap
       const max = 50_000
       return {
         tree: tree && tree.length > max ? undefined : tree,
         msa: msa && msa.length > max ? undefined : msa,
         treeMetadata:
           treeMetadata && treeMetadata.length > max ? undefined : treeMetadata,
+        gff: gff && gff.length > max ? undefined : gff,
       }
     })
 }
