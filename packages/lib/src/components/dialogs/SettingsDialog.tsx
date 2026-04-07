@@ -46,16 +46,12 @@ const TreeSettings = observer(function TreeSettings({
 }: {
   model: MsaViewModel
 }) {
-  const { classes } = useStyles()
   const {
     drawTree,
     drawLabels,
     drawNodeBubbles,
     labelsAlignRight,
-    noTree,
     showBranchLen,
-    treeWidthMatchesArea,
-    treeWidth,
   } = model
 
   return (
@@ -99,31 +95,6 @@ const TreeSettings = observer(function TreeSettings({
           model.setDrawLabels(!drawLabels)
         }}
       />
-      {noTree ? null : (
-        <div>
-          <Checkbox2
-            checked={treeWidthMatchesArea}
-            label="Make tree width fit to tree area?"
-            onChange={() => {
-              model.setTreeWidthMatchesArea(!treeWidthMatchesArea)
-            }}
-          />
-          {treeWidthMatchesArea ? null : (
-            <div className={classes.flex}>
-              <Typography>Tree width ({treeWidth}px)</Typography>
-              <Slider
-                className={classes.field}
-                min={50}
-                max={600}
-                value={treeWidth}
-                onChange={(_, val) => {
-                  model.setTreeWidth(val)
-                }}
-              />
-            </div>
-          )}
-        </div>
-      )}
     </div>
   )
 })
@@ -136,7 +107,6 @@ const MSASettings = observer(function MSASettings({
   const { classes } = useStyles()
   const {
     bgColor,
-    contrastLettering,
     colWidth,
     allowedGappyness,
     drawMsaLetters,
@@ -160,13 +130,6 @@ const MSASettings = observer(function MSASettings({
         label="Color letters instead of background of tiles"
         onChange={() => {
           model.setBgColor(!bgColor)
-        }}
-      />
-      <Checkbox2
-        checked={contrastLettering}
-        label="Use contrast lettering"
-        onChange={() => {
-          model.setContrastLettering(!contrastLettering)
         }}
       />
       <Checkbox2

@@ -52,8 +52,7 @@ const MSACanvasBlock = observer(function ({
         blockSize * highResScaleFactor,
         blockSize * highResScaleFactor,
       )
-      const { actuallyShowDomains } = model
-      if (actuallyShowDomains) {
+      if (model.actuallyShowDomains) {
         renderBoxFeatureCanvasBlock({
           ctx,
           offsetX,
@@ -102,7 +101,6 @@ const MSACanvasBlock = observer(function ({
           if (x >= 0 && x < model.numColumns && y >= 0 && y < model.numRows) {
             model.setMousePos(x, y)
           } else {
-            // Clear mouse position when outside bounds
             model.setMousePos(undefined, undefined)
           }
         }}

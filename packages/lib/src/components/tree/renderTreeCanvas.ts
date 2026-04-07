@@ -148,9 +148,6 @@ export function renderTreeLabels({
     fontSize,
     showBranchLenEffective: showBranchLen,
     treeMetadata,
-    hierarchy,
-    collapsed,
-    collapsedLeaves,
     blockSize,
     labelsAlignRight,
     drawTree,
@@ -184,17 +181,6 @@ export function renderTreeLabels({
       let xp = 0
       if (!noTree) {
         xp = (showBranchLen ? len : x) || 0
-        if (
-          !showBranchLen &&
-          !collapsed.includes(id) &&
-          !collapsedLeaves.includes(id)
-        ) {
-          // this subtraction is a hack to compensate for the leafnode rendering
-          // glitch (issue #71). the context is that an extra leaf node is added
-          // so that 'collapsing/hiding leaf nodes is possible' but this causes
-          // weird workarounds
-          xp -= treeWidth / hierarchy.height
-        }
       }
 
       const { width } = ctx.measureText(displayName)

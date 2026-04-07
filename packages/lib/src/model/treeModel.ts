@@ -8,7 +8,6 @@ import {
   defaultShowBranchLen,
   defaultTreeAreaWidth,
   defaultTreeWidth,
-  defaultTreeWidthMatchesArea,
 } from '../constants.ts'
 
 /**
@@ -35,15 +34,10 @@ export function TreeModelF() {
 
       /**
        * #property
-       * width of the tree within the treeArea, px
+       * width of the tree within the treeArea, px. automatically synced to
+       * fit within treeAreaWidth
        */
       treeWidth: types.optional(types.number, defaultTreeWidth),
-
-      /**
-       * #getter
-       * synchronization that matches treeWidth to treeAreaWidth
-       */
-      treeWidthMatchesArea: defaultTreeWidthMatchesArea,
 
       /**
        * #property
@@ -66,14 +60,6 @@ export function TreeModelF() {
       drawNodeBubbles: defaultDrawNodeBubbles,
     })
     .actions(self => ({
-      /**
-       * #action
-       * synchronize the treewidth and treeareawidth
-       */
-      setTreeWidthMatchesArea(arg: boolean) {
-        self.treeWidthMatchesArea = arg
-      },
-
       /**
        * #action
        * set tree area width (px)

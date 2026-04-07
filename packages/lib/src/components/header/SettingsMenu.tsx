@@ -14,7 +14,6 @@ const SettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
   const {
     colorSchemeName,
     drawMsaLetters,
-    contrastLettering,
     hideGaps,
     bgColor,
     drawTree,
@@ -22,8 +21,6 @@ const SettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
     labelsAlignRight,
     drawNodeBubbles,
     drawLabels,
-    treeWidthMatchesArea,
-    noTree,
   } = model
   return (
     <CascadingMenuButton
@@ -63,14 +60,6 @@ const SettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
               checked: !bgColor,
               onClick: () => {
                 model.setBgColor(!bgColor)
-              },
-            },
-            {
-              label: 'Use contrast lettering',
-              type: 'checkbox',
-              checked: contrastLettering,
-              onClick: () => {
-                model.setContrastLettering(!contrastLettering)
               },
             },
             {
@@ -128,18 +117,6 @@ const SettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
                 model.setDrawLabels(!drawLabels)
               },
             },
-            ...(noTree
-              ? []
-              : [
-                  {
-                    label: 'Make tree width fit to tree area',
-                    type: 'checkbox' as const,
-                    checked: treeWidthMatchesArea,
-                    onClick: () => {
-                      model.setTreeWidthMatchesArea(!treeWidthMatchesArea)
-                    },
-                  },
-                ]),
           ],
         },
       ]}
