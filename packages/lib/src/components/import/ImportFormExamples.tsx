@@ -33,29 +33,30 @@ function ListItem({
   )
 }
 
+const BASE = 'https://jbrowse.org/genomes/multiple_sequence_alignments'
+
 const ImportFormExamples = observer(function ({
   model,
 }: {
   model: MsaViewModel
 }) {
-  function l2(uri1?: string, uri2?: string) {
+  function loadUris({
+    msa,
+    tree,
+    gff,
+  }: {
+    msa?: string
+    tree?: string
+    gff?: string
+  }) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
         await load(
           model,
-          uri1
-            ? {
-                uri: uri1,
-                locationType: 'UriLocation',
-              }
-            : undefined,
-          uri2
-            ? {
-                uri: uri2,
-                locationType: 'UriLocation',
-              }
-            : undefined,
+          msa ? { uri: msa, locationType: 'UriLocation' } : undefined,
+          tree ? { uri: tree, locationType: 'UriLocation' } : undefined,
+          gff ? { uri: gff, locationType: 'UriLocation' } : undefined,
         )
       } catch (e) {
         console.error(e)
@@ -68,10 +69,9 @@ const ImportFormExamples = observer(function ({
       <ListItem
         model={model}
         onClick={() => {
-          l2(
-            undefined,
-            'https://jbrowse.org/genomes/newicktrees/sarscov2phylo.pub.ft.nh',
-          )
+          loadUris({
+            tree: 'https://jbrowse.org/genomes/newicktrees/sarscov2phylo.pub.ft.nh',
+          })
         }}
       >
         230k COVID-19 samples (tree only)
@@ -95,9 +95,7 @@ const ImportFormExamples = observer(function ({
       <ListItem
         model={model}
         onClick={() => {
-          l2(
-            'https://jbrowse.org/genomes/multiple_sequence_alignments/pfam-cov2.stock',
-          )
+          loadUris({ msa: `${BASE}/pfam-cov2.stock` })
         }}
       >
         PFAM SARS-CoV2 multi-stockholm
@@ -105,9 +103,18 @@ const ImportFormExamples = observer(function ({
       <ListItem
         model={model}
         onClick={() => {
-          l2(
-            'https://jbrowse.org/genomes/multiple_sequence_alignments/Lysine.stock',
-          )
+          loadUris({
+            msa: `${BASE}/pfam-cov2.stock`,
+            gff: `${BASE}/pfam-cov2-domains.gff`,
+          })
+        }}
+      >
+        PFAM SARS-CoV2 multi-stockholm w/ domains loaded
+      </ListItem>
+      <ListItem
+        model={model}
+        onClick={() => {
+          loadUris({ msa: `${BASE}/Lysine.stock` })
         }}
       >
         Lysine stockholm file
@@ -115,9 +122,7 @@ const ImportFormExamples = observer(function ({
       <ListItem
         model={model}
         onClick={() => {
-          l2(
-            'https://jbrowse.org/genomes/multiple_sequence_alignments/PF01601_full.txt',
-          )
+          loadUris({ msa: `${BASE}/PF01601_full.txt` })
         }}
       >
         PF01601 stockholm file (SARS-CoV2 spike protein)
@@ -125,9 +130,7 @@ const ImportFormExamples = observer(function ({
       <ListItem
         model={model}
         onClick={() => {
-          l2(
-            'https://jbrowse.org/genomes/multiple_sequence_alignments/europe_covid.fa',
-          )
+          loadUris({ msa: `${BASE}/europe_covid.fa` })
         }}
       >
         Europe COVID full genomes (LR883044.1 and 199 other sequences)
@@ -135,10 +138,10 @@ const ImportFormExamples = observer(function ({
       <ListItem
         model={model}
         onClick={() => {
-          l2(
-            'https://jbrowse.org/genomes/multiple_sequence_alignments/rhv_test-only.aligned_with_mafft_auto.fa',
-            'https://jbrowse.org/genomes/multiple_sequence_alignments/rhv_test-only.aligned_with_mafft_auto.nh',
-          )
+          loadUris({
+            msa: `${BASE}/rhv_test-only.aligned_with_mafft_auto.fa`,
+            tree: `${BASE}/rhv_test-only.aligned_with_mafft_auto.nh`,
+          })
         }}
       >
         MAFFT+VeryFastTree(17.9k samples)
@@ -146,7 +149,7 @@ const ImportFormExamples = observer(function ({
       <ListItem
         model={model}
         onClick={() => {
-          l2('https://jbrowse.org/demos/ttc39a.mfa')
+          loadUris({ msa: 'https://jbrowse.org/demos/ttc39a.mfa' })
         }}
       >
         Human BLAST results mfa

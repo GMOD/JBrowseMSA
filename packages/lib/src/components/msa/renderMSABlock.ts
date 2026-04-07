@@ -180,7 +180,6 @@ function drawText({
     colorScheme,
     columns,
     colWidth,
-    contrastLettering,
     rowHeight,
     relativeTo,
   } = model
@@ -214,9 +213,7 @@ function drawText({
           const displayLetter = isMatchingReference ? '.' : letter
 
           const color = colorScheme[letter.toUpperCase()]
-          const contrast = contrastLettering
-            ? contrastScheme[letter.toUpperCase()] || 'black'
-            : 'black'
+          const contrast = contrastScheme[letter.toUpperCase()] || 'black'
 
           // note: -rowHeight/4 matches +rowHeight/4 in tree
           ctx.fillStyle = actuallyShowDomains

@@ -5,15 +5,17 @@ import Help from '@mui/icons-material/Help'
 import { IconButton } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import ColorSchemeMenu from './ColorSchemeMenu.tsx'
+import DomainsMenu from './DomainsMenu.tsx'
+import FileMenu from './FileMenu.tsx'
 import GappynessSlider from './GappynessSlider.tsx'
 import HeaderInfoArea from './HeaderInfoArea.tsx'
-import HeaderMenu from './HeaderMenu.tsx'
 import HeaderStatusArea from './HeaderStatusArea.tsx'
+import MSASettingsMenu from './MSASettingsMenu.tsx'
 import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
-import SettingsMenu from './SettingsMenu.tsx'
+import TreeSettingsMenu from './TreeSettingsMenu.tsx'
 import ZoomControls from './ZoomControls.tsx'
 import ZoomMenu from './ZoomMenu.tsx'
-import ZoomStar from './ZoomStar.tsx'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -26,10 +28,12 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
   }, [model, height])
   return (
     <div ref={ref} style={{ display: 'flex' }}>
-      <HeaderMenu model={model} />
-      <SettingsMenu model={model} />
+      <FileMenu model={model} />
+      <DomainsMenu model={model} />
+      <ColorSchemeMenu model={model} />
+      <TreeSettingsMenu model={model} />
+      <MSASettingsMenu model={model} />
       <ZoomControls model={model} />
-      {model.showZoomStar ? <ZoomStar model={model} /> : null}
       <ZoomMenu model={model} />
       <GappynessSlider model={model} />
       <div style={{ paddingLeft: 20, margin: 'auto' }}>

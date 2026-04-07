@@ -57,32 +57,32 @@ const InterProScanDialog = observer(function ({
       category: 'Other category',
     },
     {
-      name: 'SUPERFAMILY',
+      name: 'SuperFamily',
       category: 'Structural domains',
       checked: true,
     },
     {
-      name: 'PANTHER',
+      name: 'Panther',
       category: 'Families, domains, sites & repeats',
       checked: true,
     },
     {
-      name: 'Gene3D',
+      name: 'Gene3d',
       category: 'Structural domains',
       checked: true,
     },
     {
-      name: 'Hamap',
+      name: 'HAMAP',
       category: 'Families, domains, sites & repeats',
       checked: true,
     },
     {
-      name: 'ProSiteProfiles',
+      name: 'PrositeProfiles',
       category: 'Families, domains, sites & repeats',
       checked: true,
     },
     {
-      name: 'ProSitePatterns',
+      name: 'PrositePatterns',
       category: 'Families, domains, sites & repeats',
       checked: true,
     },
@@ -108,7 +108,7 @@ const InterProScanDialog = observer(function ({
       checked: true,
     },
     {
-      name: 'Pfam',
+      name: 'PfamA',
       category: 'Families, domains, sites & repeats',
       checked: true,
     },
