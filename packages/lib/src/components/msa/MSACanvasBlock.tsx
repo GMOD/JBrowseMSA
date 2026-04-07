@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
+import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
 import { colorContrast } from '../../util.ts'
 
@@ -51,6 +52,14 @@ const MSACanvasBlock = observer(function ({
         blockSize * highResScaleFactor,
         blockSize * highResScaleFactor,
       )
+      if (model.actuallyShowDomains) {
+        renderBoxFeatureCanvasBlock({
+          ctx,
+          offsetX,
+          offsetY,
+          model,
+        })
+      }
       renderMSABlock({
         ctx,
         theme,

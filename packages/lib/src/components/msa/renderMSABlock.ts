@@ -24,8 +24,16 @@ export function renderMSABlock({
   blockSizeXOverride?: number
   blockSizeYOverride?: number
 }) {
-  const { colWidth, blockSize, rowHeight, fontSize, highResScaleFactor, leaves, bgColor } =
-    model
+  const {
+    colWidth,
+    blockSize,
+    rowHeight,
+    fontSize,
+    highResScaleFactor,
+    actuallyShowDomains,
+    leaves,
+    bgColor,
+  } = model
   const k = highResScaleFactorOverride || highResScaleFactor
   const bx = blockSizeXOverride || blockSize
   const by = blockSizeYOverride || blockSize
@@ -41,15 +49,17 @@ export function renderMSABlock({
   const xEnd = Math.max(0, Math.ceil((offsetX + bx) / colWidth))
   const visibleLeaves = leaves.slice(yStart, yEnd)
 
-  drawTiles({
-    model,
-    ctx,
-    theme,
-    offsetX,
-    xStart,
-    xEnd,
-    visibleLeaves,
-  })
+  if (!actuallyShowDomains) {
+    drawTiles({
+      model,
+      ctx,
+      theme,
+      offsetX,
+      xStart,
+      xEnd,
+      visibleLeaves,
+    })
+  }
   drawText({
     model,
     ctx,
@@ -163,8 +173,16 @@ function drawText({
   xStart: number
   xEnd: number
 }) {
-  const { bgColor, showMsaLetters, colorScheme, columns, colWidth, rowHeight, relativeTo } =
-    model
+  const {
+    bgColor,
+    actuallyShowDomains,
+    showMsaLetters,
+    colorScheme,
+    columns,
+    colWidth,
+    rowHeight,
+    relativeTo,
+  } = model
 
   // Get reference sequence if relativeTo is set
   const referenceSeq = relativeTo
@@ -198,7 +216,11 @@ function drawText({
           const contrast = contrastScheme[letter.toUpperCase()] || 'black'
 
           // note: -rowHeight/4 matches +rowHeight/4 in tree
-          ctx.fillStyle = bgColor ? contrast : color || 'black'
+          ctx.fillStyle = actuallyShowDomains
+            ? 'black'
+            : bgColor
+              ? contrast
+              : color || 'black'
           ctx.fillText(
             displayLetter,
             j * colWidth + offsetXAligned + halfColWidth,

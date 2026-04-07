@@ -5,8 +5,10 @@ export const defaultHeight = 550
 export const defaultScrollX = 0
 export const defaultScrollY = 0
 export const defaultCurrentAlignment = 0
+export const defaultShowDomains = false
 export const defaultHideGaps = true
 export const defaultAllowedGappyness = 100
+export const defaultSubFeatureRows = false
 export const defaultDrawMsaLetters = true
 
 // MSA model defaults

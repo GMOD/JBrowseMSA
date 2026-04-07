@@ -13,6 +13,7 @@ import type { FileLocation } from '@jbrowse/core/util/types'
 const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
   const [msaFile, setMsaFile] = useState<FileLocation>()
   const [treeFile, setTreeFile] = useState<FileLocation>()
+  const [gffFile, setGffFile] = useState<FileLocation>()
   const { error } = model
 
   return (
@@ -48,6 +49,10 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
             <Typography>Tree file or URL</Typography>
             <FileSelector location={treeFile} setLocation={setTreeFile} />
           </div>
+          <div>
+            <Typography>InterProScan GFF file or URL (optional)</Typography>
+            <FileSelector location={gffFile} setLocation={setGffFile} />
+          </div>
         </div>
         <div>
           <Button
@@ -55,7 +60,7 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
               // eslint-disable-next-line @typescript-eslint/no-floating-promises
               ;(async () => {
                 try {
-                  await load(model, msaFile, treeFile)
+                  await load(model, msaFile, treeFile, gffFile)
                 } catch (e) {
                   console.error(e)
                   model.setError(e)
