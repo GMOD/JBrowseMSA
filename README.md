@@ -2,9 +2,34 @@
 
 A multiple sequence alignment viewer, also known as JBrowseMSA.
 
+![MSA Viewer screenshot](docs/media/image1.png)
+
+## Quick start
+
+```tsx
+import { MSAViewer } from 'react-msaview'
+
+<MSAViewer
+  msa=">human\nMKAA\n>mouse\nMKAG"
+  tree="(human:0.1,mouse:0.2);"
+  colorScheme="clustal"
+/>
+```
+
+No model creation, no width management, no theme provider needed.
+
+For R users:
+
+```r
+library(msaviewr)
+msaview(msa = "alignment.stock", color_scheme = "clustal")
+```
+
 ## Docs
 
-See [user guide](docs/user_guide.md)
+- [User guide](docs/user_guide.md)
+- [Usage / API](USAGE.md) - React component, UMD bundle, and R package
+- [R package README](packages/r-msaview/README.md) - ggtree, Biostrings, Shiny
 
 ## Demo
 
@@ -17,9 +42,10 @@ protein analysis tools.
 | --------------------------------------------- | ---------------------------------------------------------- |
 | [packages/lib](packages/lib/)                 | Main react-msaview React component                         |
 | [packages/app](packages/app/)                 | Demo application (deployed at https://gmod.org/JBrowseMSA) |
-| [packages/cli](packages/cli/)                 | Command-line tools (InterProScan batch processing)         |
+| [packages/cli](packages/cli/)                 | Command-line tools                                         |
 | [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                    |
 | [packages/svgcanvas](packages/svgcanvas/)     | SVG canvas rendering (ESM fork of svgcanvas)               |
+| [packages/r-msaview](packages/r-msaview/)     | R htmlwidget (ape, ggtree, Biostrings, Shiny)              |
 
 ## Development
 
@@ -58,10 +84,6 @@ pnpm format      # Format with Prettier
 pnpm typecheck   # Typecheck all packages
 pnpm clean       # Clean all dist folders
 ```
-
-## Programmatic usage, embedding, downloading from NPM
-
-To install as a NPM package or CDN style bundle, see [USAGE.md](USAGE.md)
 
 ## Notes
 

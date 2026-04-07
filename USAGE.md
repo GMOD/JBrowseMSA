@@ -1,17 +1,45 @@
 # Usage
 
-## Using react-msaview NPM package as a React component
+## Zero-config component (recommended)
 
-Install react-msaview and its peer dependencies:
+The simplest way to use react-msaview in a React app. Handles model
+creation, width measurement, and theming automatically.
 
 ```sh
 npm install react-msaview @jbrowse/core @mui/material react react-dom @emotion/styled @emotion/react
 ```
 
-## Using the react-msaview NPM component with inline data
+```tsx
+import { MSAViewer } from 'react-msaview'
 
-```typescript
-import { MSAView, MSAModelF } from 'react-msaview';
+export default function App() {
+  return (
+    <MSAViewer
+      msa=">human\nMKAA\n>mouse\nMKAG"
+      tree="(human:0.1,mouse:0.2);"
+      colorScheme="clustal"
+    />
+  )
+}
+```
+
+Props:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `msa` | `string` | Alignment text (FASTA, Stockholm, or Clustal) |
+| `tree` | `string` | Newick tree text |
+| `msaFilehandle` | `FileLocation` | Remote file location for alignment |
+| `treeFilehandle` | `FileLocation` | Remote file location for tree |
+| `colorScheme` | `string` | Color scheme name (see below) |
+| `height` | `number` | Widget height in pixels |
+
+## Advanced: model-based API
+
+For full control over the viewer state, use `MSAModelF` directly.
+
+```tsx
+import { MSAView, MSAModelF } from 'react-msaview'
 
 export default function App() {
   const model = MSAModelF().create({
@@ -20,45 +48,26 @@ export default function App() {
       msa: 'string containing stockholm, clustalw, or multi-fasta msa here',
       tree: 'string containing newick formatted tree here',
     },
-  });
+  })
 
-  // choose MSA width, calculate width of div/rendering area if needed beforehand
-  model.setWidth(1800);
+  model.setWidth(1800)
 
   return (
     <div style={{ border: '1px solid black', margin: 20 }}>
       <MSAView model={model} />
     </div>
-  );
+  )
 }
 ```
 
-Example StackBlitz:
-https://stackblitz.com/edit/vitejs-vite-qb9v874k?file=src%2FApp.tsx
+The model exposes actions for programmatic control:
 
-## Using the react-msaview NPM component with remote files
-
-```typescript
-import { MSAView, MSAModelF } from 'react-msaview';
-
-export default function App() {
-  const model = MSAModelF().create({
-    type: 'MsaView',
-    data: {
-      msa: 'https://jbrowse.org/genomes/multiple_sequence_alignments/pfam-cov2.stock',
-      locationType: 'UriLocation',
-    },
-  });
-
-  // choose MSA width, calculate width of div/rendering area if needed beforehand
-  model.setWidth(1800);
-
-  return (
-    <div style={{ border: '1px solid black', margin: 20 }}>
-      <MSAView model={model} />
-    </div>
-  );
-}
+```ts
+model.setColorSchemeName('clustal')
+model.setRowHeight(20)
+model.setColWidth(16)
+model.toggleCollapsed('node-id')
+model.fit() // fit both axes
 ```
 
 ## Using react-msaview in a plain HTML file with UMD bundle
@@ -81,7 +90,6 @@ export default function App() {
         treeFilehandle: { uri: 'http://path/to/tree.nh' },
       })
 
-      // choose MSA width, calculate width of div/rendering area if needed beforehand
       model.setWidth(1800)
       const root = createRoot(document.getElementById('root'))
       root.render(React.createElement(MSAView, { model }))
@@ -90,47 +98,55 @@ export default function App() {
 </html>
 ```
 
-## Using react-msaview with ESM CDN (esm.sh)
+## R package (msaviewr)
 
-See [example/esm-cdn.html](example/esm-cdn.html) for a complete example using
-native ES modules with esm.sh.
+An R htmlwidget package is available in `packages/r-msaview/`. It works
+with ape, Biostrings, ggtree, and treeio objects.
 
-```html
-<script type="module">
-  import React from 'https://esm.sh/react@19'
-  import { createRoot } from 'https://esm.sh/react-dom@19/client'
-  const { MSAView, MSAModelF } =
-    await import('https://esm.sh/react-msaview@5?bundle')
+```r
+library(msaviewr)
 
-  const model = MSAModelF().create()
-  model.setWidth(window.innerWidth)
-  model.setMSA({
-    msa: '>seq1\nACGT\n>seq2\nACGT',
-    msaFilehandle: { uri: 'example.fa' },
-  })
+# from strings
+msaview(msa = ">s1\nACGT\n>s2\nACGA", tree = "(s1,s2);")
 
-  createRoot(document.getElementById('root')).render(
-    React.createElement(MSAView, { model }),
-  )
-</script>
+# from ape phylo
+library(ape)
+tree <- rtree(15)
+seqs <- setNames(
+  replicate(15, paste0(sample(c("A","C","G","T"), 300, TRUE), collapse = "")),
+  tree$tip.label
+)
+msaview(msa = seqs, tree = tree, color_scheme = "nucleotide")
+
+# from a ggtree plot object
+library(ggtree)
+p <- ggtree(tree) + geom_tiplab()
+msaview(msa = seqs, tree = p)
+
+# from Biostrings
+library(Biostrings)
+aa <- readAAStringSet("proteins.fasta")
+msaview(msa = aa, color_scheme = "clustal")
 ```
+
+See [packages/r-msaview/README.md](packages/r-msaview/README.md) for full
+documentation.
+
+## Color schemes
+
+**Protein:** maeditor, clustal, lesk, cinema, flower, buried, taylor,
+hydrophobicity, helix, strand, turn
+
+**Nucleotide:** nucleotide, purine\_pyrimidine, rainbow\_dna, rainbow\_rna
+
+**Dynamic (per-column):** clustalx\_protein\_dynamic, percent\_identity\_dynamic
 
 ## API
 
-See here for complete auto-generated API docs for the MSA view model:
-https://github.com/GMOD/react-msaview/blob/main/packages/lib/apidocs/MsaView.md
+See the auto-generated API docs:
+[packages/lib/apidocs/MsaView.md](packages/lib/apidocs/MsaView.md)
 
-You can also look at `packages/lib/src/model.ts` for the full model source code.
-
-The React-MSAView package uses this 'model' extensively, instead of a 'prop'
-based API.
-
-It is helpful to be knowledgeable of the way mobx+react interoperate: you can
-write components that "observe" (by wrapping a component with the mobx-react
-observe function) the state of the model using React and
-@jbrowse/mobx-state-tree.
-
-For example, if you wanted to know what base the user was hovering over. You can
-get an intro to basic React and @jbrowse/mobx-state-tree + observer concepts in
-this short tutorial, and the concepts will apply to this codebase as well:
-https://gist.github.com/cmdcolin/94d1cbc285e6319cc3af4b9a8556f03f
+The model source is in `packages/lib/src/model.ts`. The React-MSAView
+package uses MobX-state-tree models. Components wrapped with `observer`
+from mobx-react automatically re-render when observed model properties
+change.
