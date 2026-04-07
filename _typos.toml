@@ -1,3 +1,6 @@
 
+[files]
+extend-exclude = ["packages/r-msaview/inst/htmlwidgets/lib/"]
+
 [default.extend-words]
 BLOSUM = "BLOSUM"
