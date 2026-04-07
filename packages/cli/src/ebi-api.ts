@@ -1,11 +1,9 @@
-import { toFasta } from './util.ts'
-
 import type { InterProScanResponse, InterProScanResults } from 'msa-parsers'
 
 const BASE_URL = 'https://www.ebi.ac.uk/Tools/services/rest/iprscan5'
 
 async function submitJob(
-  sequences: { id: string; seq: string }[],
+  sequence: { id: string; seq: string },
   programs: string[],
   email: string,
 ): Promise<string> {
@@ -16,13 +14,14 @@ async function submitJob(
     },
     body: new URLSearchParams({
       email,
-      sequence: toFasta(sequences),
+      sequence: `>${sequence.id}\n${sequence.seq}`,
       appl: programs.join(','),
     }),
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to submit job: ${response.statusText}`)
+    const text = await response.text()
+    throw new Error(`Failed to submit job: ${response.statusText} - ${text}`)
   }
 
   return response.text()
@@ -45,9 +44,8 @@ async function getResults(jobId: string): Promise<InterProScanResponse> {
 }
 
 async function waitForJob(jobId: string): Promise<void> {
-  console.log(`  Waiting for job ${jobId}...`)
   let attempts = 0
-  const maxAttempts = 300 // 5 minutes max wait
+  const maxAttempts = 300
 
   while (attempts < maxAttempts) {
     const status = await checkStatus(jobId)
@@ -74,25 +72,16 @@ export async function runEbiInterProScan(
   sequences: { id: string; seq: string }[],
   programs: string[],
   email: string,
-  batchSize: number,
+  _batchSize: number,
 ): Promise<InterProScanResults[]> {
   const allResults: InterProScanResults[] = []
-  const batches: { id: string; seq: string }[][] = []
 
-  for (let i = 0; i < sequences.length; i += batchSize) {
-    batches.push(sequences.slice(i, i + batchSize))
-  }
+  for (let i = 0; i < sequences.length; i++) {
+    const seq = sequences[i]!
+    console.log(`  [${i + 1}/${sequences.length}] Submitting ${seq.id}...`)
 
-  console.log(`  Submitting ${batches.length} batch(es)...`)
-
-  for (let i = 0; i < batches.length; i++) {
-    const batch = batches[i]!
-    console.log(
-      `  Processing batch ${i + 1}/${batches.length} (${batch.length} sequences)...`,
-    )
-
-    const jobId = await submitJob(batch, programs, email)
-    console.log(`  Job submitted: ${jobId}`)
+    const jobId = await submitJob(seq, programs, email)
+    console.log(`  Job: ${jobId}`)
 
     await waitForJob(jobId)
 
@@ -101,7 +90,7 @@ export async function runEbiInterProScan(
       allResults.push(r)
     }
 
-    console.log(`  Batch ${i + 1} complete`)
+    console.log(`  [${i + 1}/${sequences.length}] Done`)
   }
 
   return allResults
