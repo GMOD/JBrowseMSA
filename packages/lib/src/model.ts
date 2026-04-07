@@ -1388,7 +1388,7 @@ function stateModelFactory() {
       applyGFFText(gffText: string) {
         const gffRecords = parseGFF(gffText)
         const interProResults = gffToInterProResults(gffRecords)
-        self.setInterProAnnotations(interProResults)
+        self.interProAnnotations = interProResults
         self.setShowDomains(true)
       },
 

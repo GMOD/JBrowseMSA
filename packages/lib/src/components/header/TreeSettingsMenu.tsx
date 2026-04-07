@@ -69,7 +69,7 @@ const TreeSettingsMenu = observer(function ({
           ? [
               {
                 label: 'Advanced',
-                type: 'subMenu',
+                type: 'subMenu' as const,
                 subMenu: [
                   {
                     label: 'Calculate neighbor joining tree (BLOSUM62)',
