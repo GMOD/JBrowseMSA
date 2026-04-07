@@ -19,6 +19,7 @@ protein analysis tools.
 | [packages/app](packages/app/)                 | Demo application (deployed at https://gmod.org/JBrowseMSA) |
 | [packages/cli](packages/cli/)                 | Command-line tools (InterProScan batch processing)         |
 | [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                    |
+| [packages/r-msaview](packages/r-msaview/)     | R htmlwidget (ggtree/Biostrings/treeio interop)            |
 | [packages/svgcanvas](packages/svgcanvas/)     | SVG canvas rendering (ESM fork of svgcanvas)               |
 
 ## Development
