@@ -1,12 +1,3 @@
-/**
- * NCBI ASN.1 Parser
- * A simple hand-made parser for NCBI ASN.1 format
- * Was too lazy to figure out how ASN.1 actually worked, and use a dedicated
- * ASN.1 parser (you have to generally pre-defined your schema)
- * Written with help of Claude AI
- */
-
-// Define types for our ASN structure
 export interface ASNNode {
   id: number
   parent?: number
@@ -28,8 +19,7 @@ export interface BioTreeContainer {
   nodes: ASNNode[]
 }
 
-// Parse the fdict section
-const remap = {
+const remap: Record<string, string> = {
   $NODE_COLLAPSED: 'collapsed',
   $NODE_COLOR: 'color',
   $LABEL_BG_COLOR: 'color',
@@ -41,454 +31,194 @@ const remap = {
   'common-name': 'commonName',
   'leaf-count': 'leafCount',
 }
-/**
- * Parse NCBI ASN.1 format string into a JavaScript object
- * @param asnString The ASN.1 string to parse
- * @returns Parsed BioTreeContainer object
- */
+
+function extractBracedBlocks(str: string): string[] {
+  const blocks: string[] = []
+  let pos = 0
+  while (pos < str.length) {
+    pos = str.indexOf('{', pos)
+    if (pos === -1) {
+      break
+    }
+    let depth = 1
+    const start = pos + 1
+    pos++
+    while (pos < str.length && depth > 0) {
+      if (str[pos] === '{') {
+        depth++
+      } else if (str[pos] === '}') {
+        depth--
+      }
+      pos++
+    }
+    if (depth === 0) {
+      blocks.push(str.slice(start, pos - 1).trim())
+    }
+  }
+  return blocks
+}
+
+function findBracedContent(str: string, after: number) {
+  const openIdx = str.indexOf('{', after)
+  if (openIdx === -1) {
+    return undefined
+  }
+  let depth = 1
+  let pos = openIdx + 1
+  while (pos < str.length && depth > 0) {
+    if (str[pos] === '{') {
+      depth++
+    } else if (str[pos] === '}') {
+      depth--
+    }
+    pos++
+  }
+  return depth === 0 ? str.slice(openIdx + 1, pos - 1).trim() : undefined
+}
+
 export function parseAsn1(
   asnString: string,
 ): { id: number; parent: number; name: string }[] {
-  const sections = extractSections(
-    asnString
-      .replace(/\s+/g, ' ')
-      .replace(/\s*{\s*/g, '{')
-      .replace(/\s*}\s*/g, '}')
-      .replace(/\s*,\s*/g, ',')
-      .replace(/\s*::\s*=\s*/g, '::=')
-      .replace(/^.*?::=/, ''),
-  )
+  const normalized = asnString
+    .replace(/\s+/g, ' ')
+    .replace(/\s*{\s*/g, '{')
+    .replace(/\s*}\s*/g, '}')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s*::\s*=\s*/g, '::=')
+    .replace(/^.*?::=/, '')
+
+  const sections = extractSections(normalized)
 
   const dict = Object.fromEntries(
-    parseFdict(sections.fdict!).map(r => [
-      r.id,
-      remap[r.name as keyof typeof remap] || r.name,
-    ]),
+    extractBracedBlocks(sections.fdict!).flatMap(block => {
+      const entry = parseDictEntry(block)
+      return entry ? [[entry.id, remap[entry.name] || entry.name]] : []
+    }),
   )
 
-  return parseNodes(sections.nodes!).map(node => {
-    const { features, ...rest } = node
-    return {
-      ...rest,
-      ...Object.fromEntries(
-        features!.map(f => [dict[f.featureid], f.value] as const),
-      ),
+  return extractBracedBlocks(sections.nodes!).flatMap(block => {
+    const node = parseNode(block)
+    if (!node) {
+      return []
     }
+    const { features = [], ...rest } = node
+    return [
+      {
+        ...rest,
+        ...Object.fromEntries(
+          features.map(f => [dict[f.featureid], f.value] as const),
+        ),
+      },
+    ]
   })
 }
 
-/**
- * Extract main sections from the ASN.1 string
- * @param asnString The ASN.1 string without type definition
- * @returns Object with extracted sections
- */
 function extractSections(asnString: string): Record<string, string> {
   const sections: Record<string, string> = {}
+  let content = asnString.trim()
+  if (content.startsWith('{') && content.endsWith('}')) {
+    content = content.slice(1, -1).trim()
+  }
 
-  // First, let's clean up the string by removing any leading/trailing whitespace
-  const cleanedString = asnString.trim()
-
-  // Remove the outer braces if they exist
-  const contentString =
-    cleanedString.startsWith('{') && cleanedString.endsWith('}')
-      ? cleanedString.slice(1, -1).trim()
-      : cleanedString
-
-  // Now we'll manually parse the top-level sections
-  let currentPos = 0
-
-  while (currentPos < contentString.length) {
-    // Skip whitespace
-    while (
-      currentPos < contentString.length &&
-      /\s/.test(contentString[currentPos]!)
-    ) {
-      currentPos++
+  let pos = 0
+  while (pos < content.length) {
+    while (pos < content.length && /\s/.test(content[pos]!)) {
+      pos++
     }
-
-    if (currentPos >= contentString.length) {
+    if (pos >= content.length) {
       break
     }
 
-    // Read section name
-    const sectionNameStart = currentPos
-    while (
-      currentPos < contentString.length &&
-      /\w/.test(contentString[currentPos]!)
-    ) {
-      currentPos++
+    const nameStart = pos
+    while (pos < content.length && /\w/.test(content[pos]!)) {
+      pos++
     }
 
     if (
-      currentPos >= contentString.length ||
-      (contentString[currentPos] !== ' ' && contentString[currentPos] !== '{')
+      pos >= content.length ||
+      (content[pos] !== ' ' && content[pos] !== '{')
     ) {
-      // Not a valid section, skip to next comma or end
-      while (
-        currentPos < contentString.length &&
-        contentString[currentPos] !== ','
-      ) {
-        currentPos++
-      }
-      if (currentPos < contentString.length) {
-        currentPos++
-      } // Skip the comma
+      pos = content.indexOf(',', pos)
+      pos = pos === -1 ? content.length : pos + 1
       continue
     }
 
-    const sectionName = contentString.slice(sectionNameStart, currentPos).trim()
+    const name = content.slice(nameStart, pos).trim()
 
-    // Skip whitespace
-    while (
-      currentPos < contentString.length &&
-      /\s/.test(contentString[currentPos]!)
-    ) {
-      currentPos++
+    while (pos < content.length && /\s/.test(content[pos]!)) {
+      pos++
     }
 
-    if (
-      currentPos >= contentString.length ||
-      contentString[currentPos] !== '{'
-    ) {
-      // Not a valid section, skip to next comma or end
-      while (
-        currentPos < contentString.length &&
-        contentString[currentPos] !== ','
-      ) {
-        currentPos++
-      }
-      if (currentPos < contentString.length) {
-        currentPos++
-      } // Skip the comma
+    if (pos >= content.length || content[pos] !== '{') {
+      pos = content.indexOf(',', pos)
+      pos = pos === -1 ? content.length : pos + 1
       continue
     }
 
-    // We found an opening brace, now we need to find the matching closing brace
-    const sectionContentStart = currentPos + 1
-    let braceCount = 1
-    currentPos++
-
-    while (currentPos < contentString.length && braceCount > 0) {
-      if (contentString[currentPos] === '{') {
-        braceCount++
-      } else if (contentString[currentPos] === '}') {
-        braceCount--
+    let depth = 1
+    const start = pos + 1
+    pos++
+    while (pos < content.length && depth > 0) {
+      if (content[pos] === '{') {
+        depth++
+      } else if (content[pos] === '}') {
+        depth--
       }
-      currentPos++
+      pos++
+    }
+    if (depth === 0) {
+      sections[name] = content.slice(start, pos - 1).trim()
     }
 
-    if (braceCount === 0) {
-      // We found the matching closing brace
-      const sectionContent = contentString
-        .slice(sectionContentStart, currentPos - 1)
-        .trim()
-      sections[sectionName] = sectionContent
-    }
-
-    // Skip to next comma or end
-    while (
-      currentPos < contentString.length &&
-      contentString[currentPos] !== ','
-    ) {
-      currentPos++
-    }
-    if (currentPos < contentString.length) {
-      currentPos++
-    } // Skip the comma
+    pos = content.indexOf(',', pos)
+    pos = pos === -1 ? content.length : pos + 1
   }
 
   return sections
 }
 
-/**
- * Parse the fdict section
- * @param fdictString The fdict section content
- * @returns Array of ASNDictEntry objects
- */
-function parseFdict(fdictString: string): ASNDictEntry[] {
-  const entries: ASNDictEntry[] = []
-
-  // We need to properly handle nested braces
-  let currentPos = 0
-
-  while (currentPos < fdictString.length) {
-    // Skip whitespace
-    while (
-      currentPos < fdictString.length &&
-      /\s/.test(fdictString[currentPos]!)
-    ) {
-      currentPos++
-    }
-
-    if (currentPos >= fdictString.length) {
-      break
-    }
-
-    // Look for opening brace
-    if (fdictString[currentPos] === '{') {
-      const entryContentStart = currentPos + 1
-      let braceCount = 1
-      currentPos++
-
-      while (currentPos < fdictString.length && braceCount > 0) {
-        if (fdictString[currentPos] === '{') {
-          braceCount++
-        } else if (fdictString[currentPos] === '}') {
-          braceCount--
-        }
-        currentPos++
-      }
-
-      if (braceCount === 0) {
-        // We found the matching closing brace
-        const entryContent = fdictString
-          .slice(entryContentStart, currentPos - 1)
-          .trim()
-        const entry = parseDictEntry(entryContent)
-        if (entry) {
-          entries.push(entry)
-        }
-      }
-    } else {
-      // Skip to next opening brace
-      while (
-        currentPos < fdictString.length &&
-        fdictString[currentPos] !== '{'
-      ) {
-        currentPos++
-      }
-    }
-  }
-
-  return entries
-}
-
-/**
- * Parse a single dictionary entry
- * @param entryString The entry content
- * @returns ASNDictEntry object or null if parsing fails
- */
 function parseDictEntry(entryString: string): ASNDictEntry | null {
   const idMatch = /id\s+(\d+)/.exec(entryString)
-  // Handle escaped quotes in strings
   const nameMatch = /name\s+"((?:[^"\\]|\\.)*)"/s.exec(entryString)
-
-  if (idMatch && nameMatch) {
-    // Process escaped characters in the string
-    const processedName = nameMatch[1]!
-      .replace(/\\"/g, '"')
-      .replace(/\\\\/g, '\\')
-
-    return {
-      id: parseInt(idMatch[1]!, 10),
-      name: processedName,
-    }
+  if (!idMatch || !nameMatch) {
+    return null
   }
-
-  return null
+  return {
+    id: parseInt(idMatch[1]!, 10),
+    name: nameMatch[1]!.replace(/\\"/g, '"').replace(/\\\\/g, '\\'),
+  }
 }
 
-/**
- * Parse the nodes section
- * @param nodesString The nodes section content
- * @returns Array of ASNNode objects
- */
-function parseNodes(nodesString: string): ASNNode[] {
-  const nodes: ASNNode[] = []
-
-  // We need to properly handle nested braces
-  let currentPos = 0
-
-  while (currentPos < nodesString.length) {
-    // Skip whitespace
-    while (
-      currentPos < nodesString.length &&
-      /\s/.test(nodesString[currentPos]!)
-    ) {
-      currentPos++
-    }
-
-    if (currentPos >= nodesString.length) {
-      break
-    }
-
-    // Look for opening brace
-    if (nodesString[currentPos] === '{') {
-      const nodeContentStart = currentPos + 1
-      let braceCount = 1
-      currentPos++
-
-      while (currentPos < nodesString.length && braceCount > 0) {
-        if (nodesString[currentPos] === '{') {
-          braceCount++
-        } else if (nodesString[currentPos] === '}') {
-          braceCount--
-        }
-        currentPos++
-      }
-
-      if (braceCount === 0) {
-        // We found the matching closing brace
-        const nodeContent = nodesString
-          .slice(nodeContentStart, currentPos - 1)
-          .trim()
-        const node = parseNode(nodeContent)
-        if (node) {
-          nodes.push(node)
-        }
-      }
-    } else {
-      // Skip to next opening brace
-      while (
-        currentPos < nodesString.length &&
-        nodesString[currentPos] !== '{'
-      ) {
-        currentPos++
-      }
-    }
-  }
-
-  return nodes
-}
-
-/**
- * Parse a single node
- * @param nodeString The node content
- * @returns ASNNode object or null if parsing fails
- */
 function parseNode(nodeString: string): ASNNode | null {
   const idMatch = /id\s+(\d+)/.exec(nodeString)
+  if (!idMatch) {
+    return null
+  }
   const parentMatch = /parent\s+(\d+)/.exec(nodeString)
+  const featuresIdx = nodeString.indexOf('features')
+  const featuresContent =
+    featuresIdx !== -1 ? findBracedContent(nodeString, featuresIdx) : undefined
 
-  if (idMatch) {
-    const node: ASNNode = {
-      id: parseInt(idMatch[1]!, 10),
-    }
-
-    if (parentMatch) {
-      node.parent = parseInt(parentMatch[1]!, 10)
-    }
-
-    // Extract features if present
-    // First find the features section
-    const featuresIndex = nodeString.indexOf('features')
-    if (featuresIndex !== -1) {
-      // Find the opening brace after "features"
-      const openBraceIndex = nodeString.indexOf('{', featuresIndex)
-      if (openBraceIndex !== -1) {
-        // Now find the matching closing brace
-        let braceCount = 1
-        let closeBraceIndex = openBraceIndex + 1
-
-        while (closeBraceIndex < nodeString.length && braceCount > 0) {
-          if (nodeString[closeBraceIndex] === '{') {
-            braceCount++
-          } else if (nodeString[closeBraceIndex] === '}') {
-            braceCount--
-          }
-          closeBraceIndex++
-        }
-
-        if (braceCount === 0) {
-          // We found the matching closing brace
-          const featuresContent = nodeString
-            .slice(openBraceIndex + 1, closeBraceIndex - 1)
-            .trim()
-          node.features = parseFeatures(featuresContent)
-        }
-      }
-    }
-
-    return node
+  return {
+    id: parseInt(idMatch[1]!, 10),
+    ...(parentMatch ? { parent: parseInt(parentMatch[1]!, 10) } : {}),
+    features: featuresContent
+      ? extractBracedBlocks(featuresContent).flatMap(block => {
+          const f = parseFeature(block)
+          return f ? [f] : []
+        })
+      : [],
   }
-
-  return null
 }
 
-/**
- * Parse features section of a node
- * @param featuresString The features section content
- * @returns Array of ASNFeature objects
- */
-function parseFeatures(featuresString: string): ASNFeature[] {
-  const features: ASNFeature[] = []
-
-  // We need to properly handle nested braces
-  let currentPos = 0
-
-  while (currentPos < featuresString.length) {
-    // Skip whitespace
-    while (
-      currentPos < featuresString.length &&
-      /\s/.test(featuresString[currentPos]!)
-    ) {
-      currentPos++
-    }
-
-    if (currentPos >= featuresString.length) {
-      break
-    }
-
-    // Look for opening brace
-    if (featuresString[currentPos] === '{') {
-      const featureContentStart = currentPos + 1
-      let braceCount = 1
-      currentPos++
-
-      while (currentPos < featuresString.length && braceCount > 0) {
-        if (featuresString[currentPos] === '{') {
-          braceCount++
-        } else if (featuresString[currentPos] === '}') {
-          braceCount--
-        }
-        currentPos++
-      }
-
-      if (braceCount === 0) {
-        // We found the matching closing brace
-        const featureContent = featuresString
-          .slice(featureContentStart, currentPos - 1)
-          .trim()
-        const feature = parseFeature(featureContent)
-        if (feature) {
-          features.push(feature)
-        }
-      }
-    } else {
-      // Skip to next opening brace
-      while (
-        currentPos < featuresString.length &&
-        featuresString[currentPos] !== '{'
-      ) {
-        currentPos++
-      }
-    }
-  }
-
-  return features
-}
-
-/**
- * Parse a single feature
- * @param featureString The feature content
- * @returns ASNFeature object or null if parsing fails
- */
 function parseFeature(featureString: string): ASNFeature | null {
   const featureidMatch = /featureid\s+(\d+)/.exec(featureString)
-  // Handle escaped quotes in strings
   const valueMatch = /value\s+"((?:[^"\\]|\\.)*)"/s.exec(featureString)
-
-  if (featureidMatch && valueMatch) {
-    // Process escaped characters in the string
-    const processedValue = valueMatch[1]!
-      .replace(/\\"/g, '"')
-      .replace(/\\\\/g, '\\')
-
-    return {
-      featureid: parseInt(featureidMatch[1]!, 10),
-      value: processedValue,
-    }
+  if (!featureidMatch || !valueMatch) {
+    return null
   }
-
-  return null
+  return {
+    featureid: parseInt(featureidMatch[1]!, 10),
+    value: valueMatch[1]!.replace(/\\"/g, '"').replace(/\\\\/g, '\\'),
+  }
 }

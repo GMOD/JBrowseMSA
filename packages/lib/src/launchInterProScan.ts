@@ -52,7 +52,7 @@ async function runInterProScan({
   await loadInterProScanResultsWithStatus({ jobId, model })
 }
 
-export function loadInterProScanResults(jobId: string) {
+function loadInterProScanResults(jobId: string) {
   return jsonfetch<InterProScanResponse>(
     `${base}/iprscan5/result/${jobId}/json`,
   )
@@ -111,14 +111,15 @@ export async function launchInterProScan({
         programs,
         model,
       })
+    } else {
+      throw new Error('unknown algorithm')
     }
-    throw new Error('unknown algorithm')
   } finally {
     onProgress()
   }
 }
 
-export async function loadInterProScanResultsWithStatus({
+async function loadInterProScanResultsWithStatus({
   jobId,
   model,
 }: {

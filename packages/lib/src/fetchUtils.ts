@@ -20,11 +20,6 @@ export async function jsonfetch<T>(url: string, args?: RequestInit) {
   return response.json() as T
 }
 
-export async function arraybufferfetch(url: string) {
-  const res = await myfetch(url)
-  return res.arrayBuffer()
-}
-
 export function timeout(time: number) {
   return new Promise(res => setTimeout(res, time))
 }

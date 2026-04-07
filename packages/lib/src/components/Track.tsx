@@ -1,9 +1,11 @@
-import React, { lazy, useEffect, useRef, useState } from 'react'
+import React, { lazy, useCallback, useRef, useState } from 'react'
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { IconButton, Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
+
+import { useWheelScroll } from '../useWheelScroll.ts'
 
 import type { MsaViewModel } from '../model.ts'
 
@@ -101,31 +103,13 @@ const Track = observer(function ({
     model: { height, error },
   } = track
   const ref = useRef<HTMLDivElement>(null)
-  const scheduled = useRef(false)
-  const deltaX = useRef(0)
-  useEffect(() => {
-    const curr = ref.current
-    if (!curr) {
-      return
-    }
-    function onWheel(event: WheelEvent) {
-      deltaX.current += event.deltaX
-
-      if (!scheduled.current) {
-        scheduled.current = true
-        requestAnimationFrame(() => {
-          model.doScrollX(-deltaX.current)
-          deltaX.current = 0
-          scheduled.current = false
-        })
-      }
-      event.preventDefault()
-    }
-    curr.addEventListener('wheel', onWheel, { passive: false })
-    return () => {
-      curr.removeEventListener('wheel', onWheel)
-    }
-  }, [model])
+  const onScrollX = useCallback(
+    (d: number) => {
+      model.doScrollX(d)
+    },
+    [model],
+  )
+  useWheelScroll({ ref, onScrollX })
 
   return (
     <div key={track.id} style={{ display: 'flex', height }}>

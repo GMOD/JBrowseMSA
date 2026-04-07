@@ -22,8 +22,6 @@ export function renderMouseover({
     scrollX,
     scrollY,
     mouseRow,
-    // @ts-expect-error
-    mouseCol2,
     mouseClickRow,
     mouseClickCol,
     relativeTo,
@@ -78,9 +76,5 @@ export function renderMouseover({
   if (mouseClickRow !== undefined) {
     ctx.fillStyle = highlightColor
     ctx.fillRect(0, mouseClickRow * rowHeight + scrollY, width, rowHeight)
-  }
-  if (mouseCol2 !== undefined) {
-    ctx.fillStyle = highlightColor
-    ctx.fillRect(mouseCol2 * colWidth + scrollX, 0, colWidth, height)
   }
 }

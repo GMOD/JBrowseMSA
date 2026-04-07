@@ -90,17 +90,6 @@ export function gffToInterProResults(
 }
 
 /**
- * Convert GFF string directly to InterProScan format
- */
-export function parseGFFToInterPro(
-  gffStr: string,
-  parseGFFfn: (str: string) => GFFRecord[],
-): Record<string, InterProScanResults> {
-  const records = parseGFFfn(gffStr)
-  return gffToInterProResults(records)
-}
-
-/**
  * Create a full InterProScanResponse from GFF records
  */
 export function gffToInterProResponse(

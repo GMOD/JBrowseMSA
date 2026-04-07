@@ -1,10 +1,7 @@
 import { colord, extend } from 'colord'
 import namesPlugin from 'colord/plugins/names'
-import { max } from 'd3-array'
 
-import type { NodeWithIds } from './types.ts'
 import type { Theme } from '@mui/material'
-import type { HierarchyNode } from 'd3-hierarchy'
 
 extend([namesPlugin])
 
@@ -25,64 +22,22 @@ export function colorContrast(
   ])
 }
 
-export function skipBlanks(blanks: number[], arg: string | string[]) {
+export function skipBlanks(blanks: number[], str: string) {
   if (blanks.length === 0) {
-    return typeof arg === 'string' ? arg : arg.join('')
+    return str
   }
   const chunks = []
   let lastEnd = 0
   for (const blankIdx of blanks) {
     if (blankIdx > lastEnd) {
-      chunks.push(
-        typeof arg === 'string'
-          ? arg.slice(lastEnd, blankIdx)
-          : arg.slice(lastEnd, blankIdx).join(''),
-      )
+      chunks.push(str.slice(lastEnd, blankIdx))
     }
     lastEnd = blankIdx + 1
   }
-  if (lastEnd < arg.length) {
-    chunks.push(
-      typeof arg === 'string'
-        ? arg.slice(lastEnd)
-        : arg.slice(lastEnd).join(''),
-    )
+  if (lastEnd < str.length) {
+    chunks.push(str.slice(lastEnd))
   }
   return chunks.join('')
-}
-
-// basically same as setRadius from https://observablehq.com/@d3/tree-of-life
-export function setBrLength(
-  d: HierarchyNode<NodeWithIds>,
-  y0: number,
-  k: number,
-) {
-  // @ts-expect-error
-  d.len = (y0 += Math.max(d.data.length || 0, 0)) * k
-
-  if (d.children) {
-    d.children.forEach(d => {
-      setBrLength(d, y0, k)
-    })
-  }
-}
-
-// basically same as maxLength from https://observablehq.com/@d3/tree-of-life
-export function maxLength(d: HierarchyNode<NodeWithIds>): number {
-  return (
-    (d.data.length || 0) + (d.children ? max(d.children, maxLength) || 0 : 0)
-  )
-}
-
-// Collapse the node and all it's children, from
-// https://bl.ocks.org/d3noob/43a860bc0024792f8803bba8ca0d5ecd
-export function collapse(d: HierarchyNode<NodeWithIds>) {
-  if (d.children) {
-    // @ts-expect-error
-    d._children = d.children
-    // @ts-expect-error
-    d.children = null
-  }
 }
 
 export function len(a: { end: number; start: number }) {

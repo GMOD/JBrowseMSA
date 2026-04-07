@@ -4,17 +4,20 @@
   "description": "Draw on SVG using Canvas's 2D Context API - ESM fork of svgcanvas",
   "license": "MIT",
   "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./src/index.ts"
   },
+  "types": "src/index.ts",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "types": "dist/index.d.ts",
+    "main": "dist/index.js"
   },
   "files": [
     "dist",

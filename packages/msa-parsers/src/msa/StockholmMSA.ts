@@ -1,15 +1,17 @@
 import parseNewick from './parseNewick.ts'
 import { parseAll } from './stockholmParser.ts'
 import { generateNodeIds } from '../util.ts'
+import BaseMSA from './BaseMSA.ts'
 
 import type { NodeWithIds } from '../types.ts'
 import type { StockholmData } from './stockholmParser.ts'
 
-export default class StockholmMSA {
+export default class StockholmMSA extends BaseMSA {
   private data: StockholmData[]
   private MSA: StockholmData
 
   constructor(text: string, currentAlignment: number) {
+    super()
     const res = parseAll(text)
     this.data = res
     this.MSA = res[currentAlignment]!
@@ -58,55 +60,32 @@ export default class StockholmMSA {
     return Object.keys(this.MSA.seqdata)
   }
 
-  getSeqCoords() {}
-
   getStructures() {
     const pdbRegex = /PDB; +(\S+) +(\S); ([0-9]+)-([0-9]+)/
     const drEntries = this.MSA.gs.DR ?? {}
-    const args = Object.entries(drEntries)
-      .flatMap(([id, drList]) =>
-        drList.map(dr => {
-          const match = pdbRegex.exec(dr)
-          return match ? { id, match } : null
-        }),
-      )
-      .filter((item): item is { id: string; match: RegExpExecArray } => !!item)
-      .map(({ id, match }) => ({
-        id,
-        pdb: match[1]!.toLowerCase(),
-        chain: match[2]!,
-        startPos: +match[3]!,
-        endPos: +match[4]!,
-      }))
-
-    const ret = {} as Record<
+    const result: Record<
       string,
       { pdb: string; chain: string; startPos: number; endPos: number }[]
-    >
-    for (const entry of args) {
-      const { id, ...rest } = entry
-      if (!ret[id]) {
-        ret[id] = []
+    > = {}
+    for (const [id, drList] of Object.entries(drEntries)) {
+      for (const dr of drList) {
+        const match = pdbRegex.exec(dr)
+        if (match) {
+          ;(result[id] ??= []).push({
+            pdb: match[1]!.toLowerCase(),
+            chain: match[2]!,
+            startPos: +match[3]!,
+            endPos: +match[4]!,
+          })
+        }
       }
-      ret[id].push(rest)
     }
-    return ret
+    return result
   }
 
   getTree(): NodeWithIds {
     const tree = this.MSA.gf.NH?.[0]
-    return tree
-      ? generateNodeIds(parseNewick(tree))
-      : {
-          id: 'root',
-          name: 'root',
-          noTree: true,
-          children: this.getNames().map(name => ({
-            id: name,
-            children: [],
-            name,
-          })),
-        }
+    return tree ? generateNodeIds(parseNewick(tree)) : super.getTree()
   }
 
   get seqConsensus() {

@@ -1,18 +1,14 @@
-import type { InterProScanResults } from 'msa-parsers'
+import { toFasta } from './util.ts'
+
+import type { InterProScanResponse, InterProScanResults } from 'msa-parsers'
 
 const BASE_URL = 'https://www.ebi.ac.uk/Tools/services/rest/iprscan5'
-
-interface InterProScanResponse {
-  results: InterProScanResults[]
-}
 
 async function submitJob(
   sequences: { id: string; seq: string }[],
   programs: string[],
   email: string,
 ): Promise<string> {
-  const fastaSeq = sequences.map(s => `>${s.id}\n${s.seq}`).join('\n')
-
   const response = await fetch(`${BASE_URL}/run`, {
     method: 'POST',
     headers: {
@@ -20,7 +16,7 @@ async function submitJob(
     },
     body: new URLSearchParams({
       email,
-      sequence: fastaSeq,
+      sequence: toFasta(sequences),
       appl: programs.join(','),
     }),
   })

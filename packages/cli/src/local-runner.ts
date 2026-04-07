@@ -3,11 +3,9 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import path from 'node:path'
 
-import type { InterProScanResults } from 'msa-parsers'
+import { toFasta } from './util.ts'
 
-interface InterProScanResponse {
-  results: InterProScanResults[]
-}
+import type { InterProScanResponse, InterProScanResults } from 'msa-parsers'
 
 export async function runLocalInterProScan(
   sequences: { id: string; seq: string }[],
@@ -19,9 +17,7 @@ export async function runLocalInterProScan(
   const outputFile = path.join(tmpDir, 'output.json')
 
   try {
-    const fastaContent = sequences.map(s => `>${s.id}\n${s.seq}`).join('\n')
-
-    fs.writeFileSync(inputFile, fastaContent, 'utf8')
+    fs.writeFileSync(inputFile, toFasta(sequences), 'utf8')
 
     console.log(`  Running InterProScan on ${sequences.length} sequences...`)
 

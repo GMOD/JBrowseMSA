@@ -1,7 +1,7 @@
+import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { NodeWithIdsAndLength } from '../../types.ts'
 import type { Theme } from '@mui/material'
-import type { HierarchyNode } from 'd3-hierarchy'
 
 export function renderMSABlock({
   model,

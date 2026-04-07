@@ -4,12 +4,9 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./src/index.ts"
   },
-  "types": "dist/index.d.ts",
+  "types": "src/index.ts",
   "files": [
     "dist",
     "src"
@@ -25,7 +22,14 @@
     "emf-js": "^2.0.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "types": "dist/index.d.ts"
   },
   "devDependencies": {
     "typescript": "^6.0.2",

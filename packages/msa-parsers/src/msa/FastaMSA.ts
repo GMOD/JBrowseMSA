@@ -1,12 +1,13 @@
-import type { NodeWithIds } from '../types.ts'
+import BaseMSA from './BaseMSA.ts'
 
-export default class FastaMSA {
+export default class FastaMSA extends BaseMSA {
   private MSA: {
     seqdata: Record<string, string>
     colonNormalized: Record<string, string>
   }
 
   constructor(text: string) {
+    super()
     const seqdata: Record<string, string> = {}
     const colonNormalized: Record<string, string> = {}
     for (const entry of text.split('>')) {
@@ -34,10 +35,6 @@ export default class FastaMSA {
     return this.MSA
   }
 
-  getRowData() {
-    return undefined
-  }
-
   getNames() {
     return Object.keys(this.MSA.seqdata)
   }
@@ -53,41 +50,5 @@ export default class FastaMSA {
   getWidth() {
     const name = Object.keys(this.MSA.seqdata)[0]!
     return this.getRow(name).length
-  }
-
-  getStructures() {
-    return {}
-  }
-
-  get alignmentNames() {
-    return []
-  }
-
-  getHeader() {
-    return {}
-  }
-
-  getTree(): NodeWithIds {
-    return {
-      id: 'root',
-      name: 'root',
-      noTree: true,
-      children: this.getNames().map(name => ({
-        id: name,
-        children: [],
-        name,
-      })),
-    }
-  }
-
-  get seqConsensus() {
-    return undefined
-  }
-  get secondaryStructureConsensus() {
-    return undefined
-  }
-
-  get tracks() {
-    return []
   }
 }

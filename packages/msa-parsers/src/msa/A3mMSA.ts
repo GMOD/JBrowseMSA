@@ -1,4 +1,4 @@
-import type { NodeWithIds } from '../types.ts'
+import BaseMSA from './BaseMSA.ts'
 
 /**
  * A3M Format Parser
@@ -22,7 +22,6 @@ import type { NodeWithIds } from '../types.ts'
  * @see https://yanglab.qd.sdu.edu.cn/trRosetta/msa_format.html
  */
 
-// Char code helpers for fast character classification
 const CODE_A = 65 // 'A'
 const CODE_Z = 90 // 'Z'
 const CODE_a = 97 // 'a'
@@ -34,15 +33,15 @@ function isLower(code: number): boolean {
   return code >= CODE_a && code <= CODE_z
 }
 
-export default class A3mMSA {
+export default class A3mMSA extends BaseMSA {
   private MSA: { seqdata: Record<string, string> }
   private orderedNames: string[]
 
   constructor(text: string) {
+    super()
     const rawSeqs: string[] = []
     const names: string[] = []
 
-    // First pass: parse sequences (like FASTA), preserving order
     for (const entry of text.split('>')) {
       if (!/\S/.test(entry)) {
         continue
@@ -64,9 +63,6 @@ export default class A3mMSA {
     this.MSA = { seqdata: this.expandA3M(rawSeqs, names) }
   }
 
-  /**
-   * Detect if text is likely A3M format
-   */
   static sniff(text: string): boolean {
     if (!text.startsWith('>')) {
       return false
@@ -91,8 +87,6 @@ export default class A3mMSA {
       return false
     }
 
-    // Check for lowercase and compute match column lengths in single pass per sequence
-    // In A3M, match columns = uppercase letters + dashes (deletions)
     let hasLowercase = false
     let firstMatchLen = -1
     let sameMatchLength = true
@@ -104,7 +98,6 @@ export default class A3mMSA {
         if (isLower(code)) {
           hasLowercase = true
         } else if ((code >= CODE_A && code <= CODE_Z) || code === CODE_DASH) {
-          // Uppercase letters and dashes are match columns
           matchLen++
         }
       }
@@ -121,14 +114,6 @@ export default class A3mMSA {
     return hasLowercase && sameMatchLength
   }
 
-  /**
-   * Expand A3M format to standard aligned format.
-   *
-   * In A3M, lowercase characters are insertions that implicitly introduce
-   * gaps in sequences that don't have an insert at that position.
-   * Gaps (-) following match columns in sequences without inserts align
-   * with lowercase inserts in other sequences.
-   */
   private expandA3M(
     rawSeqs: string[],
     names: string[],
@@ -138,8 +123,6 @@ export default class A3mMSA {
       return {}
     }
 
-    // Parse sequences: extract match chars (uppercase only) and insert content
-    // For each sequence, track: matchChars, insertContent (after each match)
     const matchChars: string[][] = []
     const insertContent: string[][] = []
 
@@ -153,10 +136,7 @@ export default class A3mMSA {
         const code = seq.charCodeAt(i)
 
         if ((code >= CODE_A && code <= CODE_Z) || code === CODE_DASH) {
-          // Uppercase letter or dash - match column (dash = deletion)
           matches.push(seq[i]!)
-          // Collect following lowercase/dot characters as insert content
-          // Note: dash is NOT insert content, it's a match column
           let ins = ''
           let j = i + 1
           while (j < seq.length) {
@@ -171,16 +151,13 @@ export default class A3mMSA {
           inserts.push(ins)
           i = j
         } else if (code === CODE_DOT) {
-          // Leading dot (gap aligned to insert) - skip
           i++
         } else if (isLower(code)) {
-          // Leading insert before first match
           let ins = ''
           while (i < seq.length && isLower(seq.charCodeAt(i))) {
             ins += seq[i]!
             i++
           }
-          // Add empty match with this insert
           matches.push('')
           inserts.push(ins)
         } else {
@@ -192,15 +169,12 @@ export default class A3mMSA {
       insertContent.push(inserts)
     }
 
-    // Find number of match positions (should be same for all valid A3M)
     const numPositions = Math.max(...matchChars.map(m => m.length), 0)
 
-    // Find max insert length at each position (only count lowercase, not gaps)
     const maxInserts = new Array<number>(numPositions).fill(0)
     for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
       const inserts = insertContent[seqIdx]!
       for (let pos = 0; pos < inserts.length; pos++) {
-        // Count only lowercase characters as actual inserts
         let lcCount = 0
         for (const c of inserts[pos]!) {
           if (isLower(c.charCodeAt(0))) {
@@ -213,7 +187,6 @@ export default class A3mMSA {
       }
     }
 
-    // Build expanded sequences
     const expanded: Record<string, string> = {}
 
     for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
@@ -228,10 +201,8 @@ export default class A3mMSA {
           const matchChar = matches[pos]!
           const insContent = inserts[pos] || ''
 
-          // Add match character (or gap if empty)
           result.push(matchChar || '-')
 
-          // Process insert content
           let lcContent = ''
           for (const c of insContent) {
             if (isLower(c.charCodeAt(0))) {
@@ -239,16 +210,13 @@ export default class A3mMSA {
             }
           }
 
-          // Add the insert content (uppercased)
           result.push(lcContent)
 
-          // Pad with gaps to match max insert length
           const padding = maxIns - lcContent.length
           if (padding > 0) {
             result.push('.'.repeat(padding))
           }
         } else {
-          // This sequence is shorter - add gaps
           result.push('-')
           if (maxIns > 0) {
             result.push('.'.repeat(maxIns))
@@ -266,10 +234,6 @@ export default class A3mMSA {
     return this.MSA
   }
 
-  getRowData() {
-    return undefined
-  }
-
   getNames() {
     return this.orderedNames
   }
@@ -281,42 +245,5 @@ export default class A3mMSA {
   getWidth() {
     const name = Object.keys(this.MSA.seqdata)[0]
     return name ? this.getRow(name).length : 0
-  }
-
-  getStructures() {
-    return {}
-  }
-
-  get alignmentNames() {
-    return []
-  }
-
-  getHeader() {
-    return {}
-  }
-
-  getTree(): NodeWithIds {
-    return {
-      id: 'root',
-      name: 'root',
-      noTree: true,
-      children: this.getNames().map(name => ({
-        id: name,
-        children: [],
-        name,
-      })),
-    }
-  }
-
-  get seqConsensus() {
-    return undefined
-  }
-
-  get secondaryStructureConsensus() {
-    return undefined
-  }
-
-  get tracks() {
-    return []
   }
 }

@@ -1,6 +1,6 @@
+import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { NodeWithIdsAndLength } from '../../types.ts'
-import type { HierarchyNode } from 'd3-hierarchy'
 
 export function renderBoxFeatureCanvasBlock({
   model,

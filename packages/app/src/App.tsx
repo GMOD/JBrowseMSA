@@ -8,7 +8,9 @@ import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 
 // locals
-import AppGlobal, { AppModel } from './model'
+import AppGlobal from './model'
+
+import type { AppModel } from './model'
 
 const urlParams = new URLSearchParams(window.location.search)
 const val = urlParams.get('data')

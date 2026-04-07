@@ -14,8 +14,6 @@ import {
 /**
  * #stateModel Tree
  */
-function x() {} // eslint-disable-line @typescript-eslint/no-unused-vars
-
 export function TreeModelF() {
   return types
     .model({

@@ -1,3 +1,5 @@
+import { descendants, links } from '../../hierarchy.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 import type { Theme } from '@mui/material'
 
@@ -45,15 +47,15 @@ export function renderTree({
   const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
   const by = blockSizeYOverride || blockSize
   ctx.strokeStyle = theme.palette.text.primary
-  for (const link of hierarchy.links()) {
+  for (const link of links(hierarchy)) {
     const { source, target } = link
     if (target.height === 0 && !showBranchLen) {
       continue
     }
     const sy = source.x!
     const ty = target.x!
-    const tx = showBranchLen ? (target as { len?: number }).len : target.y
-    const sx = showBranchLen ? (source as { len?: number }).len : source.y
+    const tx = showBranchLen ? target.len : target.y
+    const sx = showBranchLen ? source.len : source.y
     if (tx === undefined || sx === undefined) {
       continue
     }
@@ -94,8 +96,8 @@ export function renderNodeBubbles({
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride || blockSize
-  for (const node of hierarchy.descendants()) {
-    const x = showBranchLen ? (node as { len?: number }).len : node.y
+  for (const node of descendants(hierarchy)) {
+    const x = showBranchLen ? node.len : node.y
     if (x === undefined) {
       continue
     }
@@ -171,7 +173,7 @@ export function renderTreeLabels({
     const {
       data: { name, id },
     } = node
-    const len = (node as { len?: number }).len
+    const len = node.len
     const y = node.x!
     const x = node.y!
 

@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useRef } from 'react'
 
 import { observer } from 'mobx-react'
 
 import Loading from './Loading.tsx'
 import MSACanvasBlock from './MSACanvasBlock.tsx'
+import { useWheelScroll } from '../../useWheelScroll.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -17,100 +18,29 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
     blocks2d,
   } = model
   const ref = useRef<HTMLDivElement>(null)
-  // wheel
-  const scheduled = useRef(false)
-  const deltaX = useRef(0)
-  const deltaY = useRef(0)
-  // mouse click-and-drag scrolling
-  const prevX = useRef(0)
-  const prevY = useRef(0)
-  const [mouseDragging, setMouseDragging] = useState(false)
-  useEffect(() => {
-    const curr = ref.current
-    if (!curr) {
-      return
-    }
-    function onWheel(event: WheelEvent) {
-      deltaX.current += event.deltaX
-      deltaY.current += event.deltaY
-
-      if (!scheduled.current) {
-        scheduled.current = true
-        requestAnimationFrame(() => {
-          model.doScrollX(-deltaX.current)
-          model.doScrollY(-deltaY.current)
-          deltaX.current = 0
-          deltaY.current = 0
-          scheduled.current = false
-        })
-      }
-      event.preventDefault()
-      event.stopPropagation()
-    }
-    curr.addEventListener('wheel', onWheel, { passive: false })
-    return () => {
-      curr.removeEventListener('wheel', onWheel)
-    }
-  }, [model])
-
-  useEffect(() => {
-    if (mouseDragging) {
-      function globalMouseMove(event: MouseEvent) {
-        event.preventDefault()
-        const currX = event.clientX
-        const currY = event.clientY
-        const distanceX = currX - prevX.current
-        const distanceY = currY - prevY.current
-        if (distanceX || distanceY) {
-          if (!scheduled.current) {
-            scheduled.current = true
-            window.requestAnimationFrame(() => {
-              model.doScrollX(distanceX)
-              model.doScrollY(distanceY)
-              scheduled.current = false
-              prevX.current = event.clientX
-              prevY.current = event.clientY
-            })
-          }
-        }
-      }
-
-      function globalMouseUp() {
-        prevX.current = 0
-        setMouseDragging(false)
-      }
-
-      window.addEventListener('mousemove', globalMouseMove, true)
-      window.addEventListener('mouseup', globalMouseUp, true)
-      return () => {
-        window.removeEventListener('mousemove', globalMouseMove, true)
-        window.removeEventListener('mouseup', globalMouseUp, true)
-      }
-    }
-    return undefined
-  }, [model, mouseDragging])
+  const onScrollX = useCallback(
+    (d: number) => {
+      model.doScrollX(d)
+    },
+    [model],
+  )
+  const onScrollY = useCallback(
+    (d: number) => {
+      model.doScrollY(d)
+    },
+    [model],
+  )
+  const { onMouseDown, onMouseUp } = useWheelScroll({
+    ref,
+    onScrollX,
+    onScrollY,
+  })
 
   return (
     <div
       ref={ref}
-      onMouseDown={event => {
-        // check if clicking a draggable element or a resize handle
-        const target = event.target as HTMLElement
-        if (target.draggable || target.dataset.resizer) {
-          return
-        }
-
-        // otherwise do click and drag scroll
-        if (event.button === 0) {
-          prevX.current = event.clientX
-          prevY.current = event.clientY
-          setMouseDragging(true)
-        }
-      }}
-      onMouseUp={event => {
-        event.preventDefault()
-        setMouseDragging(false)
-      }}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
       onMouseLeave={event => {
         event.preventDefault()
       }}

@@ -1,11 +1,12 @@
 import { parse } from 'clustal-js'
 
-import type { NodeWithIds } from '../types.ts'
+import BaseMSA from './BaseMSA.ts'
 
-export default class ClustalMSA {
+export default class ClustalMSA extends BaseMSA {
   private MSA: ReturnType<typeof parse>
 
   constructor(text: string) {
+    super()
     this.MSA = parse(text)
   }
 
@@ -21,10 +22,6 @@ export default class ClustalMSA {
     return this.MSA.alns[0]!.seq.length
   }
 
-  getRowData() {
-    return undefined
-  }
-
   getHeader() {
     return this.MSA.header
   }
@@ -33,35 +30,7 @@ export default class ClustalMSA {
     return this.MSA.alns.map(aln => aln.id)
   }
 
-  getStructures() {
-    return {}
-  }
-
-  get alignmentNames() {
-    return []
-  }
-
-  getTree(): NodeWithIds {
-    return {
-      id: 'root',
-      name: 'root',
-      noTree: true,
-      children: this.getNames().map(name => ({
-        id: name,
-        name,
-        children: [],
-      })),
-    }
-  }
-
   get seqConsensus() {
     return this.MSA.consensus
-  }
-  get secondaryStructureConsensus() {
-    return undefined
-  }
-
-  get tracks() {
-    return []
   }
 }

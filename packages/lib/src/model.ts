@@ -11,8 +11,6 @@ import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
 import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
-import { ascending } from 'd3-array'
-import { cluster, hierarchy } from 'd3-hierarchy'
 import { autorun, transaction } from 'mobx'
 import {
   A3mMSA,
@@ -58,6 +56,18 @@ import {
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
 import { flatToTree } from './flatToTree.ts'
+import {
+  clusterLayout,
+  collapse,
+  find,
+  hierarchy,
+  leaves,
+  links,
+  maxLength,
+  setBrLength,
+  sort,
+  sum as hierarchySum,
+} from './hierarchy.ts'
 import { measureTextCanvas } from './measureTextCanvas.ts'
 import { DataModelF } from './model/DataModel.ts'
 import { DialogQueueSessionMixin } from './model/DialogQueue.ts'
@@ -72,12 +82,12 @@ import {
   visibleColToSeqPosForRow,
 } from './rowCoordinateCalculations.ts'
 import { seqPosToGlobalCol } from './seqPosToGlobalCol.ts'
-import { collapse, len, maxLength, setBrLength, skipBlanks } from './util.ts'
+import { len, skipBlanks } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
+import type { HierarchyNode } from './hierarchy.ts'
 import type { InterProScanResults } from './launchInterProScan.ts'
 import type {
-  Accession,
   BasicTrack,
   NodeWithIds,
   NodeWithIdsAndLength,
@@ -86,7 +96,6 @@ import type {
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
-import type { HierarchyNode } from 'd3-hierarchy'
 
 const showZoomStarKey = 'msa-showZoomStar'
 
@@ -455,8 +464,8 @@ function stateModelFactory() {
           return
         }
 
-        // Find the node in the hierarchy
-        const node = (self as MsaViewModel).hierarchy.find(
+        const node = find(
+          (self as MsaViewModel).hierarchy,
           n => n.data.id === nodeId,
         )
         if (!node) {
@@ -464,8 +473,7 @@ function stateModelFactory() {
           return
         }
 
-        // Get all descendant leaf names
-        const descendantNames = node.leaves().map(leaf => leaf.data.name)
+        const descendantNames = leaves(node).map(leaf => leaf.data.name)
 
         self.hoveredTreeNode = { nodeId, descendantNames }
       },
@@ -798,21 +806,18 @@ function stateModelFactory() {
        */
       get root() {
         let hier = hierarchy(this.tree, d => d.children)
-          // todo: investigate whether needed, typescript says children always true
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          .sum(d => (d.children ? 0 : 1))
-          // eslint-disable-next-line unicorn/no-array-sort
-          .sort((a, b) => ascending(a.data.length || 1, b.data.length || 1))
+        hierarchySum(hier, d => (d.children.length > 0 ? 0 : 1))
+        sort(hier, (a, b) => (a.data.length ?? 1) - (b.data.length ?? 1))
 
         if (self.showOnly) {
-          const res = hier.find(n => n.data.id === self.showOnly)
+          const res = find(hier, n => n.data.id === self.showOnly)
           if (res) {
             hier = res
           }
         }
 
         ;[...self.collapsed, ...self.collapsedLeaves]
-          .map(collapsedId => hier.find(node => node.data.id === collapsedId))
+          .map(collapsedId => find(hier, node => node.data.id === collapsedId))
           .filter(notEmpty)
           .forEach(node => {
             collapse(node)
@@ -1252,11 +1257,9 @@ function stateModelFactory() {
        */
       get hierarchy(): HierarchyNode<NodeWithIdsAndLength> {
         const r = this.root
-        const clust = cluster<NodeWithIds>()
-          .size([this.totalHeight, self.treeWidth])
-          .separation(() => 1)
-        clust(r)
-        setBrLength(r, (r.data.length = 0), self.treeWidth / maxLength(r))
+        clusterLayout(r, this.totalHeight, self.treeWidth)
+        r.data.length = 0
+        setBrLength(r, 0, self.treeWidth / maxLength(r))
         return r as HierarchyNode<NodeWithIdsAndLength>
       },
 
@@ -1264,21 +1267,21 @@ function stateModelFactory() {
        * #getter
        */
       get totalHeight() {
-        return this.root.leaves().length * self.rowHeight
+        return leaves(this.root).length * self.rowHeight
       },
 
       /**
        * #getter
        */
       get leaves() {
-        return this.hierarchy.leaves()
+        return leaves(this.hierarchy)
       },
 
       /**
        * #getter
        */
       get allBranchesLength0() {
-        return this.hierarchy.links().every(s => !s.source.data.length)
+        return links(this.hierarchy).every(s => !s.source.data.length)
       },
 
       /**
@@ -1333,13 +1336,9 @@ function stateModelFactory() {
        * #getter
        */
       get blocks2d() {
-        const ret = []
-        for (const by of self.blocksY) {
-          for (const bx of self.blocksX) {
-            ret.push([bx, by] as const)
-          }
-        }
-        return ret
+        return self.blocksY.flatMap(by =>
+          self.blocksX.map(bx => [bx, by] as const),
+        )
       },
 
       /**
@@ -1494,20 +1493,21 @@ function stateModelFactory() {
        * #getter
        */
       get labelsWidth() {
-        let x = 0
         const { rowHeight, leaves, treeMetadata, fontSize } = self
-        if (rowHeight > 5) {
-          for (const node of leaves) {
-            x = Math.max(
+        if (rowHeight <= 5) {
+          return 0
+        }
+        return leaves.reduce(
+          (max, node) =>
+            Math.max(
+              max,
               measureTextCanvas(
                 treeMetadata[node.data.name]?.genome || node.data.name,
                 fontSize,
               ),
-              x,
-            )
-          }
-        }
-        return x
+            ),
+          0,
+        )
       },
 
       /**
@@ -1529,18 +1529,22 @@ function stateModelFactory() {
        */
       get adapterTrackModels(): BasicTrack[] {
         const { rowHeight, MSA, hideGapsEffective, blanks } = self
-        return (
-          MSA?.tracks
-            .filter(t => t.data)
-            .map(t => ({
-              model: {
-                ...t,
-                data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
-                height: rowHeight,
-              } as TextTrackModel,
-              ReactComponent: TextTrack,
-            })) || []
-        )
+        const tracks = (MSA?.tracks ?? []) as (TextTrackModel & {
+          data?: string
+        })[]
+        return tracks
+          .filter(t => !!t.data)
+          .map(t => ({
+            model: {
+              ...t,
+              data:
+                hideGapsEffective && t.data
+                  ? skipBlanks(blanks, t.data)
+                  : t.data,
+              height: rowHeight,
+            },
+            ReactComponent: TextTrack,
+          }))
       },
 
       /**
@@ -1722,39 +1726,34 @@ function stateModelFactory() {
        * #getter
        */
       get tidyInterProAnnotationTypes() {
-        const types = new Map<string, Accession>()
-        for (const annot of this.tidyInterProAnnotations) {
-          types.set(annot.accession, annot)
-        }
-        return types
+        return new Map(
+          this.tidyInterProAnnotations.map(annot => [annot.accession, annot]),
+        )
       },
       /**
        * #getter
        */
       get tidyInterProAnnotations() {
-        const ret = []
         const { interProAnnotations } = self
-        if (interProAnnotations) {
-          for (const [id, val] of Object.entries(interProAnnotations)) {
-            for (const { signature, locations } of val.matches) {
-              const { entry } = signature
-              if (entry) {
-                const { name, accession, description } = entry
-                for (const { start, end } of locations) {
-                  ret.push({
+        if (!interProAnnotations) {
+          return []
+        }
+        return Object.entries(interProAnnotations)
+          .flatMap(([id, val]) =>
+            val.matches.flatMap(({ signature, locations }) =>
+              signature.entry
+                ? locations.map(({ start, end }) => ({
                     id,
-                    name,
-                    accession,
-                    description,
+                    name: signature.entry!.name,
+                    accession: signature.entry!.accession,
+                    description: signature.entry!.description,
                     start,
                     end,
-                  })
-                }
-              }
-            }
-          }
-        }
-        return ret.toSorted((a, b) => len(b) - len(a))
+                  }))
+                : [],
+            ),
+          )
+          .toSorted((a, b) => len(b) - len(a))
       },
       /**
        * #getter
@@ -2092,8 +2091,37 @@ function stateModelFactory() {
         ...rest
       } = snap
 
-      // remove the MSA/tree data from the tree if the filehandle available in
-      // which case it can be reloaded on refresh
+      const defaults: Record<string, unknown> = {
+        showDomains: defaultShowDomains,
+        hideGaps: defaultHideGaps,
+        allowedGappyness: defaultAllowedGappyness,
+        contrastLettering: defaultContrastLettering,
+        subFeatureRows: defaultSubFeatureRows,
+        drawMsaLetters: defaultDrawMsaLetters,
+        height: defaultHeight,
+        rowHeight: defaultRowHeight,
+        scrollY: defaultScrollY,
+        scrollX: defaultScrollX,
+        colWidth: defaultColWidth,
+        currentAlignment: defaultCurrentAlignment,
+        bgColor: defaultBgColor,
+        colorSchemeName: defaultColorSchemeName,
+        drawLabels: defaultDrawLabels,
+        labelsAlignRight: defaultLabelsAlignRight,
+        treeAreaWidth: defaultTreeAreaWidth,
+        treeWidth: defaultTreeWidth,
+        treeWidthMatchesArea: defaultTreeWidthMatchesArea,
+        showBranchLen: defaultShowBranchLen,
+        drawTree: defaultDrawTree,
+        drawNodeBubbles: defaultDrawNodeBubbles,
+      }
+
+      const nonDefaults = Object.fromEntries(
+        Object.entries(defaults)
+          .filter(([key, def]) => snap[key as keyof typeof snap] !== def)
+          .map(([key]) => [key, snap[key as keyof typeof snap]]),
+      )
+
       return {
         ...rest,
         data: {
@@ -2101,25 +2129,7 @@ function stateModelFactory() {
           ...(result.msaFilehandle ? {} : { msa }),
           ...(result.treeMetadataFilehandle ? {} : { treeMetadata }),
         },
-        // Main model - only include non-default values
-        ...(showDomains !== defaultShowDomains ? { showDomains } : {}),
-        ...(hideGaps !== defaultHideGaps ? { hideGaps } : {}),
-        ...(allowedGappyness !== defaultAllowedGappyness
-          ? { allowedGappyness }
-          : {}),
-        ...(contrastLettering !== defaultContrastLettering
-          ? { contrastLettering }
-          : {}),
-        ...(subFeatureRows !== defaultSubFeatureRows ? { subFeatureRows } : {}),
-        ...(drawMsaLetters !== defaultDrawMsaLetters ? { drawMsaLetters } : {}),
-        ...(height !== defaultHeight ? { height } : {}),
-        ...(rowHeight !== defaultRowHeight ? { rowHeight } : {}),
-        ...(scrollY !== defaultScrollY ? { scrollY } : {}),
-        ...(scrollX !== defaultScrollX ? { scrollX } : {}),
-        ...(colWidth !== defaultColWidth ? { colWidth } : {}),
-        ...(currentAlignment !== defaultCurrentAlignment
-          ? { currentAlignment }
-          : {}),
+        ...nonDefaults,
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ...(collapsed?.length ? { collapsed } : {}),
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -2134,26 +2144,6 @@ function stateModelFactory() {
           ? { featureFilters }
           : {}),
         ...(relativeTo !== undefined ? { relativeTo } : {}),
-        // MSA model - only include non-default values
-        ...(bgColor !== defaultBgColor ? { bgColor } : {}),
-        ...(colorSchemeName !== defaultColorSchemeName
-          ? { colorSchemeName }
-          : {}),
-        // Tree model - only include non-default values
-        ...(drawLabels !== defaultDrawLabels ? { drawLabels } : {}),
-        ...(labelsAlignRight !== defaultLabelsAlignRight
-          ? { labelsAlignRight }
-          : {}),
-        ...(treeAreaWidth !== defaultTreeAreaWidth ? { treeAreaWidth } : {}),
-        ...(treeWidth !== defaultTreeWidth ? { treeWidth } : {}),
-        ...(treeWidthMatchesArea !== defaultTreeWidthMatchesArea
-          ? { treeWidthMatchesArea }
-          : {}),
-        ...(showBranchLen !== defaultShowBranchLen ? { showBranchLen } : {}),
-        ...(drawTree !== defaultDrawTree ? { drawTree } : {}),
-        ...(drawNodeBubbles !== defaultDrawNodeBubbles
-          ? { drawNodeBubbles }
-          : {}),
       } as typeof snap
     })
 }

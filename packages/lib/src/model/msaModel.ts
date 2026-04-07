@@ -5,8 +5,6 @@ import { defaultBgColor, defaultColorSchemeName } from '../constants.ts'
 /**
  * #stateModel MSAModel
  */
-function x() {} // eslint-disable-line @typescript-eslint/no-unused-vars
-
 export function MSAModelF() {
   return types
     .model({
