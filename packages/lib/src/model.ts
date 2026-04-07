@@ -32,8 +32,6 @@ import {
   defaultDrawLabels,
   defaultDrawMsaLetters,
   defaultDrawNodeBubbles,
-  defaultShowDomains,
-  defaultSubFeatureRows,
   defaultDrawTree,
   defaultHeight,
   defaultHideGaps,
@@ -42,6 +40,8 @@ import {
   defaultScrollX,
   defaultScrollY,
   defaultShowBranchLen,
+  defaultShowDomains,
+  defaultSubFeatureRows,
   defaultTreeAreaWidth,
   defaultTreeWidth,
 } from './constants.ts'
@@ -1876,7 +1876,7 @@ function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            const gffText = self.data?.gff
+            const gffText = self.data.gff
             if (gffText) {
               try {
                 self.applyGFFText(gffText)

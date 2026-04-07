@@ -4,5 +4,7 @@ export function saveAs(blob: Blob, name: string) {
   a.href = url
   a.download = name
   a.click()
-  setTimeout(() => URL.revokeObjectURL(url), 40_000)
+  setTimeout(() => {
+    URL.revokeObjectURL(url)
+  }, 40_000)
 }

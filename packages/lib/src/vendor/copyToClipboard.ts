@@ -1,6 +1,7 @@
 export default function copy(text: string) {
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(text).catch(e => {
+  const clip = navigator.clipboard as Clipboard | undefined
+  if (clip?.writeText) {
+    clip.writeText(text).catch((e: unknown) => {
       console.error('Failed to copy to clipboard:', e)
     })
     return
@@ -9,7 +10,7 @@ export default function copy(text: string) {
   textarea.value = text
   textarea.style.position = 'fixed'
   textarea.style.opacity = '0'
-  document.body.appendChild(textarea)
+  document.body.append(textarea)
   textarea.select()
   document.execCommand('copy')
   textarea.remove()

@@ -152,7 +152,6 @@ export function renderTreeLabels({
     labelsAlignRight,
     drawTree,
     treeAreaWidth,
-    treeWidth,
     treeAreaWidthMinusMargin,
     marginLeft,
     leaves,

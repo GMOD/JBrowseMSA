@@ -6,7 +6,11 @@ import { observer } from 'mobx-react'
 
 import type { MsaViewModel } from '../../model.ts'
 
-const TreeSettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
+const TreeSettingsMenu = observer(function ({
+  model,
+}: {
+  model: MsaViewModel
+}) {
   const {
     drawTree,
     showBranchLen,

@@ -1,7 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
 import { collapse, find, hierarchy, leaves, sort, sum } from './hierarchy.ts'
-import { notEmpty } from '@jbrowse/core/util'
 
 import type { NodeWithIds } from './types.ts'
 

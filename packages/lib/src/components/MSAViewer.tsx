@@ -5,7 +5,6 @@ import useMeasure from '@jbrowse/core/util/useMeasure'
 import { ThemeProvider } from '@mui/material/styles'
 
 import MSAModelF from '../model.ts'
-
 import Loading from './Loading.tsx'
 
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
