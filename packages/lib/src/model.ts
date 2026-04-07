@@ -676,7 +676,7 @@ function stateModelFactory() {
        * #getter
        */
       get header() {
-        return this.MSA?.getHeader() || {}
+        return (this.MSA?.getHeader() || {}) as Record<string, unknown>
       },
 
       /**
