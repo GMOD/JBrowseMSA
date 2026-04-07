@@ -22,7 +22,7 @@ const { values, positionals } = parseArgs({
     },
     programs: {
       type: 'string',
-      default: 'Pfam',
+      default: 'NCBIfam',
     },
     email: {
       type: 'string',
@@ -54,7 +54,7 @@ OPTIONS:
   -o, --output <file>           Output GFF file (default: domains.gff)
   --local                       Use local InterProScan installation
   --interproscan-path <path>    Path to interproscan.sh (default: interproscan.sh)
-  --programs <list>             Comma-separated list of programs (default: Pfam)
+  --programs <list>             Comma-separated list of programs (default: NCBIfam)
   --email <email>               Email for EBI API (default: user@example.com)
   --batch-size <n>              Number of sequences per API batch (default: 30)
   -h, --help                    Show this help message
@@ -67,7 +67,7 @@ EXAMPLES:
   react-msaview-cli interproscan alignment.fasta -o domains.gff --local
 
   # Specify programs
-  react-msaview-cli interproscan alignment.clustal -o domains.gff --programs Pfam,SMART
+  react-msaview-cli interproscan alignment.clustal -o domains.gff --programs NCBIfam,SFLD
 `)
 }
 
