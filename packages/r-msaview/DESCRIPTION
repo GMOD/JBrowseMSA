@@ -1,0 +1,27 @@
+Package: msaviewr
+Title: Interactive Multiple Sequence Alignment Viewer
+Version: 0.1.0
+Authors@R: person("Colin", "Diesh", role = c("aut", "cre"),
+    email = "colin.diesh@gmail.com")
+Description: Interactive viewer for multiple sequence alignments and
+    phylogenetic trees, powered by react-msaview. Works with standard
+    R/Bioconductor objects (phylo, DNAStringSet, AAStringSet,
+    MultipleAlignment) and integrates with ggtree/treeio. Supports
+    FASTA, Stockholm, Clustal, and Newick formats. Renders as an
+    htmlwidget in RStudio, R Markdown, Quarto, and Shiny.
+License: MIT + file LICENSE
+URL: https://github.com/GMOD/react-msaview
+BugReports: https://github.com/GMOD/react-msaview/issues
+Imports:
+    htmlwidgets (>= 1.5.0)
+Suggests:
+    ape,
+    treeio,
+    Biostrings,
+    ggtree,
+    shiny,
+    knitr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+RoxygenNote: 7.3.0

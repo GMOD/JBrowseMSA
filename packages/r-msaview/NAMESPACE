@@ -1,0 +1,7 @@
+export(msaview)
+export(msaviewOutput)
+export(renderMsaview)
+importFrom(htmlwidgets, createWidget)
+importFrom(htmlwidgets, sizingPolicy)
+importFrom(htmlwidgets, shinyWidgetOutput)
+importFrom(htmlwidgets, shinyRenderWidget)
