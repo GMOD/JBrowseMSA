@@ -63,24 +63,16 @@ console.log('Updated packages/lib/src/version.ts')
 console.log('\nBuilding all packages...')
 run('pnpm build')
 
-// Publish packages in order
-console.log('\nPublishing packages...')
-for (const pkg of packages) {
-  const pkgDir = path.join(rootDir, 'packages', pkg)
-  console.log(`\nPublishing ${pkg}...`)
-  run('pnpm publish --no-git-checks --access public', pkgDir)
-}
-
 // Git operations
 const tag = `v${newVersion}`
 console.log(`\nCreating git tag ${tag}...`)
 run('git add -A')
 run(`git commit -m "${tag}"`)
 run(`git tag -a "${tag}" -m "${tag}"`)
-run('git push --follow-tags')
+run('git push && git push --tags')
 
 // Deploy app to GitHub Pages
 console.log('\nDeploying app to GitHub Pages...')
 run('pnpm run deploy', path.join(rootDir, 'packages/app'))
 
-console.log(`\n✓ Successfully released ${tag} and deployed app`)
+console.log(`\n✓ Released ${tag} — GitHub Actions will publish to npm`)
