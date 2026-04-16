@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Monorepo release script - bumps all package versions, builds, publishes, and pushes
+ * Monorepo release script - bumps all package versions, pushes
  * Usage: node scripts/release.js [patch|minor|major]
  */
 
@@ -61,7 +61,6 @@ console.log('Updated packages/lib/src/version.ts')
 
 // Build all packages
 console.log('\nBuilding all packages...')
-run('pnpm build')
 
 // Git operations
 const tag = `v${newVersion}`
