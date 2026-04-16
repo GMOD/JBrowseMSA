@@ -7,6 +7,8 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Settings from '@mui/icons-material/Settings'
 import { observer } from 'mobx-react'
 
+import { getDomainMenu } from './DomainsMenu.tsx'
+
 import type { MsaViewModel } from '../../model.ts'
 
 const MetadataDialog = lazy(() => import('../dialogs/MetadataDialog.tsx'))
@@ -49,6 +51,13 @@ const FileMenu = observer(({ model }: { model: MsaViewModel }) => {
               },
             ])
           },
+        },
+        {
+          label: 'Domain settings',
+          type: 'subMenu',
+          subMenu: getDomainMenu({
+            model,
+          }),
         },
         {
           label: 'Export SVG',

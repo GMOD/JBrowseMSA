@@ -6,7 +6,6 @@ import { IconButton } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import ColorSchemeMenu from './ColorSchemeMenu.tsx'
-import DomainsMenu from './DomainsMenu.tsx'
 import FileMenu from './FileMenu.tsx'
 import GappynessSlider from './GappynessSlider.tsx'
 import HeaderInfoArea from './HeaderInfoArea.tsx'
@@ -29,7 +28,6 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <div ref={ref} style={{ display: 'flex' }}>
       <FileMenu model={model} />
-      <DomainsMenu model={model} />
       <ColorSchemeMenu model={model} />
       <TreeSettingsMenu model={model} />
       <MSASettingsMenu model={model} />
