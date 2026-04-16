@@ -7,7 +7,7 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Settings from '@mui/icons-material/Settings'
 import { observer } from 'mobx-react'
 
-import { getDomainMenu } from './DomainsMenu.tsx'
+import { getDomainMenu } from './getDomainsMenu.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
