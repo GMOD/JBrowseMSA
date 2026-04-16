@@ -3,6 +3,11 @@
   "version": "5.0.9",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GMOD/JBrowseMSA.git",
+    "directory": "packages/cli"
+  },
   "bin": {
     "react-msaview-cli": "./dist/index.js"
   },
