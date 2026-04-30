@@ -92,7 +92,7 @@ function generateStateModelDocs(files: string[]) {
     }
 
     if (obj.type === 'stateModel') {
-      current.model = { ...obj, name, docs, id }
+      current.model = { ...obj, name, docs, id, category }
     } else if (obj.type === 'getter') {
       current.getters.push({ ...obj, name, docs, code })
     } else if (obj.type === 'method') {
