@@ -1,7 +1,4 @@
-import { describe, it, expect } from 'vitest'
-import { hierarchy } from '../../hierarchy.ts'
-
-type NodeWithIds = { id: string; children?: NodeWithIds[]; length?: number }
+import { describe, expect, it } from 'vitest'
 
 function calcDepthToLeaf(node: any): number {
   if (node.depthToLeaf !== undefined) {

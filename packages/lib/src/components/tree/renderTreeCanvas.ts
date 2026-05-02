@@ -1,7 +1,7 @@
 import { descendants, links } from '../../hierarchy.ts'
 
-import type { MsaViewModel } from '../../model.ts'
 import type { HierarchyNode } from '../../hierarchy.ts'
+import type { MsaViewModel } from '../../model.ts'
 import type { Theme } from '@mui/material'
 
 export const padding = 600

@@ -1,6 +1,6 @@
 import eslint from '@eslint/js'
 import { defineConfig } from 'eslint/config'
-import importPlugin from 'eslint-plugin-import'
+import { importX } from 'eslint-plugin-import-x'
 import eslintPluginReact from 'eslint-plugin-react'
 import eslintPluginReactHooks from 'eslint-plugin-react-hooks'
 import eslintPluginReactRefresh from 'eslint-plugin-react-refresh'
@@ -41,7 +41,7 @@ export default defineConfig(
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylisticTypeChecked,
   ...tseslint.configs.strictTypeChecked,
-  importPlugin.flatConfigs.recommended,
+  importX.flatConfigs.recommended,
   eslintPluginReact.configs.flat.recommended,
   {
     plugins: {
@@ -164,7 +164,7 @@ export default defineConfig(
         },
       ],
 
-      'import/no-unresolved': 'off',
+      'import-x/no-unresolved': 'off',
     },
   },
   {
@@ -176,7 +176,7 @@ export default defineConfig(
   },
   {
     rules: {
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           named: true,
