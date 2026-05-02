@@ -10,6 +10,10 @@ const extendBounds = 5
 const radius = 2.5
 const d = radius * 2
 
+// Cladogram positioning algorithm based on ape package's plot.phylo
+// Uses topological depth (steps to tips) instead of branch length for x-positioning
+// This ensures all leaf nodes align at the same x-coordinate (rightmost position)
+// See: https://github.com/emmanuelparadis/ape/blob/master/R/plot.phylo.R
 function calcDepthToLeaf(node: HierarchyNode): number {
   if (node.depthToLeaf !== undefined) {
     return node.depthToLeaf
@@ -36,6 +40,10 @@ function findMaxBranchLen(node: HierarchyNode): number {
   return maxLen
 }
 
+// Calculate node x-coordinate for both phylogram (with branch lengths) and cladogram (topology only) modes
+// For cladograms: x = (maxDepthToLeaf - nodeDepthToLeaf) / maxDepthToLeaf * maxWidth
+// This positions: leaves at maxWidth (rightmost), root at 0 (leftmost), internal nodes proportionally in between
+// Matches ape's: xx <- max(xx) - xx (where xx is depth from each node to tips)
 function getNodeX(
   node: HierarchyNode,
   showBranchLen: boolean,
