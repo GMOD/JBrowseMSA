@@ -1,2 +1,0 @@
-async function e(e,t){let n=await fetch(e,t);if(!n.ok)throw Error(`HTTP ${n.status} fetching ${e} ${await n.text()}`);return n}async function t(t,n){return(await e(t,n)).text()}async function n(t,n){return(await e(t,n)).json()}function r(e){return new Promise(t=>setTimeout(t,e))}export{t as n,r,n as t};
-//# sourceMappingURL=fetchUtils-kzx9jVFA.js.map

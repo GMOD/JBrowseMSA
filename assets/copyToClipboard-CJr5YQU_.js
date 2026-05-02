@@ -1,0 +1,2 @@
+function e(e){let t=navigator.clipboard;if(t?.writeText){t.writeText(e).catch(e=>{console.error(`Failed to copy to clipboard:`,e)});return}let n=document.createElement(`textarea`);n.value=e,n.style.position=`fixed`,n.style.opacity=`0`,document.body.append(n),n.select(),document.execCommand(`copy`),n.remove()}export{e as t};
+//# sourceMappingURL=copyToClipboard-CJr5YQU_.js.map

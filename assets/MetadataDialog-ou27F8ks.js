@@ -1,0 +1,2 @@
+import"./chunk-CaILmz35.js";import{n as e,r as t,t as n}from"./SequenceTextArea-BsxFvhL0.js";import{t as r}from"./DialogContent-wEb5BR6m.js";import{Ln as i,P as a,Un as o,Y as s}from"./index-CEuvCYHt.js";o();var c=i(),l=s(function({model:i,onClose:o}){let{header:s}=i;return(0,c.jsx)(a,{onClose:()=>{o()},open:!0,title:`Metadata`,maxWidth:`xl`,children:(0,c.jsxs)(r,{children:[(0,c.jsx)(t,{attributes:s}),(0,c.jsx)(e,{title:`sequence`,children:(0,c.jsx)(n,{str:i.rows})})]})})});export{l as default};
+//# sourceMappingURL=MetadataDialog-ou27F8ks.js.map
