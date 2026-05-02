@@ -10,6 +10,7 @@ export interface HierarchyNode<T = NodeWithIds> {
   x?: number
   y?: number
   len?: number
+  depthToLeaf?: number
   _children?: HierarchyNode<T>[] | null
 }
 
