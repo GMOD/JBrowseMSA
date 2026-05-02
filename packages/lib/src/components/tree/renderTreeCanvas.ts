@@ -49,9 +49,6 @@ export function renderTree({
   ctx.strokeStyle = theme.palette.text.primary
   for (const link of links(hierarchy)) {
     const { source, target } = link
-    if (target.height === 0 && !showBranchLen) {
-      continue
-    }
     const sy = source.x!
     const ty = target.x!
     const tx = showBranchLen ? target.len : target.y
