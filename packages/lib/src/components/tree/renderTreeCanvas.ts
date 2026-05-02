@@ -229,7 +229,7 @@ export function renderTreeLabels({
       const yp = y + fontSize / 4
       let xp = 0
       if (!noTree) {
-        xp = (getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf) || 0)
+        xp = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf) || 0
       }
 
       const { width } = ctx.measureText(displayName)

@@ -1,1 +1,9 @@
 pnpm-lock.yaml
+
+# Build artifacts
+**/node_modules
+**/dist
+**/build
+**/esm
+**/bundle
+**/public
