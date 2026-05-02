@@ -1,6 +1,7 @@
 import { descendants, links } from '../../hierarchy.ts'
 
 import type { MsaViewModel } from '../../model.ts'
+import type { HierarchyNode } from '../../hierarchy.ts'
 import type { Theme } from '@mui/material'
 
 export const padding = 600
@@ -8,6 +9,45 @@ export const padding = 600
 const extendBounds = 5
 const radius = 2.5
 const d = radius * 2
+
+function calcDepthToLeaf(node: HierarchyNode): number {
+  if (node.depthToLeaf !== undefined) {
+    return node.depthToLeaf
+  }
+  if (!node.children || node.children.length === 0) {
+    node.depthToLeaf = 0
+  } else {
+    let maxDepth = 0
+    for (const child of node.children) {
+      maxDepth = Math.max(maxDepth, 1 + calcDepthToLeaf(child))
+    }
+    node.depthToLeaf = maxDepth
+  }
+  return node.depthToLeaf
+}
+
+function findMaxBranchLen(node: HierarchyNode): number {
+  let maxLen = node.len || 0
+  if (node.children) {
+    for (const child of node.children) {
+      maxLen = Math.max(maxLen, findMaxBranchLen(child))
+    }
+  }
+  return maxLen
+}
+
+function getNodeX(
+  node: HierarchyNode,
+  showBranchLen: boolean,
+  maxBranchLen: number,
+  maxDepthToLeaf: number,
+): number | undefined {
+  if (showBranchLen) {
+    return node.len
+  }
+  const depthToLeaf = calcDepthToLeaf(node)
+  return ((maxDepthToLeaf - depthToLeaf) / maxDepthToLeaf) * maxBranchLen
+}
 
 interface ClickEntry {
   name: string
@@ -47,12 +87,14 @@ export function renderTree({
   const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
   const by = blockSizeYOverride || blockSize
   ctx.strokeStyle = theme.palette.text.primary
+  const maxBranchLen = findMaxBranchLen(hierarchy)
+  const maxDepthToLeaf = calcDepthToLeaf(hierarchy)
   for (const link of links(hierarchy)) {
     const { source, target } = link
     const sy = source.x!
     const ty = target.x!
-    const tx = showBranchLen ? target.len : target.y
-    const sx = showBranchLen ? source.len : source.y
+    const tx = getNodeX(target, showBranchLen, maxBranchLen, maxDepthToLeaf)
+    const sx = getNodeX(source, showBranchLen, maxBranchLen, maxDepthToLeaf)
     if (tx === undefined || sx === undefined) {
       continue
     }
@@ -93,8 +135,10 @@ export function renderNodeBubbles({
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride || blockSize
+  const maxBranchLen = findMaxBranchLen(hierarchy)
+  const maxDepthToLeaf = calcDepthToLeaf(hierarchy)
   for (const node of descendants(hierarchy)) {
-    const x = showBranchLen ? node.len : node.y
+    const x = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
     if (x === undefined) {
       continue
     }
@@ -102,7 +146,7 @@ export function renderNodeBubbles({
     const y = node.x!
     const { id, name } = data
     if (
-      node.height > 1 &&
+      node.height >= 1 &&
       y > offsetY - extendBounds &&
       y < offsetY + by + extendBounds
     ) {
@@ -153,6 +197,7 @@ export function renderTreeLabels({
     marginLeft,
     leaves,
     noTree,
+    hierarchy,
   } = model
   const by = blockSizeYOverride || blockSize
   const emHeight = ctx.measureText('M').width
@@ -162,13 +207,13 @@ export function renderTreeLabels({
   } else {
     ctx.textAlign = 'start'
   }
+  const maxBranchLen = findMaxBranchLen(hierarchy)
+  const maxDepthToLeaf = calcDepthToLeaf(hierarchy)
   for (const node of leaves) {
     const {
       data: { name, id },
     } = node
-    const len = node.len
     const y = node.x!
-    const x = node.y!
 
     const displayName = treeMetadata[name]?.genome || name
     if (y > offsetY - extendBounds && y < offsetY + by + extendBounds) {
@@ -176,7 +221,7 @@ export function renderTreeLabels({
       const yp = y + fontSize / 4
       let xp = 0
       if (!noTree) {
-        xp = (showBranchLen ? len : x) || 0
+        xp = (getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf) || 0)
       }
 
       const { width } = ctx.measureText(displayName)
