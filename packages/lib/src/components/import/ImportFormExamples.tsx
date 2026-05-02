@@ -27,7 +27,7 @@ function ListItem({
         }}
         href="#"
       >
-        <Typography display="inline">{children}</Typography>
+        <Typography component="span">{children}</Typography>
       </Link>
     </li>
   )

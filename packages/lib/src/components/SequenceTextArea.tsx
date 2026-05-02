@@ -67,10 +67,10 @@ export default function SequenceTextArea({ str }: { str: [string, string][] }) {
         maxRows={10}
         fullWidth
         value={disp}
-        InputProps={{
-          readOnly: true,
-          classes: {
-            input: classes.textAreaFont,
+        slotProps={{
+          input: {
+            readOnly: true,
+            className: classes.textAreaFont,
           },
         }}
       />
