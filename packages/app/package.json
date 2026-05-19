@@ -13,20 +13,20 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@jbrowse/core": "^4.2.0",
+    "@jbrowse/core": "^4.2.1",
     "@jbrowse/mobx-state-tree": "^5.6.0",
-    "@mui/icons-material": "^9.0.0",
-    "@mui/material": "^9.0.0",
-    "@mui/system": "^9.0.0",
+    "@mui/icons-material": "^9.0.1",
+    "@mui/material": "^9.0.1",
+    "@mui/system": "^9.0.1",
     "buffer": "^6.0.3",
-    "eslint": "^10.2.1",
+    "eslint": "^10.4.0",
     "gh-pages": "^6.3.0",
-    "mobx": "^6.15.0",
+    "mobx": "^6.15.3",
     "mobx-react": "^9.2.1",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "react-msaview": "workspace:*",
     "rxjs": "^7.8.2",
-    "tss-react": "^4.9.20"
+    "tss-react": "^4.9.21"
   }
 }

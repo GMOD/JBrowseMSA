@@ -53,12 +53,12 @@
     "main": "dist/index.js"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0"
+    "@types/node": "^25.8.0"
   },
   "dependencies": {
     "@jbrowse/svgcanvas": "workspace:*",
-    "@mui/icons-material": "^9.0.0",
-    "@mui/material": "^9.0.0",
+    "@mui/icons-material": "^9.0.1",
+    "@mui/material": "^9.0.1",
     "colord": "^2.9.3",
     "flatbush": "^4.5.1",
     "msa-parsers": "workspace:*"
