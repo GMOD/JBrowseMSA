@@ -23,7 +23,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "clustal-js": "^2.0.14",
+    "clustal-js": "^2.0.15",
     "emf-js": "^2.0.0"
   },
   "publishConfig": {
@@ -38,6 +38,6 @@
   },
   "devDependencies": {
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.7"
   }
 }

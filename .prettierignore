@@ -7,3 +7,4 @@ pnpm-lock.yaml
 **/esm
 **/bundle
 **/public
+packages/r-msaview/inst/htmlwidgets/lib/react-msaview.umd.js 
