@@ -41,7 +41,13 @@ export function renderMSABlock({
   ctx.scale(k, k)
   ctx.translate(-offsetX, rowHeight / 2 - offsetY)
   ctx.textAlign = 'center'
-  ctx.font = ctx.font.replace(/\d+px/, `${bgColor ? '' : 'bold '}${fontSize}px`)
+  // match an optional existing "bold " so re-renders don't accumulate it
+  // (an invalid "bold bold 16px" string would be silently ignored by canvas,
+  // freezing the font size against zoom changes)
+  ctx.font = ctx.font.replace(
+    /(?:bold )?\d+px/,
+    `${bgColor ? '' : 'bold '}${fontSize}px`,
+  )
 
   const yStart = Math.max(0, Math.floor((offsetY - rowHeight) / rowHeight))
   const yEnd = Math.max(0, Math.ceil((offsetY + by + rowHeight) / rowHeight))
@@ -130,14 +136,15 @@ function drawTiles({
         const isMatchingReference =
           referenceSeq && name !== relativeTo && letter === referenceSeq[j]
 
-        const color = isClustalX
-          ? model.colClustalX[xStart + j]![letter]
-          : isPercentIdentity
-            ? (() => {
-                const consensus = model.colConsensus[xStart + j]!
-                return letter === consensus.letter ? consensus.color : undefined
-              })()
-            : colorScheme[letter.toUpperCase()]
+        let color: string | undefined
+        if (isClustalX) {
+          color = model.colClustalX[xStart + j]![letter]
+        } else if (isPercentIdentity) {
+          const consensus = model.colConsensus[xStart + j]!
+          color = letter === consensus.letter ? consensus.color : undefined
+        } else {
+          color = colorScheme[letter.toUpperCase()]
+        }
         if (bgColor || isClustalX || isPercentIdentity) {
           // Use a very light background for matching positions in relative mode
           const finalColor = isMatchingReference

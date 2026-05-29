@@ -49,9 +49,11 @@ import {
 import { createPaletteMap } from './createPaletteMap.ts'
 import { flatToTree } from './flatToTree.ts'
 import {
+  calcDepthToLeaf,
   clusterLayout,
   collapse,
   find,
+  findMaxBranchLen,
   hierarchy,
   leaves,
   links,
@@ -1079,6 +1081,22 @@ function stateModelFactory() {
        */
       get leaves() {
         return leaves(this.hierarchy)
+      },
+
+      /**
+       * #getter
+       * max branch length across the tree, used to scale phylogram x-positions
+       */
+      get maxBranchLength() {
+        return findMaxBranchLen(this.hierarchy)
+      },
+
+      /**
+       * #getter
+       * max topological depth to a tip, used to scale cladogram x-positions
+       */
+      get maxDepthToLeaf() {
+        return calcDepthToLeaf(this.hierarchy)
       },
 
       /**

@@ -43,35 +43,23 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
             ctx.resetTransform()
             ctx.clearRect(0, 0, w, h)
 
-            if (relativeTo) {
-              const referenceLeaf = leaves.find(
-                leaf => leaf.data.name === relativeTo,
-              )
-              if (referenceLeaf) {
-                ctx.fillStyle = referenceColor
-                ctx.fillRect(
-                  0,
-                  referenceLeaf.x! + sy - rowHeight / 2,
-                  w,
-                  rowHeight,
-                )
+            const leafByName = new Map(leaves.map(leaf => [leaf.data.name, leaf]))
+            const fillRow = (name: string) => {
+              const leaf = leafByName.get(name)
+              if (leaf) {
+                ctx.fillRect(0, leaf.x! + sy - rowHeight / 2, w, rowHeight)
               }
+            }
+
+            if (relativeTo) {
+              ctx.fillStyle = referenceColor
+              fillRow(relativeTo)
             }
 
             if (hoveredTreeNode) {
               ctx.fillStyle = treeHoverColor
               for (const descendantName of hoveredTreeNode.descendantNames) {
-                const matchingLeaf = leaves.find(
-                  leaf => leaf.data.name === descendantName,
-                )
-                if (matchingLeaf) {
-                  ctx.fillRect(
-                    0,
-                    matchingLeaf.x! + sy - rowHeight / 2,
-                    w,
-                    rowHeight,
-                  )
-                }
+                fillRow(descendantName)
               }
             }
 
@@ -80,18 +68,8 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
               mouseOverRowName !== relativeTo &&
               !hoveredTreeNode?.descendantNames.includes(mouseOverRowName)
             ) {
-              const matchingLeaf = leaves.find(
-                leaf => leaf.data.name === mouseOverRowName,
-              )
-              if (matchingLeaf) {
-                ctx.fillStyle = treeHoverColor
-                ctx.fillRect(
-                  0,
-                  matchingLeaf.x! + sy - rowHeight / 2,
-                  w,
-                  rowHeight,
-                )
-              }
+              ctx.fillStyle = treeHoverColor
+              fillRow(mouseOverRowName)
             }
           }
         })

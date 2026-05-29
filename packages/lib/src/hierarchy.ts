@@ -204,6 +204,33 @@ export function collapse<T>(node: HierarchyNode<T>) {
   }
 }
 
+// Cladogram positioning based on ape's plot.phylo: uses topological depth (max
+// steps to a tip) instead of branch length so all leaves align at the rightmost
+// x. Memoizes onto node.depthToLeaf since the layout walks the tree repeatedly.
+// See https://github.com/emmanuelparadis/ape/blob/master/R/plot.phylo.R
+export function calcDepthToLeaf(node: HierarchyNode): number {
+  if (node.depthToLeaf === undefined) {
+    let maxDepth = 0
+    if (node.children) {
+      for (const child of node.children) {
+        maxDepth = Math.max(maxDepth, 1 + calcDepthToLeaf(child))
+      }
+    }
+    node.depthToLeaf = maxDepth
+  }
+  return node.depthToLeaf
+}
+
+export function findMaxBranchLen(node: HierarchyNode): number {
+  let maxLen = node.len || 0
+  if (node.children) {
+    for (const child of node.children) {
+      maxLen = Math.max(maxLen, findMaxBranchLen(child))
+    }
+  }
+  return maxLen
+}
+
 export function maxLength(d: HierarchyNode): number {
   return (
     (d.data.length || 0) +

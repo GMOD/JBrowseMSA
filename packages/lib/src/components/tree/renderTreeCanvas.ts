@@ -1,4 +1,4 @@
-import { descendants, links } from '../../hierarchy.ts'
+import { calcDepthToLeaf, descendants, links } from '../../hierarchy.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -9,36 +9,6 @@ export const padding = 600
 const extendBounds = 5
 const radius = 2.5
 const d = radius * 2
-
-// Cladogram positioning algorithm based on ape package's plot.phylo
-// Uses topological depth (steps to tips) instead of branch length for x-positioning
-// This ensures all leaf nodes align at the same x-coordinate (rightmost position)
-// See: https://github.com/emmanuelparadis/ape/blob/master/R/plot.phylo.R
-function calcDepthToLeaf(node: HierarchyNode): number {
-  if (node.depthToLeaf !== undefined) {
-    return node.depthToLeaf
-  }
-  if (!node.children || node.children.length === 0) {
-    node.depthToLeaf = 0
-  } else {
-    let maxDepth = 0
-    for (const child of node.children) {
-      maxDepth = Math.max(maxDepth, 1 + calcDepthToLeaf(child))
-    }
-    node.depthToLeaf = maxDepth
-  }
-  return node.depthToLeaf
-}
-
-function findMaxBranchLen(node: HierarchyNode): number {
-  let maxLen = node.len || 0
-  if (node.children) {
-    for (const child of node.children) {
-      maxLen = Math.max(maxLen, findMaxBranchLen(child))
-    }
-  }
-  return maxLen
-}
 
 // Calculate node x-coordinate for both phylogram (with branch lengths) and cladogram (topology only) modes
 // For cladograms: x = (maxDepthToLeaf - nodeDepthToLeaf) / maxDepthToLeaf * maxWidth
@@ -84,19 +54,21 @@ export function renderTree({
   ctx,
   model,
   theme,
+  maxBranchLen,
+  maxDepthToLeaf,
   blockSizeYOverride,
 }: {
   offsetY: number
   ctx: CanvasRenderingContext2D
   model: MsaViewModel
   theme: Theme
+  maxBranchLen: number
+  maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
   const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
   const by = blockSizeYOverride || blockSize
   ctx.strokeStyle = theme.palette.text.primary
-  const maxBranchLen = findMaxBranchLen(hierarchy)
-  const maxDepthToLeaf = calcDepthToLeaf(hierarchy)
   for (const link of links(hierarchy)) {
     const { source, target } = link
     const sy = source.x!
@@ -127,12 +99,16 @@ export function renderNodeBubbles({
   clickMap,
   offsetY,
   model,
+  maxBranchLen,
+  maxDepthToLeaf,
   blockSizeYOverride,
 }: {
   ctx: CanvasRenderingContext2D
   clickMap?: ClickMapIndex
   offsetY: number
   model: MsaViewModel
+  maxBranchLen: number
+  maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
   const {
@@ -143,8 +119,6 @@ export function renderNodeBubbles({
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride || blockSize
-  const maxBranchLen = findMaxBranchLen(hierarchy)
-  const maxDepthToLeaf = calcDepthToLeaf(hierarchy)
   for (const node of descendants(hierarchy)) {
     const x = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
     if (x === undefined) {
@@ -184,6 +158,8 @@ export function renderTreeLabels({
   offsetY,
   ctx,
   clickMap,
+  maxBranchLen,
+  maxDepthToLeaf,
   blockSizeYOverride,
 }: {
   model: MsaViewModel
@@ -191,6 +167,8 @@ export function renderTreeLabels({
   ctx: CanvasRenderingContext2D
   clickMap?: ClickMapIndex
   theme: Theme
+  maxBranchLen: number
+  maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
   const {
@@ -205,7 +183,6 @@ export function renderTreeLabels({
     marginLeft,
     leaves,
     noTree,
-    hierarchy,
   } = model
   const by = blockSizeYOverride || blockSize
   const emHeight = ctx.measureText('M').width
@@ -215,8 +192,6 @@ export function renderTreeLabels({
   } else {
     ctx.textAlign = 'start'
   }
-  const maxBranchLen = findMaxBranchLen(hierarchy)
-  const maxDepthToLeaf = calcDepthToLeaf(hierarchy)
   for (const node of leaves) {
     const {
       data: { name, id },
@@ -319,12 +294,18 @@ export function renderTreeCanvas({
   const font = ctx.font
   ctx.font = font.replace(/\d+px/, `${fontSize}px`)
 
+  // memoized on the model and shared across the tree/bubble/label passes (and
+  // across all tree blocks) rather than re-traversing the hierarchy in each
+  const { maxBranchLength: maxBranchLen, maxDepthToLeaf } = model
+
   if (!noTree && drawTree) {
     renderTree({
       ctx,
       offsetY,
       model,
       theme,
+      maxBranchLen,
+      maxDepthToLeaf,
       blockSizeYOverride,
     })
 
@@ -334,6 +315,8 @@ export function renderTreeCanvas({
         offsetY,
         clickMap,
         model,
+        maxBranchLen,
+        maxDepthToLeaf,
         blockSizeYOverride,
       })
     }
@@ -346,6 +329,8 @@ export function renderTreeCanvas({
       model,
       clickMap,
       theme,
+      maxBranchLen,
+      maxDepthToLeaf,
       blockSizeYOverride,
     })
   }
