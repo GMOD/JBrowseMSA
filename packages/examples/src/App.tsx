@@ -43,7 +43,7 @@ export default function App() {
                 setSelected(i)
               }}
             >
-              <ListItemText primary={e.name} secondary={e.description} />
+              <ListItemText primary={e.name} />
             </ListItemButton>
           ))}
         </List>
