@@ -20,6 +20,7 @@ import {
 } from 'msa-parsers'
 
 import { blocksX, blocksY } from './calculateBlocks.ts'
+import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
 import ConservationTrack from './components/ConservationTrack.tsx'
 import TextTrack from './components/TextTrack.tsx'
@@ -242,7 +243,9 @@ function stateModelFactory() {
       /**
        * #volatile
        */
-      status: undefined as { msg: string; url?: string } | undefined,
+      status: undefined as
+        | { msg: string; url?: string; onCancel?: () => void }
+        | undefined,
       /**
        * #volatile
        * high resolution scale factor, helps make canvas look better on hi-dpi
@@ -922,13 +925,9 @@ function stateModelFactory() {
         const columns = this.columns2d
         for (const column of columns) {
           for (let j = 0; j < column.length; j++) {
-            const l = r[j] || {}
+            const l = (r[j] ??= {})
             const cj = column[j]!
-            if (!l[cj]) {
-              l[cj] = 0
-            }
-            l[cj]++
-            r[j] = l
+            l[cj] = (l[cj] ?? 0) + 1
           }
         }
         return r
@@ -1006,136 +1005,9 @@ function stateModelFactory() {
        */
       get colClustalX() {
         const { colStats, colStatsSums } = this
-        return colStats.map((stats, i) => {
-          const total = colStatsSums[i]!
-          const colors: Record<string, string> = {}
-
-          const W = stats.W ?? 0
-          const L = stats.L ?? 0
-          const V = stats.V ?? 0
-          const I = stats.I ?? 0
-          const M = stats.M ?? 0
-          const A = stats.A ?? 0
-          const F = stats.F ?? 0
-          const C = stats.C ?? 0
-          const H = stats.H ?? 0
-          const P = stats.P ?? 0
-          const R = stats.R ?? 0
-          const K = stats.K ?? 0
-          const Q = stats.Q ?? 0
-          const E = stats.E ?? 0
-          const D = stats.D ?? 0
-          const T = stats.T ?? 0
-          const S = stats.S ?? 0
-          const G = stats.G ?? 0
-          const Y = stats.Y ?? 0
-          const N = stats.N ?? 0
-
-          const WLVIMAFCHPY = W + L + V + I + M + A + F + C + H + P + Y
-          const KR = K + R
-          const QE = Q + E
-          const ED = E + D
-          const TS = T + S
-
-          if (WLVIMAFCHPY / total > 0.6) {
-            colors.W = 'rgb(128,179,230)'
-            colors.L = 'rgb(128,179,230)'
-            colors.V = 'rgb(128,179,230)'
-            colors.A = 'rgb(128,179,230)'
-            colors.I = 'rgb(128,179,230)'
-            colors.M = 'rgb(128,179,230)'
-            colors.F = 'rgb(128,179,230)'
-            colors.C = 'rgb(128,179,230)'
-          }
-
-          if (
-            KR / total > 0.6 ||
-            K / total > 0.8 ||
-            R / total > 0.8 ||
-            Q / total > 0.8
-          ) {
-            colors.K = '#d88'
-            colors.R = '#d88'
-          }
-
-          if (
-            KR / total > 0.6 ||
-            QE / total > 0.5 ||
-            E / total > 0.8 ||
-            Q / total > 0.8 ||
-            D / total > 0.8
-          ) {
-            colors.E = 'rgb(192, 72, 192)'
-          }
-
-          if (
-            KR / total > 0.6 ||
-            ED / total > 0.5 ||
-            K / total > 0.8 ||
-            R / total > 0.8 ||
-            Q / total > 0.8
-          ) {
-            colors.D = 'rgb(204, 77, 204)'
-          }
-
-          if (N / total > 0.5 || Y / total > 0.85) {
-            colors.N = '#8f8'
-          }
-
-          if (
-            KR / total > 0.6 ||
-            QE / total > 0.6 ||
-            Q / total > 0.85 ||
-            E / total > 0.85 ||
-            K / total > 0.85 ||
-            R / total > 0.85
-          ) {
-            colors.Q = '#8f8'
-          }
-
-          if (
-            WLVIMAFCHPY / total > 0.6 ||
-            TS / total > 0.5 ||
-            S / total > 0.85 ||
-            T / total > 0.85
-          ) {
-            colors.S = 'rgb(26,204,26)'
-            colors.T = 'rgb(26,204,26)'
-          }
-
-          if (C / total > 0.85) {
-            colors.C = 'rgb(240, 128, 128)'
-          }
-
-          if (G / total > 0) {
-            colors.G = 'rgb(240, 144, 72)'
-          }
-
-          if (P / total > 0) {
-            colors.P = 'rgb(204, 204, 0)'
-          }
-
-          if (
-            WLVIMAFCHPY / total > 0.6 ||
-            W / total > 0.85 ||
-            Y / total > 0.85 ||
-            A / total > 0.85 ||
-            C / total > 0.85 ||
-            P / total > 0.85 ||
-            Q / total > 0.85 ||
-            F / total > 0.85 ||
-            H / total > 0.85 ||
-            I / total > 0.85 ||
-            L / total > 0.85 ||
-            M / total > 0.85 ||
-            V / total > 0.85
-          ) {
-            colors.H = 'rgb(26, 179, 179)'
-            colors.Y = 'rgb(26, 179, 179)'
-          }
-
-          return colors
-        })
+        return colStats.map((stats, i) =>
+          clustalXColumnColors(stats, colStatsSums[i]!),
+        )
       },
 
       /**
@@ -1420,7 +1292,7 @@ function stateModelFactory() {
       /**
        * #action
        */
-      setStatus(status?: { msg: string; url?: string }) {
+      setStatus(status?: { msg: string; url?: string; onCancel?: () => void }) {
         self.status = status
       },
     }))
@@ -1786,8 +1658,7 @@ function stateModelFactory() {
       },
 
       initFilter(arg: string) {
-        const ret = self.featureFilters.get(arg)
-        if (ret === undefined) {
+        if (!self.featureFilters.has(arg)) {
           self.featureFilters.set(arg, true)
         }
       },

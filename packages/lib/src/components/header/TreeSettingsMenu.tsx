@@ -4,6 +4,8 @@ import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
 import AccountTree from '@mui/icons-material/AccountTree'
 import { observer } from 'mobx-react'
 
+import { treeSettingsMenuItems } from './settingsMenuItems.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
 const TreeSettingsMenu = observer(function ({
@@ -11,60 +13,14 @@ const TreeSettingsMenu = observer(function ({
 }: {
   model: MsaViewModel
 }) {
-  const {
-    drawTree,
-    showBranchLen,
-    labelsAlignRight,
-    drawNodeBubbles,
-    drawLabels,
-    rows,
-  } = model
+  const { rows } = model
   return (
     <CascadingMenuButton
       closeAfterItemClick={false}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       menuItems={[
-        {
-          label: 'Show branch length',
-          type: 'checkbox',
-          checked: showBranchLen,
-          onClick: () => {
-            model.setShowBranchLen(!showBranchLen)
-          },
-        },
-        {
-          label: 'Show tree',
-          type: 'checkbox',
-          checked: drawTree,
-          onClick: () => {
-            model.setDrawTree(!drawTree)
-          },
-        },
-        {
-          label: 'Draw clickable bubbles on tree branches',
-          type: 'checkbox',
-          checked: drawNodeBubbles,
-          onClick: () => {
-            model.setDrawNodeBubbles(!drawNodeBubbles)
-          },
-        },
-        {
-          label: 'Tree labels align right',
-          type: 'checkbox',
-          checked: labelsAlignRight,
-          onClick: () => {
-            model.setLabelsAlignRight(!labelsAlignRight)
-          },
-        },
-        {
-          label: 'Draw labels',
-          type: 'checkbox',
-          checked: drawLabels,
-          onClick: () => {
-            model.setDrawLabels(!drawLabels)
-          },
-        },
+        ...treeSettingsMenuItems(model),
         ...(rows.length >= 2
           ? [
               {

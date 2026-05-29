@@ -1,15 +1,29 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { BaseTooltip } from '@jbrowse/core/ui'
-import { useTheme } from '@mui/material'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
-import { colorContrast } from '../../util.ts'
+import { useColorContrast } from '../../useColorContrast.ts'
 
 import type { MsaViewModel } from '../../model.ts'
+
+function eventToColRow(
+  event: React.MouseEvent,
+  el: HTMLCanvasElement,
+  offsetX: number,
+  offsetY: number,
+  colWidth: number,
+  rowHeight: number,
+) {
+  const { left, top } = el.getBoundingClientRect()
+  return {
+    col: Math.floor((event.clientX - left + offsetX) / colWidth),
+    row: Math.floor((event.clientY - top + offsetY) / rowHeight),
+  }
+}
 
 const MSACanvasBlock = observer(function ({
   model,
@@ -31,12 +45,7 @@ const MSACanvasBlock = observer(function ({
     mouseClickRow,
     highResScaleFactor,
   } = model
-  const theme = useTheme()
-
-  const contrastScheme = useMemo(
-    () => colorContrast(colorScheme, theme),
-    [colorScheme, theme],
-  )
+  const { theme, contrastScheme } = useColorContrast(colorScheme)
 
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -87,36 +96,44 @@ const MSACanvasBlock = observer(function ({
       <canvas
         ref={ref}
         onMouseMove={event => {
-          if (!ref.current) {
-            return
-          }
-          setMousePosition({ x: event.clientX, y: event.clientY })
-          const { left, top } = ref.current.getBoundingClientRect()
-          const mouseX = event.clientX - left + offsetX
-          const mouseY = event.clientY - top + offsetY
-          const x = Math.floor(mouseX / colWidth)
-          const y = Math.floor(mouseY / rowHeight)
-
-          // Only set mouse position if within valid MSA bounds
-          if (x >= 0 && x < model.numColumns && y >= 0 && y < model.numRows) {
-            model.setMousePos(x, y)
-          } else {
-            model.setMousePos(undefined, undefined)
+          if (ref.current) {
+            setMousePosition({ x: event.clientX, y: event.clientY })
+            const { col, row } = eventToColRow(
+              event,
+              ref.current,
+              offsetX,
+              offsetY,
+              colWidth,
+              rowHeight,
+            )
+            // Only set mouse position if within valid MSA bounds
+            if (
+              col >= 0 &&
+              col < model.numColumns &&
+              row >= 0 &&
+              row < model.numRows
+            ) {
+              model.setMousePos(col, row)
+            } else {
+              model.setMousePos(undefined, undefined)
+            }
           }
         }}
         onClick={event => {
-          if (!ref.current) {
-            return
-          }
-          const { left, top } = ref.current.getBoundingClientRect()
-          const mouseX = event.clientX - left + offsetX
-          const mouseY = event.clientY - top + offsetY
-          const x = Math.floor(mouseX / colWidth)
-          const y = Math.floor(mouseY / rowHeight)
-          if (x === mouseClickCol && y === mouseClickRow) {
-            model.setMouseClickPos(undefined, undefined)
-          } else {
-            model.setMouseClickPos(x, y)
+          if (ref.current) {
+            const { col, row } = eventToColRow(
+              event,
+              ref.current,
+              offsetX,
+              offsetY,
+              colWidth,
+              rowHeight,
+            )
+            if (col === mouseClickCol && row === mouseClickRow) {
+              model.setMouseClickPos(undefined, undefined)
+            } else {
+              model.setMouseClickPos(col, row)
+            }
           }
         }}
         onMouseLeave={() => {

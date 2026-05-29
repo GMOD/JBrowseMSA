@@ -1,18 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import { observer } from 'mobx-react'
 
+import { useDragScroll } from '../../useDragScroll.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
-interface ClickCoord {
-  clientX: number
-  scrollX: number
-}
-
 const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
-  const [mouseDown, setMouseDown] = useState<ClickCoord>()
   const [hovered, setHovered] = useState(false)
-  const scheduled = useRef(false)
   const { scrollX, msaAreaWidth, minimapHeight, colWidth, numColumns } = model
   const unit = msaAreaWidth / numColumns / colWidth
   const left = -scrollX
@@ -22,32 +17,15 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
   const fill = 'rgba(66, 119, 127, 0.3)'
   const w = Math.max(e - s, 20)
 
-  useEffect(() => {
-    function fn(event: MouseEvent) {
-      if (mouseDown !== undefined) {
-        if (!scheduled.current) {
-          scheduled.current = true
-          window.requestAnimationFrame(() => {
-            model.setScrollX(
-              mouseDown.scrollX - (event.clientX - mouseDown.clientX) / unit,
-            )
-            scheduled.current = false
-          })
-        }
-      }
-    }
-    function fn2() {
-      setMouseDown(undefined)
-    }
-    if (mouseDown !== undefined) {
-      document.addEventListener('mousemove', fn)
-      document.addEventListener('mouseup', fn2)
-      return () => {
-        document.removeEventListener('mousemove', fn)
-        document.removeEventListener('mousemove', fn2)
-      }
-    }
-  }, [model, unit, mouseDown])
+  const { startDrag } = useDragScroll(
+    'x',
+    useCallback(
+      (delta: number, startScroll: number) => {
+        model.setScrollX(startScroll - delta / unit)
+      },
+      [model, unit],
+    ),
+  )
 
   const barHeight = 12
   const polygonHeight = minimapHeight - barHeight
@@ -84,10 +62,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
           setHovered(false)
         }}
         onMouseDown={event => {
-          setMouseDown({
-            clientX: event.clientX,
-            scrollX: model.scrollX,
-          })
+          startDrag(event, model.scrollX)
         }}
       />
 

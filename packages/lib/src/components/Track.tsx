@@ -8,6 +8,7 @@ import { makeStyles } from 'tss-react/mui'
 import { useWheelScroll } from '../useWheelScroll.ts'
 
 import type { MsaViewModel } from '../model.ts'
+import type { BasicTrack } from '../types.ts'
 
 const TrackInfoDialog = lazy(() => import('./dialogs/TrackInfoDialog.tsx'))
 
@@ -22,7 +23,7 @@ const TrackLabel = observer(function TrackLabel({
   track,
 }: {
   model: MsaViewModel
-  track: any
+  track: BasicTrack
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>()
   const { drawLabels, rowHeight, treeAreaWidth: width } = model
@@ -96,11 +97,11 @@ const Track = observer(function ({
   track,
 }: {
   model: MsaViewModel
-  track: any
+  track: BasicTrack
 }) {
   const { resizeHandleWidth, colWidth, scrollX, numColumns } = model
   const {
-    model: { height, error },
+    model: { height },
   } = track
   const ref = useRef<HTMLDivElement>(null)
   const onScrollX = useCallback(
@@ -112,7 +113,7 @@ const Track = observer(function ({
   useWheelScroll({ ref, onScrollX })
 
   return (
-    <div key={track.id} style={{ display: 'flex', height }}>
+    <div style={{ display: 'flex', height }}>
       <TrackLabel model={model} track={track} />
       <div style={{ width: resizeHandleWidth, flexShrink: 0 }} />
       <div
@@ -134,11 +135,7 @@ const Track = observer(function ({
           model.setMousePos(undefined, undefined)
         }}
       >
-        {error ? (
-          <div style={{ color: 'red', fontSize: 10 }}>{`${error}`}</div>
-        ) : (
-          <track.ReactComponent model={model} track={track} />
-        )}
+        <track.ReactComponent model={model} track={track} />
       </div>
     </div>
   )

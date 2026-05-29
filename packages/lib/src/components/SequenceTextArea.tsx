@@ -27,8 +27,8 @@ export default function SequenceTextArea({ str }: { str: [string, string][] }) {
   const removeGaps = (s: string) => s.replaceAll('-', '').replaceAll('.', '')
   const disp = str
     .map(([s1, s2]) => [s1, showGaps ? s2 : removeGaps(s2)] as const)
-    .filter(f => (showEmpty ? true : !!f[1]))
-    .map(([s1, s2]) => `>${s1}\n${showGaps ? s2 : removeGaps(s2)}`)
+    .filter(([, s2]) => showEmpty || !!s2)
+    .map(([s1, s2]) => `>${s1}\n${s2}`)
     .join('\n')
   return (
     <>

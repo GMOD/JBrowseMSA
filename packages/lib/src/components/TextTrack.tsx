@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
-import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { colorContrast } from '../util.ts'
+import { useColorContrast } from '../useColorContrast.ts'
 import { drawTextTrackContent } from './tracks/renderTracksSvg.ts'
 
 import type { MsaViewModel } from '../model.ts'
@@ -33,12 +32,8 @@ const AnnotationBlock = observer(function ({
   } = track
 
   const colorScheme = customColorScheme || modelColorScheme
-  const theme = useTheme()
   const ref = useRef<HTMLCanvasElement>(null)
-  const contrastScheme = useMemo(
-    () => colorContrast(colorScheme, theme),
-    [colorScheme, theme],
-  )
+  const { contrastScheme } = useColorContrast(colorScheme)
   useEffect(() => {
     if (!ref.current) {
       return

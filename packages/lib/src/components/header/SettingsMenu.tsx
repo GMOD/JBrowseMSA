@@ -6,22 +6,16 @@ import Palette from '@mui/icons-material/Palette'
 import Settings from '@mui/icons-material/Settings'
 import { observer } from 'mobx-react'
 
+import {
+  msaSettingsMenuItems,
+  treeSettingsMenuItems,
+} from './settingsMenuItems.ts'
 import colorSchemes from '../../colorSchemes.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
 const SettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
-  const {
-    colorSchemeName,
-    drawMsaLetters,
-    hideGaps,
-    bgColor,
-    drawTree,
-    showBranchLen,
-    labelsAlignRight,
-    drawNodeBubbles,
-    drawLabels,
-  } = model
+  const { colorSchemeName } = model
   return (
     <CascadingMenuButton
       closeAfterItemClick={false}
@@ -45,79 +39,13 @@ const SettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
         {
           label: 'MSA settings',
           type: 'subMenu',
-          subMenu: [
-            {
-              label: 'Draw letters',
-              type: 'checkbox',
-              checked: drawMsaLetters,
-              onClick: () => {
-                model.setDrawMsaLetters(!drawMsaLetters)
-              },
-            },
-            {
-              label: 'Color letters instead of background of tiles',
-              type: 'checkbox',
-              checked: !bgColor,
-              onClick: () => {
-                model.setBgColor(!bgColor)
-              },
-            },
-            {
-              label: 'Enable hiding gappy columns?',
-              type: 'checkbox',
-              checked: hideGaps,
-              onClick: () => {
-                model.setHideGaps(!hideGaps)
-              },
-            },
-          ],
+          subMenu: msaSettingsMenuItems(model),
         },
         {
           label: 'Tree settings',
           type: 'subMenu',
           icon: AccountTree,
-          subMenu: [
-            {
-              label: 'Show branch length',
-              type: 'checkbox',
-              checked: showBranchLen,
-              onClick: () => {
-                model.setShowBranchLen(!showBranchLen)
-              },
-            },
-            {
-              label: 'Show tree',
-              type: 'checkbox',
-              checked: drawTree,
-              onClick: () => {
-                model.setDrawTree(!drawTree)
-              },
-            },
-            {
-              label: 'Draw clickable bubbles on tree branches',
-              type: 'checkbox',
-              checked: drawNodeBubbles,
-              onClick: () => {
-                model.setDrawNodeBubbles(!drawNodeBubbles)
-              },
-            },
-            {
-              label: 'Tree labels align right',
-              type: 'checkbox',
-              checked: labelsAlignRight,
-              onClick: () => {
-                model.setLabelsAlignRight(!labelsAlignRight)
-              },
-            },
-            {
-              label: 'Draw labels',
-              type: 'checkbox',
-              checked: drawLabels,
-              onClick: () => {
-                model.setDrawLabels(!drawLabels)
-              },
-            },
-          ],
+          subMenu: treeSettingsMenuItems(model),
         },
       ]}
     >
