@@ -93,9 +93,9 @@ import type { Theme } from '@mui/material'
 /**
  * #stateModel MsaView
  * extends
- * - DialogQueueSessionMixin
- * - MSAModel
- * - Tree
+ * - [DialogQueueSessionMixin](../dialogqueuesessionmixin)
+ * - [MSAModel](../msamodel)
+ * - [Tree](../tree)
  */
 function stateModelFactory() {
   return types

@@ -6,15 +6,39 @@ title: MsaView
 Note: this document is automatically generated from @jbrowse/mobx-state-tree
 objects in our source code.
 
-### Source file
+## Links
 
-[src/model.ts](https://github.com/GMOD/react-msaview/blob/main/lib/src/model.ts)
+[Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model.ts)
+
+## Docs
 
 extends
 
-- DialogQueueSessionMixin
-- MSAModel
-- Tree
+- [DialogQueueSessionMixin](../dialogqueuesessionmixin)
+- [MSAModel](../msamodel)
+- [Tree](../tree)
+
+## Inherited members
+
+Available on this model via composition. Follow each link for full signatures and docs.
+
+### Available via [DialogQueueSessionMixin](../dialogqueuesessionmixin)
+
+**Getters:** DialogComponent, DialogProps
+
+**Actions:** removeActiveDialog, queueDialog
+
+### Available via [MSAModel](../msamodel)
+
+**Properties:** bgColor, colorSchemeName
+
+**Actions:** setColorSchemeName, setBgColor
+
+### Available via [Tree](../tree)
+
+**Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth, showBranchLen, drawTree, drawNodeBubbles
+
+**Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree, setShowBranchLen, setDrawNodeBubbles, setDrawLabels
 
 ### MsaView - Properties
 
@@ -24,29 +48,19 @@ extends
 // type signature
 number
 // code
-allowedGappyness: 100
+allowedGappyness: defaultAllowedGappyness
 ```
 
 #### property: collapsed
 
-array of tree parent nodes that are 'collapsed' (all children are hidden)
+array of tree parent nodes that are 'collapsed' (all children are
+hidden)
 
 ```js
 // type signature
 IArrayType<ISimpleType<string>>
 // code
 collapsed: types.array(types.string)
-```
-
-#### property: collapsedLeaves
-
-array of tree leaf nodes that are 'collapsed' (just that leaf node is hidden)
-
-```js
-// type signature
-IArrayType<ISimpleType<string>>
-// code
-collapsedLeaves: types.array(types.string)
 ```
 
 #### property: colWidth
@@ -57,16 +71,7 @@ width of columns, px
 // type signature
 number
 // code
-colWidth: 14
-```
-
-#### property: contrastLettering
-
-```js
-// type signature
-true
-// code
-contrastLettering: true
+colWidth: defaultColWidth
 ```
 
 #### property: currentAlignment
@@ -75,16 +80,17 @@ contrastLettering: true
 // type signature
 number
 // code
-currentAlignment: 0
+currentAlignment: defaultCurrentAlignment
 ```
 
 #### property: data
 
-data from the loaded tree/msa/treeMetadata, generally loaded by autorun
+data from the loaded tree/msa/treeMetadata, generally loaded by
+autorun
 
 ```js
 // type signature
-IOptionalIType<IModelType<{ tree: IMaybe<ISimpleType<string>>; msa: IMaybe<ISimpleType<string>>; treeMetadata: IMaybe<ISimpleType<string>>; }, { ...; }, _NotCustomized, { ...; }>, [...]>
+IOptionalIType<IModelType<{ tree: IMaybe<ISimpleType<string>>; msa: IMaybe<ISimpleType<string>>; treeMetadata: IMaybe<ISimpleType<string>>; gff: IMaybe<...>; }, { ...; }, _NotCustomized, { ...; }>, [...]>
 // code
 data: types.optional(DataModelF(), {
           tree: '',
@@ -99,16 +105,7 @@ data: types.optional(DataModelF(), {
 // type signature
 true
 // code
-drawMsaLetters: true
-```
-
-#### property: drawTreeText
-
-```js
-// type signature
-true
-// code
-drawTreeText: true
+drawMsaLetters: defaultDrawMsaLetters
 ```
 
 #### property: featureFilters
@@ -120,6 +117,17 @@ IMapType<ISimpleType<boolean>>
 featureFilters: types.map(types.boolean)
 ```
 
+#### property: gffFilehandle
+
+filehandle object for InterProScan GFF file
+
+```js
+// type signature
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
+// code
+gffFilehandle: types.maybe(FileLocation)
+```
+
 #### property: height
 
 height of the div containing the view, px
@@ -128,16 +136,16 @@ height of the div containing the view, px
 // type signature
 IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-height: types.optional(types.number, 550)
+height: types.optional(types.number, defaultHeight)
 ```
 
 #### property: hideGaps
 
 ```js
 // type signature
-false
+true
 // code
-hideGaps: false
+hideGaps: defaultHideGaps
 ```
 
 #### property: id
@@ -153,12 +161,12 @@ id: ElementId
 
 #### property: msaFilehandle
 
-filehandle object for the MSA (which could contain a tree e.g. with stockholm
-files)
+filehandle object for the MSA (which could contain a tree e.g. with
+stockholm files)
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<ExtractCFromProps<{ locationType: ISimpleType<"UriLocation">; uri: ISimpleType<string>; baseUri: IMaybe<ISimpleType<string>>; internetAccountId: IMaybe<...>; internetAccountPreAuthorization: IMaybe<...>; }>> | ModelCreationType<...> | ModelCreationType<...>, { ....
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
 // code
 msaFilehandle: types.maybe(FileLocation)
 ```
@@ -180,7 +188,7 @@ height of each row, px
 // type signature
 number
 // code
-rowHeight: 18
+rowHeight: defaultRowHeight
 ```
 
 #### property: scrollX
@@ -191,7 +199,7 @@ scroll position, X-offset, px
 // type signature
 number
 // code
-scrollX: 0
+scrollX: defaultScrollX
 ```
 
 #### property: scrollY
@@ -202,7 +210,7 @@ scroll position, Y-offset, px
 // type signature
 number
 // code
-scrollY: 0
+scrollY: defaultScrollY
 ```
 
 #### property: showDomains
@@ -211,7 +219,7 @@ scrollY: 0
 // type signature
 false
 // code
-showDomains: false
+showDomains: defaultShowDomains
 ```
 
 #### property: showOnly
@@ -231,7 +239,7 @@ showOnly: types.maybe(types.string)
 // type signature
 false
 // code
-subFeatureRows: false
+subFeatureRows: defaultSubFeatureRows
 ```
 
 #### property: treeFilehandle
@@ -240,7 +248,7 @@ filehandle object for the tree
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<ExtractCFromProps<{ locationType: ISimpleType<"UriLocation">; uri: ISimpleType<string>; baseUri: IMaybe<ISimpleType<string>>; internetAccountId: IMaybe<...>; internetAccountPreAuthorization: IMaybe<...>; }>> | ModelCreationType<...> | ModelCreationType<...>, { ....
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
 // code
 treeFilehandle: types.maybe(FileLocation)
 ```
@@ -251,7 +259,7 @@ filehandle object for tree metadata
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<ExtractCFromProps<{ locationType: ISimpleType<"UriLocation">; uri: ISimpleType<string>; baseUri: IMaybe<ISimpleType<string>>; internetAccountId: IMaybe<...>; internetAccountPreAuthorization: IMaybe<...>; }>> | ModelCreationType<...> | ModelCreationType<...>, { ....
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
 // code
 treeMetadataFilehandle: types.maybe(FileLocation)
 ```
@@ -278,6 +286,216 @@ ISimpleType<"MsaView">
 type: types.literal('MsaView')
 ```
 
+### MsaView - Volatiles
+
+#### volatile: blockSize
+
+size of blocks of content to be drawn, px
+
+```js
+// type signature
+number
+// code
+blockSize: 500
+```
+
+#### volatile: conservationTrackHeight
+
+```js
+// type signature
+number
+// code
+conservationTrackHeight: 40
+```
+
+#### volatile: error
+
+```js
+// type signature
+unknown
+// code
+error: undefined as unknown
+```
+
+#### volatile: headerHeight
+
+```js
+// type signature
+number
+// code
+headerHeight: 0
+```
+
+#### volatile: highlightedColumns
+
+array of column indices to highlight
+
+```js
+// type signature
+number[] | undefined
+// code
+highlightedColumns: undefined as number[] | undefined
+```
+
+#### volatile: highResScaleFactor
+
+high resolution scale factor, helps make canvas look better on hi-dpi
+screens
+
+```js
+// type signature
+number
+// code
+highResScaleFactor: 2
+```
+
+#### volatile: hoveredTreeNode
+
+the currently hovered tree node ID and its descendant leaf names
+
+```js
+// type signature
+{ nodeId: string; descendantNames: string[]; } | undefined
+// code
+hoveredTreeNode: undefined as
+        | { nodeId: string; descendantNames: string[] }
+        | undefined
+```
+
+#### volatile: interProAnnotations
+
+```js
+// type signature
+Record<string, InterProScanResults> | undefined
+// code
+interProAnnotations: undefined as
+        | undefined
+        | Record<string, InterProScanResults>
+```
+
+#### volatile: loadingMSA
+
+```js
+// type signature
+false
+// code
+loadingMSA: false
+```
+
+#### volatile: loadingTree
+
+```js
+// type signature
+false
+// code
+loadingTree: false
+```
+
+#### volatile: marginLeft
+
+```js
+// type signature
+number
+// code
+marginLeft: 20
+```
+
+#### volatile: minimapHeight
+
+```js
+// type signature
+number
+// code
+minimapHeight: 56
+```
+
+#### volatile: mouseClickCol
+
+the currently mouse-click column
+
+```js
+// type signature
+number | undefined
+// code
+mouseClickCol: undefined as number | undefined
+```
+
+#### volatile: mouseClickRow
+
+the currently mouse-click row
+
+```js
+// type signature
+number | undefined
+// code
+mouseClickRow: undefined as number | undefined
+```
+
+#### volatile: mouseCol
+
+the currently mouse-hovered column
+
+```js
+// type signature
+number | undefined
+// code
+mouseCol: undefined as number | undefined
+```
+
+#### volatile: mouseRow
+
+the currently mouse-hovered row
+
+```js
+// type signature
+number | undefined
+// code
+mouseRow: undefined as number | undefined
+```
+
+#### volatile: nref
+
+a dummy variable that is incremented when ref changes so autorun for
+drawing canvas commands will run
+
+```js
+// type signature
+number
+// code
+nref: 0
+```
+
+#### volatile: resizeHandleWidth
+
+resize handle width between tree and msa area, px
+
+```js
+// type signature
+number
+// code
+resizeHandleWidth: 5
+```
+
+#### volatile: status
+
+```js
+// type signature
+{ msg: string; url?: string | undefined; onCancel?: (() => void) | undefined; } | undefined
+// code
+status: undefined as
+        | { msg: string; url?: string; onCancel?: () => void }
+        | undefined
+```
+
+#### volatile: volatileWidth
+
+```js
+// type signature
+number | undefined
+// code
+volatileWidth: undefined as number | undefined
+```
+
 ### MsaView - Getters
 
 #### getter: actuallyShowDomains
@@ -291,49 +509,81 @@ boolean
 
 ```js
 // type
-ITextTrack[]
+BasicTrack[]
 ```
 
 #### getter: alignmentNames
 
 ```js
 // type
-any
+string[]
+```
+
+#### getter: allBranchesLength0
+
+```js
+// type
+boolean
 ```
 
 #### getter: blanks
 
 ```js
 // type
-any[]
+number[]
 ```
 
 #### getter: blanksSet
 
 ```js
 // type
-Set<unknown>
+Set<number>
 ```
 
 #### getter: blocks2d
 
 ```js
 // type
-any[]
+(readonly [number, number])[]
 ```
 
 #### getter: blocksX
 
 ```js
 // type
-any[]
+number[]
 ```
 
 #### getter: blocksY
 
 ```js
 // type
-any[]
+number[]
+```
+
+#### getter: colClustalX
+
+Pre-computed ClustalX colors per column.
+Returns a map of letter -> color for each column.
+ref http://www.jalview.org/help/html/colourSchemes/clustal.html
+
+```js
+// type
+;(Record < string, string > [])
+```
+
+#### getter: colConsensus
+
+Pre-computed consensus letter and percent identity color per column.
+Used by percent_identity_dynamic color scheme.
+
+```js
+// type
+{
+  letter: string
+  color: string | undefined
+}
+;[]
 ```
 
 #### getter: colorScheme
@@ -354,42 +604,39 @@ Record<string, string>
 
 ```js
 // type
-{ [k: string]: number; }
+number[]
 ```
 
 #### getter: columns
 
 ```js
 // type
-{ [k: string]: any; }
+{ [k: string]: string; }
 ```
 
 #### getter: columns2d
 
 ```js
 // type
-any
+string[]
 ```
 
 #### getter: conservation
 
+Conservation score per column using Shannon entropy (biojs-msa style).
+Conservation = (1 - H/Hmax) \* (1 - gapFraction)
+Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
+
 ```js
 // type
-string[]
+number[]
 ```
 
 #### getter: dataInitialized
 
 ```js
 // type
-boolean
-```
-
-#### getter: fillPalette
-
-```js
-// type
-Record<string, string>
+;boolean | '' | undefined
 ```
 
 #### getter: fontSize
@@ -403,7 +650,16 @@ number
 
 ```js
 // type
-any
+Record<string, unknown>
+```
+
+#### getter: hideGapsEffective
+
+hideGaps takes effect when there are collapsed rows or allowedGappyness < 100
+
+```js
+// type
+boolean
 ```
 
 #### getter: hierarchy
@@ -413,6 +669,33 @@ generates a new tree that is clustered with x,y positions
 ```js
 // type
 HierarchyNode<NodeWithIdsAndLength>
+```
+
+#### getter: hoveredCell
+
+Returns information about the currently hovered cell
+
+```js
+// type
+{ rowName: string; col: number; base: string; seqPos: number | undefined; } | undefined
+```
+
+#### getter: hoveredInsertion
+
+Returns insertion info if mouse is hovering over an insertion indicator
+
+```js
+// type
+{ rowName: string; col: number; letters: string; } | undefined
+```
+
+#### getter: insertionPositions
+
+Returns a map of row name to array of insertions with display position and letters
+
+```js
+// type
+Map<string, { pos: number; letters: string; }[]>
 ```
 
 #### getter: isLoading
@@ -433,7 +716,25 @@ number
 
 ```js
 // type
-any
+HierarchyNode < NodeWithIdsAndLength > []
+```
+
+#### getter: maxBranchLength
+
+max branch length across the tree, used to scale phylogram x-positions
+
+```js
+// type
+number
+```
+
+#### getter: maxDepthToLeaf
+
+max topological depth to a tip, used to scale cladogram x-positions
+
+```js
+// type
+number
 ```
 
 #### getter: maxScrollX
@@ -443,25 +744,18 @@ any
 number
 ```
 
-#### getter: menuItems
-
-```js
-// type
-() => any[]
-```
-
 #### getter: mouseOverRowName
 
 ```js
 // type
-any
+string | undefined
 ```
 
 #### getter: MSA
 
 ```js
 // type
-;ClustalMSA | EmfMSA | StockholmMSA | FastaMSA
+MSAParserType | null
 ```
 
 #### getter: msaAreaHeight
@@ -482,13 +776,6 @@ widget width minus the tree area gives the space for the MSA
 number
 ```
 
-#### getter: noDomains
-
-```js
-// type
-boolean
-```
-
 #### getter: noTree
 
 ```js
@@ -497,6 +784,13 @@ boolean
 ```
 
 #### getter: numColumns
+
+```js
+// type
+number
+```
+
+#### getter: numRows
 
 ```js
 // type
@@ -514,14 +808,14 @@ number
 
 ```js
 // type
-HierarchyNode<any>
+HierarchyNode<NodeWithIds>
 ```
 
 #### getter: rowMap
 
 ```js
 // type
-Map<unknown, unknown>
+Map<string, string>
 ```
 
 #### getter: rowNames
@@ -542,21 +836,40 @@ Map<string, number>
 
 ```js
 // type
-any
+[string, string][]
 ```
 
 #### getter: secondaryStructureConsensus
 
 ```js
 // type
-any
+string | undefined
 ```
 
 #### getter: seqConsensus
 
 ```js
 // type
-any
+string | undefined
+```
+
+#### getter: sequenceType
+
+Detects sequence type based on letters present in the alignment.
+Returns 'dna', 'rna', or 'amino'.
+
+```js
+// type
+;'dna' | 'rna' | 'amino'
+```
+
+#### getter: showBranchLenEffective
+
+effective showBranchLen accounting for allBranchesLength0
+
+```js
+// type
+boolean
 ```
 
 #### getter: showHorizontalScrollbar
@@ -587,41 +900,6 @@ boolean
 boolean
 ```
 
-#### getter: strokePalette
-
-```js
-// type
-{ [k: string]: string; }
-```
-
-#### getter: tidyFilteredGatheredInterProAnnotations
-
-```js
-// type
-Record<string, unknown[]>
-```
-
-#### getter: tidyFilteredInterProAnnotations
-
-```js
-// type
-any
-```
-
-#### getter: tidyInterProAnnotations
-
-```js
-// type
-any[]
-```
-
-#### getter: tidyInterProAnnotationTypes
-
-```js
-// type
-Map<string, Accession>
-```
-
 #### getter: totalHeight
 
 ```js
@@ -649,7 +927,7 @@ number
 
 ```js
 // type
-ITextTrack[]
+BasicTrack[]
 ```
 
 #### getter: tree
@@ -677,7 +955,7 @@ any
 
 ```js
 // type
-any
+BasicTrack[]
 ```
 
 #### getter: verticalScrollbarWidth
@@ -685,13 +963,6 @@ any
 ```js
 // type
 0 | 20
-```
-
-#### getter: viewInitialized
-
-```js
-// type
-boolean
 ```
 
 #### getter: width
@@ -709,46 +980,85 @@ unused here, but can be used by derived classes to add extra items
 
 ```js
 // type signature
-extraViewMenuItems: () => any[]
+extraViewMenuItems: () => never[]
 ```
 
 #### method: getRowData
 
 ```js
 // type signature
-getRowData: (name: string) => { data: any; treeMetadata: any; }
+getRowData: (name: string) => { data: { name?: string | undefined; accession?: string | undefined; dbxref?: string | undefined; } | undefined; treeMetadata: any; }
 ```
 
-#### method: mouseOverCoordToGapRemovedRowCoord
+#### method: globalColToVisibleCol
 
-return a row-specific sequence coordinate, skipping gaps, given a global
-coordinate
+Convert a global column index to a visible column index.
+Returns undefined if the column is hidden (in blanks).
+This is the inverse of visibleColToGlobalCol.
 
 ```js
 // type signature
-mouseOverCoordToGapRemovedRowCoord: (rowName: string, position: number) => number
+globalColToVisibleCol: (globalCol: number) => number | undefined
 ```
 
-#### method: mouseOverCoordToRowLetter
+#### method: seqPosToGlobalCol
 
-return a row-specific letter, or undefined if gap
+Convert a sequence position (ungapped) to a global column index.
 
 ```js
 // type signature
-mouseOverCoordToRowLetter: (rowName: string, position: number) => any
+seqPosToGlobalCol: (rowName: string, seqPos: number) => number
 ```
 
-#### method: seqCoordToRowSpecificGlobalCoord
+#### method: seqPosToVisibleCol
 
-return a global coordinate given a row-specific sequence coordinate which does
-not not include gaps
+Convert a sequence position (ungapped) directly to a visible column index.
+This combines seqPosToGlobalCol and globalColToVisibleCol.
 
 ```js
 // type signature
-seqCoordToRowSpecificGlobalCoord: (rowName: string, position: number) => number
+seqPosToVisibleCol: (rowName: string, seqPos: number) => number | undefined
+```
+
+#### method: visibleColToRowLetter
+
+Return a row-specific letter at a visible column, or undefined if gap.
+
+```js
+// type signature
+visibleColToRowLetter: (rowName: string, visibleCol: number) => string | undefined
+```
+
+#### method: visibleColToSeqPos
+
+Convert a visible column to a row-specific sequence position (0-based).
+Returns undefined if the position is a gap in the sequence.
+
+```js
+// type signature
+visibleColToSeqPos: (rowName: string, visibleCol: number) => number | undefined
+```
+
+#### method: visibleColToSeqPosOneBased
+
+Convert a visible column to a row-specific sequence position (1-based).
+Returns undefined if the position is a gap in the sequence.
+
+```js
+// type signature
+visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => number | undefined
 ```
 
 ### MsaView - Actions
+
+#### action: calculateNeighborJoiningTreeFromMSA
+
+Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances
+
+```js
+// type signature
+calculateNeighborJoiningTreeFromMSA: () => void
+```
 
 #### action: doScrollX
 
@@ -768,14 +1078,35 @@ doScrollY: (deltaY: number) => void
 
 ```js
 // type signature
-drawRelativeTo: (id: string) => void
+drawRelativeTo: (id: string | undefined) => void
 ```
 
 #### action: exportSVG
 
 ```js
 // type signature
-exportSVG: (opts: { theme: Theme; includeMinimap?: boolean; exportType: string; }) => Promise<void>
+exportSVG: (opts: { theme: Theme; includeMinimap?: boolean | undefined; includeTracks?: boolean | undefined; exportType: string; }) => Promise<void>
+```
+
+#### action: fit
+
+```js
+// type signature
+fit: () => void
+```
+
+#### action: fitHorizontally
+
+```js
+// type signature
+fitHorizontally: () => void
+```
+
+#### action: fitVertically
+
+```js
+// type signature
+fitVertically: () => void
 ```
 
 #### action: incrementRef
@@ -787,18 +1118,18 @@ internal, used for drawing to canvas
 incrementRef: () => void
 ```
 
-#### action: initFilter
-
-```js
-// type signature
-initFilter: (arg: string) => void
-```
-
 #### action: reset
 
 ```js
 // type signature
 reset: () => void
+```
+
+#### action: resetZoom
+
+```js
+// type signature
+resetZoom: () => void
 ```
 
 #### action: setAllowedGappyness
@@ -817,11 +1148,11 @@ set col width (px)
 setColWidth: (n: number) => void
 ```
 
-#### action: setContrastLettering
+#### action: setConservationTrackHeight
 
 ```js
 // type signature
-setContrastLettering: (arg: boolean) => void
+setConservationTrackHeight: (arg: number) => void
 ```
 
 #### action: setCurrentAlignment
@@ -835,7 +1166,7 @@ setCurrentAlignment: (n: number) => void
 
 ```js
 // type signature
-setData: (data: { msa?: string; tree?: string; treeMetadata?: string; }) => void
+setData: (data: { msa?: string | undefined; tree?: string | undefined; treeMetadata?: string | undefined; gff?: string | undefined; }) => void
 ```
 
 #### action: setDrawMsaLetters
@@ -854,11 +1185,11 @@ set error state
 setError: (error?: unknown) => void
 ```
 
-#### action: setFilter
+#### action: setGFFFilehandle
 
 ```js
 // type signature
-setFilter: (arg: string, flag: boolean) => void
+setGFFFilehandle: (gffFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setHeaderHeight
@@ -884,11 +1215,22 @@ setHeight: (height: number) => void
 setHideGaps: (arg: boolean) => void
 ```
 
-#### action: setInterProAnnotations
+#### action: setHighlightedColumns
+
+set highlighted columns
 
 ```js
 // type signature
-setInterProAnnotations: (data: Record<string, InterProScanResults>) => void
+setHighlightedColumns: (columns?: number[] | undefined) => void
+```
+
+#### action: setHoveredTreeNode
+
+set hovered tree node and its descendants
+
+```js
+// type signature
+setHoveredTreeNode: (nodeId?: string | undefined) => void
 ```
 
 #### action: setLoadingMSA
@@ -911,7 +1253,7 @@ set mouse click position (row, column) in the MSA
 
 ```js
 // type signature
-setMouseClickPos: (col?: number, row?: number) => void
+setMouseClickPos: (col?: number | undefined, row?: number | undefined) => void
 ```
 
 #### action: setMousePos
@@ -920,7 +1262,7 @@ set mouse position (row, column) in the MSA
 
 ```js
 // type signature
-setMousePos: (col?: number, row?: number) => void
+setMousePos: (col?: number | undefined, row?: number | undefined) => void
 ```
 
 #### action: setMSA
@@ -934,7 +1276,7 @@ setMSA: (result: string) => void
 
 ```js
 // type signature
-setMSAFilehandle: (msaFilehandle?: FileLocation) => void
+setMSAFilehandle: (msaFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setRowHeight
@@ -973,14 +1315,14 @@ setShowDomains: (arg: boolean) => void
 
 ```js
 // type signature
-setShowOnly: (node?: string) => void
+setShowOnly: (node?: string | undefined) => void
 ```
 
 #### action: setStatus
 
 ```js
 // type signature
-setStatus: (status?: { msg: string; url?: string; }) => void
+setStatus: (status?: { msg: string; url?: string | undefined; onCancel?: (() => void) | undefined; } | undefined) => void
 ```
 
 #### action: setSubFeatureRows
@@ -1001,7 +1343,7 @@ setTree: (result: string) => void
 
 ```js
 // type signature
-setTreeFilehandle: (treeFilehandle?: FileLocation) => void
+setTreeFilehandle: (treeFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setTreeMetadata
@@ -1023,13 +1365,6 @@ setWidth: (arg: number) => void
 ```js
 // type signature
 toggleCollapsed: (node: string) => void
-```
-
-#### action: toggleCollapsed2
-
-```js
-// type signature
-toggleCollapsed2: (node: string) => void
 ```
 
 #### action: toggleTrack

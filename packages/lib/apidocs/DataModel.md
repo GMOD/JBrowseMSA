@@ -6,16 +6,27 @@ title: DataModel
 Note: this document is automatically generated from @jbrowse/mobx-state-tree
 objects in our source code.
 
-### Source file
+## Links
 
-[src/model/DataModel.ts](https://github.com/GMOD/react-msaview/blob/main/lib/src/model/DataModel.ts)
+[Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/DataModel.ts)
 
-the data stored for the model. this is sometimes temporary in the case that e.g.
-msaFilehandle is available on the parent model, because then the msa data will
-not be persisted in saved session snapshots, it will be fetched from
-msaFilehandle at startup
+## Docs
+
+the data stored for the model. this is sometimes temporary in the case that
+e.g. msaFilehandle is available on the parent model, because then the msa
+data will not be persisted in saved session snapshots, it will be fetched
+from msaFilehandle at startup
 
 ### DataModel - Properties
+
+#### property: gff
+
+```js
+// type signature
+IMaybe<ISimpleType<string>>
+// code
+gff: types.maybe(types.string)
+```
 
 #### property: msa
 
@@ -46,23 +57,30 @@ treeMetadata: types.maybe(types.string)
 
 ### DataModel - Actions
 
+#### action: setGFF
+
+```js
+// type signature
+setGFF: (gff?: string | undefined) => void
+```
+
 #### action: setMSA
 
 ```js
 // type signature
-setMSA: (msa?: string) => void
+setMSA: (msa?: string | undefined) => void
 ```
 
 #### action: setTree
 
 ```js
 // type signature
-setTree: (tree?: string) => void
+setTree: (tree?: string | undefined) => void
 ```
 
 #### action: setTreeMetadata
 
 ```js
 // type signature
-setTreeMetadata: (treeMetadata?: string) => void
+setTreeMetadata: (treeMetadata?: string | undefined) => void
 ```

@@ -6,9 +6,11 @@ title: DialogQueueSessionMixin
 Note: this document is automatically generated from @jbrowse/mobx-state-tree
 objects in our source code.
 
-### Source file
+## Links
 
-[src/model/DialogQueue.ts](https://github.com/GMOD/react-msaview/blob/main/lib/src/model/DialogQueue.ts)
+[Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/DialogQueue.ts)
+
+## Docs
 
 ### DialogQueueSessionMixin - Getters
 
@@ -16,7 +18,7 @@ objects in our source code.
 
 ```js
 // type
-any
+DialogComponentType
 ```
 
 #### getter: DialogProps
@@ -32,7 +34,7 @@ any
 
 ```js
 // type signature
-queueDialog: (cb: (doneCallback: () => void) => [any, unknown]) => void
+queueDialog: (cb: (doneCallback: () => void) => [DialogComponentType, unknown]) => void
 ```
 
 #### action: removeActiveDialog

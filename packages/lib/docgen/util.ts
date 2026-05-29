@@ -1,23 +1,34 @@
 import { exec } from 'child_process'
 import { promisify } from 'util'
 
-import ts from 'typescript'
+import * as ts from 'typescript'
+
 const exec2 = promisify(exec)
 
-interface Node {
-  signature?: string
-  code?: string
-  type: string
-  node: string
+export type TagType = (typeof TAG_TYPES)[number]
+
+export interface ExtractedNode {
+  type: TagType
   name: string
   comment: string
+  signature: string
+  node: string
   filename: string
 }
 
+const TAG_TYPES = [
+  'stateModel',
+  'property',
+  'volatile',
+  'getter',
+  'action',
+  'method',
+] as const
+
 export function extractWithComment(
   fileNames: string[],
-  cb: (obj: Node) => void,
-  options = {},
+  cb: (obj: ExtractedNode) => void,
+  options: ts.CompilerOptions = {},
 ) {
   const program = ts.createProgram(fileNames, options)
   const checker = program.getTypeChecker()
@@ -29,80 +40,144 @@ export function extractWithComment(
   }
 
   function visit(node: ts.Node) {
-    const count = node.getChildCount()
-
-    // @ts-expect-error
-    const symbol = checker.getSymbolAtLocation(node.name)
-    if (symbol) {
-      serializeSymbol(symbol, node, cb)
-    }
-
-    if (count > 0) {
-      ts.forEachChild(node, visit)
-    }
-  }
-
-  function serializeSymbol(
-    symbol: ts.Symbol,
-    node: ts.Node,
-    cb: (obj: Node) => void,
-  ) {
-    const comment = ts.displayPartsToString(
-      symbol.getDocumentationComment(checker),
-    )
-
-    const fulltext = node.getFullText()
-    const r = {
-      name: symbol.getName(),
-      comment,
-      signature: checker.typeToString(
-        checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration!),
-      ),
-      node: fulltext,
-      filename: node.getSourceFile().fileName,
-    }
-
-    const list = [
-      'stateModel',
-      'config',
-      'slot',
-      'identifier',
-      'baseConfiguration',
-      'property',
-      'getter',
-      'baseModel',
-      'action',
-      'method',
-    ]
-    for (const entry of list) {
-      const type = `#${entry}`
-      if (fulltext.includes(type) && r.comment.includes(type)) {
-        cb({ type: entry, ...r })
+    const comment = getOwnJSDocText(node)
+    const tags = comment ? TAG_TYPES.filter(t => hasTag(comment, t)) : []
+    if (tags.length) {
+      const { name, signature } = describeSymbol(checker, node)
+      const base = {
+        name,
+        comment,
+        signature,
+        node: node.getFullText(),
+        filename: node.getSourceFile().fileName,
+      }
+      for (const type of tags) {
+        cb({ type, ...base })
       }
     }
+    ts.forEachChild(node, visit)
   }
+}
+
+function describeSymbol(checker: ts.TypeChecker, node: ts.Node) {
+  const nameNode = getNameNode(node)
+  const symbol = nameNode ? checker.getSymbolAtLocation(nameNode) : undefined
+  const decl = symbol?.valueDeclaration
+  return {
+    name: symbol?.getName() ?? '',
+    signature:
+      symbol && decl
+        ? checker.typeToString(checker.getTypeOfSymbolAtLocation(symbol, decl))
+        : '',
+  }
+}
+
+function hasTag(comment: string, tag: TagType) {
+  // require word boundary so #getter doesn't also match #getterById
+  return new RegExp(`#${tag}(?![A-Za-z0-9_])`).test(comment)
+}
+
+function getNameNode(node: ts.Node): ts.Node | undefined {
+  if (
+    'name' in node &&
+    node.name &&
+    typeof node.name === 'object' &&
+    'kind' in node.name
+  ) {
+    return node.name as ts.Node
+  }
+  return undefined
+}
+
+// JSDoc body text directly attached to this node (not inherited from
+// ancestors). Uses the internal `jsDoc` parser property — unlike
+// `getJSDocCommentsAndTags`, this does not walk up, so reference nodes like
+// PropertyAccessExpression do not inherit JSDoc from their enclosing
+// declaration.
+//
+// For VariableDeclaration, the JSDoc above `const Foo = ...` attaches to the
+// parent VariableStatement, so we look there instead.
+function getOwnJSDocText(node: ts.Node): string {
+  const target: ts.Node = ts.isVariableDeclaration(node)
+    ? node.parent.parent
+    : node
+  const jsDoc = (target as { jsDoc?: ts.JSDoc[] }).jsDoc
+  if (!jsDoc) {
+    return ''
+  }
+  return jsDoc
+    .map(jd => {
+      const c = jd.comment
+      if (typeof c === 'string') {
+        return c
+      }
+      return c ? c.map(p => p.text).join('') : ''
+    })
+    .join('\n')
+}
+
+// Extracts the entity name and human-readable description from a comment body
+// like:
+//   #stateModel MsaView
+//   #category view
+//   The actual description...
+// Returns { name: "MsaView" || fallback, docs: "The actual description..." }
+export function parseTaggedComment(
+  comment: string,
+  type: TagType,
+  fallbackName: string,
+) {
+  const tag = `#${type}`
+  const lines = comment.split('\n')
+  let name = fallbackName
+  const docs: string[] = []
+  for (const line of lines) {
+    if (line.includes(tag)) {
+      const fromTag = line.replace(tag, '').trim()
+      if (fromTag) {
+        name = fromTag
+      }
+    } else if (!line.includes('#category')) {
+      docs.push(line)
+    }
+  }
+  return { name, docs: docs.join('\n') }
 }
 
 export function removeComments(string: string) {
   return string.replaceAll(/\/\*[\s\S]*?\*\/|\/\/.*/g, '').trim()
 }
 
-export function rm(str1: string, str2: string) {
-  return str1
-    .split('\n')
-    .find(x => x.includes(str2))
-    ?.replace(str2, '')
-    .trim()
+export interface ExtendsRef {
+  name: string
+  slug: string
 }
 
-export function filter(str1: string, str2: string) {
-  return str1
-    .split('\n')
-    .filter(x => !x.includes(str2))
-    .join('\n')
+// The composition graph is authored inside the #stateModel comment after an
+// `extends` marker:
+//   extends
+//   - [MSAModel](../msamodel)
+// or inline:
+//   extends [MSAModel](../msamodel)
+// We parse those links back into structured refs so the generator can flatten
+// the inherited API and validate that each link resolves. The extends block is
+// the last thing in the doc body, so every relative model link after the marker
+// is an extends ref.
+export function parseExtends(docs: string): ExtendsRef[] {
+  const marker = /^\s*extends\b/m.exec(docs)
+  const refs: ExtendsRef[] = []
+  if (marker) {
+    const body = docs.slice(marker.index + marker[0].length)
+    const re = /\[([^\]]+)\]\(\.\.\/([^)]+)\)/g
+    let match: RegExpExecArray | null
+    while ((match = re.exec(body)) !== null) {
+      refs.push({ name: match[1]!, slug: match[2]! })
+    }
+  }
+  return refs
 }
 
 export async function getAllFiles() {
-  const files = await exec2(String.raw`git ls-files | grep "\(t\|j\)sx\?$"`)
-  return files.stdout.split('\n').filter(f => !!f)
+  const { stdout } = await exec2(String.raw`git ls-files | grep "\(t\|j\)sx\?$"`)
+  return stdout.split('\n').filter(Boolean)
 }

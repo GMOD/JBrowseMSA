@@ -6,9 +6,11 @@ title: Tree
 Note: this document is automatically generated from @jbrowse/mobx-state-tree
 objects in our source code.
 
-### Source file
+## Links
 
-[src/model/treeModel.ts](https://github.com/GMOD/react-msaview/blob/main/lib/src/model/treeModel.ts)
+[Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/treeModel.ts)
+
+## Docs
 
 ### Tree - Properties
 
@@ -18,7 +20,7 @@ objects in our source code.
 // type signature
 true
 // code
-drawLabels: true
+drawLabels: defaultDrawLabels
 ```
 
 #### property: drawNodeBubbles
@@ -29,7 +31,7 @@ draw clickable node bubbles on the tree
 // type signature
 true
 // code
-drawNodeBubbles: true
+drawNodeBubbles: defaultDrawNodeBubbles
 ```
 
 #### property: drawTree
@@ -40,7 +42,7 @@ draw tree, boolean
 // type signature
 true
 // code
-drawTree: true
+drawTree: defaultDrawTree
 ```
 
 #### property: labelsAlignRight
@@ -51,20 +53,20 @@ right-align the labels
 // type signature
 false
 // code
-labelsAlignRight: false
+labelsAlignRight: defaultLabelsAlignRight
 ```
 
 #### property: showBranchLen
 
-use "branch length" e.g. evolutionary distance to draw tree branch lengths. if
-false, the layout is a "cladogram" that does not take into account evolutionary
-distances
+use "branch length" e.g. evolutionary distance to draw tree branch
+lengths. if false, the layout is a "cladogram" that does not take into
+account evolutionary distances
 
 ```js
 // type signature
 true
 // code
-showBranchLen: true
+showBranchLen: defaultShowBranchLen
 ```
 
 #### property: treeAreaWidth
@@ -75,29 +77,19 @@ width of the area the tree is drawn in, px
 // type signature
 IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-treeAreaWidth: types.optional(types.number, 400)
+treeAreaWidth: types.optional(types.number, defaultTreeAreaWidth)
 ```
 
 #### property: treeWidth
 
-width of the tree within the treeArea, px
+width of the tree within the treeArea, px. automatically synced to
+fit within treeAreaWidth
 
 ```js
 // type signature
 IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-treeWidth: types.optional(types.number, 300)
-```
-
-### Tree - Getters
-
-#### getter: treeWidthMatchesArea
-
-synchronization that matches treeWidth to treeAreaWidth
-
-```js
-// type
-true
+treeWidth: types.optional(types.number, defaultTreeWidth)
 ```
 
 ### Tree - Actions
@@ -153,13 +145,4 @@ set tree width (px)
 ```js
 // type signature
 setTreeWidth: (n: number) => void
-```
-
-#### action: setTreeWidthMatchesArea
-
-synchronize the treewidth and treeareawidth
-
-```js
-// type signature
-setTreeWidthMatchesArea: (arg: boolean) => void
 ```

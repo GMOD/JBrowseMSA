@@ -4,215 +4,247 @@ import slugify from 'slugify'
 
 import {
   extractWithComment,
-  filter,
   getAllFiles,
+  parseExtends,
+  parseTaggedComment,
   removeComments,
-  rm,
-} from './util.js'
+} from './util.ts'
 
-interface Action {
-  name: string
-  docs: string
-  code: string
-}
-interface Method {
-  name: string
-  docs: string
-  code: string
-}
-interface Getter {
-  name: string
-  docs: string
-  code: string
-}
-interface Property {
-  name: string
-  docs: string
-  code: string
-}
+import type { ExtendsRef, ExtractedNode } from './util.ts'
 
-interface Model {
+interface Member {
+  name: string
+  docs: string
+  code: string
+  signature: string
+}
+interface ModelHeader {
   name: string
   id: string
-  category?: string
   docs: string
 }
 interface StateModel {
-  model?: Model
-  getters: Getter[]
-  methods: Method[]
-  properties: Property[]
-  actions: Action[]
+  header?: ModelHeader
+  properties: Member[]
+  volatiles: Member[]
+  getters: Member[]
+  methods: Member[]
+  actions: Member[]
   filename: string
+}
+type ModelWithHeader = StateModel & { header: ModelHeader }
+interface Ancestor {
+  ref: ExtendsRef
+  model?: ModelWithHeader
+}
+
+function buildMember(obj: ExtractedNode): Member {
+  const { name, docs } = parseTaggedComment(obj.comment, obj.type, obj.name)
+  return {
+    name,
+    docs,
+    code: removeComments(obj.node),
+    signature: obj.signature,
+  }
 }
 
 function generateStateModelDocs(files: string[]) {
   const cwd = `${process.cwd()}/`
-  const contents = {} as Record<string, StateModel>
+  const byFile: Record<string, StateModel> = {}
   extractWithComment(files, obj => {
     const fn = obj.filename
-    const fn2 = fn.replace(cwd, '')
-    contents[fn] ??= {
-      model: undefined,
-      getters: [],
-      actions: [],
-      methods: [],
+    byFile[fn] ??= {
       properties: [],
-      filename: fn2,
+      volatiles: [],
+      getters: [],
+      methods: [],
+      actions: [],
+      filename: fn.replace(cwd, ''),
     }
-    const current = contents[fn]
-    const name = rm(obj.comment, `#${obj.type}`) || obj.name
-    const docs = filter(filter(obj.comment, `#${obj.type}`), '#category')
-    const code = removeComments(obj.node)
-    const id = slugify(name, { lower: true })
-
-    // category currently unused, but can organize sidebar
-    let category = rm(obj.comment, '#category')
-
-    if (!category) {
-      if (name.endsWith('Adapter')) {
-        category = 'adapter'
-      } else if (name.endsWith('Display')) {
-        category = 'display'
-      } else if (name.endsWith('View')) {
-        category = 'view'
-      } else if (name.endsWith('Renderer')) {
-        category = 'renderer'
-      } else if (name.includes('Session')) {
-        category = 'session'
-      } else if (name.includes('Root')) {
-        category = 'root'
-      } else if (name.includes('Assembly')) {
-        category = 'assemblyManagement'
-      } else if (name.includes('InternetAccount')) {
-        category = 'internetAccount'
-      } else if (name.includes('Connection')) {
-        category = 'connection'
-      }
-    }
+    const file = byFile[fn]
+    const member = buildMember(obj)
 
     if (obj.type === 'stateModel') {
-      current.model = { ...obj, name, docs, id, category }
-    } else if (obj.type === 'getter') {
-      current.getters.push({ ...obj, name, docs, code })
-    } else if (obj.type === 'method') {
-      current.methods.push({ ...obj, name, docs, code })
-    } else if (obj.type === 'action') {
-      current.actions.push({ ...obj, name, docs, code })
+      file.header = {
+        name: member.name,
+        docs: member.docs,
+        id: slugify(member.name, { lower: true }),
+      }
     } else if (obj.type === 'property') {
-      current.properties.push({ ...obj, name, docs, code })
+      file.properties.push(member)
+    } else if (obj.type === 'volatile') {
+      file.volatiles.push(member)
+    } else if (obj.type === 'getter') {
+      file.getters.push(member)
+    } else if (obj.type === 'method') {
+      file.methods.push(member)
+    } else {
+      file.actions.push(member)
     }
   })
-  return contents
+  return byFile
+}
+
+// Walk the extends graph transitively, depth-first, deduping by slug and
+// guarding cycles. Returns ancestors in reading order (direct parents first,
+// then their parents). An unresolved slug yields an entry with model undefined.
+function collectAncestors(
+  model: StateModel,
+  bySlug: Map<string, ModelWithHeader>,
+  seen = new Set<string>(),
+): Ancestor[] {
+  const out: Ancestor[] = []
+  for (const ref of parseExtends(model.header?.docs ?? '')) {
+    if (!seen.has(ref.slug)) {
+      seen.add(ref.slug)
+      const parent = bySlug.get(ref.slug)
+      out.push({ ref, model: parent })
+      if (parent) {
+        out.push(...collectAncestors(parent, bySlug, seen))
+      }
+    }
+  }
+  return out
+}
+
+function memberLine(label: string, members: Member[]) {
+  return members.length
+    ? `**${label}:** ${members.map(m => m.name).join(', ')}`
+    : ''
+}
+
+// A compact, single-page overview of every member reachable through
+// composition, grouped by the model that defines it, so a reader does not have
+// to traverse the whole inheritance chain to learn what is available.
+function inheritedSection(ancestors: Ancestor[]) {
+  const blocks = ancestors.flatMap(({ model }) => {
+    const lines = model
+      ? [
+          memberLine('Properties', model.properties),
+          memberLine('Volatiles', model.volatiles),
+          memberLine('Getters', model.getters),
+          memberLine('Methods', model.methods),
+          memberLine('Actions', model.actions),
+        ].filter(Boolean)
+      : []
+    return model && lines.length
+      ? [
+          [
+            `### Available via [${model.header.name}](../${model.header.id})`,
+            ...lines,
+          ].join('\n\n'),
+        ]
+      : []
+  })
+  return blocks.length
+    ? [
+        '## Inherited members',
+        'Available on this model via composition. Follow each link for full signatures and docs.',
+        ...blocks,
+      ].join('\n\n')
+    : ''
+}
+
+function codeBlock(...lines: string[]) {
+  return ['```js', ...lines, '```'].join('\n')
+}
+
+function memberSection(
+  modelName: string,
+  label: string,
+  members: Member[],
+  renderBody: (m: Member) => string,
+) {
+  if (!members.length) {
+    return ''
+  }
+  const kind = label.toLowerCase().replace(/ies$/, 'y').replace(/s$/, '')
+  const blocks = members
+    .toSorted((a, b) => a.name.localeCompare(b.name))
+    .map(m => [`#### ${kind}: ${m.name}`, m.docs, renderBody(m)].join('\n\n'))
+  return [`### ${modelName} - ${label}`, ...blocks].join('\n\n')
+}
+
+function renderModel(
+  {
+    header,
+    properties,
+    volatiles,
+    getters,
+    methods,
+    actions,
+    filename,
+  }: StateModel,
+  ancestors: Ancestor[],
+): string | undefined {
+  if (!header) {
+    return undefined
+  }
+  const sections = [
+    memberSection(header.name, 'Properties', properties, p =>
+      codeBlock('// type signature', p.signature, '// code', p.code),
+    ),
+    memberSection(header.name, 'Volatiles', volatiles, v =>
+      codeBlock('// type signature', v.signature, '// code', v.code),
+    ),
+    memberSection(header.name, 'Getters', getters, g =>
+      codeBlock('// type', g.signature),
+    ),
+    memberSection(header.name, 'Methods', methods, m =>
+      codeBlock('// type signature', `${m.name}: ${m.signature}`),
+    ),
+    memberSection(header.name, 'Actions', actions, a =>
+      codeBlock('// type signature', `${a.name}: ${a.signature}`),
+    ),
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+
+  return `---
+id: ${header.id}
+title: ${header.name}
+---
+
+Note: this document is automatically generated from @jbrowse/mobx-state-tree
+objects in our source code.
+
+## Links
+
+[Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/${filename})
+
+## Docs
+
+${[header.docs, inheritedSection(ancestors), sections].filter(Boolean).join('\n\n')}
+`
+}
+
+function validateLinks(model: ModelWithHeader, ancestors: Ancestor[]) {
+  for (const { ref, model: parent } of ancestors) {
+    if (!parent) {
+      console.warn(
+        `${model.header.name}: extends link "[${ref.name}](../${ref.slug})" does not resolve to a generated model page`,
+      )
+    }
+  }
+}
+
+async function main() {
+  const dir = 'apidocs'
+  fs.mkdirSync(dir, { recursive: true })
+  const models = generateStateModelDocs(await getAllFiles())
+  const withHeader = Object.values(models).filter((m): m is ModelWithHeader =>
+    Boolean(m.header),
+  )
+  const bySlug = new Map(withHeader.map(m => [m.header.id, m] as const))
+  for (const model of withHeader) {
+    const ancestors = collectAncestors(model, bySlug)
+    validateLinks(model, ancestors)
+    const rendered = renderModel(model, ancestors)
+    if (rendered) {
+      fs.writeFileSync(`${dir}/${model.header.name}.md`, rendered)
+    }
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-;(async () => {
-  const contents = generateStateModelDocs(await getAllFiles())
-
-  Object.values(contents).forEach(
-    ({ model, getters, properties, actions, methods, filename }) => {
-      if (model) {
-        const getterstr = `${getters.length ? `### ${model.name} - Getters` : ''}\n${getters
-          .toSorted((a, b) => a.name.localeCompare(b.name))
-
-          .map(({ name, docs, signature }: any) => {
-            return `#### getter: ${name}
-
-${docs}
-
-\`\`\`js
-// type
-${signature || ''}
-\`\`\`
-`
-          })
-          .join('\n')}`
-
-        const methodstr = `${methods.length ? `### ${model.name} - Methods` : ''}\n${methods
-          .toSorted((a, b) => a.name.localeCompare(b.name))
-
-          .map(({ name, docs, signature }: any) => {
-            return `#### method: ${name}
-
-${docs}
-
-\`\`\`js
-// type signature
-${name}: ${signature || ''}
-\`\`\`
-`
-          })
-          .join('\n')}`
-
-        const propertiesstr = `${properties.length ? `### ${model.name} - Properties` : ''}\n${properties
-          .toSorted((a, b) => a.name.localeCompare(b.name))
-
-          .map(({ name, docs, code, signature }: any) => {
-            return `#### property: ${name}
-
-${docs}
-
-\`\`\`js
-// type signature
-${signature || ''}
-// code
-${code}
-\`\`\`
-`
-          })
-          .join('\n')}`
-
-        const actionstr = `${actions.length ? `### ${model.name} - Actions` : ''}\n${actions
-          .toSorted((a, b) => a.name.localeCompare(b.name))
-
-          .map(({ name, docs, signature }: any) => {
-            return `#### action: ${name}
-
-${docs}
-
-\`\`\`js
-// type signature
-${name}: ${signature || ''}
-\`\`\`
-`
-          })
-          .join('\n')}`
-
-        const dir = 'apidocs'
-        try {
-          fs.mkdirSync(dir, { recursive: true })
-        } catch (e) {
-          console.error(e)
-          /* do nothing*/
-        }
-        fs.writeFileSync(
-          `${dir}/${model.name}.md`,
-          `---
-id: ${model.id}
-title: ${model.name}
----
-
-Note: this document is automatically generated from @jbrowse/mobx-state-tree objects in
-our source code.
-
-### Source file
-
-[${filename}](https://github.com/GMOD/react-msaview/blob/main/lib/${filename})
-
-${model.docs}
-
-${propertiesstr}
-
-${getterstr}
-
-${methodstr}
-
-${actionstr}
-
-`,
-        )
-      }
-    },
-  )
-})()
+main()

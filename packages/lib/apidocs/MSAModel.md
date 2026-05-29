@@ -6,9 +6,11 @@ title: MSAModel
 Note: this document is automatically generated from @jbrowse/mobx-state-tree
 objects in our source code.
 
-### Source file
+## Links
 
-[src/model/msaModel.ts](https://github.com/GMOD/react-msaview/blob/main/lib/src/model/msaModel.ts)
+[Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/msaModel.ts)
+
+## Docs
 
 ### MSAModel - Properties
 
@@ -20,7 +22,7 @@ draw MSA tiles with a background color
 // type signature
 true
 // code
-bgColor: true
+bgColor: defaultBgColor
 ```
 
 #### property: colorSchemeName
@@ -31,7 +33,7 @@ default color scheme name
 // type signature
 string
 // code
-colorSchemeName: 'maeditor'
+colorSchemeName: defaultColorSchemeName
 ```
 
 ### MSAModel - Actions
