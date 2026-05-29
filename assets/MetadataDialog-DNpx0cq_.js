@@ -1,2 +1,0 @@
-import{n as e,r as t,t as n}from"./SequenceTextArea-D9qCLU45.js";import{t as r}from"./DialogContent-B7DKcpLO.js";import{P as i,Rn as a,Wn as o,Y as s}from"./index-COEueGlb.js";o();var c=a(),l=s(function({model:a,onClose:o}){let{header:s}=a;return(0,c.jsx)(i,{onClose:()=>{o()},open:!0,title:`Metadata`,maxWidth:`xl`,children:(0,c.jsxs)(r,{children:[(0,c.jsx)(t,{attributes:s}),(0,c.jsx)(e,{title:`sequence`,children:(0,c.jsx)(n,{str:a.rows})})]})})});export{l as default};
-//# sourceMappingURL=MetadataDialog-DNpx0cq_.js.map
