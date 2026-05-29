@@ -74,4 +74,8 @@ run('git push && git push --tags')
 console.log('\nDeploying app to GitHub Pages...')
 run('pnpm run deploy', path.join(rootDir, 'packages/app'))
 
+// Deploy examples storybook to S3
+console.log('\nDeploying storybook to S3...')
+run('pnpm deploy:storybook')
+
 console.log(`\n✓ Released ${tag} — GitHub Actions will publish to npm`)

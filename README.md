@@ -32,8 +32,8 @@ msaview(msa = "alignment.stock", color_scheme = "clustal")
 
 ## Demo
 
-See [ProteinBrowser](https://github.com/GMOD/proteinbrowser) for a full suite of
-protein analysis tools.
+- Live examples: https://jbrowse.org/storybook/msa
+- See [ProteinBrowser](https://github.com/GMOD/proteinbrowser) for a full suite of protein analysis tools.
 
 ## Packages
 
