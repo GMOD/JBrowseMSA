@@ -237,6 +237,7 @@ const InterProScanDialog = observer(function ({
           variant="contained"
           color="primary"
           onClick={() => {
+            const controller = new AbortController()
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
               try {
@@ -255,9 +256,14 @@ const InterProScanDialog = observer(function ({
                     .map(row => `>${row[0]}\n${row[1]}`)
                     .join('\n'),
                   onProgress: arg => {
-                    model.setStatus(arg)
+                    model.setStatus(
+                      arg
+                        ? { ...arg, onCancel: () => { controller.abort() } }
+                        : undefined,
+                    )
                   },
                   model,
+                  signal: controller.signal,
                 })
               } catch (e) {
                 console.error(e)

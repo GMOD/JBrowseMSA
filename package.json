@@ -27,7 +27,7 @@
     "@emotion/react": "^11.14.0",
     "@eslint/js": "^10.0.1",
     "@jbrowse/core": "^4.3.0",
-    "@jbrowse/mobx-state-tree": "^5.8.7",
+    "@jbrowse/mobx-state-tree": "^5.9.3",
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
     "@mui/system": "^9.0.1",
@@ -64,6 +64,6 @@
     "vite": "^8.0.14",
     "vitest": "^4.1.7",
     "webpack": "^5.107.2",
-    "webpack-cli": "^7.0.2"
+    "webpack-cli": "^7.0.3"
   }
 }

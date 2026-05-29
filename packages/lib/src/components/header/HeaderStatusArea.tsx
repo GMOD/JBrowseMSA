@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { LoadingEllipses } from '@jbrowse/core/ui'
-import { Typography } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 import { makeStyles } from 'tss-react/mui'
 
@@ -24,6 +24,11 @@ const HeaderStatusArea = observer(({ model }: { model: MsaViewModel }) => {
         <a href={status.url} target="_blank" rel="noreferrer">
           (status)
         </a>
+      ) : null}{' '}
+      {status.onCancel ? (
+        <Button size="small" onClick={() => status.onCancel?.()}>
+          Cancel
+        </Button>
       ) : null}
     </Typography>
   ) : null
