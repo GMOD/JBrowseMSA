@@ -1,0 +1,28 @@
+{
+  "name": "examples",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@jbrowse/core": "^4.3.0",
+    "@jbrowse/mobx-state-tree": "^5.8.7",
+    "@mui/icons-material": "^9.0.1",
+    "@mui/material": "^9.0.1",
+    "mobx": "^6.15.4",
+    "mobx-react": "^9.2.2",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-msaview": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
+    "vite": "^8.0.14"
+  }
+}
