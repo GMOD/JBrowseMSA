@@ -178,6 +178,8 @@ export function parseExtends(docs: string): ExtendsRef[] {
 }
 
 export async function getAllFiles() {
-  const { stdout } = await exec2(String.raw`git ls-files | grep "\(t\|j\)sx\?$"`)
+  const { stdout } = await exec2(
+    String.raw`git ls-files | grep "\(t\|j\)sx\?$"`,
+  )
   return stdout.split('\n').filter(Boolean)
 }

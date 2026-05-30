@@ -694,15 +694,32 @@ function stateModelFactory() {
       /**
        * #getter
        */
+      /**
+       * #getter
+       * Returns the list of row (sequence) names in display order.
+       * Part of the public API used by downstream consumers (e.g. jbrowse plugins).
+       */
       get rowNames(): string[] {
         return this.leaves.map(n => n.data.name)
       },
       /**
        * #getter
        */
+      get rowNamesSet() {
+        const map = new Map<string, number>()
+        this.leaves.forEach((leaf, index) => {
+          map.set(leaf.data.name, index)
+        })
+        return map
+      },
+      /**
+       * #getter
+       */
       get mouseOverRowName() {
         const { mouseRow } = self
-        return mouseRow === undefined ? undefined : this.rowNames[mouseRow]
+        return mouseRow === undefined
+          ? undefined
+          : this.leaves[mouseRow]?.data.name
       },
       /**
        * #getter
@@ -713,7 +730,7 @@ function stateModelFactory() {
         if (mouseCol === undefined || mouseRow === undefined) {
           return undefined
         }
-        const rowName = this.rowNames[mouseRow]
+        const rowName = this.leaves[mouseRow]?.data.name
         if (!rowName) {
           return undefined
         }
@@ -899,7 +916,7 @@ function stateModelFactory() {
        * #getter
        */
       get columns() {
-        return Object.fromEntries(
+        return new Map(
           this.rows.map(
             (row, index) => [row[0], this.columns2d[index]!] as const,
           ),
@@ -913,7 +930,10 @@ function stateModelFactory() {
         return this.rows
           .map(r => r[1])
           .map(str =>
-            (hideGapsEffective ? skipBlanks(this.blanks, str) : str).toUpperCase(),
+            (hideGapsEffective
+              ? skipBlanks(this.blanks, str)
+              : str
+            ).toUpperCase(),
           )
       },
       /**
@@ -944,7 +964,9 @@ function stateModelFactory() {
       get colStatsSums() {
         return this.colStats.map(col => {
           let s = 0
-          for (const k in col) s += col[k]!
+          for (const k in col) {
+            s += col[k]!
+          }
           return s
         })
       },
@@ -1318,22 +1340,23 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      get labelsWidth() {
+      get labelWidthMap() {
         const { rowHeight, leaves, treeMetadata, fontSize } = self
         if (rowHeight <= 5) {
-          return 0
+          return new Map<string, number>()
         }
-        return leaves.reduce(
-          (max, node) =>
-            Math.max(
-              max,
-              measureTextCanvas(
-                treeMetadata[node.data.name]?.genome || node.data.name,
-                fontSize,
-              ),
-            ),
-          0,
+        return new Map(
+          leaves.map(node => {
+            const { name } = node.data
+            const displayName = treeMetadata[name]?.genome || name
+            return [name, measureTextCanvas(displayName, fontSize)] as const
+          }),
         )
+      },
+
+      get labelsWidth() {
+        const widths = this.labelWidthMap
+        return widths.size === 0 ? 0 : Math.max(...widths.values())
       },
 
       /**
@@ -1400,13 +1423,6 @@ function stateModelFactory() {
        */
       get showHorizontalScrollbar() {
         return self.msaAreaWidth < self.totalWidth
-      },
-
-      /**
-       * #getter
-       */
-      get rowNamesSet() {
-        return new Map(self.rowNames.map((r, idx) => [r, idx]))
       },
 
       /**
@@ -1485,14 +1501,8 @@ function stateModelFactory() {
        * @returns The global column index in the full MSA
        */
       seqPosToGlobalCol(rowName: string, seqPos: number) {
-        const { rows } = self
-        const index = this.rowNamesSet.get(rowName)
-        return index !== undefined && rows[index]
-          ? seqPosToGlobalCol({
-              row: rows[index][1],
-              seqPos,
-            })
-          : 0
+        const seq = self.rowMap.get(rowName)
+        return seq ? seqPosToGlobalCol({ row: seq, seqPos }) : 0
       },
 
       /**

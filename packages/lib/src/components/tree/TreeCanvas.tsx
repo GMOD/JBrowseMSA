@@ -43,7 +43,9 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
             ctx.resetTransform()
             ctx.clearRect(0, 0, w, h)
 
-            const leafByName = new Map(leaves.map(leaf => [leaf.data.name, leaf]))
+            const leafByName = new Map(
+              leaves.map(leaf => [leaf.data.name, leaf]),
+            )
             const fillRow = (name: string) => {
               const leaf = leafByName.get(name)
               if (leaf) {

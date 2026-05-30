@@ -38,8 +38,14 @@ const AnnotationBlock = observer(function ({
       return
     }
     return autorun(() => {
-      const { blockSize, bgColor, colWidth, fontSize, rowHeight, highResScaleFactor } =
-        model
+      const {
+        blockSize,
+        bgColor,
+        colWidth,
+        fontSize,
+        rowHeight,
+        highResScaleFactor,
+      } = model
       ctx.resetTransform()
       ctx.scale(highResScaleFactor, highResScaleFactor)
       ctx.clearRect(0, 0, blockSize, rowHeight)

@@ -1,5 +1,6 @@
 import { getVisibleLeaves } from './getVisibleLeaves.ts'
 import { visibleColRange } from './visibleColRange.ts'
+import { adjustColorForContrast } from '../../util.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -52,10 +53,16 @@ export function renderMSABlock({
     `${bgColor ? '' : 'bold '}${fontSize}px`,
   )
 
-  const { xStart, xEnd } = visibleColRange({ offsetX, blockWidth: bx, colWidth })
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: bx,
+    colWidth,
+  })
   const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
   const { relativeTo, columns } = model
-  const referenceSeq = relativeTo ? columns[relativeTo]?.slice(xStart, xEnd) : null
+  const referenceSeq = relativeTo
+    ? columns.get(relativeTo)?.slice(xStart, xEnd)
+    : null
 
   if (!actuallyShowDomains) {
     drawTilesAndText({
@@ -136,7 +143,7 @@ function drawTilesAndText({
     const node = visibleLeaves[i]!
     const { name } = node.data
     const y = node.x!
-    const str = columns[name]?.slice(xStart, xEnd)
+    const str = columns.get(name)?.slice(xStart, xEnd)
     if (!str) {
       continue
     }
@@ -168,9 +175,15 @@ function drawTilesAndText({
 
       if (showMsaLetters) {
         ctx.fillStyle = bgColor
-          ? contrastScheme[letter] || 'black'
-          : color || 'black'
-        ctx.fillText(isMatchingReference ? '.' : letter, x + halfColWidth, textY)
+          ? (contrastScheme[letter] ?? 'black')
+          : color
+            ? adjustColorForContrast(color, theme.palette.background.default)
+            : theme.palette.text.primary
+        ctx.fillText(
+          isMatchingReference ? '.' : letter,
+          x + halfColWidth,
+          textY,
+        )
       }
     }
   }
@@ -210,7 +223,7 @@ function drawText({
     const node = visibleLeaves[i]!
     const { name } = node.data
     const y = node.x! - quarterRowHeight
-    const str = columns[name]?.slice(xStart, xEnd)
+    const str = columns.get(name)?.slice(xStart, xEnd)
     if (!str) {
       continue
     }

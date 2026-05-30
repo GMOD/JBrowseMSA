@@ -258,7 +258,12 @@ const InterProScanDialog = observer(function ({
                   onProgress: arg => {
                     model.setStatus(
                       arg
-                        ? { ...arg, onCancel: () => { controller.abort() } }
+                        ? {
+                            ...arg,
+                            onCancel: () => {
+                              controller.abort()
+                            },
+                          }
                         : undefined,
                     )
                   },

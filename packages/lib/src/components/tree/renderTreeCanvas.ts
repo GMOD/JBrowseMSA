@@ -187,6 +187,7 @@ export function renderTreeLabels({
     marginLeft,
     leaves,
     noTree,
+    labelWidthMap,
   } = model
   const by = blockSizeYOverride ?? blockSize
   const emHeight = ctx.measureText('M').width
@@ -211,7 +212,8 @@ export function renderTreeLabels({
         xp = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf) ?? 0
       }
 
-      const { width } = ctx.measureText(displayName)
+      const width =
+        labelWidthMap.get(name) ?? ctx.measureText(displayName).width
 
       ctx.fillStyle = theme.palette.text.primary
       if (labelsAlignRight) {

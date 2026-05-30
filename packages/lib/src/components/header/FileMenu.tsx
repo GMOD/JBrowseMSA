@@ -3,6 +3,7 @@ import React, { lazy } from 'react'
 import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
 import Assignment from '@mui/icons-material/Assignment'
 import FolderOpen from '@mui/icons-material/FolderOpen'
+import Menu from '@mui/icons-material/Menu'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import Settings from '@mui/icons-material/Settings'
 import { observer } from 'mobx-react'
@@ -76,7 +77,7 @@ const FileMenu = observer(({ model }: { model: MsaViewModel }) => {
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
     >
-      <FolderOpen />
+      <Menu />
     </CascadingMenuButton>
   )
 })

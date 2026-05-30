@@ -28,7 +28,9 @@ export default function ExportSVGDialog({
 }) {
   const [includeMinimap, setIncludeMinimap] = useState(true)
   const [includeTracks, setIncludeTracks] = useState(true)
-  const [exportType, setExportType] = useState<'entire' | 'viewport'>('viewport')
+  const [exportType, setExportType] = useState<'entire' | 'viewport'>(
+    'viewport',
+  )
   const [error, setError] = useState<unknown>()
   const theme = useTheme()
   const {
@@ -111,7 +113,8 @@ export default function ExportSVGDialog({
             void model
               .exportSVG({
                 theme,
-                includeMinimap: exportType === 'entire' ? false : includeMinimap,
+                includeMinimap:
+                  exportType === 'entire' ? false : includeMinimap,
                 includeTracks: hasTracks && includeTracks,
                 exportType,
               })

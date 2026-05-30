@@ -25,7 +25,6 @@ export function renderMouseover({
     mouseClickRow,
     mouseClickCol,
     relativeTo,
-    rowNamesSet,
     hoveredTreeNode,
     highlightedColumns,
   } = model
@@ -35,7 +34,7 @@ export function renderMouseover({
 
   // Highlight reference row (relativeTo) persistently
   if (relativeTo) {
-    const referenceRowIndex = rowNamesSet.get(relativeTo)
+    const referenceRowIndex = model.rowNamesSet.get(relativeTo)
     if (referenceRowIndex !== undefined) {
       ctx.fillStyle = referenceColor
       ctx.fillRect(0, referenceRowIndex * rowHeight + scrollY, width, rowHeight)
@@ -46,7 +45,7 @@ export function renderMouseover({
   if (hoveredTreeNode) {
     ctx.fillStyle = multiRowHoverColor
     for (const descendantName of hoveredTreeNode.descendantNames) {
-      const rowIndex = rowNamesSet.get(descendantName)
+      const rowIndex = model.rowNamesSet.get(descendantName)
       if (rowIndex !== undefined) {
         ctx.fillRect(0, rowIndex * rowHeight + scrollY, width, rowHeight)
       }

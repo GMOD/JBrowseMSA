@@ -1,9 +1,33 @@
 import { colord, extend } from 'colord'
+import a11yPlugin from 'colord/plugins/a11y'
 import namesPlugin from 'colord/plugins/names'
 
 import type { Theme } from '@mui/material'
 
-extend([namesPlugin])
+extend([namesPlugin, a11yPlugin])
+
+const contrastAdjustCache = new Map<string, string>()
+
+// Adjusts a background-tile color until it meets WCAG AA (4.5:1) contrast
+// against `bg`, so it can be used as letter text in letter-color mode.
+// Darkens on light backgrounds, lightens on dark backgrounds.
+export function adjustColorForContrast(color: string, bg: string): string {
+  const cacheKey = `${color}|${bg}`
+  const cached = contrastAdjustCache.get(cacheKey)
+  if (cached !== undefined) {
+    return cached
+  }
+  let c = colord(color)
+  if (!c.isReadable(bg)) {
+    const bgIsDark = colord(bg).luminance() < 0.5
+    for (let i = 0; i < 40 && !c.isReadable(bg); i++) {
+      c = bgIsDark ? c.lighten(0.05) : c.darken(0.05)
+    }
+  }
+  const result = c.toHex()
+  contrastAdjustCache.set(cacheKey, result)
+  return result
+}
 
 export function transform<T>(
   obj: Record<string, T>,

@@ -22,8 +22,8 @@ Outputs a static site to `dist/` (relative `base`, so it works under the
 
 ## Deploy
 
-CI deploys automatically on pushes to `main` (see
-`.github/workflows/push.yml`). To deploy manually:
+CI deploys automatically on pushes to `main` (see `.github/workflows/push.yml`).
+To deploy manually:
 
 ```sh
 pnpm --filter examples build

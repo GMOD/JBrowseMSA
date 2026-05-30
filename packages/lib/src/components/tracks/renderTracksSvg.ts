@@ -19,7 +19,11 @@ export function drawConservationBars({
   offsetX: number
   blockSize: number
 }) {
-  const { xStart, xEnd } = visibleColRange({ offsetX, blockWidth: blockSize, colWidth })
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: blockSize,
+    colWidth,
+  })
 
   ctx.fillStyle = 'gray'
   for (let i = xStart; i < xEnd && i < conservation.length; i++) {
@@ -51,7 +55,11 @@ export function drawTextTrackContent({
   offsetX: number
   blockSize: number
 }) {
-  const { xStart, xEnd } = visibleColRange({ offsetX, blockWidth: blockSize, colWidth })
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: blockSize,
+    colWidth,
+  })
   const str = data?.slice(xStart, xEnd)
 
   for (let i = 0; str && i < str.length; i++) {
