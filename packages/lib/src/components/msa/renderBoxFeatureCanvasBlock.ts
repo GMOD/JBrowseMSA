@@ -1,3 +1,5 @@
+import { getVisibleLeaves } from './getVisibleLeaves.ts'
+
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { NodeWithIdsAndLength } from '../../types.ts'
@@ -17,18 +19,15 @@ export function renderBoxFeatureCanvasBlock({
   highResScaleFactorOverride?: number
   blockSizeYOverride?: number
 }) {
-  const { leaves, blockSize, rowHeight, highResScaleFactor, showDomains } =
-    model
+  const { blockSize, rowHeight, highResScaleFactor, showDomains } = model
   if (showDomains) {
-    const k = highResScaleFactorOverride || highResScaleFactor
-    const by = blockSizeYOverride || blockSize
+    const k = highResScaleFactorOverride ?? highResScaleFactor
+    const by = blockSizeYOverride ?? blockSize
     ctx.resetTransform()
     ctx.scale(k, k)
     ctx.translate(-offsetX, rowHeight / 2 - offsetY)
 
-    const yStart = Math.max(0, Math.floor((offsetY - rowHeight) / rowHeight))
-    const yEnd = Math.max(0, Math.ceil((offsetY + by + rowHeight) / rowHeight))
-    const visibleLeaves = leaves.slice(yStart, yEnd)
+    const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
 
     drawTiles({
       model,

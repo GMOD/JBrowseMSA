@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { useTheme } from '@mui/material'
 import Flatbush from 'flatbush'
@@ -62,7 +62,6 @@ class ClickMapIndex {
   finish() {
     if (this.entries.length === 0) {
       this.flatbush = null
-      return
     } else {
       this.flatbush = new Flatbush(this.entries.length)
       for (const entry of this.entries) {
@@ -114,15 +113,6 @@ const TreeCanvasBlock = observer(function ({
   const w2 = width * highResScaleFactor
   const h2 = height * highResScaleFactor
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies:
-  const vref = useCallback(
-    (arg: HTMLCanvasElement) => {
-      model.incrementRef()
-      ref.current = arg
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [model, height, width],
-  )
   useEffect(() => {
     const ctx = ref.current?.getContext('2d')
     if (!ctx) {
@@ -289,7 +279,7 @@ const TreeCanvasBlock = observer(function ({
           model.setHoveredTreeNode(undefined)
           model.setMousePos(undefined, undefined)
         }}
-        ref={vref}
+        ref={ref}
       />
       <canvas
         style={{

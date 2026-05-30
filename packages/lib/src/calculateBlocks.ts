@@ -1,58 +1,25 @@
-export function blocksY({
-  mapHeight,
+// Returns the block offsets (in pixels) needed to cover the viewport along one
+// axis. mapSize/viewportPos/viewportSize are all in pixels. The clamp pins the
+// block set to the content edge so an over-scroll past the end still fills the
+// viewport rather than leaving a gap.
+export function calculateBlocks({
+  mapSize,
   blockSize,
-  viewportY,
-  viewportHeight,
+  viewportPos,
+  viewportSize,
 }: {
-  mapHeight: number
+  mapSize: number
   blockSize: number
-  viewportY: number
-  viewportHeight: number
+  viewportPos: number
+  viewportSize: number
 }) {
-  const clampedViewportY = Math.max(
-    0,
-    Math.min(viewportY, mapHeight * blockSize - viewportHeight),
-  )
+  const clamped = Math.max(0, Math.min(viewportPos, mapSize - viewportSize))
+  const minTile = Math.floor(clamped / blockSize)
+  const maxTile = Math.floor((clamped + viewportSize - 1) / blockSize)
 
-  // Calculate visible tile ranges
-  const minTileY = Math.floor(clampedViewportY / blockSize)
-  const maxTileY = Math.floor(
-    (clampedViewportY + viewportHeight - 1) / blockSize,
-  )
-
-  // Generate list of visible tiles
-  const blocksY = []
-  for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
-    blocksY.push(tileY * blockSize)
+  const blocks = []
+  for (let tile = minTile; tile <= maxTile; tile++) {
+    blocks.push(tile * blockSize)
   }
-
-  return blocksY
-}
-
-export function blocksX({
-  mapWidth,
-  blockSize,
-  viewportX,
-  viewportWidth,
-}: {
-  mapWidth: number
-  blockSize: number
-  viewportX: number
-  viewportWidth: number
-}) {
-  const clampedViewportX = Math.max(
-    0,
-    Math.min(viewportX, mapWidth - viewportWidth),
-  )
-
-  const minTileX = Math.floor(clampedViewportX / blockSize)
-  const maxTileX = Math.floor(
-    (clampedViewportX + viewportWidth - 1) / blockSize,
-  )
-  const blocksX = []
-  for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
-    blocksX.push(tileX * blockSize)
-  }
-
-  return blocksX
+  return blocks
 }

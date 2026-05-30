@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
 import { ResizeHandle } from '@jbrowse/core/ui'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { drawConservationBars } from './tracks/renderTracksSvg.ts'
@@ -17,42 +18,32 @@ const ConservationBlock = observer(function ({
   offsetX: number
   trackHeight: number
 }) {
-  const { blockSize, scrollX, colWidth, highResScaleFactor, conservation } =
-    model
+  const { blockSize, scrollX, highResScaleFactor } = model
 
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (!ref.current) {
-      return
-    }
-
-    const ctx = ref.current.getContext('2d')
+    const ctx = ref.current?.getContext('2d')
     if (!ctx) {
       return
     }
+    return autorun(() => {
+      const { blockSize, colWidth, highResScaleFactor, conservation } = model
+      ctx.resetTransform()
+      ctx.scale(highResScaleFactor, highResScaleFactor)
+      ctx.clearRect(0, 0, blockSize, trackHeight)
+      ctx.translate(-offsetX, 0)
 
-    ctx.resetTransform()
-    ctx.scale(highResScaleFactor, highResScaleFactor)
-    ctx.clearRect(0, 0, blockSize, trackHeight)
-    ctx.translate(-offsetX, 0)
-
-    drawConservationBars({
-      ctx,
-      conservation,
-      colWidth,
-      trackHeight,
-      offsetX,
-      blockSize,
+      drawConservationBars({
+        ctx,
+        conservation,
+        colWidth,
+        trackHeight,
+        offsetX,
+        blockSize,
+      })
     })
-  }, [
-    blockSize,
-    colWidth,
-    trackHeight,
-    offsetX,
-    highResScaleFactor,
-    conservation,
-  ])
+  }, [model, offsetX, trackHeight])
 
   return (
     <canvas

@@ -19,7 +19,7 @@ import {
   parseNewick,
 } from 'msa-parsers'
 
-import { blocksX, blocksY } from './calculateBlocks.ts'
+import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
 import ConservationTrack from './components/ConservationTrack.tsx'
@@ -316,13 +316,6 @@ function stateModelFactory() {
        * array of column indices to highlight
        */
       highlightedColumns: undefined as number[] | undefined,
-
-      /**
-       * #volatile
-       * a dummy variable that is incremented when ref changes so autorun for
-       * drawing canvas commands will run
-       */
-      nref: 0,
 
       /**
        * #volatile
@@ -1134,22 +1127,22 @@ function stateModelFactory() {
        * #getter
        */
       get blocksX() {
-        return blocksX({
-          viewportWidth: self.msaAreaWidth,
-          viewportX: -self.scrollX,
+        return calculateBlocks({
+          viewportSize: self.msaAreaWidth,
+          viewportPos: -self.scrollX,
           blockSize: self.blockSize,
-          mapWidth: self.totalWidth,
+          mapSize: self.totalWidth,
         })
       },
       /**
        * #getter
        */
       get blocksY() {
-        return blocksY({
-          viewportHeight: self.height,
-          viewportY: -self.scrollY,
+        return calculateBlocks({
+          viewportSize: self.height,
+          viewportPos: -self.scrollY,
           blockSize: self.blockSize,
-          mapHeight: self.totalHeight,
+          mapSize: self.totalHeight,
         })
       },
     }))
@@ -1667,14 +1660,6 @@ function stateModelFactory() {
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, 'image.svg')
       },
-      /**
-       * #action
-       * internal, used for drawing to canvas
-       */
-      incrementRef() {
-        self.nref++
-      },
-
       initFilter(arg: string) {
         if (!self.featureFilters.has(arg)) {
           self.featureFilters.set(arg, true)

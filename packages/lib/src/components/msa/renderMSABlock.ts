@@ -1,3 +1,5 @@
+import { getVisibleLeaves } from './getVisibleLeaves.ts'
+
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { NodeWithIdsAndLength } from '../../types.ts'
@@ -31,12 +33,11 @@ export function renderMSABlock({
     fontSize,
     highResScaleFactor,
     actuallyShowDomains,
-    leaves,
     bgColor,
   } = model
-  const k = highResScaleFactorOverride || highResScaleFactor
-  const bx = blockSizeXOverride || blockSize
-  const by = blockSizeYOverride || blockSize
+  const k = highResScaleFactorOverride ?? highResScaleFactor
+  const bx = blockSizeXOverride ?? blockSize
+  const by = blockSizeYOverride ?? blockSize
   ctx.resetTransform()
   ctx.scale(k, k)
   ctx.translate(-offsetX, rowHeight / 2 - offsetY)
@@ -49,11 +50,9 @@ export function renderMSABlock({
     `${bgColor ? '' : 'bold '}${fontSize}px`,
   )
 
-  const yStart = Math.max(0, Math.floor((offsetY - rowHeight) / rowHeight))
-  const yEnd = Math.max(0, Math.ceil((offsetY + by + rowHeight) / rowHeight))
   const xStart = Math.max(0, Math.floor(offsetX / colWidth))
   const xEnd = Math.max(0, Math.ceil((offsetX + bx) / colWidth))
-  const visibleLeaves = leaves.slice(yStart, yEnd)
+  const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
 
   if (!actuallyShowDomains) {
     drawTiles({

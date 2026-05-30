@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { useColorContrast } from '../useColorContrast.ts'
@@ -20,10 +21,7 @@ const AnnotationBlock = observer(function ({
   const {
     blockSize,
     scrollX,
-    bgColor,
     colorScheme: modelColorScheme,
-    colWidth,
-    fontSize,
     rowHeight,
     highResScaleFactor,
   } = model
@@ -35,45 +33,33 @@ const AnnotationBlock = observer(function ({
   const ref = useRef<HTMLCanvasElement>(null)
   const { contrastScheme } = useColorContrast(colorScheme)
   useEffect(() => {
-    if (!ref.current) {
-      return
-    }
-
-    const ctx = ref.current.getContext('2d')
+    const ctx = ref.current?.getContext('2d')
     if (!ctx) {
       return
     }
+    return autorun(() => {
+      const { blockSize, bgColor, colWidth, fontSize, rowHeight, highResScaleFactor } =
+        model
+      ctx.resetTransform()
+      ctx.scale(highResScaleFactor, highResScaleFactor)
+      ctx.clearRect(0, 0, blockSize, rowHeight)
+      ctx.translate(-offsetX, 0)
+      ctx.textAlign = 'center'
+      ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
 
-    ctx.resetTransform()
-    ctx.scale(highResScaleFactor, highResScaleFactor)
-    ctx.clearRect(0, 0, blockSize, rowHeight)
-    ctx.translate(-offsetX, 0)
-    ctx.textAlign = 'center'
-    ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
-
-    drawTextTrackContent({
-      ctx,
-      data,
-      colorScheme,
-      contrastScheme,
-      bgColor,
-      colWidth,
-      rowHeight,
-      offsetX,
-      blockSize,
+      drawTextTrackContent({
+        ctx,
+        data,
+        colorScheme,
+        contrastScheme,
+        bgColor,
+        colWidth,
+        rowHeight,
+        offsetX,
+        blockSize,
+      })
     })
-  }, [
-    fontSize,
-    bgColor,
-    blockSize,
-    colWidth,
-    rowHeight,
-    offsetX,
-    contrastScheme,
-    colorScheme,
-    highResScaleFactor,
-    data,
-  ])
+  }, [model, offsetX, contrastScheme, colorScheme, data])
   return (
     <canvas
       ref={ref}
