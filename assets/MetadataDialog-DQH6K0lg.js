@@ -1,0 +1,2 @@
+import{n as e,r as t,t as n}from"./SequenceTextArea-B20VdZ2y.js";import{K as r,T as i,fn as a,u as o,vn as s}from"./index-DeVjyoWO.js";s();var c=a(),l=i(function({model:i,onClose:a}){let{header:s}=i;return(0,c.jsx)(o,{onClose:()=>{a()},open:!0,title:`Metadata`,maxWidth:`xl`,children:(0,c.jsxs)(r,{children:[(0,c.jsx)(t,{attributes:s}),(0,c.jsx)(e,{title:`sequence`,children:(0,c.jsx)(n,{str:i.rows})})]})})});export{l as default};
+//# sourceMappingURL=MetadataDialog-DQH6K0lg.js.map
