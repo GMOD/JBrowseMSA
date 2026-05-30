@@ -73,7 +73,6 @@ export function renderMSABlock({
     drawText({
       model,
       ctx,
-      contrastScheme,
       offsetX,
       xStart,
       xEnd,
@@ -126,6 +125,9 @@ function drawTilesAndText({
   const isClustalX = colorSchemeName === 'clustalx_protein_dynamic'
   const isPercentIdentity = colorSchemeName === 'percent_identity_dynamic'
   const drawBgTiles = bgColor || isClustalX || isPercentIdentity
+  if (!drawBgTiles && !showMsaLetters) {
+    return
+  }
   const offsetXAligned = offsetX - (offsetX % colWidth)
   const halfColWidth = colWidth / 2
   const quarterRowHeight = rowHeight / 4
@@ -179,7 +181,6 @@ function drawTilesAndText({
 function drawText({
   model,
   offsetX,
-  contrastScheme,
   ctx,
   visibleLeaves,
   xStart,
@@ -188,15 +189,13 @@ function drawText({
 }: {
   offsetX: number
   model: MsaViewModel
-  contrastScheme: Record<string, string>
   ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
   referenceSeq: string | null | undefined
 }) {
-  const { showMsaLetters, colorScheme, columns, colWidth, rowHeight, relativeTo } =
-    model
+  const { showMsaLetters, columns, colWidth, rowHeight, relativeTo } = model
 
   if (!showMsaLetters) {
     return
@@ -204,6 +203,8 @@ function drawText({
   const offsetXAligned = offsetX - (offsetX % colWidth)
   const halfColWidth = colWidth / 2
   const quarterRowHeight = rowHeight / 4
+  // note: -rowHeight/4 matches +rowHeight/4 in tree
+  ctx.fillStyle = 'black'
 
   for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
     const node = visibleLeaves[i]!
@@ -217,8 +218,6 @@ function drawText({
       const letter = str[j]!
       const isMatchingReference =
         referenceSeq && name !== relativeTo && letter === referenceSeq[j]
-      // note: -rowHeight/4 matches +rowHeight/4 in tree
-      ctx.fillStyle = 'black'
       ctx.fillText(
         isMatchingReference ? '.' : letter,
         j * colWidth + offsetXAligned + halfColWidth,
