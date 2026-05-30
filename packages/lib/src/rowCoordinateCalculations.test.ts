@@ -1,7 +1,6 @@
 import { expect, test } from 'vitest'
 
 import {
-  globalColToSeqPos,
   globalColToVisibleCol,
   visibleColToGlobalCol,
   visibleColToSeqPos,
@@ -124,56 +123,6 @@ test('globalColToVisibleCol with consecutive blanks', () => {
   expect(globalColToVisibleCol(blanks, 8)).toBe(undefined) // Hidden
   expect(globalColToVisibleCol(blanks, 9)).toBe(4)
   expect(globalColToVisibleCol(blanks, 10)).toBe(5)
-})
-
-// Tests for globalColToSeqPos (global column → sequence position)
-test('globalColToSeqPos with gaps in sequence', () => {
-  const sequence = 'AC-GT-A'
-  expect(globalColToSeqPos(sequence, 0)).toBe(0)
-  expect(globalColToSeqPos(sequence, 1)).toBe(1)
-  expect(globalColToSeqPos(sequence, 2)).toBe(2)
-  // Position 2 is a gap, so count before it is 2
-  expect(globalColToSeqPos(sequence, 3)).toBe(2)
-  expect(globalColToSeqPos(sequence, 4)).toBe(3)
-  expect(globalColToSeqPos(sequence, 5)).toBe(4)
-  // Position 5 is a gap, so count before it is 4
-  expect(globalColToSeqPos(sequence, 6)).toBe(4)
-})
-
-test('globalColToSeqPos with mixed gap characters (- and .)', () => {
-  const sequence = 'AC.GT-A'
-  expect(globalColToSeqPos(sequence, 0)).toBe(0)
-  expect(globalColToSeqPos(sequence, 1)).toBe(1)
-  // Position 2 is a gap (.), so count before it is 2
-  expect(globalColToSeqPos(sequence, 2)).toBe(2)
-  expect(globalColToSeqPos(sequence, 3)).toBe(2)
-  expect(globalColToSeqPos(sequence, 4)).toBe(3)
-  // Position 5 is a gap (-), so count before it is 4
-  expect(globalColToSeqPos(sequence, 5)).toBe(4)
-  expect(globalColToSeqPos(sequence, 6)).toBe(4)
-})
-
-test('globalColToSeqPos with no gaps in sequence', () => {
-  const sequence = 'ACGTA'
-  expect(globalColToSeqPos(sequence, 0)).toBe(0)
-  expect(globalColToSeqPos(sequence, 1)).toBe(1)
-  expect(globalColToSeqPos(sequence, 2)).toBe(2)
-  expect(globalColToSeqPos(sequence, 3)).toBe(3)
-  expect(globalColToSeqPos(sequence, 4)).toBe(4)
-})
-
-test('globalColToSeqPos with all gaps in sequence', () => {
-  const sequence = '-----'
-  expect(globalColToSeqPos(sequence, 0)).toBe(0)
-  expect(globalColToSeqPos(sequence, 1)).toBe(0)
-  expect(globalColToSeqPos(sequence, 2)).toBe(0)
-  expect(globalColToSeqPos(sequence, 3)).toBe(0)
-  expect(globalColToSeqPos(sequence, 4)).toBe(0)
-})
-
-test('globalColToSeqPos with position exceeding sequence length', () => {
-  const sequence = 'AC-GT'
-  expect(globalColToSeqPos(sequence, 10)).toBe(4)
 })
 
 // Tests for visibleColToSeqPos (visible column → sequence position)

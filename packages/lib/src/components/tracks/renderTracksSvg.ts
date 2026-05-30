@@ -1,5 +1,8 @@
+import { visibleColRange } from '../msa/visibleColRange.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 import type { BasicTrack } from '../../types.ts'
+import type { RenderCtx } from '../renderCtx.ts'
 
 export function drawConservationBars({
   ctx,
@@ -9,15 +12,14 @@ export function drawConservationBars({
   offsetX,
   blockSize,
 }: {
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   conservation: number[]
   colWidth: number
   trackHeight: number
   offsetX: number
   blockSize: number
 }) {
-  const xStart = Math.max(0, Math.floor(offsetX / colWidth))
-  const xEnd = Math.max(0, Math.ceil((offsetX + blockSize) / colWidth))
+  const { xStart, xEnd } = visibleColRange({ offsetX, blockWidth: blockSize, colWidth })
 
   ctx.fillStyle = 'gray'
   for (let i = xStart; i < xEnd && i < conservation.length; i++) {
@@ -39,7 +41,7 @@ export function drawTextTrackContent({
   offsetX,
   blockSize,
 }: {
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   data: string | undefined
   colorScheme: Record<string, string>
   contrastScheme: Record<string, string>
@@ -49,8 +51,7 @@ export function drawTextTrackContent({
   offsetX: number
   blockSize: number
 }) {
-  const xStart = Math.max(0, Math.floor(offsetX / colWidth))
-  const xEnd = Math.max(0, Math.ceil((offsetX + blockSize) / colWidth))
+  const { xStart, xEnd } = visibleColRange({ offsetX, blockWidth: blockSize, colWidth })
   const str = data?.slice(xStart, xEnd)
 
   for (let i = 0; str && i < str.length; i++) {
@@ -78,7 +79,7 @@ export function renderConservationTrack({
   highResScaleFactorOverride,
 }: {
   model: MsaViewModel
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   offsetX: number
   offsetY: number
   trackHeight: number
@@ -116,7 +117,7 @@ export function renderTextTrack({
   highResScaleFactorOverride,
 }: {
   model: MsaViewModel
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   track: BasicTrack
   offsetX: number
   offsetY: number
@@ -169,7 +170,7 @@ export function renderAllTracks({
   highResScaleFactorOverride,
 }: {
   model: MsaViewModel
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   offsetX: number
   contrastScheme: Record<string, string>
   blockSizeXOverride?: number

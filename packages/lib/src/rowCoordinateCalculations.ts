@@ -89,29 +89,6 @@ export function globalColToVisibleCol(
 }
 
 /**
- * Convert a global column index to a row-specific sequence position.
- * This counts non-gap characters up to the given global column.
- *
- * @param seq - The row's sequence string (including gaps)
- * @param globalCol - The global column index
- * @returns The sequence position (count of non-gap characters before this column)
- */
-export function globalColToSeqPos(seq: string, globalCol: number) {
-  let seqPos = 0
-  let currentCol = 0
-  const seqLen = seq.length
-
-  while (currentCol < globalCol && currentCol < seqLen) {
-    if (!isBlank(seq[currentCol])) {
-      seqPos++
-    }
-    currentCol++
-  }
-
-  return seqPos
-}
-
-/**
  * Convert a visible column to a row-specific sequence position.
  * Returns undefined if the position is a gap in the sequence.
  *

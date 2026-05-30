@@ -3,6 +3,7 @@ import { getVisibleLeaves } from './getVisibleLeaves.ts'
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { NodeWithIdsAndLength } from '../../types.ts'
+import type { RenderCtx } from '../renderCtx.ts'
 
 export function renderBoxFeatureCanvasBlock({
   model,
@@ -15,7 +16,7 @@ export function renderBoxFeatureCanvasBlock({
   offsetX: number
   offsetY: number
   model: MsaViewModel
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   highResScaleFactorOverride?: number
   blockSizeYOverride?: number
 }) {
@@ -43,7 +44,7 @@ function drawTiles({
   visibleLeaves,
 }: {
   model: MsaViewModel
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
 }) {
   const {

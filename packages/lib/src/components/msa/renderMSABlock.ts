@@ -1,8 +1,10 @@
 import { getVisibleLeaves } from './getVisibleLeaves.ts'
+import { visibleColRange } from './visibleColRange.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { NodeWithIdsAndLength } from '../../types.ts'
+import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
 export function renderMSABlock({
@@ -21,7 +23,7 @@ export function renderMSABlock({
   theme: Theme
   model: MsaViewModel
   contrastScheme: Record<string, string>
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   highResScaleFactorOverride?: number
   blockSizeXOverride?: number
   blockSizeYOverride?: number
@@ -50,8 +52,7 @@ export function renderMSABlock({
     `${bgColor ? '' : 'bold '}${fontSize}px`,
   )
 
-  const xStart = Math.max(0, Math.floor(offsetX / colWidth))
-  const xEnd = Math.max(0, Math.ceil((offsetX + bx) / colWidth))
+  const { xStart, xEnd } = visibleColRange({ offsetX, blockWidth: bx, colWidth })
   const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
 
   if (!actuallyShowDomains) {
@@ -96,7 +97,7 @@ function drawTiles({
   model: MsaViewModel
   offsetX: number
   theme: Theme
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
@@ -174,7 +175,7 @@ function drawText({
   offsetX: number
   model: MsaViewModel
   contrastScheme: Record<string, string>
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
@@ -246,7 +247,7 @@ function drawInsertionIndicators({
   xEnd,
 }: {
   model: MsaViewModel
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
@@ -272,7 +273,7 @@ function drawZigZag({
   offset,
 }: {
   model: MsaViewModel
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number

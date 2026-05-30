@@ -51,18 +51,3 @@ export interface InterProScanResults {
 export interface InterProScanResponse {
   results: InterProScanResults[]
 }
-
-export interface MSAParser {
-  getMSA(): unknown
-  getRow(name: string): string
-  getWidth(): number
-  getNames(): string[]
-  getTree(): NodeWithIds
-  getHeader(): unknown
-  getRowData(name: string): unknown
-  getStructures(): Record<string, unknown>
-  alignmentNames: string[]
-  seqConsensus: string | undefined
-  secondaryStructureConsensus: string | undefined
-  tracks: unknown[]
-}

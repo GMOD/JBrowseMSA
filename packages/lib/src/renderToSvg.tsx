@@ -139,9 +139,9 @@ function CoreRendering({
   const clipId2 = `msa-${id}`
   const contrastScheme = colorContrast(colorScheme, theme)
 
-  const ctx1 = new Context(width, contentHeight) as any
+  const ctx1 = new Context(width, contentHeight)
 
-  const ctx2 = new Context(width, contentHeight) as any
+  const ctx2 = new Context(width, contentHeight)
   renderBoxFeatureCanvasBlock({
     ctx: ctx2,
     offsetX,
@@ -216,7 +216,7 @@ function TrackRendering({
   const contrastScheme = colorContrast(colorScheme, theme)
   const msaAreaWidth = width - treeAreaWidth
 
-  const ctx = new Context(msaAreaWidth, trackHeight) as any
+  const ctx = new Context(msaAreaWidth, trackHeight)
 
   renderAllTracks({
     model,

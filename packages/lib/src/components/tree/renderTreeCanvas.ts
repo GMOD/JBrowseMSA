@@ -2,6 +2,7 @@ import { calcDepthToLeaf, descendants, links } from '../../hierarchy.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
+import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
 export const padding = 600
@@ -59,7 +60,7 @@ export function renderTree({
   blockSizeYOverride,
 }: {
   offsetY: number
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   model: MsaViewModel
   theme: Theme
   maxBranchLen: number
@@ -103,7 +104,7 @@ export function renderNodeBubbles({
   maxDepthToLeaf,
   blockSizeYOverride,
 }: {
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   clickMap?: ClickMapIndex
   offsetY: number
   model: MsaViewModel
@@ -164,7 +165,7 @@ export function renderTreeLabels({
 }: {
   model: MsaViewModel
   offsetY: number
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   clickMap?: ClickMapIndex
   theme: Theme
   maxBranchLen: number
@@ -255,7 +256,7 @@ export function renderTreeCanvas({
 }: {
   model: MsaViewModel
   offsetY: number
-  ctx: CanvasRenderingContext2D
+  ctx: RenderCtx
   clickMap?: ClickMapIndex
   theme: Theme
   highResScaleFactorOverride?: number

@@ -401,6 +401,10 @@ function stateModelFactory() {
       /**
        * #action
        * set mouse position (row, column) in the MSA
+       *
+       * CROSS-REPO CONTRACT: jbrowse-plugin-protein3d calls this (and reads the
+       * `mouseCol` volatile) to sync MSA<->3D-structure hover. Keep the name and
+       * signature stable; see that repo's ProteinToMsaHoverSync.tsx.
        */
       setMousePos(col?: number, row?: number) {
         self.mouseCol = col
@@ -433,6 +437,10 @@ function stateModelFactory() {
       /**
        * #action
        * set highlighted columns
+       *
+       * CROSS-REPO CONTRACT: called by jbrowse-plugin-msaview
+       * (afterCreateAutoruns.ts) to highlight alignment columns. It has no
+       * in-repo caller, so do not flag it as dead code — it is public API.
        */
       setHighlightedColumns(columns?: number[]) {
         self.highlightedColumns = columns
@@ -1420,6 +1428,11 @@ function stateModelFactory() {
        * Convert a visible column to a row-specific sequence position (0-based).
        * Returns undefined if the position is a gap in the sequence.
        *
+       * CROSS-REPO CONTRACT: this and the sibling coordinate converters
+       * (seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) are used
+       * by jbrowse-plugin-protein3d to translate between alignment columns and
+       * structure/sequence residue positions across gaps. Keep them stable.
+       *
        * @param rowName - The name of the row
        * @param visibleCol - The visible column index
        * @returns The sequence position (0-based), or undefined if it's a gap
@@ -1499,30 +1512,6 @@ function stateModelFactory() {
     }))
 
     .views(self => ({
-      /**
-       * #getter
-       * Returns information about the currently hovered cell
-       */
-      get hoveredCell() {
-        const { mouseCol, mouseRow } = self
-        if (mouseCol === undefined || mouseRow === undefined) {
-          return undefined
-        }
-        const rowName = self.rowNames[mouseRow]
-        if (!rowName) {
-          return undefined
-        }
-        const seq = self.columns[rowName]
-        const base = seq?.[mouseCol]
-        const seqPos = self.visibleColToSeqPosOneBased(rowName, mouseCol)
-        return {
-          rowName,
-          col: mouseCol,
-          base,
-          seqPos,
-        }
-      },
-
       /**
        * #getter
        * widget width minus the tree area gives the space for the MSA
