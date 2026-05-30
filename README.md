@@ -62,8 +62,9 @@ pnpm install
 pnpm dev
 ```
 
-This starts the app with hot module reloading. Changes to `packages/lib/src/`
-will automatically reload.
+This starts the app with hot module reloading. When this is active, source code
+changes to `packages/lib/src/` will automatically reloaded by the dev server
+app.
 
 ### Build all packages
 
