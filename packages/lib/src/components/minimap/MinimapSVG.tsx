@@ -14,13 +14,14 @@ const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
   } = model
 
   const BAR_HEIGHT = 12
-  const H2 = H - 12
+  const H2 = H - BAR_HEIGHT
 
   const unit = W / numColumns / colWidth
   const left = -scrollX
   const right = left + W
   const s = left * unit
   const e = right * unit
+  const w = Math.max(e - s, 20)
   const fillColor = 'rgb(66, 119, 127)'
   const fillOpacity = 0.3
 
@@ -37,7 +38,7 @@ const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
       <rect
         x={Math.max(0, s)}
         y={0}
-        width={e - s}
+        width={w}
         height={BAR_HEIGHT}
         fill={fillColor}
         fillOpacity={fillOpacity}
@@ -47,12 +48,7 @@ const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
         <polygon
           fill={fillColor}
           fillOpacity={fillOpacity}
-          points={[
-            [e, 0],
-            [s, 0],
-            [0, H2],
-            [W, H2],
-          ].toString()}
+          points={`${s + w},0 ${s},0 0,${H2} ${W},${H2}`}
         />
       </g>
     </>

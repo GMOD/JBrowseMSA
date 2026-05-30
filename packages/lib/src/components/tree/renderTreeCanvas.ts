@@ -68,7 +68,7 @@ export function renderTree({
   blockSizeYOverride?: number
 }) {
   const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
-  const by = blockSizeYOverride || blockSize
+  const by = blockSizeYOverride ?? blockSize
   ctx.strokeStyle = theme.palette.text.primary
   for (const link of links(hierarchy)) {
     const { source, target } = link
@@ -119,7 +119,7 @@ export function renderNodeBubbles({
     blockSize,
     marginLeft: ml,
   } = model
-  const by = blockSizeYOverride || blockSize
+  const by = blockSizeYOverride ?? blockSize
   for (const node of descendants(hierarchy)) {
     const x = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
     if (x === undefined) {
@@ -185,7 +185,7 @@ export function renderTreeLabels({
     leaves,
     noTree,
   } = model
-  const by = blockSizeYOverride || blockSize
+  const by = blockSizeYOverride ?? blockSize
   const emHeight = ctx.measureText('M').width
   if (labelsAlignRight) {
     ctx.textAlign = 'right'
@@ -205,7 +205,7 @@ export function renderTreeLabels({
       const yp = y + fontSize / 4
       let xp = 0
       if (!noTree) {
-        xp = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf) || 0
+        xp = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf) ?? 0
       }
 
       const { width } = ctx.measureText(displayName)

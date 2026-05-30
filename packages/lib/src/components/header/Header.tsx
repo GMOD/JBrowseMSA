@@ -23,7 +23,7 @@ const AboutDialog = lazy(() => import('../dialogs/AboutDialog.tsx'))
 const Header = observer(function ({ model }: { model: MsaViewModel }) {
   const [ref, { height }] = useMeasure()
   useEffect(() => {
-    model.setHeaderHeight(height || 0)
+    model.setHeaderHeight(height ?? 0)
   }, [model, height])
   return (
     <div ref={ref} style={{ display: 'flex' }}>

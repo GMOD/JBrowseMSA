@@ -69,12 +69,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
       <svg height={polygonHeight} style={{ width: '100%' }}>
         <polygon
           fill={fill}
-          points={[
-            [s + w, 0],
-            [s, 0],
-            [0, polygonHeight],
-            [msaAreaWidth, polygonHeight],
-          ].toString()}
+          points={`${s + w},0 ${s},0 0,${polygonHeight} ${msaAreaWidth},${polygonHeight}`}
         />
       </svg>
     </div>

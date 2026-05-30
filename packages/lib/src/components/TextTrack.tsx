@@ -29,7 +29,7 @@ const AnnotationBlock = observer(function ({
     model: { customColorScheme, data },
   } = track
 
-  const colorScheme = customColorScheme || modelColorScheme
+  const colorScheme = customColorScheme ?? modelColorScheme
   const ref = useRef<HTMLCanvasElement>(null)
   const { contrastScheme } = useColorContrast(colorScheme)
   useEffect(() => {

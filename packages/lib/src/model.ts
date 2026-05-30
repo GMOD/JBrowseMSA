@@ -626,14 +626,14 @@ function stateModelFactory() {
        * #getter
        */
       get header() {
-        return (this.MSA?.getHeader() || {}) as Record<string, unknown>
+        return (this.MSA?.getHeader() ?? {}) as Record<string, unknown>
       },
 
       /**
        * #getter
        */
       get alignmentNames() {
-        return this.MSA?.alignmentNames || []
+        return this.MSA?.alignmentNames ?? []
       },
       /**
        * #getter
@@ -666,7 +666,7 @@ function stateModelFactory() {
        * #getter
        */
       get numColumns() {
-        return (this.MSA?.getWidth() || 0) - this.blanks.length
+        return (this.MSA?.getWidth() ?? 0) - this.blanks.length
       },
 
       /**
@@ -912,7 +912,9 @@ function stateModelFactory() {
         const { hideGapsEffective } = self
         return this.rows
           .map(r => r[1])
-          .map(str => (hideGapsEffective ? skipBlanks(this.blanks, str) : str))
+          .map(str =>
+            (hideGapsEffective ? skipBlanks(this.blanks, str) : str).toUpperCase(),
+          )
       },
       /**
        * #getter
@@ -952,9 +954,8 @@ function stateModelFactory() {
         const letters = new Set<string>()
         for (const stats of this.colStats) {
           for (const letter of Object.keys(stats)) {
-            const upper = letter.toUpperCase()
-            if (upper !== '-' && upper !== '.') {
-              letters.add(upper)
+            if (letter !== '-' && letter !== '.') {
+              letters.add(letter)
             }
           }
         }
@@ -1030,24 +1031,18 @@ function stateModelFactory() {
             return 0
           }
 
-          const gapCount = (stats['-'] || 0) + (stats['.'] || 0)
+          const gapCount = (stats['-'] ?? 0) + (stats['.'] ?? 0)
           const nonGapTotal = total - gapCount
           if (nonGapTotal === 0) {
             return 0
           }
 
-          const merged: Record<string, number> = {}
+          let entropy = 0
           for (const letter of Object.keys(stats)) {
             if (letter === '-' || letter === '.') {
               continue
             }
-            const upper = letter.toUpperCase()
-            merged[upper] = (merged[upper] || 0) + stats[letter]!
-          }
-
-          let entropy = 0
-          for (const key of Object.keys(merged)) {
-            const freq = merged[key]! / nonGapTotal
+            const freq = stats[letter]! / nonGapTotal
             if (freq > 0) {
               entropy -= freq * Math.log2(freq)
             }
@@ -1273,7 +1268,7 @@ function stateModelFactory() {
         self.scrollY = clamp(self.scrollY + deltaY, -self.totalHeight + 10, 0)
       },
 
-      setInterProAnnotations(data: Record<string, InterProScanResults>) {
+      setInterProAnnotations(data?: Record<string, InterProScanResults>) {
         self.interProAnnotations = data
       },
 
@@ -1632,7 +1627,7 @@ function stateModelFactory() {
         self.setTreeFilehandle(undefined)
         self.setMSAFilehandle(undefined)
         self.setGFFFilehandle(undefined)
-        self.setInterProAnnotations({})
+        self.setInterProAnnotations(undefined)
         self.setShowDomains(false)
       },
       /**
@@ -1642,7 +1637,7 @@ function stateModelFactory() {
         theme: Theme
         includeMinimap?: boolean
         includeTracks?: boolean
-        exportType: string
+        exportType: 'entire' | 'viewport'
       }) {
         const { renderToSvg } = await import('./renderToSvg.tsx')
         const html = await renderToSvg(self as MsaViewModel, opts)

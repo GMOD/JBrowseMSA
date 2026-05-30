@@ -54,6 +54,8 @@ export function renderMSABlock({
 
   const { xStart, xEnd } = visibleColRange({ offsetX, blockWidth: bx, colWidth })
   const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
+  const { relativeTo, columns } = model
+  const referenceSeq = relativeTo ? columns[relativeTo]?.slice(xStart, xEnd) : null
 
   if (!actuallyShowDomains) {
     drawTiles({
@@ -64,6 +66,7 @@ export function renderMSABlock({
       xStart,
       xEnd,
       visibleLeaves,
+      referenceSeq,
     })
   }
   drawText({
@@ -74,6 +77,7 @@ export function renderMSABlock({
     xStart,
     xEnd,
     visibleLeaves,
+    referenceSeq,
   })
   drawInsertionIndicators({
     model,
@@ -93,6 +97,7 @@ function drawTiles({
   theme,
   xStart,
   xEnd,
+  referenceSeq,
 }: {
   model: MsaViewModel
   offsetX: number
@@ -101,6 +106,7 @@ function drawTiles({
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
+  referenceSeq: string | null | undefined
 }) {
   const {
     bgColor,
@@ -111,11 +117,6 @@ function drawTiles({
     rowHeight,
     relativeTo,
   } = model
-
-  // Get reference sequence if relativeTo is set
-  const referenceSeq = relativeTo
-    ? columns[relativeTo]?.slice(xStart, xEnd)
-    : null
 
   const isClustalX = colorSchemeName === 'clustalx_protein_dynamic'
   const isPercentIdentity = colorSchemeName === 'percent_identity_dynamic'
@@ -171,6 +172,7 @@ function drawText({
   visibleLeaves,
   xStart,
   xEnd,
+  referenceSeq,
 }: {
   offsetX: number
   model: MsaViewModel
@@ -179,6 +181,7 @@ function drawText({
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
+  referenceSeq: string | null | undefined
 }) {
   const {
     bgColor,
@@ -190,11 +193,6 @@ function drawText({
     rowHeight,
     relativeTo,
   } = model
-
-  // Get reference sequence if relativeTo is set
-  const referenceSeq = relativeTo
-    ? columns[relativeTo]?.slice(xStart, xEnd)
-    : null
 
   if (showMsaLetters) {
     const offsetXAligned = offsetX - (offsetX % colWidth)

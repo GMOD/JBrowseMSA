@@ -28,13 +28,19 @@ export default function ExportSVGDialog({
 }) {
   const [includeMinimap, setIncludeMinimap] = useState(true)
   const [includeTracks, setIncludeTracks] = useState(true)
-  const [exportType, setExportType] = useState('viewport')
+  const [exportType, setExportType] = useState<'entire' | 'viewport'>('viewport')
   const [error, setError] = useState<unknown>()
   const theme = useTheme()
-  const { totalWidth, totalHeight, treeAreaWidth, turnedOnTracks } = model
+  const {
+    totalWidth,
+    totalHeight,
+    treeAreaWidth,
+    turnedOnTracks,
+    totalTrackAreaHeight,
+  } = model
   const hasTracks = turnedOnTracks.length > 0
   const entireWidth = totalWidth + treeAreaWidth
-  const entireHeight = totalHeight
+  const entireHeight = totalHeight + (includeTracks ? totalTrackAreaHeight : 0)
   const isLargeExport =
     exportType === 'entire' && (entireWidth > 10000 || entireHeight > 10000)
   return (
@@ -71,7 +77,10 @@ export default function ExportSVGDialog({
             <RadioGroup
               value={exportType}
               onChange={event => {
-                setExportType(event.target.value)
+                const { value } = event.target
+                if (value === 'entire' || value === 'viewport') {
+                  setExportType(value)
+                }
               }}
             >
               <FormControlLabel
@@ -99,22 +108,20 @@ export default function ExportSVGDialog({
           variant="contained"
           color="primary"
           onClick={() => {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ;(async () => {
-              try {
-                await model.exportSVG({
-                  theme,
-                  includeMinimap:
-                    exportType === 'entire' ? false : includeMinimap,
-                  includeTracks: hasTracks && includeTracks,
-                  exportType,
-                })
+            void model
+              .exportSVG({
+                theme,
+                includeMinimap: exportType === 'entire' ? false : includeMinimap,
+                includeTracks: hasTracks && includeTracks,
+                exportType,
+              })
+              .then(() => {
                 onClose()
-              } catch (e) {
+              })
+              .catch((e: unknown) => {
                 console.error(e)
                 setError(e)
-              }
-            })()
+              })
           }}
         >
           Submit
