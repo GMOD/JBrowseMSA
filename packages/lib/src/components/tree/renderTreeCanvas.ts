@@ -1,4 +1,8 @@
-import { calcDepthToLeaf, descendants, links } from '../../hierarchy.ts'
+import {
+  calcDepthToLeaf,
+  forEachDescendant,
+  forEachLink,
+} from '../../hierarchy.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -70,14 +74,13 @@ export function renderTree({
   const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
   const by = blockSizeYOverride ?? blockSize
   ctx.strokeStyle = theme.palette.text.primary
-  for (const link of links(hierarchy)) {
-    const { source, target } = link
+  forEachLink(hierarchy, (source, target) => {
     const sy = source.x!
     const ty = target.x!
     const tx = getNodeX(target, showBranchLen, maxBranchLen, maxDepthToLeaf)
     const sx = getNodeX(source, showBranchLen, maxBranchLen, maxDepthToLeaf)
     if (tx === undefined || sx === undefined) {
-      continue
+      return
     }
 
     const y1 = Math.min(sy, ty)
@@ -92,7 +95,7 @@ export function renderTree({
       ctx.lineTo(tx, ty)
       ctx.stroke()
     }
-  }
+  })
 }
 
 export function renderNodeBubbles({
@@ -120,10 +123,10 @@ export function renderNodeBubbles({
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride ?? blockSize
-  for (const node of descendants(hierarchy)) {
+  forEachDescendant(hierarchy, node => {
     const x = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
     if (x === undefined) {
-      continue
+      return
     }
     const { data } = node
     const y = node.x!
@@ -150,7 +153,7 @@ export function renderNodeBubbles({
         name,
       })
     }
-  }
+  })
 }
 
 export function renderTreeLabels({

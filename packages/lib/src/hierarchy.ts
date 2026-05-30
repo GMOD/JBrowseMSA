@@ -157,6 +157,33 @@ export function links<T>(node: HierarchyNode<T>): HierarchyLink<T>[] {
   return result
 }
 
+export function forEachLink<T>(
+  node: HierarchyNode<T>,
+  cb: (source: HierarchyNode<T>, target: HierarchyNode<T>) => void,
+) {
+  function visit(n: HierarchyNode<T>) {
+    if (n.children) {
+      for (const child of n.children) {
+        cb(n, child)
+        visit(child)
+      }
+    }
+  }
+  visit(node)
+}
+
+export function forEachDescendant<T>(
+  node: HierarchyNode<T>,
+  cb: (n: HierarchyNode<T>) => void,
+) {
+  cb(node)
+  if (node.children) {
+    for (const child of node.children) {
+      forEachDescendant(child, cb)
+    }
+  }
+}
+
 export function clusterLayout<T>(
   root: HierarchyNode<T>,
   sizeX: number,

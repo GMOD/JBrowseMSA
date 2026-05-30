@@ -58,10 +58,22 @@ export function renderMSABlock({
   const referenceSeq = relativeTo ? columns[relativeTo]?.slice(xStart, xEnd) : null
 
   if (!actuallyShowDomains) {
-    drawTiles({
+    drawTilesAndText({
       model,
       ctx,
       theme,
+      contrastScheme,
+      offsetX,
+      xStart,
+      xEnd,
+      visibleLeaves,
+      referenceSeq,
+    })
+  } else {
+    drawText({
+      model,
+      ctx,
+      contrastScheme,
       offsetX,
       xStart,
       xEnd,
@@ -69,16 +81,6 @@ export function renderMSABlock({
       referenceSeq,
     })
   }
-  drawText({
-    model,
-    ctx,
-    offsetX,
-    contrastScheme,
-    xStart,
-    xEnd,
-    visibleLeaves,
-    referenceSeq,
-  })
   drawInsertionIndicators({
     model,
     ctx,
@@ -89,12 +91,13 @@ export function renderMSABlock({
   ctx.resetTransform()
 }
 
-function drawTiles({
+function drawTilesAndText({
   model,
   offsetX,
   ctx,
-  visibleLeaves,
   theme,
+  contrastScheme,
+  visibleLeaves,
   xStart,
   xEnd,
   referenceSeq,
@@ -103,6 +106,7 @@ function drawTiles({
   offsetX: number
   theme: Theme
   ctx: RenderCtx
+  contrastScheme: Record<string, string>
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
@@ -116,54 +120,62 @@ function drawTiles({
     colWidth,
     rowHeight,
     relativeTo,
+    showMsaLetters,
   } = model
 
   const isClustalX = colorSchemeName === 'clustalx_protein_dynamic'
   const isPercentIdentity = colorSchemeName === 'percent_identity_dynamic'
+  const drawBgTiles = bgColor || isClustalX || isPercentIdentity
   const offsetXAligned = offsetX - (offsetX % colWidth)
+  const halfColWidth = colWidth / 2
+  const quarterRowHeight = rowHeight / 4
 
   for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
     const node = visibleLeaves[i]!
-    const {
-      data: { name },
-    } = node
+    const { name } = node.data
     const y = node.x!
     const str = columns[name]?.slice(xStart, xEnd)
-    if (str) {
-      for (let j = 0, l2 = str.length; j < l2; j++) {
-        const letter = str[j]!
+    if (!str) {
+      continue
+    }
+    const tileY = y - rowHeight
+    const textY = y - quarterRowHeight
 
-        // Use a muted background for positions that match reference
-        const isMatchingReference =
-          referenceSeq && name !== relativeTo && letter === referenceSeq[j]
+    for (let j = 0, l2 = str.length; j < l2; j++) {
+      const letter = str[j]!
+      const x = j * colWidth + offsetXAligned
+      const isMatchingReference =
+        referenceSeq && name !== relativeTo && letter === referenceSeq[j]
 
-        let color: string | undefined
-        if (isClustalX) {
-          color = model.colClustalX[xStart + j]![letter]
-        } else if (isPercentIdentity) {
-          const consensus = model.colConsensus[xStart + j]!
-          color = letter === consensus.letter ? consensus.color : undefined
-        } else {
-          color = colorScheme[letter.toUpperCase()]
-        }
-        if (bgColor || isClustalX || isPercentIdentity) {
-          // Use a very light background for matching positions in relative mode
-          const finalColor = isMatchingReference
-            ? theme.palette.action.hover
-            : color || theme.palette.background.default
-          ctx.fillStyle = finalColor
-          ctx.fillRect(
-            j * colWidth + offsetXAligned,
-            y - rowHeight,
-            colWidth,
-            rowHeight,
-          )
-        }
+      let color: string | undefined
+      if (isClustalX) {
+        color = model.colClustalX[xStart + j]![letter]
+      } else if (isPercentIdentity) {
+        const consensus = model.colConsensus[xStart + j]!
+        color = letter === consensus.letter ? consensus.color : undefined
+      } else {
+        color = colorScheme[letter]
+      }
+
+      if (drawBgTiles) {
+        ctx.fillStyle = isMatchingReference
+          ? theme.palette.action.hover
+          : color || theme.palette.background.default
+        ctx.fillRect(x, tileY, colWidth, rowHeight)
+      }
+
+      if (showMsaLetters) {
+        ctx.fillStyle = bgColor
+          ? contrastScheme[letter] || 'black'
+          : color || 'black'
+        ctx.fillText(isMatchingReference ? '.' : letter, x + halfColWidth, textY)
       }
     }
   }
 }
 
+// When domains are shown the background tiles come from renderBoxFeatureCanvasBlock,
+// so we only need to draw text here.
 function drawText({
   model,
   offsetX,
@@ -183,56 +195,35 @@ function drawText({
   xEnd: number
   referenceSeq: string | null | undefined
 }) {
-  const {
-    bgColor,
-    actuallyShowDomains,
-    showMsaLetters,
-    colorScheme,
-    columns,
-    colWidth,
-    rowHeight,
-    relativeTo,
-  } = model
+  const { showMsaLetters, colorScheme, columns, colWidth, rowHeight, relativeTo } =
+    model
 
-  if (showMsaLetters) {
-    const offsetXAligned = offsetX - (offsetX % colWidth)
-    const halfColWidth = colWidth / 2
-    const quarterRowHeight = rowHeight / 4
+  if (!showMsaLetters) {
+    return
+  }
+  const offsetXAligned = offsetX - (offsetX % colWidth)
+  const halfColWidth = colWidth / 2
+  const quarterRowHeight = rowHeight / 4
 
-    for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
-      const node = visibleLeaves[i]!
-      const {
-        data: { name },
-      } = node
-      const y = node.x! - quarterRowHeight
-      const str = columns[name]?.slice(xStart, xEnd)
-      if (str) {
-        for (let j = 0, l2 = str.length; j < l2; j++) {
-          const letter = str[j]!
-
-          // Check if this position matches the reference
-          const isMatchingReference =
-            referenceSeq && name !== relativeTo && letter === referenceSeq[j]
-
-          // Show dot for matching positions, original letter for differences
-          const displayLetter = isMatchingReference ? '.' : letter
-
-          const color = colorScheme[letter.toUpperCase()]
-          const contrast = contrastScheme[letter.toUpperCase()] || 'black'
-
-          // note: -rowHeight/4 matches +rowHeight/4 in tree
-          ctx.fillStyle = actuallyShowDomains
-            ? 'black'
-            : bgColor
-              ? contrast
-              : color || 'black'
-          ctx.fillText(
-            displayLetter,
-            j * colWidth + offsetXAligned + halfColWidth,
-            y,
-          )
-        }
-      }
+  for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
+    const node = visibleLeaves[i]!
+    const { name } = node.data
+    const y = node.x! - quarterRowHeight
+    const str = columns[name]?.slice(xStart, xEnd)
+    if (!str) {
+      continue
+    }
+    for (let j = 0, l2 = str.length; j < l2; j++) {
+      const letter = str[j]!
+      const isMatchingReference =
+        referenceSeq && name !== relativeTo && letter === referenceSeq[j]
+      // note: -rowHeight/4 matches +rowHeight/4 in tree
+      ctx.fillStyle = 'black'
+      ctx.fillText(
+        isMatchingReference ? '.' : letter,
+        j * colWidth + offsetXAligned + halfColWidth,
+        y,
+      )
     }
   }
 }

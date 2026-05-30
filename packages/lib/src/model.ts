@@ -942,7 +942,11 @@ function stateModelFactory() {
        * #getter
        */
       get colStatsSums() {
-        return this.colStats.map(val => sum(Object.values(val)))
+        return this.colStats.map(col => {
+          let s = 0
+          for (const k in col) s += col[k]!
+          return s
+        })
       },
 
       /**
