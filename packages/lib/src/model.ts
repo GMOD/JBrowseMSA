@@ -916,10 +916,9 @@ function stateModelFactory() {
        * #getter
        */
       get columns() {
+        const columns2d = this.columns2d
         return new Map(
-          this.rows.map(
-            (row, index) => [row[0], this.columns2d[index]!] as const,
-          ),
+          this.rows.map((row, index) => [row[0], columns2d[index]!] as const),
         )
       },
       /**
@@ -985,14 +984,19 @@ function stateModelFactory() {
             }
           }
         }
+        if (letters.size === 0) {
+          return 'amino'
+        }
+        // isDna already excludes U (not in the DNA set) and isRna excludes T,
+        // so the set membership alone disambiguates the two
         const dna = new Set(['A', 'C', 'G', 'T', 'N'])
         const rna = new Set(['A', 'C', 'G', 'U', 'N'])
         const isDna = [...letters].every(l => dna.has(l))
         const isRna = [...letters].every(l => rna.has(l))
-        if (isDna && !letters.has('U')) {
+        if (isDna) {
           return 'dna'
         }
-        if (isRna && !letters.has('T')) {
+        if (isRna) {
           return 'rna'
         }
         return 'amino'
@@ -1298,11 +1302,20 @@ function stateModelFactory() {
         self.interProAnnotations = data
       },
 
+      /**
+       * #action
+       * Set domain annotations and reveal the overlay in a single step (or clear
+       * both when passed undefined). Shared by every domain source: InterProScan,
+       * GFF, user-provided uploads, and NCBI CDD.
+       */
+      setDomains(data?: Record<string, InterProScanResults>) {
+        self.interProAnnotations = data
+        self.setShowDomains(!!data)
+      },
+
       applyGFFText(gffText: string) {
         const gffRecords = parseGFF(gffText)
-        const interProResults = gffToInterProResults(gffRecords)
-        self.interProAnnotations = interProResults
-        self.setShowDomains(true)
+        this.setDomains(gffToInterProResults(gffRecords))
       },
 
       /**
@@ -1641,8 +1654,7 @@ function stateModelFactory() {
         self.setTreeFilehandle(undefined)
         self.setMSAFilehandle(undefined)
         self.setGFFFilehandle(undefined)
-        self.setInterProAnnotations(undefined)
-        self.setShowDomains(false)
+        self.setDomains(undefined)
       },
       /**
        * #action
@@ -1671,8 +1683,12 @@ function stateModelFactory() {
        * #action
        */
       fit() {
-        self.rowHeight = self.msaAreaHeight / self.numRows
-        self.colWidth = self.msaAreaWidth / self.numColumns
+        if (self.numRows > 0) {
+          self.rowHeight = self.msaAreaHeight / self.numRows
+        }
+        if (self.numColumns > 0) {
+          self.colWidth = self.msaAreaWidth / self.numColumns
+        }
         self.scrollX = 0
         self.scrollY = 0
       },
@@ -1680,14 +1696,18 @@ function stateModelFactory() {
        * #action
        */
       fitVertically() {
-        self.rowHeight = self.msaAreaHeight / self.numRows
+        if (self.numRows > 0) {
+          self.rowHeight = self.msaAreaHeight / self.numRows
+        }
         self.scrollY = 0
       },
       /**
        * #action
        */
       fitHorizontally() {
-        self.colWidth = self.msaAreaWidth / self.numColumns
+        if (self.numColumns > 0) {
+          self.colWidth = self.msaAreaWidth / self.numColumns
+        }
         self.scrollX = 0
       },
 
@@ -1812,7 +1832,10 @@ function stateModelFactory() {
           }),
         )
 
-        // force colStats not to go stale
+        // Keep the parse chain warm: reading self.columns transitively holds
+        // self.MSA (parseMSA) computed alive, so it is parsed once per data
+        // change rather than re-parsed on every non-reactive access. colStats is
+        // additionally held for dynamic color schemes. Do not remove.
         // xref solution https://github.com/mobxjs/mobx/issues/266#issuecomment-222007278
         // xref problem https://github.com/GMOD/react-msaview/issues/75
         addDisposer(

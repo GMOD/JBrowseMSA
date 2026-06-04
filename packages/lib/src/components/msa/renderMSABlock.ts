@@ -127,6 +127,8 @@ function drawTilesAndText({
     rowHeight,
     relativeTo,
     showMsaLetters,
+    colClustalX,
+    colConsensus,
   } = model
 
   const isClustalX = colorSchemeName === 'clustalx_protein_dynamic'
@@ -158,9 +160,9 @@ function drawTilesAndText({
 
       let color: string | undefined
       if (isClustalX) {
-        color = model.colClustalX[xStart + j]![letter]
+        color = colClustalX[xStart + j]![letter]
       } else if (isPercentIdentity) {
-        const consensus = model.colConsensus[xStart + j]!
+        const consensus = colConsensus[xStart + j]!
         color = letter === consensus.letter ? consensus.color : undefined
       } else {
         color = colorScheme[letter]

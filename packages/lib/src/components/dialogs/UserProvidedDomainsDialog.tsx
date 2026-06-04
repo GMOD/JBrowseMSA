@@ -112,10 +112,9 @@ const UserProvidedDomainsDialog = observer(function ({
                   ? JSON.parse(await file.text())
                   : await jsonfetch(interProURL)
 
-                model.setInterProAnnotations(
+                model.setDomains(
                   Object.fromEntries(ret.results.map(r => [r.xref[0]!.id, r])),
                 )
-                model.setShowDomains(true)
                 getSession(model).notify(
                   'Loaded interproscan results',
                   'success',

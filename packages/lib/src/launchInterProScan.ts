@@ -152,10 +152,9 @@ async function loadInterProScanResultsWithStatus({
       url: `https://www.ebi.ac.uk/Tools/services/rest/iprscan5/result/${jobId}/json`,
     })
     const ret = await loadInterProScanResults(jobId, signal)
-    model.setInterProAnnotations(
+    model.setDomains(
       Object.fromEntries(ret.results.map(r => [r.xref[0]!.id, r])),
     )
-    model.setShowDomains(true)
     getSession(model).notify(`Loaded interproscan ${jobId} results`, 'success')
   } catch (e) {
     if (isAbortError(e)) {
