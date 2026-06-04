@@ -16,6 +16,7 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
     height,
     msaAreaWidth,
     blocks2d,
+    scrollZoom,
   } = model
   const ref = useRef<HTMLDivElement>(null)
   const onScrollX = useCallback(
@@ -30,10 +31,18 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
     },
     [model],
   )
+  const onZoom = useCallback(
+    (scaleFactor: number, offsetX: number, offsetY: number) => {
+      model.zoomToPos(scaleFactor, offsetX, offsetY)
+    },
+    [model],
+  )
   const { onMouseDown, onMouseUp } = useWheelScroll({
     ref,
     onScrollX,
     onScrollY,
+    onZoom,
+    scrollZoom,
   })
 
   return (

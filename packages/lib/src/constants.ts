@@ -10,6 +10,7 @@ export const defaultHideGaps = true
 export const defaultAllowedGappyness = 100
 export const defaultSubFeatureRows = false
 export const defaultDrawMsaLetters = true
+export const defaultScrollZoom = false
 
 // MSA model defaults
 export const defaultBgColor = true

@@ -4,14 +4,22 @@ export function useWheelScroll({
   ref,
   onScrollX,
   onScrollY,
+  onZoom,
+  scrollZoom,
 }: {
   ref: React.RefObject<HTMLDivElement | null>
   onScrollX?: (delta: number) => void
   onScrollY?: (delta: number) => void
+  onZoom?: (scaleFactor: number, offsetX: number, offsetY: number) => void
+  scrollZoom?: boolean
 }) {
   const scheduled = useRef(false)
+  const zoomScheduled = useRef(false)
   const deltaX = useRef(0)
   const deltaY = useRef(0)
+  const zoomDelta = useRef(0)
+  const zoomX = useRef(0)
+  const zoomY = useRef(0)
   const prevX = useRef(0)
   const prevY = useRef(0)
   const [mouseDragging, setMouseDragging] = useState(false)
@@ -22,6 +30,35 @@ export function useWheelScroll({
       return
     }
     function onWheel(event: WheelEvent) {
+      // ctrlKey is also set by trackpad pinch gestures on all platforms. when
+      // scrollZoom is on, a plain vertical-dominant wheel zooms too; holding
+      // shift is the escape hatch to pan instead.
+      const isCtrlZoom = event.ctrlKey || event.metaKey
+      const isScrollZoom =
+        scrollZoom &&
+        !event.shiftKey &&
+        Math.abs(event.deltaY) >= Math.abs(event.deltaX)
+      if (onZoom && (isCtrlZoom || isScrollZoom)) {
+        const rect = curr!.getBoundingClientRect()
+        zoomDelta.current += event.deltaY
+        zoomX.current = event.clientX - rect.left
+        zoomY.current = event.clientY - rect.top
+        if (!zoomScheduled.current) {
+          zoomScheduled.current = true
+          requestAnimationFrame(() => {
+            onZoom(
+              Math.exp(-zoomDelta.current * 0.002),
+              zoomX.current,
+              zoomY.current,
+            )
+            zoomDelta.current = 0
+            zoomScheduled.current = false
+          })
+        }
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
       if (onScrollX) {
         deltaX.current += event.deltaX
       }
@@ -50,7 +87,7 @@ export function useWheelScroll({
     return () => {
       curr.removeEventListener('wheel', onWheel)
     }
-  }, [ref, onScrollX, onScrollY])
+  }, [ref, onScrollX, onScrollY, onZoom, scrollZoom])
 
   useEffect(() => {
     if (!mouseDragging) {

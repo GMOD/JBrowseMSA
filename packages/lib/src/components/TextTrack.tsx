@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
+import { setFontSize } from '../setFontSize.ts'
 import { useColorContrast } from '../useColorContrast.ts'
 import { drawTextTrackContent } from './tracks/renderTracksSvg.ts'
 
@@ -51,7 +52,7 @@ const AnnotationBlock = observer(function ({
       ctx.clearRect(0, 0, blockSize, rowHeight)
       ctx.translate(-offsetX, 0)
       ctx.textAlign = 'center'
-      ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
+      setFontSize(ctx, fontSize)
 
       drawTextTrackContent({
         ctx,

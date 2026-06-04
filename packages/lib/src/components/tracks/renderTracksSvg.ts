@@ -1,3 +1,4 @@
+import { setFontSize } from '../../setFontSize.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -152,7 +153,7 @@ export function renderTextTrack({
   ctx.scale(k, k)
   ctx.translate(-offsetX, offsetY)
   ctx.textAlign = 'center'
-  ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
+  setFontSize(ctx, fontSize)
 
   drawTextTrackContent({
     ctx,

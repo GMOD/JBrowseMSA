@@ -40,6 +40,7 @@ import {
   defaultRowHeight,
   defaultScrollX,
   defaultScrollY,
+  defaultScrollZoom,
   defaultShowBranchLen,
   defaultShowDomains,
   defaultSubFeatureRows,
@@ -137,6 +138,12 @@ function stateModelFactory() {
          * #property
          */
         drawMsaLetters: defaultDrawMsaLetters,
+
+        /**
+         * #property
+         * zoom in/out on plain mouse-wheel without holding ctrl
+         */
+        scrollZoom: defaultScrollZoom,
 
         /**
          * #property
@@ -1228,6 +1235,13 @@ function stateModelFactory() {
 
       /**
        * #action
+       */
+      setScrollZoom(arg: boolean) {
+        self.scrollZoom = arg
+      },
+
+      /**
+       * #action
        * Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances
        */
       calculateNeighborJoiningTreeFromMSA() {
@@ -1289,6 +1303,30 @@ function stateModelFactory() {
           self.colWidth = Math.max(1, Math.floor(self.colWidth * 0.75))
           self.rowHeight = Math.max(1.5, Math.floor(self.rowHeight * 0.75))
           self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
+        })
+      },
+      /**
+       * #action
+       * Smoothly zoom by a continuous scaleFactor, keeping the column/row under
+       * the cursor (offsetX/offsetY, px relative to the MSA area) anchored in
+       * place. Drives wheel/trackpad-pinch zoom.
+       */
+      zoomToPos(scaleFactor: number, offsetX: number, offsetY: number) {
+        transaction(() => {
+          const colInView = (-self.scrollX + offsetX) / self.colWidth
+          const rowInView = (-self.scrollY + offsetY) / self.rowHeight
+          self.colWidth = clamp(self.colWidth * scaleFactor, 0.2, 80)
+          self.rowHeight = clamp(self.rowHeight * scaleFactor, 1, 80)
+          self.scrollX = clamp(
+            offsetX - colInView * self.colWidth,
+            self.maxScrollX,
+            0,
+          )
+          self.scrollY = clamp(
+            offsetY - rowInView * self.rowHeight,
+            -self.totalHeight + 10,
+            0,
+          )
         })
       },
       /**

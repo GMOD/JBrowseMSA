@@ -1,3 +1,5 @@
+import { setFontSize } from './setFontSize.ts'
+
 let canvasHandle: HTMLCanvasElement | undefined
 
 export function measureTextCanvas(text: string, fontSize: number) {
@@ -9,6 +11,6 @@ export function measureTextCanvas(text: string, fontSize: number) {
   if (!ctx) {
     throw new Error('no canvas context')
   }
-  ctx.font = ctx.font.replace(/\d+px/, `${fontSize}px`)
+  setFontSize(ctx, fontSize)
   return ctx.measureText(text).width
 }

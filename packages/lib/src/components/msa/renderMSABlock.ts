@@ -1,5 +1,6 @@
 import { getVisibleLeaves } from './getVisibleLeaves.ts'
 import { visibleColRange } from './visibleColRange.ts'
+import { setFontSize } from '../../setFontSize.ts'
 import { adjustColorForContrast } from '../../util.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
@@ -45,13 +46,7 @@ export function renderMSABlock({
   ctx.scale(k, k)
   ctx.translate(-offsetX, rowHeight / 2 - offsetY)
   ctx.textAlign = 'center'
-  // match an optional existing "bold " so re-renders don't accumulate it
-  // (an invalid "bold bold 16px" string would be silently ignored by canvas,
-  // freezing the font size against zoom changes)
-  ctx.font = ctx.font.replace(
-    /(?:bold )?\d+px/,
-    `${bgColor ? '' : 'bold '}${fontSize}px`,
-  )
+  setFontSize(ctx, fontSize, !bgColor)
 
   const { xStart, xEnd } = visibleColRange({
     offsetX,

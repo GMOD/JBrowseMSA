@@ -3,6 +3,7 @@ import {
   forEachDescendant,
   forEachLink,
 } from '../../hierarchy.ts'
+import { setFontSize } from '../../setFontSize.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -288,8 +289,7 @@ export function renderTreeCanvas({
   ctx.scale(k, k)
   ctx.translate(marginLeft, -offsetY)
 
-  const font = ctx.font
-  ctx.font = font.replace(/\d+px/, `${fontSize}px`)
+  setFontSize(ctx, fontSize)
 
   // memoized on the model and shared across the tree/bubble/label passes (and
   // across all tree blocks) rather than re-traversing the hierarchy in each
