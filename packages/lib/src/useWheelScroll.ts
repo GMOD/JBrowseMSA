@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
+import {
+  SCROLL_ZOOM_DIVISOR,
+  getZoomNormalizer,
+  normalizeWheelDelta,
+  zoomFactorFromAccum,
+} from './wheelZoom.ts'
+
 export function useWheelScroll({
   ref,
   onScrollX,
@@ -17,9 +24,10 @@ export function useWheelScroll({
   const zoomScheduled = useRef(false)
   const deltaX = useRef(0)
   const deltaY = useRef(0)
-  const zoomDelta = useRef(0)
+  const zoomAccum = useRef(0)
   const zoomX = useRef(0)
   const zoomY = useRef(0)
+  const lastZoomTime = useRef<number | null>(null)
   const prevX = useRef(0)
   const prevY = useRef(0)
   const [mouseDragging, setMouseDragging] = useState(false)
@@ -40,18 +48,25 @@ export function useWheelScroll({
         Math.abs(event.deltaY) >= Math.abs(event.deltaX)
       if (onZoom && (isCtrlZoom || isScrollZoom)) {
         const rect = curr!.getBoundingClientRect()
-        zoomDelta.current += event.deltaY
+        // normalize away deltaMode (line/page), then divide by an adaptive
+        // factor so fine pinches and coarse notches feel consistent
+        const dY = normalizeWheelDelta(event.deltaY, event.deltaMode)
+        const divisor = isCtrlZoom ? getZoomNormalizer(dY) : SCROLL_ZOOM_DIVISOR
+        zoomAccum.current += dY / divisor
         zoomX.current = event.clientX - rect.left
         zoomY.current = event.clientY - rect.top
         if (!zoomScheduled.current) {
           zoomScheduled.current = true
-          requestAnimationFrame(() => {
+          requestAnimationFrame(now => {
+            const elapsed =
+              lastZoomTime.current === null ? 16.67 : now - lastZoomTime.current
+            lastZoomTime.current = now
             onZoom(
-              Math.exp(-zoomDelta.current * 0.002),
+              zoomFactorFromAccum(zoomAccum.current, Math.min(100, elapsed)),
               zoomX.current,
               zoomY.current,
             )
-            zoomDelta.current = 0
+            zoomAccum.current = 0
             zoomScheduled.current = false
           })
         }
