@@ -12,6 +12,13 @@ export const defaultSubFeatureRows = false
 export const defaultDrawMsaLetters = true
 export const defaultScrollZoom = false
 
+// Zoom limits, px per cell. maxCellSize caps both smooth zoom and the stepwise
+// zoom-in buttons (which otherwise grow unbounded). minColWidth/minRowHeight are
+// the smooth-zoom floors.
+export const minColWidth = 0.2
+export const minRowHeight = 1
+export const maxCellSize = 80
+
 // MSA model defaults
 export const defaultBgColor = true
 export const defaultColorSchemeName = 'maeditor'

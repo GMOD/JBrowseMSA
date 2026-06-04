@@ -46,6 +46,9 @@ import {
   defaultSubFeatureRows,
   defaultTreeAreaWidth,
   defaultTreeWidth,
+  maxCellSize,
+  minColWidth,
+  minRowHeight,
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
 import { flatToTree } from './flatToTree.ts'
@@ -1270,14 +1273,14 @@ function stateModelFactory() {
        * #action
        */
       zoomInHorizontal() {
-        self.colWidth = Math.ceil(self.colWidth * 1.5)
+        self.colWidth = Math.min(maxCellSize, Math.ceil(self.colWidth * 1.5))
         self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
       },
       /**
        * #action
        */
       zoomInVertical() {
-        self.rowHeight = Math.ceil(self.rowHeight * 1.5)
+        self.rowHeight = Math.min(maxCellSize, Math.ceil(self.rowHeight * 1.5))
       },
       /**
        * #action
@@ -1290,8 +1293,8 @@ function stateModelFactory() {
        */
       zoomIn() {
         transaction(() => {
-          self.colWidth = Math.ceil(self.colWidth * 1.5)
-          self.rowHeight = Math.ceil(self.rowHeight * 1.5)
+          self.colWidth = Math.min(maxCellSize, Math.ceil(self.colWidth * 1.5))
+          self.rowHeight = Math.min(maxCellSize, Math.ceil(self.rowHeight * 1.5))
           self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
         })
       },
@@ -1319,8 +1322,8 @@ function stateModelFactory() {
         transaction(() => {
           const colInView = (-self.scrollX + offsetX) / self.colWidth
           const rowInView = (-self.scrollY + offsetY) / self.rowHeight
-          self.colWidth = clamp(self.colWidth * scaleFactor, 0.2, 80)
-          self.rowHeight = clamp(self.rowHeight * scaleFactor, 1, 80)
+          self.colWidth = clamp(self.colWidth * scaleFactor, minColWidth, maxCellSize)
+          self.rowHeight = clamp(self.rowHeight * scaleFactor, minRowHeight, maxCellSize)
           self.scrollX = clamp(
             offsetX - colInView * self.colWidth,
             self.maxScrollX,
