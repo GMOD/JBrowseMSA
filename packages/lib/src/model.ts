@@ -1307,9 +1307,13 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * Smoothly zoom by a continuous scaleFactor, keeping the column/row under
-       * the cursor (offsetX/offsetY, px relative to the MSA area) anchored in
-       * place. Drives wheel/trackpad-pinch zoom.
+       * Smoothly zoom by a continuous scaleFactor. The column under the cursor
+       * (offsetX/offsetY, px relative to the MSA area) stays anchored
+       * horizontally. Vertically the anchor is biased toward the top: when the
+       * alignment nearly fits the viewport, snap to y=0 rather than pinning a
+       * random row under the cursor, with the bias fading out as the alignment
+       * grows taller than the viewport (where cursor-anchoring is useful).
+       * Drives wheel/trackpad-pinch zoom.
        */
       zoomToPos(scaleFactor: number, offsetX: number, offsetY: number) {
         transaction(() => {
@@ -1322,8 +1326,13 @@ function stateModelFactory() {
             self.maxScrollX,
             0,
           )
+
+          const anchoredScrollY = offsetY - rowInView * self.rowHeight
+          const overflow = Math.max(0, self.totalHeight - self.height)
+          const topBias =
+            self.height > 0 ? clamp(1 - overflow / self.height, 0, 1) : 0
           self.scrollY = clamp(
-            offsetY - rowInView * self.rowHeight,
+            anchoredScrollY * (1 - topBias),
             -self.totalHeight + 10,
             0,
           )
