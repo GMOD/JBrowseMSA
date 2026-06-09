@@ -48,7 +48,6 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
-    "eslint-plugin-unicorn": "^64.0.0",
     "flatbush": "^4.5.1",
     "mobx": "^6.15.4",
     "mobx-react": "^9.2.2",
