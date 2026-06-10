@@ -10,6 +10,17 @@ objects in our source code.
 
 [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model.ts)
 
+## Example usage
+
+```js
+import { MSAModelF } from 'react-msaview'
+import { types } from '@jbrowse/mobx-state-tree'
+
+const RootModel = types.model({ view: types.optional(MSAModelF(), {}) })
+const root = RootModel.create({})
+root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
+```
+
 ## Overview
 
 ## Inherited members
@@ -625,7 +636,7 @@ number[]
 
 ```js
 // type
-boolean | "" | undefined
+boolean
 ```
 
 #### getter: fontSize
@@ -639,7 +650,7 @@ number
 
 ```js
 // type
-Record<string, unknown>
+{ info: string; version: string | undefined; } | Record<string, unknown> | { General: Record<string, string[]>; Accessions: { [k: string]: string; }; Dbxref: { [k: string]: string; }; }
 ```
 
 #### getter: hideGapsEffective

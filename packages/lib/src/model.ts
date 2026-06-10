@@ -95,6 +95,15 @@ import type { Theme } from '@mui/material'
 
 /**
  * #stateModel MsaView
+ * #example
+ * ```js
+ * import { MSAModelF } from 'react-msaview'
+ * import { types } from '@jbrowse/mobx-state-tree'
+ *
+ * const RootModel = types.model({ view: types.optional(MSAModelF(), {}) })
+ * const root = RootModel.create({})
+ * root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
+ * ```
  */
 function stateModelFactory() {
   return types
@@ -613,7 +622,7 @@ function stateModelFactory() {
        * #getter
        */
       get header() {
-        return (this.MSA?.getHeader() ?? {}) as Record<string, unknown>
+        return this.MSA?.getHeader() ?? {}
       },
 
       /**
@@ -690,11 +699,7 @@ function stateModelFactory() {
        * #getter
        */
       get rowNamesSet() {
-        const map = new Map<string, number>()
-        this.leaves.forEach((leaf, index) => {
-          map.set(leaf.data.name, index)
-        })
-        return map
+        return new Map(this.leaves.map((leaf, index) => [leaf.data.name, index] as const))
       },
       /**
        * #getter
@@ -1122,7 +1127,7 @@ function stateModelFactory() {
        * #getter
        */
       get dataInitialized() {
-        return (self.data.msa || self.data.tree) && !self.error
+        return (self.data.msa !== '' || self.data.tree !== '') && !self.error
       },
       /**
        * #getter
@@ -1429,10 +1434,7 @@ function stateModelFactory() {
           .map(t => ({
             model: {
               ...t,
-              data:
-                hideGapsEffective && t.data
-                  ? skipBlanks(blanks, t.data)
-                  : t.data,
+              data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
               height: rowHeight,
             },
             ReactComponent: TextTrack,
@@ -1714,10 +1716,10 @@ function stateModelFactory() {
        */
       fit() {
         if (self.numRows > 0) {
-          self.rowHeight = self.msaAreaHeight / self.numRows
+          self.rowHeight = clamp(self.msaAreaHeight / self.numRows, minRowHeight, maxCellSize)
         }
         if (self.numColumns > 0) {
-          self.colWidth = self.msaAreaWidth / self.numColumns
+          self.colWidth = clamp(self.msaAreaWidth / self.numColumns, minColWidth, maxCellSize)
         }
         self.scrollX = 0
         self.scrollY = 0
@@ -1727,7 +1729,7 @@ function stateModelFactory() {
        */
       fitVertically() {
         if (self.numRows > 0) {
-          self.rowHeight = self.msaAreaHeight / self.numRows
+          self.rowHeight = clamp(self.msaAreaHeight / self.numRows, minRowHeight, maxCellSize)
         }
         self.scrollY = 0
       },
@@ -1736,7 +1738,7 @@ function stateModelFactory() {
        */
       fitHorizontally() {
         if (self.numColumns > 0) {
-          self.colWidth = self.msaAreaWidth / self.numColumns
+          self.colWidth = clamp(self.msaAreaWidth / self.numColumns, minColWidth, maxCellSize)
         }
         self.scrollX = 0
       },
