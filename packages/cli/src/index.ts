@@ -2,7 +2,8 @@
 
 import { parseArgs } from 'node:util'
 
-import { runInterProScan } from './interproscan-msa'
+import { exportSvg } from './export-svg.ts'
+import { runInterProScan } from './interproscan-msa.ts'
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -11,6 +12,30 @@ const { values, positionals } = parseArgs({
       type: 'string',
       short: 'o',
       default: 'domains.gff',
+    },
+    msa: {
+      type: 'string',
+    },
+    tree: {
+      type: 'string',
+    },
+    gff: {
+      type: 'string',
+    },
+    'color-scheme': {
+      type: 'string',
+      default: 'maeditor',
+    },
+    width: {
+      type: 'string',
+      default: '1200',
+    },
+    height: {
+      type: 'string',
+      default: '600',
+    },
+    'tree-area-width': {
+      type: 'string',
     },
     local: {
       type: 'boolean',
@@ -53,12 +78,13 @@ function printHelp() {
 react-msaview-cli - CLI tools for react-msaview
 
 USAGE:
-  react-msaview-cli interproscan <input-msa> [options]
+  react-msaview-cli <command> [options]
 
 COMMANDS:
   interproscan    Run InterProScan on all sequences in an MSA file
+  export-svg      Export alignment as SVG (no browser required)
 
-OPTIONS:
+OPTIONS (interproscan):
   -o, --output <file>           Output GFF file (default: domains.gff)
   --local                       Use local InterProScan installation
   --docker                      Use Docker (interpro/interproscan image)
@@ -67,23 +93,27 @@ OPTIONS:
   --interproscan-path <path>    Path to interproscan.sh (default: interproscan.sh)
   --programs <list>             Comma-separated list of programs (default: PfamA,CDD)
   --email <email>               Email for EBI API (default: user@example.com)
+
+OPTIONS (export-svg):
+  --msa <file>                  MSA file (FASTA, Stockholm, or Clustal) [required]
+  --tree <file>                 Newick tree file (optional)
+  --gff <file>                  InterProScan domain GFF file (optional)
+  -o, --output <file>           Output SVG file (default: alignment.svg)
+  --color-scheme <name>         Color scheme (default: maeditor)
+  --width <px>                  Canvas width in pixels (default: 1200)
+  --height <px>                 Canvas height in pixels (default: 600)
+  --tree-area-width <px>        Tree panel width in pixels (optional)
+
   -h, --help                    Show this help message
 
 EXAMPLES:
-  # Run InterProScan using EBI API (one sequence at a time)
+  react-msaview-cli export-svg --msa alignment.fasta -o alignment.svg
+  react-msaview-cli export-svg --msa alignment.fasta --tree tree.nwk -o alignment.svg
+  react-msaview-cli export-svg --msa alignment.fasta --gff domains.gff --color-scheme clustalx_protein_dynamic -o alignment.svg
+
   react-msaview-cli interproscan alignment.fasta -o domains.gff
-
-  # Run with Docker (processes all sequences locally, much faster)
   react-msaview-cli interproscan alignment.fasta -o domains.gff --docker
-
-  # Run with local InterProScan installation
   react-msaview-cli interproscan alignment.fasta -o domains.gff --local
-
-  # Run with Singularity using a local .sif file
-  react-msaview-cli interproscan alignment.fasta -o domains.gff --singularity --singularity-image /path/to/interproscan.sif
-
-  # Run with Singularity pulling from Docker Hub (requires network)
-  react-msaview-cli interproscan alignment.fasta -o domains.gff --singularity
 `)
 }
 
@@ -95,7 +125,27 @@ async function main() {
 
   const command = positionals[0]
 
-  if (command === 'interproscan') {
+  if (command === 'export-svg') {
+    const msaFile = values['msa']
+    if (!msaFile) {
+      console.error('Error: --msa <file> is required')
+      process.exit(1)
+    }
+    const outputFile = values.output === 'domains.gff' ? 'alignment.svg' : values.output!
+    await exportSvg({
+      msaFile,
+      treeFile: values['tree'],
+      gffFile: values['gff'],
+      outputFile,
+      colorScheme: values['color-scheme']!,
+      width: parseInt(values['width']!, 10),
+      height: parseInt(values['height']!, 10),
+      treeAreaWidth: values['tree-area-width'] !== undefined
+        ? parseInt(values['tree-area-width']!, 10)
+        : undefined,
+    })
+    console.log(`wrote ${outputFile}`)
+  } else if (command === 'interproscan') {
     const inputFile = positionals[1]
     if (!inputFile) {
       console.error('Error: Input MSA file is required')

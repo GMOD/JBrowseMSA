@@ -108,7 +108,7 @@ export function parseAsn1(
         ...Object.fromEntries(
           features.map(f => [dict[f.featureid], f.value] as const),
         ),
-      },
+      } as { id: number; parent: number; name: string },
     ]
   })
 }

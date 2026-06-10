@@ -5,6 +5,7 @@
 // Those plugins also reach into the MsaViewModel instance at runtime; the model
 // members they rely on (e.g. mouseCol/setMousePos, setHighlightedColumns,
 // seqPosToVisibleCol/visibleColToSeqPos) are flagged inline in model.ts.
+export { renderToSvg } from './renderToSvg.tsx'
 export { default as MSAView } from './components/Loading.tsx'
 export { default as MSAViewer } from './components/MSAViewer.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'

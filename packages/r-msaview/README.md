@@ -32,7 +32,13 @@ widget <- msaview(
   tree = "((human:0.1,mouse:0.2):0.05,goat:0.3);"
 )
 widget
-# htmlwidgets::saveWidget(widget, "alignment.html")  # save to a self-contained HTML file
+# htmlwidgets::saveWidget(widget, "alignment.html")                     # self-contained HTML
+# webshot2::webshot("alignment.html", "alignment.png")                  # PNG (requires webshot2)
+
+# SVG via the CLI (requires react-msaview-cli installed via npm/npx):
+# writeLines(widget$x$config$data$msa, "alignment.fasta")
+# system2("react-msaview-cli", c("export-svg", "--msa", "alignment.fasta", "--output", "alignment.svg"))
+# Or with tree: system2("react-msaview-cli", c("export-svg", "--msa", "alignment.fasta", "--tree", "tree.nwk", "--output", "alignment.svg"))
 ```
 
 ![Hemoglobin alignment with tree](../../docs/media/r-quickstart.svg)

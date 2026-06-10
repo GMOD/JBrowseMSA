@@ -6,10 +6,10 @@ import {
   parseMSA,
 } from 'msa-parsers'
 
-import { runDockerInterProScan } from './docker-runner'
-import { runEbiInterProScan } from './ebi-api'
-import { runLocalInterProScan } from './local-runner'
-import { runSingularityInterProScan } from './singularity-runner'
+import { runDockerInterProScan } from './docker-runner.ts'
+import { runEbiInterProScan } from './ebi-api.ts'
+import { runLocalInterProScan } from './local-runner.ts'
+import { runSingularityInterProScan } from './singularity-runner.ts'
 
 import type { InterProScanResults } from 'msa-parsers'
 

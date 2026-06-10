@@ -11,34 +11,30 @@
   "bin": {
     "react-msaview-cli": "./dist/index.js"
   },
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "types": "src/index.ts",
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
-    },
-    "types": "dist/index.d.ts",
-    "main": "dist/index.js"
-  },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "scripts": {
-    "clean": "rimraf dist",
+    "clean": "node --eval \"fs.rmSync('dist',{recursive:true,force:true})\" --input-type=module",
     "build": "tsc",
     "watch": "tsc --watch",
     "test": "vitest"
   },
   "devDependencies": {
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^25.9.2"
   },
   "dependencies": {
-    "msa-parsers": "workspace:*"
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@jbrowse/core": "^4.3.0",
+    "@mui/material": "^7.3.11",
+    "jsdom": "^26.1.0",
+    "mobx": "^6.15.4",
+    "mobx-react": "^9.2.2",
+    "msa-parsers": "workspace:*",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-msaview": "workspace:*"
   }
 }
