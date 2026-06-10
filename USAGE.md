@@ -31,8 +31,10 @@ Props:
 | ---------------- | -------------- | --------------------------------------------- |
 | `msa`            | `string`       | Alignment text (FASTA, Stockholm, or Clustal) |
 | `tree`           | `string`       | Newick tree text                              |
+| `gff`            | `string`       | InterProScan domain annotations (GFF3 text)   |
 | `msaFilehandle`  | `FileLocation` | Remote file location for alignment            |
 | `treeFilehandle` | `FileLocation` | Remote file location for tree                 |
+| `gffFilehandle`  | `FileLocation` | Remote file location for domain GFF           |
 | `colorScheme`    | `string`       | Color scheme name (see below)                 |
 | `height`         | `number`       | Widget height in pixels                       |
 

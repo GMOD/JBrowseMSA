@@ -4,7 +4,7 @@ Interactive multiple sequence alignment viewer for R, powered by
 [react-msaview](https://github.com/GMOD/react-msaview). Renders as an htmlwidget
 in RStudio, R Markdown, Quarto, and Shiny.
 
-![MSA Viewer screenshot](../../docs/media/image1.png)
+![MSA Viewer screenshot](../../docs/media/example-protein.svg)
 
 ## Installation
 

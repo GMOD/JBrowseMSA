@@ -157,6 +157,9 @@ test('generate README figures', async () => {
 
   for (const fig of figures) {
     const model = MSAModelF().create({
+      // fixed id keeps the generated clipPath ids (and thus the SVG output)
+      // stable across runs, so regenerating doesn't churn the committed files
+      id: fig.name,
       type: 'MsaView',
       height: 400,
       colorSchemeName: fig.colorScheme,
