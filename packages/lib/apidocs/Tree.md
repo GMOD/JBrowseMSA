@@ -10,7 +10,7 @@ objects in our source code.
 
 [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/treeModel.ts)
 
-## Docs
+## Overview
 
 ### Tree - Properties
 

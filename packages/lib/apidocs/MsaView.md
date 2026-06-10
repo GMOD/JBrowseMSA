@@ -10,13 +10,7 @@ objects in our source code.
 
 [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model.ts)
 
-## Docs
-
-extends
-
-- [DialogQueueSessionMixin](../dialogqueuesessionmixin)
-- [MSAModel](../msamodel)
-- [Tree](../tree)
+## Overview
 
 ## Inherited members
 
@@ -28,17 +22,17 @@ Available on this model via composition. Follow each link for full signatures an
 
 **Actions:** removeActiveDialog, queueDialog
 
-### Available via [MSAModel](../msamodel)
-
-**Properties:** bgColor, colorSchemeName
-
-**Actions:** setColorSchemeName, setBgColor
-
 ### Available via [Tree](../tree)
 
 **Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth, showBranchLen, drawTree, drawNodeBubbles
 
 **Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree, setShowBranchLen, setDrawNodeBubbles, setDrawLabels
+
+### Available via [MSAModel](../msamodel)
+
+**Properties:** bgColor, colorSchemeName
+
+**Actions:** setColorSchemeName, setBgColor
 
 ### MsaView - Properties
 
@@ -123,7 +117,7 @@ filehandle object for InterProScan GFF file
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
 // code
 gffFilehandle: types.maybe(FileLocation)
 ```
@@ -166,7 +160,7 @@ stockholm files)
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
 // code
 msaFilehandle: types.maybe(FileLocation)
 ```
@@ -213,6 +207,17 @@ number
 scrollY: defaultScrollY
 ```
 
+#### property: scrollZoom
+
+zoom in/out on plain mouse-wheel without holding ctrl
+
+```js
+// type signature
+false
+// code
+scrollZoom: defaultScrollZoom
+```
+
 #### property: showDomains
 
 ```js
@@ -248,7 +253,7 @@ filehandle object for the tree
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
 // code
 treeFilehandle: types.maybe(FileLocation)
 ```
@@ -259,7 +264,7 @@ filehandle object for tree metadata
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: { internetAccountType: string; authInfo: any; } | undefined; } | { ...; } | { ...; } | { ...; }, any>, _NotCustomized, _NotCustomized>>
+IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
 // code
 treeMetadataFilehandle: types.maybe(FileLocation)
 ```
@@ -453,18 +458,6 @@ number | undefined
 mouseRow: undefined as number | undefined
 ```
 
-#### volatile: nref
-
-a dummy variable that is incremented when ref changes so autorun for
-drawing canvas commands will run
-
-```js
-// type signature
-number
-// code
-nref: 0
-```
-
 #### volatile: resizeHandleWidth
 
 resize handle width between tree and msa area, px
@@ -569,7 +562,7 @@ ref http://www.jalview.org/help/html/colourSchemes/clustal.html
 
 ```js
 // type
-;(Record < string, string > [])
+Record<string, string>[]
 ```
 
 #### getter: colConsensus
@@ -579,11 +572,7 @@ Used by percent_identity_dynamic color scheme.
 
 ```js
 // type
-{
-  letter: string
-  color: string | undefined
-}
-;[]
+{ letter: string; color: string | undefined; }[]
 ```
 
 #### getter: colorScheme
@@ -597,7 +586,7 @@ Record<string, string>
 
 ```js
 // type
-;(Record < string, number > [])
+Record<string, number>[]
 ```
 
 #### getter: colStatsSums
@@ -611,7 +600,7 @@ number[]
 
 ```js
 // type
-{ [k: string]: string; }
+Map<string, string>
 ```
 
 #### getter: columns2d
@@ -624,7 +613,7 @@ string[]
 #### getter: conservation
 
 Conservation score per column using Shannon entropy (biojs-msa style).
-Conservation = (1 - H/Hmax) \* (1 - gapFraction)
+Conservation = (1 - H/Hmax) * (1 - gapFraction)
 Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
 
 ```js
@@ -636,7 +625,7 @@ number[]
 
 ```js
 // type
-;boolean | '' | undefined
+boolean | "" | undefined
 ```
 
 #### getter: fontSize
@@ -671,15 +660,6 @@ generates a new tree that is clustered with x,y positions
 HierarchyNode<NodeWithIdsAndLength>
 ```
 
-#### getter: hoveredCell
-
-Returns information about the currently hovered cell
-
-```js
-// type
-{ rowName: string; col: number; base: string; seqPos: number | undefined; } | undefined
-```
-
 #### getter: hoveredInsertion
 
 Returns insertion info if mouse is hovering over an insertion indicator
@@ -705,18 +685,18 @@ Map<string, { pos: number; letters: string; }[]>
 boolean
 ```
 
-#### getter: labelsWidth
+#### getter: labelWidthMap
 
 ```js
 // type
-number
+Map<string, number>
 ```
 
 #### getter: leaves
 
 ```js
 // type
-HierarchyNode < NodeWithIdsAndLength > []
+HierarchyNode<NodeWithIdsAndLength>[]
 ```
 
 #### getter: maxBranchLength
@@ -738,6 +718,17 @@ number
 ```
 
 #### getter: maxScrollX
+
+```js
+// type
+number
+```
+
+#### getter: maxScrollY
+
+most-negative allowed scrollY, keeping the last row in view rather than
+letting the whole alignment scroll off the top. visible MSA height is
+computed inline here because msaAreaHeight is defined later in the chain.
 
 ```js
 // type
@@ -820,6 +811,9 @@ Map<string, string>
 
 #### getter: rowNames
 
+Returns the list of row (sequence) names in display order.
+Part of the public API used by downstream consumers (e.g. jbrowse plugins).
+
 ```js
 // type
 string[]
@@ -860,7 +854,7 @@ Returns 'dna', 'rna', or 'amino'.
 
 ```js
 // type
-;'dna' | 'rna' | 'amino'
+"dna" | "rna" | "amino"
 ```
 
 #### getter: showBranchLenEffective
@@ -1034,6 +1028,11 @@ visibleColToRowLetter: (rowName: string, visibleCol: number) => string | undefin
 Convert a visible column to a row-specific sequence position (0-based).
 Returns undefined if the position is a gap in the sequence.
 
+CROSS-REPO CONTRACT: this and the sibling coordinate converters
+(seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) are used
+by jbrowse-plugin-protein3d to translate between alignment columns and
+structure/sequence residue positions across gaps. Keep them stable.
+
 ```js
 // type signature
 visibleColToSeqPos: (rowName: string, visibleCol: number) => number | undefined
@@ -1085,7 +1084,7 @@ drawRelativeTo: (id: string | undefined) => void
 
 ```js
 // type signature
-exportSVG: (opts: { theme: Theme; includeMinimap?: boolean | undefined; includeTracks?: boolean | undefined; exportType: string; }) => Promise<void>
+exportSVG: (opts: { theme: Theme; includeMinimap?: boolean | undefined; includeTracks?: boolean | undefined; exportType: "entire" | "viewport"; }) => Promise<void>
 ```
 
 #### action: fit
@@ -1107,15 +1106,6 @@ fitHorizontally: () => void
 ```js
 // type signature
 fitVertically: () => void
-```
-
-#### action: incrementRef
-
-internal, used for drawing to canvas
-
-```js
-// type signature
-incrementRef: () => void
 ```
 
 #### action: reset
@@ -1169,6 +1159,17 @@ setCurrentAlignment: (n: number) => void
 setData: (data: { msa?: string | undefined; tree?: string | undefined; treeMetadata?: string | undefined; gff?: string | undefined; }) => void
 ```
 
+#### action: setDomains
+
+Set domain annotations and reveal the overlay in a single step (or clear
+both when passed undefined). Shared by every domain source: InterProScan,
+GFF, user-provided uploads, and NCBI CDD.
+
+```js
+// type signature
+setDomains: (data?: Record<string, InterProScanResults> | undefined) => void
+```
+
 #### action: setDrawMsaLetters
 
 ```js
@@ -1219,6 +1220,10 @@ setHideGaps: (arg: boolean) => void
 
 set highlighted columns
 
+CROSS-REPO CONTRACT: called by jbrowse-plugin-msaview
+(afterCreateAutoruns.ts) to highlight alignment columns. It has no
+in-repo caller, so do not flag it as dead code — it is public API.
+
 ```js
 // type signature
 setHighlightedColumns: (columns?: number[] | undefined) => void
@@ -1259,6 +1264,10 @@ setMouseClickPos: (col?: number | undefined, row?: number | undefined) => void
 #### action: setMousePos
 
 set mouse position (row, column) in the MSA
+
+CROSS-REPO CONTRACT: jbrowse-plugin-protein3d calls this (and reads the
+`mouseCol` volatile) to sync MSA<->3D-structure hover. Keep the name and
+signature stable; see that repo's ProteinToMsaHoverSync.tsx.
 
 ```js
 // type signature
@@ -1302,6 +1311,13 @@ set scroll Y-offset (px)
 ```js
 // type signature
 setScrollY: (n: number) => void
+```
+
+#### action: setScrollZoom
+
+```js
+// type signature
+setScrollZoom: (arg: boolean) => void
 ```
 
 #### action: setShowDomains
@@ -1414,4 +1430,19 @@ zoomOutHorizontal: () => void
 ```js
 // type signature
 zoomOutVertical: () => void
+```
+
+#### action: zoomToPos
+
+Smoothly zoom by a continuous scaleFactor. The column under the cursor
+(offsetX/offsetY, px relative to the MSA area) stays anchored
+horizontally. Vertically the anchor is biased toward the top: when the
+alignment nearly fits the viewport, snap to y=0 rather than pinning a
+random row under the cursor, with the bias fading out as the alignment
+grows taller than the viewport (where cursor-anchoring is useful).
+Drives wheel/trackpad-pinch zoom.
+
+```js
+// type signature
+zoomToPos: (scaleFactor: number, offsetX: number, offsetY: number) => void
 ```

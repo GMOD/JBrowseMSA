@@ -5,5 +5,5 @@
     "module": "commonjs",
     "moduleResolution": "node"
   },
-  "include": ["generateConfigDocs.ts", "generateStateModelDocs.ts", "util.ts"]
+  "include": ["generateStateModelDocs.ts", "util.ts"]
 }

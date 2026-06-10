@@ -3,18 +3,23 @@ import fs from 'fs'
 import slugify from 'slugify'
 
 import {
+  codeBlock,
+  exampleSection,
   extractWithComment,
   getAllFiles,
-  parseExtends,
+  overviewSection,
   parseTaggedComment,
   removeComments,
+  section,
+  stripComposedBlock,
 } from './util.ts'
 
-import type { ExtendsRef, ExtractedNode } from './util.ts'
+import type { ComposedRef, Example, ExtractedNode } from './util.ts'
 
 interface Member {
   name: string
   docs: string
+  examples: Example[]
   code: string
   signature: string
 }
@@ -22,6 +27,9 @@ interface ModelHeader {
   name: string
   id: string
   docs: string
+  examples: Example[]
+  selfDeclId?: string
+  composedOf: ComposedRef[]
 }
 interface StateModel {
   header?: ModelHeader
@@ -34,15 +42,23 @@ interface StateModel {
 }
 type ModelWithHeader = StateModel & { header: ModelHeader }
 interface Ancestor {
-  ref: ExtendsRef
-  model?: ModelWithHeader
+  model: ModelWithHeader
+}
+interface ModelIndex {
+  byDeclId: Map<string, ModelWithHeader>
+  bySlug: Map<string, ModelWithHeader>
 }
 
 function buildMember(obj: ExtractedNode): Member {
-  const { name, docs } = parseTaggedComment(obj.comment, obj.type, obj.name)
+  const { name, docs, examples } = parseTaggedComment(
+    obj.comment,
+    obj.type,
+    obj.name,
+  )
   return {
     name,
     docs,
+    examples,
     code: removeComments(obj.node),
     signature: obj.signature,
   }
@@ -51,7 +67,7 @@ function buildMember(obj: ExtractedNode): Member {
 function generateStateModelDocs(files: string[]) {
   const cwd = `${process.cwd()}/`
   const byFile: Record<string, StateModel> = {}
-  extractWithComment(files, obj => {
+  extractWithComment(files, (obj: ExtractedNode) => {
     const fn = obj.filename
     byFile[fn] ??= {
       properties: [],
@@ -61,14 +77,17 @@ function generateStateModelDocs(files: string[]) {
       actions: [],
       filename: fn.replace(cwd, ''),
     }
-    const file = byFile[fn]
+    const file = byFile[fn]!
     const member = buildMember(obj)
 
     if (obj.type === 'stateModel') {
       file.header = {
         name: member.name,
-        docs: member.docs,
+        docs: stripComposedBlock(member.docs),
+        examples: member.examples,
         id: slugify(member.name, { lower: true }),
+        selfDeclId: obj.selfDeclId,
+        composedOf: obj.composedOf ?? [],
       }
     } else if (obj.type === 'property') {
       file.properties.push(member)
@@ -85,23 +104,25 @@ function generateStateModelDocs(files: string[]) {
   return byFile
 }
 
-// Walk the extends graph transitively, depth-first, deduping by slug and
-// guarding cycles. Returns ancestors in reading order (direct parents first,
-// then their parents). An unresolved slug yields an entry with model undefined.
+// Walk the composition graph transitively, depth-first, deduping by id and
+// guarding cycles. Resolves first by declId (robust to aliased imports), then
+// falls back to slug matching on the human-readable name.
 function collectAncestors(
-  model: StateModel,
-  bySlug: Map<string, ModelWithHeader>,
+  model: ModelWithHeader,
+  index: ModelIndex,
   seen = new Set<string>(),
 ): Ancestor[] {
   const out: Ancestor[] = []
-  for (const ref of parseExtends(model.header?.docs ?? '')) {
-    if (!seen.has(ref.slug)) {
-      seen.add(ref.slug)
-      const parent = bySlug.get(ref.slug)
-      out.push({ ref, model: parent })
-      if (parent) {
-        out.push(...collectAncestors(parent, bySlug, seen))
-      }
+  for (const ref of model.header.composedOf) {
+    const parent =
+      (ref.declId ? index.byDeclId.get(ref.declId) : undefined) ??
+      (ref.name
+        ? index.bySlug.get(slugify(ref.name, { lower: true }))
+        : undefined)
+    if (parent && !seen.has(parent.header.id)) {
+      seen.add(parent.header.id)
+      out.push({ model: parent })
+      out.push(...collectAncestors(parent, index, seen))
     }
   }
   return out
@@ -113,40 +134,31 @@ function memberLine(label: string, members: Member[]) {
     : ''
 }
 
-// A compact, single-page overview of every member reachable through
-// composition, grouped by the model that defines it, so a reader does not have
-// to traverse the whole inheritance chain to learn what is available.
 function inheritedSection(ancestors: Ancestor[]) {
   const blocks = ancestors.flatMap(({ model }) => {
-    const lines = model
+    const lines = [
+      memberLine('Properties', model.properties),
+      memberLine('Volatiles', model.volatiles),
+      memberLine('Getters', model.getters),
+      memberLine('Methods', model.methods),
+      memberLine('Actions', model.actions),
+    ].filter(Boolean)
+    return lines.length
       ? [
-          memberLine('Properties', model.properties),
-          memberLine('Volatiles', model.volatiles),
-          memberLine('Getters', model.getters),
-          memberLine('Methods', model.methods),
-          memberLine('Actions', model.actions),
-        ].filter(Boolean)
-      : []
-    return model && lines.length
-      ? [
-          [
+          section(
             `### Available via [${model.header.name}](../${model.header.id})`,
             ...lines,
-          ].join('\n\n'),
+          ),
         ]
       : []
   })
   return blocks.length
-    ? [
+    ? section(
         '## Inherited members',
         'Available on this model via composition. Follow each link for full signatures and docs.',
         ...blocks,
-      ].join('\n\n')
+      )
     : ''
-}
-
-function codeBlock(...lines: string[]) {
-  return ['```js', ...lines, '```'].join('\n')
 }
 
 function memberSection(
@@ -155,14 +167,22 @@ function memberSection(
   members: Member[],
   renderBody: (m: Member) => string,
 ) {
-  if (!members.length) {
-    return ''
-  }
   const kind = label.toLowerCase().replace(/ies$/, 'y').replace(/s$/, '')
-  const blocks = members
-    .toSorted((a, b) => a.name.localeCompare(b.name))
-    .map(m => [`#### ${kind}: ${m.name}`, m.docs, renderBody(m)].join('\n\n'))
-  return [`### ${modelName} - ${label}`, ...blocks].join('\n\n')
+  return members.length
+    ? section(
+        `### ${modelName} - ${label}`,
+        ...members
+          .toSorted((a, b) => a.name.localeCompare(b.name))
+          .map(m =>
+            section(
+              `#### ${kind}: ${m.name}`,
+              m.docs,
+              renderBody(m),
+              exampleSection(m.examples, '**Example:**'),
+            ),
+          ),
+      )
+    : ''
 }
 
 function renderModel(
@@ -174,13 +194,10 @@ function renderModel(
     methods,
     actions,
     filename,
-  }: StateModel,
+  }: ModelWithHeader,
   ancestors: Ancestor[],
-): string | undefined {
-  if (!header) {
-    return undefined
-  }
-  const sections = [
+): string {
+  const sections = section(
     memberSection(header.name, 'Properties', properties, p =>
       codeBlock('// type signature', p.signature, '// code', p.code),
     ),
@@ -196,9 +213,7 @@ function renderModel(
     memberSection(header.name, 'Actions', actions, a =>
       codeBlock('// type signature', `${a.name}: ${a.signature}`),
     ),
-  ]
-    .filter(Boolean)
-    .join('\n\n')
+  )
 
   return `---
 id: ${header.id}
@@ -212,20 +227,8 @@ objects in our source code.
 
 [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/${filename})
 
-## Docs
-
-${[header.docs, inheritedSection(ancestors), sections].filter(Boolean).join('\n\n')}
+${section(exampleSection(header.examples), overviewSection(header.docs, inheritedSection(ancestors), sections))}
 `
-}
-
-function validateLinks(model: ModelWithHeader, ancestors: Ancestor[]) {
-  for (const { ref, model: parent } of ancestors) {
-    if (!parent) {
-      console.warn(
-        `${model.header.name}: extends link "[${ref.name}](../${ref.slug})" does not resolve to a generated model page`,
-      )
-    }
-  }
 }
 
 async function main() {
@@ -235,14 +238,17 @@ async function main() {
   const withHeader = Object.values(models).filter((m): m is ModelWithHeader =>
     Boolean(m.header),
   )
-  const bySlug = new Map(withHeader.map(m => [m.header.id, m] as const))
+  const index: ModelIndex = {
+    byDeclId: new Map(
+      withHeader
+        .filter(m => m.header.selfDeclId)
+        .map(m => [m.header.selfDeclId!, m] as const),
+    ),
+    bySlug: new Map(withHeader.map(m => [m.header.id, m] as const)),
+  }
   for (const model of withHeader) {
-    const ancestors = collectAncestors(model, bySlug)
-    validateLinks(model, ancestors)
-    const rendered = renderModel(model, ancestors)
-    if (rendered) {
-      fs.writeFileSync(`${dir}/${model.header.name}.md`, rendered)
-    }
+    const ancestors = collectAncestors(model, index)
+    fs.writeFileSync(`${dir}/${model.header.name}.md`, renderModel(model, ancestors))
   }
 }
 

@@ -1,66 +1,40 @@
-All documentation is in the website folder `website`, which powers
-https://jbrowse.org/jb2/docs/
+This folder contains scripts to auto-generate state model API docs from JSDoc
+comments in `src/`. Generated output goes to `apidocs/`.
 
-## For devs
-
-This folder contains scripts to auto-generate some docs
-
-In the root dir run
+Run from `packages/lib`:
 
 ```
-yarn statedocs
-yarn configdocs
+pnpm statedocs
 ```
 
-To update statemodels and config individually
+## Authoring tags
 
-These will update website/docs/models and website/docs/config respectively
+Mark declarations with JSDoc tags. One `#stateModel` per file.
 
-You will have to manually do This
+```
+#stateModel ModelName   — factory function or const for the model
+#property               — types.model property
+#volatile               — volatile (runtime-only) property
+#getter                 — computed view getter
+#method                 — view that takes arguments
+#action                 — action
+```
 
-It looks for comments named
+Optionally add `#example` blocks at the end of a JSDoc comment:
 
 ```js
 /**
- * #stateModel ModelName
+ * #stateModel MsaView
+ * #example minimal
+ * ```js
+ * const model = stateModelFactory()
+ * ```
  */
 ```
 
-and
+## Composition graph
 
-```js
-/**
- * #config ConfigName
- */
-```
-
-it is not able to document a single variable, so in some places, a dummy
-function is put below the `#config/#stateModel` comments
-
-```
-function x(){}
-```
-
-Only one config/statemodel per file can be used currently
-
-It uses the typescript compiler which spiders over many files when processing a
-single file, and it is otherwise hard to keep track of which config/statemodel
-is processed unless we keep it to one config/statemodel at a time.
-
-Then, in statemodels
-
-```
-#stateModel
-#getter
-#property - model property
-#action
-#method - a view that takes function params or is called as a function
-```
-
-and in config models
-
-```
-#identifier - explicitIdentifier
-#baseConfiguration - baseConfiguration
-#slot - a config slot
-```
+The generator derives model composition automatically from `types.compose(...)`
+calls in the source — no need to maintain a manual `extends` list. The
+"Inherited members" section in each generated doc reflects what is composed in
+code.

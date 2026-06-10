@@ -88,7 +88,6 @@ import type {
   BasicTrack,
   NodeWithIds,
   NodeWithIdsAndLength,
-  TextTrackModel,
 } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -96,10 +95,6 @@ import type { Theme } from '@mui/material'
 
 /**
  * #stateModel MsaView
- * extends
- * - [DialogQueueSessionMixin](../dialogqueuesessionmixin)
- * - [MSAModel](../msamodel)
- * - [Tree](../tree)
  */
 function stateModelFactory() {
   return types
@@ -423,29 +418,6 @@ function stateModelFactory() {
 
       /**
        * #action
-       * set hovered tree node and its descendants
-       */
-      setHoveredTreeNode(nodeId?: string) {
-        if (!nodeId) {
-          self.hoveredTreeNode = undefined
-          return
-        }
-
-        const node = find(
-          (self as MsaViewModel).hierarchy,
-          n => n.data.id === nodeId,
-        )
-        if (!node) {
-          self.hoveredTreeNode = undefined
-          return
-        }
-
-        const descendantNames = leaves(node).map(leaf => leaf.data.name)
-
-        self.hoveredTreeNode = { nodeId, descendantNames }
-      },
-      /**
-       * #action
        * set highlighted columns
        *
        * CROSS-REPO CONTRACT: called by jbrowse-plugin-msaview
@@ -698,7 +670,7 @@ function stateModelFactory() {
                     text.startsWith('SEQ') ? parseEmfTree(text).tree : text,
                   ),
             )
-          : this.MSA?.getTree() || {
+          : this.MSA?.getTree() ?? {
               noTree: true,
               children: [],
               id: 'empty',
@@ -706,9 +678,6 @@ function stateModelFactory() {
             }
       },
 
-      /**
-       * #getter
-       */
       /**
        * #getter
        * Returns the list of row (sequence) names in display order.
@@ -742,23 +711,15 @@ function stateModelFactory() {
        */
       get hoveredInsertion() {
         const { mouseCol, mouseRow } = self
-        if (mouseCol === undefined || mouseRow === undefined) {
-          return undefined
-        }
-        const rowName = this.leaves[mouseRow]?.data.name
-        if (!rowName) {
-          return undefined
-        }
-        const insertions = this.insertionPositions.get(rowName)
-        if (!insertions) {
-          return undefined
-        }
-        const insertion = insertions.find(ins => ins.pos === mouseCol)
-        if (insertion) {
-          return {
-            rowName,
-            col: mouseCol,
-            letters: insertion.letters,
+        if (mouseCol !== undefined && mouseRow !== undefined) {
+          const rowName = this.leaves[mouseRow]?.data.name
+          if (rowName) {
+            const insertion = this.insertionPositions
+              .get(rowName)
+              ?.find(ins => ins.pos === mouseCol)
+            if (insertion) {
+              return { rowName, col: mouseCol, letters: insertion.letters }
+            }
           }
         }
         return undefined
@@ -960,7 +921,7 @@ function stateModelFactory() {
        * #getter
        */
       get colStats() {
-        const r = [] as Record<string, number>[]
+        const r: Record<string, number>[] = []
         const columns = this.columns2d
         for (const column of columns) {
           for (let j = 0; j < column.length; j++) {
@@ -976,13 +937,7 @@ function stateModelFactory() {
        * #getter
        */
       get colStatsSums() {
-        return this.colStats.map(col => {
-          let s = 0
-          for (const k in col) {
-            s += col[k]!
-          }
-          return s
-        })
+        return this.colStats.map(col => sum(Object.values(col)))
       },
 
       /**
@@ -1084,11 +1039,8 @@ function stateModelFactory() {
 
           let entropy = 0
           for (const letter of Object.keys(stats)) {
-            if (letter === '-' || letter === '.') {
-              continue
-            }
-            const freq = stats[letter]! / nonGapTotal
-            if (freq > 0) {
+            if (letter !== '-' && letter !== '.') {
+              const freq = stats[letter]! / nonGapTotal
               entropy -= freq * Math.log2(freq)
             }
           }
@@ -1264,6 +1216,21 @@ function stateModelFactory() {
 
       /**
        * #action
+       * set hovered tree node and its descendants
+       */
+      setHoveredTreeNode(nodeId?: string) {
+        if (nodeId) {
+          const node = find(self.hierarchy, n => n.data.id === nodeId)
+          self.hoveredTreeNode = node
+            ? { nodeId, descendantNames: leaves(node).map(leaf => leaf.data.name) }
+            : undefined
+        } else {
+          self.hoveredTreeNode = undefined
+        }
+      },
+
+      /**
+       * #action
        * Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances
        */
       calculateNeighborJoiningTreeFromMSA() {
@@ -1285,7 +1252,7 @@ function stateModelFactory() {
        * #action
        */
       zoomOutHorizontal() {
-        self.colWidth = Math.max(1, Math.floor(self.colWidth * 0.75))
+        self.colWidth = Math.max(minColWidth, Math.floor(self.colWidth * 0.75))
         self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
       },
       /**
@@ -1305,7 +1272,7 @@ function stateModelFactory() {
        * #action
        */
       zoomOutVertical() {
-        self.rowHeight = Math.max(1.5, Math.floor(self.rowHeight * 0.75))
+        self.rowHeight = Math.max(minRowHeight, Math.floor(self.rowHeight * 0.75))
       },
       /**
        * #action
@@ -1322,8 +1289,8 @@ function stateModelFactory() {
        */
       zoomOut() {
         transaction(() => {
-          self.colWidth = Math.max(1, Math.floor(self.colWidth * 0.75))
-          self.rowHeight = Math.max(1.5, Math.floor(self.rowHeight * 0.75))
+          self.colWidth = Math.max(minColWidth, Math.floor(self.colWidth * 0.75))
+          self.rowHeight = Math.max(minRowHeight, Math.floor(self.rowHeight * 0.75))
           self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
         })
       },
@@ -1365,10 +1332,6 @@ function stateModelFactory() {
        */
       doScrollY(deltaY: number) {
         self.scrollY = clamp(self.scrollY + deltaY, self.maxScrollY, 0)
-      },
-
-      setInterProAnnotations(data?: Record<string, InterProScanResults>) {
-        self.interProAnnotations = data
       },
 
       /**
@@ -1460,9 +1423,7 @@ function stateModelFactory() {
        */
       get adapterTrackModels(): BasicTrack[] {
         const { rowHeight, MSA, hideGapsEffective, blanks } = self
-        const tracks = (MSA?.tracks ?? []) as (TextTrackModel & {
-          data?: string
-        })[]
+        const tracks = MSA?.tracks ?? []
         return tracks
           .filter(t => !!t.data)
           .map(t => ({
