@@ -23,7 +23,7 @@ Jump to what you need:
 
 | You want to…                                             | Start here                                                                                                                                             |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Use the viewer** — load data, explore, export an image | [User guide](docs/user_guide.md) · [live app](https://gmod.org/JBrowseMSA)                                                                             |
+| **Use the viewer** — load data, explore, export an image | [User guide](docs/user_guide.md) · [live app](https://gmod.org/JBrowseMSA/demo/) · [docs site](https://gmod.org/JBrowseMSA)                            |
 | **Embed the React component** in your own app            | [Usage & embedding guide](USAGE.md) · [live code examples](https://jbrowse.org/storybook/msa) · [model API reference](packages/lib/apidocs/MsaView.md) |
 | **Use it from R** (ape, Biostrings, ggtree, Shiny)       | [R package README](packages/r-msaview/README.md)                                                                                                       |
 | **Annotate protein domains** from an alignment           | [CLI README](packages/cli/) — batch InterProScan → GFF                                                                                                 |
@@ -79,7 +79,8 @@ labelled boxes on the alignment:
 | Package                                       | Description                                                |
 | --------------------------------------------- | ---------------------------------------------------------- |
 | [packages/lib](packages/lib/)                 | Main react-msaview React component                         |
-| [packages/app](packages/app/)                 | Demo application (deployed at https://gmod.org/JBrowseMSA) |
+| [packages/website](packages/website/)         | Docs site (deployed at gmod.org/JBrowseMSA)                |
+| [packages/app](packages/app/)                 | Demo application (deployed at gmod.org/JBrowseMSA/demo)    |
 | [packages/examples](packages/examples/)       | Live usage examples (deployed at the Storybook link above) |
 | [packages/cli](packages/cli/)                 | Command-line tools (batch InterProScan)                    |
 | [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                    |
@@ -107,6 +108,17 @@ pnpm install
 Architecture notes live in [CLAUDE.md](CLAUDE.md); the core state model is
 `packages/lib/src/model.ts` (MobX-state-tree), and `observer`-wrapped components
 re-render when observed model properties change.
+
+## Deployment
+
+- **Docs site → gmod.org/JBrowseMSA**, with the **demo app at
+  gmod.org/JBrowseMSA/demo**. `pnpm build:pages` builds both into `pages-dist/`
+  (docs at the root, app under `/demo`); the
+  [Deploy docs site](.github/workflows/deploy-docs.yml) workflow publishes it to
+  the `gh-pages` branch on every push to `main`. To deploy by hand:
+  `pnpm deploy:pages`.
+- **Examples gallery → jbrowse.org/storybook/msa** is deployed separately and
+  **must be run locally** (it needs AWS credentials): `pnpm deploy:storybook`.
 
 ## Releasing
 

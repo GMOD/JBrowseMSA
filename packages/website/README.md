@@ -31,7 +31,17 @@ doc, `import { Content } from '../../../../<path>.md'` and render `<Content />`.
 
 ## Deployment
 
-Intended for **gmod.org/JBrowseMSA** (hence `base: '/JBrowseMSA'` in
-`astro.config.mjs`). The live demo **app** (`packages/app`) and the interactive
-**examples gallery** (`packages/examples`, at jbrowse.org/storybook/msa) are
-linked from the portal and deploy separately. Hosting/CI is not yet wired up.
+Deployed to **gmod.org/JBrowseMSA** (hence `base: '/JBrowseMSA'` in
+`astro.config.mjs`), with the demo **app** bundled in at
+**gmod.org/JBrowseMSA/demo**.
+
+From the repo root, `pnpm build:pages` builds this site plus the app into
+`pages-dist/` (docs at the root, app under `/demo`, with a `.nojekyll` so
+Astro's `_astro/` assets survive). The
+[Deploy docs site](../../.github/workflows/deploy-docs.yml) workflow publishes
+`pages-dist/` to the `gh-pages` branch on every push to `main`; `pnpm
+deploy:pages` does the same by hand.
+
+The interactive **examples gallery** (`packages/examples`,
+jbrowse.org/storybook/msa) deploys separately and must be run locally
+(`pnpm deploy:storybook`, needs AWS credentials).

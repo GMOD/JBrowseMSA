@@ -98,6 +98,9 @@ importers:
       flatbush:
         specifier: ^4.5.1
         version: 4.5.1
+      gh-pages:
+        specifier: ^6.3.0
+        version: 6.3.0
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1

@@ -1,0 +1,45 @@
+name: Deploy docs site
+
+# Builds the docs website (gmod.org/JBrowseMSA) with the demo app at /demo and
+# publishes to the gh-pages branch. The interactive examples gallery
+# (jbrowse.org/storybook/msa) is deployed separately/locally (needs AWS creds).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# allow one concurrent deploy; let an in-progress run finish
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build pages bundle (docs + /demo app)
+        run: pnpm build:pages
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages-dist
