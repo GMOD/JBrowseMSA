@@ -13,11 +13,6 @@ const nav = [
   { href: `${base}/embedding`, label: 'Embedding' },
   { href: `${base}/examples`, label: 'Examples' },
   { href: `${base}/r-package`, label: 'R package' },
-  {
-    href: 'https://github.com/GMOD/JBrowseMSA',
-    label: 'GitHub',
-    external: true,
-  },
 ]
 ---
 
@@ -33,18 +28,15 @@ const nav = [
     <header class="site-header">
       <a class="brand" href={base}>JBrowseMSA</a>
       <nav>
-        {
-          nav.map(item => (
-            <a
-              href={item.href}
-              target={item.external ? '_blank' : undefined}
-              rel={item.external ? 'noopener noreferrer' : undefined}
-            >
-              {item.label}
-            </a>
-          ))
-        }
+        {nav.map(item => <a href={item.href}>{item.label}</a>)}
       </nav>
+      <a
+        class="github-icon"
+        href="https://github.com/GMOD/JBrowseMSA"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="GitHub"
+      ></a>
     </header>
     <main>
       <slot />

@@ -271,6 +271,7 @@ function SvgWrapper({
       xmlnsXlink="http://www.w3.org/1999/xlink"
       viewBox={`0 0 ${width} ${height}`}
     >
+      <rect width="100%" height="100%" fill="white" />
       {children}
     </svg>
   )
