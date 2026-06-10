@@ -1,4 +1,3 @@
-import { unified } from '@astrojs/markdown-remark'
 import react from '@astrojs/react'
 import { defineConfig } from 'astro/config'
 
@@ -34,7 +33,7 @@ export default defineConfig({
   trailingSlash: 'ignore',
   integrations: [react()],
   markdown: {
-    processor: unified({ rehypePlugins: [rewriteMarkdownImages] }),
+    rehypePlugins: [rewriteMarkdownImages],
   },
   vite: {
     server: {
