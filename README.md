@@ -1,40 +1,70 @@
 # react-msaview (JBrowseMSA)
 
-A multiple sequence alignment viewer, also known as JBrowseMSA.
+An interactive multiple sequence alignment viewer, also known as JBrowseMSA. It
+renders a phylogenetic tree alongside a protein or DNA alignment on HTML5
+canvas, with protein domain annotations, many color schemes, and SVG export.
+Usable from React, plain HTML (UMD bundle), and R.
 
-![MSA Viewer screenshot](docs/media/image1.png)
+![Protein alignment with tree](docs/media/example-protein.svg)
 
-## Quick start
+## Features
+
+- Tree and alignment rendered together, tiled for large inputs
+- Parses FASTA, Stockholm, Clustal, A3M, EMF alignments and Newick/EMF trees
+- Protein domain overlays from InterProScan GFF (see the [CLI](packages/cli/))
+- Protein and nucleotide color schemes, including per-column dynamic schemes
+- React component, UMD-in-HTML, and R htmlwidget entry points
+
+## Quick start (React)
+
+```sh
+npm install react-msaview @jbrowse/core @mui/material @emotion/react @emotion/styled react react-dom
+```
 
 ```tsx
 import { MSAViewer } from 'react-msaview'
-;<MSAViewer
-  msa=">human\nMKAA\n>mouse\nMKAG"
-  tree="(human:0.1,mouse:0.2);"
-  colorScheme="clustal"
-/>
+
+export default function App() {
+  // backticks (template literal) so the \n become real newlines
+  return (
+    <MSAViewer
+      msa={`>human\nMKAANSE\n>mouse\nMKA-NSE`}
+      tree="(human:0.1,mouse:0.2);"
+      colorScheme="clustal"
+    />
+  )
+}
 ```
 
-No model creation, no width management, no theme provider needed.
+No model creation, width management, or theme provider needed. For the
+model-based API, UMD bundle, and full prop reference see [USAGE.md](USAGE.md).
 
-For R users:
+## Quick start (R)
 
 ```r
 library(msaviewr)
-msaview(msa = "alignment.stock", color_scheme = "clustal")
+msaview(msa = "alignment.fasta", tree = "tree.nwk", color_scheme = "clustal")
 ```
 
-## Docs
+![Hemoglobin alignment with tree](docs/media/r-quickstart.svg)
 
-- [User guide](docs/user_guide.md)
-- [Usage / API](USAGE.md) - React component, UMD bundle, and R package
-- [R package README](packages/r-msaview/README.md) - ggtree, Biostrings, Shiny
+See the [R package README](packages/r-msaview/README.md) for ape, Biostrings,
+ggtree, treeio, and Shiny usage.
 
-## Demo
+## Protein domains
+
+Domain annotations (e.g. the GFF emitted by the [CLI](packages/cli/)) overlay as
+labelled boxes on the alignment:
+
+![InterProScan domains](docs/media/example-domains.svg)
+
+## Demo & docs
 
 - Live examples: https://jbrowse.org/storybook/msa
-- See [ProteinBrowser](https://github.com/GMOD/proteinbrowser) for a full suite
-  of protein analysis tools.
+- [User guide](docs/user_guide.md) · [Usage / API](USAGE.md) ·
+  [R package](packages/r-msaview/README.md)
+- [ProteinBrowser](https://github.com/GMOD/proteinbrowser) — a full suite of
+  protein analysis tools built on this viewer
 
 ## Packages
 
@@ -46,7 +76,6 @@ msaview(msa = "alignment.stock", color_scheme = "clustal")
 | [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                    |
 | [packages/r-msaview](packages/r-msaview/)     | R htmlwidget (ggtree/Biostrings/treeio interop)            |
 | [packages/svgcanvas](packages/svgcanvas/)     | SVG canvas rendering (ESM fork of svgcanvas)               |
-| [packages/r-msaview](packages/r-msaview/)     | R htmlwidget (ape, ggtree, Biostrings, Shiny)              |
 
 ## Development
 

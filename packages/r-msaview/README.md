@@ -33,6 +33,8 @@ msaview(
 )
 ```
 
+![Hemoglobin alignment with tree](../../docs/media/r-quickstart.svg)
+
 ## Examples
 
 ### Named character vector
@@ -65,6 +67,8 @@ seqs <- setNames(
 )
 msaview(msa = seqs, tree = tree, color_scheme = "nucleotide")
 ```
+
+![Nucleotide alignment with tree](../../docs/media/r-nucleotide.svg)
 
 ### Cladogram (no branch lengths)
 

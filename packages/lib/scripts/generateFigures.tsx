@@ -63,7 +63,10 @@ class Pt {
     public y = 0,
   ) {}
   matrixTransform(m: Mat) {
-    return new Pt(m.a * this.x + m.c * this.y + m.e, m.b * this.x + m.d * this.y + m.f)
+    return new Pt(
+      m.a * this.x + m.c * this.y + m.e,
+      m.b * this.x + m.d * this.y + m.f,
+    )
   }
 }
 
@@ -90,11 +93,45 @@ function setup() {
   } as typeof HTMLCanvasElement.prototype.getContext
 }
 
+// Inline data mirroring the R package README examples, so the R figures are
+// authentic output of the same viewer the htmlwidget embeds.
+const hemoglobinMSA = `>human
+MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSH
+>mouse
+MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSH
+>goat
+MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHS
+`
+const hemoglobinTree = '((human:0.1,mouse:0.2):0.05,goat:0.3);'
+
+const dnaMSA = `>seqA
+ATGCGATCGATCGATCGATCGATCG
+>seqB
+ATGCGATCGATGCGATCGATCGATCG
+>seqC
+ATGCGTTCGATCGATCAATCGATCG
+>seqD
+ATGCGATCGATCGATCGATCTATCG
+`
+const dnaTree = '((seqA:0.1,seqB:0.15):0.1,(seqC:0.2,seqD:0.05):0.1);'
+
 const figures = [
   {
     name: 'example-protein',
     colorScheme: 'maeditor',
     data: { msa: proteinMSA, tree: proteinTree },
+  },
+  {
+    name: 'r-quickstart',
+    colorScheme: 'clustal',
+    treeAreaWidth: 160,
+    data: { msa: hemoglobinMSA, tree: hemoglobinTree },
+  },
+  {
+    name: 'r-nucleotide',
+    colorScheme: 'nucleotide',
+    treeAreaWidth: 160,
+    data: { msa: dnaMSA, tree: dnaTree },
   },
   {
     name: 'example-nucleotide',

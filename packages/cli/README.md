@@ -28,17 +28,17 @@ react-msaview-cli interproscan <input-msa> [options]
 
 #### Options
 
-| Option                       | Description                                             | Default                                  |
-| ---------------------------- | ------------------------------------------------------- | ---------------------------------------- |
-| `-o, --output <file>`        | Output GFF file path                                    | `domains.gff`                            |
-| `--local`                    | Use a local InterProScan installation instead of EBI    | `false`                                  |
-| `--docker`                   | Run InterProScan via the `interpro/interproscan` image  | `false`                                  |
-| `--singularity`              | Run InterProScan via a Singularity/Apptainer container  | `false`                                  |
-| `--singularity-image <img>`  | Singularity image to use                                | `docker://interpro/interproscan:latest`  |
-| `--interproscan-path <path>` | Path to local interproscan.sh                           | `interproscan.sh`                        |
-| `--programs <list>`          | Comma-separated list of InterProScan programs           | `PfamA,CDD`                              |
-| `--email <email>`            | Email for EBI API (used only for EBI API runs)          | `user@example.com`                       |
-| `-h, --help`                 | Show help message                                       |                                          |
+| Option                       | Description                                            | Default                                 |
+| ---------------------------- | ------------------------------------------------------ | --------------------------------------- |
+| `-o, --output <file>`        | Output GFF file path                                   | `domains.gff`                           |
+| `--local`                    | Use a local InterProScan installation instead of EBI   | `false`                                 |
+| `--docker`                   | Run InterProScan via the `interpro/interproscan` image | `false`                                 |
+| `--singularity`              | Run InterProScan via a Singularity/Apptainer container | `false`                                 |
+| `--singularity-image <img>`  | Singularity image to use                               | `docker://interpro/interproscan:latest` |
+| `--interproscan-path <path>` | Path to local interproscan.sh                          | `interproscan.sh`                       |
+| `--programs <list>`          | Comma-separated list of InterProScan programs          | `PfamA,CDD`                             |
+| `--email <email>`            | Email for EBI API (used only for EBI API runs)         | `user@example.com`                      |
+| `-h, --help`                 | Show help message                                      |                                         |
 
 By default (no backend flag) the CLI submits sequences to the EBI InterProScan
 REST API one at a time. `--local`, `--docker`, and `--singularity` instead run
@@ -230,8 +230,8 @@ Make sure InterProScan is installed and specify the full path:
 
 The EBI InterProScan API has usage limits:
 
-- Sequences are submitted one at a time, sequentially, to avoid overwhelming
-  the server
+- Sequences are submitted one at a time, sequentially, to avoid overwhelming the
+  server
 - For large datasets (>100 sequences), use `--local`, `--docker`, or
   `--singularity` instead
 
