@@ -6,3 +6,6 @@ allowBuilds:
   unrs-resolver: true
 overrides:
   fflate: 0.8.2
+  # Astro 6 targets Vite 7; pin it only within Astro's subtree so the rest of
+  # the monorepo (lib/app/examples) stays on Vite 8
+  astro>vite: ^7
