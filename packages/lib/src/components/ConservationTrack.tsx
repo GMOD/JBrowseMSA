@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react'
 
-import { ResizeHandle } from '@jbrowse/core/ui'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
+import { ConservationTrackResizeHandle } from './ResizeHandles.tsx'
 import { drawConservationBars } from './tracks/renderTracksSvg.ts'
 
 import type { MsaViewModel } from '../model.ts'
@@ -87,23 +87,7 @@ const ConservationTrack = observer(function ({
           trackHeight={trackHeight}
         />
       ))}
-      <ResizeHandle
-        onDrag={delta => {
-          model.setConservationTrackHeight(
-            Math.max(10, model.conservationTrackHeight + delta),
-          )
-          return delta
-        }}
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          height: 4,
-          width: '100%',
-          zIndex: 1,
-          background: 'rgba(200,200,200,0.5)',
-        }}
-      />
+      <ConservationTrackResizeHandle model={model} />
     </div>
   )
 })

@@ -6,7 +6,7 @@ import { proteinMSA, proteinTree } from './exampleData'
 // + ResizeObserver, so it must render in the browser (client:only="react").
 export default function Viewer() {
   return (
-    <div style={{ border: '1px solid #ccc', borderRadius: 6 }}>
+    <div style={{ border: '1px solid var(--border)', borderRadius: 6 }}>
       <MSAViewer
         msa={proteinMSA}
         tree={proteinTree}

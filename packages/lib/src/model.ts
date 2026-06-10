@@ -766,7 +766,7 @@ function stateModelFactory() {
        * widget width minus the tree area gives the space for the MSA
        */
       get msaAreaWidth() {
-        return self.width - self.treeAreaWidth
+        return self.width - self.treeAreaWidth - self.resizeHandleWidth
       },
 
       /**

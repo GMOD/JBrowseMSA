@@ -3,6 +3,7 @@
   --muted: #555;
   --accent: #42777f;
   --border: #e2e2e2;
+  --bg: #fff;
   --bg-soft: #f7f8f8;
   --maxw: 960px;
 }
@@ -35,7 +36,7 @@ body {
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background: #fff;
+  background: var(--bg);
   z-index: 10;
 }
 
@@ -80,7 +81,7 @@ main {
 }
 
 .embed {
-  margin: 32px 0;
+  margin: 32px -24px;
 }
 
 .cards {
@@ -116,10 +117,6 @@ main {
   margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
-}
-
-.prose {
-  max-width: 100%;
 }
 
 .prose img {
