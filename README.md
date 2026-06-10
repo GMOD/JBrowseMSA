@@ -1,9 +1,6 @@
 # react-msaview (JBrowseMSA)
 
-An interactive multiple sequence alignment viewer, also known as JBrowseMSA. It
-renders a phylogenetic tree alongside a protein or DNA alignment on HTML5
-canvas, with protein domain annotations, many color schemes, and SVG export.
-Usable from React, plain HTML (UMD bundle), and R.
+An interactive multiple sequence alignment viewer.
 
 ![Protein alignment with tree](docs/media/example-protein.svg)
 
