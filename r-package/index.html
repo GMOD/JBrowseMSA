@@ -15,10 +15,18 @@ in RStudio, R Markdown, Quarto, and Shiny.</p>
 <h2 id="quick-start">Quick start</h2>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="r"><code><span class="line"><span style="color:#F97583">library</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">msaviewr</span><span style="color:#E1E4E8">)</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#B392F0">msaview</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#FFAB70">widget</span><span style="color:#F97583"> &#x3C;-</span><span style="color:#B392F0"> msaview</span><span style="color:#E1E4E8">(</span></span>
 <span class="line"><span style="color:#FFAB70">  msa</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> ">human</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSH</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">>mouse</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">MVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSH</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">>goat</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">MSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHS"</span><span style="color:#F97583">,</span></span>
 <span class="line"><span style="color:#FFAB70">  tree</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "((human:0.1,mouse:0.2):0.05,goat:0.3);"</span></span>
-<span class="line"><span style="color:#E1E4E8">)</span></span></code></pre>
+<span class="line"><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#FFAB70">widget</span></span>
+<span class="line"><span style="color:#6A737D"># htmlwidgets::saveWidget(widget, "alignment.html")                     # self-contained HTML</span></span>
+<span class="line"><span style="color:#6A737D"># webshot2::webshot("alignment.html", "alignment.png")                  # PNG (requires webshot2)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># SVG via the CLI (requires react-msaview-cli installed via npm/npx):</span></span>
+<span class="line"><span style="color:#6A737D"># writeLines(widget$x$config$data$msa, "alignment.fasta")</span></span>
+<span class="line"><span style="color:#6A737D"># system2("react-msaview-cli", c("export-svg", "--msa", "alignment.fasta", "--output", "alignment.svg"))</span></span>
+<span class="line"><span style="color:#6A737D"># Or with tree: system2("react-msaview-cli", c("export-svg", "--msa", "alignment.fasta", "--tree", "tree.nwk", "--output", "alignment.svg"))</span></span></code></pre>
 <p><img src="/JBrowseMSA/media/r-quickstart.svg" alt="Hemoglobin alignment with tree"></p>
 <h2 id="examples">Examples</h2>
 <h3 id="named-character-vector">Named character vector</h3>
