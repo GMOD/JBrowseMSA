@@ -9,11 +9,25 @@ Usable from React, plain HTML (UMD bundle), and R.
 
 ## Features
 
-- Tree and alignment rendered together, tiled for large inputs
-- Parses FASTA, Stockholm, Clustal, A3M, EMF alignments and Newick/EMF trees
-- Protein domain overlays from InterProScan GFF (see the [CLI](packages/cli/))
+- Tree and alignment rendered together, tiled to stay fast on large inputs
+- Parses FASTA, Stockholm, Clustal, A3M, and EMF alignments and Newick/EMF trees
+- Protein domain overlays from InterProScan GFF (generate them with the
+  [CLI](packages/cli/))
 - Protein and nucleotide color schemes, including per-column dynamic schemes
 - React component, UMD-in-HTML, and R htmlwidget entry points
+- Shareable view state and SVG export
+
+## Documentation
+
+Jump to what you need:
+
+| You want to…                                             | Start here                                                                                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Use the viewer** — load data, explore, export an image | [User guide](docs/user_guide.md) · [live app](https://gmod.org/JBrowseMSA)                                                                             |
+| **Embed the React component** in your own app            | [Usage & embedding guide](USAGE.md) · [live code examples](https://jbrowse.org/storybook/msa) · [model API reference](packages/lib/apidocs/MsaView.md) |
+| **Use it from R** (ape, Biostrings, ggtree, Shiny)       | [R package README](packages/r-msaview/README.md)                                                                                                       |
+| **Annotate protein domains** from an alignment           | [CLI README](packages/cli/) — batch InterProScan → GFF                                                                                                 |
+| **Contribute / hack on the code**                        | [Development](#development)                                                                                                                            |
 
 ## Quick start (React)
 
@@ -37,7 +51,9 @@ export default function App() {
 ```
 
 No model creation, width management, or theme provider needed. For the
-model-based API, UMD bundle, and full prop reference see [USAGE.md](USAGE.md).
+model-based API, UMD bundle, and full prop reference see [USAGE.md](USAGE.md),
+and browse runnable snippets in the
+[live examples](https://jbrowse.org/storybook/msa).
 
 ## Quick start (R)
 
@@ -58,23 +74,16 @@ labelled boxes on the alignment:
 
 ![InterProScan domains](docs/media/example-domains.svg)
 
-## Demo & docs
-
-- Live examples: https://jbrowse.org/storybook/msa
-- [User guide](docs/user_guide.md) · [Usage / API](USAGE.md) ·
-  [R package](packages/r-msaview/README.md)
-- [ProteinBrowser](https://github.com/GMOD/proteinbrowser) — a full suite of
-  protein analysis tools built on this viewer
-
 ## Packages
 
 | Package                                       | Description                                                |
 | --------------------------------------------- | ---------------------------------------------------------- |
 | [packages/lib](packages/lib/)                 | Main react-msaview React component                         |
 | [packages/app](packages/app/)                 | Demo application (deployed at https://gmod.org/JBrowseMSA) |
-| [packages/cli](packages/cli/)                 | Command-line tools                                         |
+| [packages/examples](packages/examples/)       | Live usage examples (deployed at the Storybook link above) |
+| [packages/cli](packages/cli/)                 | Command-line tools (batch InterProScan)                    |
 | [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                    |
-| [packages/r-msaview](packages/r-msaview/)     | R htmlwidget (ggtree/Biostrings/treeio interop)            |
+| [packages/r-msaview](packages/r-msaview/)     | R htmlwidget (ape/ggtree/Biostrings/treeio interop)        |
 | [packages/svgcanvas](packages/svgcanvas/)     | SVG canvas rendering (ESM fork of svgcanvas)               |
 
 ## Development
@@ -85,52 +94,30 @@ cd react-msaview
 pnpm install
 ```
 
-### Run the demo app
+| Command                              | What it does                                                         |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| `pnpm dev`                           | Run the demo app with hot reload (edits in `packages/lib/src/`)      |
+| `pnpm --filter examples dev`         | Run the live examples gallery                                        |
+| `pnpm build`                         | Build all packages                                                   |
+| `pnpm test`                          | Run the test suite                                                   |
+| `pnpm figures`                       | Regenerate the README figures (headless, see `packages/lib/scripts`) |
+| `pnpm lint` / `format` / `typecheck` | Lint, format with Prettier, typecheck all packages                   |
 
-```bash
-pnpm dev
-```
+Architecture notes live in [CLAUDE.md](CLAUDE.md); the core state model is
+`packages/lib/src/model.ts` (MobX-state-tree), and `observer`-wrapped components
+re-render when observed model properties change.
 
-This starts the app with hot module reloading. When this is active, source code
-changes to `packages/lib/src/` will automatically reloaded by the dev server
-app.
+## Releasing
 
-### Build all packages
+Run `scripts/release.js` to create and push a new git tag. We use npm trusted
+publishing, so pushing a tag to GitHub launches the npm release automatically.
 
-```bash
-pnpm build
-```
+## Related projects
 
-### Run tests
+- [jbrowse-plugin-msaview](https://github.com/GMOD/jbrowse-plugin-msaview) — a
+  JBrowse 2 plugin for viewing MSAs, supported by this repo
+- [ProteinBrowser](https://github.com/GMOD/proteinbrowser) — a full suite of
+  protein analysis tools built on this viewer
 
-```bash
-pnpm test
-```
-
-### Other commands
-
-```bash
-pnpm lint        # Run ESLint
-pnpm format      # Format with Prettier
-pnpm typecheck   # Typecheck all packages
-pnpm clean       # Clean all dist folders
-```
-
-## Publishing a new release
-
-To cut a new release run
-
-`scripts/release.js`
-
-This makes a new git tag and pushes to github.
-
-We use npm trusted publishing so just having a new tag published to github
-launches the npm release process
-
-## Notes
-
-This repo also supports https://github.com/GMOD/jbrowse-plugin-msaview which is
-a JBrowse 2 plugin for viewing MSAs.
-
-This repo also builds on abrowse (https://github.com/ihh/abrowse) and
-phylo-react (https://www.npmjs.com/package/phylo-react).
+Builds on [abrowse](https://github.com/ihh/abrowse) and
+[phylo-react](https://www.npmjs.com/package/phylo-react).
