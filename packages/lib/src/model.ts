@@ -79,7 +79,7 @@ import {
   visibleColToSeqPosForRow,
 } from './rowCoordinateCalculations.ts'
 import { seqPosToGlobalCol } from './seqPosToGlobalCol.ts'
-import { len, skipBlanks } from './util.ts'
+import { computeRowInsertions, len, skipBlanks, transform } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
@@ -92,6 +92,13 @@ import type {
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
+
+function parseTreeText(text: string) {
+  if (text.startsWith('BioTreeContainer')) {
+    return flatToTree(parseAsn1(text))
+  }
+  return parseNewick(text.startsWith('SEQ') ? parseEmfTree(text).tree : text)
+}
 
 /**
  * #stateModel MsaView
@@ -670,15 +677,8 @@ function stateModelFactory() {
        */
       get tree(): NodeWithIds {
         const text = self.data.tree
-
         return text
-          ? generateNodeIds(
-              text.startsWith('BioTreeContainer')
-                ? flatToTree(parseAsn1(text))
-                : parseNewick(
-                    text.startsWith('SEQ') ? parseEmfTree(text).tree : text,
-                  ),
-            )
+          ? generateNodeIds(parseTreeText(text))
           : this.MSA?.getTree() ?? {
               noTree: true,
               children: [],
@@ -747,15 +747,14 @@ function stateModelFactory() {
 
         for (const collapsedId of self.collapsed) {
           const node = find(hier, n => n.data.id === collapsedId)
-          if (!node) {
-            continue
-          }
-          if (node.children) {
-            collapse(node)
-          } else if (node.parent?.children) {
-            node.parent.children = node.parent.children.filter(
-              c => c.data.id !== collapsedId,
-            )
+          if (node) {
+            if (node.children) {
+              collapse(node)
+            } else if (node.parent?.children) {
+              node.parent.children = node.parent.children.filter(
+                c => c.data.id !== collapsedId,
+              )
+            }
           }
         }
 
@@ -822,49 +821,13 @@ function stateModelFactory() {
        * Returns a map of row name to array of insertions with display position and letters
        */
       get insertionPositions() {
-        const { hideGapsEffective } = self
         const { blanks, rows } = this
-        const blanksLen = blanks.length
-        if (blanksLen === 0 || !hideGapsEffective) {
+        if (blanks.length === 0 || !self.hideGapsEffective) {
           return new Map<string, { pos: number; letters: string }[]>()
         }
         const result = new Map<string, { pos: number; letters: string }[]>()
         for (const [name, seq] of rows) {
-          const insertions: { pos: number; letters: string }[] = []
-          let displayPos = 0
-          let blankIdx = 0
-          let currentInsertPos = -1
-          let letterChars: string[] = []
-          const seqLen = seq.length
-          for (let i = 0; i < seqLen; i++) {
-            if (blankIdx < blanksLen && blanks[blankIdx] === i) {
-              // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
-              const code = seq.charCodeAt(i)
-              if (!((code - 45) >>> 0 <= 1)) {
-                if (currentInsertPos === displayPos) {
-                  letterChars.push(seq[i]!)
-                } else {
-                  if (letterChars.length > 0) {
-                    insertions.push({
-                      pos: currentInsertPos,
-                      letters: letterChars.join(''),
-                    })
-                  }
-                  currentInsertPos = displayPos
-                  letterChars = [seq[i]!]
-                }
-              }
-              blankIdx++
-            } else {
-              displayPos++
-            }
-          }
-          if (letterChars.length > 0) {
-            insertions.push({
-              pos: currentInsertPos,
-              letters: letterChars.join(''),
-            })
-          }
+          const insertions = computeRowInsertions(blanks, seq)
           if (insertions.length > 0) {
             result.set(name, insertions)
           }
@@ -907,14 +870,9 @@ function stateModelFactory() {
        */
       get columns2d() {
         const { hideGapsEffective } = self
-        return this.rows
-          .map(r => r[1])
-          .map(str =>
-            (hideGapsEffective
-              ? skipBlanks(this.blanks, str)
-              : str
-            ).toUpperCase(),
-          )
+        return this.rows.map(([, str]) =>
+          (hideGapsEffective ? skipBlanks(this.blanks, str) : str).toUpperCase(),
+        )
       },
       /**
        * #getter
@@ -959,22 +917,13 @@ function stateModelFactory() {
             }
           }
         }
-        if (letters.size === 0) {
-          return 'amino'
-        }
         // isDna already excludes U (not in the DNA set) and isRna excludes T,
         // so the set membership alone disambiguates the two
         const dna = new Set(['A', 'C', 'G', 'T', 'N'])
         const rna = new Set(['A', 'C', 'G', 'U', 'N'])
-        const isDna = [...letters].every(l => dna.has(l))
-        const isRna = [...letters].every(l => rna.has(l))
-        if (isDna) {
-          return 'dna'
-        }
-        if (isRna) {
-          return 'rna'
-        }
-        return 'amino'
+        const isDna = letters.size > 0 && [...letters].every(l => dna.has(l))
+        const isRna = letters.size > 0 && [...letters].every(l => rna.has(l))
+        return isDna ? 'dna' : isRna ? 'rna' : 'amino'
       },
 
       /**
@@ -988,8 +937,7 @@ function stateModelFactory() {
           const total = colStatsSums[i]!
           let maxCount = 0
           let letter = ''
-          for (const key in stats) {
-            const val = stats[key]!
+          for (const [key, val] of Object.entries(stats)) {
             if (val > maxCount && key !== '-' && key !== '.') {
               maxCount = val
               letter = key
@@ -1043,9 +991,9 @@ function stateModelFactory() {
           }
 
           let entropy = 0
-          for (const letter of Object.keys(stats)) {
+          for (const [letter, count] of Object.entries(stats)) {
             if (letter !== '-' && letter !== '.') {
-              const freq = stats[letter]! / nonGapTotal
+              const freq = count / nonGapTotal
               entropy -= freq * Math.log2(freq)
             }
           }
@@ -1392,16 +1340,15 @@ function stateModelFactory() {
        */
       get labelWidthMap() {
         const { rowHeight, leaves, treeMetadata, fontSize } = self
-        if (rowHeight <= 5) {
-          return new Map<string, number>()
-        }
-        return new Map(
-          leaves.map(node => {
-            const { name } = node.data
-            const displayName = treeMetadata[name]?.genome || name
-            return [name, measureTextCanvas(displayName, fontSize)] as const
-          }),
-        )
+        return rowHeight <= 5
+          ? new Map<string, number>()
+          : new Map(
+              leaves.map(node => {
+                const { name } = node.data
+                const displayName = treeMetadata[name]?.genome ?? name
+                return [name, measureTextCanvas(displayName, fontSize)] as const
+              }),
+            )
       },
 
       get labelsWidth() {
@@ -1590,26 +1537,25 @@ function stateModelFactory() {
         )
       },
       get tidyInterProAnnotations() {
-        const { interProAnnotations } = self
-        if (!interProAnnotations) {
-          return []
-        }
-        return Object.entries(interProAnnotations)
-          .flatMap(([id, val]) =>
-            val.matches.flatMap(({ signature, locations }) =>
-              signature.entry
-                ? locations.map(({ start, end }) => ({
-                    id,
-                    name: signature.entry!.name,
-                    accession: signature.entry!.accession,
-                    description: signature.entry!.description,
-                    start,
-                    end,
-                  }))
-                : [],
-            ),
-          )
-          .toSorted((a, b) => len(b) - len(a))
+        return self.interProAnnotations
+          ? Object.entries(self.interProAnnotations)
+              .flatMap(([id, val]) =>
+                val.matches.flatMap(({ signature, locations }) => {
+                  const { entry } = signature
+                  return entry
+                    ? locations.map(({ start, end }) => ({
+                        id,
+                        name: entry.name,
+                        accession: entry.accession,
+                        description: entry.description,
+                        start,
+                        end,
+                      }))
+                    : []
+                }),
+              )
+              .toSorted((a, b) => len(b) - len(a))
+          : []
       },
       get tidyFilteredInterProAnnotations() {
         return this.tidyInterProAnnotations.filter(r =>
@@ -1639,12 +1585,7 @@ function stateModelFactory() {
         return createPaletteMap([...self.tidyInterProAnnotationTypes.keys()])
       },
       get strokePalette() {
-        return Object.fromEntries(
-          Object.entries(this.fillPalette).map(([key, val]) => [
-            key,
-            colord(val).darken(0.1).toHex(),
-          ]),
-        )
+        return transform(this.fillPalette, ([key, val]) => [key, colord(val).darken(0.1).toHex()])
       },
 
       /**

@@ -64,6 +64,38 @@ export function skipBlanks(blanks: number[], str: string) {
   return chunks.join('')
 }
 
+export function computeRowInsertions(blanks: number[], seq: string) {
+  const insertions: { pos: number; letters: string }[] = []
+  const blanksLen = blanks.length
+  let displayPos = 0
+  let blankIdx = 0
+  let currentInsertPos = -1
+  let letterChars: string[] = []
+  for (let i = 0; i < seq.length; i++) {
+    if (blankIdx < blanksLen && blanks[blankIdx] === i) {
+      // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
+      if (!((seq.charCodeAt(i) - 45) >>> 0 <= 1)) {
+        if (currentInsertPos === displayPos) {
+          letterChars.push(seq[i]!)
+        } else {
+          if (letterChars.length > 0) {
+            insertions.push({ pos: currentInsertPos, letters: letterChars.join('') })
+          }
+          currentInsertPos = displayPos
+          letterChars = [seq[i]!]
+        }
+      }
+      blankIdx++
+    } else {
+      displayPos++
+    }
+  }
+  if (letterChars.length > 0) {
+    insertions.push({ pos: currentInsertPos, letters: letterChars.join('') })
+  }
+  return insertions
+}
+
 export function len(a: { end: number; start: number }) {
   return a.end - a.start
 }
