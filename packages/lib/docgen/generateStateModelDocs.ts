@@ -77,7 +77,7 @@ function generateStateModelDocs(files: string[]) {
       actions: [],
       filename: fn.replace(cwd, ''),
     }
-    const file = byFile[fn]!
+    const file = byFile[fn]
     const member = buildMember(obj)
 
     if (obj.type === 'stateModel') {

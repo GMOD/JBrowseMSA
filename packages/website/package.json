@@ -1,0 +1,26 @@
+{
+  "name": "website",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "scripts": {
+    "sync-media": "node scripts/sync-media.mjs",
+    "dev": "pnpm sync-media && astro dev",
+    "build": "pnpm sync-media && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/react": "^5.0.7",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@jbrowse/core": "^4.3.0",
+    "@mui/icons-material": "^7.3.11",
+    "@mui/material": "^7.3.11",
+    "astro": "^6.4.4",
+    "mobx": "^6.15.4",
+    "mobx-react": "^9.2.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-msaview": "workspace:*"
+  }
+}

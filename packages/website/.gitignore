@@ -1,0 +1,5 @@
+dist/
+.astro/
+node_modules/
+# synced from ../../docs/media by scripts/sync-media.mjs
+public/media/

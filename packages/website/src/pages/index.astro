@@ -1,0 +1,72 @@
+---
+import Viewer from '../components/Viewer.tsx'
+import Base from '../layouts/Base.astro'
+
+const base = import.meta.env.BASE_URL
+const cards = [
+  {
+    title: 'User guide',
+    body: 'Features, file formats, and a tour of the app.',
+    href: `${base}/guide`,
+  },
+  {
+    title: 'Embed in React',
+    body: 'Add the viewer to your app: props, model API, UMD bundle.',
+    href: `${base}/embedding`,
+  },
+  {
+    title: 'Interactive examples',
+    body: 'A live gallery of usage patterns with source.',
+    href: 'https://jbrowse.org/storybook/msa',
+  },
+  {
+    title: 'Live demo app',
+    body: 'Open your own alignment, tree, and domain annotations.',
+    href: 'https://gmod.org/JBrowseMSA',
+  },
+  {
+    title: 'R package (msaviewr)',
+    body: 'ape, Biostrings, ggtree, treeio, and Shiny interop.',
+    href: 'https://github.com/GMOD/JBrowseMSA/tree/main/packages/r-msaview',
+  },
+  {
+    title: 'CLI',
+    body: 'Batch InterProScan → GFF domain annotations.',
+    href: 'https://github.com/GMOD/JBrowseMSA/tree/main/packages/cli',
+  },
+]
+---
+
+<Base
+  title="JBrowseMSA — multiple sequence alignment viewer"
+  description="Interactive multiple sequence alignment viewer with phylogenetic tree, protein domains, and many color schemes. React, HTML, and R."
+>
+  <section class="hero">
+    <h1>JBrowseMSA</h1>
+    <p class="tagline">
+      An interactive multiple sequence alignment viewer — phylogenetic tree
+      alongside a protein or DNA alignment, with domain annotations, dynamic
+      color schemes, and SVG export. Use it in React, plain HTML, or R.
+    </p>
+  </section>
+
+  <section class="embed">
+    <h2>Try it</h2>
+    <p>A live viewer, running right here on the page:</p>
+    <Viewer client:only="react" />
+  </section>
+
+  <section>
+    <h2>Documentation</h2>
+    <div class="cards">
+      {
+        cards.map(card => (
+          <a class="card" href={card.href}>
+            <h3>{card.title}</h3>
+            <p>{card.body}</p>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</Base>

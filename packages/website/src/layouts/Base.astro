@@ -1,0 +1,59 @@
+---
+import '../styles/global.css'
+
+interface Props {
+  title: string
+  description?: string
+}
+const { title, description } = Astro.props
+const base = import.meta.env.BASE_URL
+const nav = [
+  { href: base, label: 'Home' },
+  { href: `${base}/guide`, label: 'User guide' },
+  { href: `${base}/embedding`, label: 'Embedding' },
+  { href: 'https://jbrowse.org/storybook/msa', label: 'Examples', external: true },
+  {
+    href: 'https://github.com/GMOD/JBrowseMSA',
+    label: 'GitHub',
+    external: true,
+  },
+]
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href={base}>JBrowseMSA</a>
+      <nav>
+        {
+          nav.map(item => (
+            <a
+              href={item.href}
+              target={item.external ? '_blank' : undefined}
+              rel={item.external ? 'noopener' : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <span>
+        react-msaview (JBrowseMSA) ·
+        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> ·
+        part of <a href="https://jbrowse.org">JBrowse</a>
+      </span>
+    </footer>
+  </body>
+</html>

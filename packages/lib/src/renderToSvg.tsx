@@ -22,7 +22,7 @@ export interface ExportSvgOptions {
   exportType: 'entire' | 'viewport'
 }
 export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
-  await when(() => !!model.dataInitialized)
+  await when(() => model.dataInitialized)
   const { width, height, scrollX, scrollY, totalTrackAreaHeight } = model
   const { exportType, theme, includeMinimap, includeTracks } = opts
   const trackHeight = includeTracks ? totalTrackAreaHeight : 0

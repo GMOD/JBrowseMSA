@@ -21,6 +21,7 @@ export default defineConfig(
       'packages/lib/webpack.config.mjs',
       'packages/lib/vite.config.ts',
       'packages/r-msaview',
+      'packages/website',
     ],
   },
   {
