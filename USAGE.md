@@ -133,8 +133,9 @@ aa <- readAAStringSet("proteins.fasta")
 msaview(msa = aa, color_scheme = "clustal")
 ```
 
-See [packages/r-msaview/README.md](packages/r-msaview/README.md) for full
-documentation.
+See
+[packages/r-msaview/README.md](https://github.com/GMOD/JBrowseMSA/tree/main/packages/r-msaview#readme)
+for full documentation.
 
 ## Color schemes
 

@@ -40,7 +40,9 @@ const HeaderInfoArea = observer(function ({ model }: { model: MsaViewModel }) {
       className={classes.container}
       title={mouseOverRowName}
     >
-      <span className={classes.nameFirst}>{mouseOverRowName.slice(0, mid)}</span>
+      <span className={classes.nameFirst}>
+        {mouseOverRowName.slice(0, mid)}
+      </span>
       <span className={classes.nameRest}>
         {mouseOverRowName.slice(mid)}:{pos} ({letter})
       </span>

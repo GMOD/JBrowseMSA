@@ -20,8 +20,8 @@ pnpm --filter website preview   # preview the build
   markdown (`docs/user_guide.md`, `USAGE.md`) directly, so the docs are not
   duplicated. A small rehype plugin in `astro.config.mjs` rewrites every
   markdown `<img>` to `/{base}/media/<file>`.
-- **`scripts/sync-media.mjs`** copies `docs/media/*` into `public/media/`
-  (run automatically by `dev`/`build`); `public/media` is git-ignored.
+- **`scripts/sync-media.mjs`** copies `docs/media/*` into `public/media/` (run
+  automatically by `dev`/`build`); `public/media` is git-ignored.
 
 ## Adding a page
 
@@ -39,8 +39,8 @@ From the repo root, `pnpm build:pages` builds this site plus the app into
 `pages-dist/` (docs at the root, app under `/demo`, with a `.nojekyll` so
 Astro's `_astro/` assets survive). The
 [Deploy docs site](../../.github/workflows/deploy-docs.yml) workflow publishes
-`pages-dist/` to the `gh-pages` branch on every push to `main`; `pnpm
-deploy:pages` does the same by hand.
+`pages-dist/` to the `gh-pages` branch on every push to `main`;
+`pnpm deploy:pages` does the same by hand.
 
 The interactive **examples gallery** (`packages/examples`,
 jbrowse.org/storybook/msa) deploys separately and must be run locally

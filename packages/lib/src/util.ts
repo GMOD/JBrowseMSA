@@ -79,7 +79,10 @@ export function computeRowInsertions(blanks: number[], seq: string) {
           letterChars.push(seq[i]!)
         } else {
           if (letterChars.length > 0) {
-            insertions.push({ pos: currentInsertPos, letters: letterChars.join('') })
+            insertions.push({
+              pos: currentInsertPos,
+              letters: letterChars.join(''),
+            })
           }
           currentInsertPos = displayPos
           letterChars = [seq[i]!]

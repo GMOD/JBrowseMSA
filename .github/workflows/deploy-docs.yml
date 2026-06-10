@@ -1,8 +1,7 @@
 name: Deploy docs site
 
 # Builds the docs website (gmod.org/JBrowseMSA) with the demo app at /demo and
-# publishes to the gh-pages branch. The interactive examples gallery
-# (jbrowse.org/storybook/msa) is deployed separately/locally (needs AWS creds).
+# publishes to the gh-pages branch.
 on:
   push:
     branches: [main]

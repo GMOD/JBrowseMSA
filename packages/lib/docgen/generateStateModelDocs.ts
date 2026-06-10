@@ -248,7 +248,10 @@ async function main() {
   }
   for (const model of withHeader) {
     const ancestors = collectAncestors(model, index)
-    fs.writeFileSync(`${dir}/${model.header.name}.md`, renderModel(model, ancestors))
+    fs.writeFileSync(
+      `${dir}/${model.header.name}.md`,
+      renderModel(model, ancestors),
+    )
   }
 }
 

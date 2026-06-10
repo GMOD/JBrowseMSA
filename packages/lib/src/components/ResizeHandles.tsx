@@ -19,8 +19,9 @@ export const VerticalResizeHandle = observer(function ({
   const { startDrag } = useDragScroll(
     'x',
     useCallback(
-      (delta: number, startWidth: number) =>
-        { model.setTreeAreaWidth(startWidth + delta) },
+      (delta: number, startWidth: number) => {
+        model.setTreeAreaWidth(startWidth + delta)
+      },
       [model],
     ),
   )
@@ -30,8 +31,12 @@ export const VerticalResizeHandle = observer(function ({
       onMouseDown={event => {
         startDrag(event, model.treeAreaWidth)
       }}
-      onMouseEnter={() => { setHovered(true) }}
-      onMouseLeave={() => { setHovered(false) }}
+      onMouseEnter={() => {
+        setHovered(true)
+      }}
+      onMouseLeave={() => {
+        setHovered(false)
+      }}
       style={{
         cursor: 'ew-resize',
         width: resizeHandleWidth,
@@ -52,8 +57,9 @@ export const HorizontalResizeHandle = observer(function ({
   const { startDrag } = useDragScroll(
     'y',
     useCallback(
-      (delta: number, startHeight: number) =>
-        { model.setHeight(startHeight + delta) },
+      (delta: number, startHeight: number) => {
+        model.setHeight(startHeight + delta)
+      },
       [model],
     ),
   )
@@ -63,8 +69,12 @@ export const HorizontalResizeHandle = observer(function ({
       onMouseDown={event => {
         startDrag(event, model.height)
       }}
-      onMouseEnter={() => { setHovered(true) }}
-      onMouseLeave={() => { setHovered(false) }}
+      onMouseEnter={() => {
+        setHovered(true)
+      }}
+      onMouseLeave={() => {
+        setHovered(false)
+      }}
       style={{
         cursor: 'ns-resize',
         width: '100%',
@@ -98,8 +108,12 @@ export const ConservationTrackResizeHandle = observer(function ({
       onMouseDown={event => {
         startDrag(event, model.conservationTrackHeight)
       }}
-      onMouseEnter={() => { setHovered(true) }}
-      onMouseLeave={() => { setHovered(false) }}
+      onMouseEnter={() => {
+        setHovered(true)
+      }}
+      onMouseLeave={() => {
+        setHovered(false)
+      }}
       style={{
         position: 'absolute',
         bottom: 0,

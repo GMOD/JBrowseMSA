@@ -84,11 +84,7 @@ import { saveAs } from './vendor/fileSaver.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
 import type { InterProScanResults } from './launchInterProScan.ts'
-import type {
-  BasicTrack,
-  NodeWithIds,
-  NodeWithIdsAndLength,
-} from './types.ts'
+import type { BasicTrack, NodeWithIds, NodeWithIdsAndLength } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
@@ -679,12 +675,12 @@ function stateModelFactory() {
         const text = self.data.tree
         return text
           ? generateNodeIds(parseTreeText(text))
-          : this.MSA?.getTree() ?? {
+          : (this.MSA?.getTree() ?? {
               noTree: true,
               children: [],
               id: 'empty',
               name: 'empty',
-            }
+            })
       },
 
       /**
@@ -699,7 +695,9 @@ function stateModelFactory() {
        * #getter
        */
       get rowNamesSet() {
-        return new Map(this.leaves.map((leaf, index) => [leaf.data.name, index] as const))
+        return new Map(
+          this.leaves.map((leaf, index) => [leaf.data.name, index] as const),
+        )
       },
       /**
        * #getter
@@ -871,7 +869,10 @@ function stateModelFactory() {
       get columns2d() {
         const { hideGapsEffective } = self
         return this.rows.map(([, str]) =>
-          (hideGapsEffective ? skipBlanks(this.blanks, str) : str).toUpperCase(),
+          (hideGapsEffective
+            ? skipBlanks(this.blanks, str)
+            : str
+          ).toUpperCase(),
         )
       },
       /**
@@ -1175,7 +1176,10 @@ function stateModelFactory() {
         if (nodeId) {
           const node = find(self.hierarchy, n => n.data.id === nodeId)
           self.hoveredTreeNode = node
-            ? { nodeId, descendantNames: leaves(node).map(leaf => leaf.data.name) }
+            ? {
+                nodeId,
+                descendantNames: leaves(node).map(leaf => leaf.data.name),
+              }
             : undefined
         } else {
           self.hoveredTreeNode = undefined
@@ -1225,7 +1229,10 @@ function stateModelFactory() {
        * #action
        */
       zoomOutVertical() {
-        self.rowHeight = Math.max(minRowHeight, Math.floor(self.rowHeight * 0.75))
+        self.rowHeight = Math.max(
+          minRowHeight,
+          Math.floor(self.rowHeight * 0.75),
+        )
       },
       /**
        * #action
@@ -1233,7 +1240,10 @@ function stateModelFactory() {
       zoomIn() {
         transaction(() => {
           self.colWidth = Math.min(maxCellSize, Math.ceil(self.colWidth * 1.5))
-          self.rowHeight = Math.min(maxCellSize, Math.ceil(self.rowHeight * 1.5))
+          self.rowHeight = Math.min(
+            maxCellSize,
+            Math.ceil(self.rowHeight * 1.5),
+          )
           self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
         })
       },
@@ -1242,8 +1252,14 @@ function stateModelFactory() {
        */
       zoomOut() {
         transaction(() => {
-          self.colWidth = Math.max(minColWidth, Math.floor(self.colWidth * 0.75))
-          self.rowHeight = Math.max(minRowHeight, Math.floor(self.rowHeight * 0.75))
+          self.colWidth = Math.max(
+            minColWidth,
+            Math.floor(self.colWidth * 0.75),
+          )
+          self.rowHeight = Math.max(
+            minRowHeight,
+            Math.floor(self.rowHeight * 0.75),
+          )
           self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
         })
       },
@@ -1261,8 +1277,16 @@ function stateModelFactory() {
         transaction(() => {
           const colInView = (-self.scrollX + offsetX) / self.colWidth
           const rowInView = (-self.scrollY + offsetY) / self.rowHeight
-          self.colWidth = clamp(self.colWidth * scaleFactor, minColWidth, maxCellSize)
-          self.rowHeight = clamp(self.rowHeight * scaleFactor, minRowHeight, maxCellSize)
+          self.colWidth = clamp(
+            self.colWidth * scaleFactor,
+            minColWidth,
+            maxCellSize,
+          )
+          self.rowHeight = clamp(
+            self.rowHeight * scaleFactor,
+            minRowHeight,
+            maxCellSize,
+          )
           self.scrollX = clamp(
             offsetX - colInView * self.colWidth,
             self.maxScrollX,
@@ -1585,7 +1609,10 @@ function stateModelFactory() {
         return createPaletteMap([...self.tidyInterProAnnotationTypes.keys()])
       },
       get strokePalette() {
-        return transform(this.fillPalette, ([key, val]) => [key, colord(val).darken(0.1).toHex()])
+        return transform(this.fillPalette, ([key, val]) => [
+          key,
+          colord(val).darken(0.1).toHex(),
+        ])
       },
 
       /**
@@ -1657,10 +1684,18 @@ function stateModelFactory() {
        */
       fit() {
         if (self.numRows > 0) {
-          self.rowHeight = clamp(self.msaAreaHeight / self.numRows, minRowHeight, maxCellSize)
+          self.rowHeight = clamp(
+            self.msaAreaHeight / self.numRows,
+            minRowHeight,
+            maxCellSize,
+          )
         }
         if (self.numColumns > 0) {
-          self.colWidth = clamp(self.msaAreaWidth / self.numColumns, minColWidth, maxCellSize)
+          self.colWidth = clamp(
+            self.msaAreaWidth / self.numColumns,
+            minColWidth,
+            maxCellSize,
+          )
         }
         self.scrollX = 0
         self.scrollY = 0
@@ -1670,7 +1705,11 @@ function stateModelFactory() {
        */
       fitVertically() {
         if (self.numRows > 0) {
-          self.rowHeight = clamp(self.msaAreaHeight / self.numRows, minRowHeight, maxCellSize)
+          self.rowHeight = clamp(
+            self.msaAreaHeight / self.numRows,
+            minRowHeight,
+            maxCellSize,
+          )
         }
         self.scrollY = 0
       },
@@ -1679,7 +1718,11 @@ function stateModelFactory() {
        */
       fitHorizontally() {
         if (self.numColumns > 0) {
-          self.colWidth = clamp(self.msaAreaWidth / self.numColumns, minColWidth, maxCellSize)
+          self.colWidth = clamp(
+            self.msaAreaWidth / self.numColumns,
+            minColWidth,
+            maxCellSize,
+          )
         }
         self.scrollX = 0
       },

@@ -91,7 +91,9 @@ export async function runInterProScanProcess({
       })
 
       proc.on('error', err => {
-        reject(new Error(`Failed to run ${label}: ${err.message}. ${errorHint}`))
+        reject(
+          new Error(`Failed to run ${label}: ${err.message}. ${errorHint}`),
+        )
       })
     })
 

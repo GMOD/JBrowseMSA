@@ -573,7 +573,7 @@ ref http://www.jalview.org/help/html/colourSchemes/clustal.html
 
 ```js
 // type
-Record<string, string>[]
+;(Record < string, string > [])
 ```
 
 #### getter: colConsensus
@@ -583,7 +583,11 @@ Used by percent_identity_dynamic color scheme.
 
 ```js
 // type
-{ letter: string; color: string | undefined; }[]
+{
+  letter: string
+  color: string | undefined
+}
+;[]
 ```
 
 #### getter: colorScheme
@@ -597,7 +601,7 @@ Record<string, string>
 
 ```js
 // type
-Record<string, number>[]
+;(Record < string, number > [])
 ```
 
 #### getter: colStatsSums
@@ -624,7 +628,7 @@ string[]
 #### getter: conservation
 
 Conservation score per column using Shannon entropy (biojs-msa style).
-Conservation = (1 - H/Hmax) * (1 - gapFraction)
+Conservation = (1 - H/Hmax) \* (1 - gapFraction)
 Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
 
 ```js
@@ -707,7 +711,7 @@ Map<string, number>
 
 ```js
 // type
-HierarchyNode<NodeWithIdsAndLength>[]
+HierarchyNode < NodeWithIdsAndLength > []
 ```
 
 #### getter: maxBranchLength
@@ -865,7 +869,7 @@ Returns 'dna', 'rna', or 'amino'.
 
 ```js
 // type
-"dna" | "rna" | "amino"
+;'dna' | 'rna' | 'amino'
 ```
 
 #### getter: showBranchLenEffective

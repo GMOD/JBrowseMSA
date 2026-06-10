@@ -21,8 +21,7 @@
     "release:patch": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",
     "release:major": "node scripts/release.js major",
-    "attw": "pnpm -r --filter react-msaview --filter msa-parsers --filter @jbrowse/svgcanvas exec attw --pack . --ignore-rules cjs-resolves-to-esm",
-    "deploy:storybook": "pnpm --filter examples build && aws s3 sync --delete packages/examples/dist s3://jbrowse.org/storybook/msa && aws cloudfront create-invalidation --distribution-id E13LGELJOT4GQO --paths \"/storybook/msa/*\""
+    "attw": "pnpm -r --filter react-msaview --filter msa-parsers --filter @jbrowse/svgcanvas exec attw --pack . --ignore-rules cjs-resolves-to-esm"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.3",

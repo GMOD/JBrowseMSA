@@ -22,7 +22,7 @@ Mark declarations with JSDoc tags. One `#stateModel` per file.
 
 Optionally add `#example` blocks at the end of a JSDoc comment:
 
-```js
+````js
 /**
  * #stateModel MsaView
  * #example minimal
@@ -30,7 +30,7 @@ Optionally add `#example` blocks at the end of a JSDoc comment:
  * const model = stateModelFactory()
  * ```
  */
-```
+````
 
 ## Composition graph
 

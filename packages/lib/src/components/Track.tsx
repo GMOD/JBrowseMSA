@@ -31,7 +31,7 @@ const TrackLabel = observer(function TrackLabel({
     model: { name, height },
   } = track
   const { classes } = useStyles()
-  const trackLabelHeight = Math.max(8, rowHeight - 8)
+  const trackLabelHeight = Math.min(height, Math.max(8, rowHeight - 8))
 
   return (
     <div
