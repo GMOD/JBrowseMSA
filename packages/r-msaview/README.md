@@ -27,10 +27,12 @@ BiocManager::install(c("Biostrings", "ggtree", "treeio"))
 ```r
 library(msaviewr)
 
-msaview(
+widget <- msaview(
   msa = ">human\nMVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSH\n>mouse\nMVLSGEDKSNIKAAWGKIGGHGAEYGAEALERMFASFPTTKTYFPHFDVSH\n>goat\nMSLTRTERTIILSLWSKISTQADVIGTETLERLFSCYPQAKTYFPHFDLHS",
   tree = "((human:0.1,mouse:0.2):0.05,goat:0.3);"
 )
+widget
+# htmlwidgets::saveWidget(widget, "alignment.html")  # save to a self-contained HTML file
 ```
 
 ![Hemoglobin alignment with tree](../../docs/media/r-quickstart.svg)
