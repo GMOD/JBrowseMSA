@@ -22,7 +22,7 @@ export default class StockholmMSA extends BaseMSA {
   }
 
   getRow(name: string) {
-    return this.MSA.seqdata[name] || ''
+    return this.MSA.seqdata[name] ?? ''
   }
 
   getWidth() {
@@ -96,7 +96,7 @@ export default class StockholmMSA extends BaseMSA {
     return this.MSA.gc.SS_cons
   }
 
-  get tracks() {
+  get tracks(): { id: string; name: string; data?: string; customColorScheme?: Record<string, string> }[] {
     return [
       {
         id: 'seqConsensus',

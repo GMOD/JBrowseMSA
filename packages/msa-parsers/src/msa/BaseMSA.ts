@@ -29,7 +29,7 @@ export default abstract class BaseMSA {
     return {}
   }
 
-  getHeader(): unknown {
+  getHeader(): Record<string, unknown> {
     return {}
   }
 
@@ -45,7 +45,7 @@ export default abstract class BaseMSA {
     return undefined
   }
 
-  get tracks(): unknown[] {
+  get tracks(): { id: string; name: string; data?: string; customColorScheme?: Record<string, string> }[] {
     return []
   }
 }

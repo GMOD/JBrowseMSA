@@ -15,15 +15,11 @@ export default class EmfMSA extends BaseMSA {
   }
 
   getRow(name: string): string {
-    return this.MSA.find(aln => aln.protein === name)?.seq || ''
+    return this.MSA.find(aln => aln.protein === name)?.seq ?? ''
   }
 
   getWidth() {
     return this.MSA[0]!.seq.length
-  }
-
-  getHeader() {
-    return ''
   }
 
   getNames() {

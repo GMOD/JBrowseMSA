@@ -15,7 +15,7 @@ export default class ClustalMSA extends BaseMSA {
   }
 
   getRow(name: string): string {
-    return this.MSA.alns.find(aln => aln.id === name)?.seq || ''
+    return this.MSA.alns.find(aln => aln.id === name)?.seq ?? ''
   }
 
   getWidth() {
