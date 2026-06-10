@@ -629,7 +629,12 @@ function stateModelFactory() {
        * #getter
        */
       get colorScheme() {
-        return colorSchemes[self.colorSchemeName]!
+        // colorSchemeName is a free string (menus, snapshots, URL params); fall
+        // back to the default rather than returning undefined on a stale name
+        return (
+          colorSchemes[self.colorSchemeName] ??
+          colorSchemes[defaultColorSchemeName]!
+        )
       },
 
       /**
@@ -1101,7 +1106,8 @@ function stateModelFactory() {
         const r = this.root
         clusterLayout(r, this.totalHeight, self.treeWidth)
         r.data.length = 0
-        setBrLength(r, 0, self.treeWidth / maxLength(r))
+        const max = maxLength(r)
+        setBrLength(r, 0, max ? self.treeWidth / max : 0)
         return r as HierarchyNode<NodeWithIdsAndLength>
       },
 
@@ -1210,6 +1216,19 @@ function stateModelFactory() {
        */
       get maxScrollX() {
         return Math.min(-self.totalWidth + (self.msaAreaWidth - 100), 0)
+      },
+      /**
+       * #getter
+       * most-negative allowed scrollY, keeping the last row in view rather than
+       * letting the whole alignment scroll off the top. visible MSA height is
+       * computed inline here because msaAreaHeight is defined later in the chain.
+       */
+      get maxScrollY() {
+        const visibleHeight =
+          self.height -
+          self.headerHeight -
+          (self.msaAreaWidth < self.totalWidth ? self.minimapHeight : 0)
+        return Math.min(-self.totalHeight + visibleHeight, 0)
       },
       /**
        * #getter
@@ -1336,7 +1355,7 @@ function stateModelFactory() {
             self.height > 0 ? clamp(1 - overflow / self.height, 0, 1) : 0
           self.scrollY = clamp(
             anchoredScrollY * (1 - topBias),
-            -self.totalHeight + 10,
+            self.maxScrollY,
             0,
           )
         })
@@ -1345,7 +1364,7 @@ function stateModelFactory() {
        * #action
        */
       doScrollY(deltaY: number) {
-        self.scrollY = clamp(self.scrollY + deltaY, -self.totalHeight + 10, 0)
+        self.scrollY = clamp(self.scrollY + deltaY, self.maxScrollY, 0)
       },
 
       setInterProAnnotations(data?: Record<string, InterProScanResults>) {

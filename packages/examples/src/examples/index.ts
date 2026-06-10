@@ -2,6 +2,8 @@ import type { ComponentType } from 'react'
 
 import ColorSchemes from './ColorSchemes'
 import ColorSchemesSrc from './ColorSchemes.tsx?raw'
+import Domains from './Domains'
+import DomainsSrc from './Domains.tsx?raw'
 import LoadFromUrl from './LoadFromUrl'
 import LoadFromUrlSrc from './LoadFromUrl.tsx?raw'
 import ModelApi from './ModelApi'
@@ -10,6 +12,8 @@ import NucleotideAlignment from './NucleotideAlignment'
 import NucleotideAlignmentSrc from './NucleotideAlignment.tsx?raw'
 import ProgrammaticControl from './ProgrammaticControl'
 import ProgrammaticControlSrc from './ProgrammaticControl.tsx?raw'
+import TreeOptions from './TreeOptions'
+import TreeOptionsSrc from './TreeOptions.tsx?raw'
 import ZeroConfig from './ZeroConfig'
 import ZeroConfigSrc from './ZeroConfig.tsx?raw'
 
@@ -54,6 +58,20 @@ export const examples: Example[] = [
     description: 'Drive the viewer by calling model actions from buttons.',
     Component: ProgrammaticControl,
     source: ProgrammaticControlSrc,
+  },
+  {
+    name: 'Tree options',
+    description:
+      'Toggle branch lengths, label alignment, node bubbles, and the tree panel.',
+    Component: TreeOptions,
+    source: TreeOptionsSrc,
+  },
+  {
+    name: 'Protein domains',
+    description:
+      'Overlay InterProScan domain annotations from an inline GFF3 string.',
+    Component: Domains,
+    source: DomainsSrc,
   },
   {
     name: 'Load from URL',

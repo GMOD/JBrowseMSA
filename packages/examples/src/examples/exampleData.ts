@@ -28,3 +28,25 @@ ACGTTCGTACGTACCTACGTACGTACGTACGAACGTACGT
 >seq4
 ACGTACGTACGTACGTACGTACATACGTTCGTACGTACGT
 `
+
+// Rhodopsin N-terminus across four species, ungapped so domain coordinates map
+// straight to columns. Pairs with domainsGFF below.
+export const domainsMSA = `>GPCR_human
+MNGTEGPNFYVPFSNATGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIVLGFPINFLTLYVTVQHKKLR
+>GPCR_mouse
+MNGTEGPNFYVPFSNKTGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIMLGFPINFLTLYVTVQHKKLR
+>GPCR_bovine
+MNGTEGPNFYVPFSNATGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIVLGFPINFLTLYVTVQHKKLR
+>GPCR_chicken
+MNGTEGPNFYVPFSNKSGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLILLGFPINFLTLYVTIQHKKLR
+`
+
+// InterProScan-style domain annotations in GFF3 — exactly the shape that
+// `react-msaview-cli interproscan` emits. seq_id matches the alignment rows and
+// start/end are 1-based positions in the ungapped sequence.
+export const domainsGFF = `##gff-version 3
+GPCR_human\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+GPCR_mouse\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+GPCR_bovine\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+GPCR_chicken\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+`

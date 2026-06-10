@@ -72,7 +72,6 @@ export async function runEbiInterProScan(
   sequences: { id: string; seq: string }[],
   programs: string[],
   email: string,
-  _batchSize: number,
 ): Promise<InterProScanResults[]> {
   const allResults: InterProScanResults[] = []
 

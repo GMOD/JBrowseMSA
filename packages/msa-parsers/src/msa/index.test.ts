@@ -74,6 +74,14 @@ MNPQRSTVWY`
   })
 })
 
+describe('FastaMSA CRLF line endings', () => {
+  test('strips trailing carriage return from sequence names', () => {
+    const msa = new FastaMSA('>seq1\r\nACDEF\r\n>seq2\r\nGHIKL\r\n')
+    expect(msa.getNames()).toEqual(['seq1', 'seq2'])
+    expect(msa.getRow('seq1')).toBe('ACDEF')
+  })
+})
+
 describe('parseNewick single-quoted names', () => {
   test('parses quoted name containing a colon', () => {
     const tree = parseNewick(

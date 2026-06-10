@@ -20,9 +20,9 @@ const VerticalScrollbar = observer(({ model }: { model: MsaViewModel }) => {
     'y',
     useCallback(
       (delta: number, startScroll: number) => {
-        model.setScrollY(clamp(startScroll - delta / unit, -totalHeight, 0))
+        model.setScrollY(clamp(startScroll - delta / unit, model.maxScrollY, 0))
       },
-      [model, unit, totalHeight],
+      [model, unit],
     ),
   )
   return (

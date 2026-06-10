@@ -15,19 +15,19 @@ import type { AppModel } from './model'
 const urlParams = new URLSearchParams(window.location.search)
 const val = urlParams.get('data')
 
-const mymodel = AppGlobal.create(
-  val
-    ? JSON.parse(val) || {
-        msaview: {
-          type: 'MsaView',
-        },
-      }
-    : {
-        msaview: {
-          type: 'MsaView',
-        },
-      },
-)
+function parseData(data: string | null) {
+  let result = { msaview: { type: 'MsaView' } }
+  if (data) {
+    try {
+      result = JSON.parse(data)
+    } catch (e) {
+      console.error('Failed to parse ?data= URL param', e)
+    }
+  }
+  return result
+}
+
+const mymodel = AppGlobal.create(parseData(val))
 
 // used in ViewContainer files to get the width
 function useWidthSetter(view: { setWidth: (arg: number) => void }) {

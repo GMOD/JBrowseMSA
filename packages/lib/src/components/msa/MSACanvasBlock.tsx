@@ -97,7 +97,6 @@ const MSACanvasBlock = observer(function ({
         ref={ref}
         onMouseMove={event => {
           if (ref.current) {
-            setMousePosition({ x: event.clientX, y: event.clientY })
             const { col, row } = eventToColRow(
               event,
               ref.current,
@@ -117,6 +116,13 @@ const MSACanvasBlock = observer(function ({
             } else {
               model.setMousePos(undefined, undefined)
             }
+            // only track client coords when an insertion is hovered (the only
+            // consumer is the tooltip below); avoids a re-render on every move
+            setMousePosition(
+              model.hoveredInsertion
+                ? { x: event.clientX, y: event.clientY }
+                : undefined,
+            )
           }
         }}
         onClick={event => {

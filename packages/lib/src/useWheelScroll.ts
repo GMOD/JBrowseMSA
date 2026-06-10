@@ -74,29 +74,35 @@ export function useWheelScroll({
         event.stopPropagation()
         return
       }
-      if (onScrollX) {
-        deltaX.current += event.deltaX
-      }
-      if (onScrollY) {
-        deltaY.current += event.deltaY
-      }
+      // only swallow the wheel event on an axis we actually handle, otherwise a
+      // vertical wheel over an x-only scroller (e.g. a Track) blocks page scroll
+      const consumeX = !!onScrollX && event.deltaX !== 0
+      const consumeY = !!onScrollY && event.deltaY !== 0
+      if (consumeX || consumeY) {
+        if (onScrollX) {
+          deltaX.current += event.deltaX
+        }
+        if (onScrollY) {
+          deltaY.current += event.deltaY
+        }
 
-      if (!scheduled.current) {
-        scheduled.current = true
-        requestAnimationFrame(() => {
-          if (onScrollX) {
-            onScrollX(-deltaX.current)
-            deltaX.current = 0
-          }
-          if (onScrollY) {
-            onScrollY(-deltaY.current)
-            deltaY.current = 0
-          }
-          scheduled.current = false
-        })
+        if (!scheduled.current) {
+          scheduled.current = true
+          requestAnimationFrame(() => {
+            if (onScrollX) {
+              onScrollX(-deltaX.current)
+              deltaX.current = 0
+            }
+            if (onScrollY) {
+              onScrollY(-deltaY.current)
+              deltaY.current = 0
+            }
+            scheduled.current = false
+          })
+        }
+        event.preventDefault()
+        event.stopPropagation()
       }
-      event.preventDefault()
-      event.stopPropagation()
     }
     curr.addEventListener('wheel', onWheel, { passive: false })
     return () => {

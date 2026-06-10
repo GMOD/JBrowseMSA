@@ -2,20 +2,16 @@ import React, { useCallback, useState } from 'react'
 
 import { observer } from 'mobx-react'
 
+import { MINIMAP_BAR_HEIGHT, getMinimapLayout } from './minimapLayout.ts'
 import { useDragScroll } from '../../useDragScroll.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
 const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
   const [hovered, setHovered] = useState(false)
-  const { scrollX, msaAreaWidth, minimapHeight, colWidth, numColumns } = model
-  const unit = msaAreaWidth / numColumns / colWidth
-  const left = -scrollX
-  const right = left + msaAreaWidth
-  const s = left * unit
-  const e = right * unit
+  const { minimapHeight } = model
+  const { unit, s, w, polygonHeight, polygonPoints } = getMinimapLayout(model)
   const fill = 'rgba(66, 119, 127, 0.3)'
-  const w = Math.max(e - s, 20)
 
   const { startDrag } = useDragScroll(
     'x',
@@ -27,8 +23,6 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
     ),
   )
 
-  const barHeight = 12
-  const polygonHeight = minimapHeight - barHeight
   return (
     <div
       style={{
@@ -39,7 +33,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
     >
       <div
         style={{
-          height: barHeight,
+          height: MINIMAP_BAR_HEIGHT,
           boxSizing: 'border-box',
           border: '1px solid #555',
         }}
@@ -51,7 +45,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
           left: Math.max(0, s),
           background: hovered ? 'rgba(66,119,127,0.6)' : fill,
           cursor: 'pointer',
-          height: barHeight,
+          height: MINIMAP_BAR_HEIGHT,
           width: w,
           zIndex: 100,
         }}
@@ -67,10 +61,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
       />
 
       <svg height={polygonHeight} style={{ width: '100%' }}>
-        <polygon
-          fill={fill}
-          points={`${s + w},0 ${s},0 0,${polygonHeight} ${msaAreaWidth},${polygonHeight}`}
-        />
+        <polygon fill={fill} points={polygonPoints} />
       </svg>
     </div>
   )

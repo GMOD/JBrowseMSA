@@ -5,6 +5,21 @@ Each example renders a live viewer alongside its own source code.
 
 Deployed at https://jbrowse.org/storybook/msa/
 
+### Protein alignment with a tree
+
+![Protein alignment example](../../docs/media/example-protein.svg)
+
+### Nucleotide alignment
+
+![Nucleotide alignment example](../../docs/media/example-nucleotide.svg)
+
+### Protein domains (InterProScan GFF)
+
+![Protein domains example](../../docs/media/example-domains.svg)
+
+> Figures are generated headlessly from the viewer's own SVG export via
+> `pnpm figures` (see `packages/lib/scripts/generateFigures.tsx`).
+
 ## Develop
 
 ```sh

@@ -23,7 +23,6 @@ export interface InterProScanOptions {
   interproscanPath: string
   programs: string[]
   email: string
-  batchSize: number
 }
 
 export async function runInterProScan(options: InterProScanOptions) {
@@ -37,7 +36,6 @@ export async function runInterProScan(options: InterProScanOptions) {
     interproscanPath,
     programs,
     email,
-    batchSize,
   } = options
 
   console.log(`Reading MSA from ${inputFile}...`)
@@ -79,7 +77,7 @@ export async function runInterProScan(options: InterProScanOptions) {
     )
   } else {
     console.log('Running InterProScan via EBI API...')
-    allResults = await runEbiInterProScan(sequences, programs, email, batchSize)
+    allResults = await runEbiInterProScan(sequences, programs, email)
   }
 
   console.log('Converting results to GFF...')

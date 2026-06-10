@@ -50,7 +50,7 @@ export default class A3mMSA extends BaseMSA {
       if (newlineIdx === -1) {
         continue
       }
-      const defLine = entry.slice(0, newlineIdx)
+      const defLine = entry.slice(0, newlineIdx).replace(/\r$/, '')
       const spaceIdx = defLine.indexOf(' ')
       const id = spaceIdx === -1 ? defLine : defLine.slice(0, spaceIdx)
       if (id) {

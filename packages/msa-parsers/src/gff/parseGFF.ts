@@ -1,5 +1,15 @@
 import type { GFFRecord } from '../types.ts'
 
+// decodeURIComponent throws on a stray '%' (common in unescaped GFF3 values);
+// fall back to the raw value rather than aborting the whole parse
+function safeDecode(val: string) {
+  try {
+    return decodeURIComponent(val)
+  } catch {
+    return val
+  }
+}
+
 function parseAttributes(col9?: string): Record<string, string | undefined> {
   if (!col9) {
     return {}
@@ -9,11 +19,15 @@ function parseAttributes(col9?: string): Record<string, string | undefined> {
       .split(';')
       .map(f => f.trim())
       .filter(f => !!f)
-      .map(f => f.split('='))
-      .map(([key, val]) => [
-        key?.trim() ?? '',
-        val ? decodeURIComponent(val).trim().split(',').join(' ') : undefined,
-      ])
+      .map(f => {
+        const eq = f.indexOf('=')
+        const key = (eq === -1 ? f : f.slice(0, eq)).trim()
+        const val = eq === -1 ? undefined : f.slice(eq + 1)
+        return [
+          key,
+          val ? safeDecode(val).trim().split(',').join(' ') : undefined,
+        ]
+      })
       .filter(([key]) => key !== ''),
   )
 }

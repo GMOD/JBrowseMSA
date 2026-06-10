@@ -93,6 +93,18 @@ seq2\tSource\ttype\t20\t30\t.\t.\t.\tName=test2`
     expect(result[0]?.Ontology_term).toBe('GO:0001 GO:0002')
   })
 
+  test('does not throw on a stray percent sign', () => {
+    const gff = 'seq1\tSource\ttype\t1\t10\t.\t.\t.\tNote=100%done'
+    const result = parseGFF(gff)
+    expect(result[0]?.Note).toBe('100%done')
+  })
+
+  test('keeps text after a second equals sign', () => {
+    const gff = 'seq1\tSource\ttype\t1\t10\t.\t.\t.\tNote=a=b'
+    const result = parseGFF(gff)
+    expect(result[0]?.Note).toBe('a=b')
+  })
+
   test('parses multiple lines', () => {
     const gff = `seq1\tPfam\tprotein_match\t10\t50\t.\t.\t.\tName=PF00001
 seq1\tSMART\tprotein_match\t60\t100\t.\t.\t.\tName=SM00001

@@ -9,8 +9,8 @@ Uses [msa-parsers](../msa-parsers/) for file format support.
 
 ```bash
 # From the monorepo root
-yarn install
-yarn workspace @react-msaview/cli build
+pnpm install
+pnpm --filter @react-msaview/cli build
 
 # Or install globally (after publishing)
 npm install -g @react-msaview/cli
@@ -28,15 +28,22 @@ react-msaview-cli interproscan <input-msa> [options]
 
 #### Options
 
-| Option                       | Description                                            | Default            |
-| ---------------------------- | ------------------------------------------------------ | ------------------ |
-| `-o, --output <file>`        | Output GFF file path                                   | `domains.gff`      |
-| `--local`                    | Use local InterProScan installation instead of EBI API | `false`            |
-| `--interproscan-path <path>` | Path to local interproscan.sh                          | `interproscan.sh`  |
-| `--programs <list>`          | Comma-separated list of InterProScan programs          | `Pfam`             |
-| `--email <email>`            | Email for EBI API (required for EBI API usage)         | `user@example.com` |
-| `--batch-size <n>`           | Number of sequences per API batch                      | `30`               |
-| `-h, --help`                 | Show help message                                      |                    |
+| Option                       | Description                                             | Default                                  |
+| ---------------------------- | ------------------------------------------------------- | ---------------------------------------- |
+| `-o, --output <file>`        | Output GFF file path                                    | `domains.gff`                            |
+| `--local`                    | Use a local InterProScan installation instead of EBI    | `false`                                  |
+| `--docker`                   | Run InterProScan via the `interpro/interproscan` image  | `false`                                  |
+| `--singularity`              | Run InterProScan via a Singularity/Apptainer container  | `false`                                  |
+| `--singularity-image <img>`  | Singularity image to use                                | `docker://interpro/interproscan:latest`  |
+| `--interproscan-path <path>` | Path to local interproscan.sh                           | `interproscan.sh`                        |
+| `--programs <list>`          | Comma-separated list of InterProScan programs           | `PfamA,CDD`                              |
+| `--email <email>`            | Email for EBI API (used only for EBI API runs)          | `user@example.com`                       |
+| `-h, --help`                 | Show help message                                       |                                          |
+
+By default (no backend flag) the CLI submits sequences to the EBI InterProScan
+REST API one at a time. `--local`, `--docker`, and `--singularity` instead run
+InterProScan on the whole alignment locally, which is much faster for large
+datasets.
 
 #### Supported MSA Formats
 
@@ -52,7 +59,7 @@ The CLI automatically detects the input format:
 
 When using `--programs`, you can specify any combination of:
 
-- `Pfam` - Protein families (default)
+- `PfamA` - Protein families (part of the `PfamA,CDD` default)
 - `SMART` - Simple Modular Architecture Research Tool
 - `SUPERFAMILY` - Structural and functional annotation
 - `Gene3D` - Structural domain assignments
@@ -78,11 +85,6 @@ react-msaview-cli interproscan alignment.fasta -o domains.gff --email your@email
 react-msaview-cli interproscan alignment.fasta -o domains.gff \
   --programs Pfam,SMART,Gene3D \
   --email your@email.com
-
-# Smaller batch size for large sequences
-react-msaview-cli interproscan large_proteins.fasta -o domains.gff \
-  --batch-size 10 \
-  --email your@email.com
 ```
 
 ### Using Local InterProScan
@@ -104,6 +106,31 @@ react-msaview-cli interproscan alignment.fasta -o domains.gff \
   --programs Pfam,SMART
 ```
 
+### Using Docker
+
+No local InterProScan install needed — just Docker:
+
+```bash
+react-msaview-cli interproscan alignment.fasta -o domains.gff --docker
+```
+
+This mounts a temp directory into the `interpro/interproscan` container, runs
+the scan on the whole alignment at once, and reads the JSON back out.
+
+### Using Singularity / Apptainer
+
+On HPC clusters where Docker is unavailable:
+
+```bash
+# Pull from Docker Hub (requires network)
+react-msaview-cli interproscan alignment.fasta -o domains.gff --singularity
+
+# Or use a pre-pulled .sif image
+react-msaview-cli interproscan alignment.fasta -o domains.gff \
+  --singularity \
+  --singularity-image /path/to/interproscan.sif
+```
+
 ### Different Input Formats
 
 ```bash
@@ -117,9 +144,27 @@ react-msaview-cli interproscan PF00001.stockholm -o domains.gff
 react-msaview-cli interproscan colabfold.a3m -o domains.gff
 ```
 
+## Worked example
+
+```console
+$ react-msaview-cli interproscan gpcrs.fasta -o domains.gff --docker
+Reading MSA from gpcrs.fasta...
+Found 4 sequences
+Processing 4 non-empty sequences...
+Running InterProScan via Docker...
+  Running InterProScan via Docker on 4 sequences (image: interpro/interproscan:latest)...
+  docker run --rm -v /tmp/interproscan-Xyz12:/data interpro/interproscan:latest -i /data/input.fasta -o /data/output.json -f JSON -appl PfamA,CDD
+Converting results to GFF...
+Writing output to domains.gff...
+Done!
+```
+
 ## Output Format
 
-The output is standard GFF3 format compatible with react-msaview:
+The output is standard GFF3, with one `protein_match` line per domain hit.
+`start`/`end` are 1-based positions in the **ungapped** sequence (gaps are
+stripped before scanning), and the attributes carry the signature accession,
+name, and description:
 
 ```gff
 ##gff-version 3
@@ -132,10 +177,26 @@ seq2	InterProScan	protein_match	5	120	.	.	.	Name=PF00001;signature_desc=7tm_1;de
 
 After generating the GFF file, you can load it in react-msaview:
 
-1. Open your MSA file in react-msaview
-2. Go to **Menu > Open domains...**
-3. Select the generated GFF file
-4. Domains will appear as colored boxes on the alignment
+- Open your MSA file in react-msaview
+- Go to **Menu > Open domains...** and select the generated GFF file
+- Domains appear as colored boxes on the alignment
+
+In the React component, pass it inline as the `gff` prop (see the "Protein
+domains" example in `packages/examples`):
+
+```jsx
+<MSAViewer msa={msaText} gff={domainsGff} />
+```
+
+From R, pass the file (or string) as the `gff` argument:
+
+```r
+msaview(msa = "alignment.fasta", gff = "domains.gff")
+```
+
+The domains render as labelled boxes over the matching rows:
+
+![InterProScan domains rendered over an alignment](../../docs/media/example-domains.svg)
 
 ## Troubleshooting
 
@@ -143,14 +204,14 @@ After generating the GFF file, you can load it in react-msaview:
 
 If you get timeout errors with the EBI API:
 
-- Reduce `--batch-size` (try 10-20 for large proteins)
-- Use `--local` with a local InterProScan installation
+- Use `--local`, `--docker`, or `--singularity` to run InterProScan yourself
 - Check your internet connection
+- For large datasets, a local/container backend is much faster than the API
 
 ### Local InterProScan Not Found
 
 ```
-Error: Failed to run InterProScan: spawn interproscan.sh ENOENT
+Error: Failed to run Local: spawn interproscan.sh ENOENT. Is interproscan.sh installed and on PATH?
 ```
 
 Make sure InterProScan is installed and specify the full path:
@@ -169,9 +230,10 @@ Make sure InterProScan is installed and specify the full path:
 
 The EBI InterProScan API has usage limits:
 
-- Maximum ~30 sequences per request (configurable via `--batch-size`)
-- Requests are processed sequentially to avoid overwhelming the server
-- For large datasets (>100 sequences), consider using local InterProScan
+- Sequences are submitted one at a time, sequentially, to avoid overwhelming
+  the server
+- For large datasets (>100 sequences), use `--local`, `--docker`, or
+  `--singularity` instead
 
 ## License
 

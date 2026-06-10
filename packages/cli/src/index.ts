@@ -40,10 +40,6 @@ const { values, positionals } = parseArgs({
       type: 'string',
       default: 'user@example.com',
     },
-    'batch-size': {
-      type: 'string',
-      default: '30',
-    },
     help: {
       type: 'boolean',
       short: 'h',
@@ -71,7 +67,6 @@ OPTIONS:
   --interproscan-path <path>    Path to interproscan.sh (default: interproscan.sh)
   --programs <list>             Comma-separated list of programs (default: PfamA,CDD)
   --email <email>               Email for EBI API (default: user@example.com)
-  --batch-size <n>              Number of sequences per API batch (default: 30)
   -h, --help                    Show this help message
 
 EXAMPLES:
@@ -117,7 +112,6 @@ async function main() {
       interproscanPath: values['interproscan-path'],
       programs: values.programs.split(','),
       email: values.email,
-      batchSize: Number.parseInt(values['batch-size'], 10),
     })
   } else {
     console.error(`Unknown command: ${command}`)

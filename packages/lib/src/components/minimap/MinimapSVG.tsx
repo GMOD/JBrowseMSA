@@ -2,26 +2,13 @@ import React from 'react'
 
 import { observer } from 'mobx-react'
 
+import { MINIMAP_BAR_HEIGHT, getMinimapLayout } from './minimapLayout.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
 const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
-  const {
-    scrollX,
-    msaAreaWidth: W,
-    minimapHeight: H,
-    colWidth,
-    numColumns,
-  } = model
-
-  const BAR_HEIGHT = 12
-  const H2 = H - BAR_HEIGHT
-
-  const unit = W / numColumns / colWidth
-  const left = -scrollX
-  const right = left + W
-  const s = left * unit
-  const e = right * unit
-  const w = Math.max(e - s, 20)
+  const { msaAreaWidth } = model
+  const { s, w, polygonPoints } = getMinimapLayout(model)
   const fillColor = 'rgb(66, 119, 127)'
   const fillOpacity = 0.3
 
@@ -30,8 +17,8 @@ const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
       <rect
         x={0}
         y={0}
-        width={W}
-        height={BAR_HEIGHT}
+        width={msaAreaWidth}
+        height={MINIMAP_BAR_HEIGHT}
         stroke="#555"
         fill="none"
       />
@@ -39,16 +26,16 @@ const MinimapSVG = observer(({ model }: { model: MsaViewModel }) => {
         x={Math.max(0, s)}
         y={0}
         width={w}
-        height={BAR_HEIGHT}
+        height={MINIMAP_BAR_HEIGHT}
         fill={fillColor}
         fillOpacity={fillOpacity}
         stroke="#555"
       />
-      <g transform={`translate(0 ${BAR_HEIGHT})`}>
+      <g transform={`translate(0 ${MINIMAP_BAR_HEIGHT})`}>
         <polygon
           fill={fillColor}
           fillOpacity={fillOpacity}
-          points={`${s + w},0 ${s},0 0,${H2} ${W},${H2}`}
+          points={polygonPoints}
         />
       </g>
     </>

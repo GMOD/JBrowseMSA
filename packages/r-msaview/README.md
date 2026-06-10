@@ -114,6 +114,39 @@ aligned <- msa(unaligned, method = "ClustalOmega")
 msaview(msa = as(aligned, "AAStringSet"))
 ```
 
+### Domain annotations
+
+Overlay InterProScan-style protein domains as boxes on the alignment. The `gff`
+argument accepts a file path, a GFF3 string, or a data frame. This pairs with
+the [CLI](../cli/), which writes domains as GFF3:
+
+```sh
+react-msaview-cli interproscan proteins.fasta -o domains.gff
+```
+
+```r
+seqs <- c(
+  GPCR_human  = "MNGTEGPNFYVPFSNATGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIVLGFPINFLTLYVTVQHKKLR",
+  GPCR_mouse  = "MNGTEGPNFYVPFSNKTGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIMLGFPINFLTLYVTVQHKKLR",
+  GPCR_bovine = "MNGTEGPNFYVPFSNATGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIVLGFPINFLTLYVTVQHKKLR"
+)
+
+# from a CLI-generated GFF file
+msaview(msa = seqs, gff = "domains.gff")
+
+# or from a data frame (columns: seqname, start, end, name, description)
+domains <- data.frame(
+  seqname     = names(seqs),
+  start       = 6,
+  end         = 62,
+  name        = "PF00001",
+  description = "7tm receptor (rhodopsin family)"
+)
+msaview(msa = seqs, gff = domains, color_scheme = "clustalx_protein_dynamic")
+```
+
+![InterProScan domains rendered over an alignment](../../docs/media/example-domains.svg)
+
 ### With ggtree
 
 Pass a ggtree plot object directly as the `tree` argument. The phylogenetic
