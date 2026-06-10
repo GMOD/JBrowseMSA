@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>User guide — JBrowseMSA</title><meta name="description" content="Features, file format support, and a tour of the JBrowseMSA viewer."><style>:root{--fg: #1a1a2e;--muted: #555;--accent: #42777f;--border: #e2e2e2;--bg-soft: #f7f8f8;--maxw: 960px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.6}.site-header{display:flex;align-items:center;gap:24px;padding:12px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:10}.site-header .brand{font-weight:700;font-size:1.1rem;color:var(--accent);text-decoration:none}.site-header nav{display:flex;gap:18px;flex-wrap:wrap}.site-header nav a{color:var(--fg);text-decoration:none;font-size:.95rem}.site-header nav a:hover{color:var(--accent)}main{max-width:var(--maxw);margin:0 auto;padding:24px}.hero h1{font-size:2.6rem;margin:.2em 0 .1em}.hero .tagline{font-size:1.15rem;color:var(--muted);max-width:42em}.embed{margin:32px 0}.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}.card{display:block;border:1px solid var(--border);border-radius:8px;padding:16px 18px;text-decoration:none;color:inherit;background:var(--bg-soft);transition:border-color .15s,transform .15s}.card:hover{border-color:var(--accent);transform:translateY(-2px)}.card h3{margin:0 0 6px;color:var(--accent)}.card p{margin:0;color:var(--muted);font-size:.95rem}.prose{max-width:100%}.prose img{max-width:100%;height:auto;border:1px solid var(--border);border-radius:4px}.prose pre{background:var(--bg-soft);padding:14px;border-radius:6px;overflow-x:auto}.prose code{font-size:.9em}.prose table{border-collapse:collapse;width:100%}.prose th,.prose td{border:1px solid var(--border);padding:6px 10px;text-align:left}.site-footer{border-top:1px solid var(--border);margin-top:48px;padding:20px 24px;color:var(--muted);font-size:.9rem;text-align:center}
+</style></head> <body> <header class="site-header"> <a class="brand" href="/JBrowseMSA">JBrowseMSA</a> <nav> <a href="/JBrowseMSA"> Home </a><a href="/JBrowseMSA/guide"> User guide </a><a href="/JBrowseMSA/embedding"> Embedding </a><a href="https://jbrowse.org/storybook/msa" target="_blank" rel="noopener"> Examples </a><a href="https://github.com/GMOD/JBrowseMSA" target="_blank" rel="noopener"> GitHub </a> </nav> </header> <main>  <article class="prose"> <h1 id="react-msaview">react-msaview</h1>
+<p>We developed the react-msaview to make a compact, efficient, and scalable
+web-based MSA viewer. Being web-based, it is easily shareable with other users.
+We take special care to make the code efficient by rendering to HTML5 canvas and
+to use tiled scrolling.</p>
+<h2 id="features">Features</h2>
+<h3 id="scalability">Scalability</h3>
+<ul>
+<li>
+<p>1D vertical tiled scrolling of phylogenetic tree to optimize rendering of
+large trees</p>
+</li>
+<li>
+<p>2D tiled scrolling to optimize rendering of large multiple sequence alignments</p>
+</li>
+<li>
+<p>Examples: can render 230k node newick tree from UCSC COVID-19 sample tree</p>
+</li>
+</ul>
+<h3 id="view-detailed-metadata-about-entries-inside-the-app">View detailed metadata about entries inside the app</h3>
+<ul>
+<li>
+<p>E.g. View metadata about alignment from MSA datafile headers (e.g. stockholm)</p>
+</li>
+<li>
+<p>E.g. View metadata about “annotation tracks” from UniProt in a dialog e.g. GFF
+file</p>
+</li>
+</ul>
+<h3 id="shareability">Shareability</h3>
+<ul>
+<li>Can share sessions with other users by copying and pasting the URL which will
+send all relevant settings about what is in a session to other users to open
+your results</li>
+</ul>
+<h3 id="data-exploration">Data exploration</h3>
+<ul>
+<li>
+<p>Collapse certain subtrees with click action on branches which also hides gaps
+that were introduced by that subtree in the rest of the alignment</p>
+</li>
+<li>
+<p>View only subtree to only view a small section of a large MSA</p>
+</li>
+</ul>
+<h3 id="customizability">Customizability</h3>
+<ul>
+<li>
+<p>Allows changing color schemes, with jalview, clustal, and other color schemes</p>
+</li>
+<li>
+<p>Allows toggling the branch length rendering for the phylogenetic tree</p>
+</li>
+<li>
+<p>The tree or the MSA panel can be loaded separately from each other</p>
+</li>
+<li>
+<p>Can draw labels aligned right or next to the tree</p>
+</li>
+<li>
+<p>Allows “zooming out” by setting tiny rowHeight/colWidth settings to get big
+picture patterns in MSA data</p>
+</li>
+</ul>
+<h3 id="protein-domainstructure-tracks">Protein domain/structure tracks</h3>
+<ul>
+<li>Users can dynamically fetch data from UniProt to plot protein domains (for a
+specific protein) on the MSA (specific protein’s coordinates translated to
+account for gaps in MSA coordinate space)</li>
+</ul>
+<h3 id="3d-protein-structure-viewer">3D protein structure viewer</h3>
+<ul>
+<li>Hovering over the various columns in the MSA highlights the position on the
+protein and vice-versa</li>
+</ul>
+<h3 id="reusability-and-availability">Reusability and availability</h3>
+<ul>
+<li>
+<p>The code is published on NPM as the <code>react-msaview</code> package</p>
+</li>
+<li>
+<p>A simple instance is also available at this weblink
+<a href="https://gmod.github.io/react-msaview/">https://gmod.github.io/react-msaview/</a></p>
+</li>
+</ul>
+<h3 id="file-format-support">File format support</h3>
+<ul>
+<li>
+<p>FASTA formatted for MSA (e.g. gaps already inserted)</p>
+</li>
+<li>
+<p>Stockholm files (e.g. .stock file, with or without embedded newick tree, uses
+stockholm-js parser. also supports “multi-stockholm” files with multiple
+alignments embedded in a single file)</p>
+</li>
+<li>
+<p>Clustal files (e.g. .aln file, uses clustal-js parser)</p>
+</li>
+<li>
+<p>Newick (tree can be loaded separately as a .nh file)</p>
+</li>
+</ul>
+<h3 id="embedding-in-jbrowse-2">Embedding in JBrowse 2</h3>
+<ul>
+<li>
+<p>We have also released the code as a JBrowse 2 plugin, where the MSA can be
+displayed alongside other JBrowse 2 genome browser panels</p>
+</li>
+<li>
+<p>Available as a plugin here
+<a href="https://github.com/GMOD/jbrowse-plugin-msaview">https://github.com/GMOD/jbrowse-plugin-msaview</a></p>
+</li>
+<li>
+<p>Available as a demo here <a href="https://jbrowse.org/demos/app">https://jbrowse.org/demos/app</a></p>
+</li>
+</ul>
+<h2 id="screenshots">Screenshots</h2>
+<h3 id="import-form">Import form</h3>
+<p><img src="/JBrowseMSA/media/import-form.png" alt=""></p>
+<p>The “import form” with pre-loaded examples including a 230K node COVID tree from
+UCSC, several CLUSTAL formatted files, several RNA and Protein formatted
+stockholm files, and a large tree+MSA generated by MAFFT. You can then also open
+your own MSA file, Tree file, or combine both together</p>
+<h3 id="settings-panel">Settings panel</h3>
+<p><img src="/JBrowseMSA/media/settings-dialog.png" alt=""></p>
+<p>Figure showing the “settings panel”, showing color scheme editor and other
+settings</p>
+<h3 id="dynamic-color-schemes">Dynamic color schemes</h3>
+<p>The clustal_protein_dynamic and percent_identity_dynamic color schemes use
+statistics about letters in a certain column to generate a color</p>
+<p><img src="/JBrowseMSA/media/colorscheme-clustalx.png" alt=""></p>
+<p>ClustalX dynamic coloring</p>
+<p><img src="/JBrowseMSA/media/colorscheme-pid.png" alt=""></p>
+<p>Percent identity dynamic coloring</p> </article>  </main> <footer class="site-footer"> <span>
+react-msaview (JBrowseMSA) ·
+<a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> ·
+        part of <a href="https://jbrowse.org">JBrowse</a> </span> </footer> </body></html>
