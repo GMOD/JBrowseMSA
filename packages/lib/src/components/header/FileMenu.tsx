@@ -19,6 +19,7 @@ const SettingsDialog = lazy(() => import('../dialogs/SettingsDialog.tsx'))
 const FileMenu = observer(({ model }: { model: MsaViewModel }) => {
   return (
     <CascadingMenuButton
+      data-testid="file_menu"
       menuItems={[
         {
           label: 'Return to import form',

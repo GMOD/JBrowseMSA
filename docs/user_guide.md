@@ -93,7 +93,7 @@ to use tiled scrolling.
 
 ### Import form
 
-![](media/image2.png)
+![](media/import-form.png)
 
 The "import form" with pre-loaded examples including a 230K node COVID tree from
 UCSC, several CLUSTAL formatted files, several RNA and Protein formatted
@@ -102,7 +102,7 @@ your own MSA file, Tree file, or combine both together
 
 ### Settings panel
 
-![](media/image14.png)
+![](media/settings-dialog.png)
 
 Figure showing the "settings panel", showing color scheme editor and other
 settings
@@ -112,10 +112,10 @@ settings
 The clustal_protein_dynamic and percent_identity_dynamic color schemes use
 statistics about letters in a certain column to generate a color
 
-![](media/image19.png)
+![](media/colorscheme-clustalx.png)
 
 ClustalX dynamic coloring
 
-![](media/image20.png)
+![](media/colorscheme-pid.png)
 
 Percent identity dynamic coloring

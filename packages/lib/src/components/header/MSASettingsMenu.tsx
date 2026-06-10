@@ -11,6 +11,7 @@ import type { MsaViewModel } from '../../model.ts'
 const MSASettingsMenu = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <CascadingMenuButton
+      data-testid="msa_settings_menu"
       closeAfterItemClick={false}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}

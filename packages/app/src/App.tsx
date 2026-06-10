@@ -50,7 +50,11 @@ const App = observer(function ({ model }: { model: AppModel }) {
   const ref = useWidthSetter(msaview)
   return (
     <div>
-      <div ref={ref} style={{ border: '1px solid black', margin: 20 }}>
+      <div
+        ref={ref}
+        data-testid="msaview"
+        style={{ border: '1px solid black', margin: 20 }}
+      >
         <MSAView model={msaview} />
       </div>
       <div style={{ height: 500 }} />

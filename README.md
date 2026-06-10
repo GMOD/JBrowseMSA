@@ -100,7 +100,8 @@ pnpm install
 | `pnpm --filter examples dev`         | Run the live examples gallery                                        |
 | `pnpm build`                         | Build all packages                                                   |
 | `pnpm test`                          | Run the test suite                                                   |
-| `pnpm figures`                       | Regenerate the README figures (headless, see `packages/lib/scripts`) |
+| `pnpm figures`                       | Regenerate the README figures (headless SVG, `packages/lib/scripts`) |
+| `pnpm screenshots`                   | Regenerate the user-guide app screenshots (`scripts/screenshots`)    |
 | `pnpm lint` / `format` / `typecheck` | Lint, format with Prettier, typecheck all packages                   |
 
 Architecture notes live in [CLAUDE.md](CLAUDE.md); the core state model is
