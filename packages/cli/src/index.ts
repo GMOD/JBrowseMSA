@@ -126,23 +126,25 @@ async function main() {
   const command = positionals[0]
 
   if (command === 'export-svg') {
-    const msaFile = values['msa']
+    const msaFile = values.msa
     if (!msaFile) {
       console.error('Error: --msa <file> is required')
       process.exit(1)
     }
-    const outputFile = values.output === 'domains.gff' ? 'alignment.svg' : values.output!
+    const outputFile =
+      values.output === 'domains.gff' ? 'alignment.svg' : values.output
     await exportSvg({
       msaFile,
-      treeFile: values['tree'],
-      gffFile: values['gff'],
+      treeFile: values.tree,
+      gffFile: values.gff,
       outputFile,
-      colorScheme: values['color-scheme']!,
-      width: parseInt(values['width']!, 10),
-      height: parseInt(values['height']!, 10),
-      treeAreaWidth: values['tree-area-width'] !== undefined
-        ? parseInt(values['tree-area-width']!, 10)
-        : undefined,
+      colorScheme: values['color-scheme'],
+      width: parseInt(values.width, 10),
+      height: parseInt(values.height, 10),
+      treeAreaWidth:
+        values['tree-area-width'] !== undefined
+          ? parseInt(values['tree-area-width'], 10)
+          : undefined,
     })
     console.log(`wrote ${outputFile}`)
   } else if (command === 'interproscan') {

@@ -73,20 +73,35 @@ async function wait({
   signal?: AbortSignal
 }) {
   const url = `${base}/iprscan5/status/${jobId}`
+  // EBI jobs run for minutes; cap polling so an unexpected/stuck status can't
+  // spin forever (the abort signal is the normal early exit). ~10s per check.
+  const maxChecks = 360
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
+    let finished = false
+    for (let check = 0; check < maxChecks && !finished; check++) {
       for (let i = 0; i < 10; i++) {
         await timeout(1000, signal)
         onProgress({ msg: `Checking status ${10 - i}`, url })
       }
-      const result = await textfetch(url, { signal })
-      if (result.includes('FINISHED')) {
-        break
+      // status endpoint returns a bare status token; match exactly rather than
+      // substring so an error page mentioning "FINISHED" can't be a false hit
+      const status = (await textfetch(url, { signal })).trim()
+      if (status === 'FINISHED') {
+        finished = true
+      } else if (
+        status === 'FAILURE' ||
+        status === 'ERROR' ||
+        status === 'NOT_FOUND'
+      ) {
+        throw new Error(
+          `InterProScan job ${jobId} ended with status: ${status}`,
+        )
       }
-      if (result.includes('FAILURE')) {
-        throw new Error(`Failed to run: jobId ${jobId}`)
-      }
+    }
+    if (!finished) {
+      throw new Error(
+        `InterProScan job ${jobId} did not finish after ${maxChecks} status checks`,
+      )
     }
   } finally {
     onProgress()
@@ -152,8 +167,16 @@ async function loadInterProScanResultsWithStatus({
       url: `https://www.ebi.ac.uk/Tools/services/rest/iprscan5/result/${jobId}/json`,
     })
     const ret = await loadInterProScanResults(jobId, signal)
+    // key each result by its xref id; skip any result lacking an xref entry
+    // rather than crashing the whole load on one malformed result
     model.setDomains(
-      Object.fromEntries(ret.results.map(r => [r.xref[0]!.id, r])),
+      Object.fromEntries(
+        ret.results
+          .map(r => [r.xref[0]?.id, r] as const)
+          .filter(
+            (e): e is [string, InterProScanResults] => e[0] !== undefined,
+          ),
+      ),
     )
     getSession(model).notify(`Loaded interproscan ${jobId} results`, 'success')
   } catch (e) {

@@ -27,10 +27,12 @@ export function renderMouseover({
     relativeTo,
     hoveredTreeNode,
     highlightedColumns,
+    highResScaleFactor,
   } = model
   const width = msaAreaWidth - verticalScrollbarWidth
   ctx.resetTransform()
-  ctx.clearRect(0, 0, width, height)
+  ctx.clearRect(0, 0, width * highResScaleFactor, height * highResScaleFactor)
+  ctx.scale(highResScaleFactor, highResScaleFactor)
 
   // Highlight reference row (relativeTo) persistently
   if (relativeTo) {

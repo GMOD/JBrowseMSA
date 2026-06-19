@@ -1,7 +1,8 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 
 import { observer } from 'mobx-react'
 
+import { useDevicePixelRatio } from '../useDevicePixelRatio.ts'
 import {
   HorizontalResizeHandle,
   VerticalResizeHandle,
@@ -128,6 +129,14 @@ const View = observer(function ({ model }: { model: MsaViewModel }) {
 
 const MSAView = observer(function ({ model }: { model: MsaViewModel }) {
   const { height, viewInitialized, DialogComponent, DialogProps } = model
+
+  // mirror the live device pixel ratio into the model so canvas backing stores
+  // re-scale when the window moves between monitors or the browser zooms
+  const devicePixelRatio = useDevicePixelRatio()
+  useEffect(() => {
+    model.setHighResScaleFactor(devicePixelRatio)
+  }, [model, devicePixelRatio])
+
   return (
     <div>
       {viewInitialized ? (

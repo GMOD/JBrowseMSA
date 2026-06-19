@@ -19,7 +19,8 @@ export default class EmfMSA extends BaseMSA {
   }
 
   getWidth() {
-    return this.MSA[0]!.seq.length
+    // 0 for an empty alignment rather than crashing on MSA[0]
+    return this.MSA[0]?.seq.length ?? 0
   }
 
   getNames() {

@@ -35,5 +35,14 @@ export function flatToTree(items: FlatItem[]): TreeNode {
     }
   }
 
-  return root!
+  if (root === undefined) {
+    // no node lacks a (resolvable) parent: empty input, or every node's parent
+    // points back into the set (a cycle). returning undefined here would crash
+    // cryptically downstream, so fail with a diagnosable message instead
+    throw new Error(
+      'could not build tree from flat node list: no root found (input was empty or contains a parent cycle)',
+    )
+  }
+
+  return root
 }

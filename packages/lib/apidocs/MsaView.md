@@ -356,13 +356,14 @@ highlightedColumns: undefined as number[] | undefined
 #### volatile: highResScaleFactor
 
 high resolution scale factor, helps make canvas look better on hi-dpi
-screens
+screens. derived from the device pixel ratio so canvases are crisp on
+retina/4k displays and not needlessly oversized on standard ones
 
 ```js
 // type signature
 number
 // code
-highResScaleFactor: 2
+highResScaleFactor: typeof window === 'undefined' ? 1 : window.devicePixelRatio
 ```
 
 #### volatile: hoveredTreeNode
@@ -1242,6 +1243,16 @@ in-repo caller, so do not flag it as dead code — it is public API.
 ```js
 // type signature
 setHighlightedColumns: (columns?: number[] | undefined) => void
+```
+
+#### action: setHighResScaleFactor
+
+high-res scale factor, tracks the device pixel ratio so canvases stay
+crisp when the window moves between monitors or the browser zooms
+
+```js
+// type signature
+setHighResScaleFactor: (arg: number) => void
 ```
 
 #### action: setHoveredTreeNode

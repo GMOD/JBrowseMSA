@@ -19,7 +19,9 @@ export default class ClustalMSA extends BaseMSA {
   }
 
   getWidth() {
-    return this.MSA.alns[0]!.seq.length
+    // 0 for an empty alignment (e.g. unrecognized text routed here as fallback)
+    // rather than crashing on alns[0]
+    return this.MSA.alns[0]?.seq.length ?? 0
   }
 
   getHeader() {

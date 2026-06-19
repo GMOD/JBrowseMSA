@@ -88,15 +88,23 @@ export function parseAsn1(
     .replace(/^.*?::=/, '')
 
   const sections = extractSections(normalized)
+  const { fdict, nodes } = sections
+  if (fdict === undefined || nodes === undefined) {
+    // a truncated/malformed BioTreeContainer would otherwise pass undefined to
+    // extractBracedBlocks and crash cryptically; fail with a clear message
+    throw new Error(
+      `invalid BioTreeContainer ASN.1: missing '${fdict === undefined ? 'fdict' : 'nodes'}' section`,
+    )
+  }
 
   const dict = Object.fromEntries(
-    extractBracedBlocks(sections.fdict!).flatMap(block => {
+    extractBracedBlocks(fdict).flatMap(block => {
       const entry = parseDictEntry(block)
       return entry ? [[entry.id, remap[entry.name] || entry.name]] : []
     }),
   )
 
-  return extractBracedBlocks(sections.nodes!).flatMap(block => {
+  return extractBracedBlocks(nodes).flatMap(block => {
     const node = parseNode(block)
     if (!node) {
       return []

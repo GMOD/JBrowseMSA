@@ -268,9 +268,11 @@ function stateModelFactory() {
       /**
        * #volatile
        * high resolution scale factor, helps make canvas look better on hi-dpi
-       * screens
+       * screens. derived from the device pixel ratio so canvases are crisp on
+       * retina/4k displays and not needlessly oversized on standard ones
        */
-      highResScaleFactor: 2,
+      highResScaleFactor:
+        typeof window === 'undefined' ? 1 : window.devicePixelRatio,
 
       /**
        * #volatile
@@ -398,6 +400,14 @@ function stateModelFactory() {
        */
       setWidth(arg: number) {
         self.volatileWidth = arg
+      },
+      /**
+       * #action
+       * high-res scale factor, tracks the device pixel ratio so canvases stay
+       * crisp when the window moves between monitors or the browser zooms
+       */
+      setHighResScaleFactor(arg: number) {
+        self.highResScaleFactor = arg
       },
       /**
        * #action
@@ -1737,26 +1747,39 @@ function stateModelFactory() {
           }),
         )
 
-        // autorun opens treeFilehandle
+        // autorun opens treeFilehandle. generation guard: if the filehandle
+        // changes mid-fetch, a slower earlier request must not clobber the data
+        // (or loading flag) set by the newer one
+        let treeGeneration = 0
         addDisposer(
           self,
           autorun(async () => {
             const { treeFilehandle } = self
             if (treeFilehandle) {
+              const generation = ++treeGeneration
               try {
                 self.setLoadingTree(true)
-                self.setTree(
-                  await fetchAndMaybeUnzipText(openLocation(treeFilehandle)),
+                const text = await fetchAndMaybeUnzipText(
+                  openLocation(treeFilehandle),
                 )
-                if (treeFilehandle.locationType === 'BlobLocation') {
-                  // clear filehandle after loading if from a local file
-                  self.setTreeFilehandle(undefined)
+                if (generation === treeGeneration) {
+                  transaction(() => {
+                    self.setTree(text)
+                    if (treeFilehandle.locationType === 'BlobLocation') {
+                      // clear filehandle after loading if from a local file
+                      self.setTreeFilehandle(undefined)
+                    }
+                  })
                 }
               } catch (e) {
-                console.error(e)
-                self.setError(e)
+                if (generation === treeGeneration) {
+                  console.error(e)
+                  self.setError(e)
+                }
               } finally {
-                self.setLoadingTree(false)
+                if (generation === treeGeneration) {
+                  self.setLoadingTree(false)
+                }
               }
             }
           }),
@@ -1819,30 +1842,38 @@ function stateModelFactory() {
           }),
         )
 
-        // autorun opens msaFilehandle
+        // autorun opens msaFilehandle. generation guard: see treeFilehandle
+        let msaGeneration = 0
         addDisposer(
           self,
           autorun(async () => {
             const { msaFilehandle } = self
             if (msaFilehandle) {
+              const generation = ++msaGeneration
               try {
                 self.setLoadingMSA(true)
                 self.setError(undefined)
                 const txt = await fetchAndMaybeUnzipText(
                   openLocation(msaFilehandle),
                 )
-                transaction(() => {
-                  self.setMSA(txt)
-                  if (msaFilehandle.locationType === 'BlobLocation') {
-                    // clear filehandle after loading if from a local file
-                    self.setMSAFilehandle(undefined)
-                  }
-                })
+                if (generation === msaGeneration) {
+                  transaction(() => {
+                    self.setMSA(txt)
+                    if (msaFilehandle.locationType === 'BlobLocation') {
+                      // clear filehandle after loading if from a local file
+                      self.setMSAFilehandle(undefined)
+                    }
+                  })
+                }
               } catch (e) {
-                console.error(e)
-                self.setError(e)
+                if (generation === msaGeneration) {
+                  console.error(e)
+                  self.setError(e)
+                }
               } finally {
-                self.setLoadingMSA(false)
+                if (generation === msaGeneration) {
+                  self.setLoadingMSA(false)
+                }
               }
             }
           }),

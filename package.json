@@ -16,7 +16,7 @@
     "test": "vitest",
     "figures": "vitest run --config vitest.figures.config.ts",
     "screenshots": "pnpm --filter app exec vite build && node scripts/screenshots/generate.mjs",
-    "typecheck": "pnpm -r --filter=!website exec tsc --noEmit && pnpm --filter website exec tsc --noEmit",
+    "typecheck": "pnpm -r --filter=!website exec tsc --noEmit && pnpm --filter website exec astro sync && pnpm --filter website exec tsc --noEmit",
     "release": "node scripts/release.js",
     "release:patch": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",
