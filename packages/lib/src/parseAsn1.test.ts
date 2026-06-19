@@ -12,3 +12,9 @@ const r = readFileSync(
 test('real data file', () => {
   expect(parseAsn1(r)).toMatchSnapshot()
 })
+
+test('throws a clear error on input missing required sections', () => {
+  expect(() => parseAsn1('BioTreeContainer ::= { something {} }')).toThrow(
+    /missing/,
+  )
+})

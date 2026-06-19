@@ -1,8 +1,35 @@
 import { describe, expect, test } from 'vitest'
 
-import { collapse, find, hierarchy, leaves, sort, sum } from './hierarchy.ts'
+import {
+  calcDepthToLeaf,
+  collapse,
+  find,
+  findMaxBranchLen,
+  hierarchy,
+  leaves,
+  maxLength,
+  setBrLength,
+  sort,
+  sum,
+} from './hierarchy.ts'
 
 import type { NodeWithIds } from './types.ts'
+
+// Builds a fully unbalanced "caterpillar" tree of the given depth: each internal
+// node has one leaf child and one internal child. Recursion over this would blow
+// the call stack; the iterative traversals must handle it.
+function makeDeepTree(depth: number): NodeWithIds {
+  let node: NodeWithIds = { id: 'leaf0', name: 'leaf0', children: [] }
+  for (let i = 1; i <= depth; i++) {
+    node = {
+      id: `node${i}`,
+      name: `node${i}`,
+      length: 1,
+      children: [{ id: `leaf${i}`, name: `leaf${i}`, children: [] }, node],
+    }
+  }
+  return node
+}
 
 function makeTree(): NodeWithIds {
   return {
@@ -116,5 +143,30 @@ describe('sum', () => {
     sum(h, d => (d.children.length > 0 ? 0 : 1))
     expect(h.value).toBe(4)
     expect(find(h, n => n.data.id === 'A')?.value).toBe(2)
+  })
+})
+
+describe('deep (caterpillar) trees do not overflow the stack', () => {
+  const depth = 100_000
+
+  test('build, height, leaf count, and ordering', () => {
+    const h = hierarchy(makeDeepTree(depth), d => d.children)
+    expect(h.height).toBe(depth)
+    const l = leaves(h)
+    expect(l.length).toBe(depth + 1)
+    // each level contributes its own leafN before descending; deepest leaf last
+    expect(l[0]!.data.name).toBe(`leaf${depth}`)
+    expect(l.at(-1)!.data.name).toBe('leaf0')
+  })
+
+  test('accumulation helpers (sum, find, maxLength, setBrLength, depth)', () => {
+    const h = hierarchy(makeDeepTree(depth), d => d.children)
+    sum(h, d => (d.children.length > 0 ? 0 : 1))
+    expect(h.value).toBe(depth + 1)
+    expect(find(h, n => n.data.id === 'leaf0')?.data.name).toBe('leaf0')
+    expect(maxLength(h)).toBe(depth)
+    expect(calcDepthToLeaf(h)).toBe(depth)
+    setBrLength(h, 0, 1)
+    expect(findMaxBranchLen(h)).toBe(depth)
   })
 })
