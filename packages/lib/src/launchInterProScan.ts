@@ -93,7 +93,9 @@ async function wait({
         status === 'ERROR' ||
         status === 'NOT_FOUND'
       ) {
-        throw new Error(`InterProScan job ${jobId} ended with status: ${status}`)
+        throw new Error(
+          `InterProScan job ${jobId} ended with status: ${status}`,
+        )
       }
     }
     if (!finished) {
@@ -171,7 +173,9 @@ async function loadInterProScanResultsWithStatus({
       Object.fromEntries(
         ret.results
           .map(r => [r.xref[0]?.id, r] as const)
-          .filter((e): e is [string, InterProScanResults] => e[0] !== undefined),
+          .filter(
+            (e): e is [string, InterProScanResults] => e[0] !== undefined,
+          ),
       ),
     )
     getSession(model).notify(`Loaded interproscan ${jobId} results`, 'success')
