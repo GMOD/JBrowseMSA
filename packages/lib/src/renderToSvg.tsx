@@ -23,9 +23,19 @@ export interface ExportSvgOptions {
 }
 export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
   await when(() => model.dataInitialized)
-  const { width, height, scrollX, scrollY, totalTrackAreaHeight } = model
-  const { exportType, theme, includeMinimap, includeTracks } = opts
+  const {
+    width,
+    height,
+    scrollX,
+    scrollY,
+    totalTrackAreaHeight,
+    minimapHeight,
+  } = model
+  const { exportType, theme, includeTracks } = opts
   const trackHeight = includeTracks ? totalTrackAreaHeight : 0
+  // the minimap reflects the live viewport scroll position, so it's only
+  // meaningful for a viewport export, never for the entire alignment
+  const includeMinimap = exportType === 'viewport' && !!opts.includeMinimap
 
   if (exportType === 'entire') {
     return render({
@@ -43,7 +53,7 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
   }
   return render({
     width,
-    height: height + (includeMinimap ? model.minimapHeight : 0) + trackHeight,
+    height: height + (includeMinimap ? minimapHeight : 0) + trackHeight,
     contentHeight: height,
     trackHeight,
     theme,
@@ -79,37 +89,48 @@ async function render({
   includeTracks?: boolean
 }) {
   const { Context } = await import('@jbrowse/svgcanvas')
-  const Wrapper = includeMinimap ? MinimapWrapper : NullWrapper
+  const { treeAreaWidth, minimapHeight } = model
+
+  const content = (
+    <>
+      {includeTracks && trackHeight > 0 ? (
+        <TrackRendering
+          Context={Context}
+          model={model}
+          theme={theme}
+          offsetX={offsetX}
+          msaAreaWidth={width - treeAreaWidth}
+          trackHeight={trackHeight}
+        />
+      ) : null}
+      <g
+        transform={trackHeight > 0 ? `translate(0 ${trackHeight})` : undefined}
+      >
+        <CoreRendering
+          Context={Context}
+          model={model}
+          theme={theme}
+          offsetX={offsetX}
+          offsetY={offsetY}
+          msaAreaWidth={width - treeAreaWidth}
+          contentHeight={contentHeight}
+        />
+      </g>
+    </>
+  )
 
   return renderToStaticMarkup(
     <SvgWrapper width={width} height={height}>
-      <Wrapper model={model}>
-        {includeTracks && trackHeight > 0 ? (
-          <TrackRendering
-            Context={Context}
-            model={model}
-            theme={theme}
-            offsetX={offsetX}
-            msaAreaWidth={width - model.treeAreaWidth}
-            trackHeight={trackHeight}
-          />
-        ) : null}
-        <g
-          transform={
-            trackHeight > 0 ? `translate(0 ${trackHeight})` : undefined
-          }
-        >
-          <CoreRendering
-            Context={Context}
-            model={model}
-            theme={theme}
-            offsetX={offsetX}
-            offsetY={offsetY}
-            msaAreaWidth={width - model.treeAreaWidth}
-            contentHeight={contentHeight}
-          />
-        </g>
-      </Wrapper>
+      {includeMinimap ? (
+        <>
+          <g transform={`translate(${treeAreaWidth} 0)`}>
+            <MinimapSVG model={model} />
+          </g>
+          <g transform={`translate(0 ${minimapHeight})`}>{content}</g>
+        </>
+      ) : (
+        content
+      )}
     </SvgWrapper>,
   )
 }
@@ -176,16 +197,33 @@ function CoreRendering({
         </clipPath>
       </defs>
 
-      <g
-        clipPath={`url(#${clipId1})`}
-        dangerouslySetInnerHTML={{ __html: ctx1.getSvg().innerHTML }}
-      />
-      <g
-        clipPath={`url(#${clipId2})`}
+      <ClipGroup clipId={clipId1} html={ctx1.getSvg().innerHTML} />
+      <ClipGroup
+        clipId={clipId2}
         transform={`translate(${treeAreaWidth} 0)`}
-        dangerouslySetInnerHTML={{ __html: ctx2.getSvg().innerHTML }}
+        html={ctx2.getSvg().innerHTML}
       />
     </>
+  )
+}
+
+// Wraps SVG markup produced by a svgcanvas Context in a clipped group. The
+// markup is injected verbatim since it's already serialized SVG, not React.
+function ClipGroup({
+  clipId,
+  html,
+  transform,
+}: {
+  clipId: string
+  html: string
+  transform?: string
+}) {
+  return (
+    <g
+      clipPath={`url(#${clipId})`}
+      transform={transform}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   )
 }
 
@@ -226,31 +264,8 @@ function TrackRendering({
           <rect x={0} y={0} width={msaAreaWidth} height={trackHeight} />
         </clipPath>
       </defs>
-      <g
-        clipPath={`url(#${clipId})`}
-        dangerouslySetInnerHTML={{ __html: ctx.getSvg().innerHTML }}
-      />
+      <ClipGroup clipId={clipId} html={ctx.getSvg().innerHTML} />
     </g>
-  )
-}
-
-function MinimapWrapper({
-  model,
-  children,
-}: {
-  model: MsaViewModel
-  children: React.ReactNode
-}) {
-  const { minimapHeight, treeAreaWidth } = model
-
-  return (
-    <>
-      <g transform={`translate(${treeAreaWidth} 0)`}>
-        <MinimapSVG model={model} />
-      </g>
-
-      <g transform={`translate(0 ${minimapHeight})`}>{children}</g>
-    </>
   )
 }
 
@@ -275,8 +290,4 @@ function SvgWrapper({
       {children}
     </svg>
   )
-}
-
-function NullWrapper({ children }: { children: React.ReactNode }) {
-  return children
 }
