@@ -22,7 +22,9 @@ const exampleData = fs.readFileSync(
   'utf8',
 )
 function backtickConst(name) {
-  const m = exampleData.match(new RegExp(`export const ${name} = \`([\\s\\S]*?)\``))
+  const m = exampleData.match(
+    new RegExp(`export const ${name} = \`([\\s\\S]*?)\``),
+  )
   if (!m) {
     throw new Error(`could not find ${name} in exampleData.ts`)
   }
@@ -31,9 +33,7 @@ function backtickConst(name) {
 const kinaseMSA = backtickConst('kinaseMSA')
 const kinaseDomainsGFF = backtickConst('kinaseDomainsGFF')
 const lysineMSA = backtickConst('lysineMSA')
-const kinaseTree = exampleData.match(
-  /export const kinaseTree =\s*'([^']*)'/,
-)[1]
+const kinaseTree = exampleData.match(/export const kinaseTree =\s*'([^']*)'/)[1]
 
 // The phylogeny examples (MyD88/globin/ACE2/opsins) are built reproducibly into
 // generatedData.ts by scripts/examples-gen; read those constants the same way.
@@ -83,6 +83,17 @@ function data(extra) {
   return `?data=${encodeURIComponent(JSON.stringify(snap))}`
 }
 
+// Like data(), but with no inline-alignment default: for specs that load their
+// (large) alignment from a hosted file via *Filehandle props pointing at
+// data/<file> (written by scripts/screenshots/writeExampleData.mjs, served at
+// the app root). Keeps the deep-link a few hundred bytes instead of tens of KB.
+// The uri is relative, so it resolves against the page — localhost during
+// capture, gmod.org/JBrowseMSA/demo/ once deployed.
+function fileSnap(msaview) {
+  const snap = { msaview: { type: 'MsaView', ...msaview } }
+  return `?data=${encodeURIComponent(JSON.stringify(snap))}`
+}
+
 export const specs = [
   {
     name: 'import-form',
@@ -115,22 +126,25 @@ export const specs = [
     // zoomed out (small colWidth) so the full ~526-column alignment fits and
     // the shared SH3 + SH2 + kinase domain architecture shows as colored
     // blocks aligned down every member of the family
-    url: data({
+    url: fileSnap({
       height: 360,
       treeAreaWidth: 175,
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: { msa: kinaseMSA, tree: kinaseTree, gff: kinaseDomainsGFF },
+      msaFilehandle: { uri: 'data/kinase.aln' },
+      treeFilehandle: { uri: 'data/kinase.nh' },
+      gffFilehandle: { uri: 'data/kinase-domains.gff' },
     }),
+    settle: 2000,
     clip: 'viewer',
   },
   {
     name: 'large-tree',
-    url: data({
+    url: fileSnap({
       height: 480,
       treeAreaWidth: 300,
       colorSchemeName: 'nucleotide',
-      data: { msa: lysineMSA },
+      msaFilehandle: { uri: 'data/lysine.stock' },
     }),
     settle: 3500,
     clip: 'viewer',
