@@ -24,6 +24,19 @@ const run = (cmd, cwd = rootDir) => {
   execSync(cmd, { stdio: 'inherit', cwd })
 }
 
+const capture = cmd => execSync(cmd, { cwd: rootDir }).toString().trim()
+
+// Preflight: release only from a clean main checkout
+const branch = capture('git rev-parse --abbrev-ref HEAD')
+if (branch !== 'main') {
+  console.error(`Must be on main to release (currently on ${branch})`)
+  process.exit(1)
+}
+if (capture('git status --porcelain')) {
+  console.error('Working tree is dirty; commit or clean it before releasing')
+  process.exit(1)
+}
+
 // Packages to publish (in dependency order)
 const packages = ['svgcanvas', 'msa-parsers', 'lib', 'cli']
 
@@ -59,16 +72,21 @@ const versionTsPath = path.join(rootDir, 'packages/lib/src/version.ts')
 fs.writeFileSync(versionTsPath, `export const version = '${newVersion}'\n`)
 console.log('Updated packages/lib/src/version.ts')
 
-// Git operations
+// Build before tagging so a broken build never gets a release tag pushed
+console.log('\nBuilding all packages...')
+run('pnpm build')
+
+// Commit the version bump, tag, and push. The pushed tag triggers publish.yml
+// (npm), and the push to main triggers deploy-docs.yml (GitHub Pages).
 const tag = `v${newVersion}`
 console.log(`\nCreating git tag ${tag}...`)
-run('git add -A')
+const changed = [
+  ...packages.map(pkg => `packages/${pkg}/package.json`),
+  'packages/lib/src/version.ts',
+].join(' ')
+run(`git add ${changed}`)
 run(`git commit -m "${tag}"`)
 run(`git tag -a "${tag}" -m "${tag}"`)
 run('git push && git push --tags')
 
-// Build and deploy the GitHub Pages site (lib + website + app)
-console.log('\nDeploying to GitHub Pages...')
-run('pnpm run deploy:pages')
-
-console.log(`\n✓ Released ${tag} — GitHub Actions will publish to npm`)
+console.log(`\n✓ Released ${tag} — CI will publish to npm and deploy the site`)
