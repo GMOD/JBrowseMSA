@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "test": "vitest",
     "figures": "vitest run --config vitest.figures.config.ts",
+    "examples:gen": "node scripts/examples-gen/generate.mjs",
     "screenshots": "pnpm --filter app exec vite build && node scripts/screenshots/generate.mjs",
     "typecheck": "pnpm -r --filter=!website exec tsc --noEmit && pnpm --filter website exec astro sync && pnpm --filter website exec tsc --noEmit",
     "release": "node scripts/release.js",

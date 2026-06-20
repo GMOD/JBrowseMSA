@@ -134,19 +134,35 @@ function tsLiteral(s) {
   return `\`${s}\``
 }
 
-const selected = process.argv.slice(2)
+// --fetch re-downloads sequences from UniProt and overwrites the committed
+// datasets/<name>.fasta snapshot. By default we align the committed snapshot, so
+// regeneration is fully deterministic and offline, and the exact sequences used
+// are visible in git rather than being whatever UniProt serves today.
+const doFetch = process.argv.includes('--fetch')
+const selected = process.argv.slice(2).filter(a => !a.startsWith('--'))
 const todo = selected.length
   ? datasets.filter(d => selected.includes(d.name))
   : datasets
 
 const results = {}
 for (const d of todo) {
-  const rows = readDataset(d.name)
-  console.log(`\n[${d.name}] fetching ${rows.length} sequences`)
   const dir = path.join(buildDir, d.name)
   fs.mkdirSync(dir, { recursive: true })
-  fs.writeFileSync(path.join(dir, 'input.fasta'), await fetchFasta(rows))
-  results[d.varName] = { ...buildOne(d), def: d, rows }
+  const fastaPath = path.join(here, 'datasets', `${d.name}.fasta`)
+  let inputFasta
+  if (doFetch || !fs.existsSync(fastaPath)) {
+    const rows = readDataset(d.name)
+    console.log(`\n[${d.name}] fetching ${rows.length} sequences from UniProt`)
+    inputFasta = await fetchFasta(rows)
+    fs.writeFileSync(fastaPath, inputFasta)
+  } else {
+    console.log(
+      `\n[${d.name}] aligning committed datasets/${d.name}.fasta (use --fetch to refresh)`,
+    )
+    inputFasta = fs.readFileSync(fastaPath, 'utf8')
+  }
+  fs.writeFileSync(path.join(dir, 'input.fasta'), inputFasta)
+  results[d.varName] = { ...buildOne(d), def: d }
 }
 
 // Emit / update the generated TS file. When run on a subset, merge with the

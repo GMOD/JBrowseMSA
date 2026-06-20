@@ -16,10 +16,14 @@ the whole pipeline, every step, nothing hidden.
 sudo apt-get install clustalw        # Debian/Ubuntu
 # brew install clustal-w             # macOS
 
-# regenerate every dataset (fetch -> align -> tree -> write TS constants)
-node scripts/examples-gen/generate.mjs
+# rebuild constants from the committed sequence snapshots (deterministic,
+# offline): align -> tree -> write TS constants
+node scripts/examples-gen/generate.mjs        # or: pnpm examples:gen
 
-# or just some of them
+# re-download the sequences from UniProt first (refreshes datasets/<name>.fasta)
+node scripts/examples-gen/generate.mjs --fetch
+
+# limit to some datasets
 node scripts/examples-gen/generate.mjs myd88 ace2
 ```
 
@@ -45,6 +49,13 @@ That's the entire human-authored input: a curated list of accessions and the
 short label each row should get in the viewer. The first row is treated as the
 reference (for `relativeTo`, see below).
 
+Alongside each `.tsv`, the **exact fetched sequences** are committed as
+`datasets/<name>.fasta`. That snapshot — not a live UniProt request — is what
+the pipeline aligns by default, so regeneration is deterministic and offline and
+the precise sequences are visible in git. UniProt entries can change over time;
+run with `--fetch` to deliberately refresh the snapshot from UniProt (and review
+the diff) rather than having it drift silently underfoot.
+
 Current datasets:
 
 | File              | Family | Story it tells |
@@ -58,9 +69,10 @@ Current datasets:
 
 For each dataset, in order:
 
-1. **Fetch.** For every accession, GET
-   `https://rest.uniprot.org/uniprotkb/<acc>.fasta` and rewrite the header to
-   the clean label. Result: `build/<name>/input.fasta`.
+1. **Fetch** (only with `--fetch`, or if the snapshot is missing). For every
+   accession, GET `https://rest.uniprot.org/uniprotkb/<acc>.fasta` and rewrite
+   the header to the clean label, writing the committed snapshot
+   `datasets/<name>.fasta`. Otherwise that committed snapshot is used as-is.
 
 2. **Align.** Run ClustalW:
 
@@ -90,9 +102,10 @@ emitted as the `…MSA` / `…Tree` constants. Row labels in the alignment and t
 tree are identical, which is how the viewer pairs a tree leaf to its alignment
 row.
 
-`build/` is gitignored scratch; only `datasets/*` (inputs) and the generated TS
-(output) are committed, so the data is both reproducible _and_ present without
-needing network access at build time.
+`build/` is gitignored scratch; only `datasets/*` (the accession TSVs, the
+`.fasta` sequence snapshots, and any `-domains.gff`) and the generated TS output
+are committed, so the data is both reproducible _and_ present without needing
+network access at build time.
 
 ## The `relativeTo` reference-row trick
 
