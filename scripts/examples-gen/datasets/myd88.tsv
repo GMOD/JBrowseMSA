@@ -1,0 +1,28 @@
+# MyD88 (myeloid differentiation primary response 88) across mammals.
+#
+# A TLR/IL-1R adaptor; the C-terminal TIR domain is where signalling-relevant
+# substitutions cluster. Inspired by Irving et al. 2023 (PMC10162675), which
+# compared MyD88 across bats vs other mammals. Bats are highlighted because of
+# their unusual tolerance of viral infection. Human is listed first so it can
+# be used as the `relativeTo` reference row (identical residues render as dots).
+#
+# Columns: UniProt accession <TAB> row label
+# Lines starting with # are comments. Reviewed (Swiss-Prot) entries preferred;
+# bat orthologs are unreviewed (TrEMBL) genome annotations.
+Q99836	Human
+B3Y678	Chimp
+B3Y680	Gorilla
+B3Y683	Macaque
+P22366	Mouse
+Q6Y1S1	Rat
+Q599T9	Cattle
+A2TF48	Pig
+F6TAV5	Horse
+A0A8I3Q209	Dog
+A0ABI7WPI4	Cat
+A0A6J3S0R3	Dolphin
+A0A8B8YSW7	Blue_whale
+G3U5U7	Elephant
+A0A6P3QII4	Bat_Pteropus
+A0A8B7T2C5	Bat_Hipposideros
+A0A6J2M3C2	Bat_Phyllostomus

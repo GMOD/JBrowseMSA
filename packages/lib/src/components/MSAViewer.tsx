@@ -18,6 +18,8 @@ interface MSAViewerProps {
   gffFilehandle?: FileLocationType
   colorScheme?: string
   height?: number
+  /** row name to diff every other row against (matches render as ".") */
+  relativeTo?: string
 }
 
 export default function MSAViewer({
@@ -29,6 +31,7 @@ export default function MSAViewer({
   gffFilehandle,
   colorScheme,
   height,
+  relativeTo,
 }: MSAViewerProps) {
   const theme = useMemo(() => createJBrowseTheme(), [])
   const model = useMemo(
@@ -43,6 +46,7 @@ export default function MSAViewer({
         ...(gffFilehandle ? { gffFilehandle } : {}),
         ...(colorScheme ? { colorSchemeName: colorScheme } : {}),
         ...(height ? { height } : {}),
+        ...(relativeTo ? { relativeTo } : {}),
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],

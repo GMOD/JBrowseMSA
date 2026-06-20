@@ -1,0 +1,24 @@
+# Globin gene family — the textbook example of evolution by gene duplication.
+#
+# Hemoglobin alpha/beta, myoglobin, neuroglobin and cytoglobin all descend from
+# one ancestral globin. In the resulting tree the sequences group by globin
+# TYPE (paralog), not by species — alpha-type chains cluster together across
+# human/mouse/horse, beta-type chains cluster separately, and so on — which is
+# the signature of duplication-then-divergence. There is no natural reference
+# row here, so this example does not use `relativeTo`.
+#
+# Columns: UniProt accession <TAB> row label (Species_globintype)
+P69905	Human_alpha
+P01942	Mouse_alpha
+P01958	Horse_alpha
+P02008	Human_zeta
+P68871	Human_beta
+P02088	Mouse_beta
+P02062	Horse_beta
+P02042	Human_delta
+P69891	Human_gamma
+P02144	Human_myoglobin
+P04247	Mouse_myoglobin
+P68082	Horse_myoglobin
+Q9NPG2	Human_neuroglobin
+Q8WWM9	Human_cytoglobin

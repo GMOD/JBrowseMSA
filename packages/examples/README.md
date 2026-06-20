@@ -32,11 +32,43 @@ A real Src-family kinase family with its tree and real InterProScan annotations
 A real ~60 sequence ncRNA family (Rfam Lysine riboswitch) with its full
 inferred tree, showing the canvas tiling holds up past toy data.
 
+### Reference dots: MyD88 across bats
+
+![MyD88 reference-dots example](../../docs/media/reference-dots.png)
+
+MyD88 across mammals (including three bats), diffed against human with
+`relativeTo` so identical residues render as dots and only the lineage-specific
+substitutions show as letters, beside the inferred tree.
+
+### Gene duplication: globin family
+
+![Globin family example](../../docs/media/gene-duplication.png)
+
+Hemoglobin α/β, myoglobin, neuroglobin and cytoglobin — the inferred tree groups
+sequences by globin **type**, not by species, the signature of gene duplication.
+
+### Host range: ACE2 (SARS-CoV-2 receptor)
+
+![ACE2 host-range example](../../docs/media/host-range.png)
+
+ACE2 across mammals (bats, civet, pangolin, resistant rodents) diffed against
+human, so the few divergent spike-contact positions that drive viral
+susceptibility stand out of the otherwise-conserved protein.
+
+### Color vision: opsin duplications
+
+![Opsin example](../../docs/media/opsin-classes.png)
+
+Vertebrate visual pigments sorted by opsin class (rhodopsins vs cone opsins),
+with a real InterProScan 7TM-GPCR domain overlay.
+
 > The vector figures above are generated headlessly from the viewer's own SVG
 > export via `pnpm figures` (see `packages/lib/scripts/generateFigures.tsx`).
-> The two real-data examples are PNG screenshots from `pnpm screenshots`
-> (their full-length vector export would be many MB), see
-> `scripts/screenshots/specs.mjs`.
+> The real-data examples are PNG screenshots from `pnpm screenshots` (their
+> full-length vector export would be many MB), see
+> `scripts/screenshots/specs.mjs`. The MyD88/globin/ACE2/opsin alignments and
+> trees are built reproducibly from UniProt with ClustalW — see
+> `scripts/examples-gen/README.md`.
 
 ## Develop
 

@@ -1,0 +1,195 @@
+/**
+ * Reproducible builder for the real-data phylogeny examples.
+ *
+ * For each dataset in datasets/*.tsv this does, transparently and from scratch:
+ *   1. fetch  — download each UniProt sequence by accession (REST API) and
+ *               write a FASTA with clean row labels (datasets/<name>.tsv maps
+ *               accession -> label).
+ *   2. align  — run ClustalW to produce a multiple sequence alignment.
+ *   3. tree   — run ClustalW again on the alignment to infer a neighbor-joining
+ *               tree (Newick), so the example ships a real inferred phylogeny
+ *               rather than a hand-drawn cladogram.
+ * The aligned FASTA + Newick for every dataset are then written as string
+ * constants into ../../packages/examples/src/examples/generatedData.ts, which
+ * the gallery, figures and screenshot specs all import.
+ *
+ * Prerequisites: clustalw on PATH (Debian/Ubuntu: `apt install clustalw`;
+ * macOS: `brew install clustal-w`) and network access to rest.uniprot.org.
+ *
+ * Usage:
+ *   node scripts/examples-gen/generate.mjs            # all datasets
+ *   node scripts/examples-gen/generate.mjs myd88 ace2 # a subset
+ *
+ * Intermediate files land in build/<name>/ (gitignored). Domain GFFs are NOT
+ * produced here — InterProScan is a separate, slow, network step documented in
+ * README.md and committed alongside the data.
+ */
+import { execFileSync } from 'node:child_process'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+const buildDir = path.join(here, 'build')
+const outFile = path.resolve(
+  here,
+  '../../packages/examples/src/examples/generatedData.ts',
+)
+
+// Each dataset names the constants it produces and whether the gallery should
+// offer a `relativeTo` reference row (the first label in the .tsv, i.e. the
+// first row of the alignment).
+const datasets = [
+  { name: 'myd88', varName: 'myd88', relativeToFirstRow: true },
+  { name: 'globin', varName: 'globin', relativeToFirstRow: false },
+  { name: 'ace2', varName: 'ace2', relativeToFirstRow: true },
+  { name: 'opsins', varName: 'opsin', relativeToFirstRow: false },
+]
+
+function readDataset(name) {
+  const tsv = fs.readFileSync(path.join(here, 'datasets', `${name}.tsv`), 'utf8')
+  return tsv
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !l.startsWith('#'))
+    .map(l => {
+      const [accession, label] = l.split('\t')
+      return { accession, label }
+    })
+}
+
+async function fetchFasta(rows) {
+  const parts = []
+  for (const { accession, label } of rows) {
+    const res = await fetch(
+      `https://rest.uniprot.org/uniprotkb/${accession}.fasta`,
+    )
+    if (!res.ok) {
+      throw new Error(`fetch ${accession} failed: ${res.status}`)
+    }
+    const seq = (await res.text()).split('\n').slice(1).join('')
+    if (!seq) {
+      throw new Error(`empty sequence for ${accession}`)
+    }
+    parts.push(`>${label}\n${seq}`)
+    console.log(`  fetched ${label} (${accession}, ${seq.length} aa)`)
+  }
+  return `${parts.join('\n')}\n`
+}
+
+function clustalw(args, cwd) {
+  execFileSync('clustalw', args, { cwd, stdio: 'pipe' })
+}
+
+// ClustalW outputs FASTA wrapped at 60 cols; join each record onto one line so
+// the committed string is one header + one sequence line per row.
+function unwrapFasta(afa) {
+  const records = []
+  let cur = null
+  for (const line of afa.split('\n')) {
+    if (line.startsWith('>')) {
+      cur = { head: line, seq: '' }
+      records.push(cur)
+    } else if (cur) {
+      cur.seq += line.trim()
+    }
+  }
+  return `${records.map(r => `${r.head}\n${r.seq}`).join('\n')}\n`
+}
+
+function buildOne({ name }) {
+  const dir = path.join(buildDir, name)
+  // 1. fetch — handled by caller (async); written to input.fasta
+  // 2. align
+  clustalw(
+    [
+      '-INFILE=input.fasta',
+      '-ALIGN',
+      '-TYPE=PROTEIN',
+      '-OUTPUT=FASTA',
+      '-OUTFILE=aligned.afa',
+    ],
+    dir,
+  )
+  // 3. neighbor-joining tree from the alignment (writes aligned.ph, Newick)
+  clustalw(
+    ['-INFILE=aligned.afa', '-TREE', '-TYPE=PROTEIN', '-OUTPUTTREE=phylip'],
+    dir,
+  )
+
+  const msa = unwrapFasta(fs.readFileSync(path.join(dir, 'aligned.afa'), 'utf8'))
+  const tree = fs
+    .readFileSync(path.join(dir, 'aligned.ph'), 'utf8')
+    .replace(/\s+/g, '')
+  const nSeqs = (msa.match(/^>/gm) || []).length
+  const width = msa.split('\n')[1].length
+  console.log(`  aligned ${nSeqs} sequences, ${width} columns`)
+  return { msa, tree }
+}
+
+function tsLiteral(s) {
+  if (s.includes('`') || s.includes('${')) {
+    throw new Error('unexpected backtick/template char in generated data')
+  }
+  return `\`${s}\``
+}
+
+const selected = process.argv.slice(2)
+const todo = selected.length
+  ? datasets.filter(d => selected.includes(d.name))
+  : datasets
+
+const results = {}
+for (const d of todo) {
+  const rows = readDataset(d.name)
+  console.log(`\n[${d.name}] fetching ${rows.length} sequences`)
+  const dir = path.join(buildDir, d.name)
+  fs.mkdirSync(dir, { recursive: true })
+  fs.writeFileSync(path.join(dir, 'input.fasta'), await fetchFasta(rows))
+  results[d.varName] = { ...buildOne(d), def: d, rows }
+}
+
+// Emit / update the generated TS file. When run on a subset, merge with the
+// existing file so untouched datasets keep their constants.
+const header = `// AUTO-GENERATED by scripts/examples-gen/generate.mjs — do not edit by hand.
+// Real protein-family alignments + neighbor-joining trees, built reproducibly
+// from UniProt accessions with ClustalW. See scripts/examples-gen/README.md for
+// the full method (which accessions, how they are fetched, aligned and the tree
+// inferred) and how to add or regenerate a dataset.
+`
+
+const blocks = []
+for (const [varName, { msa, tree, def }] of Object.entries(results)) {
+  const accList = `// accessions: scripts/examples-gen/datasets/${def.name}.tsv`
+  let block = `${accList}\nexport const ${varName}MSA = ${tsLiteral(msa)}\n\nexport const ${varName}Tree = ${tsLiteral(tree)}\n`
+  // Optional committed InterProScan domain GFF (produced out-of-band; see
+  // README.md). Sequence ids in it match the row labels in datasets/<name>.tsv.
+  const gffPath = path.join(here, 'datasets', `${def.name}-domains.gff`)
+  if (fs.existsSync(gffPath)) {
+    const gff = fs.readFileSync(gffPath, 'utf8').replace(/\s*$/, '\n')
+    block += `\nexport const ${varName}DomainsGFF = ${tsLiteral(gff)}\n`
+  }
+  blocks.push(block)
+}
+
+// Preserve constants for datasets not regenerated this run.
+let existing = ''
+if (fs.existsSync(outFile)) {
+  existing = fs.readFileSync(outFile, 'utf8')
+}
+const keep = []
+for (const d of datasets) {
+  if (results[d.varName]) {
+    continue
+  }
+  const re = new RegExp(
+    `(?:// accessions:[^\\n]*\\n)?export const ${d.varName}MSA = \`[\\s\\S]*?\`\\n\\nexport const ${d.varName}Tree = \`[\\s\\S]*?\`\\n(?:\\nexport const ${d.varName}DomainsGFF = \`[\\s\\S]*?\`\\n)?`,
+  )
+  const m = existing.match(re)
+  if (m) {
+    keep.push(m[0])
+  }
+}
+
+fs.writeFileSync(outFile, `${header}\n${[...keep, ...blocks].join('\n')}`)
+console.log(`\nwrote ${outFile}`)

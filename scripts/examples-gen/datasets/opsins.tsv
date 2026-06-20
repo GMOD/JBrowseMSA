@@ -1,0 +1,22 @@
+# Opsins (visual pigments) — a G-protein-coupled receptor family whose
+# duplications underlie colour vision.
+#
+# The tree sorts the sequences into the classic opsin classes rather than by
+# species: the dim-light rhodopsins (RH1) form one clade across human/cow/
+# chicken/fish, while the cone opsins split into RH2 (green), SWS1 (UV/violet/
+# blue) and LWS (red/green) clades. Human green (MWS) and red (LWS) are a very
+# recent duplication and come out nearly identical. Every member is a 7-
+# transmembrane GPCR, which the InterProScan domain overlay (opsinDomainsGFF)
+# marks across the body of each sequence.
+#
+# Columns: UniProt accession <TAB> row label (Species_colour_class)
+P08100	Human_RHO
+P02699	Bovine_RHO
+P22328	Chicken_RHO
+Q9YGZ1	Fish_RHO
+P28683	Chicken_green_RH2
+P03999	Human_blue_SWS1
+P28684	Chicken_violet_SWS1
+P04001	Human_green_MWS
+P04000	Human_red_LWS
+P22329	Chicken_red_LWS

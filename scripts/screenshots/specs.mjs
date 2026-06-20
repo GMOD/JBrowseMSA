@@ -35,6 +35,28 @@ const kinaseTree = exampleData.match(
   /export const kinaseTree =\s*'([^']*)'/,
 )[1]
 
+// The phylogeny examples (MyD88/globin/ACE2/opsins) are built reproducibly into
+// generatedData.ts by scripts/examples-gen; read those constants the same way.
+const generatedData = fs.readFileSync(
+  path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../packages/examples/src/examples/generatedData.ts',
+  ),
+  'utf8',
+)
+function genConst(name) {
+  const m = generatedData.match(
+    new RegExp(`export const ${name} = \`([\\s\\S]*?)\``),
+  )
+  if (!m) {
+    throw new Error(`could not find ${name} in generatedData.ts`)
+  }
+  return m[1]
+}
+// The opsin domain GFF is an out-of-band InterProScan product (see
+// scripts/examples-gen/README.md); keep the opsin spec out until it's present.
+const hasOpsinDomains = /export const opsinDomainsGFF = /.test(generatedData)
+
 // Small IL2RA protein alignment + matching tree (same data as the examples).
 const proteinMSA = `CLUSTAL O(1.2.3) multiple sequence alignment
 UniProt|P26898|IL2RA_SHEEP      MEPSLLMWRFFVFIVVPGCVTEACHDDPPSLRNA----------MFKVLRYE----VGTM
@@ -113,4 +135,116 @@ export const specs = [
     settle: 3500,
     clip: 'viewer',
   },
+  {
+    name: 'color-scheme-menu',
+    url: data({ colorSchemeName: 'clustal' }),
+    actions: [
+      { click: '[data-testid="color_scheme_menu"]' },
+      { waitFor: '::-p-text(percent_identity_dynamic)' },
+    ],
+    clip: 'full',
+  },
+  {
+    name: 'tree-collapse',
+    // collapse the (FELCA,(HUMAN,MACMU)) subclade; node ids are deterministic
+    // from generateNodeIds (msa-parsers/src/util.ts): root 'node-0', each child
+    // appends '-<index>-<depth>'. Collapsing it draws the collapsed-branch
+    // marker and drops those rows (and the gaps they introduced) from the MSA.
+    url: data({ collapsed: ['node-0-0-1-0-2-1-3'] }),
+    clip: 'viewer',
+  },
+  {
+    name: 'export-svg-dialog',
+    url: data({}),
+    actions: [
+      { click: '[data-testid="file_menu"]' },
+      { click: '::-p-text(Export SVG)' },
+      { waitFor: '::-p-text(Export type)' },
+    ],
+    clip: 'full',
+  },
+  {
+    name: 'metadata-dialog',
+    url: data({ data: { msa: proteinMSA, tree: proteinTree } }),
+    actions: [
+      { click: '[data-testid="file_menu"]' },
+      { click: '::-p-text(Metadata)' },
+      { waitFor: '::-p-text(sequence)' },
+    ],
+    clip: 'full',
+  },
+  {
+    name: 'reference-dots',
+    // relativeTo=Human: identical residues render as ".", so the lineage-
+    // specific MyD88 substitutions (and the bat clade) stand out next to the
+    // inferred tree. Readable column width so the dots/letters are legible.
+    url: data({
+      height: 460,
+      treeAreaWidth: 150,
+      relativeTo: 'Human',
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('myd88MSA'),
+        tree: genConst('myd88Tree'),
+      },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+  },
+  {
+    name: 'gene-duplication',
+    // globin family: the tree groups by globin TYPE across species, the
+    // signature of gene duplication
+    url: data({
+      height: 420,
+      treeAreaWidth: 215,
+      colWidth: 7,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('globinMSA'),
+        tree: genConst('globinTree'),
+      },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+  },
+  {
+    name: 'host-range',
+    // ACE2 diffed against human; the few divergent spike-contact residues in
+    // the N-terminal peptidase domain pop out of the otherwise-conserved protein
+    url: data({
+      height: 460,
+      treeAreaWidth: 250,
+      relativeTo: 'Human',
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('ace2MSA'),
+        tree: genConst('ace2Tree'),
+      },
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  ...(hasOpsinDomains
+    ? [
+        {
+          name: 'opsin-classes',
+          // vertebrate opsins: tree sorts by opsin class, with the real
+          // InterProScan 7TM-GPCR domain overlay across each sequence
+          url: data({
+            height: 420,
+            treeAreaWidth: 200,
+            colWidth: 4,
+            colorSchemeName: 'clustalx_protein_dynamic',
+            data: {
+              msa: genConst('opsinMSA'),
+              tree: genConst('opsinTree'),
+              gff: genConst('opsinDomainsGFF'),
+            },
+          }),
+          settle: 2500,
+          clip: 'viewer',
+        },
+      ]
+    : []),
 ]

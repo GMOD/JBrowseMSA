@@ -27,10 +27,11 @@ function rewriteMarkdownImages() {
   }
 }
 
-// Wrap a standalone screenshot (a <p> containing only an <img>) together
-// with the descriptive paragraph right after it into a <figure>, so
-// screenshots read as documentation figures rather than looking like a live
-// demo embedded in the page.
+// Wrap a standalone screenshot (a <p> containing only an <img>, or an <img>
+// wrapped in a single <a> when the figure links to a live demo) together with
+// the descriptive paragraph right after it into a <figure>, so screenshots read
+// as documentation figures rather than looking like a live demo embedded in the
+// page.
 function wrapFigures() {
   return tree => {
     const visit = node => {
@@ -39,12 +40,22 @@ function wrapFigures() {
       }
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i]
-        const img =
+        const only =
           child.type === 'element' &&
           child.tagName === 'p' &&
           child.children.length === 1 &&
           child.children[0]
-        if (img && img.type === 'element' && img.tagName === 'img') {
+        // the figure content is either a bare <img> or an <a><img></a>
+        const img =
+          only &&
+          only.type === 'element' &&
+          (only.tagName === 'img' ||
+            (only.tagName === 'a' &&
+              only.children.length === 1 &&
+              only.children[0]?.tagName === 'img'))
+            ? only
+            : undefined
+        if (img) {
           // skip whitespace-only text nodes that remark-rehype inserts
           // between block elements to mirror blank lines in the source
           let j = i + 1

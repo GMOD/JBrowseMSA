@@ -1,17 +1,25 @@
 import type { ComponentType } from 'react'
 
+import Ace2 from './Ace2'
+import Ace2Src from './Ace2.tsx?raw'
 import ColorSchemes from './ColorSchemes'
 import ColorSchemesSrc from './ColorSchemes.tsx?raw'
 import Domains from './Domains'
 import DomainsSrc from './Domains.tsx?raw'
+import Globin from './Globin'
+import GlobinSrc from './Globin.tsx?raw'
 import LargeTree from './LargeTree'
 import LargeTreeSrc from './LargeTree.tsx?raw'
 import LoadFromUrl from './LoadFromUrl'
 import LoadFromUrlSrc from './LoadFromUrl.tsx?raw'
 import ModelApi from './ModelApi'
 import ModelApiSrc from './ModelApi.tsx?raw'
+import Myd88 from './Myd88'
+import Myd88Src from './Myd88.tsx?raw'
 import NucleotideAlignment from './NucleotideAlignment'
 import NucleotideAlignmentSrc from './NucleotideAlignment.tsx?raw'
+import Opsins from './Opsins'
+import OpsinsSrc from './Opsins.tsx?raw'
 import ProgrammaticControl from './ProgrammaticControl'
 import ProgrammaticControlSrc from './ProgrammaticControl.tsx?raw'
 import RealDomains from './RealDomains'
@@ -93,6 +101,42 @@ export const examples: Example[] = [
       'full inferred tree — shows the canvas tiling holds up past toy data.',
     Component: LargeTree,
     source: LargeTreeSrc,
+  },
+  {
+    name: 'Reference dots (MyD88 across bats)',
+    description:
+      'MyD88 across mammals incl. bats, diffed against human (relativeTo) so ' +
+      'identical residues show as dots and lineage-specific changes stand out, ' +
+      'beside the inferred tree.',
+    Component: Myd88,
+    source: Myd88Src,
+  },
+  {
+    name: 'Gene duplication (globin family)',
+    description:
+      'Hemoglobin alpha/beta, myoglobin, neuroglobin and cytoglobin — the ' +
+      'inferred tree groups by globin type, not species: the signature of ' +
+      'gene duplication.',
+    Component: Globin,
+    source: GlobinSrc,
+  },
+  {
+    name: 'Host range (ACE2 / SARS-CoV-2 receptor)',
+    description:
+      'ACE2 across mammals (bats, civet, pangolin, resistant rodents) diffed ' +
+      'against human, so the few spike-contact positions that drive viral ' +
+      'susceptibility stand out.',
+    Component: Ace2,
+    source: Ace2Src,
+  },
+  {
+    name: 'Color vision (opsin duplications)',
+    description:
+      'Vertebrate opsins sorted by class (rhodopsins vs cone opsins) with a ' +
+      'real InterProScan 7TM-GPCR domain overlay — a color-vision duplication ' +
+      'history.',
+    Component: Opsins,
+    source: OpsinsSrc,
   },
   {
     name: 'Load from URL',

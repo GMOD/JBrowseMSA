@@ -92,15 +92,15 @@ cd react-msaview
 pnpm install
 ```
 
-| Command                              | What it does                                                         |
-| ------------------------------------ | -------------------------------------------------------------------- |
-| `pnpm dev`                           | Run the demo app with hot reload (edits in `packages/lib/src/`)      |
-| `pnpm --filter examples dev`         | Run the live examples gallery                                        |
-| `pnpm build`                         | Build all packages                                                   |
-| `pnpm test`                          | Run the test suite                                                   |
-| `pnpm figures`                       | Regenerate the README figures (headless SVG, `packages/lib/scripts`) |
-| `pnpm screenshots`                   | Regenerate the user-guide app screenshots (`scripts/screenshots`)    |
-| `pnpm lint` / `format` / `typecheck` | Lint, format with Prettier, typecheck all packages                   |
+| Command                              | What it does                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| `pnpm dev`                           | Run the demo app with hot reload (edits in `packages/lib/src/`)                     |
+| `pnpm --filter examples dev`         | Run the live examples gallery                                                       |
+| `pnpm build`                         | Build all packages                                                                  |
+| `pnpm test`                          | Run the test suite                                                                  |
+| `pnpm figures`                       | Regenerate the README figures (headless SVG, `packages/lib/scripts`)                |
+| `pnpm screenshots`                   | Regenerate the user-guide app screenshots (diff-gated; only changed images rewrite) |
+| `pnpm lint` / `format` / `typecheck` | Lint, format with Prettier, typecheck all packages                                  |
 
 Architecture notes live in [CLAUDE.md](CLAUDE.md); the core state model is
 `packages/lib/src/model.ts` (MobX-state-tree), and `observer`-wrapped components

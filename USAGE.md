@@ -149,7 +149,7 @@ hydrophobicity, helix, strand, turn
 ## API
 
 See the auto-generated API docs:
-[packages/lib/apidocs/MsaView.md](packages/lib/apidocs/MsaView.md)
+[packages/lib/apidocs/MsaView.md](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/apidocs/MsaView.md)
 
 The model source is in `packages/lib/src/model.ts`. The React-MSAView package
 uses MobX-state-tree models. Components wrapped with `observer` from mobx-react

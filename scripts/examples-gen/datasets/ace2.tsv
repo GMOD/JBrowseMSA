@@ -1,0 +1,27 @@
+# ACE2 (angiotensin-converting enzyme 2) across mammals — the SARS-CoV / SARS-
+# CoV-2 entry receptor.
+#
+# Whether a species is susceptible largely tracks a handful of residues in the
+# N-terminal peptidase domain that contact the viral spike. Comparing orthologs
+# (with human as the `relativeTo` reference, so identical residues show as dots)
+# makes those few divergent contact positions pop out against an otherwise
+# highly conserved ~800-residue protein. Includes reservoir/intermediate-host
+# candidates (horseshoe bats, civet, pangolin) and naturally resistant rodents.
+#
+# Columns: UniProt accession <TAB> row label. Human first (reference).
+Q9BYF1	Human
+B6DUE6	Macaque
+Q8R0I0	Mouse
+Q5EGZ1	Rat
+A0A1U7QTA1	Hamster
+Q56NL1	Civet
+Q56H28	Cat
+A0A6M4S156	Dog
+Q2WG88	Ferret
+B4XEP4	Raccoon_dog
+K7GLM4	Pig
+Q58DD0	Cattle
+A0A7D5TP47	Pangolin
+A0A671F9Q9	Bat_Rhinolophus
+E2DHI3	Bat_Rhinolophus_macrotis
+D8WU01	Bat_Rousettus
