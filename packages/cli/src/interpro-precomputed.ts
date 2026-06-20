@@ -118,7 +118,9 @@ export async function runInterProPrecomputed(
     string,
     {
       matches: {
-        signature: { entry: { accession: string; name: string; description: string } }
+        signature: {
+          entry: { accession: string; name: string; description: string }
+        }
         locations: ApiFragment[]
       }[]
       xref: { id: string }[]

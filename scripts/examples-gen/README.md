@@ -27,11 +27,10 @@ node scripts/examples-gen/generate.mjs --fetch
 node scripts/examples-gen/generate.mjs myd88 ace2
 ```
 
-Output is written to
-`packages/examples/src/examples/generatedData.ts` as plain string constants
-(`myd88MSA`, `myd88Tree`, `globinMSA`, …) that the gallery, the SVG figures and
-the screenshot specs all import. That file is **generated — do not edit it by
-hand**; edit the inputs here and re-run.
+Output is written to `packages/examples/src/examples/generatedData.ts` as plain
+string constants (`myd88MSA`, `myd88Tree`, `globinMSA`, …) that the gallery, the
+SVG figures and the screenshot specs all import. That file is **generated — do
+not edit it by hand**; edit the inputs here and re-run.
 
 ## What a dataset is
 
@@ -61,24 +60,25 @@ Current datasets:
 A ✦ in the last column marks datasets that ship a committed InterProScan domain
 overlay (`<name>-domains.gff`).
 
-| File              | Family | Story it tells | Paper | Dom |
-| ----------------- | ------ | -------------- | ----- | --- |
-| `myd88.tsv`       | MyD88 TLR/IL-1R adaptor across mammals + 3 bats | `relativeTo=Human` identity-dots; lineage-specific substitutions; Death + TIR two-domain architecture | Tian et al. 2023, Sci. Adv. (PMC10162675) | ✦ |
-| `globin.tsv`      | Hemoglobin α/β, myoglobin, neuroglobin, cytoglobin | tree groups by globin **type**, not species — gene duplication | Zuckerkandl & Pauling 1965 | |
-| `ace2.tsv`        | ACE2 (SARS-CoV-2 receptor) across mammals | dot view exposes the few spike-contact residues driving host range; peptidase M2 + collectrin domains | Damas et al. 2020, PNAS | ✦ |
-| `opsins.tsv`      | Vertebrate visual pigments | tree sorts by opsin class; + real 7TM-GPCR domain overlay | Yokoyama 2000, Prog. Retin. Eye Res. | ✦ |
-| `histone_h4.tsv`  | Histone H4 across eukaryotes | one of the most conserved proteins known — near-flat alignment | | |
-| `cytochrome_c.tsv`| Cytochrome c across eukaryotic life | classic molecular clock; tree spans >1 Gy | Fitch & Margoliash 1967, Science | |
-| `prestin.tsv`     | Prestin (SLC26A5) hearing motor | echolocators converge in the gene tree; SLC26 transmembrane + STAS domains | Li et al. 2010, Curr. Biol. | ✦ |
-| `p53.tsv`         | Tumor suppressor p53 across mammals | conserved DNA-binding core vs variable termini; multi-domain TAD/DBD/tetramerization | Lane 1992, Nature | ✦ |
-| `ef1a.tsv`        | EF-1α / EF-Tu across the three domains of life | universal GTPase rooting the tree of life; 3-domain EF architecture | Iwabe et al. 1989, PNAS | ✦ |
-| `insulin.tsv`     | Insulin / IGF preprohormone | signal + B + C + A peptide segments across vertebrates | | |
-| `aquaporin.tsv`   | Aquaporin (MIP) channel family | shared 6-TM MIP fold; tree splits water channels from aquaglyceroporins — groups by function | — | ✦ |
-| `hox.tsv`         | Hox transcription factors (human, PG1→PG13) | divergent proteins sharing one conserved homeodomain; overlay marks that single block | Gehring et al. 1994, Annu. Rev. Biochem. | ✦ |
-| `trna.stock`      | Transfer RNA cloverleaf (Rfam RF00005 seed subset) | RNA secondary structure: `SS_cons` renders as a base-paired track over the alignment | Sprinzl & Vassilenko 2005, NAR | |
-| `hammerhead.stock`| Hammerhead ribozyme type III (Rfam RF00008 seed subset) | catalytic RNA: `SS_cons` shows the three-way helix junction; counterpoint to tRNA | Pley et al. 1994, Nature | |
+| File               | Family                                                  | Story it tells                                                                                        | Paper                                     | Dom |
+| ------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------- | --- |
+| `myd88.tsv`        | MyD88 TLR/IL-1R adaptor across mammals + 3 bats         | `relativeTo=Human` identity-dots; lineage-specific substitutions; Death + TIR two-domain architecture | Tian et al. 2023, Sci. Adv. (PMC10162675) | ✦   |
+| `globin.tsv`       | Hemoglobin α/β, myoglobin, neuroglobin, cytoglobin      | tree groups by globin **type**, not species — gene duplication                                        | Zuckerkandl & Pauling 1965                |     |
+| `ace2.tsv`         | ACE2 (SARS-CoV-2 receptor) across mammals               | dot view exposes the few spike-contact residues driving host range; peptidase M2 + collectrin domains | Damas et al. 2020, PNAS                   | ✦   |
+| `opsins.tsv`       | Vertebrate visual pigments                              | tree sorts by opsin class; + real 7TM-GPCR domain overlay                                             | Yokoyama 2000, Prog. Retin. Eye Res.      | ✦   |
+| `histone_h4.tsv`   | Histone H4 across eukaryotes                            | one of the most conserved proteins known — near-flat alignment                                        |                                           |     |
+| `cytochrome_c.tsv` | Cytochrome c across eukaryotic life                     | classic molecular clock; tree spans >1 Gy                                                             | Fitch & Margoliash 1967, Science          |     |
+| `prestin.tsv`      | Prestin (SLC26A5) hearing motor                         | echolocators converge in the gene tree; SLC26 transmembrane + STAS domains                            | Li et al. 2010, Curr. Biol.               | ✦   |
+| `p53.tsv`          | Tumor suppressor p53 across mammals                     | conserved DNA-binding core vs variable termini; multi-domain TAD/DBD/tetramerization                  | Lane 1992, Nature                         | ✦   |
+| `ef1a.tsv`         | EF-1α / EF-Tu across the three domains of life          | universal GTPase rooting the tree of life; 3-domain EF architecture                                   | Iwabe et al. 1989, PNAS                   | ✦   |
+| `insulin.tsv`      | Insulin / IGF preprohormone                             | signal + B + C + A peptide segments across vertebrates                                                |                                           |     |
+| `aquaporin.tsv`    | Aquaporin (MIP) channel family                          | shared 6-TM MIP fold; tree splits water channels from aquaglyceroporins — groups by function          | —                                         | ✦   |
+| `hox.tsv`          | Hox transcription factors (human, PG1→PG13)             | divergent proteins sharing one conserved homeodomain; overlay marks that single block                 | Gehring et al. 1994, Annu. Rev. Biochem.  | ✦   |
+| `trna.stock`       | Transfer RNA cloverleaf (Rfam RF00005 seed subset)      | RNA secondary structure: `SS_cons` renders as a base-paired track over the alignment                  | Sprinzl & Vassilenko 2005, NAR            |     |
+| `hammerhead.stock` | Hammerhead ribozyme type III (Rfam RF00008 seed subset) | catalytic RNA: `SS_cons` shows the three-way helix junction; counterpoint to tRNA                     | Pley et al. 1994, Nature                  |     |
 
-The `.stock` datasets are RNA, not protein — see "RNA structural alignments" below.
+The `.stock` datasets are RNA, not protein — see "RNA structural alignments"
+below.
 
 ## The pipeline (`generate.mjs`)
 
@@ -134,18 +134,18 @@ comparative-genomics figures.
 ## Domain overlays — committed `datasets/<name>-domains.gff`
 
 Domain annotations are produced once with the project's own CLI and committed as
-`datasets/<name>-domains.gff`; `generate.mjs` picks the file up automatically and
-emits a `…DomainsGFF` constant. The GFF `seq_id`s are the dataset row labels and
-the coordinates are in ungapped sequence space — the viewer maps them onto
+`datasets/<name>-domains.gff`; `generate.mjs` picks the file up automatically
+and emits a `…DomainsGFF` constant. The GFF `seq_id`s are the dataset row labels
+and the coordinates are in ungapped sequence space — the viewer maps them onto
 alignment columns (`seqPosToGlobalCol`), so domains line up on a gapped
 alignment.
 
 **Preferred method — precomputed InterPro (`interpro`).** Every UniProtKB
 sequence already has InterPro matches computed and served by the EBI InterPro
-API, and our inputs *are* UniProt accessions, so there is no need to run a scan
-at all. This path is instant, deterministic, needs no email, and pins to a single
-InterPro release (stamped in the GFF header). It reads `datasets/<name>.tsv`
-directly:
+API, and our inputs _are_ UniProt accessions, so there is no need to run a scan
+at all. This path is instant, deterministic, needs no email, and pins to a
+single InterPro release (stamped in the GFF header). It reads
+`datasets/<name>.tsv` directly:
 
 ```sh
 node packages/cli/dist/index.js interpro \
@@ -159,9 +159,9 @@ signature per domain (e.g. Death + TIR for MyD88, the four p53 domains, the
 available.
 
 **Fallback — live InterProScan (`interproscan`).** Only needed for sequences
-that are *not* in UniProtKB (custom/edited/predicted), where no precomputed match
-exists. It submits each ungapped sequence to the EBI InterProScan API (slow,
-~1–5 min/seq, email-gated) or to a local/Docker/Singularity install:
+that are _not_ in UniProtKB (custom/edited/predicted), where no precomputed
+match exists. It submits each ungapped sequence to the EBI InterProScan API
+(slow, ~1–5 min/seq, email-gated) or to a local/Docker/Singularity install:
 
 ```sh
 node packages/cli/dist/index.js interproscan \
@@ -173,12 +173,13 @@ node packages/cli/dist/index.js interproscan \
 ## Adding a new example
 
 1. Create `datasets/mygene.tsv` (accession `<TAB>` label; reference row first).
-2. Add `{ name: 'mygene', varName: 'mygene', relativeToFirstRow: <bool> }` to the
-   `datasets` array in `generate.mjs`.
+2. Add `{ name: 'mygene', varName: 'mygene', relativeToFirstRow: <bool> }` to
+   the `datasets` array in `generate.mjs`.
 3. `node scripts/examples-gen/generate.mjs mygene` → constants `mygeneMSA` /
    `mygeneTree` appear in `generatedData.ts`.
-4. (optional) `node packages/cli/dist/index.js interpro datasets/mygene.tsv -o
-   datasets/mygene-domains.gff` to add `mygeneDomainsGFF` (precomputed InterPro).
+4. (optional)
+   `node packages/cli/dist/index.js interpro datasets/mygene.tsv -o datasets/mygene-domains.gff`
+   to add `mygeneDomainsGFF` (precomputed InterPro).
 5. Add a gallery component in `packages/examples/src/examples/` that imports the
    constants, and register it in `index.ts`.
 
@@ -188,13 +189,13 @@ Structured-RNA families are handled differently from the protein `.tsv`
 datasets. An Rfam seed alignment is **already** a hand-curated structural
 alignment that carries a consensus secondary structure (`#=GC SS_cons`, WUSS
 notation), so re-aligning it would destroy the column-to-structure
-correspondence. The committed `datasets/<name>.stock` is therefore kept
-verbatim as the alignment; `generate.mjs` only:
+correspondence. The committed `datasets/<name>.stock` is therefore kept verbatim
+as the alignment; `generate.mjs` only:
 
 - runs ClustalW `-TREE -TYPE=DNA` on its sequences to infer a neighbor-joining
   tree (mapping `U`→`T` and Rfam insert gaps `.`→`-` purely for the inference),
-  then injects that tree as `#=GF NH` so the parser
-  (`StockholmMSA.getTree`) renders it; and
+  then injects that tree as `#=GF NH` so the parser (`StockholmMSA.getTree`)
+  renders it; and
 - emits a single `<var>MSA` Stockholm string constant (no separate `Tree`
   constant — the tree is embedded).
 
@@ -218,6 +219,7 @@ Two real examples predate this pipeline and are documented here for provenance:
 - **Src-family kinases** (`kinaseMSA`/`kinaseTree`/`kinaseDomainsGFF` in
   `exampleData.ts`) — 10 SFKs aligned with ClustalW, domains from
   `react-msaview-cli interproscan`; same method as above, just hand-run earlier.
-- **Lysine riboswitch** (`lysineMSA` in `exampleData.ts`) — not built here: it is
-  the Rfam RF00168 seed alignment downloaded as Stockholm, which already embeds
-  its own tree (`#=GF NH`) and secondary structure, extracted by the parser.
+- **Lysine riboswitch** (`lysineMSA` in `exampleData.ts`) — not built here: it
+  is the Rfam RF00168 seed alignment downloaded as Stockholm, which already
+  embeds its own tree (`#=GF NH`) and secondary structure, extracted by the
+  parser.

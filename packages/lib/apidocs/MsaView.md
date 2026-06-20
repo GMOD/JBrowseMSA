@@ -41,9 +41,9 @@ Available on this model via composition. Follow each link for full signatures an
 
 ### Available via [MSAModel](../msamodel)
 
-**Properties:** bgColor, colorSchemeName
+**Properties:** bgColor, colorSchemeName, msaFormat
 
-**Actions:** setColorSchemeName, setBgColor
+**Actions:** setColorSchemeName, setBgColor, setMSAFormat
 
 ### MsaView - Properties
 

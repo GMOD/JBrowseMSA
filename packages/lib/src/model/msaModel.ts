@@ -29,7 +29,9 @@ export function MSAModelF() {
        * force the MSA data to be parsed as a specific format instead of relying
        * on auto-detection (which is ambiguous between e.g. fasta and a3m)
        */
-      msaFormat: types.maybe(types.enumeration<MSAFormat>('MSAFormat', msaFormats)),
+      msaFormat: types.maybe(
+        types.enumeration<MSAFormat>('MSAFormat', msaFormats),
+      ),
     })
     .actions(self => ({
       /**

@@ -29,8 +29,8 @@ A real Src-family kinase family with its tree and real InterProScan annotations
 
 ![Lysine riboswitch example](../../docs/media/large-tree.png)
 
-A real ~60 sequence ncRNA family (Rfam Lysine riboswitch) with its full
-inferred tree, showing the canvas tiling holds up past toy data.
+A real ~60 sequence ncRNA family (Rfam Lysine riboswitch) with its full inferred
+tree, showing the canvas tiling holds up past toy data.
 
 ### Reference dots: MyD88 across bats
 

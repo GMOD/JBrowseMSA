@@ -134,7 +134,8 @@ export function renderCollapsedTriangles({
     if (collapsed.includes(id)) {
       const apexX = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
       const y = node.x!
-      const inBlock = y > offsetY - extendBounds && y < offsetY + by + extendBounds
+      const inBlock =
+        y > offsetY - extendBounds && y < offsetY + by + extendBounds
       // in cladogram mode the hidden tips align at the right edge, otherwise use
       // the branch-length extent recorded in the model's hierarchy getter
       const baseX = showBranchLen

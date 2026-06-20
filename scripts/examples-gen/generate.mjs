@@ -66,7 +66,10 @@ const datasets = [
 ]
 
 function readDataset(name) {
-  const tsv = fs.readFileSync(path.join(here, 'datasets', `${name}.tsv`), 'utf8')
+  const tsv = fs.readFileSync(
+    path.join(here, 'datasets', `${name}.tsv`),
+    'utf8',
+  )
   return tsv
     .split('\n')
     .map(l => l.trim())
@@ -136,7 +139,9 @@ function buildOne({ name }) {
     dir,
   )
 
-  const msa = unwrapFasta(fs.readFileSync(path.join(dir, 'aligned.afa'), 'utf8'))
+  const msa = unwrapFasta(
+    fs.readFileSync(path.join(dir, 'aligned.afa'), 'utf8'),
+  )
   const tree = fs
     .readFileSync(path.join(dir, 'aligned.ph'), 'utf8')
     .replace(/\s+/g, '')
@@ -178,9 +183,7 @@ function buildRnaStockholm({ name }) {
     .replace(/\s+/g, '')
   // Inject the inferred tree as #=GF NH right after the STOCKHOLM header, the
   // same place the parser (StockholmMSA.getTree) reads it from.
-  const out = lines.flatMap((l, i) =>
-    i === 0 ? [l, `#=GF NH ${tree}`] : [l],
-  )
+  const out = lines.flatMap((l, i) => (i === 0 ? [l, `#=GF NH ${tree}`] : [l]))
   const msa = out.join('\n')
   console.log(`  ${seqRows.length} sequences, ${seqRows[0].seq.length} columns`)
   return { msa }

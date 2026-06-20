@@ -269,7 +269,10 @@ export function collapsedSubtreeLengthExtent<T extends { length?: number }>(
       const kids = n.children ?? n._children
       if (kids?.length) {
         for (const child of kids) {
-          stack.push({ node: child, acc: acc + Math.max(child.data.length ?? 0, 0) })
+          stack.push({
+            node: child,
+            acc: acc + Math.max(child.data.length ?? 0, 0),
+          })
         }
       } else {
         min = Math.min(min, acc)
