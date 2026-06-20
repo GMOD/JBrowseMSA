@@ -98,8 +98,9 @@ the alignment tightens up as you fold clades away.
 
 [![](media/tree-collapse.png)][live-tree-collapse]
 
-A collapsed subtree, marked by a filled node on the branch. The rows beneath it
-are hidden and the gap-only columns they introduced are removed.
+A collapsed subtree, drawn as a triangle labelled with its tip count (here 3).
+The rows beneath it are hidden and the gap-only columns they introduced are
+removed.
 
 The tree settings menu toggles branch-length rendering, right-aligned vs
 tree-adjacent labels, and clickable branch bubbles. You can also compute a
