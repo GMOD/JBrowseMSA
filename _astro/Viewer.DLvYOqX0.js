@@ -1,1 +1,0 @@
-import{j as e,D as r,z as i,A as o}from"./exampleData.CFCfm1IC.js";function t(){return e.jsx("div",{style:{border:"1px solid var(--border)",borderRadius:6},children:e.jsx(r,{msa:o,tree:i,colorScheme:"clustalx_protein_dynamic",height:400})})}export{t as default};
