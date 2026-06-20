@@ -148,6 +148,27 @@ main.wide {
   border-radius: 4px;
 }
 
+.prose figure {
+  margin: 24px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-soft);
+}
+
+.prose figure img {
+  display: block;
+  margin: 0 auto;
+}
+
+.prose figcaption {
+  text-align: center;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
 .prose pre {
   background: var(--bg-soft);
   padding: 14px;
