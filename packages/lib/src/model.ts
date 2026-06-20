@@ -1,10 +1,4 @@
-import {
-  clamp,
-  fetchAndMaybeUnzipText,
-  groupBy,
-  notEmpty,
-  sum,
-} from '@jbrowse/core/util'
+import { clamp, groupBy, notEmpty, sum } from '@jbrowse/core/util'
 import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
 import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
@@ -51,6 +45,7 @@ import {
   minRowHeight,
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
+import { fetchTextWithProgress, isAbortError } from './fetchUtils.ts'
 import { flatToTree } from './flatToTree.ts'
 import {
   calcDepthToLeaf,
@@ -1759,8 +1754,13 @@ function stateModelFactory() {
               const generation = ++treeGeneration
               try {
                 self.setLoadingTree(true)
-                const text = await fetchAndMaybeUnzipText(
+                const text = await fetchTextWithProgress(
                   openLocation(treeFilehandle),
+                  status => {
+                    if (generation === treeGeneration) {
+                      self.setStatus(status)
+                    }
+                  },
                 )
                 if (generation === treeGeneration) {
                   transaction(() => {
@@ -1773,8 +1773,14 @@ function stateModelFactory() {
                 }
               } catch (e) {
                 if (generation === treeGeneration) {
-                  console.error(e)
-                  self.setError(e)
+                  if (isAbortError(e)) {
+                    // cancelled by the user: drop the filehandle so the view
+                    // returns to the import form instead of a stuck spinner
+                    self.setTreeFilehandle(undefined)
+                  } else {
+                    console.error(e)
+                    self.setError(e)
+                  }
                 }
               } finally {
                 if (generation === treeGeneration) {
@@ -1784,21 +1790,34 @@ function stateModelFactory() {
             }
           }),
         )
-        // autorun opens treeMetadataFilehandle
+        // autorun opens treeMetadataFilehandle. generation guard: see
+        // treeFilehandle
+        let treeMetadataGeneration = 0
         addDisposer(
           self,
           autorun(async () => {
             const { treeMetadataFilehandle } = self
             if (treeMetadataFilehandle) {
+              const generation = ++treeMetadataGeneration
               try {
-                self.setTreeMetadata(
-                  await fetchAndMaybeUnzipText(
-                    openLocation(treeMetadataFilehandle),
-                  ),
+                const text = await fetchTextWithProgress(
+                  openLocation(treeMetadataFilehandle),
+                  status => {
+                    if (generation === treeMetadataGeneration) {
+                      self.setStatus(status)
+                    }
+                  },
                 )
+                if (generation === treeMetadataGeneration) {
+                  self.setTreeMetadata(text)
+                }
               } catch (e) {
-                console.error(e)
-                self.setError(e)
+                // on user cancel (isAbortError) just stop; treeMetadata is
+                // optional and gates no view, so nothing is left stuck
+                if (generation === treeMetadataGeneration && !isAbortError(e)) {
+                  console.error(e)
+                  self.setError(e)
+                }
               }
             }
           }),
@@ -1820,23 +1839,39 @@ function stateModelFactory() {
           }),
         )
 
-        // autorun opens gffFilehandle for InterProScan domains
+        // autorun opens gffFilehandle for InterProScan domains. generation
+        // guard: see treeFilehandle
+        let gffGeneration = 0
         addDisposer(
           self,
           autorun(async () => {
             const { gffFilehandle } = self
             if (gffFilehandle) {
+              const generation = ++gffGeneration
               try {
-                const gffText = await fetchAndMaybeUnzipText(
+                const gffText = await fetchTextWithProgress(
                   openLocation(gffFilehandle),
+                  status => {
+                    if (generation === gffGeneration) {
+                      self.setStatus(status)
+                    }
+                  },
                 )
-                self.applyGFFText(gffText)
-                if (gffFilehandle.locationType === 'BlobLocation') {
-                  self.setGFFFilehandle(undefined)
+                if (generation === gffGeneration) {
+                  self.applyGFFText(gffText)
+                  if (gffFilehandle.locationType === 'BlobLocation') {
+                    self.setGFFFilehandle(undefined)
+                  }
                 }
               } catch (e) {
-                console.error(e)
-                self.setError(e)
+                if (generation === gffGeneration) {
+                  if (isAbortError(e)) {
+                    self.setGFFFilehandle(undefined)
+                  } else {
+                    console.error(e)
+                    self.setError(e)
+                  }
+                }
               }
             }
           }),
@@ -1853,8 +1888,13 @@ function stateModelFactory() {
               try {
                 self.setLoadingMSA(true)
                 self.setError(undefined)
-                const txt = await fetchAndMaybeUnzipText(
+                const txt = await fetchTextWithProgress(
                   openLocation(msaFilehandle),
+                  status => {
+                    if (generation === msaGeneration) {
+                      self.setStatus(status)
+                    }
+                  },
                 )
                 if (generation === msaGeneration) {
                   transaction(() => {
@@ -1867,8 +1907,14 @@ function stateModelFactory() {
                 }
               } catch (e) {
                 if (generation === msaGeneration) {
-                  console.error(e)
-                  self.setError(e)
+                  if (isAbortError(e)) {
+                    // cancelled by the user: drop the filehandle so the view
+                    // returns to the import form instead of a stuck spinner
+                    self.setMSAFilehandle(undefined)
+                  } else {
+                    console.error(e)
+                    self.setError(e)
+                  }
                 }
               } finally {
                 if (generation === msaGeneration) {

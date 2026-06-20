@@ -1,3 +1,51 @@
+import { fetchAndMaybeUnzipText } from '@jbrowse/core/util'
+
+export interface FetchStatus {
+  msg: string
+  url?: string
+  onCancel?: () => void
+}
+
+type Filehandle = Parameters<typeof fetchAndMaybeUnzipText>[0]
+
+type ProgressFetcher = (
+  loc: Filehandle,
+  opts: { signal: AbortSignal; statusCallback: (msg: string) => void },
+) => Promise<string>
+
+/**
+ * Fetch text from a filehandle while reporting download/unzip progress through
+ * setStatus, and wiring a Cancel handler that aborts the underlying request.
+ * The status is always cleared once the fetch settles. The fetcher is injectable
+ * for testing.
+ */
+export async function fetchTextWithProgress(
+  loc: Filehandle,
+  setStatus: (status?: FetchStatus) => void,
+  fetcher: ProgressFetcher = fetchAndMaybeUnzipText,
+) {
+  const controller = new AbortController()
+  try {
+    return await fetcher(loc, {
+      signal: controller.signal,
+      statusCallback: msg => {
+        setStatus(
+          msg
+            ? {
+                msg,
+                onCancel: () => {
+                  controller.abort()
+                },
+              }
+            : undefined,
+        )
+      },
+    })
+  } finally {
+    setStatus(undefined)
+  }
+}
+
 export async function myfetch(url: string, args?: RequestInit) {
   const response = await fetch(url, args)
 

@@ -10,7 +10,8 @@ import ImportForm from './import/ImportForm.tsx'
 
 import type { MsaViewModel } from '../model.ts'
 
-function LoadingSpinner() {
+const LoadingSpinner = observer(function ({ model }: { model: MsaViewModel }) {
+  const { status } = model
   return (
     <div
       style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 20 }}
@@ -44,10 +45,19 @@ function LoadingSpinner() {
           }}
         />
       </svg>
-      <Typography variant="h6">Loading...</Typography>
+      <Typography variant="h6">{status?.msg ?? 'Loading...'}</Typography>
+      {status?.onCancel ? (
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => status.onCancel?.()}
+        >
+          Cancel
+        </Button>
+      ) : null}
     </div>
   )
-}
+})
 
 const Reset = observer(function ({
   model,
@@ -83,12 +93,12 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
       >
         {dataInitialized ? (
           isLoading ? (
-            <LoadingSpinner />
+            <LoadingSpinner model={model} />
           ) : (
             <MSAView model={model} />
           )
         ) : hasPendingFilehandle || isLoading ? (
-          <LoadingSpinner />
+          <LoadingSpinner model={model} />
         ) : (
           <ImportForm model={model} />
         )}
