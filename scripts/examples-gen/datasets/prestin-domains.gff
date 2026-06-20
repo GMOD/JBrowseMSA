@@ -1,0 +1,28 @@
+##gff-version 3
+# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+Human	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Human	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Mouse	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Mouse	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Cow	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Cow	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Elephant	InterProScan	protein_match	81	472	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Elephant	InterProScan	protein_match	525	706	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Horse	InterProScan	protein_match	80	438	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Horse	InterProScan	protein_match	491	672	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Dog	InterProScan	protein_match	80	438	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Dog	InterProScan	protein_match	491	672	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Blue_whale	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Blue_whale	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Rhinolophus_bat_echo	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Rhinolophus_bat_echo	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Dolphin_echo	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Dolphin_echo	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Sperm_whale_echo	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Sperm_whale_echo	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Beluga_echo	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Beluga_echo	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Narwhal_echo	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Narwhal_echo	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
+Vaquita_echo	InterProScan	protein_match	81	467	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
+Vaquita_echo	InterProScan	protein_match	605	686	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain

@@ -6,7 +6,9 @@ import { cytochromeCMSA, cytochromeCTree } from './generatedData'
 // eukaryotic life: mammals, reptile, fish, insect, plant and fungus all in one
 // short (~105-residue) alignment. The inferred tree therefore spans well over a
 // billion years, a deliberately different scale from the within-family
-// examples. Built by scripts/examples-gen (UniProt + ClustalW).
+// examples — the very protein Fitch & Margoliash 1967, Science
+// (https://www.science.org/doi/10.1126/science.155.3760.279) used to found
+// molecular phylogenetics. Built by scripts/examples-gen (UniProt + ClustalW).
 export default function CytochromeC() {
   return (
     <MSAViewer

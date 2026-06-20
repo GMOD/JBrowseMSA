@@ -1,0 +1,10 @@
+##gff-version 3
+# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+AQP1	InterProScan	protein_match	5	227	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein
+AQP2	InterProScan	protein_match	3	219	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein
+AQP4	InterProScan	protein_match	32	248	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein
+AQP5	InterProScan	protein_match	5	221	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein
+AQP0_lens	InterProScan	protein_match	3	219	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein
+AQP3_glycerol	InterProScan	protein_match	20	261	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein
+AQP7_glycerol	InterProScan	protein_match	30	272	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein
+AQP9_glycerol	InterProScan	protein_match	20	262	.	.	.	Name=IPR000425;signature_desc=Major%20intrinsic%20protein;description=Major%20intrinsic%20protein

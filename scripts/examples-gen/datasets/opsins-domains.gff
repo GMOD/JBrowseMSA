@@ -1,16 +1,17 @@
 ##gff-version 3
-Human_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Rhodopsin_N;description=Rhodopsin%2C%20N-terminal
-Human_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Bovine_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Rhodopsin_N;description=Rhodopsin%2C%20N-terminal
-Bovine_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Chicken_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Chicken_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Rhodopsin_N;description=Rhodopsin%2C%20N-terminal
-Fish_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Rhodopsin_N;description=Rhodopsin%2C%20N-terminal
-Fish_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Chicken_green_RH2	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Chicken_green_RH2	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Rhodopsin_N;description=Rhodopsin%2C%20N-terminal
-Human_blue_SWS1	InterProScan	protein_match	49	300	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Chicken_violet_SWS1	InterProScan	protein_match	50	301	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Human_green_MWS	InterProScan	protein_match	71	322	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Human_red_LWS	InterProScan	protein_match	71	322	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
-Chicken_red_LWS	InterProScan	protein_match	68	319	.	.	.	Name=IPR000276;signature_desc=GPCR_Rhodpsn;description=G%20protein-coupled%20receptor%2C%20rhodopsin-like
+# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+Human_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Human_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin;description=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin
+Bovine_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Bovine_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin;description=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin
+Chicken_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Chicken_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin;description=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin
+Fish_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Fish_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin;description=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin
+Chicken_green_RH2	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Chicken_green_RH2	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin;description=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin
+Human_blue_SWS1	InterProScan	protein_match	49	300	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Chicken_violet_SWS1	InterProScan	protein_match	50	301	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Human_green_MWS	InterProScan	protein_match	71	322	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Human_red_LWS	InterProScan	protein_match	71	322	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
+Chicken_red_LWS	InterProScan	protein_match	68	319	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)

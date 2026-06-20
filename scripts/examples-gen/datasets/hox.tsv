@@ -1,0 +1,22 @@
+# Hox transcription factors — one tiny conserved domain in a sea of divergence.
+#
+# Hox proteins are master regulators of the body plan. Across paralog groups
+# (PG1 anterior -> PG13 posterior) and clusters (A/B/C/D) they are highly
+# divergent EXCEPT for the ~60-residue homeodomain, the DNA-binding helix-turn-
+# helix that all of them share. In the alignment almost everything is gaps and
+# mismatch while one block — the homeodomain — stays conserved; the InterProScan
+# overlay marks exactly that block. The inferred tree tends to recover the
+# anterior/posterior paralog-group gradient. No natural reference row.
+#
+# Columns: UniProt accession <TAB> row label (gene, ordered PG1 -> PG13)
+P49639	HOXA1
+P14653	HOXB1
+P17483	HOXB4
+P20719	HOXA5
+Q00444	HOXC5
+P31268	HOXA7
+P17481	HOXB8
+P31269	HOXA9
+P28358	HOXD10
+P31271	HOXA13
+P35453	HOXD13

@@ -1,0 +1,36 @@
+##gff-version 3
+# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+Human	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Human	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Chimp	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Chimp	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Gorilla	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Gorilla	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Macaque	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Macaque	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Mouse	InterProScan	protein_match	31	107	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Mouse	InterProScan	protein_match	164	277	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Rat	InterProScan	protein_match	31	107	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Rat	InterProScan	protein_match	164	277	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Cattle	InterProScan	protein_match	31	105	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Cattle	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Pig	InterProScan	protein_match	32	105	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Pig	InterProScan	protein_match	161	275	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Horse	InterProScan	protein_match	31	105	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Horse	InterProScan	protein_match	163	277	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Dog	InterProScan	protein_match	31	105	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Dog	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Cat	InterProScan	protein_match	31	105	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Cat	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Dolphin	InterProScan	protein_match	31	105	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Dolphin	InterProScan	protein_match	164	277	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Blue_whale	InterProScan	protein_match	31	105	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Blue_whale	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Elephant	InterProScan	protein_match	28	102	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Elephant	InterProScan	protein_match	161	274	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Bat_Pteropus	InterProScan	protein_match	31	106	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Bat_Pteropus	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Bat_Hipposideros	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Bat_Hipposideros	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
+Bat_Phyllostomus	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
+Bat_Phyllostomus	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain

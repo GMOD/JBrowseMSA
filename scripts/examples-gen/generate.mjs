@@ -55,6 +55,8 @@ const datasets = [
   { name: 'p53', varName: 'p53', relativeToFirstRow: true },
   { name: 'ef1a', varName: 'ef1a', relativeToFirstRow: false },
   { name: 'insulin', varName: 'insulin', relativeToFirstRow: true },
+  { name: 'aquaporin', varName: 'aquaporin', relativeToFirstRow: false },
+  { name: 'hox', varName: 'hox', relativeToFirstRow: false },
   // RNA structural alignment: the input is a committed Rfam seed subset
   // (datasets/trna.stock) that already carries #=GC SS_cons. It is NOT
   // re-aligned (that would break the SS column correspondence); only a tree is

@@ -34,3 +34,13 @@ group color, with a small legend. Reuse the existing color infrastructure in
 More candidates remain if you want to keep going (lysozyme convergence, a
 homeodomain/Hox set, an aquaporin channel family), but a dozen feels like a
 strong, non-bloated set. Happy to add more or stop here.
+
+## Done
+
+- Added committed InterProScan domain overlays (Pfam+CDD, EBI API) to the
+  multi-domain examples: myd88 (Death+TIR), prestin (SLC26+STAS), p53
+  (TAD/DBD/tetramerization), ef1a (3-domain EF GTPase), ace2 (peptidase
+  M2+collectrin). Wired into the gallery components via `gff=`.
+- Added paper citations to the real-biology example components and the
+  examples-gen README dataset table. MyD88 ↔ Tian et al. 2023, Sci. Adv.
+  (https://pmc.ncbi.nlm.nih.gov/articles/PMC10162675/).

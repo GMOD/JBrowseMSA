@@ -2,6 +2,8 @@ import type { ComponentType } from 'react'
 
 import Ace2 from './Ace2'
 import Ace2Src from './Ace2.tsx?raw'
+import Aquaporin from './Aquaporin'
+import AquaporinSrc from './Aquaporin.tsx?raw'
 import ColorSchemes from './ColorSchemes'
 import ColorSchemesSrc from './ColorSchemes.tsx?raw'
 import CytochromeC from './CytochromeC'
@@ -16,6 +18,8 @@ import Hammerhead from './Hammerhead'
 import HammerheadSrc from './Hammerhead.tsx?raw'
 import HistoneH4 from './HistoneH4'
 import HistoneH4Src from './HistoneH4.tsx?raw'
+import Hox from './Hox'
+import HoxSrc from './Hox.tsx?raw'
 import Insulin from './Insulin'
 import InsulinSrc from './Insulin.tsx?raw'
 import LargeTree from './LargeTree'
@@ -173,6 +177,15 @@ export const examples: Example[] = [
     source: OpsinsSrc,
   },
   {
+    name: 'Channel family (aquaporins)',
+    description:
+      'The aquaporin (MIP) family: all share one six-transmembrane domain ' +
+      '(InterProScan overlay) but the tree splits water-only channels from the ' +
+      '"_glycerol" aquaglyceroporins — grouping by function.',
+    Component: Aquaporin,
+    source: AquaporinSrc,
+  },
+  {
     name: 'Extreme conservation (histone H4)',
     description:
       'Histone H4 across eukaryotes diffed against human — one of the most ' +
@@ -206,6 +219,15 @@ export const examples: Example[] = [
       'selection acts within one protein.',
     Component: P53,
     source: P53Src,
+  },
+  {
+    name: 'One conserved domain (Hox homeodomain)',
+    description:
+      'Hox transcription factors are wildly divergent except for the ~60-residue ' +
+      'homeodomain they all share — the InterProScan overlay marks the one ' +
+      'block that stays conserved across the family.',
+    Component: Hox,
+    source: HoxSrc,
   },
   {
     name: 'Tree of life (EF-1α / EF-Tu)',

@@ -1,0 +1,20 @@
+# Aquaporin (MIP) family — membrane channels that split by what they conduct.
+#
+# All aquaporins share the same six-transmembrane MIP fold with two NPA motifs,
+# yet the family divides into two functional classes: the classical water-only
+# channels (AQP0/1/2/4/5) and the aquaglyceroporins (AQP3/7/9) that also pass
+# glycerol and other small solutes. The inferred tree recovers that split — the
+# "_glycerol" rows form their own clade — so, like the globins, the family
+# groups by function rather than by anything else. A second membrane-channel
+# example to sit alongside the opsin GPCRs, with its own InterProScan MIP-domain
+# overlay. No natural reference row, so no `relativeTo`.
+#
+# Columns: UniProt accession <TAB> row label
+P29972	AQP1
+P41181	AQP2
+P55087	AQP4
+P55064	AQP5
+P30301	AQP0_lens
+Q92482	AQP3_glycerol
+O14520	AQP7_glycerol
+O43315	AQP9_glycerol

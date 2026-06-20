@@ -3,6 +3,7 @@
 import { parseArgs } from 'node:util'
 
 import { exportSvg } from './export-svg.ts'
+import { runInterProPrecomputed } from './interpro-precomputed.ts'
 import { runInterProScan } from './interproscan-msa.ts'
 
 const { values, positionals } = parseArgs({
@@ -61,6 +62,10 @@ const { values, positionals } = parseArgs({
       type: 'string',
       default: 'PfamA,CDD',
     },
+    database: {
+      type: 'string',
+      default: 'pfam',
+    },
     email: {
       type: 'string',
       default: 'user@example.com',
@@ -82,6 +87,8 @@ USAGE:
 
 COMMANDS:
   interproscan    Run InterProScan on all sequences in an MSA file
+  interpro        Build a domain GFF from InterPro's PRECOMPUTED matches for
+                  UniProtKB accessions (instant, deterministic, no scan job)
   export-svg      Export alignment as SVG (no browser required)
 
 OPTIONS (interproscan):
@@ -93,6 +100,12 @@ OPTIONS (interproscan):
   --interproscan-path <path>    Path to interproscan.sh (default: interproscan.sh)
   --programs <list>             Comma-separated list of programs (default: PfamA,CDD)
   --email <email>               Email for EBI API (default: user@example.com)
+
+OPTIONS (interpro — precomputed):
+  <input>                       Accession list / TSV (accession <TAB> label per
+                                line; # comments ok — the examples-gen .tsv works)
+  -o, --output <file>           Output GFF file (default: domains.gff)
+  --database <name>             InterPro member db to read (default: pfam)
 
 OPTIONS (export-svg):
   --msa <file>                  MSA file (FASTA, Stockholm, or Clustal) [required]
@@ -114,6 +127,9 @@ EXAMPLES:
   react-msaview-cli interproscan alignment.fasta -o domains.gff
   react-msaview-cli interproscan alignment.fasta -o domains.gff --docker
   react-msaview-cli interproscan alignment.fasta -o domains.gff --local
+
+  react-msaview-cli interpro accessions.tsv -o domains.gff
+  react-msaview-cli interpro accessions.tsv -o domains.gff --database cdd
 `)
 }
 
@@ -164,6 +180,18 @@ async function main() {
       interproscanPath: values['interproscan-path'],
       programs: values.programs.split(','),
       email: values.email,
+    })
+  } else if (command === 'interpro') {
+    const inputFile = positionals[1]
+    if (!inputFile) {
+      console.error('Error: Input accession list / TSV file is required')
+      process.exit(1)
+    }
+
+    await runInterProPrecomputed({
+      inputFile,
+      outputFile: values.output,
+      database: values.database,
     })
   } else {
     console.error(`Unknown command: ${command}`)
