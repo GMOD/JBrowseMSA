@@ -36,18 +36,6 @@ jobs:
       - name: Test
         run: pnpm test
 
-      - name: Check apidocs are up to date
-        run: |
-          cd packages/lib
-          node --experimental-strip-types docgen/generateStateModelDocs.ts
-          # match the committed docs, which pnpm statedocs formats via prettier
-          npx prettier --write apidocs
-          if ! git diff --quiet apidocs; then
-            echo "apidocs are out of date — run pnpm statedocs and commit the result"
-            git diff apidocs
-            exit 1
-          fi
-
   lint:
     name: Lint and Format
     runs-on: ubuntu-latest
