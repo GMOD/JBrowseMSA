@@ -15,7 +15,7 @@ export default function ExamplesApp() {
   const example = examples[selected]!
   const { Component } = example
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex', height: '100%' }}>
       <Box
         component="nav"
         sx={{

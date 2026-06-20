@@ -93,8 +93,27 @@ main.wide {
 
 main.full-bleed {
   max-width: none;
+  margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+/* Full-bleed app pages: fixed-height flex column so the app fills the space
+   between header and footer instead of overflowing past the viewport. */
+body.app-layout {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+body.app-layout main.full-bleed {
+  flex: 1;
+  min-height: 0;
+}
+
+body.app-layout .site-footer {
+  margin-top: 0;
 }
 
 .hero h1 {
