@@ -38,8 +38,12 @@ const chromePaths = [
 ]
 
 function startServer() {
-  const server = http.createServer((req, res) =>
-    serveHandler(req, res, { public: appDist }),
+  // Some specs deep-link a full alignment via a `?data=` query string, which
+  // for the real-data examples can run to tens of KB. Node's default request
+  // line/header cap (16 KB) rejects those with HTTP 431, so raise it here.
+  const server = http.createServer(
+    { maxHeaderSize: 1024 * 1024 },
+    (req, res) => serveHandler(req, res, { public: appDist }),
   )
   return new Promise(resolve =>
     server.listen(PORT, () => {

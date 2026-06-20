@@ -6,6 +6,35 @@
 // The app reads a `?data=` URL param as a JSON model snapshot, so we can
 // deep-link a fully loaded alignment instead of driving the import form.
 
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+// Single source of truth: the real example datasets live in the examples
+// package as TS string constants. This script runs under plain node (no TS
+// loader), so read the file and pull the constants out by name rather than
+// importing or duplicating the (multi-KB) data here.
+const exampleData = fs.readFileSync(
+  path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../packages/examples/src/examples/exampleData.ts',
+  ),
+  'utf8',
+)
+function backtickConst(name) {
+  const m = exampleData.match(new RegExp(`export const ${name} = \`([\\s\\S]*?)\``))
+  if (!m) {
+    throw new Error(`could not find ${name} in exampleData.ts`)
+  }
+  return m[1]
+}
+const kinaseMSA = backtickConst('kinaseMSA')
+const kinaseDomainsGFF = backtickConst('kinaseDomainsGFF')
+const lysineMSA = backtickConst('lysineMSA')
+const kinaseTree = exampleData.match(
+  /export const kinaseTree =\s*'([^']*)'/,
+)[1]
+
 // Small IL2RA protein alignment + matching tree (same data as the examples).
 const proteinMSA = `CLUSTAL O(1.2.3) multiple sequence alignment
 UniProt|P26898|IL2RA_SHEEP      MEPSLLMWRFFVFIVVPGCVTEACHDDPPSLRNA----------MFKVLRYE----VGTM
@@ -58,5 +87,30 @@ export const specs = [
       { waitFor: '::-p-text(Tree options)' },
     ],
     clip: 'full',
+  },
+  {
+    name: 'real-domains',
+    // zoomed out (small colWidth) so the full ~526-column alignment fits and
+    // the shared SH3 + SH2 + kinase domain architecture shows as colored
+    // blocks aligned down every member of the family
+    url: data({
+      height: 360,
+      treeAreaWidth: 175,
+      colWidth: 2,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: { msa: kinaseMSA, tree: kinaseTree, gff: kinaseDomainsGFF },
+    }),
+    clip: 'viewer',
+  },
+  {
+    name: 'large-tree',
+    url: data({
+      height: 480,
+      treeAreaWidth: 300,
+      colorSchemeName: 'nucleotide',
+      data: { msa: lysineMSA },
+    }),
+    settle: 3500,
+    clip: 'viewer',
   },
 ]
