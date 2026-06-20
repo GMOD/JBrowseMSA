@@ -93,6 +93,23 @@ p53 diffed against human — the central DNA-binding domain (where cancer
 mutations fall) collapses to dots while the variable N/C-termini stay full of
 letters, showing where selection acts within one protein.
 
+### Tree of life: EF-1α / EF-Tu
+
+![EF tree-of-life example](../../docs/media/tree-of-life.png)
+
+Translation elongation factor across all three domains of life — bacteria
+(EF-Tu), archaea and eukaryotes (EF-1α) in one alignment, a universal protein
+used to probe the deepest splits in the tree of life (labels prefixed
+`Euk_`/`Arc_`/`Bac_`).
+
+### Processing vs conservation: insulin
+
+![Insulin example](../../docs/media/processing-conservation.png)
+
+Preproinsulin across vertebrates diffed against human — the B and A chains of
+mature insulin stay conserved (dots) while the cleaved-out C-peptide drifts
+(letters); guinea-pig insulin is famously divergent throughout.
+
 > The vector figures above are generated headlessly from the viewer's own SVG
 > export via `pnpm figures` (see `packages/lib/scripts/generateFigures.tsx`).
 > The real-data examples are PNG screenshots from `pnpm screenshots` (their

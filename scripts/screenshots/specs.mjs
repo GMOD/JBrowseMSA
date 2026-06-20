@@ -330,4 +330,38 @@ export const specs = [
     settle: 2500,
     clip: 'viewer',
   },
+  {
+    name: 'tree-of-life',
+    // EF-1a/EF-Tu across bacteria, archaea, eukaryotes; labels prefixed
+    // Euk_/Arc_/Bac_ so the three-domain grouping reads off the tree
+    url: data({
+      height: 420,
+      treeAreaWidth: 215,
+      colWidth: 2,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('ef1aMSA'),
+        tree: genConst('ef1aTree'),
+      },
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
+    name: 'processing-conservation',
+    // insulin vs human: conserved B/A chains (dots) vs the variable cleaved-out
+    // C-peptide (letters)
+    url: data({
+      height: 320,
+      treeAreaWidth: 150,
+      relativeTo: 'Human',
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('insulinMSA'),
+        tree: genConst('insulinTree'),
+      },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+  },
 ]

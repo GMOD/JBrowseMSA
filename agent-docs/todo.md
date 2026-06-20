@@ -28,3 +28,9 @@ group color, with a small legend. Reuse the existing color infrastructure in
 - The example trees are ClustalW neighbor-joining (fast, deterministic, fine for
   illustration). Document/support an optional upgrade path to MAFFT/MUSCLE +
   IQ-TREE/FastTree for publication-grade trees in `scripts/examples-gen`.
+
+## More examples
+
+More candidates remain if you want to keep going (lysozyme convergence, a
+homeodomain/Hox set, an aquaporin channel family), but a dozen feels like a
+strong, non-bloated set. Happy to add more or stop here.

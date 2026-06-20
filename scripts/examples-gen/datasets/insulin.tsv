@@ -1,0 +1,20 @@
+# Insulin (preproinsulin) across vertebrates — conservation tracks protein
+# processing.
+#
+# Preproinsulin is signal peptide - B chain - C-peptide - A chain. The B and A
+# chains fold into mature insulin and are tightly conserved; the C-peptide,
+# which is cleaved out and discarded, drifts freely. With relativeTo=Human the
+# B and A regions render mostly as dots while the C-peptide region fills with
+# letters — conservation mapping onto which parts of the precursor survive into
+# the functional hormone. Guinea-pig insulin is famously divergent throughout.
+#
+# Columns: UniProt accession <TAB> row label. Human first (reference).
+P01308	Human
+P01315	Pig
+P01317	Cow
+P01318	Sheep
+P01325	Mouse
+P01329	Guinea_pig
+P67970	Chicken
+P12706	Xenopus
+O73727	Zebrafish

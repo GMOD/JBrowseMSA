@@ -8,10 +8,14 @@ import CytochromeC from './CytochromeC'
 import CytochromeCSrc from './CytochromeC.tsx?raw'
 import Domains from './Domains'
 import DomainsSrc from './Domains.tsx?raw'
+import Ef1a from './Ef1a'
+import Ef1aSrc from './Ef1a.tsx?raw'
 import Globin from './Globin'
 import GlobinSrc from './Globin.tsx?raw'
 import HistoneH4 from './HistoneH4'
 import HistoneH4Src from './HistoneH4.tsx?raw'
+import Insulin from './Insulin'
+import InsulinSrc from './Insulin.tsx?raw'
 import LargeTree from './LargeTree'
 import LargeTreeSrc from './LargeTree.tsx?raw'
 import LoadFromUrl from './LoadFromUrl'
@@ -180,6 +184,24 @@ export const examples: Example[] = [
       'selection acts within one protein.',
     Component: P53,
     source: P53Src,
+  },
+  {
+    name: 'Tree of life (EF-1α / EF-Tu)',
+    description:
+      'Elongation factor across all three domains of life (bacteria, archaea, ' +
+      'eukaryotes) in one alignment — a universal protein used to probe the ' +
+      'deepest splits in the tree of life.',
+    Component: Ef1a,
+    source: Ef1aSrc,
+  },
+  {
+    name: 'Processing vs conservation (insulin)',
+    description:
+      'Preproinsulin across vertebrates diffed against human — the B and A ' +
+      'chains of mature insulin stay conserved (dots) while the cleaved-out ' +
+      'C-peptide drifts (letters).',
+    Component: Insulin,
+    source: InsulinSrc,
   },
   {
     name: 'Load from URL',

@@ -1,0 +1,26 @@
+# Translation elongation factor EF-1-alpha / EF-Tu — across the three domains of
+# life.
+#
+# This GTPase that delivers aminoacyl-tRNA to the ribosome is universal and
+# conserved enough to align from bacteria (EF-Tu) through archaea and eukaryotes
+# (EF-1-alpha). It is one of the molecules used to probe the deepest splits in the
+# tree of life. In this simple neighbor-joining tree the eukaryotes and the
+# bacteria each form a clean clade and the archaea fall near the root — the
+# three groups separate, though a single protein under NJ doesn't perfectly
+# recover the canonical Archaea+Eukaryote sistering. Labels are prefixed
+# Euk_/Arc_/Bac_ so you can read the grouping straight off the tree.
+# (No relativeTo: the point is the breadth of the tree.)
+#
+# Columns: UniProt accession <TAB> row label
+P68104	Euk_Human
+P02994	Euk_Yeast
+P0DH99	Euk_Arabidopsis
+P08736	Euk_Drosophila
+Q9HM89	Arc_Halobacterium
+P19486	Arc_Thermoplasma
+A9A9U3	Arc_Methanococcus
+A3MV69	Arc_Pyrobaculum
+P0CE47	Bac_Ecoli
+P33166	Bac_Bacillus
+P60338	Bac_Thermus
+P74227	Bac_Synechocystis
