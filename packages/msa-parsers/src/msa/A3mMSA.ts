@@ -87,6 +87,15 @@ export default class A3mMSA extends BaseMSA {
       return false
     }
 
+    // A true aligned FASTA (e.g. impg's fasta-aln output from soft-masked
+    // references) has all rows the same total length. A3M's defining feature is
+    // variable-length rows, since lowercase inserts live outside the fixed match
+    // grid. So equal-length rows are an alignment, not A3M, even when lowercase
+    // soft-masking is present.
+    if (new Set(seqs.map(s => s.length)).size === 1) {
+      return false
+    }
+
     let hasLowercase = false
     let firstMatchLen = -1
     let sameMatchLength = true

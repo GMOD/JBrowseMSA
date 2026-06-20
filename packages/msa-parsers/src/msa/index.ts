@@ -14,7 +14,32 @@ export type MSAParserType =
   | EmfMSA
   | ClustalMSA
 
-export function parseMSA(text: string, currentAlignment = 0): MSAParserType {
+export type MSAFormat = 'stockholm' | 'a3m' | 'fasta' | 'emf' | 'clustal'
+
+// when `format` is given the heuristic sniffing is bypassed -- callers that
+// already know the format (e.g. impg emitting fasta-aln) can force it rather
+// than rely on auto-detection, which is necessarily ambiguous between formats
+// that share a leading '>' (fasta vs a3m)
+export function parseMSA(
+  text: string,
+  currentAlignment = 0,
+  format?: MSAFormat,
+): MSAParserType {
+  if (format === 'stockholm') {
+    return new StockholmMSA(text, currentAlignment)
+  }
+  if (format === 'a3m') {
+    return new A3mMSA(text)
+  }
+  if (format === 'fasta') {
+    return new FastaMSA(text)
+  }
+  if (format === 'emf') {
+    return new EmfMSA(text)
+  }
+  if (format === 'clustal') {
+    return new ClustalMSA(text)
+  }
   if (stockholmSniff(text)) {
     return new StockholmMSA(text, currentAlignment)
   }

@@ -46,6 +46,24 @@ that doesn't match anything`
 
     expect(msa).toBeInstanceOf(ClustalMSA)
   })
+
+  test('explicit format bypasses auto-detection', () => {
+    // a3m-looking input (lowercase inserts, differing row lengths) forced to
+    // FASTA, and FASTA-looking input forced to A3M
+    const a3mLooking = `>seq1
+ACDEFghiKLMNPQ
+>seq2
+ACDEFKLMNPQ`
+    expect(parseMSA(a3mLooking)).toBeInstanceOf(A3mMSA)
+    expect(parseMSA(a3mLooking, 0, 'fasta')).toBeInstanceOf(FastaMSA)
+
+    const fastaLooking = `>seq1
+ACDEF
+>seq2
+GHIKL`
+    expect(parseMSA(fastaLooking)).toBeInstanceOf(FastaMSA)
+    expect(parseMSA(fastaLooking, 0, 'a3m')).toBeInstanceOf(A3mMSA)
+  })
 })
 
 describe('FastaMSA colon-in-name lookup', () => {

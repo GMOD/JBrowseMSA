@@ -17,7 +17,7 @@ export {
   parseNewick,
   stockholmSniff,
 } from './msa/index.ts'
-export type { MSAParserType } from './msa/index.ts'
+export type { MSAFormat, MSAParserType } from './msa/index.ts'
 
 // GFF parsing
 export {

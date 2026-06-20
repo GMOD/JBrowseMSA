@@ -666,7 +666,9 @@ function stateModelFactory() {
         const text = self.data.msa
         // uses parseMSA so the named MSAParserType return type is portable
         // to downstream consumers (avoids TS2883 with default exports)
-        return text ? parseMSA(text, self.currentAlignment) : null
+        return text
+          ? parseMSA(text, self.currentAlignment, self.msaFormat)
+          : null
       },
       /**
        * #getter
