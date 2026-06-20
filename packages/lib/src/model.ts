@@ -1790,31 +1790,24 @@ function stateModelFactory() {
             }
           }),
         )
-        // autorun opens treeMetadataFilehandle. generation guard: see
-        // treeFilehandle
-        let treeMetadataGeneration = 0
+        // autorun opens treeMetadataFilehandle
         addDisposer(
           self,
           autorun(async () => {
             const { treeMetadataFilehandle } = self
             if (treeMetadataFilehandle) {
-              const generation = ++treeMetadataGeneration
               try {
-                const text = await fetchTextWithProgress(
-                  openLocation(treeMetadataFilehandle),
-                  status => {
-                    if (generation === treeMetadataGeneration) {
+                self.setTreeMetadata(
+                  await fetchTextWithProgress(
+                    openLocation(treeMetadataFilehandle),
+                    status => {
                       self.setStatus(status)
-                    }
-                  },
+                    },
+                  ),
                 )
-                if (generation === treeMetadataGeneration) {
-                  self.setTreeMetadata(text)
-                }
               } catch (e) {
-                // on user cancel (isAbortError) just stop; treeMetadata is
-                // optional and gates no view, so nothing is left stuck
-                if (generation === treeMetadataGeneration && !isAbortError(e)) {
+                // ignore user cancel (isAbortError); treeMetadata is optional
+                if (!isAbortError(e)) {
                   console.error(e)
                   self.setError(e)
                 }
@@ -1839,38 +1832,30 @@ function stateModelFactory() {
           }),
         )
 
-        // autorun opens gffFilehandle for InterProScan domains. generation
-        // guard: see treeFilehandle
-        let gffGeneration = 0
+        // autorun opens gffFilehandle for InterProScan domains
         addDisposer(
           self,
           autorun(async () => {
             const { gffFilehandle } = self
             if (gffFilehandle) {
-              const generation = ++gffGeneration
               try {
                 const gffText = await fetchTextWithProgress(
                   openLocation(gffFilehandle),
                   status => {
-                    if (generation === gffGeneration) {
-                      self.setStatus(status)
-                    }
+                    self.setStatus(status)
                   },
                 )
-                if (generation === gffGeneration) {
-                  self.applyGFFText(gffText)
-                  if (gffFilehandle.locationType === 'BlobLocation') {
-                    self.setGFFFilehandle(undefined)
-                  }
+                self.applyGFFText(gffText)
+                if (gffFilehandle.locationType === 'BlobLocation') {
+                  self.setGFFFilehandle(undefined)
                 }
               } catch (e) {
-                if (generation === gffGeneration) {
-                  if (isAbortError(e)) {
-                    self.setGFFFilehandle(undefined)
-                  } else {
-                    console.error(e)
-                    self.setError(e)
-                  }
+                // on user cancel (isAbortError) drop the filehandle
+                if (isAbortError(e)) {
+                  self.setGFFFilehandle(undefined)
+                } else {
+                  console.error(e)
+                  self.setError(e)
                 }
               }
             }
