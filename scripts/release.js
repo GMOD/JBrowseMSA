@@ -59,9 +59,6 @@ const versionTsPath = path.join(rootDir, 'packages/lib/src/version.ts')
 fs.writeFileSync(versionTsPath, `export const version = '${newVersion}'\n`)
 console.log('Updated packages/lib/src/version.ts')
 
-// Build all packages
-console.log('\nBuilding all packages...')
-
 // Git operations
 const tag = `v${newVersion}`
 console.log(`\nCreating git tag ${tag}...`)
@@ -70,12 +67,8 @@ run(`git commit -m "${tag}"`)
 run(`git tag -a "${tag}" -m "${tag}"`)
 run('git push && git push --tags')
 
-// Deploy app to GitHub Pages
-console.log('\nDeploying app to GitHub Pages...')
-run('pnpm run deploy', path.join(rootDir, 'packages/app'))
-
-// Deploy examples storybook to S3
-console.log('\nDeploying storybook to S3...')
-run('pnpm deploy:storybook')
+// Build and deploy the GitHub Pages site (lib + website + app)
+console.log('\nDeploying to GitHub Pages...')
+run('pnpm run deploy:pages')
 
 console.log(`\n✓ Released ${tag} — GitHub Actions will publish to npm`)
