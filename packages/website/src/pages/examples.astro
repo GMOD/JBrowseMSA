@@ -6,14 +6,7 @@ import Base from '../layouts/Base.astro'
 <Base
   title="Examples — JBrowseMSA"
   description="Live interactive examples of react-msaview: zero-config, model API, color schemes, domains, and more."
+  fullBleed
 >
   <ExamplesApp client:only="react" />
 </Base>
-
-<style>
-  /* Let the examples app fill the viewport below the header */
-  main {
-    padding: 0;
-    overflow: hidden;
-  }
-</style>

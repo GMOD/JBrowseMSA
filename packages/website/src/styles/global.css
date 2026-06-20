@@ -91,6 +91,12 @@ main.wide {
   max-width: var(--maxw-demo);
 }
 
+main.full-bleed {
+  max-width: none;
+  padding: 0;
+  overflow: hidden;
+}
+
 .hero h1 {
   font-size: 2.6rem;
   margin: 0.2em 0 0.1em;

@@ -5,8 +5,9 @@ interface Props {
   title: string
   description?: string
   wide?: boolean
+  fullBleed?: boolean
 }
-const { title, description, wide } = Astro.props
+const { title, description, wide, fullBleed } = Astro.props
 const base = import.meta.env.BASE_URL
 const nav = [
   { href: base, label: 'Home' },
@@ -39,7 +40,7 @@ const nav = [
         aria-label="GitHub"
       ></a>
     </header>
-    <main class:list={{ wide }}>
+    <main class:list={{ wide, 'full-bleed': fullBleed }}>
       <slot />
     </main>
     <footer class="site-footer">
