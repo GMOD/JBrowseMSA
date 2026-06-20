@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   calcDepthToLeaf,
   collapse,
+  collapsedSubtreeLengthExtent,
   find,
   findMaxBranchLen,
   hierarchy,
@@ -108,6 +109,61 @@ describe('collapse', () => {
     const leaf = find(h, n => n.data.id === 'A1')!
     collapse(leaf)
     expect(leaves(h).map(n => n.data.name)).toEqual(['A1', 'A2', 'B1', 'B2'])
+  })
+
+  test('preserves the subtree depth so the layout stays stable', () => {
+    const h = hierarchy(makeTree(), d => d.children)
+    const nodeA = find(h, n => n.data.id === 'A')!
+    collapse(nodeA)
+    // the collapsed node keeps its real depth (1) rather than becoming a depth-0
+    // leaf, so the cladogram apex sits at the true branch point
+    expect(nodeA.depthToLeaf).toBe(1)
+    // and the root still measures the tree as 2 deep, so collapsing A does not
+    // horizontally shift the rest of the tree
+    expect(calcDepthToLeaf(h)).toBe(2)
+  })
+})
+
+describe('collapsedSubtreeLengthExtent', () => {
+  // root → A(1) → [ A1(2), C(3) → [ C1(1), C2(10) ] ]
+  function makeLenTree(): NodeWithIds {
+    return {
+      id: 'root',
+      name: 'root',
+      children: [
+        {
+          id: 'A',
+          name: 'A',
+          length: 1,
+          children: [
+            { id: 'A1', name: 'A1', length: 2, children: [] },
+            {
+              id: 'C',
+              name: 'C',
+              length: 3,
+              children: [
+                { id: 'C1', name: 'C1', length: 1, children: [] },
+                { id: 'C2', name: 'C2', length: 10, children: [] },
+              ],
+            },
+          ],
+        },
+      ],
+    }
+  }
+
+  test('min/max cumulative branch length to the tips below a node', () => {
+    const h = hierarchy(makeLenTree(), d => d.children)
+    const nodeA = find(h, n => n.data.id === 'A')!
+    collapse(nodeA)
+    // excludes A's own branch: nearest tip A1 = 2, farthest tip C2 = 3 + 10 = 13
+    expect(collapsedSubtreeLengthExtent(nodeA)).toEqual({ min: 2, max: 13 })
+  })
+
+  test('returns zero extent for a node with no descendants', () => {
+    const h = hierarchy(makeLenTree(), d => d.children)
+    const leaf = find(h, n => n.data.id === 'A1')!
+    expect(collapsedSubtreeLengthExtent(leaf)).toEqual({ min: 0, max: 0 })
   })
 })
 

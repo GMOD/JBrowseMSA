@@ -101,6 +101,7 @@ export function renderTree({
 
 export function renderCollapsedTriangles({
   ctx,
+  clickMap,
   offsetY,
   model,
   theme,
@@ -109,6 +110,7 @@ export function renderCollapsedTriangles({
   blockSizeYOverride,
 }: {
   ctx: RenderCtx
+  clickMap?: ClickMapIndex
   offsetY: number
   model: MsaViewModel
   theme: Theme
@@ -123,11 +125,12 @@ export function renderCollapsedTriangles({
     blockSize,
     rowHeight,
     fontSize,
+    marginLeft: ml,
   } = model
   const by = blockSizeYOverride ?? blockSize
   const halfHeight = Math.max(2, rowHeight * 0.42)
   forEachDescendant(hierarchy, node => {
-    const { id } = node.data
+    const { id, name } = node.data
     if (collapsed.includes(id)) {
       const apexX = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
       const y = node.x!
@@ -155,6 +158,20 @@ export function renderCollapsedTriangles({
           ctx.textAlign = 'left'
           ctx.fillText(`${count}`, baseX + 3, y + fontSize / 4)
         }
+
+        // the whole triangle is a click/hover target that opens the
+        // branch menu (Expand this node); the apex bubble's own click entry is
+        // skipped for collapsed nodes so this descriptive label wins
+        const label = name === id ? 'Collapsed clade' : name
+        clickMap?.insert({
+          minX: apexX + ml,
+          maxX: baseX + ml,
+          minY: y - halfHeight,
+          maxY: y + halfHeight,
+          branch: true,
+          id,
+          name: count === undefined ? label : `${label} (${count} tips)`,
+        })
       }
     }
   })
@@ -198,22 +215,27 @@ export function renderNodeBubbles({
       y > offsetY - extendBounds &&
       y < offsetY + by + extendBounds
     ) {
+      const isCollapsed = collapsed.includes(id)
       ctx.strokeStyle = 'black'
-      ctx.fillStyle = collapsed.includes(id) ? 'black' : 'white'
+      ctx.fillStyle = isCollapsed ? 'black' : 'white'
       ctx.beginPath()
       ctx.arc(x, y, radius, 0, 2 * Math.PI)
       ctx.fill()
       ctx.stroke()
 
-      clickMap?.insert({
-        minX: x - radius + ml,
-        maxX: x - radius + d + ml,
-        minY: y - radius,
-        maxY: y - radius + d,
-        branch: true,
-        id,
-        name,
-      })
+      // collapsed nodes get their click/hover target from the triangle pass,
+      // which covers the apex bubble and carries a descriptive label
+      if (!isCollapsed) {
+        clickMap?.insert({
+          minX: x - radius + ml,
+          maxX: x - radius + d + ml,
+          minY: y - radius,
+          maxY: y - radius + d,
+          branch: true,
+          id,
+          name,
+        })
+      }
     }
   })
 }
@@ -377,6 +399,7 @@ export function renderTreeCanvas({
 
     renderCollapsedTriangles({
       ctx,
+      clickMap,
       offsetY,
       model,
       theme,

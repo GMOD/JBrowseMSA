@@ -148,8 +148,9 @@ export const specs = [
     name: 'tree-collapse',
     // collapse the (FELCA,(HUMAN,MACMU)) subclade; node ids are deterministic
     // from generateNodeIds (msa-parsers/src/util.ts): root 'node-0', each child
-    // appends '-<index>-<depth>'. Collapsing it draws the collapsed-branch
-    // marker and drops those rows (and the gaps they introduced) from the MSA.
+    // appends '-<index>-<depth>'. Collapsing it draws the clade as a triangle
+    // labelled with its tip count and drops those rows (and the gaps they
+    // introduced) from the MSA.
     url: data({ collapsed: ['node-0-0-1-0-2-1-3'] }),
     clip: 'viewer',
   },
