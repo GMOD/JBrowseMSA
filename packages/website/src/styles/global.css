@@ -5,7 +5,8 @@
   --border: #e2e2e2;
   --bg: #fff;
   --bg-soft: #f7f8f8;
-  --maxw: 1400px;
+  --maxw: 960px;
+  --maxw-demo: 1400px;
 }
 
 * {
@@ -84,6 +85,10 @@ main {
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 24px;
+}
+
+main.wide {
+  max-width: var(--maxw-demo);
 }
 
 .hero h1 {
