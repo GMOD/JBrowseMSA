@@ -1,1 +1,3 @@
 packages/svgcanvas/src/index.ts
+packages/examples/src/examples/exampleData.ts
+*.gff
