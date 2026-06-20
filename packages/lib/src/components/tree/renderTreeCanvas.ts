@@ -99,6 +99,67 @@ export function renderTree({
   })
 }
 
+export function renderCollapsedTriangles({
+  ctx,
+  offsetY,
+  model,
+  theme,
+  maxBranchLen,
+  maxDepthToLeaf,
+  blockSizeYOverride,
+}: {
+  ctx: RenderCtx
+  offsetY: number
+  model: MsaViewModel
+  theme: Theme
+  maxBranchLen: number
+  maxDepthToLeaf: number
+  blockSizeYOverride?: number
+}) {
+  const {
+    hierarchy,
+    showBranchLenEffective: showBranchLen,
+    collapsed,
+    blockSize,
+    rowHeight,
+    fontSize,
+  } = model
+  const by = blockSizeYOverride ?? blockSize
+  const halfHeight = Math.max(2, rowHeight * 0.42)
+  forEachDescendant(hierarchy, node => {
+    const { id } = node.data
+    if (collapsed.includes(id)) {
+      const apexX = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
+      const y = node.x!
+      const inBlock = y > offsetY - extendBounds && y < offsetY + by + extendBounds
+      // in cladogram mode the hidden tips align at the right edge, otherwise use
+      // the branch-length extent recorded in the model's hierarchy getter
+      const baseX = showBranchLen
+        ? (node.collapsedTipXFar ?? maxBranchLen)
+        : maxBranchLen
+      if (apexX !== undefined && inBlock && baseX > apexX) {
+        ctx.beginPath()
+        ctx.moveTo(apexX, y)
+        ctx.lineTo(baseX, y - halfHeight)
+        ctx.lineTo(baseX, y + halfHeight)
+        ctx.closePath()
+        ctx.fillStyle = theme.palette.action.disabled
+        ctx.fill()
+        ctx.strokeStyle = theme.palette.text.primary
+        ctx.stroke()
+
+        // node.value carries the leaf count from the pre-collapse sum() pass
+        const count = node.value
+        if (count !== undefined && rowHeight >= 8) {
+          ctx.fillStyle = theme.palette.text.primary
+          ctx.textAlign = 'left'
+          ctx.fillText(`${count}`, baseX + 3, y + fontSize / 4)
+        }
+      }
+    }
+  })
+}
+
 export function renderNodeBubbles({
   ctx,
   clickMap,
@@ -189,6 +250,7 @@ export function renderTreeLabels({
     leaves,
     noTree,
     labelWidthMap,
+    collapsed,
   } = model
   const by = blockSizeYOverride ?? blockSize
   const emHeight = ctx.measureText('M').width
@@ -205,7 +267,14 @@ export function renderTreeLabels({
     const y = node.x!
 
     const displayName = treeMetadata[name]?.genome || name
-    if (y > offsetY - extendBounds && y < offsetY + by + extendBounds) {
+    // a collapsed clade is drawn as a triangle + tip count; suppress its leaf
+    // label when the "name" is just the auto-generated internal-node id
+    const isAnonymousCollapsed = collapsed.includes(id) && name === id
+    if (
+      !isAnonymousCollapsed &&
+      y > offsetY - extendBounds &&
+      y < offsetY + by + extendBounds
+    ) {
       // note: +rowHeight/4 matches with -rowHeight/4 in msa
       const yp = y + fontSize / 4
       let xp = 0
@@ -297,6 +366,16 @@ export function renderTreeCanvas({
 
   if (!noTree && drawTree) {
     renderTree({
+      ctx,
+      offsetY,
+      model,
+      theme,
+      maxBranchLen,
+      maxDepthToLeaf,
+      blockSizeYOverride,
+    })
+
+    renderCollapsedTriangles({
       ctx,
       offsetY,
       model,

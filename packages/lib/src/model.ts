@@ -51,8 +51,10 @@ import {
   calcDepthToLeaf,
   clusterLayout,
   collapse,
+  collapsedSubtreeLengthExtent,
   find,
   findMaxBranchLen,
+  forEachDescendant,
   hierarchy,
   leaves,
   links,
@@ -1018,7 +1020,18 @@ function stateModelFactory() {
         clusterLayout(r, this.totalHeight, self.treeWidth)
         r.data.length = 0
         const max = maxLength(r)
-        setBrLength(r, 0, max ? self.treeWidth / max : 0)
+        const k = max ? self.treeWidth / max : 0
+        setBrLength(r, 0, k)
+        // for each collapsed clade, record the pixel x-positions of its
+        // nearest/farthest tips so the renderer can draw a triangle that spans
+        // the branch-length extent of the hidden subtree
+        forEachDescendant(r, node => {
+          if (node._children) {
+            const { min, max: mx } = collapsedSubtreeLengthExtent(node)
+            node.collapsedTipXNear = (node.len ?? 0) + min * k
+            node.collapsedTipXFar = (node.len ?? 0) + mx * k
+          }
+        })
         return r as HierarchyNode<NodeWithIdsAndLength>
       },
 

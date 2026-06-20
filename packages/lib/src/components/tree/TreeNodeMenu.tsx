@@ -67,7 +67,7 @@ const TreeMenu = observer(function ({
           onClose()
         }}
       >
-        {isCollapsed ? 'Show node' : 'Hide node'}
+        {isCollapsed ? 'Expand subtree' : 'Collapse subtree'}
       </MenuItem>
       <MenuItem
         dense

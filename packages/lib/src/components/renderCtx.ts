@@ -9,6 +9,7 @@ export type RenderCtx = Pick<
   | 'arc'
   | 'beginPath'
   | 'clearRect'
+  | 'closePath'
   | 'fill'
   | 'fillRect'
   | 'fillStyle'

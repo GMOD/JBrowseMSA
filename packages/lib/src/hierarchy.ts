@@ -12,6 +12,10 @@ export interface HierarchyNode<T = NodeWithIds> {
   len?: number
   depthToLeaf?: number
   _children?: HierarchyNode<T>[] | null
+  // pixel x-positions of the nearest/farthest tips of a collapsed subtree, used
+  // to draw the collapsed-clade triangle. Set in the model's hierarchy getter.
+  collapsedTipXNear?: number
+  collapsedTipXFar?: number
 }
 
 export interface HierarchyLink<T = NodeWithIds> {
@@ -235,16 +239,52 @@ export function clusterLayout<T>(
 
 export function collapse<T>(node: HierarchyNode<T>) {
   if (node.children) {
+    // memoize the real subtree depth onto the node before detaching its
+    // children, so cladogram positioning keeps the node (now the apex of a
+    // collapsed-clade triangle) at its true branch point rather than snapping
+    // it to the tip-alignment line. This also keeps the rest of the tree's
+    // horizontal layout stable when a clade is collapsed.
+    calcDepthToLeaf(node)
     node._children = node.children
     node.children = null
   }
+}
+
+// Min/max cumulative raw branch length from a collapsed node down to the tips of
+// its detached subtree (excludes the node's own branch). Used to size the
+// collapsed-clade triangle in phylogram mode.
+export function collapsedSubtreeLengthExtent<T extends { length?: number }>(
+  node: HierarchyNode<T>,
+) {
+  const roots = node._children ?? node.children
+  let min = Infinity
+  let max = 0
+  if (roots) {
+    const stack = roots.map(child => ({
+      node: child,
+      acc: Math.max(child.data.length ?? 0, 0),
+    }))
+    while (stack.length > 0) {
+      const { node: n, acc } = stack.pop()!
+      const kids = n.children ?? n._children
+      if (kids?.length) {
+        for (const child of kids) {
+          stack.push({ node: child, acc: acc + Math.max(child.data.length ?? 0, 0) })
+        }
+      } else {
+        min = Math.min(min, acc)
+        max = Math.max(max, acc)
+      }
+    }
+  }
+  return { min: min === Infinity ? 0 : min, max }
 }
 
 // Cladogram positioning based on ape's plot.phylo: uses topological depth (max
 // steps to a tip) instead of branch length so all leaves align at the rightmost
 // x. Memoizes onto node.depthToLeaf since the layout walks the tree repeatedly.
 // See https://github.com/emmanuelparadis/ape/blob/master/R/plot.phylo.R
-export function calcDepthToLeaf(node: HierarchyNode): number {
+export function calcDepthToLeaf<T>(node: HierarchyNode<T>): number {
   const nodes = descendants(node)
   for (let i = nodes.length - 1; i >= 0; i--) {
     const n = nodes[i]!
