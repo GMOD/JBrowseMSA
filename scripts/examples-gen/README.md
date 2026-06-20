@@ -64,6 +64,8 @@ Current datasets:
 | `globin.tsv`      | Hemoglobin α/β, myoglobin, neuroglobin, cytoglobin | tree groups by globin **type**, not species — gene duplication |
 | `ace2.tsv`        | ACE2 (SARS-CoV-2 receptor) across mammals | dot view exposes the few spike-contact residues driving host range |
 | `opsins.tsv`      | Vertebrate visual pigments | tree sorts by opsin class; + real 7TM-GPCR domain overlay |
+| `trna.stock`      | Transfer RNA cloverleaf (Rfam RF00005 seed subset) | RNA secondary structure: `SS_cons` renders as a base-paired track over the alignment |
+| `hammerhead.stock`| Hammerhead ribozyme type III (Rfam RF00008 seed subset) | catalytic RNA: `SS_cons` shows the three-way helix junction; counterpoint to tRNA |
 
 ## The pipeline (`generate.mjs`)
 
@@ -148,6 +150,34 @@ sequence space; the viewer maps them back onto alignment columns
 5. Add a gallery component in `packages/examples/src/examples/` that imports the
    constants, and register it in `index.ts`.
 
+## RNA structural alignments (`.stock` datasets)
+
+Structured-RNA families are handled differently from the protein `.tsv`
+datasets. An Rfam seed alignment is **already** a hand-curated structural
+alignment that carries a consensus secondary structure (`#=GC SS_cons`, WUSS
+notation), so re-aligning it would destroy the column-to-structure
+correspondence. The committed `datasets/<name>.stock` is therefore kept
+verbatim as the alignment; `generate.mjs` only:
+
+- runs ClustalW `-TREE -TYPE=DNA` on its sequences to infer a neighbor-joining
+  tree (mapping `U`→`T` and Rfam insert gaps `.`→`-` purely for the inference),
+  then injects that tree as `#=GF NH` so the parser
+  (`StockholmMSA.getTree`) renders it; and
+- emits a single `<var>MSA` Stockholm string constant (no separate `Tree`
+  constant — the tree is embedded).
+
+The viewer shows `SS_cons` as a dedicated "Secondary-structure" track, coloring
+every WUSS bracket type (`<>`, `()`, `[]`, `{}`) by base-pairing — so e.g. the
+tRNA acceptor stem (parens) and the D/anticodon/T arms (angle brackets) all
+light up over the alignment columns.
+
+To add one: drop the curated Rfam subset into `datasets/<name>.stock` (a normal
+Stockholm with `#=GC SS_cons` and no tree), add
+`{ name: '<name>', varName: '<var>', kind: 'rna-stockholm' }` to the `datasets`
+array, and run `generate.mjs <name>`. `trna.stock` is a 24-sequence subset of
+the RF00005 seed (full seed: 954 sequences) and `hammerhead.stock` a 20-sequence
+subset of RF00008 (full seed: 85); the row labels are the raw Rfam
+`accession/coords` ids, same as the lysine example.
 ## The other real examples
 
 Two real examples predate this pipeline and are documented here for provenance:

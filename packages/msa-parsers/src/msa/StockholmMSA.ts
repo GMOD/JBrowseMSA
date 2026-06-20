@@ -113,9 +113,19 @@ export default class StockholmMSA extends BaseMSA {
         id: 'secondaryStruct',
         name: 'Secondary-structure',
         data: this.secondaryStructureConsensus,
+        // WUSS notation pairs base-paired columns as open/close brackets of
+        // several nesting types (<>, (), [], {}); color all opens one way and
+        // closes the other so every helix (e.g. the tRNA acceptor stem, which
+        // is written with parens) is highlighted, not just the <> arms.
         customColorScheme: {
-          '>': 'pink',
           '<': 'lightblue',
+          '(': 'lightblue',
+          '[': 'lightblue',
+          '{': 'lightblue',
+          '>': 'pink',
+          ')': 'pink',
+          ']': 'pink',
+          '}': 'pink',
         },
       },
     ]

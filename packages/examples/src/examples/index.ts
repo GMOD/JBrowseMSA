@@ -12,6 +12,8 @@ import Ef1a from './Ef1a'
 import Ef1aSrc from './Ef1a.tsx?raw'
 import Globin from './Globin'
 import GlobinSrc from './Globin.tsx?raw'
+import Hammerhead from './Hammerhead'
+import HammerheadSrc from './Hammerhead.tsx?raw'
 import HistoneH4 from './HistoneH4'
 import HistoneH4Src from './HistoneH4.tsx?raw'
 import Insulin from './Insulin'
@@ -38,6 +40,8 @@ import RealDomains from './RealDomains'
 import RealDomainsSrc from './RealDomains.tsx?raw'
 import TreeOptions from './TreeOptions'
 import TreeOptionsSrc from './TreeOptions.tsx?raw'
+import Trna from './Trna'
+import TrnaSrc from './Trna.tsx?raw'
 import ZeroConfig from './ZeroConfig'
 import ZeroConfigSrc from './ZeroConfig.tsx?raw'
 
@@ -113,6 +117,24 @@ export const examples: Example[] = [
       'full inferred tree — shows the canvas tiling holds up past toy data.',
     Component: LargeTree,
     source: LargeTreeSrc,
+  },
+  {
+    name: 'RNA secondary structure (tRNA)',
+    description:
+      'Transfer RNA (Rfam RF00005): the Stockholm SS_cons cloverleaf renders ' +
+      'as a secondary-structure track, coloring the acceptor stem and D/' +
+      'anticodon/T arms by base-pairing above the alignment.',
+    Component: Trna,
+    source: TrnaSrc,
+  },
+  {
+    name: 'Ribozyme structure (hammerhead)',
+    description:
+      'Hammerhead ribozyme (Rfam RF00008), a small self-cleaving catalytic ' +
+      'RNA: the SS_cons track shows its three-way helix junction colored by ' +
+      'base-pairing — a catalytic-RNA counterpoint to the tRNA cloverleaf.',
+    Component: Hammerhead,
+    source: HammerheadSrc,
   },
   {
     name: 'Reference dots (MyD88 across bats)',
