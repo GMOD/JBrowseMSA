@@ -1,0 +1,25 @@
+# p53 (TP53) — conservation concentrated in the functional core.
+#
+# The tumor suppressor p53 is not uniformly conserved: its central DNA-binding
+# domain (where most cancer mutations fall) is highly conserved across mammals,
+# while the N- and C-terminal regions vary freely. With relativeTo=Human the
+# middle of the alignment collapses to dots while the flanks stay full of
+# letters — a clear picture of WHERE selection acts within a single protein.
+#
+# Columns: UniProt accession <TAB> row label. Human first (reference).
+P04637	Human
+P56424	Macaque
+P13481	Green_monkey
+P02340	Mouse
+P10361	Rat
+Q00366	Hamster
+Q9WUR6	Guinea_pig
+Q95330	Rabbit
+P67939	Cow
+P51664	Sheep
+Q9TUB2	Pig
+P41685	Cat
+Q29537	Dog
+Q8SPZ3	Beluga_whale
+Q9TTA1	Treeshrew
+O36006	Woodchuck

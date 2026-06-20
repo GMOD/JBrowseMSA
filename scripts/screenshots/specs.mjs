@@ -262,4 +262,72 @@ export const specs = [
         },
       ]
     : []),
+  {
+    name: 'extreme-conservation',
+    // histone H4 vs human: one of the most conserved proteins known renders
+    // almost entirely as dots, with only the distant lineages showing letters
+    url: data({
+      height: 300,
+      treeAreaWidth: 150,
+      relativeTo: 'Human',
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('histoneH4MSA'),
+        tree: genConst('histoneH4Tree'),
+      },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+  },
+  {
+    name: 'deep-phylogeny',
+    // cytochrome c from mammals to plants/fungi: the tree spans >1 billion years
+    url: data({
+      height: 320,
+      treeAreaWidth: 160,
+      colWidth: 9,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('cytochromeCMSA'),
+        tree: genConst('cytochromeCTree'),
+      },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+  },
+  {
+    name: 'convergent-evolution',
+    // prestin: the echolocating bat + toothed whales ("_echo") group together,
+    // pulled off the species tree by convergent selection
+    url: data({
+      height: 440,
+      treeAreaWidth: 230,
+      colWidth: 2,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('prestinMSA'),
+        tree: genConst('prestinTree'),
+      },
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
+    name: 'within-protein-conservation',
+    // p53 vs human: the central DNA-binding domain collapses to dots while the
+    // variable N/C-termini stay full of letters
+    url: data({
+      height: 480,
+      treeAreaWidth: 175,
+      colWidth: 3,
+      relativeTo: 'Human',
+      colorSchemeName: 'clustalx_protein_dynamic',
+      data: {
+        msa: genConst('p53MSA'),
+        tree: genConst('p53Tree'),
+      },
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
 ]

@@ -1,0 +1,17 @@
+# Histone H4 — one of the most conserved proteins known.
+#
+# H4 packages DNA in every eukaryote and tolerates almost no change: across
+# ~1.5 billion years (mammal, bird, insect, nematode, fungus, ciliate, plant)
+# the ~103-residue sequence differs at only a handful of positions. With
+# relativeTo=Human nearly the whole alignment renders as dots, and the rare
+# substitutions (mostly in the divergent ciliate/plant/yeast rows) are the
+# entire story — the opposite extreme from a fast-evolving protein.
+#
+# Columns: UniProt accession <TAB> row label. Human first (reference).
+P62805	Human
+P62801	Chicken
+P84040	Drosophila
+P62784	C_elegans
+P59259	Arabidopsis
+P02309	Yeast
+P69152	Tetrahymena

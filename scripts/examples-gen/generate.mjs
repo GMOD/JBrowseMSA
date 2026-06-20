@@ -44,6 +44,10 @@ const datasets = [
   { name: 'globin', varName: 'globin', relativeToFirstRow: false },
   { name: 'ace2', varName: 'ace2', relativeToFirstRow: true },
   { name: 'opsins', varName: 'opsin', relativeToFirstRow: false },
+  { name: 'histone_h4', varName: 'histoneH4', relativeToFirstRow: true },
+  { name: 'cytochrome_c', varName: 'cytochromeC', relativeToFirstRow: false },
+  { name: 'prestin', varName: 'prestin', relativeToFirstRow: false },
+  { name: 'p53', varName: 'p53', relativeToFirstRow: true },
 ]
 
 function readDataset(name) {

@@ -1,0 +1,24 @@
+# Prestin (SLC26A5) — convergent molecular evolution for echolocation.
+#
+# Prestin is the motor protein of cochlear outer hair cells. Echolocating
+# (laryngeal) bats and toothed whales independently evolved many of the same
+# prestin substitutions for high-frequency hearing — a textbook case of
+# molecular convergence. Famously, a tree built from prestin can pull the
+# echolocators together AGAINST the species tree: watch whether the "_echo"
+# species (a horseshoe bat + toothed whales) group with each other rather than
+# with their true relatives (e.g. the non-echolocating baleen Blue_whale).
+#
+# Columns: UniProt accession <TAB> row label ("_echo" = laryngeal echolocator)
+P58743	Human
+Q99NH7	Mouse
+E1BHY0	Cow
+G3U0F9	Elephant
+A0A3Q2I7M4	Horse
+A0A8I3P3I6	Dog
+A0A8B8YIN7	Blue_whale
+A0A671FAI5	Rhinolophus_bat_echo
+D7PC76	Dolphin_echo
+A0A2Y9S6E5	Sperm_whale_echo
+A0A2Y9LSQ7	Beluga_echo
+A0A8C6B181	Narwhal_echo
+A0A8C9EEV9	Vaquita_echo

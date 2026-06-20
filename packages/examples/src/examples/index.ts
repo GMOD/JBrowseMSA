@@ -4,10 +4,14 @@ import Ace2 from './Ace2'
 import Ace2Src from './Ace2.tsx?raw'
 import ColorSchemes from './ColorSchemes'
 import ColorSchemesSrc from './ColorSchemes.tsx?raw'
+import CytochromeC from './CytochromeC'
+import CytochromeCSrc from './CytochromeC.tsx?raw'
 import Domains from './Domains'
 import DomainsSrc from './Domains.tsx?raw'
 import Globin from './Globin'
 import GlobinSrc from './Globin.tsx?raw'
+import HistoneH4 from './HistoneH4'
+import HistoneH4Src from './HistoneH4.tsx?raw'
 import LargeTree from './LargeTree'
 import LargeTreeSrc from './LargeTree.tsx?raw'
 import LoadFromUrl from './LoadFromUrl'
@@ -20,6 +24,10 @@ import NucleotideAlignment from './NucleotideAlignment'
 import NucleotideAlignmentSrc from './NucleotideAlignment.tsx?raw'
 import Opsins from './Opsins'
 import OpsinsSrc from './Opsins.tsx?raw'
+import P53 from './P53'
+import P53Src from './P53.tsx?raw'
+import Prestin from './Prestin'
+import PrestinSrc from './Prestin.tsx?raw'
 import ProgrammaticControl from './ProgrammaticControl'
 import ProgrammaticControlSrc from './ProgrammaticControl.tsx?raw'
 import RealDomains from './RealDomains'
@@ -137,6 +145,41 @@ export const examples: Example[] = [
       'history.',
     Component: Opsins,
     source: OpsinsSrc,
+  },
+  {
+    name: 'Extreme conservation (histone H4)',
+    description:
+      'Histone H4 across eukaryotes diffed against human — one of the most ' +
+      'conserved proteins known renders almost entirely as dots, the opposite ' +
+      'extreme from a fast-evolving protein.',
+    Component: HistoneH4,
+    source: HistoneH4Src,
+  },
+  {
+    name: 'Deep phylogeny (cytochrome c)',
+    description:
+      'Cytochrome c from mammals to plants and fungi in one short alignment — ' +
+      'the inferred tree spans over a billion years of evolution.',
+    Component: CytochromeC,
+    source: CytochromeCSrc,
+  },
+  {
+    name: 'Convergent evolution (prestin / echolocation)',
+    description:
+      'Prestin (SLC26A5): echolocating bats and toothed whales convergently ' +
+      'evolved shared changes, so the "_echo" species cluster together against ' +
+      'the species tree.',
+    Component: Prestin,
+    source: PrestinSrc,
+  },
+  {
+    name: 'Conservation within a protein (p53)',
+    description:
+      'p53 diffed against human — the central DNA-binding domain collapses to ' +
+      'dots while the variable N/C-termini stay full of letters, showing where ' +
+      'selection acts within one protein.',
+    Component: P53,
+    source: P53Src,
   },
   {
     name: 'Load from URL',

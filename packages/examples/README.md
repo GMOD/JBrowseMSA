@@ -62,12 +62,43 @@ susceptibility stand out of the otherwise-conserved protein.
 Vertebrate visual pigments sorted by opsin class (rhodopsins vs cone opsins),
 with a real InterProScan 7TM-GPCR domain overlay.
 
+### Extreme conservation: histone H4
+
+![Histone H4 example](../../docs/media/extreme-conservation.png)
+
+H4 across eukaryotes (human to chicken, fly, worm, plant, yeast, ciliate) diffed
+against human — one of the most conserved proteins known is almost entirely
+dots, the opposite extreme from a fast-evolving protein.
+
+### Deep phylogeny: cytochrome c
+
+![Cytochrome c example](../../docs/media/deep-phylogeny.png)
+
+Cytochrome c from mammals through reptile, fish and insect to plant and fungus
+in one short alignment — the inferred tree spans over a billion years.
+
+### Convergent evolution: prestin / echolocation
+
+![Prestin example](../../docs/media/convergent-evolution.png)
+
+Prestin (SLC26A5): echolocating bats and toothed whales convergently evolved
+shared substitutions, so the `_echo` species cluster together in the tree
+against the species tree.
+
+### Conservation within a protein: p53
+
+![p53 example](../../docs/media/within-protein-conservation.png)
+
+p53 diffed against human — the central DNA-binding domain (where cancer
+mutations fall) collapses to dots while the variable N/C-termini stay full of
+letters, showing where selection acts within one protein.
+
 > The vector figures above are generated headlessly from the viewer's own SVG
 > export via `pnpm figures` (see `packages/lib/scripts/generateFigures.tsx`).
 > The real-data examples are PNG screenshots from `pnpm screenshots` (their
 > full-length vector export would be many MB), see
-> `scripts/screenshots/specs.mjs`. The MyD88/globin/ACE2/opsin alignments and
-> trees are built reproducibly from UniProt with ClustalW — see
+> `scripts/screenshots/specs.mjs`. The protein-family alignments and trees are
+> built reproducibly from UniProt with ClustalW — see
 > `scripts/examples-gen/README.md`.
 
 ## Develop

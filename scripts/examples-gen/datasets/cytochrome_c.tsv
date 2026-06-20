@@ -1,0 +1,18 @@
+# Cytochrome c — the classic molecular-clock protein, here across the breadth of
+# eukaryotic life.
+#
+# This ~105-residue electron carrier is alignable from mammals through reptiles,
+# fish and insects to fungi and plants, so the inferred tree spans well over a
+# billion years of evolution in a single short alignment — a deliberately
+# different scale from the within-family examples. (No relativeTo here: the
+# point is the breadth of the tree, not a reference diff.)
+#
+# Columns: UniProt accession <TAB> row label
+P99999	Human
+P00004	Horse
+P62894	Cow
+P81280	Alligator
+P00026	Carp
+P84029	Drosophila
+P00057	Castor_bean
+P00044	Yeast
