@@ -21,3 +21,7 @@ group color, with a small legend. Reuse the existing color infrastructure in
 - The example trees are ClustalW neighbor-joining (fast, deterministic, fine for
   illustration). Document/support an optional upgrade path to MAFFT/MUSCLE +
   IQ-TREE/FastTree for publication-grade trees in `scripts/examples-gen`.
+
+## cap size of 'conservation track' track label
+
+when zoom in gets too large. should be max size of other text labels
