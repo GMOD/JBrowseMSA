@@ -23,9 +23,17 @@ function parseAttributes(col9?: string): Record<string, string | undefined> {
         const eq = f.indexOf('=')
         const key = (eq === -1 ? f : f.slice(0, eq)).trim()
         const val = eq === -1 ? undefined : f.slice(eq + 1)
+        // split on comma (the GFF3 multi-value separator) BEFORE decoding, so a
+        // literal comma encoded as %2C survives the split and isn't mistaken
+        // for a separator
         return [
           key,
-          val ? safeDecode(val).trim().split(',').join(' ') : undefined,
+          val
+            ? val
+                .split(',')
+                .map(v => safeDecode(v).trim())
+                .join(' ')
+            : undefined,
         ]
       })
       .filter(([key]) => key !== ''),

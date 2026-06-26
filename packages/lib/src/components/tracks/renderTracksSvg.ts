@@ -67,7 +67,7 @@ export function drawTextTrackContent({
     const letter = str[i]!
     const color = colorScheme[letter.toUpperCase()]
     if (bgColor) {
-      const x = i * colWidth + offsetX - (offsetX % colWidth)
+      const x = (xStart + i) * colWidth
       ctx.fillStyle = color || 'white'
       ctx.fillRect(x, 0, colWidth, rowHeight)
       if (rowHeight >= 10 && colWidth >= rowHeight / 2) {

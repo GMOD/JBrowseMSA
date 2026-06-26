@@ -14,7 +14,11 @@ export default class StockholmMSA extends BaseMSA {
     super()
     const res = parseAll(text)
     this.data = res
-    this.MSA = res[currentAlignment]!
+    const aln = res[currentAlignment] ?? res[0]
+    if (!aln) {
+      throw new Error('No alignments found in Stockholm file')
+    }
+    this.MSA = aln
   }
 
   getMSA() {
@@ -26,8 +30,8 @@ export default class StockholmMSA extends BaseMSA {
   }
 
   getWidth() {
-    const name = Object.keys(this.MSA.seqdata)[0]!
-    return this.getRow(name).length
+    const name = Object.keys(this.MSA.seqdata)[0]
+    return name === undefined ? 0 : this.getRow(name).length
   }
 
   get alignmentNames() {

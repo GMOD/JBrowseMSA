@@ -17,7 +17,13 @@ export default function Checkbox2({
     <div>
       <FormControlLabel
         control={
-          <Checkbox disabled={disabled} checked={checked} onChange={onChange} />
+          <Checkbox
+            disabled={disabled}
+            checked={checked}
+            onChange={() => {
+              onChange()
+            }}
+          />
         }
         label={label}
       />

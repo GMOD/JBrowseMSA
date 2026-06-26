@@ -944,7 +944,10 @@ function stateModelFactory() {
       get colConsensus() {
         const { colStats, colStatsSums } = this
         return colStats.map((stats, i) => {
-          const total = colStatsSums[i]!
+          const total = colStatsSums[i]
+          if (!total) {
+            return { letter: '', color: undefined }
+          }
           let maxCount = 0
           let letter = ''
           for (const [key, val] of Object.entries(stats)) {

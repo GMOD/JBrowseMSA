@@ -55,9 +55,7 @@ export default function MSAViewer({
   const [ref, { width }] = useMeasure()
   useEffect(() => {
     if (width) {
-      requestAnimationFrame(() => {
-        model.setWidth(width)
-      })
+      model.setWidth(width)
     }
   }, [model, width])
 

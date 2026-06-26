@@ -250,25 +250,45 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
   return nodes[finalActive[0]!]!
 }
 
-function nodeToNewick(node: NJNode, branchLength?: number): string {
-  let result: string
+function withBranchLength(newick: string, branchLength?: number) {
+  return branchLength === undefined
+    ? newick
+    : `${newick}:${branchLength.toFixed(6)}`
+}
 
-  if (node.name !== undefined && !node.left && !node.right) {
-    const quotedName = node.name.replaceAll("'", "''")
-    result = `'${quotedName}'`
-  } else {
-    const leftNewick = node.left ? nodeToNewick(node.left, node.leftLength) : ''
-    const rightNewick = node.right
-      ? nodeToNewick(node.right, node.rightLength)
-      : ''
-    result = `(${leftNewick},${rightNewick})`
+// Emit Newick iteratively rather than recursively: an NJ tree of N leaves can
+// be a caterpillar of depth ~N, so recursion risks a stack overflow on large
+// alignments (matching the iterative-traversal convention in hierarchy.ts).
+function nodeToNewick(root: NJNode): string {
+  const postOrder: NJNode[] = []
+  const stack: NJNode[] = [root]
+  while (stack.length > 0) {
+    const node = stack.pop()!
+    postOrder.push(node)
+    if (node.left) {
+      stack.push(node.left)
+    }
+    if (node.right) {
+      stack.push(node.right)
+    }
   }
 
-  if (branchLength !== undefined) {
-    result += `:${branchLength.toFixed(6)}`
+  const newickByNode = new Map<NJNode, string>()
+  for (let i = postOrder.length - 1; i >= 0; i--) {
+    const node = postOrder[i]!
+    if (node.name !== undefined && !node.left && !node.right) {
+      newickByNode.set(node, `'${node.name.replaceAll("'", "''")}'`)
+    } else {
+      const left = node.left
+        ? withBranchLength(newickByNode.get(node.left)!, node.leftLength)
+        : ''
+      const right = node.right
+        ? withBranchLength(newickByNode.get(node.right)!, node.rightLength)
+        : ''
+      newickByNode.set(node, `(${left},${right})`)
+    }
   }
-
-  return result
+  return newickByNode.get(root)!
 }
 
 export function calculateNeighborJoiningTree(

@@ -65,7 +65,6 @@ export function renderMSABlock({
       ctx,
       theme,
       contrastScheme,
-      offsetX,
       xStart,
       xEnd,
       visibleLeaves,
@@ -75,7 +74,6 @@ export function renderMSABlock({
     drawText({
       model,
       ctx,
-      offsetX,
       xStart,
       xEnd,
       visibleLeaves,
@@ -94,7 +92,6 @@ export function renderMSABlock({
 
 function drawTilesAndText({
   model,
-  offsetX,
   ctx,
   theme,
   contrastScheme,
@@ -104,7 +101,6 @@ function drawTilesAndText({
   referenceSeq,
 }: {
   model: MsaViewModel
-  offsetX: number
   theme: Theme
   ctx: RenderCtx
   contrastScheme: Record<string, string>
@@ -132,7 +128,7 @@ function drawTilesAndText({
   if (!drawBgTiles && !showMsaLetters) {
     return
   }
-  const offsetXAligned = offsetX - (offsetX % colWidth)
+  const offsetXAligned = xStart * colWidth
   const halfColWidth = colWidth / 2
   const quarterRowHeight = rowHeight / 4
 
@@ -190,14 +186,12 @@ function drawTilesAndText({
 // so we only need to draw text here.
 function drawText({
   model,
-  offsetX,
   ctx,
   visibleLeaves,
   xStart,
   xEnd,
   referenceSeq,
 }: {
-  offsetX: number
   model: MsaViewModel
   ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
@@ -210,7 +204,7 @@ function drawText({
   if (!showMsaLetters) {
     return
   }
-  const offsetXAligned = offsetX - (offsetX % colWidth)
+  const offsetXAligned = xStart * colWidth
   const halfColWidth = colWidth / 2
   const quarterRowHeight = rowHeight / 4
   // note: -rowHeight/4 matches +rowHeight/4 in tree
