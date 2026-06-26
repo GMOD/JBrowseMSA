@@ -1259,12 +1259,8 @@ function stateModelFactory() {
        */
       zoomIn() {
         transaction(() => {
-          self.colWidth = Math.min(maxCellSize, Math.ceil(self.colWidth * 1.5))
-          self.rowHeight = Math.min(
-            maxCellSize,
-            Math.ceil(self.rowHeight * 1.5),
-          )
-          self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
+          this.zoomInHorizontal()
+          this.zoomInVertical()
         })
       },
       /**
@@ -1272,15 +1268,8 @@ function stateModelFactory() {
        */
       zoomOut() {
         transaction(() => {
-          self.colWidth = Math.max(
-            minColWidth,
-            Math.floor(self.colWidth * 0.75),
-          )
-          self.rowHeight = Math.max(
-            minRowHeight,
-            Math.floor(self.rowHeight * 0.75),
-          )
-          self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
+          this.zoomOutHorizontal()
+          this.zoomOutVertical()
         })
       },
       /**
@@ -1314,9 +1303,13 @@ function stateModelFactory() {
           )
 
           const anchoredScrollY = offsetY - rowInView * self.rowHeight
-          const overflow = Math.max(0, self.totalHeight - self.height)
+          // maxScrollY is -(totalHeight - visibleMsaHeight) when the alignment
+          // overflows, so -maxScrollY is exactly that overflow past the
+          // scrollable MSA viewport (0 when it fits)
+          const overflow = Math.max(0, -self.maxScrollY)
+          const visibleHeight = self.totalHeight - overflow
           const topBias =
-            self.height > 0 ? clamp(1 - overflow / self.height, 0, 1) : 0
+            visibleHeight > 0 ? clamp(1 - overflow / visibleHeight, 0, 1) : 1
           self.scrollY = clamp(
             anchoredScrollY * (1 - topBias),
             self.maxScrollY,
@@ -1703,22 +1696,8 @@ function stateModelFactory() {
        * #action
        */
       fit() {
-        if (self.numRows > 0) {
-          self.rowHeight = clamp(
-            self.msaAreaHeight / self.numRows,
-            minRowHeight,
-            maxCellSize,
-          )
-        }
-        if (self.numColumns > 0) {
-          self.colWidth = clamp(
-            self.msaAreaWidth / self.numColumns,
-            minColWidth,
-            maxCellSize,
-          )
-        }
-        self.scrollX = 0
-        self.scrollY = 0
+        this.fitVertically()
+        this.fitHorizontally()
       },
       /**
        * #action

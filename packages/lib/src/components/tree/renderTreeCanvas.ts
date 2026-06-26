@@ -29,6 +29,9 @@ function getNodeX(
   if (showBranchLen) {
     return node.len
   }
+  if (maxDepthToLeaf === 0) {
+    return 0
+  }
   const depthToLeaf = calcDepthToLeaf(node)
   return ((maxDepthToLeaf - depthToLeaf) / maxDepthToLeaf) * maxBranchLen
 }

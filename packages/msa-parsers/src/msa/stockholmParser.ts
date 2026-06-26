@@ -24,6 +24,21 @@ function createStockholm(): StockholmData {
   }
 }
 
+// records before a "# STOCKHOLM 1.0" header are an error in strict mode,
+// otherwise they implicitly start a new alignment
+function ensureStock(
+  stock: StockholmData | null,
+  strict: boolean,
+): StockholmData {
+  if (stock) {
+    return stock
+  }
+  if (strict) {
+    throw new Error('No format header: # STOCKHOLM 1.0')
+  }
+  return createStockholm()
+}
+
 const formatStartRegex = /^# STOCKHOLM 1.0/
 const formatEndRegex = /^\/\/\s*$/
 const gfRegex = /^#=GF\s+(\S+)\s+(.*?)\s*$/
@@ -57,36 +72,21 @@ export function parseAll(
       }
       stock = null
     } else if ((match = gfRegex.exec(line))) {
-      if (!stock) {
-        if (options.strict) {
-          throw new Error('No format header: # STOCKHOLM 1.0')
-        }
-        stock = createStockholm()
-      }
+      stock = ensureStock(stock, !!options.strict)
       const tag = match[1]!
       if (!stock.gf[tag]) {
         stock.gf[tag] = []
       }
       stock.gf[tag].push(match[2]!)
     } else if ((match = gcRegex.exec(line))) {
-      if (!stock) {
-        if (options.strict) {
-          throw new Error('No format header: # STOCKHOLM 1.0')
-        }
-        stock = createStockholm()
-      }
+      stock = ensureStock(stock, !!options.strict)
       const tag = match[1]!
       if (!stock.gc[tag]) {
         stock.gc[tag] = ''
       }
       stock.gc[tag] += match[2]!
     } else if ((match = gsRegex.exec(line))) {
-      if (!stock) {
-        if (options.strict) {
-          throw new Error('No format header: # STOCKHOLM 1.0')
-        }
-        stock = createStockholm()
-      }
+      stock = ensureStock(stock, !!options.strict)
       const seqname = match[1]!
       const tag = match[2]!
       const value = match[3]!
@@ -98,12 +98,7 @@ export function parseAll(
       }
       stock.gs[tag][seqname].push(value)
     } else if ((match = grRegex.exec(line))) {
-      if (!stock) {
-        if (options.strict) {
-          throw new Error('No format header: # STOCKHOLM 1.0')
-        }
-        stock = createStockholm()
-      }
+      stock = ensureStock(stock, !!options.strict)
       const seqname = match[1]!
       const tag = match[2]!
       const value = match[3]!
@@ -115,12 +110,7 @@ export function parseAll(
       }
       stock.gr[tag][seqname] += value
     } else if ((match = lineRegex.exec(line))) {
-      if (!stock) {
-        if (options.strict) {
-          throw new Error('No format header: # STOCKHOLM 1.0')
-        }
-        stock = createStockholm()
-      }
+      stock = ensureStock(stock, !!options.strict)
       const seqname = match[1]!
       const seqdata = match[2]!
       if (!stock.seqdata[seqname]) {

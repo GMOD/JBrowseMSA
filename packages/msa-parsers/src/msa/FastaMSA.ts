@@ -6,6 +6,10 @@ export default class FastaMSA extends BaseMSA {
     colonNormalized: Record<string, string>
   }
 
+  // explicit insertion-ordered ids: object key order reorders integer-like
+  // keys (e.g. a numeric ">123" defline) to the front, scrambling row order
+  private orderedNames: string[] = []
+
   constructor(text: string) {
     super()
     const seqdata: Record<string, string> = {}
@@ -23,6 +27,7 @@ export default class FastaMSA extends BaseMSA {
       const id = spaceIdx === -1 ? defLine : defLine.slice(0, spaceIdx)
       if (id) {
         seqdata[id] = entry.slice(newlineIdx + 1).replaceAll(/\s/g, '')
+        this.orderedNames.push(id)
         if (id.includes(':')) {
           colonNormalized[id.replaceAll(':', '_')] = id
         }
@@ -36,7 +41,7 @@ export default class FastaMSA extends BaseMSA {
   }
 
   getNames() {
-    return Object.keys(this.MSA.seqdata)
+    return this.orderedNames
   }
 
   getRow(name: string) {
@@ -48,7 +53,7 @@ export default class FastaMSA extends BaseMSA {
   }
 
   getWidth() {
-    const name = Object.keys(this.MSA.seqdata)[0]!
-    return this.getRow(name).length
+    const name = this.orderedNames[0]
+    return name === undefined ? 0 : this.getRow(name).length
   }
 }

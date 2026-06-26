@@ -194,16 +194,10 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
     const ri = r.get(minI)!
     const rj = r.get(minJ)!
 
-    let limbI: number
-    let limbJ: number
-
-    if (remaining > 2) {
-      limbI = dij / 2 + (ri - rj) / (2 * (remaining - 2))
-      limbJ = dij - limbI
-    } else {
-      limbI = dij / 2
-      limbJ = dij / 2
-    }
+    // remaining is always > 2 inside this loop; the final two nodes are
+    // connected after it
+    let limbI = dij / 2 + (ri - rj) / (2 * (remaining - 2))
+    let limbJ = dij - limbI
 
     // Ensure non-negative branch lengths
     limbI = Math.max(0, limbI)
@@ -217,19 +211,18 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
       rightLength: limbJ,
     }
 
-    // Update distance matrix
-    const newIdx = minI
+    // Update distance matrix, reusing minI's slot for the merged node
     for (const k of active) {
       if (k !== minI && k !== minJ) {
         const newDist = (D[minI]![k]! + D[minJ]![k]! - dij) / 2
-        D[newIdx]![k] = Math.max(0, newDist)
-        D[k]![newIdx] = Math.max(0, newDist)
+        D[minI]![k] = Math.max(0, newDist)
+        D[k]![minI] = Math.max(0, newDist)
       }
     }
 
     // Mark minJ as removed
     nodes[minJ] = undefined
-    nodes[newIdx] = newNode
+    nodes[minI] = newNode
 
     remaining--
   }

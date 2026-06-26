@@ -18,6 +18,20 @@ GHIKL`
     expect(msa.getNames()).toEqual(['seq1', 'seq2'])
   })
 
+  test('preserves row order for numeric FASTA ids', () => {
+    // object key order would hoist integer-like keys ('10' before '2'),
+    // scrambling the alignment; getNames must keep file order
+    const fasta = `>3
+ACDEF
+>1
+GHIKL
+>2
+MNPQR`
+    const msa = parseMSA(fasta)
+
+    expect(msa.getNames()).toEqual(['3', '1', '2'])
+  })
+
   test('parses A3M format', () => {
     const a3m = `>seq1
 ACDEFghiKLMNPQ

@@ -4,6 +4,7 @@ import { Dialog } from '@jbrowse/core/ui'
 import { getSession } from '@jbrowse/core/util'
 import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
+import { getUngappedSequence } from 'msa-parsers'
 
 import { launchInterProScan } from '../../launchInterProScan.ts'
 
@@ -251,7 +252,7 @@ const InterProScanDialog = observer(function ({
                   algorithm: 'interproscan',
                   programs: programs,
                   seq: rows
-                    .map(row => [row[0], row[1].replaceAll('-', '')])
+                    .map(row => [row[0], getUngappedSequence(row[1])])
                     .filter(f => !!f[1])
                     .map(row => `>${row[0]}\n${row[1]}`)
                     .join('\n'),
