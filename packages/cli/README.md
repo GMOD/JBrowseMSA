@@ -73,6 +73,43 @@ When using `--programs`, you can specify any combination of:
 - `PIRSF` - PIR SuperFamily
 - `MobiDBLite` - Disorder prediction
 
+### genestructure
+
+Build a **gene-structure GFF** for a coding-sequence alignment from a RefSeq
+transcript, overlaid in react-msaview the same way InterProScan domains are. The
+exon model is fetched from the NCBI Datasets v2 API; each species' Nth exon is
+named `exon-N`, so a given exon is the same color in every row and the exon
+architecture reads straight down the alignment.
+
+```bash
+react-msaview-cli genestructure <input-msa> --gene <symbol> --ref <rowname> [options]
+```
+
+The exon boundaries of the chosen transcript are mapped onto the reference row's
+columns, then projected into every other row's own ungapped coordinates — so an
+exon that picks up a frameshifting indel in one lineage gets shorter on exactly
+that row while staying column-aligned with the rest. The reference row must be
+the transcript's coding sequence (the CLI warns if its length doesn't match).
+
+#### Options
+
+| Option                | Description                                   | Default             |
+| --------------------- | --------------------------------------------- | ------------------- |
+| `--gene <symbol>`     | Gene symbol to look up in RefSeq (e.g. `F12`) |                     |
+| `--taxon <name\|id>`  | Taxon for `--gene`                            | `human`             |
+| `--gene-id <id>`      | NCBI GeneID, instead of `--gene`              |                     |
+| `--transcript <acc>`  | Specific transcript accession                 | MANE/RefSeq Select  |
+| `--ref <rowname>`     | Reference row = the transcript's CDS          | first row           |
+| `-o, --output <file>` | Output GFF file path                          | `genestructure.gff` |
+
+```bash
+# F12 coding alignment -> 14-exon overlay (MANE Select transcript, human row)
+react-msaview-cli genestructure f12-cds.stock --gene F12 --ref human -o exons.gff
+
+# pin a specific transcript
+react-msaview-cli genestructure aln.fa --transcript NM_000505.4 --ref human
+```
+
 ## Examples
 
 ### Using EBI API (recommended for small datasets)

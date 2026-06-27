@@ -3,6 +3,7 @@
 import { parseArgs } from 'node:util'
 
 import { exportSvg } from './export-svg.ts'
+import { runGeneStructure } from './genestructure.ts'
 import { runInterProPrecomputed } from './interpro-precomputed.ts'
 import { runInterProScan } from './interproscan-msa.ts'
 
@@ -66,6 +67,22 @@ const { values, positionals } = parseArgs({
       type: 'string',
       default: 'pfam',
     },
+    ref: {
+      type: 'string',
+    },
+    gene: {
+      type: 'string',
+    },
+    taxon: {
+      type: 'string',
+      default: 'human',
+    },
+    'gene-id': {
+      type: 'string',
+    },
+    transcript: {
+      type: 'string',
+    },
     email: {
       type: 'string',
       default: 'user@example.com',
@@ -89,6 +106,8 @@ COMMANDS:
   interproscan    Run InterProScan on all sequences in an MSA file
   interpro        Build a domain GFF from InterPro's PRECOMPUTED matches for
                   UniProtKB accessions (instant, deterministic, no scan job)
+  genestructure   Build an exon-structure GFF for a coding-sequence alignment
+                  from a RefSeq transcript (NCBI Datasets), overlaid like domains
   export-svg      Export alignment as SVG (no browser required)
 
 OPTIONS (interproscan):
@@ -106,6 +125,16 @@ OPTIONS (interpro — precomputed):
                                 line; # comments ok — the examples-gen .tsv works)
   -o, --output <file>           Output GFF file (default: domains.gff)
   --database <name>             InterPro member db to read (default: pfam)
+
+OPTIONS (genestructure):
+  <input>                       MSA file (coding-sequence alignment) [required]
+  --gene <symbol>               Gene symbol to fetch from RefSeq (e.g. F12)
+  --taxon <name|id>             Taxon for --gene (default: human)
+  --gene-id <id>                NCBI GeneID, instead of --gene
+  --transcript <accession>      Specific transcript (default: MANE/RefSeq Select)
+  --ref <rowname>               Reference row = the transcript's CDS
+                                (default: first alignment row)
+  -o, --output <file>           Output GFF file (default: genestructure.gff)
 
 OPTIONS (export-svg):
   --msa <file>                  MSA file (FASTA, Stockholm, or Clustal) [required]
@@ -130,6 +159,9 @@ EXAMPLES:
 
   react-msaview-cli interpro accessions.tsv -o domains.gff
   react-msaview-cli interpro accessions.tsv -o domains.gff --database cdd
+
+  react-msaview-cli genestructure f12-cds.stock --gene F12 --ref human -o exons.gff
+  react-msaview-cli genestructure aln.fa --transcript NM_000505.4 --ref human
 `)
 }
 
@@ -192,6 +224,23 @@ async function main() {
       inputFile,
       outputFile: values.output,
       database: values.database,
+    })
+  } else if (command === 'genestructure') {
+    const inputFile = positionals[1]
+    if (!inputFile) {
+      console.error('Error: Input MSA file is required')
+      process.exit(1)
+    }
+    const outputFile =
+      values.output === 'domains.gff' ? 'genestructure.gff' : values.output
+    await runGeneStructure({
+      inputFile,
+      outputFile,
+      ref: values.ref,
+      gene: values.gene,
+      taxon: values.taxon,
+      geneId: values['gene-id'],
+      transcript: values.transcript,
     })
   } else {
     console.error(`Unknown command: ${command}`)

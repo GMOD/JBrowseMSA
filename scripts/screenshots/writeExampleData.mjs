@@ -30,6 +30,8 @@ const files = {
   'kinase.nh': readConst('kinaseTree'),
   'kinase-domains.gff': readConst('kinaseDomainsGFF'),
   'lysine.stock': readConst('lysineMSA'),
+  'f12-cetacean-cds.stock': readConst('f12CdsMSA'),
+  'f12-cetacean-exons.gff': readConst('f12ExonsGFF'),
 }
 
 fs.mkdirSync(outDir, { recursive: true })

@@ -321,4 +321,42 @@ export const specs = [
     settle: 2000,
     clip: 'viewer',
   },
+  {
+    name: 'f12-exon-architecture',
+    // F12 coding alignment with its 14-exon gene structure overlaid (each exon
+    // a distinct color, the same color across species). Zoomed out so the whole
+    // gene's exon architecture reads straight down the alignment and the
+    // cetacean clade clusters in the tree. Loads from hosted files (large
+    // alignment + exon GFF), like real-domains/large-tree.
+    url: fileSnap({
+      height: 470,
+      treeAreaWidth: 150,
+      colWidth: 0.7,
+      colorSchemeName: 'nucleotide',
+      msaFilehandle: { uri: 'data/f12-cetacean-cds.stock' },
+      gffFilehandle: { uri: 'data/f12-cetacean-exons.gff' },
+    }),
+    viewportWidth: 1500,
+    settle: 3500,
+    clip: 'viewer',
+  },
+  {
+    name: 'f12-frameshift',
+    // zoomed to exon 3 (alignment col 205, highlighted): a single-column deletion
+    // shared by exactly the four cetaceans (gap) but intact in human/manatee/land
+    // mammals — the shared inactivating frameshift, in gene-structure (exon) color.
+    url: fileSnap({
+      height: 470,
+      treeAreaWidth: 150,
+      colWidth: 14,
+      scrollX: -2240,
+      highlightColumns: [205],
+      colorSchemeName: 'nucleotide',
+      msaFilehandle: { uri: 'data/f12-cetacean-cds.stock' },
+      gffFilehandle: { uri: 'data/f12-cetacean-exons.gff' },
+    }),
+    viewportWidth: 1400,
+    settle: 3500,
+    clip: 'viewer',
+  },
 ]

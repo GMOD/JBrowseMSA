@@ -7,6 +7,16 @@ const base = import.meta.env.BASE_URL
 // biological story that reads straight off the alignment + tree.
 const figures = [
   {
+    src: 'f12-exon-architecture.png',
+    title: 'Gene structure overlay (DNA)',
+    body: 'Coagulation factor XII coding alignment with its 14 exons overlaid — each exon the same color across species, drawn through the same overlay path as InterProScan domains (built by react-msaview-cli genestructure). The whole gene’s exon architecture reads straight down the alignment.',
+  },
+  {
+    src: 'f12-frameshift.png',
+    title: 'Pseudogenization',
+    body: 'F12 is intact in land mammals and the manatee (a fully aquatic sirenian), but a single-base deletion shared by exactly the four cetaceans — beside premature stop codons elsewhere — disables it. Gene loss visible at the nucleotide level, in exon 3, which a protein alignment cannot show.',
+  },
+  {
     src: 'within-protein-conservation.png',
     title: 'Within-protein conservation',
     body: 'p53 across vertebrates, relative to human: the central DNA-binding domain collapses to dots while the variable N- and C-termini stay full of substitutions.',
@@ -79,6 +89,13 @@ const brafV600 =
   'https://jbrowse.org/code/jb2/webgl-poc/?config=https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fjbrowse-msa-combined-config.json&session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22id%22%3A%22lgv-braf%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr7%3A140%2C753%2C295-140%2C753%2C377%22%2C%22highlight%22%3A%5B%22chr7%3A140%2C753%2C335-140%2C753%2C337%22%5D%2C%22colorByCDS%22%3Atrue%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeqSelect%22%2C%22hg38-braf-clinvar-pathogenic%22%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22connectedViewId%22%3A%22lgv-braf%22%2C%22connectedFeature%22%3A%7B%22type%22%3A%22mRNA%22%2C%22refName%22%3A%22chr7%22%2C%22start%22%3A140734599%2C%22end%22%3A140924703%2C%22strand%22%3A-1%2C%22name%22%3A%22NM_004333.6%22%2C%22subfeatures%22%3A%5B%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140734599%2C%22end%22%3A140734770%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140739811%2C%22end%22%3A140739946%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140749286%2C%22end%22%3A140749418%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140753274%2C%22end%22%3A140753393%2C%22strand%22%3A-1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140754186%2C%22end%22%3A140754233%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140776911%2C%22end%22%3A140777088%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140777990%2C%22end%22%3A140778075%2C%22strand%22%3A-1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140781575%2C%22end%22%3A140781693%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140783020%2C%22end%22%3A140783157%2C%22strand%22%3A-1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140787547%2C%22end%22%3A140787584%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140794307%2C%22end%22%3A140794467%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140800361%2C%22end%22%3A140800481%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140801411%2C%22end%22%3A140801560%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140807959%2C%22end%22%3A140808062%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140808891%2C%22end%22%3A140808995%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140834608%2C%22end%22%3A140834872%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140850110%2C%22end%22%3A140850212%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A140924565%2C%22end%22%3A140924703%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%5D%7D%2C%22querySeqName%22%3A%22BRAF_HUMAN%22%2C%22highlightColumns%22%3A%5B647%5D%2C%22msaFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fbraf.aln%22%7D%2C%22treeFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fbraf.nh%22%7D%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22labelsAlignRight%22%3Atrue%2C%22treeAreaWidth%22%3A200%7D%5D%7D'
 const tp53R248 =
   'https://jbrowse.org/code/jb2/webgl-poc/?config=https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fjbrowse-msa-combined-config.json&session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22id%22%3A%22lgv-tp53%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr17%3A7%2C674%2C189-7%2C674%2C251%22%2C%22highlight%22%3A%5B%22chr17%3A7%2C674%2C219-7%2C674%2C221%22%5D%2C%22colorByCDS%22%3Atrue%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeqSelect%22%2C%22hg38-tp53-clinvar-pathogenic%22%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22connectedViewId%22%3A%22lgv-tp53%22%2C%22connectedFeature%22%3A%7B%22type%22%3A%22mRNA%22%2C%22refName%22%3A%22chr17%22%2C%22start%22%3A7669611%2C%22end%22%3A7676594%2C%22strand%22%3A-1%2C%22name%22%3A%22NM_000546.6%22%2C%22subfeatures%22%3A%5B%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7669611%2C%22end%22%3A7669690%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7670608%2C%22end%22%3A7670715%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7673534%2C%22end%22%3A7673608%2C%22strand%22%3A-1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7673700%2C%22end%22%3A7673837%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7674180%2C%22end%22%3A7674290%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7674858%2C%22end%22%3A7674971%2C%22strand%22%3A-1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7675052%2C%22end%22%3A7675236%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7675993%2C%22end%22%3A7676272%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7676381%2C%22end%22%3A7676403%2C%22strand%22%3A-1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A7676520%2C%22end%22%3A7676594%2C%22strand%22%3A-1%2C%22phase%22%3A0%7D%5D%7D%2C%22querySeqName%22%3A%22human%22%2C%22highlightColumns%22%3A%5B258%5D%2C%22msaFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Ftp53-p53-orthologs.fa%22%7D%2C%22treeFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Ftp53-p53.nh%22%7D%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22labelsAlignRight%22%3Atrue%2C%22treeAreaWidth%22%3A200%7D%5D%7D'
+
+// F12 in genomic coordinates: a plain genome view (no connected MSA) of the F12
+// locus with the canonical transcript and the Multiz 470-way mammal MAF track —
+// the genomic complement to the two F12 gene-loss figures above. Captured by
+// scripts/screenshots/f12-genome-figure.mjs.
+const f12Genome =
+  'https://jbrowse.org/code/jb2/webgl-poc/?config=https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fjbrowse-msa-combined-config.json&session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22id%22%3A%22lgv-f12%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr5%3A177%2C401%2C800-177%2C409%2C900%22%2C%22colorByCDS%22%3Atrue%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeqSelect%22%2C%22hg38-multiz470way%22%5D%7D%5D%7D'
 ---
 
 <Base
@@ -107,6 +124,29 @@ const tp53R248 =
         ))
       }
     </div>
+
+    <p>
+      The two F12 figures above are the curated coding alignment. The same gene
+      in <em>genomic</em> coordinates — introns and all, with the raw Multiz 470-way
+      mammal MAF track — is a separate genome-browser view rather than a duplicate
+      alignment crammed into one session:
+    </p>
+
+    <figure>
+      <a href={f12Genome} target="_blank" rel="noopener">
+        <img
+          src={`${base}/media/genome-browser-f12.png`}
+          alt="JBrowse: the F12 locus on hg38 with the canonical RefSeq transcript colored by CDS frame, over the Multiz 470-way mammal MAF track showing the comparative alignment across mammals including dolphin and blue whale"
+        />
+      </a>
+      <figcaption>
+        The F12 locus (chr5, 14 exons) with the canonical RefSeq transcript over
+        the Multiz 470-way mammal MAF track — two cetaceans (dolphin, blue
+        whale) among the aligned mammals. The genomic context for the gene-loss
+        alignment above.{' '}
+        <a href={f12Genome} target="_blank" rel="noopener">Open in JBrowse ↗</a>
+      </figcaption>
+    </figure>
 
     <h2 id="connected">Connected JBrowse sessions</h2>
     <p>

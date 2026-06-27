@@ -20,6 +20,10 @@ interface MSAViewerProps {
   gffFilehandle?: FileLocationType
   colorScheme?: string
   height?: number
+  /** initial per-column pixel width (zoom level) */
+  colWidth?: number
+  /** alignment columns (0-based) to highlight with a persistent overlay */
+  highlightColumns?: number[]
   /** row name to diff every other row against (matches render as ".") */
   relativeTo?: string
 }
@@ -33,6 +37,8 @@ export default function MSAViewer({
   gffFilehandle,
   colorScheme,
   height,
+  colWidth,
+  highlightColumns,
   relativeTo,
 }: MSAViewerProps) {
   // lazy initializer: the model is created exactly once from the initial props
@@ -48,6 +54,8 @@ export default function MSAViewer({
       ...(gffFilehandle ? { gffFilehandle } : {}),
       ...(colorScheme ? { colorSchemeName: colorScheme } : {}),
       ...(height ? { height } : {}),
+      ...(colWidth ? { colWidth } : {}),
+      ...(highlightColumns ? { highlightColumns } : {}),
       ...(relativeTo ? { relativeTo } : {}),
     }),
   )

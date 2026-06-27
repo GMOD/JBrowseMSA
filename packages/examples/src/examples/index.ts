@@ -12,6 +12,8 @@ import Domains from './Domains'
 import DomainsSrc from './Domains.tsx?raw'
 import Ef1a from './Ef1a'
 import Ef1aSrc from './Ef1a.tsx?raw'
+import F12 from './F12'
+import F12Src from './F12.tsx?raw'
 import Globin from './Globin'
 import GlobinSrc from './Globin.tsx?raw'
 import Hammerhead from './Hammerhead'
@@ -70,6 +72,17 @@ export const examples: Example[] = [
       'A DNA alignment with no tree, using a nucleotide color scheme.',
     Component: NucleotideAlignment,
     source: NucleotideAlignmentSrc,
+  },
+  {
+    name: 'Gene loss + exon structure (F12 in cetaceans)',
+    description:
+      'A DNA coding alignment of coagulation factor XII with its 14-exon gene ' +
+      'structure overlaid (each exon the same color across species). F12 is ' +
+      'intact in land mammals and the manatee but disabled in cetaceans by a ' +
+      'shared frameshift in exon 3 + premature stops — pseudogenization read ' +
+      'straight off the nucleotides, which a protein alignment cannot show.',
+    Component: F12,
+    source: F12Src,
   },
   {
     name: 'Color schemes',

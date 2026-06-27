@@ -15,11 +15,11 @@ three phases, each writing into `docs/media` and each self-gating — a re-rende
 only overwrites a committed image when its pixels actually changed (rendering is
 deterministic), so a full regen leaves unchanged figures untouched.
 
-| Phase     | Command                | What it makes                                                   | Browser? |
-| --------- | ---------------------- | --------------------------------------------------------------- | -------- |
-| `figures` | `pnpm figures`         | the SVG README figures, via the viewer's own SVG export (jsdom) | no       |
-| `app`     | `pnpm screenshots`     | demo-app PNGs (color schemes, dialogs, phylogeny gallery)       | yes      |
-| `jbrowse` | `pnpm screenshots:jbrowse` | the genome-browser figures, via the JBrowse plugin          | yes + jbrowse-web |
+| Phase     | Command                    | What it makes                                                   | Browser?          |
+| --------- | -------------------------- | --------------------------------------------------------------- | ----------------- |
+| `figures` | `pnpm figures`             | the SVG README figures, via the viewer's own SVG export (jsdom) | no                |
+| `app`     | `pnpm screenshots`         | demo-app PNGs (color schemes, dialogs, phylogeny gallery)       | yes               |
+| `jbrowse` | `pnpm screenshots:jbrowse` | the genome-browser figures, via the JBrowse plugin              | yes + jbrowse-web |
 
 The `jbrowse` phase needs a running jbrowse-web (the `webgl-poc` branch). If it
 isn't reachable that phase is **skipped** (not failed), so the self-contained
@@ -96,8 +96,8 @@ pnpm screenshots:jbrowse --filter=protein3d --protein3d-dist=../jbrowse-plugin-p
 
 The figures are **declarative**: each is one entry in the `FIGURES` list in
 [`jbrowse-figures.mjs`](jbrowse-figures.mjs), naming a key in the `links` map of
-`packages/website/src/pages/genome-browser.astro` — _the same declarative URL the
-docs page ships_, so the figure and the live link can never drift. A single
+`packages/website/src/pages/genome-browser.astro` — _the same declarative URL
+the docs page ships_, so the figure and the live link can never drift. A single
 generic driver loads each link and screenshots it.
 
 ```js
@@ -120,18 +120,35 @@ serves `packages/app/public/data` itself and loads a locally-rewritten config
 bumped plugin shows up before deploy. `--plugin-dist=<path>` additionally serves
 a local plugin build in place of the published `latest` bundle.
 
-| Flag               | Effect                                                       |
-| ------------------ | ------------------------------------------------------------ |
-| `--filter=a,b`     | Only figures whose `out`/`link` contains a token             |
-| `--jbrowse-url=U`     | jbrowse-web base URL (default `http://localhost:3000`)          |
-| `--plugin-dist=P`     | Serve a local msaview plugin `dist/` instead of the published bundle |
-| `--protein3d-dist=P`  | Serve a local protein3d plugin `dist/` (the three-view figure)  |
-| `--force`             | Rewrite every PNG, bypassing the diff gate                      |
+| Flag                 | Effect                                                               |
+| -------------------- | -------------------------------------------------------------------- |
+| `--filter=a,b`       | Only figures whose `out`/`link` contains a token                     |
+| `--jbrowse-url=U`    | jbrowse-web base URL (default `http://localhost:3000`)               |
+| `--plugin-dist=P`    | Serve a local msaview plugin `dist/` instead of the published bundle |
+| `--protein3d-dist=P` | Serve a local protein3d plugin `dist/` (the three-view figure)       |
+| `--force`            | Rewrite every PNG, bypassing the diff gate                           |
+
+### Standalone: the F12 genome figure
+
+`docs/media/genome-browser-f12.png` (the genomic-coordinate complement to the
+F12 gene-loss MSA figures) is a plain genome view — no connected MSA — so it
+captures against the **published** jbrowse-web, with no local build:
+
+```sh
+node scripts/screenshots/f12-genome-figure.mjs --force
+```
+
+It defaults to `https://jbrowse.org/code/jb2/webgl-poc` and the hosted combined
+config; the session URL mirrors the `f12Genome` link in `gallery.astro`.
 
 ---
 
 Image diffing/optimization ([`image-pipeline.mjs`](image-pipeline.mjs)) shells
-out to ImageMagick (`compare`/`identify`) and `pngquant`; each is best-effort and
-degrades gracefully if the tool is missing. `pnpm --filter website sync-media`
-copies `docs/media` into the site's `public/media` at build time.
+out to ImageMagick (`compare`/`identify`) and `pngquant`; each is best-effort
+and degrades gracefully if the tool is missing.
+`pnpm --filter website sync-media` copies `docs/media` into the site's
+`public/media` at build time.
+
+```
+
 ```
