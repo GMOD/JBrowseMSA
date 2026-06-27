@@ -1,7 +1,8 @@
 :root {
   --fg: #1a1a2e;
   --muted: #555;
-  --accent: #42777f;
+  /* JBrowse "midnight" navy — matches createJBrowseTheme() primary */
+  --accent: #0d233f;
   --border: #e2e2e2;
   --bg: #fff;
   --bg-soft: #f7f8f8;

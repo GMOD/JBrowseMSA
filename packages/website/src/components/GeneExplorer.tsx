@@ -14,7 +14,10 @@ import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { ThemeProvider } from '@mui/material/styles'
 import { MSAViewer } from 'react-msaview'
+
+import { theme } from '../lib/theme'
 
 import {
   DEFAULT_WINDOW_SIZE,
@@ -156,61 +159,63 @@ export default function GeneExplorer() {
   }, [])
 
   return (
-    <Box>
-      <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-        <Autocomplete
-          freeSolo
-          sx={{ width: 320 }}
-          options={options}
-          onInputChange={(_e, v) => {
-            void onSearch(v)
-          }}
-          onChange={(_e, v) => {
-            navigate(typeof v === 'string' ? v : null)
-          }}
-          renderInput={params => (
-            <TextField
-              {...params}
-              label="Gene symbol"
-              placeholder="e.g. TP53"
-              size="small"
-            />
-          )}
-        />
-        {busy ? <CircularProgress size={24} /> : null}
-        <Typography variant="body2" color="text.secondary">
-          Try:{' '}
-          {EXAMPLES.map((g, i) => (
-            <span key={g.symbol}>
-              {i > 0 ? ', ' : ''}
-              <Link
-                component="button"
-                type="button"
-                onClick={() => {
-                  navigate(g.symbol)
-                }}
-              >
-                {g.symbol}
-              </Link>
-            </span>
-          ))}
-        </Typography>
-      </Stack>
+    <ThemeProvider theme={theme}>
+      <Box>
+        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+          <Autocomplete
+            freeSolo
+            sx={{ width: 320 }}
+            options={options}
+            onInputChange={(_e, v) => {
+              void onSearch(v)
+            }}
+            onChange={(_e, v) => {
+              navigate(typeof v === 'string' ? v : null)
+            }}
+            renderInput={params => (
+              <TextField
+                {...params}
+                label="Gene symbol"
+                placeholder="e.g. TP53"
+                size="small"
+              />
+            )}
+          />
+          {busy ? <CircularProgress size={24} /> : null}
+          <Typography variant="body2" color="text.secondary">
+            Try:{' '}
+            {EXAMPLES.map((g, i) => (
+              <span key={g.symbol}>
+                {i > 0 ? ', ' : ''}
+                <Link
+                  component="button"
+                  type="button"
+                  onClick={() => {
+                    navigate(g.symbol)
+                  }}
+                >
+                  {g.symbol}
+                </Link>
+              </span>
+            ))}
+          </Typography>
+        </Stack>
 
-      {picked?.note ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          <strong>{picked.symbol}</strong> — {picked.note}
-        </Typography>
-      ) : null}
+        {picked?.note ? (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <strong>{picked.symbol}</strong> — {picked.note}
+          </Typography>
+        ) : null}
 
-      {error ? (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      ) : null}
+        {error ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        ) : null}
 
-      {result ? <ResultPanel result={result} /> : null}
-    </Box>
+        {result ? <ResultPanel result={result} /> : null}
+      </Box>
+    </ThemeProvider>
   )
 }
 
@@ -268,7 +273,13 @@ function ResultPanel({ result }: { result: Result }) {
         ) : null}
       </Stack>
 
-      <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ mt: 2 }}
+        flexWrap="wrap"
+        useFlexGap
+      >
         <Button variant="contained" href={url} target="_blank" rel="noopener">
           Open in JBrowse ↗
         </Button>
@@ -302,7 +313,11 @@ function ResultPanel({ result }: { result: Result }) {
               variant="outlined"
             />
             {uniprotId ? (
-              <Chip label={`UniProt ${uniprotId}`} size="small" variant="outlined" />
+              <Chip
+                label={`UniProt ${uniprotId}`}
+                size="small"
+                variant="outlined"
+              />
             ) : null}
             <Button
               size="small"
