@@ -33,7 +33,12 @@ async function cdsBounds(symbol) {
   const [, , refName, , spec] = line.split('\t')
   const starts = spec.split(',').map(s => Number(s.split(':')[0]))
   const ends = spec.split(',').map(s => Number(s.split(':')[1]))
-  return { refName, min: Math.min(...starts), max: Math.max(...ends) }
+  // the session emits canonical refnames (hg38 sequence is "17", not "chr17")
+  return {
+    refName: refName.replace(/^chr/, ''),
+    min: Math.min(...starts),
+    max: Math.max(...ends),
+  }
 }
 
 async function main() {
@@ -191,6 +196,19 @@ async function main() {
         if (probe.a && probe.a.refName !== cds.refName) failures.push(`highlight refName ${probe.a.refName} != ${cds.refName}`)
         if (probe.codonGap !== undefined && probe.codonGap !== 3) failures.push(`adjacent residues map ${probe.codonGap} bp apart, expected 3`)
         if (!probe.click) failures.push('clickGenomeHighlights empty')
+
+        // the model getter being right isn't enough — the LGV must actually
+        // RENDER the highlight. This catches the refname-aliasing class of bug
+        // (correct coords, but the overlay can't place itself). Let mobx/React
+        // flush, then look for the rendered highlight overlay in the DOM.
+        await delay(2500)
+        const domHighlights = await page.evaluate(() =>
+          [...document.querySelectorAll('div')].filter(
+            d => getComputedStyle(d).backgroundColor === 'rgba(255, 255, 0, 0.2)',
+          ).length,
+        )
+        console.log('  rendered highlight overlays in LGV:', domHighlights)
+        if (domHighlights === 0) failures.push('LGV rendered NO highlight overlay despite valid clickGenomeHighlights (refname alias / rendering bug)')
       }
     }
   } finally {
