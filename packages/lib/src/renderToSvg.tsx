@@ -22,6 +22,22 @@ export interface ExportSvgOptions {
   exportType: 'entire' | 'viewport'
 }
 
+// domain-legend geometry, shared by the width calculation and the renderer so
+// the reserved column on the right exactly fits the drawn legend
+const LEGEND_PAD = 8
+const LEGEND_ROW_H = 16
+const LEGEND_SWATCH = 12
+const LEGEND_TITLE_H = 20
+const LEGEND_FONT = 12
+const LEGEND_CHAR_W = 7
+
+function getLegendWidth(model: MsaViewModel) {
+  const names = model.visibleDomainTypes.map(d => d.name)
+  const maxLen = Math.max(0, ...names.map(n => n.length))
+  const w = LEGEND_PAD * 2 + LEGEND_SWATCH + 6 + maxLen * LEGEND_CHAR_W
+  return Math.min(360, Math.max(120, w))
+}
+
 // resolved sizes/offsets (in svg user units) for the chosen export, shared by
 // every layer; 'entire' renders the whole alignment unscrolled, 'viewport'
 // mirrors the live scroll position
@@ -33,6 +49,7 @@ interface Layout {
   offsetX: number
   offsetY: number
   includeMinimap: boolean
+  legendWidth: number
 }
 
 function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
@@ -51,7 +68,13 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
   // the minimap reflects the live viewport scroll position, so it's only
   // meaningful for a viewport export, never for the entire alignment
   const includeMinimap = opts.exportType === 'viewport' && !!opts.includeMinimap
+  const legendWidth =
+    model.actuallyShowDomains && model.visibleDomainTypes.length > 0
+      ? getLegendWidth(model)
+      : 0
 
+  // width stays content-only (the renderers derive msaAreaWidth from it); the
+  // legend occupies an extra column added at the svg root in MsaSvg
   return opts.exportType === 'entire'
     ? {
         width: totalWidth + treeAreaWidth,
@@ -61,6 +84,7 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
         offsetX: 0,
         offsetY: 0,
         includeMinimap,
+        legendWidth,
       }
     : {
         width,
@@ -70,6 +94,7 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
         offsetX: -scrollX,
         offsetY: -scrollY,
         includeMinimap,
+        legendWidth,
       }
 }
 
@@ -97,8 +122,10 @@ function MsaSvg({
   Context: typeof ContextType
   layout: Layout
 }) {
-  const { width, height, trackHeight, includeMinimap } = layout
+  const { width, height, trackHeight, includeMinimap, legendWidth } = layout
   const { treeAreaWidth, minimapHeight } = model
+  const totalWidth = width + legendWidth
+  const legendTop = includeMinimap ? minimapHeight : 0
 
   const body = (
     <>
@@ -125,11 +152,11 @@ function MsaSvg({
 
   return (
     <svg
-      width={width}
+      width={totalWidth}
       height={height}
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
-      viewBox={`0 0 ${width} ${height}`}
+      viewBox={`0 0 ${totalWidth} ${height}`}
     >
       <rect width="100%" height="100%" fill="white" />
       {includeMinimap ? (
@@ -142,7 +169,63 @@ function MsaSvg({
       ) : (
         body
       )}
+      {legendWidth > 0 ? (
+        <g transform={`translate(${width} ${legendTop})`}>
+          <LegendSVG model={model} width={legendWidth} />
+        </g>
+      ) : null}
     </svg>
+  )
+}
+
+// the domain color key drawn as a reserved column to the right of the
+// alignment, mirroring the on-screen DomainLegend overlay
+function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
+  const { visibleDomainTypes, fillPalette, strokePalette } = model
+  const boxHeight =
+    LEGEND_PAD * 2 + LEGEND_TITLE_H + visibleDomainTypes.length * LEGEND_ROW_H
+  return (
+    <g>
+      <rect
+        x={0}
+        y={0}
+        width={width - 4}
+        height={boxHeight}
+        fill="white"
+        stroke="#ccc"
+        rx={2}
+      />
+      <text
+        x={LEGEND_PAD}
+        y={LEGEND_PAD + LEGEND_FONT}
+        fontSize={LEGEND_FONT}
+        fontWeight="bold"
+      >
+        Domains ({visibleDomainTypes.length})
+      </text>
+      {visibleDomainTypes.map((d, i) => {
+        const y = LEGEND_PAD + LEGEND_TITLE_H + i * LEGEND_ROW_H
+        return (
+          <g key={d.accession}>
+            <rect
+              x={LEGEND_PAD}
+              y={y}
+              width={LEGEND_SWATCH}
+              height={LEGEND_SWATCH}
+              fill={fillPalette[d.accession]}
+              stroke={strokePalette[d.accession]}
+            />
+            <text
+              x={LEGEND_PAD + LEGEND_SWATCH + 6}
+              y={y + LEGEND_SWATCH - 1}
+              fontSize={LEGEND_FONT}
+            >
+              {d.name}
+            </text>
+          </g>
+        )
+      })}
+    </g>
   )
 }
 

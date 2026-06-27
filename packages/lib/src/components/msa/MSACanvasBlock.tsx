@@ -89,7 +89,7 @@ const MSACanvasBlock = observer(function ({
   ])
 
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>()
-  const { hoveredInsertion } = model
+  const { hoveredInsertion, mouseOverDomains } = model
 
   return (
     <>
@@ -116,10 +116,11 @@ const MSACanvasBlock = observer(function ({
             } else {
               model.setMousePos(undefined, undefined)
             }
-            // only track client coords when an insertion is hovered (the only
-            // consumer is the tooltip below); avoids a re-render on every move
+            // only track client coords when there's something to show in the
+            // tooltip (insertion or a domain under the cursor); avoids a
+            // re-render on every move over plain alignment cells
             setMousePosition(
-              model.hoveredInsertion
+              model.hoveredInsertion || model.mouseOverDomains.length > 0
                 ? { x: event.clientX, y: event.clientY }
                 : undefined,
             )
@@ -165,6 +166,23 @@ const MSACanvasBlock = observer(function ({
           {hoveredInsertion.letters.length > 20
             ? `${hoveredInsertion.letters.slice(0, 20)}...`
             : hoveredInsertion.letters}
+        </BaseTooltip>
+      ) : null}
+      {!hoveredInsertion && mouseOverDomains.length > 0 && mousePosition ? (
+        <BaseTooltip
+          clientPoint={{ x: mousePosition.x, y: mousePosition.y + 15 }}
+        >
+          {mouseOverDomains.map(d => (
+            <div key={`${d.accession}-${d.start}-${d.end}`}>
+              <b>{d.name}</b> ({d.accession}) {d.start}-{d.end}
+              {d.description ? (
+                <>
+                  <br />
+                  {d.description}
+                </>
+              ) : null}
+            </div>
+          ))}
         </BaseTooltip>
       ) : null}
     </>

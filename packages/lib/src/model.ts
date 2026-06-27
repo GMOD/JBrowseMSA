@@ -1659,6 +1659,41 @@ function stateModelFactory() {
       },
 
       /**
+       * #getter
+       * the domain types currently drawn on the alignment (filtered-on), shared
+       * by the on-screen legend and the SVG export legend
+       */
+      get visibleDomainTypes() {
+        return [...self.tidyInterProAnnotationTypes.values()].filter(d =>
+          self.featureFilters.get(d.accession),
+        )
+      },
+
+      /**
+       * #getter
+       * domain annotations under the mouse, hit-tested against the exact visible
+       * column span each box is drawn at (so it matches the overlay across gaps)
+       */
+      get mouseOverDomains() {
+        const { mouseCol } = self
+        const name = self.mouseOverRowName
+        if (name !== undefined && mouseCol !== undefined) {
+          const entry = self.tidyFilteredGatheredInterProAnnotations[name] ?? []
+          return entry.filter(d => {
+            const m1 = self.seqPosToVisibleCol(name, d.start - 1)
+            const m2 = self.seqPosToVisibleCol(name, d.end)
+            return (
+              m1 !== undefined &&
+              m2 !== undefined &&
+              mouseCol >= m1 &&
+              mouseCol < m2
+            )
+          })
+        }
+        return []
+      },
+
+      /**
        * #method
        */
       getRowData(name: string) {
