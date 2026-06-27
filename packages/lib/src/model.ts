@@ -249,6 +249,15 @@ function stateModelFactory() {
          * #property
          */
         relativeTo: types.maybe(types.string),
+        /**
+         * #property
+         * declarative seed for the highlighted-columns overlay (visible column
+         * indices). Unlike the volatile `highlightedColumns` (driven by
+         * transient genome-hover sync), this persists in the snapshot/URL so a
+         * shared link can open with specific columns highlighted. Applied once
+         * in afterCreate.
+         */
+        highlightColumns: types.frozen<number[] | undefined>(),
       }),
     )
     .volatile(() => ({
@@ -1730,6 +1739,13 @@ function stateModelFactory() {
       },
 
       afterCreate() {
+        // seed the highlighted-columns overlay from the declarative property so
+        // a shared snapshot/URL opens with those columns highlighted (the
+        // volatile highlightedColumns can later be driven by genome-hover sync)
+        if (self.highlightColumns?.length) {
+          self.setHighlightedColumns(self.highlightColumns)
+        }
+
         addDisposer(
           self,
           autorun(() => {

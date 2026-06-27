@@ -1,0 +1,105 @@
+---
+import Base from '../layouts/Base.astro'
+
+const base = import.meta.env.BASE_URL
+
+// Live, declarative links — no saved session, the whole view is in the URL.
+// Standalone viewer links load a react-msaview model snapshot via ?data=.
+// The combined link drives JBrowse 2 via a session spec (?session=spec-…),
+// launching a Linear Genome View (gene track + Multiz mammal alignment) beside
+// an MsaView, against the published jbrowse-plugin-msaview.
+const links = {
+  combined:
+    'https://jbrowse.org/code/jb2/webgl-poc/?config=https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fjbrowse-msa-combined-config.json&session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr5%3A177%2C405%2C935-177%2C406%2C012%22%2C%22highlight%22%3A%5B%22chr5%3A177%2C405%2C970-177%2C405%2C973%22%5D%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeq%22%2C%7B%22trackId%22%3A%22hg38-multiz470way%22%2C%22displaySnapshot%22%3A%7B%22type%22%3A%22LinearMafDisplay%22%2C%22rowHeight%22%3A22%7D%7D%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22msaFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Ff12-cetacean-region.stock%22%7D%2C%22colorSchemeName%22%3A%22percent_identity_dynamic%22%2C%22treeAreaWidth%22%3A200%2C%22colWidth%22%3A15%2C%22rowHeight%22%3A16%2C%22labelsAlignRight%22%3Atrue%7D%5D%7D',
+  proteinDomains:
+    'https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fkinase.aln%22%2C%22locationType%22%3A%22UriLocation%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fkinase.nh%22%2C%22locationType%22%3A%22UriLocation%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fkinase-domains.gff%22%2C%22locationType%22%3A%22UriLocation%22%7D%2C%22colorSchemeName%22%3A%22percent_identity_dynamic%22%2C%22showDomains%22%3Atrue%7D%7D',
+  proteinPlain:
+    'https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fkinase.aln%22%2C%22locationType%22%3A%22UriLocation%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fkinase.nh%22%2C%22locationType%22%3A%22UriLocation%22%7D%2C%22colorSchemeName%22%3A%22percent_identity_dynamic%22%7D%7D',
+  dnaStandalone:
+    'https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Ff12-cetacean-region.stock%22%2C%22locationType%22%3A%22UriLocation%22%7D%2C%22colorSchemeName%22%3A%22percent_identity_dynamic%22%2C%22labelsAlignRight%22%3Atrue%2C%22highlightColumns%22%3A%5B40%5D%7D%7D',
+}
+---
+
+<Base
+  title="Genome browser integration — JBrowseMSA"
+  description="Use react-msaview inside JBrowse 2 — an MSA viewer with a tree beside genome annotation and DNA-alignment tracks, driven entirely by declarative URLs."
+  wide
+>
+  <article class="prose">
+    <h1>In the genome browser</h1>
+    <p>
+      react-msaview ships as a JBrowse 2 plugin
+      (<a href="https://github.com/GMOD/jbrowse-plugin-msaview">jbrowse-plugin-msaview</a>), so the
+      same viewer — alignment, phylogenetic tree, and all — runs as a view <em>inside</em> JBrowse,
+      stacked alongside a Linear Genome View with gene annotation and multiple-alignment tracks.
+      Every view here is opened by a <strong>declarative link</strong>: the whole state lives in the
+      URL, with no saved session to set up.
+    </p>
+
+    <h2>A combined view: factor XII lost in whales</h2>
+    <p>
+      The link below opens one JBrowse view with two panels. On top, a Linear Genome View of the
+      human <strong>F12</strong> locus (coagulation factor XII) showing the NCBI RefSeq gene track and
+      a UCSC Multiz mammalian DNA alignment. Below, the react-msaview panel: the F12 coding alignment
+      across mammals with its inferred tree.
+    </p>
+    <p>
+      F12 is intact across land mammals and in the semi-aquatic hippopotamus, but is
+      <strong>disabled by frameshifts and premature stop codons in cetaceans</strong> — whales,
+      dolphins and porpoises — one of many genes lost in the transition to fully aquatic life. The
+      tree groups the cetaceans together (with hippo as their closest relative), and a single shared
+      frameshift is visible in the alignment. It is exactly the cross-species, nucleotide-level
+      evidence an MSA <em>editor</em> would let you curate and lift over to many species.
+    </p>
+
+    <p>
+      <a class="cta" href={links.combined} target="_blank" rel="noopener">
+        Open the combined view in JBrowse →
+      </a>
+    </p>
+
+    <figure>
+      <img
+        src={`${base}/media/f12-combined-view.png`}
+        alt="JBrowse combined view: F12 gene track and Multiz mammal alignment above a react-msaview panel with a phylogenetic tree"
+      />
+      <figcaption>
+        F12 on hg38 — gene track + Multiz 470-way mammal alignment, above the react-msaview panel
+        (coding alignment + tree). One declarative URL.
+      </figcaption>
+    </figure>
+
+    <h2>The MSA viewer on its own</h2>
+    <p>
+      The same viewer also runs standalone — each link below opens the live demo app with the
+      alignment, tree and (optionally) protein domains specified entirely in the URL.
+    </p>
+    <div class="cards">
+      <a class="card" href={links.proteinDomains} target="_blank" rel="noopener">
+        <h3>Protein, with domains</h3>
+        <p>Src-family kinases + tree, with InterProScan SH3 / SH2 / kinase domain overlays.</p>
+      </a>
+      <a class="card" href={links.proteinPlain} target="_blank" rel="noopener">
+        <h3>Protein, no domains</h3>
+        <p>The same Src-family kinase alignment and tree, domains turned off.</p>
+      </a>
+      <a class="card" href={links.dnaStandalone} target="_blank" rel="noopener">
+        <h3>DNA: F12 in cetaceans</h3>
+        <p>The factor XII coding alignment + tree, where whales lost the gene.</p>
+      </a>
+    </div>
+
+    <h2>How the links are built</h2>
+    <p>
+      The standalone links carry a react-msaview model snapshot in <code>?data=</code> — file
+      locations for the alignment (<code>msaFilehandle</code>), tree (<code>treeFilehandle</code>)
+      and domains (<code>gffFilehandle</code>), plus display options like
+      <code>colorSchemeName</code>. The combined link uses a JBrowse
+      <a href="https://jbrowse.org/jb2/docs/urlparams/#session-spec">session spec</a>:
+      <code>?config=…&amp;session=spec-&#123;"views":[…]&#125;</code>, where each entry launches a view
+      — a <code>LinearGenomeView</code> with its assembly, location and tracks, and an
+      <code>MsaView</code> pointed at an alignment file. A combined view loaded from a cross-origin
+      config will ask you to trust the plugin once before it renders.
+    </p>
+  </article>
+</Base>

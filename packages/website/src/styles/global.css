@@ -225,3 +225,21 @@ body.app-layout .site-footer {
   font-size: 0.9rem;
   text-align: center;
 }
+
+.prose a.cta {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    filter 0.15s,
+    transform 0.15s;
+}
+
+.prose a.cta:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
