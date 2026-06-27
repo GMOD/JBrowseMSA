@@ -9,6 +9,9 @@
  *
  *   genome-browser-src.png, genome-browser-braf-v600e.png,
  *   genome-browser-tp53-r248.png   (the connected protein<->genome links)
+ *   genome-browser-tp53-protein3d.png  (the three-view genome+alignment+3D
+ *                                       structure link, with a domain lit across
+ *                                       all three — needs jbrowse-plugin-protein3d)
  *
  * Unlike the app screenshots (scripts/screenshots/generate.mjs, which serves the
  * self-contained demo app), these run the react-msaview JBrowse plugin *inside*
@@ -20,8 +23,10 @@
  * serve packages/app/public/data ourselves and load a *locally rewritten* copy
  * of jbrowse-msa-combined-config.json with every gmod.org data URL pointed at
  * that local server. So a fresh braf-clinvar VCF or a bumped plugin `latest`
- * shows up here before it is deployed (and --plugin-dist swaps in a local plugin
- * build to preview a not-yet-published plugin change).
+ * shows up here before it is deployed (and --plugin-dist / --protein3d-dist swap
+ * in a local msaview / protein3d build to preview a not-yet-published change —
+ * the protein3d figure's declarative `initialSelection` needs the latter until
+ * it is published).
  *
  * The `expect` block on a figure is an assertion: the connected view must
  * resolve and the pre-highlighted column must carry the named residue, or the
@@ -31,6 +36,7 @@
  *   node scripts/screenshots/jbrowse-figures.mjs --jbrowse-url=http://localhost:3000
  *   node scripts/screenshots/jbrowse-figures.mjs --filter=braf,tp53
  *   node scripts/screenshots/jbrowse-figures.mjs --plugin-dist=/path/to/plugin/dist
+ *   node scripts/screenshots/jbrowse-figures.mjs --protein3d-dist=/path/to/protein3d/dist
  *   node scripts/screenshots/jbrowse-figures.mjs --force
  */
 import fs from 'node:fs'
@@ -73,6 +79,14 @@ const PLUGIN_BUNDLE = 'jbrowse-plugin-msaview.umd.production.min.js'
 const PLUGIN_PUBLISHED =
   'https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/dist/' +
   PLUGIN_BUNDLE
+// same idea for the protein3d plugin (the three-view figure needs it);
+// --protein3d-dist swaps the published bundle for a local build, which the
+// tp53-protein3d figure currently requires (the declarative `initialSelection`
+// prop is unpublished)
+const PROTEIN3D_BUNDLE = 'jbrowse-plugin-protein3d.umd.production.min.js'
+const PROTEIN3D_PUBLISHED =
+  'https://jbrowse.org/plugins/jbrowse-plugin-protein3d/latest/dist/' +
+  PROTEIN3D_BUNDLE
 
 // ---- args -----------------------------------------------------------------
 const force = flag('force')
@@ -84,6 +98,9 @@ const pluginPort = numOpt('plugin-port', 9100)
 // path to a local jbrowse-plugin-msaview dist/ to use instead of the published
 // `latest` bundle (env MSAVIEW_PLUGIN_DIST also accepted)
 const pluginDist = opt('plugin-dist', process.env.MSAVIEW_PLUGIN_DIST)
+// path to a local jbrowse-plugin-protein3d dist/ (env PROTEIN3D_PLUGIN_DIST)
+const protein3dDist = opt('protein3d-dist', process.env.PROTEIN3D_PLUGIN_DIST)
+const protein3dPort = numOpt('protein3d-port', 9101)
 const filterTokens = listOpt('filter')
 
 // ---- the figures (declarative) --------------------------------------------
@@ -114,6 +131,24 @@ const FIGURES = [
     centerHighlight: true,
     expect: { connected: true, colChar: 'R' },
   },
+  {
+    // the flagship three-view figure: genome + alignment + AlphaFold structure,
+    // all connected, opened with the p53 DNA-binding domain pre-highlighted.
+    // longer settle: protein3d downloads the AlphaFold model, inits molstar, and
+    // computes the structure<->transcript alignment before the selection lights.
+    out: 'genome-browser-tp53-protein3d',
+    link: 'tp53Protein3d',
+    settle: 30000,
+    // side-by-side layout (genome+alignment left, 3D structure right): wider so
+    // both columns have room, height tuned so the content fills the frame
+    viewport: { width: 1800, height: 980 },
+    centerHighlight: true,
+    expect: { connected: true },
+    // assert the ProteinView resolved its connected genome view and the domain
+    // selection was applied declaratively (clickedStructureRange seeded from
+    // initialSelection), so a broken wiring can't ship a screenshot of itself
+    expectProtein: { connected: true, selected: true },
+  },
 ]
 
 // ---- helpers --------------------------------------------------------------
@@ -142,11 +177,14 @@ function decodeSpec(url) {
 // pluginUrl is given (--plugin-dist), the published `latest` plugin URL is also
 // swapped for it, so a not-yet-published plugin fix is exercised; otherwise the
 // figure loads the same published plugin the docs link does.
-function writeLocalConfig(dataBase, pluginUrl) {
+function writeLocalConfig(dataBase, pluginUrl, protein3dUrl) {
   let raw = fs.readFileSync(path.join(dataDir, CONFIG_NAME), 'utf8')
   raw = raw.replaceAll(GMOD_DATA, dataBase)
   if (pluginUrl) {
     raw = raw.replace(PLUGIN_PUBLISHED, pluginUrl)
+  }
+  if (protein3dUrl) {
+    raw = raw.replace(PROTEIN3D_PUBLISHED, protein3dUrl)
   }
   fs.writeFileSync(path.join(dataDir, LOCAL_CONFIG_NAME), raw)
   return `${dataBase}/${LOCAL_CONFIG_NAME}`
@@ -206,15 +244,18 @@ async function shootAndCommit(page, outName) {
 // Read the MSA model state for the assertions, and (when asked) scroll the
 // alignment so the pre-highlighted column is centered — otherwise the figure
 // opens on the N-terminus with the lit column (the whole point) off-screen.
-function inspectAndCenter(page, { expectCol, queryName, center }) {
+function inspectAndCenter(page, { expectCol, centerCol, queryName, center }) {
   return page.evaluate(
-    (expectCol, queryName, center) => {
+    (expectCol, centerCol, queryName, center) => {
       const msa = window.JBrowseRootModel.session.views.find(
         v => v.type === 'MsaView',
       )
       const queryRow = msa.rows.find(r => r[0] === queryName)?.[1]
-      if (center && expectCol !== undefined) {
-        msa.setScrollX(msa.msaAreaWidth / 2 - expectCol * msa.colWidth)
+      // center on centerCol (the middle of a highlighted domain band) rather
+      // than the first highlighted column, so a wide band reads centered
+      const col = centerCol ?? expectCol
+      if (center && col !== undefined) {
+        msa.setScrollX(msa.msaAreaWidth / 2 - col * msa.colWidth)
       }
       return {
         connected: !!msa.connectedView,
@@ -223,9 +264,43 @@ function inspectAndCenter(page, { expectCol, queryName, center }) {
       }
     },
     expectCol,
+    centerCol,
     queryName,
     center,
   )
+}
+
+// Read the ProteinView model for the three-view figure's assertions: that it
+// resolved its connected genome view and that the declarative domain selection
+// (clickedStructureRange, seeded from initialSelection) was applied.
+function inspectProtein(page) {
+  return page.evaluate(() => {
+    const pv = window.JBrowseRootModel.session.views.find(
+      v => v.type === 'ProteinView',
+    )
+    const structure = pv?.structures?.[0]
+    return {
+      exists: !!pv,
+      connected: !!structure?.connectedView,
+      range: structure?.clickedStructureRange
+        ? { ...structure.clickedStructureRange }
+        : undefined,
+    }
+  })
+}
+
+function checkProteinExpectations(fig, result) {
+  const problems = []
+  if (!result.exists) {
+    problems.push('ProteinView did not resolve')
+  }
+  if (fig.expectProtein?.connected && !result.connected) {
+    problems.push('ProteinView connectedView did not resolve')
+  }
+  if (fig.expectProtein?.selected && !result.range) {
+    problems.push('ProteinView domain selection (initialSelection) not applied')
+  }
+  return problems
 }
 
 function checkExpectations(fig, result, expectCol) {
@@ -254,11 +329,21 @@ async function captureFigure(browser, fig, ctx, links) {
     throw new Error(`docs link '${fig.link}' not found in genome-browser.astro`)
   }
   const msaView = decodeSpec(realUrl).views.find(v => v.type === 'MsaView')
-  const expectCol = msaView?.highlightColumns?.[0]
+  const highlightCols = msaView?.highlightColumns ?? []
+  const expectCol = highlightCols[0]
+  // for a multi-column domain band, center on its middle column
+  const centerCol = highlightCols[Math.floor(highlightCols.length / 2)]
   const localUrl = localizeUrl(realUrl, ctx)
 
   const page = await browser.newPage()
-  await page.setViewport({ width: 1600, height: 1135, deviceScaleFactor: 2 })
+  // a figure can override the viewport (the three-view protein3d figure is
+  // taller — it stacks a genome view, an alignment, and the 3D structure)
+  await page.setViewport({
+    width: 1600,
+    height: 1135,
+    deviceScaleFactor: 2,
+    ...fig.viewport,
+  })
   try {
     page.on('pageerror', e => console.log(`  [${fig.out}]`, e.message))
     await page.goto(localUrl, { waitUntil: 'networkidle2', timeout: 120000 })
@@ -268,6 +353,7 @@ async function captureFigure(browser, fig, ctx, links) {
     if (fig.expect || fig.centerHighlight) {
       const result = await inspectAndCenter(page, {
         expectCol,
+        centerCol,
         queryName: msaView?.querySeqName,
         center: !!fig.centerHighlight,
       })
@@ -275,6 +361,14 @@ async function captureFigure(browser, fig, ctx, links) {
       const problems = checkExpectations(fig, result, expectCol)
       if (problems.length > 0) {
         throw new Error(problems.join('; '))
+      }
+    }
+
+    if (fig.expectProtein) {
+      const proteinResult = await inspectProtein(page)
+      const proteinProblems = checkProteinExpectations(fig, proteinResult)
+      if (proteinProblems.length > 0) {
+        throw new Error(proteinProblems.join('; '))
       }
     }
 
@@ -321,7 +415,25 @@ async function main() {
     console.log(`using local plugin build: ${pluginDist}`)
   }
 
-  const ctx = { configUrl: writeLocalConfig(dataBase, pluginUrl), dataBase }
+  // same for a local protein3d build (the three-view figure's declarative
+  // initialSelection prop isn't published yet)
+  let protein3dServer
+  let protein3dUrl
+  if (protein3dDist) {
+    if (!fs.existsSync(path.join(protein3dDist, PROTEIN3D_BUNDLE))) {
+      throw new Error(
+        `no ${PROTEIN3D_BUNDLE} in --protein3d-dist=${protein3dDist}`,
+      )
+    }
+    protein3dServer = await startStaticServer(protein3dPort, protein3dDist)
+    protein3dUrl = `http://localhost:${protein3dPort}/${PROTEIN3D_BUNDLE}`
+    console.log(`using local protein3d build: ${protein3dDist}`)
+  }
+
+  const ctx = {
+    configUrl: writeLocalConfig(dataBase, pluginUrl, protein3dUrl),
+    dataBase,
+  }
 
   const browser = await puppeteer.launch({
     headless: true,
@@ -357,6 +469,7 @@ async function main() {
     await browser.close()
     server.close()
     pluginServer?.close()
+    protein3dServer?.close()
     fs.rmSync(path.join(dataDir, LOCAL_CONFIG_NAME), { force: true })
   }
 

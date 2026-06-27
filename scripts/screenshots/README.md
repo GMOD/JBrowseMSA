@@ -85,6 +85,15 @@ pnpm screenshots:jbrowse                          # or: --jbrowse-url=http://loc
 pnpm screenshots:jbrowse --plugin-dist=../jbrowse-plugin-msaview/dist   # preview a local plugin build
 ```
 
+The `genome-browser-tp53-protein3d` figure (genome + alignment + AlphaFold
+structure, with a domain lit across all three) additionally needs a local
+`jbrowse-plugin-protein3d` build until its declarative `initialSelection` prop
+is published:
+
+```sh
+pnpm screenshots:jbrowse --filter=protein3d --protein3d-dist=../jbrowse-plugin-protein3d/dist
+```
+
 The figures are **declarative**: each is one entry in the `FIGURES` list in
 [`jbrowse-figures.mjs`](jbrowse-figures.mjs), naming a key in the `links` map of
 `packages/website/src/pages/genome-browser.astro` — _the same declarative URL the
@@ -114,9 +123,10 @@ a local plugin build in place of the published `latest` bundle.
 | Flag               | Effect                                                       |
 | ------------------ | ------------------------------------------------------------ |
 | `--filter=a,b`     | Only figures whose `out`/`link` contains a token             |
-| `--jbrowse-url=U`  | jbrowse-web base URL (default `http://localhost:3000`)       |
-| `--plugin-dist=P`  | Serve a local plugin `dist/` instead of the published bundle |
-| `--force`          | Rewrite every PNG, bypassing the diff gate                   |
+| `--jbrowse-url=U`     | jbrowse-web base URL (default `http://localhost:3000`)          |
+| `--plugin-dist=P`     | Serve a local msaview plugin `dist/` instead of the published bundle |
+| `--protein3d-dist=P`  | Serve a local protein3d plugin `dist/` (the three-view figure)  |
+| `--force`             | Rewrite every PNG, bypassing the diff gate                      |
 
 ---
 

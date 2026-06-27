@@ -40,6 +40,7 @@ const skipBuild = flag('skip-build')
 const filter = opt('filter', '')
 const jbrowseUrl = opt('jbrowse-url', '')
 const pluginDist = opt('plugin-dist', '')
+const protein3dDist = opt('protein3d-dist', '')
 const only = listOpt('only')
 
 const ALL_PHASES = ['figures', 'app', 'jbrowse']
@@ -82,6 +83,7 @@ if (wants('jbrowse')) {
     ...passthrough,
     jbrowseUrl && `--jbrowse-url=${jbrowseUrl}`,
     pluginDist && `--plugin-dist=${pluginDist}`,
+    protein3dDist && `--protein3d-dist=${protein3dDist}`,
   ].filter(Boolean)
   const status = run('node', jbArgs)
   // exit 2 from the phase means "jbrowse-web not reachable" -> skip, don't fail
