@@ -1,0 +1,123 @@
+{
+  "plugins": [
+    {
+      "name": "MsaView",
+      "url": "https://jbrowse.org/plugins/jbrowse-plugin-msaview/dist/jbrowse-plugin-msaview.umd.production.min.js"
+    }
+  ],
+  "assemblies": [
+    {
+      "name": "hg38",
+      "aliases": [
+        "GRCh38"
+      ],
+      "sequence": {
+        "type": "ReferenceSequenceTrack",
+        "trackId": "P6R5xbRqRr",
+        "adapter": {
+          "type": "BgzipFastaAdapter",
+          "uri": "https://jbrowse.org/genomes/GRCh38/fasta/hg38.prefix.fa.gz"
+        }
+      },
+      "refNameAliases": {
+        "adapter": {
+          "type": "RefNameAliasAdapter",
+          "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/hg38_aliases.txt"
+        }
+      },
+      "cytobands": {
+        "adapter": {
+          "type": "CytobandAdapter",
+          "uri": "https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/cytoBand.txt"
+        }
+      }
+    }
+  ],
+  "tracks": [
+    {
+      "type": "FeatureTrack",
+      "trackId": "hg38-ncbiRefSeq",
+      "name": "NCBI RefSeq genes",
+      "assemblyNames": [
+        "hg38"
+      ],
+      "category": [
+        "Genes"
+      ],
+      "adapter": {
+        "type": "Gff3TabixAdapter",
+        "gffGzLocation": {
+          "uri": "https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz"
+        },
+        "index": {
+          "indexType": "CSI",
+          "location": {
+            "uri": "https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz.csi"
+          }
+        }
+      }
+    },
+    {
+      "type": "MafTrack",
+      "trackId": "hg38-multiz470way",
+      "name": "Multiz 470-way mammal alignment",
+      "assemblyNames": [
+        "hg38"
+      ],
+      "category": [
+        "Comparative genomics"
+      ],
+      "adapter": {
+        "type": "BigMafAdapter",
+        "bigBedLocation": {
+          "uri": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz470way/multiz470way.bigMaf"
+        },
+        "nhLocation": {
+          "uri": "https://gmod.org/JBrowseMSA/demo/data/multiz470way-mammals.nh"
+        },
+        "samples": [
+          {
+            "id": "hg38",
+            "label": "human"
+          },
+          {
+            "id": "HLpapAnu5",
+            "label": "baboon"
+          },
+          {
+            "id": "HLcalJac4",
+            "label": "marmoset"
+          },
+          {
+            "id": "HLoryCunCun4",
+            "label": "rabbit"
+          },
+          {
+            "id": "HLbosInd2",
+            "label": "zebu cattle"
+          },
+          {
+            "id": "HLturTru4",
+            "label": "dolphin"
+          },
+          {
+            "id": "HLbalMus1",
+            "label": "blue whale"
+          },
+          {
+            "id": "HLailMel2",
+            "label": "giant panda"
+          },
+          {
+            "id": "HLchoHof3",
+            "label": "sloth"
+          },
+          {
+            "id": "HLdidVir1",
+            "label": "opossum"
+          }
+        ]
+      }
+    }
+  ]
+}

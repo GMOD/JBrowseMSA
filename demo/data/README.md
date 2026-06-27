@@ -24,5 +24,15 @@ node scripts/screenshots/writeExampleData.mjs
 | `kinase-domains.gff` | `kinaseDomainsGFF` | InterProScan GFF3   | `react-msaview-cli interproscan kinase.aln` against the EBI InterProScan API (PfamA, CDD)                  |
 | `lysine.stock`       | `lysineMSA`        | Stockholm (tree+SS) | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded |
 
+The files below back the **Genome browser** docs page (JBrowse integration). They are
+built by `scripts/f12-cetacean/` (see its README), not by `writeExampleData.mjs`:
+
+| File                              | Format            | Provenance                                                                                          |
+| --------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------- |
+| `f12-cetacean-cds.stock`          | Stockholm (+tree) | F12 coding alignment across mammals, stitched from UCSC cactus 241-way; tree inferred with ClustalW |
+| `f12-cetacean-region.stock`       | Stockholm (+tree) | The above windowed on the shared cetacean frameshift (CDS col ~205)                                 |
+| `multiz470way-mammals.nh`         | Newick            | Pruned UCSC `hg38.470way.nh` (the genome-browser MAF track's displayed species)                     |
+| `jbrowse-msa-combined-config.json`| JBrowse config    | hg38 + NCBI RefSeq gene track + Multiz 470-way MAF track + the MsaView plugin                       |
+
 The formats are detected from file content (the `CLUSTAL` / `# STOCKHOLM` / `>` /
 `##gff` header), so the extensions above are only for readability.
