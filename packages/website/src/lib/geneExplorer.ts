@@ -160,6 +160,8 @@ function getMsaBgzf() {
 // stream. ~1 MB, fetched once and cached.
 let msaIndex: Promise<Map<string, { offset: number; length: number }>> | undefined
 function getMsaIndex() {
+  // clear the memo if the fetch fails so a transient error doesn't wedge every
+  // later lookup on a cached rejected promise (the placeholder-forever bug)
   msaIndex ??= fetch(`${MSA_GZ}.idx`)
     .then(res => res.text())
     .then(
@@ -174,6 +176,10 @@ function getMsaIndex() {
             }),
         ),
     )
+    .catch((e: unknown) => {
+      msaIndex = undefined
+      throw e
+    })
   return msaIndex
 }
 
@@ -217,6 +223,10 @@ function getCdsIndex() {
             }),
         ),
     )
+    .catch((e: unknown) => {
+      cdsIndex = undefined
+      throw e
+    })
   return cdsIndex
 }
 

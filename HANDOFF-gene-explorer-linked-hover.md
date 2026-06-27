@@ -64,14 +64,30 @@ CDS spans sum to `3 × (its hg38 alignment-row length)` for every normal protein
   100-way set. Drops the per-gene RefSeq GFF tabix fetch for covered genes. tsc clean.
 - Source files cached at `~/data/gene-explorer/` to avoid re-downloading 474 MB.
 
+## ROOT CAUSE of "no LGV highlight" — stale webgl-poc (FOUND via puppeteer)
+
+A live puppeteer test (`scripts/gene-explorer/test-lgv-highlight.mjs`) proved the structure
+loads and aligns (`aligned: true`) but **no view resolves `connectedView`**. The spec pins the
+LGV `id: lgv-<symbol>`, but the deployed `jbrowse.org/code/jb2/webgl-poc/` assigned a RANDOM id
+(e.g. `EKHfi2bykB`), so the MsaView/ProteinView `connectedViewId: lgv-<symbol>` matched nothing.
+Current jbrowse-components `LaunchView-LinearGenomeView` DOES honor a provided `id` (passes it to
+`addView`, comment: "lets a session spec pin the created view's id so another view can reference
+it via connectedViewId") — the deployed webgl-poc was simply built before that. **The whole
+genome↔MSA↔3D linkage hinges on this id; the coordinate work above was correct but invisible
+without it.** Fix: webgl-poc rebuilt from current jbrowse-components (pushed 2026-06-27).
+
+Verify after the rebuild: `node scripts/gene-explorer/test-lgv-highlight.mjs TP53`. It drives the
+real page → grabs its JBrowse URL → opens it (headless swiftshader Chrome) → waits for
+`connectedView` (fails fast if the build still doesn't preserve the id) → sets
+`structure.setHoveredPosition` and asserts `structure.hoverGenomeHighlights` lands in the CDS,
+codon-spaced. Deterministic unit complement: protein3d `src/ProteinView/geneExplorerLinkage.test.ts`.
+
 ## STILL OPEN
 
-- **Deploy the website** (`packages/website`, gmod.org/JBrowseMSA, its own pipeline) so the
-  new spec-building code ships. The plugins + data are already live.
-- **Runtime-verify 3D → genome** actually fires on hover. The chain is structurally sound
-  (pairwiseAlignment builds from `userProvidedTranscriptSequence`; `connectedView` resolves by
-  `connectedViewId`), but molstar hover needs a real browser, so nobody has confirmed it
-  end-to-end since the 0.5.3 publish. Hover a gene's structure and watch the LGV.
+- **Deploy the website** (`packages/website`, gmod.org/JBrowseMSA, its own pipeline). Done
+  2026-06-27; also includes the rejected-promise-cache fix (a failed `.idx`/`.cds` fetch no
+  longer wedges every later lookup) and accurate "no alignment for this gene" copy.
+- **Confirm the live test passes** once the webgl-poc rebuild is deployed.
 - Cosmetic: the LGV still *displays* the RefSeq Select track while the connected feature +
   collapsed regions are now knownCanonical (coding-only). For the divergent ~10% the visible
   glyph won't perfectly match. A knownGene track in the hosted jbrowse config would align them.

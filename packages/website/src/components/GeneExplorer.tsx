@@ -219,7 +219,7 @@ function ResultPanel({ result }: { result: Result }) {
   const exons = exonBp(transcript)
   const span = genomicSpanBp(transcript)
   const ratio = (span / exons).toFixed(1)
-  const [showJson, setShowJson] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
   // launch the genome view with introns squeezed out (default) vs. the whole
   // gene; recomputes the loc/url/session spec below
   const [collapse, setCollapse] = useState(true)
@@ -259,13 +259,6 @@ function ResultPanel({ result }: { result: Result }) {
           variant="outlined"
         />
         <Chip label={`${transcript.exons.length} exons`} variant="outlined" />
-        <Chip
-          label={`${exons.toLocaleString()} exon bp / ${span.toLocaleString()} bp span (${ratio}× collapsed)`}
-          variant="outlined"
-        />
-        {uniprotId ? (
-          <Chip label={`UniProt ${uniprotId}`} variant="outlined" />
-        ) : null}
         {msa ? (
           <Chip
             label={`${msa.rowCount}-species alignment`}
@@ -279,22 +272,6 @@ function ResultPanel({ result }: { result: Result }) {
         <Button variant="contained" href={url} target="_blank" rel="noopener">
           Open in JBrowse ↗
         </Button>
-        <Button
-          variant="outlined"
-          onClick={() => {
-            copy(window.location.href, 'Page link copied')
-          }}
-        >
-          Copy page link
-        </Button>
-        <Button
-          variant="outlined"
-          onClick={() => {
-            setShowJson(v => !v)
-          }}
-        >
-          {showJson ? 'Hide' : 'Show'} session JSON
-        </Button>
         <FormControlLabel
           control={
             <Checkbox
@@ -306,52 +283,72 @@ function ResultPanel({ result }: { result: Result }) {
           }
           label={`Collapse introns (±${DEFAULT_WINDOW_SIZE}bp around exons)`}
         />
-      </Stack>
-      <Typography
-        variant="caption"
-        display="block"
-        color="text.secondary"
-        sx={{ mt: 0.5 }}
-      >
-        Opens a connected session:{' '}
-        {collapse ? 'collapsed-intron gene view' : 'whole-gene view'}
-        {msa ? ' + alignment' : ''}
-        {msa && uniprotId ? ' + AlphaFold structure' : ''}.
-      </Typography>
-
-      {showJson ? (
-        <Paper
-          variant="outlined"
-          sx={{ mt: 1, p: 1.5, bgcolor: 'action.hover' }}
+        <Button
+          size="small"
+          onClick={() => {
+            setShowDetails(v => !v)
+          }}
         >
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="caption" color="text.secondary">
-              Declarative JBrowse session spec (passed as
-              <code> &session=spec-…</code>)
-            </Typography>
+          {showDetails ? 'Hide details' : 'Show details'}
+        </Button>
+      </Stack>
+
+      {showDetails ? (
+        <Box sx={{ mt: 1 }}>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Chip
+              label={`${exons.toLocaleString()} exon bp / ${span.toLocaleString()} bp span (${ratio}× collapsed)`}
+              size="small"
+              variant="outlined"
+            />
+            {uniprotId ? (
+              <Chip label={`UniProt ${uniprotId}`} size="small" variant="outlined" />
+            ) : null}
+            <Button
+              size="small"
+              onClick={() => {
+                copy(window.location.href, 'Page link copied')
+              }}
+            >
+              Copy page link
+            </Button>
             <Button
               size="small"
               onClick={() => {
                 copy(specJson, 'Session JSON copied')
               }}
             >
-              Copy JSON
+              Copy session JSON
             </Button>
           </Stack>
+          <Paper
+            variant="outlined"
+            sx={{ p: 1.5, mt: 1, overflowX: 'auto', bgcolor: 'action.hover' }}
+          >
+            <Box
+              component="code"
+              sx={{ fontSize: 12, fontFamily: 'monospace', whiteSpace: 'pre' }}
+            >
+              {loc}
+            </Box>
+          </Paper>
           <Box
             component="pre"
             sx={{
               m: 0,
-              mt: 0.5,
+              mt: 1,
+              p: 1.5,
               maxHeight: 280,
               overflow: 'auto',
               fontSize: 11,
               fontFamily: 'monospace',
+              bgcolor: 'action.hover',
+              borderRadius: 1,
             }}
           >
             {specJson}
           </Box>
-        </Paper>
+        </Box>
       ) : null}
 
       <Snackbar
@@ -362,23 +359,6 @@ function ResultPanel({ result }: { result: Result }) {
         }}
         message={copied}
       />
-
-      <Typography variant="subtitle2" sx={{ mt: 2 }}>
-        {collapse
-          ? `Collapsed-intron regions (${transcript.exons.length} exons ±${DEFAULT_WINDOW_SIZE}bp, overlaps merged)`
-          : `Whole-gene region (${transcript.exons.length} exons, introns intact)`}
-      </Typography>
-      <Paper
-        variant="outlined"
-        sx={{ p: 1.5, mt: 0.5, overflowX: 'auto', bgcolor: 'action.hover' }}
-      >
-        <Box
-          component="code"
-          sx={{ fontSize: 12, fontFamily: 'monospace', whiteSpace: 'pre' }}
-        >
-          {loc}
-        </Box>
-      </Paper>
 
       {msa ? (
         <Box sx={{ mt: 2 }}>
@@ -396,9 +376,9 @@ function ResultPanel({ result }: { result: Result }) {
         </Box>
       ) : (
         <Alert severity="info" sx={{ mt: 2 }}>
-          The 100-way alignment preview will appear once the alignment file is
-          hosted (see scripts/gene-explorer). The genome view link above works
-          now.
+          No 100-way alignment for {transcript.geneName} — it isn&apos;t in the
+          UCSC knownCanonical set. The collapsed genome view (and its JBrowse
+          link) still work.
         </Alert>
       )}
     </Box>
