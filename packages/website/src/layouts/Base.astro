@@ -18,6 +18,11 @@ const nav = [
   { href: `${base}/r-package`, label: 'R package' },
   { href: `${base}/cli`, label: 'CLI' },
 ]
+
+const strip = (s: string) => s.replace(/\/$/, '')
+const current = strip(Astro.url.pathname)
+const isActive = (href: string) => strip(href) === current
+const canonical = new URL(Astro.url.pathname, Astro.site).href
 ---
 
 <!doctype html>
@@ -27,12 +32,35 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2342777f'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='11' font-weight='bold' text-anchor='middle' fill='white'%3EM%3C/text%3E%3C/svg%3E"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JBrowseMSA" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
   </head>
   <body class:list={{ 'app-layout': fullBleed }}>
     <header class="site-header">
       <a class="brand" href={base}>JBrowseMSA</a>
       <nav>
-        {nav.map(item => <a href={item.href}>{item.label}</a>)}
+        {
+          nav.map(item => (
+            <a
+              href={item.href}
+              class:list={{ active: isActive(item.href) }}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+        }
       </nav>
       <a
         class="github-icon"

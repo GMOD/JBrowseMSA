@@ -21,9 +21,16 @@ views:
   codon and a `highlight` band over it, and
 - an `MsaView` whose `connectedViewId` points at that id, plus a
   `connectedFeature` (the BRAF transcript model for the codon mapping),
-  `querySeqName: BRAF_HUMAN`, and `highlightColumns: [647]` — the 0-based aligned
-  column of BRAF_HUMAN residue 600, which `generate.mjs` reads out of `braf.aln`
-  itself rather than hard-coding.
+  `querySeqName: BRAF_HUMAN`, and `highlightColumns: [647]` — the 0-based
+  aligned column of BRAF_HUMAN residue 600, which `generate.mjs` reads out of
+  `braf.aln` itself rather than hard-coding.
+
+The `LinearGenomeView` also sets `colorByCDS: true` (codon-frame colouring on
+the reference sequence) and overrides the gene-track display with
+`geneGlyphMode: "longestCoding"`, so the base-level zoom shows the single
+canonical transcript in-frame instead of a stack of isoforms. It carries a
+`hg38-braf-clinvar-pathogenic` `VariantTrack` so the V600 pathogenic-allele
+pileup sits over the same codon (built by `build-clinvar.mjs`, see below).
 
 The query row `BRAF_HUMAN` (UniProt P15056, 766 aa) is byte-for-byte the protein
 of RefSeq `NM_004333.6` → `NP_004324.2`, so the query row's residue _i_ lines up
@@ -54,11 +61,20 @@ for the `loc`/`highlight`.
 aligned with Clustal to produce `raf-family.aln` (→
 `packages/app/public/data/braf.aln`) and its guide tree (→ `braf.nh`).
 
+## The ClinVar track (`braf-clinvar-pathogenic.vcf.gz`)
+
+`build-clinvar.mjs` pulls the BRAF locus (`7:140,713,328-140,924,929`) out of
+NCBI's `clinvar.vcf.gz`, keeps only Pathogenic / Likely_pathogenic germline
+classifications, and bgzip+tabix-indexes the result into
+`packages/app/public/data/`. Same filter as `scripts/tp53-protein-link/`.
+
 ## Usage
 
 ```sh
-node scripts/braf-protein-link/generate.mjs   # prints the declarative URL
+node scripts/braf-protein-link/build-clinvar.mjs  # regenerate the ClinVar VCF
+node scripts/braf-protein-link/generate.mjs       # prints the declarative URL
 ```
 
-Requires `tabix` (htslib) on PATH for the remote RefSeq fetch. The printed URL
-is the value pasted into `packages/website/src/pages/genome-browser.astro`.
+Requires `tabix`/`bgzip` (htslib) on PATH for the remote RefSeq + ClinVar
+fetches. The printed URL is the value pasted into
+`packages/website/src/pages/genome-browser.astro`.

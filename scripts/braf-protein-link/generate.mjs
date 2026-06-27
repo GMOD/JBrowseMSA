@@ -142,7 +142,24 @@ const spec = {
       assembly: 'hg38',
       loc: `${refName}:${fmt(codonStart + 1 - pad)}-${fmt(codonEnd + pad)}`,
       highlight: [`${refName}:${fmt(codonStart + 1)}-${fmt(codonEnd)}`],
-      tracks: ['hg38-ncbiRefSeq'],
+      // codon-frame coloring on the reference sequence so the highlighted V600
+      // codon reads in-frame beside the alignment
+      colorByCDS: true,
+      // collapse the gene track to the single longest coding transcript
+      // (NM_004333.6, the same one the protein<->genome map uses) so the deep
+      // zoom isn't a confusing stack of overlapping isoforms
+      tracks: [
+        {
+          trackId: 'hg38-ncbiRefSeq',
+          displaySnapshot: {
+            type: 'LinearBasicDisplay',
+            geneGlyphMode: 'longestCoding',
+          },
+        },
+        // ClinVar pathogenic-variant pileup over the V600 codon — the disease
+        // parallel to the conserved alignment column (like TP53 R248)
+        'hg38-braf-clinvar-pathogenic',
+      ],
     },
     {
       type: 'MsaView',

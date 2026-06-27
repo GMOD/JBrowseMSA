@@ -78,7 +78,20 @@ const spec = {
       id: 'lgv-src',
       assembly: 'hg38',
       loc: 'chr20:37,344,685-37,406,050',
-      tracks: ['hg38-ncbiRefSeq'],
+      // codon-frame coloring on the reference sequence
+      colorByCDS: true,
+      // collapse the gene track to the single longest coding transcript
+      // (the same one the protein<->genome map uses) so the view isn't a stack
+      // of overlapping isoforms
+      tracks: [
+        {
+          trackId: 'hg38-ncbiRefSeq',
+          displaySnapshot: {
+            type: 'LinearBasicDisplay',
+            geneGlyphMode: 'longestCoding',
+          },
+        },
+      ],
     },
     {
       type: 'MsaView',

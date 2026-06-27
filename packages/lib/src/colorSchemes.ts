@@ -6,8 +6,19 @@ import { transform } from './util.ts'
 
 extend([namesPlugin])
 
+// standard A/C/G/T(/U) coloring, shared by the `jbrowse_dna` and `nucleotide`
+// scheme names
+const dna = {
+  A: green[500],
+  C: blue[500],
+  G: orange[500],
+  T: red[500],
+  U: red[500],
+}
+
 const colorSchemes = {
   none: {},
+  nucleotide: dna,
   clustal: {
     G: 'orange',
     P: 'orange',
@@ -135,13 +146,7 @@ const colorSchemes = {
     T: '#19cc19',
     U: '#19cc19',
   },
-  jbrowse_dna: {
-    A: green[500],
-    C: blue[500],
-    G: orange[500],
-    T: red[500],
-    U: red[500],
-  },
+  jbrowse_dna: dna,
   jalview_buried: {
     A: '#00a35c',
     R: '#00fc03',

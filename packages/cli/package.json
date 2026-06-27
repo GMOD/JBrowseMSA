@@ -21,15 +21,15 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/jsdom": "^21.1.7",
-    "@types/node": "^25.9.4"
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^26.0.1"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@jbrowse/core": "^4.3.0",
     "@mui/material": "^7.3.11",
-    "jsdom": "^26.1.0",
+    "jsdom": "^29.1.1",
     "mobx": "^6.16.1",
     "mobx-react": "^9.2.2",
     "msa-parsers": "workspace:*",

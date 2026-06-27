@@ -139,10 +139,11 @@ for full documentation.
 
 ## Color schemes
 
-**Protein:** maeditor, clustal, lesk, cinema, flower, buried, taylor,
-hydrophobicity, helix, strand, turn
+**Protein:** clustal, maeditor, lesk, cinema, flower, clustalx_protein,
+jalview_taylor, jalview_zappo, jalview_hydrophobicity, jalview_buried,
+jalview_prophelix, jalview_propstrand, jalview_propturn
 
-**Nucleotide:** nucleotide, purine_pyrimidine, rainbow_dna, rainbow_rna
+**Nucleotide:** nucleotide, jbrowse_dna, rainbow_dna, clustalx_dna
 
 **Dynamic (per-column):** clustalx_protein_dynamic, percent_identity_dynamic
 

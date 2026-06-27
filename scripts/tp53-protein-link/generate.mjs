@@ -147,7 +147,22 @@ const spec = {
       assembly: 'hg38',
       loc: `${refName}:${fmt(codonStart + 1 - pad)}-${fmt(codonEnd + pad)}`,
       highlight: [`${refName}:${fmt(codonStart + 1)}-${fmt(codonEnd)}`],
-      tracks: ['hg38-ncbiRefSeq', CLINVAR_TRACK],
+      // codon-frame coloring on the reference sequence so the highlighted R248
+      // codon reads in-frame beside the alignment
+      colorByCDS: true,
+      // collapse the gene track to the single longest coding transcript
+      // (NM_000546.6, the same one the protein<->genome map uses) so the deep
+      // zoom isn't a confusing stack of overlapping isoforms
+      tracks: [
+        {
+          trackId: 'hg38-ncbiRefSeq',
+          displaySnapshot: {
+            type: 'LinearBasicDisplay',
+            geneGlyphMode: 'longestCoding',
+          },
+        },
+        CLINVAR_TRACK,
+      ],
     },
     {
       type: 'MsaView',

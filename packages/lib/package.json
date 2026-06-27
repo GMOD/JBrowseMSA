@@ -56,7 +56,7 @@
     "main": "dist/index.js"
   },
   "devDependencies": {
-    "@types/node": "^25.9.4"
+    "@types/node": "^26.0.1"
   },
   "dependencies": {
     "@jbrowse/svgcanvas": "workspace:*",

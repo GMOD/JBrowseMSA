@@ -107,7 +107,12 @@ const geom = await page.evaluate(
     const lgvBox = cands[0]
 
     return {
-      cRect: { left: cRect.left, top: cRect.top, width: cRect.width, height: cRect.height },
+      cRect: {
+        left: cRect.left,
+        top: cRect.top,
+        width: cRect.width,
+        height: cRect.height,
+      },
       model: { colWidth, rowHeight, scrollX, scrollY },
       rows: msa.rows.slice(0, N_CETACEANS).map(r => r[0]),
       msaBox,
@@ -127,7 +132,8 @@ await page.evaluate(g => {
   const RED = '#d32f2f'
   const add = (style, html = '') => {
     const el = document.createElement('div')
-    el.style.cssText = 'position:fixed;z-index:99999;pointer-events:none;' + style
+    el.style.cssText =
+      'position:fixed;z-index:99999;pointer-events:none;' + style
     el.innerHTML = html
     document.body.appendChild(el)
     return el
@@ -190,6 +196,10 @@ await page.evaluate(g => {
 
 await new Promise(r => setTimeout(r, 500))
 await page.screenshot({ path: '/tmp/f12-new.png' })
-console.log('screenshot -> /tmp/f12-new.png  (lgvBox found:', !!geom.lgvBox, ')')
+console.log(
+  'screenshot -> /tmp/f12-new.png  (lgvBox found:',
+  !!geom.lgvBox,
+  ')',
+)
 
 await browser.close()

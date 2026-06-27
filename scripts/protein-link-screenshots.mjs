@@ -92,9 +92,13 @@ for (const ex of EXAMPLES) {
         assemblyNames: ['hg38'],
         adapter: {
           type: 'VcfTabixAdapter',
-          vcfGzLocation: { uri: `${DATA_LOCAL}/tp53-clinvar-pathogenic.vcf.gz` },
+          vcfGzLocation: {
+            uri: `${DATA_LOCAL}/tp53-clinvar-pathogenic.vcf.gz`,
+          },
           index: {
-            location: { uri: `${DATA_LOCAL}/tp53-clinvar-pathogenic.vcf.gz.tbi` },
+            location: {
+              uri: `${DATA_LOCAL}/tp53-clinvar-pathogenic.vcf.gz.tbi`,
+            },
           },
         },
       },
@@ -173,8 +177,13 @@ for (const ex of EXAMPLES) {
   if (ex.expectColChar && result.colChar !== ex.expectColChar) {
     problems.push(`column char ${result.colChar} != ${ex.expectColChar}`)
   }
-  if (expectCol !== undefined && !result.highlightedColumns.includes(expectCol)) {
-    problems.push(`highlightedColumns ${result.highlightedColumns} missing ${expectCol}`)
+  if (
+    expectCol !== undefined &&
+    !result.highlightedColumns.includes(expectCol)
+  ) {
+    problems.push(
+      `highlightedColumns ${result.highlightedColumns} missing ${expectCol}`,
+    )
   }
 
   const outPath = join(repo, 'docs', 'media', ex.out)
