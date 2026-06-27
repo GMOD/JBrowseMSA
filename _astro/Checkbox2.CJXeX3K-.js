@@ -1,1 +1,0 @@
-import{r as e}from"./client.BsH-iNIJ.js";import{t}from"./jsx-runtime.CCAohHoN.js";import{t as n}from"./FormControlLabel.B5n2npzH.js";import{t as r}from"./Checkbox.V4ebvi70.js";e();var i=t();function a({checked:e,label:t,disabled:a,onChange:o}){return(0,i.jsx)(`div`,{children:(0,i.jsx)(n,{control:(0,i.jsx)(r,{disabled:a,checked:e,onChange:()=>{o()}}),label:t})})}export{a as t};
