@@ -14,7 +14,6 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { ThemeProvider } from '@mui/material/styles'
-import { MSAViewer } from 'react-msaview'
 
 import { theme } from '../lib/theme'
 
@@ -360,21 +359,7 @@ function ResultPanel({ result }: { result: Result }) {
         message={copied}
       />
 
-      {msa ? (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            100-way alignment (live preview)
-          </Typography>
-          <Box sx={{ border: '1px solid var(--border)', borderRadius: 1 }}>
-            <MSAViewer
-              key={transcript.name}
-              msa={msa.fasta}
-              colorScheme="clustalx_protein_dynamic"
-              height={340}
-            />
-          </Box>
-        </Box>
-      ) : (
+      {msa ? null : (
         <Alert severity="info" sx={{ mt: 2 }}>
           No 100-way alignment for {transcript.geneName} — it isn&apos;t in the
           UCSC knownCanonical set. The collapsed genome view (and its JBrowse
