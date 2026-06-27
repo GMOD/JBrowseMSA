@@ -124,8 +124,7 @@ function drawTilesAndText({
 
   const isClustalX = colorSchemeName === 'clustalx_protein_dynamic'
   const isPercentIdentity = colorSchemeName === 'percent_identity_dynamic'
-  const drawBgTiles = bgColor || isClustalX || isPercentIdentity
-  if (!drawBgTiles && !showMsaLetters) {
+  if (!bgColor && !showMsaLetters) {
     return
   }
   const offsetXAligned = xStart * colWidth
@@ -159,7 +158,7 @@ function drawTilesAndText({
         color = colorScheme[letter]
       }
 
-      if (drawBgTiles) {
+      if (bgColor) {
         ctx.fillStyle = isMatchingReference
           ? theme.palette.action.hover
           : color || theme.palette.background.default
