@@ -481,7 +481,7 @@ export function buildSessionSpec({
         msaIndexedLocation: { uri: MSA_GZ },
         msaName: transcript.geneName,
         treeFileLocation: { uri: TREE_URI },
-        colorSchemeName: 'clustalx_protein_dynamic',
+        colorSchemeName: 'percent_identity_dynamic',
         labelsAlignRight: true,
         treeAreaWidth: 200,
       }
