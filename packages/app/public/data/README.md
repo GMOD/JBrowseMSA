@@ -25,15 +25,13 @@ node scripts/screenshots/writeExampleData.mjs
 | `lysine.stock`       | `lysineMSA`        | Stockholm (tree+SS) | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded |
 
 The files below back the **Genome browser** docs page (JBrowse integration), built by
-`scripts/f12-cetacean/`, `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
+`scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
 (see their READMEs), not by `writeExampleData.mjs`:
 
 | File                              | Format            | Provenance                                                                                          |
 | --------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------- |
-| `f12-cetacean-cds.stock`          | Stockholm (+tree) | F12 coding alignment across mammals, stitched from UCSC cactus 241-way; tree inferred with ClustalW |
-| `f12-cetacean-region.stock`       | Stockholm (+tree) | The above windowed on the shared cetacean frameshift (CDS col ~205)                                 |
-| `multiz470way-mammals.nh`         | Newick            | Pruned UCSC `hg38.470way.nh` (the genome-browser MAF track's displayed species)                     |
-| `jbrowse-msa-combined-config.json`| JBrowse config    | hg38 + NCBI RefSeq gene track + Multiz 470-way MAF track + TP53 ClinVar track + the MsaView plugin  |
+| `multiz470way-mammals.nh`         | Newick            | Pruned UCSC `hg38.470way.nh` (the MAF track's displayed species)                                    |
+| `jbrowse-msa-combined-config.json`| JBrowse config    | hg38 + NCBI RefSeq (all + RefSeq Select/MANE) gene tracks + Multiz 470-way MAF + BRAF & TP53 ClinVar tracks + the MsaView plugin |
 | `braf.aln`                        | CLUSTAL           | RAF-family kinases (BRAF/ARAF/RAF1 human, BRAF mouse/chick, KRAF1 fly), full-length UniProt, Clustal — query row `BRAF_HUMAN` (P15056, 766 aa) for the V600E protein↔genome link |
 | `braf.nh`                         | Newick            | Clustal guide tree for `braf.aln`                                                                    |
 | `tp53-p53-orthologs.fa`           | FASTA (aligned)   | p53 across 13 vertebrates, NCBI RefSeq proteins, ClustalW — query row `human` (NP_000537.3, 393 aa) for the R248 protein↔genome link |

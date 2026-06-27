@@ -17,38 +17,19 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { readConst } from './exampleConsts.mjs'
+
 const here = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(here, '..', '..')
-const exampleData = fs.readFileSync(
-  path.join(repoRoot, 'packages/examples/src/examples/exampleData.ts'),
-  'utf8',
-)
 const outDir = path.join(repoRoot, 'packages/app/public/data')
-
-function backtickConst(name) {
-  const m = exampleData.match(
-    new RegExp(`export const ${name} = \`([\\s\\S]*?)\``),
-  )
-  if (!m) {
-    throw new Error(`could not find ${name} in exampleData.ts`)
-  }
-  return m[1]
-}
-function quotedConst(name) {
-  const m = exampleData.match(new RegExp(`export const ${name} =\\s*'([^']*)'`))
-  if (!m) {
-    throw new Error(`could not find ${name} in exampleData.ts`)
-  }
-  return m[1]
-}
 
 // format is detected from content (CLUSTAL/# STOCKHOLM/>/##gff headers), so the
 // extensions here are only for human readability
 const files = {
-  'kinase.aln': backtickConst('kinaseMSA'),
-  'kinase.nh': quotedConst('kinaseTree'),
-  'kinase-domains.gff': backtickConst('kinaseDomainsGFF'),
-  'lysine.stock': backtickConst('lysineMSA'),
+  'kinase.aln': readConst('kinaseMSA'),
+  'kinase.nh': readConst('kinaseTree'),
+  'kinase-domains.gff': readConst('kinaseDomainsGFF'),
+  'lysine.stock': readConst('lysineMSA'),
 }
 
 fs.mkdirSync(outDir, { recursive: true })

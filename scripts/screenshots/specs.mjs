@@ -6,56 +6,13 @@
 // The app reads a `?data=` URL param as a JSON model snapshot, so we can
 // deep-link a fully loaded alignment instead of driving the import form.
 
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { hasConst, readConst } from './exampleConsts.mjs'
 
-// Single source of truth: the real example datasets live in the examples
-// package as TS string constants. This script runs under plain node (no TS
-// loader), so read the file and pull the constants out by name rather than
-// importing or duplicating the (multi-KB) data here.
-const exampleData = fs.readFileSync(
-  path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    '../../packages/examples/src/examples/exampleData.ts',
-  ),
-  'utf8',
-)
-function backtickConst(name) {
-  const m = exampleData.match(
-    new RegExp(`export const ${name} = \`([\\s\\S]*?)\``),
-  )
-  if (!m) {
-    throw new Error(`could not find ${name} in exampleData.ts`)
-  }
-  return m[1]
-}
-const kinaseMSA = backtickConst('kinaseMSA')
-const kinaseDomainsGFF = backtickConst('kinaseDomainsGFF')
-const lysineMSA = backtickConst('lysineMSA')
-const kinaseTree = exampleData.match(/export const kinaseTree =\s*'([^']*)'/)[1]
-
-// The phylogeny examples (MyD88/globin/ACE2/opsins) are built reproducibly into
-// generatedData.ts by scripts/examples-gen; read those constants the same way.
-const generatedData = fs.readFileSync(
-  path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    '../../packages/examples/src/examples/generatedData.ts',
-  ),
-  'utf8',
-)
-function genConst(name) {
-  const m = generatedData.match(
-    new RegExp(`export const ${name} = \`([\\s\\S]*?)\``),
-  )
-  if (!m) {
-    throw new Error(`could not find ${name} in generatedData.ts`)
-  }
-  return m[1]
-}
-// The opsin domain GFF is an out-of-band InterProScan product (see
+// The phylogeny examples (MyD88/globin/ACE2/opsins/…) are real datasets built
+// reproducibly into the examples package by scripts/examples-gen. The opsin
+// domain GFF is an out-of-band InterProScan product (see
 // scripts/examples-gen/README.md); keep the opsin spec out until it's present.
-const hasOpsinDomains = /export const opsinDomainsGFF = /.test(generatedData)
+const hasOpsinDomains = hasConst('opsinDomainsGFF')
 
 // Small IL2RA protein alignment + matching tree (same data as the examples).
 const proteinMSA = `CLUSTAL O(1.2.3) multiple sequence alignment
@@ -199,8 +156,8 @@ export const specs = [
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('myd88MSA'),
-        tree: genConst('myd88Tree'),
+        msa: readConst('myd88MSA'),
+        tree: readConst('myd88Tree'),
       },
     }),
     settle: 2000,
@@ -216,8 +173,8 @@ export const specs = [
       colWidth: 7,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('globinMSA'),
-        tree: genConst('globinTree'),
+        msa: readConst('globinMSA'),
+        tree: readConst('globinTree'),
       },
     }),
     settle: 2000,
@@ -233,8 +190,8 @@ export const specs = [
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('ace2MSA'),
-        tree: genConst('ace2Tree'),
+        msa: readConst('ace2MSA'),
+        tree: readConst('ace2Tree'),
       },
     }),
     settle: 2500,
@@ -252,9 +209,9 @@ export const specs = [
             colWidth: 4,
             colorSchemeName: 'clustalx_protein_dynamic',
             data: {
-              msa: genConst('opsinMSA'),
-              tree: genConst('opsinTree'),
-              gff: genConst('opsinDomainsGFF'),
+              msa: readConst('opsinMSA'),
+              tree: readConst('opsinTree'),
+              gff: readConst('opsinDomainsGFF'),
             },
           }),
           settle: 2500,
@@ -272,8 +229,8 @@ export const specs = [
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('histoneH4MSA'),
-        tree: genConst('histoneH4Tree'),
+        msa: readConst('histoneH4MSA'),
+        tree: readConst('histoneH4Tree'),
       },
     }),
     settle: 2000,
@@ -288,8 +245,8 @@ export const specs = [
       colWidth: 9,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('cytochromeCMSA'),
-        tree: genConst('cytochromeCTree'),
+        msa: readConst('cytochromeCMSA'),
+        tree: readConst('cytochromeCTree'),
       },
     }),
     settle: 2000,
@@ -305,8 +262,8 @@ export const specs = [
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('prestinMSA'),
-        tree: genConst('prestinTree'),
+        msa: readConst('prestinMSA'),
+        tree: readConst('prestinTree'),
       },
     }),
     settle: 2500,
@@ -323,8 +280,8 @@ export const specs = [
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('p53MSA'),
-        tree: genConst('p53Tree'),
+        msa: readConst('p53MSA'),
+        tree: readConst('p53Tree'),
       },
     }),
     settle: 2500,
@@ -340,8 +297,8 @@ export const specs = [
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('ef1aMSA'),
-        tree: genConst('ef1aTree'),
+        msa: readConst('ef1aMSA'),
+        tree: readConst('ef1aTree'),
       },
     }),
     settle: 2500,
@@ -357,8 +314,8 @@ export const specs = [
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
       data: {
-        msa: genConst('insulinMSA'),
-        tree: genConst('insulinTree'),
+        msa: readConst('insulinMSA'),
+        tree: readConst('insulinTree'),
       },
     }),
     settle: 2000,

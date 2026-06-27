@@ -3,13 +3,11 @@
 Builds the **protein** example on the _Genome browser_ docs page: the Src-family
 kinase alignment opened _inside_ JBrowse, **connected** to the human **SRC**
 gene on hg38 so the two views share coordinates. Clicking a residue in the MSA
-navigates the genome to its codon; hovering the gene highlights the MSA column.
-This is the protein↔genome codon mapping the F12 DNA example does _not_ have
-(that one is two independent views).
+navigates the genome to its codon; hovering the gene highlights the MSA column —
+a true protein↔genome codon mapping rather than two independent views.
 
-Same philosophy as `scripts/f12-cetacean/` and `scripts/examples-gen/`: the link
-is built reproducibly from a public source rather than pasted in as an opaque
-blob.
+Same philosophy as `scripts/examples-gen/`: the link is built reproducibly from
+a public source rather than pasted in as an opaque blob.
 
 ## How the link works
 

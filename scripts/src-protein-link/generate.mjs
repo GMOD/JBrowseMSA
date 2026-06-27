@@ -8,7 +8,7 @@
 // can't be a bare file URL is `connectedFeature` (the transcript model used for
 // the protein<->genome codon mapping), so we derive it reproducibly here from
 // the same public RefSeq GFF the gene track uses, rather than pasting an opaque
-// blob. Same philosophy as scripts/f12-cetacean/ and scripts/examples-gen/.
+// blob. Same philosophy as scripts/examples-gen/.
 //
 // Usage:  node scripts/src-protein-link/generate.mjs
 // Requires: tabix (htslib) on PATH for the remote RefSeq fetch.
@@ -80,18 +80,11 @@ const spec = {
       loc: 'chr20:37,344,685-37,406,050',
       // codon-frame coloring on the reference sequence
       colorByCDS: true,
-      // collapse the gene track to the single longest coding transcript
-      // (the same one the protein<->genome map uses) so the view isn't a stack
-      // of overlapping isoforms
-      tracks: [
-        {
-          trackId: 'hg38-ncbiRefSeq',
-          displaySnapshot: {
-            type: 'LinearBasicDisplay',
-            geneGlyphMode: 'longestCoding',
-          },
-        },
-      ],
+      // canonical (RefSeq Select / MANE) transcript only — one transcript per
+      // gene, so the view isn't a stack of overlapping isoforms and its CDS
+      // matches the protein<->genome map (SRC MANE NM_198291.3 is CDS-identical
+      // to the connectedFeature NM_005417.5)
+      tracks: ['hg38-ncbiRefSeqSelect'],
     },
     {
       type: 'MsaView',

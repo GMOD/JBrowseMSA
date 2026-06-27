@@ -145,17 +145,11 @@ const spec = {
       // codon-frame coloring on the reference sequence so the highlighted V600
       // codon reads in-frame beside the alignment
       colorByCDS: true,
-      // collapse the gene track to the single longest coding transcript
-      // (NM_004333.6, the same one the protein<->genome map uses) so the deep
-      // zoom isn't a confusing stack of overlapping isoforms
+      // canonical (RefSeq Select / MANE) transcript only — NM_004333.6, the same
+      // one the protein<->genome map and the alignment use, so the codon labels
+      // read V600 and the deep zoom isn't a stack of overlapping isoforms
       tracks: [
-        {
-          trackId: 'hg38-ncbiRefSeq',
-          displaySnapshot: {
-            type: 'LinearBasicDisplay',
-            geneGlyphMode: 'longestCoding',
-          },
-        },
+        'hg38-ncbiRefSeqSelect',
         // ClinVar pathogenic-variant pileup over the V600 codon — the disease
         // parallel to the conserved alignment column (like TP53 R248)
         'hg38-braf-clinvar-pathogenic',

@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# temp config written by scripts/screenshots/jbrowse-figures.mjs
+public/data/jbrowse-msa-combined-config.local.json

@@ -16,19 +16,25 @@
  * (the pnpm script does this).
  */
 import fs from 'node:fs'
-import http from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import puppeteer from 'puppeteer-core'
-import serveHandler from 'serve-handler'
 
 import {
   commitScreenshot,
   optimizePng,
   pngDiffFraction,
 } from './image-pipeline.mjs'
+import {
+  delay,
+  findChrome,
+  flag,
+  listOpt,
+  numOpt,
+  startStaticServer,
+} from './lib.mjs'
 import { specs } from './specs.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -41,52 +47,13 @@ const PORT = 5599
 // run; 0.5% absorbs that while still letting a real edit through.
 const DEFAULT_DIFF_THRESHOLD = 0.005
 
-const args = process.argv.slice(2)
-function flag(name) {
-  return args.includes(`--${name}`)
-}
-function opt(name, fallback) {
-  const raw = args.find(a => a.startsWith(`--${name}=`))?.split('=')[1]
-  return raw ?? fallback
-}
-function numOpt(name, fallback) {
-  const n = Number(opt(name, undefined))
-  return Number.isFinite(n) ? n : fallback
-}
-
 const headed = flag('headed')
 const force = flag('force')
 const check = flag('check')
 const exact = flag('exact')
-const filterTokens = (opt('filter', '') || '')
-  .split(',')
-  .map(t => t.trim())
-  .filter(Boolean)
+const filterTokens = listOpt('filter')
 const diffThreshold = numOpt('diff-threshold', DEFAULT_DIFF_THRESHOLD)
 const concurrency = numOpt('concurrency', headed ? 1 : 4)
-
-const delay = ms => new Promise(r => setTimeout(r, ms))
-
-const chromePaths = [
-  '/usr/bin/google-chrome-stable',
-  '/usr/bin/google-chrome',
-  '/usr/bin/chromium-browser',
-  '/usr/bin/chromium',
-]
-
-function startServer() {
-  // Some specs deep-link a full alignment via a `?data=` query string, which
-  // for the real-data examples can run to tens of KB. Node's default request
-  // line/header cap (16 KB) rejects those with HTTP 431, so raise it here.
-  const server = http.createServer({ maxHeaderSize: 1024 * 1024 }, (req, res) =>
-    serveHandler(req, res, { public: appDist }),
-  )
-  return new Promise(resolve =>
-    server.listen(PORT, () => {
-      resolve(server)
-    }),
-  )
-}
 
 async function runAction(page, action) {
   if (action.click) {
@@ -251,11 +218,7 @@ async function main() {
     )
     process.exit(1)
   }
-  const executablePath = chromePaths.find(p => fs.existsSync(p))
-  if (!executablePath) {
-    console.error(`No Chrome/Chromium found in: ${chromePaths.join(', ')}`)
-    process.exit(1)
-  }
+  const executablePath = findChrome()
 
   const list =
     filterTokens.length > 0
@@ -273,7 +236,7 @@ async function main() {
     `${check ? 'Checking' : 'Generating'} ${list.length} screenshot(s) with concurrency ${concurrency}`,
   )
 
-  const server = await startServer()
+  const server = await startStaticServer(PORT, appDist)
   const failures = []
   const flaky = []
   const queue = [...list]
