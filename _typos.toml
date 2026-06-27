@@ -1,7 +1,18 @@
 
 [files]
-extend-exclude = ["packages/r-msaview/inst/htmlwidgets/lib/"]
+extend-exclude = [
+  "packages/r-msaview/inst/htmlwidgets/lib/",
+  # phylogenetic trees + the demo config are full of UCSC species db ids
+  # (panTro4, HLturTru4, ...) that the spell checker reads as typos
+  "*.nh",
+  "packages/app/public/data/jbrowse-msa-combined-config.json",
+]
 
 [default.extend-words]
 BLOSUM = "BLOSUM"
-Pase="Pase"
+Pase = "Pase"
+# UCSC species db names in comments, e.g. panTro4 (chimp)
+Tro = "Tro"
+# prose abbreviations the checker mis-reads (IIFEs, PNGs)
+IIF = "IIF"
+PN = "PN"
