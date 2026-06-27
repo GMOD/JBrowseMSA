@@ -8,7 +8,8 @@ const base = import.meta.env.BASE_URL
 // (?session=spec-…) against the published jbrowse-plugin-msaview.
 //
 // `combined` opens an F12 (DNA) Linear Genome View — gene track + Multiz mammal
-// alignment — beside an MsaView, as two independent views.
+// alignment, reference colored by codon frame (colorByCDS) so the cetacean
+// frameshift reads out — beside an MsaView, as two independent views.
 //
 // `proteinLinked` opens the human SRC gene beside the Src-family kinase MsaView
 // *connected* to it: the MsaView's connectedViewId references the LGV's pinned
@@ -30,7 +31,7 @@ const base = import.meta.env.BASE_URL
 // Built by scripts/tp53-protein-link/generate.mjs (data: build-data.mjs).
 const links = {
   combined:
-    'https://jbrowse.org/code/jb2/webgl-poc/?config=https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fjbrowse-msa-combined-config.json&session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr5%3A177%2C405%2C935-177%2C406%2C012%22%2C%22highlight%22%3A%5B%22chr5%3A177%2C405%2C970-177%2C405%2C973%22%5D%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeq%22%2C%7B%22trackId%22%3A%22hg38-multiz470way%22%2C%22displaySnapshot%22%3A%7B%22type%22%3A%22LinearMafDisplay%22%2C%22rowHeight%22%3A22%7D%7D%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22msaFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Ff12-cetacean-region.stock%22%7D%2C%22colorSchemeName%22%3A%22percent_identity_dynamic%22%2C%22treeAreaWidth%22%3A200%2C%22colWidth%22%3A15%2C%22rowHeight%22%3A16%2C%22labelsAlignRight%22%3Atrue%7D%5D%7D',
+    'https://jbrowse.org/code/jb2/webgl-poc/?config=https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fjbrowse-msa-combined-config.json&session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr5%3A177%2C405%2C935-177%2C406%2C012%22%2C%22highlight%22%3A%5B%22chr5%3A177%2C405%2C970-177%2C405%2C973%22%5D%2C%22colorByCDS%22%3Atrue%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeq%22%2C%7B%22trackId%22%3A%22hg38-multiz470way%22%2C%22displaySnapshot%22%3A%7B%22type%22%3A%22LinearMafDisplay%22%2C%22rowHeight%22%3A22%7D%7D%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22msaFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Ff12-cetacean-region.stock%22%7D%2C%22colorSchemeName%22%3A%22percent_identity_dynamic%22%2C%22treeAreaWidth%22%3A200%2C%22colWidth%22%3A15%2C%22rowHeight%22%3A16%2C%22labelsAlignRight%22%3Atrue%7D%5D%7D',
   proteinLinked:
     'https://jbrowse.org/code/jb2/webgl-poc/?config=https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fjbrowse-msa-combined-config.json&session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22id%22%3A%22lgv-src%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr20%3A37%2C344%2C685-37%2C406%2C050%22%2C%22colorByCDS%22%3Atrue%2C%22tracks%22%3A%5B%7B%22trackId%22%3A%22hg38-ncbiRefSeq%22%2C%22displaySnapshot%22%3A%7B%22type%22%3A%22LinearBasicDisplay%22%2C%22geneGlyphMode%22%3A%22longestCoding%22%7D%7D%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22connectedViewId%22%3A%22lgv-src%22%2C%22connectedFeature%22%3A%7B%22type%22%3A%22mRNA%22%2C%22refName%22%3A%22chr20%22%2C%22start%22%3A37384153%2C%22end%22%3A37403376%2C%22strand%22%3A1%2C%22name%22%3A%22NM_005417.5%22%2C%22subfeatures%22%3A%5B%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37384153%2C%22end%22%3A37384403%2C%22strand%22%3A1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37386074%2C%22end%22%3A37386174%2C%22strand%22%3A1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37393894%2C%22end%22%3A37393993%2C%22strand%22%3A1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37394173%2C%22end%22%3A37394277%2C%22strand%22%3A1%2C%22phase%22%3A1%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37396161%2C%22end%22%3A37396311%2C%22strand%22%3A1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37397698%2C%22end%22%3A37397854%2C%22strand%22%3A1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37400114%2C%22end%22%3A37400294%2C%22strand%22%3A1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37401601%2C%22end%22%3A37401678%2C%22strand%22%3A1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37402434%2C%22end%22%3A37402588%2C%22strand%22%3A1%2C%22phase%22%3A0%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37402748%2C%22end%22%3A37402880%2C%22strand%22%3A1%2C%22phase%22%3A2%7D%2C%7B%22type%22%3A%22CDS%22%2C%22start%22%3A37403170%2C%22end%22%3A37403376%2C%22strand%22%3A1%2C%22phase%22%3A2%7D%5D%7D%2C%22querySeqName%22%3A%22SRC_HUMAN%22%2C%22msaFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fkinase.aln%22%7D%2C%22treeFileLocation%22%3A%7B%22uri%22%3A%22https%3A%2F%2Fgmod.org%2FJBrowseMSA%2Fdemo%2Fdata%2Fkinase.nh%22%7D%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22labelsAlignRight%22%3Atrue%2C%22treeAreaWidth%22%3A200%7D%5D%7D',
   brafV600:
@@ -58,18 +59,11 @@ const links = {
 
     <h2 id="combined-view">A combined view: factor XII lost in whales</h2>
     <p>
-      The link below opens one JBrowse view with two panels. On top, a Linear Genome View of the
-      human <strong>F12</strong> locus (coagulation factor XII) showing the NCBI RefSeq gene track and
-      a UCSC Multiz mammalian DNA alignment. Below, the react-msaview panel: the F12 coding alignment
-      across mammals with its inferred tree.
-    </p>
-    <p>
-      F12 is intact across land mammals and in the semi-aquatic hippopotamus, but is
-      <strong>disabled by frameshifts and premature stop codons in cetaceans</strong> — whales,
-      dolphins and porpoises — one of many genes lost in the transition to fully aquatic life. The
-      tree groups the cetaceans together (with hippo as their closest relative), and a single shared
-      frameshift is visible in the alignment. It is exactly the cross-species, nucleotide-level
-      evidence an MSA <em>editor</em> would let you curate and lift over to many species.
+      One JBrowse view, two independent panels: the human <strong>F12</strong> locus (coagulation
+      factor XII) on hg38 — RefSeq genes and a UCSC Multiz mammal DNA alignment — above the
+      react-msaview panel with the F12 coding alignment and its tree. F12 is intact across land
+      mammals but <strong>disabled by frameshifts in cetaceans</strong>; the tree groups the
+      cetaceans and the shared frameshift is visible in the alignment.
     </p>
 
     <p>
@@ -91,21 +85,15 @@ const links = {
 
     <h2 id="linked-src">A linked protein view: SRC, beside its gene</h2>
     <p>
-      The combined view above is two <em>independent</em> panels. The MSA viewer can also be
-      <strong>connected</strong> to the genome view so the two share coordinates. This link opens the
-      human <strong>SRC</strong> proto-oncogene on hg38 beside the Src-family kinase alignment (with
-      its tree), connected through the SRC transcript model:
+      The MSA viewer can also be <strong>connected</strong> to the genome view so the two share
+      coordinates. This link opens the human <strong>SRC</strong> proto-oncogene on hg38 beside the
+      Src-family kinase alignment, linked through the SRC transcript model so the mapping is a true
+      protein-to-nucleotide one:
     </p>
     <ul>
       <li>Click a residue in the alignment → the genome view navigates to that residue's codon.</li>
       <li>Hover the gene in the genome view → the corresponding alignment column highlights.</li>
     </ul>
-    <p>
-      The mapping runs through the codon structure of the transcript, so it is a true
-      protein-to-nucleotide link rather than a side-by-side approximation. SRC is the prototypical
-      tyrosine-kinase proto-oncogene, with the SH3 / SH2 / kinase domain architecture the family is
-      named for.
-    </p>
 
     <p>
       <a class="cta" href={links.proteinLinked} target="_blank" rel="noopener">
@@ -115,30 +103,12 @@ const links = {
 
     <h2 id="braf-v600e">Zoomed on a mutation: BRAF V600E</h2>
     <p>
-      The same connected pattern, opened on a single codon. This link puts the human
-      <strong>BRAF</strong> proto-oncogene on hg38 beside the RAF-family kinase alignment, with the
-      genome view positioned right on the <strong>V600</strong> codon (highlighted in the genome) and
-      the matching alignment column pre-highlighted across every sequence. The gene track is collapsed
-      to BRAF's single longest coding transcript and the reference sequence is coloured by codon frame,
-      so at this base-level zoom the V600 codon reads cleanly in-frame beside the alignment. A
-      <strong>ClinVar pathogenic-variant track</strong> stacks the known disease alleles directly onto
-      that codon.
-    </p>
-    <p>
-      <strong>V600E</strong> — a single <code>c.1799T&gt;A</code> change at
-      <code>chr7:140,753,336</code> that swaps valine for glutamate — is the most common oncogenic
-      mutation in melanoma and a recurrent driver in colorectal and thyroid cancer, hairy-cell
-      leukemia and others. V600 sits in the kinase <em>activation segment</em>, and the alignment shows
-      why the position matters: the valine is <strong>invariant</strong> down the RAF family and across
-      human, mouse, chicken and fly, so the highlighted column is solid. Because the views are
-      connected through the BRAF transcript model, the lit alignment column and the highlighted genome
-      base are the very same residue — click the column and the genome stays locked on the V600E codon,
-      where the ClinVar track shows V600E (<code>c.1799T&gt;A</code>) amid a pileup of other pathogenic
-      V600 alleles.
-    </p>
-    <p>
-      This is the protein the <a href="https://github.com/GMOD/proteinbrowser">proteinbrowser</a> demos
-      center on, here as a self-contained declarative link with the biology made explicit.
+      The same connected pattern zoomed to a single codon: human <strong>BRAF</strong> beside the
+      RAF-family kinase alignment, positioned on the <strong>V600</strong> codon with the matching
+      alignment column pre-highlighted. <strong>V600E</strong> (<code>c.1799T&gt;A</code>) is the most
+      common oncogenic mutation in melanoma; V600 is <strong>invariant</strong> down the RAF family, so
+      the highlighted column is solid, and a <strong>ClinVar pathogenic-variant track</strong> stacks
+      disease alleles directly onto the codon.
     </p>
 
     <p>
@@ -149,20 +119,12 @@ const links = {
 
     <h2 id="tp53-r248">Conservation meets pathogenicity: TP53 R248</h2>
     <p>
-      The BRAF link shows one mutation; this one shows a whole clinical archive landing on a single
-      conserved column. It opens the human <strong>TP53</strong> tumour suppressor on hg38 — with a
-      <strong>ClinVar pathogenic-variant track</strong> — beside an alignment of p53 across thirteen
-      vertebrates (human to zebrafish), connected and positioned on the <strong>R248</strong> codon.
-    </p>
-    <p>
-      <strong>R248</strong> is the single most frequently mutated residue in TP53 across human cancers.
-      It reaches into the DNA minor groove to let p53 bind its targets, so substitutions there abolish
-      function. In the genome view a dense wall of distinct ClinVar pathogenic variants stacks onto the
-      three bases of the R248 codon; in the alignment directly below, the highlighted column reads
-      <code>R</code> in every species — <strong>invariant for ~430 million years</strong>. The
-      conserved column and the pathogenic pileup are the same position, viewed through evolution and
-      through the clinic at once. (ClinVar is updated weekly, so the exact variant count drifts over
-      time.)
+      A whole clinical archive landing on one conserved column: human <strong>TP53</strong> on hg38
+      with a <strong>ClinVar pathogenic-variant track</strong>, beside p53 aligned across thirteen
+      vertebrates, positioned on the <strong>R248</strong> codon — the most frequently mutated residue
+      in TP53. A dense wall of ClinVar variants stacks on the codon while the alignment column reads
+      <code>R</code> in every species: the pathogenic pileup and the conserved column are the same
+      position.
     </p>
 
     <p>
@@ -175,23 +137,15 @@ const links = {
     <p>
       Each link is a JBrowse
       <a href="https://jbrowse.org/jb2/docs/urlparams/#session-spec">session spec</a>:
-      <code>?config=…&amp;session=spec-&#123;"views":[…]&#125;</code>, where each entry launches a view
-      — a <code>LinearGenomeView</code> with its assembly, location and tracks, and an
-      <code>MsaView</code> pointed at an alignment file. To <em>connect</em> the two (the SRC
-      example), the genome view is given an explicit <code>id</code> and the <code>MsaView</code>
-      carries a <code>connectedViewId</code> referencing it, plus a <code>connectedFeature</code> —
-      the transcript model used for the protein↔genome codon mapping — and a <code>querySeqName</code>
-      naming the matching row in the alignment. A <code>highlightColumns</code> array (the BRAF and
-      TP53 examples) seeds the highlighted-column overlay so a link can open with specific columns lit;
-      <code>colorByCDS</code> on the genome view colours the reference by codon frame; and the
-      <code>tracks</code> entries can carry per-track display overrides (the gene track is collapsed to
-      its longest coding transcript with <code>geneGlyphMode: "longestCoding"</code>) plus extra tracks
-      such as the BRAF and TP53 ClinVar variant tracks. Those transcript models are derived reproducibly
-      from the public RefSeq annotation by the generators under <code>scripts/</code>
-      (<code>src-protein-link</code>, <code>braf-protein-link</code>, <code>tp53-protein-link</code>); the
-      BRAF and TP53 directories also carry <code>build-*</code> scripts that regenerate the alignment,
-      tree and ClinVar variant data from their public sources. A view loaded from a cross-origin config
-      asks you to trust the plugin once before it renders.
+      <code>?config=…&amp;session=spec-&#123;"views":[…]&#125;</code>, where each entry launches a
+      <code>LinearGenomeView</code> or an <code>MsaView</code>. To <em>connect</em> the two, the genome
+      view gets an <code>id</code> and the <code>MsaView</code> carries a <code>connectedViewId</code>,
+      a <code>connectedFeature</code> (the transcript model for the codon mapping), and a
+      <code>querySeqName</code> naming the matching alignment row; <code>highlightColumns</code> seeds
+      the lit-column overlay. The transcript models and alignment/tree/ClinVar data are regenerated
+      reproducibly from public sources by the scripts under <code>scripts/</code>
+      (<code>src-protein-link</code>, <code>braf-protein-link</code>, <code>tp53-protein-link</code>). A
+      view loaded from a cross-origin config asks you to trust the plugin once before it renders.
     </p>
   </article>
 </Base>
