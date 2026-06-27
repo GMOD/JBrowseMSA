@@ -362,6 +362,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.14.1
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7))(@types/react@19.2.17)(react@19.2.7)
+      '@gmod/bgzf-filehandle':
+        specifier: ^6.2.0
+        version: 6.2.0
       '@gmod/tabix':
         specifier: ^3.0.1
         version: 3.4.2

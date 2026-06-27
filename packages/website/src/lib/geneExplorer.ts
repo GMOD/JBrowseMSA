@@ -1,3 +1,4 @@
+import { BgzfFilehandle } from '@gmod/bgzf-filehandle'
 import { TabixIndexedFile } from '@gmod/tabix'
 import { RemoteFile } from 'generic-filehandle2'
 import { parseGFF } from 'msa-parsers'
@@ -12,8 +13,8 @@ import type { GFFRecord } from 'msa-parsers'
 //    with tabix and parsed in the browser (this is the "parse GFF" step)
 //  - AlphaFold    : the 3D structure, by UniProt accession
 //
-// Only the 100-way alignment preview needs a hosted file (it is a slice of a
-// genome-scale alignment) — see MSA_TABIX / scripts/gene-explorer.
+// Only the 100-way alignment needs a hosted file (it is a slice of a
+// genome-scale alignment) — see MSA_* / scripts/gene-explorer.
 
 const MYGENE = 'https://mygene.info/v3'
 
@@ -23,10 +24,16 @@ export const REFSEQ_SELECT_GFF =
   'https://jbrowse.org/ucsc/hg38/ncbiRefSeqSelect.gff.gz'
 
 export const DATA_BASE = 'https://gmod.org/JBrowseMSA/demo/data'
-// Tabix file keyed by genomic locus; each line packs one transcript's whole
-// 100-way amino-acid alignment (built by scripts/gene-explorer/build-data.mjs).
-export const MSA_TABIX = `${DATA_BASE}/hg38.ncbiRefSeq.multiz100way.aa.txt.gz`
-export const TREE_URI = `${DATA_BASE}/hg38.multiz100way.nh`
+
+// One bgzip `.fa.gz` of per-transcript FASTA blocks (hg38 + 99 vertebrates),
+// built by scripts/gene-explorer/build-data.mjs from the UCSC knownCanonical
+// 100-way exon-AA. Its bgzip index (`.gzi`) and name index (`.idx`) are found by
+// suffix. A gene's whole alignment is one random read, keyed by GENE SYMBOL —
+// the same symbol resolved from mygene.info, unique per gene — so no
+// coordinates / overlap matching is needed.
+const MSA_BASE = 'https://jbrowse.org/demos/msaview/100way'
+export const MSA_GZ = `${MSA_BASE}/hg38.knownCanonical.multiz100way.aa.fa.gz`
+export const TREE_URI = `${MSA_BASE}/hg38.multiz100way.nh`
 
 // The JBrowse build + config that bundle jbrowse-plugin-msaview and
 // jbrowse-plugin-protein3d (see scripts/gene-explorer/config additions).
@@ -139,13 +146,35 @@ function getGffTabix() {
   return gffTabix
 }
 
-let msaTabix: TabixIndexedFile | undefined
-function getMsaTabix() {
-  msaTabix ??= new TabixIndexedFile({
-    filehandle: new RemoteFile(MSA_TABIX),
-    csiFilehandle: new RemoteFile(`${MSA_TABIX}.csi`),
+// The bgzip alignment, random-read by uncompressed byte offset.
+let msaBgzf: BgzfFilehandle | undefined
+function getMsaBgzf() {
+  msaBgzf ??= new BgzfFilehandle({
+    filehandle: new RemoteFile(MSA_GZ),
+    gziFilehandle: new RemoteFile(`${MSA_GZ}.gzi`),
   })
-  return msaTabix
+  return msaBgzf
+}
+
+// The name index: gene symbol -> {offset,length} into the uncompressed bgzip
+// stream. ~1 MB, fetched once and cached.
+let msaIndex: Promise<Map<string, { offset: number; length: number }>> | undefined
+function getMsaIndex() {
+  msaIndex ??= fetch(`${MSA_GZ}.idx`)
+    .then(res => res.text())
+    .then(
+      text =>
+        new Map(
+          text
+            .trim()
+            .split('\n')
+            .map((line): [string, { offset: number; length: number }] => {
+              const [id, offset, length] = line.split('\t')
+              return [id, { offset: Number(offset), length: Number(length) }]
+            }),
+        ),
+    )
+  return msaIndex
 }
 
 async function tabixLines(
@@ -265,34 +294,23 @@ export interface GeneMsa {
   rowCount: number
 }
 
-// Fetch one transcript's 100-way alignment from the tabix file. Each matching
-// line is `refName<TAB>start<TAB>end<TAB>transcript<TAB>packed`, where `packed`
-// is `name:SEQ;name:SEQ;...` (no newlines, so it survives as one tabix column).
+// Fetch one transcript's 100-way alignment from the indexed bgzip file: look up
+// the gene symbol in the name index, random-read its FASTA block, and return it
+// as-is — the block is already valid FASTA (`>hg38\nSEQ\n>panTro4\nSEQ\n...`,
+// hg38 first).
 export async function fetchGeneMsa(
   transcript: Transcript,
 ): Promise<GeneMsa | undefined> {
-  const start = Math.min(...transcript.exons.map(e => e.start))
-  const end = Math.max(...transcript.exons.map(e => e.end))
-  const lines = await tabixLines(getMsaTabix(), transcript.refName, start, end)
-  const line = lines.find(l => l.split('\t')[3] === transcript.name)
-  return line ? unpackMsaLine(line) : undefined
-}
-
-function unpackMsaLine(line: string): GeneMsa {
-  const packed = line.split('\t')[4] ?? ''
-  const rows = packed
-    .split(';')
-    .filter(Boolean)
-    .map(pair => {
-      const colon = pair.indexOf(':')
-      return { name: pair.slice(0, colon), seq: pair.slice(colon + 1) }
-    })
-  const fasta = rows.map(r => `>${r.name}\n${r.seq}`).join('\n')
+  const entry = (await getMsaIndex()).get(transcript.geneName)
+  if (!entry) {
+    return undefined
+  }
+  const bytes = await getMsaBgzf().read(entry.length, entry.offset)
+  const fasta = new TextDecoder().decode(bytes).trim()
   return {
     fasta,
-    // first row is the human reference (= the transcript's translation)
-    querySeqName: rows[0]?.name ?? 'hg38',
-    rowCount: rows.length,
+    querySeqName: 'hg38', // first row is the human reference
+    rowCount: (fasta.match(/^>/gm) ?? []).length,
   }
 }
 
@@ -306,8 +324,9 @@ export interface SpecOptions {
 }
 
 // Synthesize the declarative JBrowse session: a collapsed-intron
-// LinearGenomeView, a connected MsaView (alignment pulled from the tabix file
-// by locus at launch), and — when a structure exists — a connected ProteinView.
+// LinearGenomeView, a connected MsaView (alignment random-read from the indexed
+// bgzip file by name at launch), and — when a structure exists — a connected
+// ProteinView.
 export function buildSessionSpec({
   transcript,
   uniprotId,
@@ -323,10 +342,11 @@ export function buildSessionSpec({
         connectedViewId: lgvId,
         connectedFeature: feature,
         querySeqName: 'hg38',
-        // declarative tabix MSA source — jbrowse-plugin-msaview forwards
-        // msaTabixLocation + msaId into the launch and fetches this gene's rows.
-        msaTabixLocation: { uri: MSA_TABIX },
-        msaId: transcript.name,
+        // declarative indexed-MSA source — jbrowse-plugin-msaview random-reads
+        // this gene's FASTA block from the bgzip file by name (the gene symbol);
+        // the .gzi/.idx are found by suffix.
+        msaIndexedLocation: { uri: MSA_GZ },
+        msaName: transcript.geneName,
         treeFileLocation: { uri: TREE_URI },
         colorSchemeName: 'clustalx_protein_dynamic',
         labelsAlignRight: true,
