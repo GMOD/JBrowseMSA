@@ -24,15 +24,21 @@ node scripts/screenshots/writeExampleData.mjs
 | `kinase-domains.gff` | `kinaseDomainsGFF` | InterProScan GFF3   | `react-msaview-cli interproscan kinase.aln` against the EBI InterProScan API (PfamA, CDD)                  |
 | `lysine.stock`       | `lysineMSA`        | Stockholm (tree+SS) | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded |
 
-The files below back the **Genome browser** docs page (JBrowse integration). They are
-built by `scripts/f12-cetacean/` (see its README), not by `writeExampleData.mjs`:
+The files below back the **Genome browser** docs page (JBrowse integration), built by
+`scripts/f12-cetacean/`, `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
+(see their READMEs), not by `writeExampleData.mjs`:
 
 | File                              | Format            | Provenance                                                                                          |
 | --------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------- |
 | `f12-cetacean-cds.stock`          | Stockholm (+tree) | F12 coding alignment across mammals, stitched from UCSC cactus 241-way; tree inferred with ClustalW |
 | `f12-cetacean-region.stock`       | Stockholm (+tree) | The above windowed on the shared cetacean frameshift (CDS col ~205)                                 |
 | `multiz470way-mammals.nh`         | Newick            | Pruned UCSC `hg38.470way.nh` (the genome-browser MAF track's displayed species)                     |
-| `jbrowse-msa-combined-config.json`| JBrowse config    | hg38 + NCBI RefSeq gene track + Multiz 470-way MAF track + the MsaView plugin                       |
+| `jbrowse-msa-combined-config.json`| JBrowse config    | hg38 + NCBI RefSeq gene track + Multiz 470-way MAF track + TP53 ClinVar track + the MsaView plugin  |
+| `braf.aln`                        | CLUSTAL           | RAF-family kinases (BRAF/ARAF/RAF1 human, BRAF mouse/chick, KRAF1 fly), full-length UniProt, Clustal — query row `BRAF_HUMAN` (P15056, 766 aa) for the V600E protein↔genome link |
+| `braf.nh`                         | Newick            | Clustal guide tree for `braf.aln`                                                                    |
+| `tp53-p53-orthologs.fa`           | FASTA (aligned)   | p53 across 13 vertebrates, NCBI RefSeq proteins, ClustalW — query row `human` (NP_000537.3, 393 aa) for the R248 protein↔genome link |
+| `tp53-p53.nh`                     | Newick            | ClustalW neighbor-joining tree for `tp53-p53-orthologs.fa`                                           |
+| `tp53-clinvar-pathogenic.vcf.gz`  | VCF (bgzip+tabix) | ClinVar (GRCh38) variants over the TP53 locus filtered to Pathogenic/Likely_pathogenic — weekly-updated source, count drifts |
 
 The formats are detected from file content (the `CLUSTAL` / `# STOCKHOLM` / `>` /
 `##gff` header), so the extensions above are only for readability.
