@@ -2,6 +2,7 @@ import { BgzfFilehandle } from '@gmod/bgzf-filehandle'
 import { TabixIndexedFile } from '@gmod/tabix'
 import { RemoteFile } from 'generic-filehandle2'
 import { parseGFF } from 'msa-parsers'
+import { deflate } from 'pako-esm2'
 
 import type { GFFRecord } from 'msa-parsers'
 
@@ -43,6 +44,19 @@ export const GENE_TRACK = 'hg38-ncbiRefSeqSelect'
 
 const alphafoldCif = (uniprotId: string) =>
   `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v6.cif`
+
+// Mirrors @jbrowse/core's sessionSharing.toUrlSafeB64 (deflate + url-safe,
+// unpadded base64) so jbrowse-web's `encoded-` SessionLoader path inflates it
+// back via fromUrlSafeB64. Kept byte-compatible deliberately — this is the one
+// contract between the link we emit and the viewer that opens it.
+function toUrlSafeB64(str: string) {
+  const deflated: Uint8Array = deflate(new TextEncoder().encode(str), undefined)
+  const b64 = btoa(Array.from(deflated, b => String.fromCharCode(b)).join(''))
+  const pos = b64.indexOf('=')
+  return (pos > 0 ? b64.slice(0, pos) : b64)
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+}
 
 export interface Exon {
   start: number // 0-based interbase
@@ -237,7 +251,12 @@ function getCdsIndex() {
 export async function fetchGeneCds(
   geneName: string,
 ): Promise<Transcript | undefined> {
-  return (await getCdsIndex()).get(geneName)
+  // an unreachable .cds index is just another "no CDS for this gene" as far as
+  // the caller is concerned (it falls back to RefSeq Select either way), so
+  // collapse the network failure into the undefined the return type already
+  // allows. getCdsIndex clears its memo on failure, so a later pick retries.
+  const index = await getCdsIndex().catch(() => undefined)
+  return index?.get(geneName)
 }
 
 async function tabixLines(
@@ -308,16 +327,6 @@ function toBlocks(records: GFFRecord[]): Exon[] {
   return records
     .map(r => ({ start: r.start - 1, end: r.end }))
     .sort((a, b) => a.start - b.start)
-}
-
-export function exonBp(transcript: Transcript) {
-  return transcript.exons.reduce((s, e) => s + (e.end - e.start), 0)
-}
-
-export function genomicSpanBp(transcript: Transcript) {
-  const start = Math.min(...transcript.exons.map(e => e.start))
-  const end = Math.max(...transcript.exons.map(e => e.end))
-  return end - start
 }
 
 // bp of context shown on either side of every exon in the collapsed view, so
@@ -415,7 +424,10 @@ export interface GeneMsa {
 export async function fetchGeneMsa(
   geneName: string,
 ): Promise<GeneMsa | undefined> {
-  const entry = (await getMsaIndex()).get(geneName)
+  // the alignment slice is hosted separately and is optional; an unreachable
+  // index reads as "no MSA for this gene", same as a missing entry
+  const index = await getMsaIndex().catch(() => undefined)
+  const entry = index?.get(geneName)
   if (!entry) {
     return undefined
   }
@@ -435,105 +447,134 @@ function firstSequence(fasta: string) {
   return seqLines.join('').replaceAll('-', '')
 }
 
-export interface SpecOptions {
+export interface SessionOptions {
   transcript: Transcript
   uniprotId?: string
   proteinSequence?: string
-  // include the connected MsaView only when the alignment slice is actually
-  // available, so the link is always valid (just the collapsed LGV otherwise)
+  // include the connected MsaView only when the alignment slice is available
   msaAvailable?: boolean
   // false launches a whole-gene view (introns intact) instead of collapsed exons
   collapseIntrons?: boolean
 }
 
-// Synthesize the declarative JBrowse session: a collapsed-intron
-// LinearGenomeView, a connected MsaView (alignment random-read from the indexed
-// bgzip file by name at launch), and — when a structure exists — a connected
-// ProteinView.
-export function buildSessionSpec({
+type Feature = ReturnType<typeof connectedFeature>
+
+// --- view snapshot builders --------------------------------------------------
+// Each returns the snapshot the matching LaunchView-* extension point would
+// build, so we skip those extension points: the view's own afterAttach autorun
+// resolves the `init`/`structures` fields (loc -> displayedRegions, MSA-by-name
+// read, AlphaFold load + linking) the same way. See the plugins' DEVELOPERS.md.
+
+// loc/tracks/assembly under `init`: navToLocations expands the space-separated
+// collapsed-exon loc into one displayedRegion per exon, squeezing introns out.
+function linearGenomeView(transcript: Transcript, collapseIntrons: boolean) {
+  return {
+    id: `lgv-${transcript.geneName}`,
+    type: 'LinearGenomeView',
+    colorByCDS: true,
+    init: {
+      assembly: 'hg38',
+      loc: collapsedLoc(transcript, { collapse: collapseIntrons }),
+      tracks: [GENE_TRACK],
+    },
+  }
+}
+
+// jbrowse-plugin-msaview random-reads this gene's FASTA block from the bgzip
+// file by name (the gene symbol); the .gzi/.idx are found by suffix. uniprotId
+// lets MsaView.autoConnectStructures link to the AlphaFold structure (it derives
+// the same id from the structure's url, so the two match).
+function msaView(transcript: Transcript, feature: Feature, uniprotId?: string) {
+  return {
+    id: `msa-${transcript.geneName}`,
+    type: 'MsaView',
+    connectedViewId: `lgv-${transcript.geneName}`,
+    connectedFeature: feature,
+    uniprotId,
+    colorSchemeName: 'percent_identity_dynamic',
+    labelsAlignRight: true,
+    treeAreaWidth: 200,
+    treeFilehandle: { uri: TREE_URI, locationType: 'UriLocation' },
+    init: {
+      msaIndexedLocation: { uri: MSA_GZ },
+      msaName: transcript.geneName,
+      querySeqName: 'hg38',
+    },
+  }
+}
+
+// CDS strand/phase drive the genome<->residue map; the AlphaFold url's accession
+// matches MsaView's uniprotId, so the two views connect.
+function proteinView(
+  transcript: Transcript,
+  feature: Feature,
+  uniprotId: string,
+  proteinSequence: string,
+) {
+  return {
+    id: `protein-${transcript.geneName}`,
+    type: 'ProteinView',
+    height: 500,
+    zoomToBaseLevel: false,
+    structures: [
+      {
+        url: alphafoldCif(uniprotId),
+        feature,
+        userProvidedTranscriptSequence: proteinSequence,
+        connectedViewId: `lgv-${transcript.geneName}`,
+      },
+    ],
+  }
+}
+
+// genome+alignment stacked on the left, the 3D structure on the right (the
+// simple viewIds/direction/size form app-core's createInitialPanels consumes).
+function sideBySideLayout(leftIds: string[], rightId: string) {
+  return {
+    direction: 'horizontal' as const,
+    children: [
+      { viewIds: leftIds, size: 58 },
+      { viewIds: [rightId], size: 42 },
+    ],
+  }
+}
+
+// deflate+base64 a full session snapshot into a `#…session=encoded-…` URL. Two
+// things keep the link working for any gene, including titin-scale ones whose
+// plain session JSON is >100 KB:
+//   - the hash fragment is never sent to the server, so it can't trip the server
+//     request-line limit (HTTP 414) the query string did
+//   - deflate shrinks the (highly repetitive) JSON ~6x so the URL stays sane
+// jbrowse-web reads params from the hash and inflates `encoded-` via
+// fromUrlSafeB64. https://jbrowse.org/jb2/docs/urlparams/
+function encodedSessionUrl(session: unknown) {
+  return `${JBROWSE}#config=${encodeURIComponent(JBROWSE_CONFIG)}&session=encoded-${toUrlSafeB64(JSON.stringify(session))}`
+}
+
+// Build the JBrowse session URL for a gene: a collapsed-intron genome view, plus
+// — when the alignment slice and structure exist — a connected alignment and 3D
+// structure, laid out side by side.
+export function buildSessionUrl({
   transcript,
   uniprotId,
   proteinSequence,
   msaAvailable,
   collapseIntrons = true,
-}: SpecOptions) {
+}: SessionOptions) {
   const feature = connectedFeature(transcript)
-  const lgvId = `lgv-${transcript.geneName}`
-
-  // MsaView <-> LinearGenomeView linking (connectedViewId + connectedFeature,
-  // and the MSA-by-name source): see "Communication with Linear Genome View" in
-  // https://github.com/GMOD/jbrowse-plugin-msaview/blob/main/DEVELOPERS.md
-  const msaView = msaAvailable
-    ? {
-        type: 'MsaView',
-        connectedViewId: lgvId,
-        connectedFeature: feature,
-        querySeqName: 'hg38',
-        // the alignment's own UniProt accession — without it the MsaView's
-        // autoConnectStructures bails (`if (!uniprotId) return`) and never links
-        // to the AlphaFold structure, so MSA-column hover can't highlight the 3D
-        // residue. The structure derives the same id from its AlphaFold url, so
-        // the two match and connect.
-        uniprotId,
-        // declarative indexed-MSA source — jbrowse-plugin-msaview random-reads
-        // this gene's FASTA block from the bgzip file by name (the gene symbol);
-        // the .gzi/.idx are found by suffix.
-        msaIndexedLocation: { uri: MSA_GZ },
-        msaName: transcript.geneName,
-        treeFileLocation: { uri: TREE_URI },
-        colorSchemeName: 'percent_identity_dynamic',
-        labelsAlignRight: true,
-        treeAreaWidth: 200,
-      }
-    : undefined
-
-  // ProteinView <-> LinearGenomeView linking (connectedViewId + feature, CDS
-  // strand/phase driving the genome<->residue map): see the "explicit form" in
-  // https://github.com/GMOD/jbrowse-plugin-protein3d/blob/main/DEVELOPERS.md
-  const proteinView =
+  const lgv = linearGenomeView(transcript, collapseIntrons)
+  const msa = msaAvailable ? msaView(transcript, feature, uniprotId) : undefined
+  const protein =
     msaAvailable && uniprotId && proteinSequence
-      ? {
-          type: 'ProteinView',
-          connectedViewId: lgvId,
-          url: alphafoldCif(uniprotId),
-          feature,
-          userProvidedTranscriptSequence: proteinSequence,
-          zoomToBaseLevel: false,
-          height: 500,
-        }
+      ? proteinView(transcript, feature, uniprotId, proteinSequence)
       : undefined
 
-  const lgv = {
-    type: 'LinearGenomeView',
-    id: lgvId,
-    assembly: 'hg38',
-    loc: collapsedLoc(transcript, { collapse: collapseIntrons }),
-    colorByCDS: true,
-    tracks: [GENE_TRACK],
+  const session = {
+    name: `Gene explorer: ${transcript.geneName}`,
+    views: [lgv, ...(msa ? [msa] : []), ...(protein ? [protein] : [])],
+    ...(msa && protein
+      ? { init: sideBySideLayout([lgv.id, msa.id], protein.id) }
+      : {}),
   }
-  const views = [
-    lgv,
-    ...(msaView ? [msaView] : []),
-    ...(proteinView ? [proteinView] : []),
-  ]
-
-  // genome+alignment stacked on the left, the 3D structure on the right — only
-  // meaningful when all three views are present
-  const layout = proteinView
-    ? {
-        direction: 'horizontal' as const,
-        children: [
-          { views: [0, 1], size: 58 },
-          { views: [2], size: 42 },
-        ],
-      }
-    : undefined
-
-  // The `?config=…&session=spec-…` URL param API (a session spec is an array of
-  // views JBrowse opens on load): https://jbrowse.org/jb2/docs/urlparams/
-  const spec = layout ? { views, layout } : { views }
-  const url = `${JBROWSE}?config=${encodeURIComponent(
-    JBROWSE_CONFIG,
-  )}&session=spec-${encodeURIComponent(JSON.stringify(spec))}`
-  return { spec, url }
+  return { session, url: encodedSessionUrl(session) }
 }

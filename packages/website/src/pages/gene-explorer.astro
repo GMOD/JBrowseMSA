@@ -4,11 +4,14 @@ import Base from '../layouts/Base.astro'
 
 // Shown verbatim in the "Build the same thing yourself" section. Kept as a
 // frontmatter string (not inline JSX) so the braces/angle-brackets aren't
-// parsed as Astro expressions inside <pre>. Mirrors buildSessionSpec() in
+// parsed as Astro expressions inside <pre>. Mirrors buildSessionUrl() in
 // src/lib/geneExplorer.ts.
 const buildSnippet = `
 // A JBrowse session is just an array of views, linked to each other by id.
-// You open one by putting the spec in the URL — no server, no build step.
+// You open one by putting the spec in the URL hash (#) — no server, no build
+// step. The hash fragment never reaches the server, so there's no URL-length
+// limit (a long ?query= would 414); the live explorer also gzips the session
+// into a 'session=encoded-…' param to keep big genes compact.
 const spec = {
   views: [
     {
@@ -38,7 +41,7 @@ const spec = {
 }
 
 const url =
-  JBROWSE + '?config=' + encodeURIComponent(CONFIG) +
+  JBROWSE + '#config=' + encodeURIComponent(CONFIG) +
   '&session=spec-' + encodeURIComponent(JSON.stringify(spec))
 `.trim()
 ---
@@ -120,7 +123,7 @@ const url =
           href="https://github.com/GMOD/JBrowseMSA/blob/main/packages/website/src/lib/geneExplorer.ts"
           >geneExplorer.ts</a
         >{' '}
-        (see <code>buildSessionSpec</code>), and the URL-param API is documented
+        (see <code>buildSessionUrl</code>), and the URL-param API is documented
         under{' '}
         <a href="https://jbrowse.org/jb2/docs/urlparams/">JBrowse URL params</a
         >.

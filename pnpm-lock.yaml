@@ -398,6 +398,9 @@ importers:
       msa-parsers:
         specifier: workspace:*
         version: link:../msa-parsers
+      pako-esm2:
+        specifier: ^2.0.2
+        version: 2.0.2
       react:
         specifier: ^19.2.7
         version: 19.2.7

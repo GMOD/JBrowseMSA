@@ -19,13 +19,11 @@ import { theme } from '../lib/theme'
 
 import {
   DEFAULT_WINDOW_SIZE,
-  buildSessionSpec,
+  buildSessionUrl,
   collapsedLoc,
-  exonBp,
   fetchGeneCds,
   fetchGeneMsa,
   fetchTranscript,
-  genomicSpanBp,
   resolveGene,
   searchGenes,
 } from '../lib/geneExplorer'
@@ -107,12 +105,11 @@ export default function GeneExplorer() {
         const locus = await resolveGene(symbol)
         // prefer the knownCanonical CDS model that backs the alignment so the
         // connected feature shares its coordinate space; fall back to RefSeq
-        // Select for genes outside the 100-way set
+        // Select for genes outside the 100-way set (fetchGeneCds returns
+        // undefined for both a missing gene and an unreachable index)
         const transcript =
           (await fetchGeneCds(symbol)) ?? (await fetchTranscript(locus))
-        // the alignment slice is hosted separately; treat it as optional so the
-        // genome view still works before/without it
-        const msa = await fetchGeneMsa(symbol).catch(() => undefined)
+        const msa = await fetchGeneMsa(symbol)
         if (latestPick.current === pickId) {
           setResult({ transcript, uniprotId: locus.uniprotId, msa })
         }
@@ -219,18 +216,24 @@ export default function GeneExplorer() {
 
 function ResultPanel({ result }: { result: Result }) {
   const { transcript, uniprotId, msa } = result
-  const exons = exonBp(transcript)
-  const span = genomicSpanBp(transcript)
-  const ratio = (span / exons).toFixed(1)
+  // Stats describe the CODING model (transcript.cds), so they mean the same
+  // thing whether the transcript came from the .cds sidecar or the RefSeq
+  // fallback. transcript.exons is coding-only for the former but full mRNA
+  // (incl. UTR) for the latter, so it can't be labelled consistently.
+  const codingBp = transcript.cds.reduce((s, c) => s + (c.end - c.start), 0)
+  const codingStart = Math.min(...transcript.cds.map(c => c.start))
+  const codingEnd = Math.max(...transcript.cds.map(c => c.end))
+  const span = codingEnd - codingStart
+  const ratio = (span / codingBp).toFixed(1)
   const [showDetails, setShowDetails] = useState(false)
   // launch the genome view with introns squeezed out (default) vs. the whole
   // gene; recomputes the loc/url/session spec below
   const [collapse, setCollapse] = useState(true)
   // the message currently shown in the "copied" toast (undefined = hidden)
   const [copied, setCopied] = useState<string>()
-  const { url, spec } = useMemo(
+  const { url, session } = useMemo(
     () =>
-      buildSessionSpec({
+      buildSessionUrl({
         transcript,
         uniprotId,
         proteinSequence: msa?.querySequence,
@@ -243,7 +246,7 @@ function ResultPanel({ result }: { result: Result }) {
     () => collapsedLoc(transcript, { collapse }),
     [transcript, collapse],
   )
-  const specJson = JSON.stringify(spec, null, 2)
+  const sessionJson = JSON.stringify(session, null, 2)
 
   function copy(text: string, message: string) {
     void navigator.clipboard.writeText(text)
@@ -260,7 +263,7 @@ function ResultPanel({ result }: { result: Result }) {
       </Typography>
       <Typography variant="body2" color="text.secondary">
         {transcript.refName} {transcript.strand === 1 ? '+' : '−'} ·{' '}
-        {transcript.exons.length} exons
+        {transcript.cds.length} coding exons
         {msa ? ` · ${msa.rowCount}-species alignment` : ''}
       </Typography>
 
@@ -298,8 +301,8 @@ function ResultPanel({ result }: { result: Result }) {
       {showDetails ? (
         <Box sx={{ mt: 1 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            {exons.toLocaleString()} exon bp / {span.toLocaleString()} bp span (
-            {ratio}× collapsed)
+            {codingBp.toLocaleString()} CDS bp / {span.toLocaleString()} bp
+            coding span ({ratio}× collapsed)
             {uniprotId ? ` · UniProt ${uniprotId}` : ''}
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -314,7 +317,7 @@ function ResultPanel({ result }: { result: Result }) {
             <Button
               size="small"
               onClick={() => {
-                copy(specJson, 'Session JSON copied')
+                copy(sessionJson, 'Session JSON copied')
               }}
             >
               Copy session JSON
@@ -345,7 +348,7 @@ function ResultPanel({ result }: { result: Result }) {
               borderRadius: 1,
             }}
           >
-            {specJson}
+            {sessionJson}
           </Box>
         </Box>
       ) : null}
