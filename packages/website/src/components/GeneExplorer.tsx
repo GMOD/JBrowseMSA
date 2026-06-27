@@ -18,6 +18,7 @@ import {
   buildSessionSpec,
   collapsedLoc,
   exonBp,
+  fetchGeneCds,
   fetchGeneMsa,
   fetchTranscript,
   genomicSpanBp,
@@ -103,10 +104,14 @@ export default function GeneExplorer() {
       setPicked({ symbol, note: NOTE_BY_SYMBOL.get(symbol) })
       try {
         const locus = await resolveGene(symbol)
-        const transcript = await fetchTranscript(locus)
+        // prefer the knownCanonical CDS model that backs the alignment so the
+        // connected feature shares its coordinate space; fall back to RefSeq
+        // Select for genes outside the 100-way set
+        const transcript =
+          (await fetchGeneCds(symbol)) ?? (await fetchTranscript(locus))
         // the alignment slice is hosted separately; treat it as optional so the
         // genome view still works before/without it
-        const msa = await fetchGeneMsa(transcript).catch(() => undefined)
+        const msa = await fetchGeneMsa(symbol).catch(() => undefined)
         const { url, spec } = buildSessionSpec({
           transcript,
           uniprotId: locus.uniprotId,

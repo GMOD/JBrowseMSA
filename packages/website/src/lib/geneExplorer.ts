@@ -177,6 +177,59 @@ function getMsaIndex() {
   return msaIndex
 }
 
+// The knownCanonical CDS model index (`<fa.gz>.cds`): gene symbol -> the hg38
+// row's coding exons. Built by scripts/gene-explorer/build-data.mjs from the
+// SAME transcript as the alignment, so a feature built from it shares the
+// alignment's coordinate space (see fetchGeneCds). ~5 MB, fetched once.
+let cdsIndex: Promise<Map<string, Transcript>> | undefined
+function getCdsIndex() {
+  cdsIndex ??= fetch(`${MSA_GZ}.cds`)
+    .then(res => res.text())
+    .then(
+      text =>
+        new Map(
+          text
+            .trim()
+            .split('\n')
+            .map((line): [string, Transcript] => {
+              const [symbol, name, refName, strand, spec] = line.split('\t')
+              const cds = spec!.split(',').map((s): CDS => {
+                const [start, end, phase] = s.split(':')
+                return {
+                  start: Number(start),
+                  end: Number(end),
+                  phase: Number(phase),
+                }
+              })
+              return [
+                symbol!,
+                {
+                  refName: refName!,
+                  strand: strand === '-' ? -1 : 1,
+                  name: name!,
+                  geneName: symbol!,
+                  // coding-only model: the collapsed view shows CDS exons, which
+                  // is what the protein/MSA views align to
+                  exons: cds.map(c => ({ start: c.start, end: c.end })),
+                  cds,
+                },
+              ]
+            }),
+        ),
+    )
+  return cdsIndex
+}
+
+// The knownCanonical transcript model that backs the alignment, keyed by gene
+// symbol. Preferred over fetchTranscript (RefSeq Select) so connectedFeature
+// shares the alignment's transcript and the genome<->MSA / genome<->3D mappings
+// stay coordinate-consistent for every gene.
+export async function fetchGeneCds(
+  geneName: string,
+): Promise<Transcript | undefined> {
+  return (await getCdsIndex()).get(geneName)
+}
+
 async function tabixLines(
   file: TabixIndexedFile,
   refName: string,
@@ -301,9 +354,9 @@ export interface GeneMsa {
 // as-is — the block is already valid FASTA (`>hg38\nSEQ\n>panTro4\nSEQ\n...`,
 // hg38 first).
 export async function fetchGeneMsa(
-  transcript: Transcript,
+  geneName: string,
 ): Promise<GeneMsa | undefined> {
-  const entry = (await getMsaIndex()).get(transcript.geneName)
+  const entry = (await getMsaIndex()).get(geneName)
   if (!entry) {
     return undefined
   }

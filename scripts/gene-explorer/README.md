@@ -9,11 +9,15 @@ Almost everything is computed live in the browser from public CORS services, so
 there is nothing per-gene to host:
 
 - **mygene.info** — gene symbol → hg38 locus + UniProt accession (+ type-ahead)
-- **UCSC RefSeq Select GFF** — the canonical (MANE) transcript's exon/CDS model,
-  pulled by locus with tabix and parsed in the browser (`msa-parsers`'
-  `parseGFF`). The space-separated exon ranges become the LinearGenomeView
-  `loc`, which is how you collapse introns declaratively — each range is one
-  displayed region, rendered back-to-back.
+- **the `.cds` sidecar** (below) — the knownCanonical transcript's coding-exon
+  model, the same transcript the alignment is built from. Its exon ranges become
+  the LinearGenomeView `loc` (each range = one displayed region, rendered
+  back-to-back — that is how introns collapse declaratively) AND the connected
+  feature the MsaView/ProteinView map through. Sourcing the feature from the
+  alignment's own transcript (not RefSeq Select, a different canonical isoform
+  for ~10% of genes) keeps the genome↔MSA and genome↔3D mappings
+  coordinate-consistent for every gene. RefSeq Select GFF is the fallback only
+  for genes outside the 100-way set.
 - **AlphaFold** — the structure, by UniProt accession.
 
 The one thing that cannot be fetched live is the alignment: the UCSC 100-way
@@ -28,6 +32,17 @@ is one random read **by gene symbol** — no per-gene files, no coordinates, no
 # streams knownCanonical.multiz100way.exonAA.fa.gz from UCSC (~474 MB) and
 # kgXref. Requires bgzip (htslib) on PATH. Writes to ./out by default.
 node scripts/gene-explorer/build-data.mjs [exonAA-url] [outDir]
+```
+
+Prefer a **local copy** of the exonAA input to avoid re-downloading ~474 MB each
+run (and to sidestep a harmless TLS socket-close the streamed fetch can emit
+*after* all output is written):
+
+```sh
+mkdir -p ~/data/gene-explorer && cd ~/data/gene-explorer
+curl -sLO https://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz100way/alignments/knownCanonical.multiz100way.exonAA.fa.gz
+node /path/to/scripts/gene-explorer/build-data.mjs \
+  ~/data/gene-explorer/knownCanonical.multiz100way.exonAA.fa.gz ./out
 ```
 
 `knownCanonical` is one canonical transcript per gene (Ensembl-keyed, `ENST`),
@@ -51,6 +66,12 @@ JBrowse's bam/bai shorthand):
 - `hg38.knownCanonical.multiz100way.aa.fa.gz.idx` — TSV `SYMBOL <TAB> offset
   <TAB> length`: the uncompressed byte offset + length of each block. ~1 MB,
   fetched once by the browser, then random-read by name.
+- `hg38.knownCanonical.multiz100way.aa.fa.gz.cds` — TSV `SYMBOL <TAB> ENST <TAB>
+  refName <TAB> strand <TAB> start:end:phase,…`: the hg38 row's knownCanonical
+  CDS model (0-based interbase, genomic-ascending; phase recomputed from
+  cumulative coding length, the GFF3 definition). The whole CDS spans of a gene
+  sum to `3 × (its hg38 alignment-row length)`, so a feature built from it shares
+  the alignment's coordinate space exactly. ~2 MB, fetched once.
 - `hg38.multiz100way.nh` — the 100-way species tree.
 
 ### How it works
@@ -88,6 +109,8 @@ aws s3 cp out/hg38.knownCanonical.multiz100way.aa.fa.gz \
 aws s3 cp out/hg38.knownCanonical.multiz100way.aa.fa.gz.gzi \
   s3://jbrowse.org/demos/msaview/100way/ --content-type application/octet-stream
 aws s3 cp out/hg38.knownCanonical.multiz100way.aa.fa.gz.idx \
+  s3://jbrowse.org/demos/msaview/100way/ --content-type text/plain
+aws s3 cp out/hg38.knownCanonical.multiz100way.aa.fa.gz.cds \
   s3://jbrowse.org/demos/msaview/100way/ --content-type text/plain
 aws s3 cp out/hg38.multiz100way.nh \
   s3://jbrowse.org/demos/msaview/100way/ --content-type text/plain

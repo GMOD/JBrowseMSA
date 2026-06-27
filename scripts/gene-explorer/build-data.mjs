@@ -28,6 +28,10 @@
 //     <TAB> length` — uncompressed byte offset + length of each block, keyed by
 //     gene symbol. The `.gzi`/`.idx` are found by appending to the `.fa.gz` uri.
 //     Fetched once by the browser (~1 MB), then random-read by name.
+//   hg38.knownCanonical.multiz100way.aa.fa.gz.cds   TSV `SYMBOL <TAB> ENST <TAB>
+//     refName <TAB> strand <TAB> start:end:phase,...` — the hg38 knownCanonical
+//     CDS model (0-based interbase, genomic-ascending). The website builds the
+//     connected feature from this so it shares the alignment's transcript.
 //   hg38.multiz100way.nh   the 100-way species tree (leaf names = UCSC db ids).
 //
 // Usage:
@@ -61,6 +65,12 @@ const faPath = join(outDir, `${outName}.fa`)
 // name index sits beside the bgzip as `<fa.gz>.idx`, so a single `.fa.gz` uri
 // finds both the `.gzi` and `.idx` by suffix (cf. JBrowse's bam/bai shorthand)
 const idxPath = join(outDir, `${outName}.fa.gz.idx`)
+// the knownCanonical CDS model (genomic coords + phase) of the hg38 row, keyed by
+// the same gene symbol. Found by suffix `.cds` on the `.fa.gz` uri. The website
+// builds the MsaView/ProteinView `connectedFeature` from THIS, so the feature
+// shares the alignment's transcript (knownCanonical) instead of RefSeq Select —
+// keeping the genome<->MSA and genome<->3D coordinate mappings self-consistent.
+const cdsPath = join(outDir, `${outName}.fa.gz.cds`)
 
 // ENST is matched versionless, so version drift between the alignment build and
 // kgXref doesn't break the lookup
@@ -87,6 +97,7 @@ console.error(`kgXref: ${enstToSymbol.size} ENST->symbol mappings`)
 // --- stream the exonAA, reassemble per transcript, write blocks + index ------
 const fa = createWriteStream(faPath)
 const idx = createWriteStream(idxPath)
+const cdsOut = createWriteStream(cdsPath)
 const lines = readline.createInterface({ input: await openInput(input) })
 
 let cur // { transcript, exons: Map<exonNum,{len,bySpecies:Map<db,seq>}> }
@@ -95,6 +106,10 @@ let seq = ''
 let offset = 0
 let written = 0
 let dupes = 0
+// CDS whose coding length is not a clean multiple of 3 — UCSC's exonAA is itself
+// partial here (immunoglobulin/TCR gene segments, a few truncated rows). The
+// model is still emitted; the mapping is just off by the partial last codon.
+let partialCds = 0
 // one canonical transcript per gene, so a symbol keys exactly one block — but
 // guard anyway: if two knownCanonical ENSTs ever share a symbol, keep the first
 // and count the rest, so a name can never silently return the wrong gene.
@@ -113,6 +128,7 @@ await commitRecord()
 await flush()
 await endStream(fa)
 await endStream(idx)
+await endStream(cdsOut)
 
 async function commitRecord() {
   if (header) {
@@ -129,20 +145,40 @@ async function commitRecord() {
       }
       exon.len = Math.max(exon.len, seq.length)
       exon.bySpecies.set(rec.db, seq)
+      // capture the hg38 row's genomic CDS coords for this exon (for the .cds)
+      if (rec.db === 'hg38' && rec.coord) {
+        exon.hg38 = rec.coord
+        cur.refName = rec.coord.refName
+        cur.strand = rec.coord.strand
+      }
     }
   }
   header = undefined
 }
 
-// Header: {ENST.version}_{db}_{exonNum}_{exonCount} {len} {x} {y} {coord}
+// Header: {ENST.version}_{db}_{exonNum}_{exonCount} {aaLen} {f0} {f1} {coord}
+// where {coord} = chr:start-end[+-], 1-based inclusive genomic CDS span of the
+// exon's coding bases. The two frame ints are derivable from cumulative length,
+// so phase is recomputed in flush() rather than trusted from the header.
 function parseHeader(h) {
-  const id = h.split(/\s+/)[0]
-  const parts = id.split('_')
+  const tokens = h.split(/\s+/)
+  const parts = tokens[0].split('_')
   parts.pop() // exonCount
   const exonNum = Number(parts.pop())
   const db = parts.pop()
   const transcript = parts.join('_')
-  return transcript && db && exonNum ? { transcript, db, exonNum } : undefined
+  const coord = parseCoord(tokens.at(-1))
+  return transcript && db && exonNum
+    ? { transcript, db, exonNum, coord }
+    : undefined
+}
+
+// chr1:169888676-169888840-  ->  {refName, start (1-based), end, strand}
+function parseCoord(token) {
+  const m = /^(.+):(\d+)-(\d+)([+-])$/.exec(token ?? '')
+  return m
+    ? { refName: m[1], start: Number(m[2]), end: Number(m[3]), strand: m[4] }
+    : undefined
 }
 
 async function flush() {
@@ -160,9 +196,45 @@ async function flush() {
         idx.write(`${symbol}\t${offset}\t${block.length}\n`)
         offset += block.length
         written++
+        const cds = buildCds(cur)
+        if (cds) {
+          if (cds.bp % 3 !== 0) {
+            partialCds++
+          }
+          cdsOut.write(
+            `${symbol}\t${cur.transcript}\t${cds.refName}\t${cds.strand}\t${cds.spec}\n`,
+          )
+        }
       }
     }
   }
+}
+
+// The hg38 knownCanonical CDS model from the per-exon genomic coords. Exons are
+// numbered in translation order, so phase is the running codon offset over that
+// order ((3 - cumBefore%3) % 3, the GFF3 definition); the emitted list is sorted
+// genomic-ascending (with each exon's phase) to match a JBrowse feature's CDS
+// subfeatures. Coords are 0-based interbase (start-1) like the GFF path was.
+function buildCds(t) {
+  const exons = [...t.exons.entries()]
+    .filter(([, e]) => e.hg38)
+    .sort((a, b) => a[0] - b[0]) // exonNum = translation order
+    .map(([, e]) => e.hg38)
+  if (exons.length === 0 || !t.refName) {
+    return undefined
+  }
+  let cum = 0
+  const withPhase = exons.map(c => {
+    const phase = (3 - (cum % 3)) % 3
+    cum += c.end - (c.start - 1)
+    return { start: c.start - 1, end: c.end, phase }
+  })
+  const bp = withPhase.reduce((s, c) => s + (c.end - c.start), 0)
+  const spec = withPhase
+    .sort((a, b) => a.start - b.start)
+    .map(c => `${c.start}:${c.end}:${c.phase}`)
+    .join(',')
+  return { refName: t.refName, strand: t.strand, spec, bp }
 }
 
 // One FASTA block: hg38 first, then every other species in first-seen order;
@@ -192,13 +264,14 @@ function assemble(t) {
 }
 
 console.error(
-  `assembled ${written} transcript blocks (${dupes} dropped as duplicate symbol); bgzipping...`,
+  `assembled ${written} transcript blocks (${dupes} dropped as duplicate symbol, ` +
+    `${partialCds} partial-CDS genes); bgzipping...`,
 )
 
 // bgzip -i builds the .gzi alongside the .gz in one pass (random reads use the
 // uncompressed offsets recorded in the .idx above).
 run('bgzip', ['-i', '-f', faPath]) // -> .fa.gz + .fa.gz.gzi
-console.error(`wrote ${faPath}.gz (+ .gzi), ${idxPath}`)
+console.error(`wrote ${faPath}.gz (+ .gzi), ${idxPath}, ${cdsPath}`)
 
 // --- species tree ------------------------------------------------------------
 const treeText = await (await fetch(TREE)).text()
