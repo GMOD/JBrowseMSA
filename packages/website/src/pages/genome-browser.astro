@@ -46,138 +46,63 @@ const links = {
   <article class="prose">
     <h1>In the genome browser</h1>
     <p>
-      react-msaview ships as a JBrowse 2 plugin
-      (<a href="https://github.com/GMOD/jbrowse-plugin-msaview">jbrowse-plugin-msaview</a>), so the
-      same viewer — alignment, phylogenetic tree, and all — runs as a view <em>inside</em> JBrowse,
-      stacked alongside a Linear Genome View with gene annotation and multiple-alignment tracks.
-      Every view here is opened by a <strong>declarative link</strong>: the whole multi-view session
-      lives in the URL, with nothing to install or set up.
+      react-msaview runs as a
+      <a href="https://github.com/GMOD/jbrowse-plugin-msaview">JBrowse 2 plugin</a>, so the alignment
+      and tree open as a view <em>inside</em> JBrowse — connected to a Linear Genome View and, with
+      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">jbrowse-plugin-protein3d</a>, to the
+      protein's 3D structure. Each example is one <strong>declarative link</strong>: the whole
+      multi-view session lives in the URL.
     </p>
 
-    <h2 id="linked-src">A linked protein view: SRC, beside its gene</h2>
+    <h2 id="three-view">Genome ↔ alignment ↔ 3D structure</h2>
     <p>
-      The MSA viewer can also be <strong>connected</strong> to the genome view so the two share
-      coordinates. This link opens the human <strong>SRC</strong> proto-oncogene on hg38 beside the
-      Src-family kinase alignment, linked through the SRC transcript model so the mapping is a true
-      protein-to-nucleotide one:
-    </p>
-    <ul>
-      <li>Click a residue in the alignment → the genome view navigates to that residue's codon.</li>
-      <li>Hover the gene in the genome view → the corresponding alignment column highlights.</li>
-    </ul>
-
-    <figure>
-      <a href={links.proteinLinked} target="_blank" rel="noopener">
-        <img
-          src={`${base}/media/genome-browser-src.png`}
-          alt="JBrowse: the human SRC gene on hg38 above the Src-family kinase alignment and tree, connected as one view"
-        />
-      </a>
-      <figcaption>
-        The human SRC gene on hg38 (canonical RefSeq Select / MANE transcript) above the Src-family
-        kinase alignment, connected through the SRC transcript model so residues and codons share
-        coordinates.{' '}
-        <a href={links.proteinLinked} target="_blank" rel="noopener">Open this view in JBrowse ↗</a>
-      </figcaption>
-    </figure>
-
-    <h2 id="braf-v600e">Zoomed on a mutation: BRAF V600E</h2>
-    <p>
-      The same connected pattern zoomed to a single codon: human <strong>BRAF</strong> beside the
-      RAF-family kinase alignment, positioned on the <strong>V600</strong> codon with the matching
-      alignment column pre-highlighted. <strong>V600E</strong> (<code>c.1799T&gt;A</code>) is the most
-      common oncogenic mutation in melanoma; V600 is <strong>invariant</strong> down the RAF family, so
-      the highlighted column is solid, and a <strong>ClinVar pathogenic-variant track</strong> stacks
-      disease alleles directly onto the codon.
-    </p>
-
-    <figure>
-      <a href={links.brafV600} target="_blank" rel="noopener">
-        <img
-          src={`${base}/media/genome-browser-braf-v600e.png`}
-          alt="JBrowse: BRAF zoomed on the V600 codon with a ClinVar pathogenic-variant pileup above the lit, invariant V600 alignment column"
-        />
-      </a>
-      <figcaption>
-        BRAF zoomed on the <strong>V600</strong> codon — gene track (canonical transcript) and the
-        ClinVar pathogenic-variant pileup above, the invariant V600 alignment column lit across the RAF
-        family below. The highlighted genome base and alignment column are the same residue.{' '}
-        <a href={links.brafV600} target="_blank" rel="noopener">Open this view in JBrowse ↗</a>
-      </figcaption>
-    </figure>
-
-    <h2 id="tp53-r248">Conservation meets pathogenicity: TP53 R248</h2>
-    <p>
-      A whole clinical archive landing on one conserved column: human <strong>TP53</strong> on hg38
-      with a <strong>ClinVar pathogenic-variant track</strong>, beside p53 aligned across thirteen
-      vertebrates, positioned on the <strong>R248</strong> codon — the most frequently mutated residue
-      in TP53. A dense wall of ClinVar variants stacks on the codon while the alignment column reads
-      <code>R</code> in every species: the pathogenic pileup and the conserved column are the same
-      position.
-    </p>
-
-    <figure>
-      <a href={links.tp53R248} target="_blank" rel="noopener">
-        <img
-          src={`${base}/media/genome-browser-tp53-r248.png`}
-          alt="JBrowse: TP53 on the R248 codon with a dense ClinVar pathogenic-variant wall above the conserved R alignment column across vertebrates"
-        />
-      </a>
-      <figcaption>
-        TP53 on the <strong>R248</strong> codon — a dense wall of ClinVar pathogenic variants over the
-        codon, above the alignment column that reads <code>R</code> in every vertebrate. The pathogenic
-        pileup and the conserved column are the same position.{' '}
-        <a href={links.tp53R248} target="_blank" rel="noopener">Open this view in JBrowse ↗</a>
-      </figcaption>
-    </figure>
-
-    <h2 id="tp53-protein3d">Into three dimensions: TP53, alignment, and structure</h2>
-    <p>
-      The same connection extends to the protein's <strong>3D structure</strong>. With
-      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">jbrowse-plugin-protein3d</a> in the
-      mix, one link opens <em>three</em> linked views — the human <strong>TP53</strong> gene (RefSeq +
-      ClinVar), the p53 ortholog alignment, and the <strong>AlphaFold</strong> p53 structure — all
-      connected to the same genome view, and all opened with a single annotated feature pinpointed
-      across the three. Here it's the p53 <strong>nuclear export signal</strong> (UniProt motif,
-      residues 339–350): magenta on the structure, a band over the gene, and the matching columns in
-      the alignment — the same residues, located three ways at once.
+      One link opens three connected views sharing a coordinate system — the human <strong>TP53</strong>
+      gene (RefSeq + ClinVar), the p53 ortholog alignment, and the <strong>AlphaFold</strong> structure —
+      and lights one annotated feature across all three at once. Here the p53
+      <strong>nuclear export signal</strong> (residues 339–350) is magenta on the structure, a band over
+      the gene, and the matching alignment columns; click any residue, motif, or domain and the others
+      follow.
     </p>
 
     <figure>
       <a href={links.tp53Protein3d} target="_blank" rel="noopener">
         <img
           src={`${base}/media/genome-browser-tp53-protein3d.png`}
-          alt="JBrowse: TP53 gene with ClinVar, the p53 ortholog alignment, and the AlphaFold structure, all connected, with the nuclear export signal motif highlighted across genome, alignment, and 3D structure"
+          alt="JBrowse: the TP53 gene with ClinVar, the p53 ortholog alignment, and the AlphaFold structure, all connected, with the nuclear export signal motif lit across genome, alignment, and 3D structure"
         />
       </a>
       <figcaption>
-        Genome, alignment, and AlphaFold structure as one connected session, with the p53 nuclear
-        export signal motif (UniProt P04637, residues 339–350) lit across all three — magenta in the
-        structure, a highlight band over the gene, and the matching columns in the alignment. The whole
-        layout, connections, and the pre-lit motif are declared in the URL.{' '}
-        <a href={links.tp53Protein3d} target="_blank" rel="noopener">Open this view in JBrowse ↗</a>
+        TP53 gene, p53 alignment, and AlphaFold structure as one connected session, opened with the
+        nuclear export signal motif (UniProt P04637, 339–350) lit across all three — layout,
+        connections, and the pre-lit motif all declared in the URL.{' '}
+        <a href={links.tp53Protein3d} target="_blank" rel="noopener">Open in JBrowse ↗</a>
       </figcaption>
     </figure>
+
+    <h2 id="more">Protein ↔ genome, on other genes</h2>
+    <p>The same connected alignment-to-genome link without the structure view:</p>
+    <ul>
+      <li>
+        <a href={links.proteinLinked} target="_blank" rel="noopener">SRC ↗</a> — the Src-family kinase
+        alignment beside the SRC gene.
+      </li>
+      <li>
+        <a href={links.brafV600} target="_blank" rel="noopener">BRAF V600E ↗</a> — the RAF family on the
+        invariant V600 codon, with a ClinVar pathogenic-variant track.
+      </li>
+      <li>
+        <a href={links.tp53R248} target="_blank" rel="noopener">TP53 R248 ↗</a> — p53 across vertebrates
+        on the R248 hotspot, with ClinVar.
+      </li>
+    </ul>
 
     <h2 id="how-built">How the links are built</h2>
     <p>
       Each link is a JBrowse
-      <a href="https://jbrowse.org/jb2/docs/urlparams/#session-spec">session spec</a>
-      (<code>?config=…&amp;session=spec-&#123;"views":[…]&#125;</code>), where each entry launches a
-      <code>LinearGenomeView</code> or an <code>MsaView</code>. To <em>connect</em> the two, the genome
-      view gets an <code>id</code> and the <code>MsaView</code> carries:
-    </p>
-    <ul>
-      <li><code>connectedViewId</code> — the genome view's <code>id</code>.</li>
-      <li><code>connectedFeature</code> — the transcript model that maps codons to residues.</li>
-      <li><code>querySeqName</code> — the matching alignment row.</li>
-      <li><code>highlightColumns</code> — seeds the lit-column overlay.</li>
-    </ul>
-    <p>
-      Transcript models and alignment/tree/ClinVar data are regenerated reproducibly from public
-      sources by the scripts under <code>scripts/</code> (<code>src-protein-link</code>,
-      <code>braf-protein-link</code>, <code>tp53-protein-link</code>). A view loaded from a
-      cross-origin config asks you to trust the plugin once before it renders.
+      <a href="https://jbrowse.org/jb2/docs/urlparams/#session-spec">session spec</a>. A pinned
+      <code>LinearGenomeView</code> <code>id</code> is shared by the <code>MsaView</code> and
+      <code>ProteinView</code> through <code>connectedViewId</code>; transcript models, alignments, and
+      ClinVar data are regenerated from public sources by the scripts under <code>scripts/</code>.
     </p>
   </article>
 </Base>
