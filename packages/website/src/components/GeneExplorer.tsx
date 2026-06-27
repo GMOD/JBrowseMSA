@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
 import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Snackbar from '@mui/material/Snackbar'
@@ -15,6 +17,7 @@ import Typography from '@mui/material/Typography'
 import { MSAViewer } from 'react-msaview'
 
 import {
+  DEFAULT_WINDOW_SIZE,
   buildSessionSpec,
   collapsedLoc,
   exonBp,
@@ -32,9 +35,6 @@ interface Result {
   transcript: Transcript
   uniprotId?: string
   msa?: GeneMsa
-  loc: string
-  url: string
-  spec: ReturnType<typeof buildSessionSpec>['spec']
 }
 
 // curated, all present in the 100-way index — chosen to span tumour
@@ -112,21 +112,8 @@ export default function GeneExplorer() {
         // the alignment slice is hosted separately; treat it as optional so the
         // genome view still works before/without it
         const msa = await fetchGeneMsa(symbol).catch(() => undefined)
-        const { url, spec } = buildSessionSpec({
-          transcript,
-          uniprotId: locus.uniprotId,
-          proteinSequence: msa?.querySequence,
-          msaAvailable: !!msa,
-        })
         if (latestPick.current === pickId) {
-          setResult({
-            transcript,
-            uniprotId: locus.uniprotId,
-            msa,
-            loc: collapsedLoc(transcript),
-            url,
-            spec,
-          })
+          setResult({ transcript, uniprotId: locus.uniprotId, msa })
         }
       } catch (e) {
         if (latestPick.current === pickId) {
@@ -228,13 +215,31 @@ export default function GeneExplorer() {
 }
 
 function ResultPanel({ result }: { result: Result }) {
-  const { transcript, uniprotId, msa, loc, url, spec } = result
+  const { transcript, uniprotId, msa } = result
   const exons = exonBp(transcript)
   const span = genomicSpanBp(transcript)
   const ratio = (span / exons).toFixed(1)
   const [showJson, setShowJson] = useState(false)
+  // launch the genome view with introns squeezed out (default) vs. the whole
+  // gene; recomputes the loc/url/session spec below
+  const [collapse, setCollapse] = useState(true)
   // the message currently shown in the "copied" toast (undefined = hidden)
   const [copied, setCopied] = useState<string>()
+  const { url, spec } = useMemo(
+    () =>
+      buildSessionSpec({
+        transcript,
+        uniprotId,
+        proteinSequence: msa?.querySequence,
+        msaAvailable: !!msa,
+        collapseIntrons: collapse,
+      }),
+    [transcript, uniprotId, msa, collapse],
+  )
+  const loc = useMemo(
+    () => collapsedLoc(transcript, { collapse }),
+    [transcript, collapse],
+  )
   const specJson = JSON.stringify(spec, null, 2)
 
   function copy(text: string, message: string) {
@@ -290,6 +295,17 @@ function ResultPanel({ result }: { result: Result }) {
         >
           {showJson ? 'Hide' : 'Show'} session JSON
         </Button>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={collapse}
+              onChange={event => {
+                setCollapse(event.target.checked)
+              }}
+            />
+          }
+          label={`Collapse introns (±${DEFAULT_WINDOW_SIZE}bp around exons)`}
+        />
       </Stack>
       <Typography
         variant="caption"
@@ -297,7 +313,8 @@ function ResultPanel({ result }: { result: Result }) {
         color="text.secondary"
         sx={{ mt: 0.5 }}
       >
-        Opens a connected session: collapsed-intron gene view
+        Opens a connected session:{' '}
+        {collapse ? 'collapsed-intron gene view' : 'whole-gene view'}
         {msa ? ' + alignment' : ''}
         {msa && uniprotId ? ' + AlphaFold structure' : ''}.
       </Typography>
@@ -347,8 +364,9 @@ function ResultPanel({ result }: { result: Result }) {
       />
 
       <Typography variant="subtitle2" sx={{ mt: 2 }}>
-        Collapsed-intron regions ({transcript.exons.length} exons, introns
-        removed)
+        {collapse
+          ? `Collapsed-intron regions (${transcript.exons.length} exons ±${DEFAULT_WINDOW_SIZE}bp, overlaps merged)`
+          : `Whole-gene region (${transcript.exons.length} exons, introns intact)`}
       </Typography>
       <Paper
         variant="outlined"

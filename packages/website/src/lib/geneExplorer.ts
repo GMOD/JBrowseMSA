@@ -310,14 +310,52 @@ export function genomicSpanBp(transcript: Transcript) {
   return end - start
 }
 
-// A space-separated list of exon locstrings. Each becomes one displayedRegion
-// in the LinearGenomeView (via JBrowse's navToLocations), so the introns
-// between them collapse out — there is no `collapseIntrons` view option, this
-// IS how you build a collapsed view declaratively. Locstrings are 1-based.
-export function collapsedLoc(transcript: Transcript) {
-  return transcript.exons
-    .map(e => `${transcript.refName}:${e.start + 1}-${e.end}`)
-    .join(' ')
+// bp of context shown on either side of every exon in the collapsed view, so
+// the splice boundaries aren't flush against the region edge.
+export const DEFAULT_WINDOW_SIZE = 40
+
+export interface CollapseOptions {
+  // false shows the whole gene (introns intact) as a single region
+  collapse?: boolean
+  // bp of padding added around each exon before merging (collapsed view only)
+  padding?: number
+}
+
+// Expand each exon by `padding` on both sides, then merge any intervals that now
+// overlap. The padding is already baked into start/end, so a plain overlap merge
+// (no extra gap allowance) leaves an intron collapsed only when its gap exceeds
+// 2*padding. Mirrors jbrowse-components' buildCollapsedRegions.
+function paddedMergedExons(transcript: Transcript, padding: number): Exon[] {
+  const merged: Exon[] = []
+  for (const e of [...transcript.exons].sort((a, b) => a.start - b.start)) {
+    const start = Math.max(0, e.start - padding)
+    const end = e.end + padding
+    const last = merged.at(-1)
+    if (last && start <= last.end) {
+      last.end = Math.max(last.end, end)
+    } else {
+      merged.push({ start, end })
+    }
+  }
+  return merged
+}
+
+// A space-separated list of locstrings. When collapsing, each padded/merged exon
+// becomes one displayedRegion in the LinearGenomeView (via JBrowse's
+// navToLocations), so the introns between them squeeze out — there is no
+// `collapseIntrons` view option, this IS how you build a collapsed view
+// declaratively. When not collapsing, a single region spans the whole gene.
+// Locstrings are 1-based.
+export function collapsedLoc(
+  transcript: Transcript,
+  { collapse = true, padding = DEFAULT_WINDOW_SIZE }: CollapseOptions = {},
+) {
+  const { refName } = transcript
+  return collapse
+    ? paddedMergedExons(transcript, padding)
+        .map(e => `${refName}:${e.start + 1}-${e.end}`)
+        .join(' ')
+    : `${refName}:${Math.min(...transcript.exons.map(e => e.start)) + 1}-${Math.max(...transcript.exons.map(e => e.end))}`
 }
 
 // The transcript model the MsaView and ProteinView use to map a residue to its
@@ -383,6 +421,8 @@ export interface SpecOptions {
   // include the connected MsaView only when the alignment slice is actually
   // available, so the link is always valid (just the collapsed LGV otherwise)
   msaAvailable?: boolean
+  // false launches a whole-gene view (introns intact) instead of collapsed exons
+  collapseIntrons?: boolean
 }
 
 // Synthesize the declarative JBrowse session: a collapsed-intron
@@ -394,6 +434,7 @@ export function buildSessionSpec({
   uniprotId,
   proteinSequence,
   msaAvailable,
+  collapseIntrons = true,
 }: SpecOptions) {
   const feature = connectedFeature(transcript)
   const lgvId = `lgv-${transcript.geneName}`
@@ -445,7 +486,7 @@ export function buildSessionSpec({
     type: 'LinearGenomeView',
     id: lgvId,
     assembly: 'hg38',
-    loc: collapsedLoc(transcript),
+    loc: collapsedLoc(transcript, { collapse: collapseIntrons }),
     colorByCDS: true,
     tracks: [GENE_TRACK],
   }
