@@ -154,3 +154,14 @@ See the auto-generated API docs:
 The model source is in `packages/lib/src/model.ts`. The React-MSAView package
 uses MobX-state-tree models. Components wrapped with `observer` from mobx-react
 automatically re-render when observed model properties change.
+
+## See also
+
+- [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer's
+  features (color schemes, tree, domains, sharing, SVG export).
+- [Interactive examples](https://gmod.org/JBrowseMSA/examples) — a live gallery
+  of usage patterns, each with copyable source.
+- [Genome browser guide](https://gmod.org/JBrowseMSA/genome-browser) — embed the
+  viewer inside JBrowse 2 beside annotation tracks.
+- [Model API reference](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/apidocs/MsaView.md)
+  — the auto-generated state-model docs.

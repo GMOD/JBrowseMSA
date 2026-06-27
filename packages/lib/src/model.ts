@@ -95,6 +95,14 @@ function parseTreeText(text: string) {
 
 /**
  * #stateModel MsaView
+ *
+ * The main MSAView state model. Holds the loaded alignment, tree, and optional
+ * InterProScan domain annotations, plus all display state (color scheme, zoom,
+ * scroll, collapsed clades). It composes in members from `DialogQueueSessionMixin`,
+ * `Tree`, and `MSAModel` (see Inherited members below). Data is loaded reactively
+ * from the `msaFilehandle` / `treeFilehandle` / `gffFilehandle` properties, or set
+ * directly with `setData`. Most state is persisted into the shareable URL.
+ *
  * #example
  * ```js
  * import { MSAModelF } from 'react-msaview'
@@ -373,12 +381,15 @@ function stateModelFactory() {
     .actions(self => ({
       /**
        * #action
+       * draw the alignment with positions numbered relative to the given row's
+       * sequence (its node id), instead of in raw MSA-column coordinates
        */
       drawRelativeTo(id: string | undefined) {
         self.relativeTo = id
       },
       /**
        * #action
+       * hide columns that are entirely (or mostly, see allowedGappyness) gaps
        */
       setHideGaps(arg: boolean) {
         self.hideGaps = arg
@@ -457,6 +468,7 @@ function stateModelFactory() {
       },
       /**
        * #action
+       * toggle the InterProScan protein-domain overlay on the alignment
        */
       setShowDomains(arg: boolean) {
         self.showDomains = arg
@@ -510,6 +522,7 @@ function stateModelFactory() {
 
       /**
        * #action
+       * collapse or un-collapse the subtree rooted at the given tree node id
        */
       toggleCollapsed(node: string) {
         if (self.collapsed.includes(node)) {
@@ -521,6 +534,8 @@ function stateModelFactory() {
 
       /**
        * #action
+       * show only the subtree rooted at the given node id (pass undefined to
+       * show the whole tree again)
        */
       setShowOnly(node?: string) {
         self.showOnly = node
@@ -528,6 +543,8 @@ function stateModelFactory() {
 
       /**
        * #action
+       * set the alignment/tree/metadata/domain data directly from strings,
+       * bypassing the filehandle loaders
        */
       setData(data: {
         msa?: string
@@ -1232,6 +1249,7 @@ function stateModelFactory() {
 
       /**
        * #action
+       * restore the default column width and row height
        */
       resetZoom() {
         self.setColWidth(defaultColWidth)

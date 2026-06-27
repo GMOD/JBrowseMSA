@@ -8,7 +8,9 @@ objects in our source code.
 
 ## Links
 
-[Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model.ts)
+- [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model.ts)
+- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this model in React, HTML, and R
+- [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
 
 ## Example usage
 
@@ -22,6 +24,13 @@ root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
 ```
 
 ## Overview
+
+The main MSAView state model. Holds the loaded alignment, tree, and optional
+InterProScan domain annotations, plus all display state (color scheme, zoom,
+scroll, collapsed clades). It composes in members from `DialogQueueSessionMixin`,
+`Tree`, and `MSAModel` (see Inherited members below). Data is loaded reactively
+from the `msaFilehandle` / `treeFilehandle` / `gffFilehandle` properties, or set
+directly with `setData`. Most state is persisted into the shareable URL.
 
 ## Inherited members
 
@@ -151,6 +160,21 @@ height: types.optional(types.number, defaultHeight)
 true
 // code
 hideGaps: defaultHideGaps
+```
+
+#### property: highlightColumns
+
+declarative seed for the highlighted-columns overlay (visible column
+indices). Unlike the volatile `highlightedColumns` (driven by
+transient genome-hover sync), this persists in the snapshot/URL so a
+shared link can open with specific columns highlighted. Applied once
+in afterCreate.
+
+```js
+// type signature
+IType<number[] | undefined, number[] | undefined, number[] | undefined>
+// code
+highlightColumns: types.frozen<number[] | undefined>()
 ```
 
 #### property: id
@@ -1091,6 +1115,9 @@ doScrollY: (deltaY: number) => void
 
 #### action: drawRelativeTo
 
+draw the alignment with positions numbered relative to the given row's
+sequence (its node id), instead of in raw MSA-column coordinates
+
 ```js
 // type signature
 drawRelativeTo: (id: string | undefined) => void
@@ -1133,6 +1160,8 @@ reset: () => void
 
 #### action: resetZoom
 
+restore the default column width and row height
+
 ```js
 // type signature
 resetZoom: () => void
@@ -1169,6 +1198,9 @@ setCurrentAlignment: (n: number) => void
 ```
 
 #### action: setData
+
+set the alignment/tree/metadata/domain data directly from strings,
+bypassing the filehandle loaders
 
 ```js
 // type signature
@@ -1226,6 +1258,8 @@ setHeight: (height: number) => void
 ```
 
 #### action: setHideGaps
+
+hide columns that are entirely (or mostly, see allowedGappyness) gaps
 
 ```js
 // type signature
@@ -1348,12 +1382,17 @@ setScrollZoom: (arg: boolean) => void
 
 #### action: setShowDomains
 
+toggle the InterProScan protein-domain overlay on the alignment
+
 ```js
 // type signature
 setShowDomains: (arg: boolean) => void
 ```
 
 #### action: setShowOnly
+
+show only the subtree rooted at the given node id (pass undefined to
+show the whole tree again)
 
 ```js
 // type signature
@@ -1403,6 +1442,8 @@ setWidth: (arg: number) => void
 ```
 
 #### action: toggleCollapsed
+
+collapse or un-collapse the subtree rooted at the given tree node id
 
 ```js
 // type signature

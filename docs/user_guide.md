@@ -173,6 +173,10 @@ sized data.
 - Embed the viewer in your own app — see the
   [embedding guide](https://gmod.org/JBrowseMSA/embedding) for React, the
   UMD-in-HTML bundle, and the R package.
+- Run it inside a genome browser — see the
+  [genome browser guide](https://gmod.org/JBrowseMSA/genome-browser) for the MSA
+  viewer running as a view inside JBrowse 2, beside annotation and DNA-alignment
+  tracks, all from a declarative link.
 - [jbrowse-plugin-msaview](https://github.com/GMOD/jbrowse-plugin-msaview) — a
   JBrowse 2 plugin that shows an MSA alongside genome-browser panels
   ([demo](https://jbrowse.org/demos/app)).
