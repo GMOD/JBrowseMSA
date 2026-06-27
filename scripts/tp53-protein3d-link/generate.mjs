@@ -85,7 +85,15 @@ function residueToColumn(residue) {
   throw new Error(`residue ${residue} not found in ${QUERY_SEQ}`)
 }
 
-// --- the DNA-binding domain (residue range from EBI UniProt features) --------
+// --- the highlighted feature (residue range from EBI UniProt features) -------
+// A small, precise UniProt Motif rather than the whole DNA-binding domain: it
+// reads as a crisp pinpoint highlight across all three views (this is the same
+// "Motif" track the jbrowse-components protein3d example highlights). The
+// nuclear export signal overlaps the structured tetramerization helix, so the
+// magenta lands on a distinct small helix, and it's a short 12-residue band in
+// the alignment.
+const FEATURE_TYPE = 'MOTIF'
+const FEATURE_DESC = 'Nuclear export signal'
 const featuresUrl = `https://www.ebi.ac.uk/proteins/api/features/${UNIPROT}?categories=DOMAINS_AND_SITES`
 const featuresJson = await fetch(featuresUrl).then(r => {
   if (!r.ok) {
@@ -93,31 +101,35 @@ const featuresJson = await fetch(featuresUrl).then(r => {
   }
   return r.json()
 })
-const dnaBind = featuresJson.features?.find(f => f.type === 'DNA_BIND')
-if (!dnaBind) {
-  throw new Error(`no DNA_BIND feature for ${UNIPROT} at ${featuresUrl}`)
+const feature = featuresJson.features?.find(
+  f => f.type === FEATURE_TYPE && (f.description ?? '').includes(FEATURE_DESC),
+)
+if (!feature) {
+  throw new Error(
+    `no ${FEATURE_TYPE} "${FEATURE_DESC}" for ${UNIPROT} at ${featuresUrl}`,
+  )
 }
 // EBI begin/end are 1-based inclusive
-const DOMAIN_START = Number(dnaBind.begin)
-const DOMAIN_END = Number(dnaBind.end)
+const FEATURE_START = Number(feature.begin)
+const FEATURE_END = Number(feature.end)
 console.error(
-  `${UNIPROT} DNA-binding domain: residues ${DOMAIN_START}-${DOMAIN_END}`,
+  `${UNIPROT} ${FEATURE_DESC}: residues ${FEATURE_START}-${FEATURE_END}`,
 )
 
 // ProteinView selection is a 0-based half-open *structure*-residue range; the
 // AlphaFold model is the full-length protein, so structure index = residue - 1.
-const initialSelection = { start: DOMAIN_START - 1, end: DOMAIN_END }
+const initialSelection = { start: FEATURE_START - 1, end: FEATURE_END }
 
-// MSA highlight: the contiguous alignment-column span covering the domain, so
-// it reads as one solid band (gaps within are included for a clean band).
-const colStart = residueToColumn(DOMAIN_START)
-const colEnd = residueToColumn(DOMAIN_END)
+// MSA highlight: the contiguous alignment-column span covering the motif, so it
+// reads as one solid band (gaps within are included for a clean band).
+const colStart = residueToColumn(FEATURE_START)
+const colEnd = residueToColumn(FEATURE_END)
 const highlightColumns = []
 for (let c = colStart; c <= colEnd; c++) {
   highlightColumns.push(c)
 }
 console.error(
-  `domain alignment columns: ${colStart}-${colEnd} (${highlightColumns.length} cols)`,
+  `motif alignment columns: ${colStart}-${colEnd} (${highlightColumns.length} cols)`,
 )
 
 // --- the transcript model (connectedFeature) from public RefSeq GFF ----------
@@ -162,8 +174,8 @@ const connectedFeature = {
   })),
 }
 
-// Walk the CDS in translation order to find the genomic span of the domain
-// (residues DOMAIN_START..DOMAIN_END), so the genome view frames it.
+// Walk the CDS in translation order to find the genomic span of the motif
+// (residues FEATURE_START..FEATURE_END), so the genome view frames it.
 const codingPositions = []
 const exonsInTranslationOrder = [...cds].sort((a, b) =>
   connectedFeature.strand === 1 ? a.start - b.start : b.start - a.start,
@@ -177,17 +189,22 @@ for (const c of exonsInTranslationOrder) {
     ...(connectedFeature.strand === 1 ? range : range.reverse()),
   )
 }
-const domainCodingStart = (DOMAIN_START - 1) * 3
-const domainCodingEnd = DOMAIN_END * 3 // exclusive (past the last codon)
-const domainPositions = codingPositions.slice(domainCodingStart, domainCodingEnd)
-const domainGenomeStart = Math.min(...domainPositions) // 0-based interbase
-const domainGenomeEnd = Math.max(...domainPositions) + 1
+const featureCodingStart = (FEATURE_START - 1) * 3
+const featureCodingEnd = FEATURE_END * 3 // exclusive (past the last codon)
+const featurePositions = codingPositions.slice(
+  featureCodingStart,
+  featureCodingEnd,
+)
+const domainGenomeStart = Math.min(...featurePositions) // 0-based interbase
+const domainGenomeEnd = Math.max(...featurePositions) + 1
 const refName = connectedFeature.refName
 console.error(
-  `domain genomic span -> ${refName}:${domainGenomeStart + 1}-${domainGenomeEnd}`,
+  `motif genomic span -> ${refName}:${domainGenomeStart + 1}-${domainGenomeEnd}`,
 )
 
-const pad = 500
+// the motif is small, so frame fairly tight (with some flanking context) — the
+// protein3d genome band over it then reads as a clear pinpoint highlight
+const pad = 400
 const fmt = n => n.toLocaleString('en-US')
 const spec = {
   views: [
@@ -220,11 +237,11 @@ const spec = {
       url: `https://alphafold.ebi.ac.uk/files/AF-${UNIPROT}-F1-model_${ALPHAFOLD_VERSION}.cif`,
       feature: connectedFeature,
       userProvidedTranscriptSequence: proteinSeq,
-      // keep the genome at the gene-wide framing so the domain shows as a
-      // highlighted sub-region rather than zooming to base level
+      // don't zoom to base level on the selection — keep the framing so the
+      // motif reads as a highlighted sub-region
       zoomToBaseLevel: false,
       height: 500,
-      // the declarative domain pre-selection (protein3d initialSelection)
+      // the declarative motif pre-selection (protein3d initialSelection)
       initialSelection,
     },
   ],

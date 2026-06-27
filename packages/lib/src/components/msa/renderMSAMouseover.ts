@@ -2,8 +2,30 @@ import type { MsaViewModel } from '../../model.ts'
 
 const hoverColor = 'rgba(0,0,0,0.15)'
 const highlightColor = 'rgba(128,128,0,0.2)'
+// the persistent highlightColumns overlay: a stronger fill plus a solid border
+// so a domain/motif band reads clearly over the colored alignment cells (the
+// faint hover-style wash alone is invisible against clustalx coloring)
+const highlightColumnsFill = 'rgba(255,140,0,0.28)'
+const highlightColumnsBorder = 'rgba(210,90,0,0.95)'
 const referenceColor = 'rgba(0,128,255,0.3)' // Blue highlight for reference row
 const multiRowHoverColor = 'rgba(255,165,0,0.15)' // Orange highlight for multi-row tree hover
+
+// Collapse sorted column indices into contiguous [start,end] runs so a run of
+// highlighted columns draws as one bordered band rather than per-column slices
+// (which would draw internal borders).
+function contiguousRuns(columns: number[]) {
+  const sorted = [...columns].sort((a, b) => a - b)
+  const runs: { start: number; end: number }[] = []
+  for (const col of sorted) {
+    const last = runs.at(-1)
+    if (last && col === last.end + 1) {
+      last.end = col
+    } else {
+      runs.push({ start: col, end: col })
+    }
+  }
+  return runs
+}
 
 export function renderMouseover({
   ctx,
@@ -54,11 +76,17 @@ export function renderMouseover({
     }
   }
 
-  // Highlight multiple columns
+  // Highlight multiple columns — draw each contiguous run as a filled, bordered
+  // band so a domain/motif highlight is clearly visible over the alignment
   if (highlightedColumns?.length) {
-    ctx.fillStyle = highlightColor
-    for (const col of highlightedColumns) {
-      ctx.fillRect(col * colWidth + scrollX, 0, colWidth, height)
+    ctx.lineWidth = 2
+    for (const { start, end } of contiguousRuns(highlightedColumns)) {
+      const x = start * colWidth + scrollX
+      const w = (end - start + 1) * colWidth
+      ctx.fillStyle = highlightColumnsFill
+      ctx.fillRect(x, 0, w, height)
+      ctx.strokeStyle = highlightColumnsBorder
+      ctx.strokeRect(x, 0, w, height)
     }
   }
 
