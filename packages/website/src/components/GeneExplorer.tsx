@@ -5,7 +5,6 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
-import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Link from '@mui/material/Link'
@@ -254,24 +253,17 @@ function ResultPanel({ result }: { result: Result }) {
 
   return (
     <Box sx={{ mt: 3 }}>
-      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-        <Chip
-          label={`${transcript.geneName} · ${transcript.name}`}
-          color="primary"
-        />
-        <Chip
-          label={`${transcript.refName} ${transcript.strand === 1 ? '+' : '−'}`}
-          variant="outlined"
-        />
-        <Chip label={`${transcript.exons.length} exons`} variant="outlined" />
-        {msa ? (
-          <Chip
-            label={`${msa.rowCount}-species alignment`}
-            color="success"
-            variant="outlined"
-          />
-        ) : null}
-      </Stack>
+      <Typography variant="h6" component="h2" sx={{ mb: 0.25 }}>
+        {transcript.geneName}{' '}
+        <Typography component="span" variant="body2" color="text.secondary">
+          {transcript.name}
+        </Typography>
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {transcript.refName} {transcript.strand === 1 ? '+' : '−'} ·{' '}
+        {transcript.exons.length} exons
+        {msa ? ` · ${msa.rowCount}-species alignment` : ''}
+      </Typography>
 
       <Stack
         direction="row"
@@ -306,19 +298,12 @@ function ResultPanel({ result }: { result: Result }) {
 
       {showDetails ? (
         <Box sx={{ mt: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {exons.toLocaleString()} exon bp / {span.toLocaleString()} bp span (
+            {ratio}× collapsed)
+            {uniprotId ? ` · UniProt ${uniprotId}` : ''}
+          </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            <Chip
-              label={`${exons.toLocaleString()} exon bp / ${span.toLocaleString()} bp span (${ratio}× collapsed)`}
-              size="small"
-              variant="outlined"
-            />
-            {uniprotId ? (
-              <Chip
-                label={`UniProt ${uniprotId}`}
-                size="small"
-                variant="outlined"
-              />
-            ) : null}
             <Button
               size="small"
               onClick={() => {
