@@ -58,6 +58,28 @@
       }
     },
     {
+      "type": "VariantTrack",
+      "trackId": "hg38-tp53-clinvar-pathogenic",
+      "name": "ClinVar pathogenic variants (TP53)",
+      "assemblyNames": [
+        "hg38"
+      ],
+      "category": [
+        "Variants"
+      ],
+      "adapter": {
+        "type": "VcfTabixAdapter",
+        "vcfGzLocation": {
+          "uri": "https://gmod.org/JBrowseMSA/demo/data/tp53-clinvar-pathogenic.vcf.gz"
+        },
+        "index": {
+          "location": {
+            "uri": "https://gmod.org/JBrowseMSA/demo/data/tp53-clinvar-pathogenic.vcf.gz.tbi"
+          }
+        }
+      }
+    },
+    {
       "type": "MafTrack",
       "trackId": "hg38-multiz470way",
       "name": "Multiz 470-way mammal alignment",
