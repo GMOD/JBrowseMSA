@@ -1,8 +1,7 @@
 import eslint from '@eslint/js'
+import eslintReact from '@eslint-react/eslint-plugin'
 import { defineConfig } from 'eslint/config'
 import { importX } from 'eslint-plugin-import-x'
-import eslintPluginReact from 'eslint-plugin-react'
-import eslintPluginReactHooks from 'eslint-plugin-react-hooks'
 import eslintPluginReactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
@@ -44,13 +43,7 @@ export default defineConfig(
   ...tseslint.configs.stylisticTypeChecked,
   ...tseslint.configs.strictTypeChecked,
   importX.flatConfigs.recommended,
-  eslintPluginReact.configs.flat.recommended,
-  {
-    plugins: {
-      'react-hooks': eslintPluginReactHooks,
-    },
-    rules: eslintPluginReactHooks.configs.recommended.rules,
-  },
+  eslintReact.configs['recommended-typescript'],
   {
     // in main config for TSX/JSX source files
     plugins: {
@@ -82,9 +75,11 @@ export default defineConfig(
         'warn',
         { allowConstantExport: true },
       ],
-      'react/no-unescaped-entities': 'off',
-      'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off',
+
+      // not using React Compiler; IIFEs in event handlers are intentional
+      '@eslint-react/unsupported-syntax': 'off',
+      // most useRef here hold mutable instance values, not DOM/element refs
+      '@eslint-react/naming-convention-ref-name': 'off',
 
       '@typescript-eslint/consistent-type-imports': [
         'error',

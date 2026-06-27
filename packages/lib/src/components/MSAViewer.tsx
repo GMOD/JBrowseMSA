@@ -48,7 +48,7 @@ export default function MSAViewer({
         ...(height ? { height } : {}),
         ...(relativeTo ? { relativeTo } : {}),
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line @eslint-react/exhaustive-deps
     [],
   )
 
