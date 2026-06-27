@@ -14,6 +14,8 @@ import Ef1a from './Ef1a'
 import Ef1aSrc from './Ef1a.tsx?raw'
 import F12 from './F12'
 import F12Src from './F12.tsx?raw'
+import GeneCluster from './GeneCluster'
+import GeneClusterSrc from './GeneCluster.tsx?raw'
 import Globin from './Globin'
 import GlobinSrc from './Globin.tsx?raw'
 import Hammerhead from './Hammerhead'
@@ -83,6 +85,18 @@ export const examples: Example[] = [
       'straight off the nucleotides, which a protein alignment cannot show.',
     Component: F12,
     source: F12Src,
+  },
+  {
+    name: 'Gene arrow map (gggenes-style)',
+    description:
+      'A colinear gene cluster across 6 genomes with each gene drawn as a ' +
+      'strand-directed arrow (gggenes-style), overlaid on a real alignment. ' +
+      'Genes keep one color down the columns; two are inverted (the arrow ' +
+      'flips) and one is deleted (its columns gap out) — yet every gene stays ' +
+      'column-aligned, because the arrows are anchored to alignment columns ' +
+      'rather than each genome’s own coordinate. Synthetic demo data.',
+    Component: GeneCluster,
+    source: GeneClusterSrc,
   },
   {
     name: 'Color schemes',

@@ -136,6 +136,68 @@ describe('gffToInterProResults', () => {
     ])
   })
 
+  test('gives gene-level features a direction but leaves exons/domains as blocks', () => {
+    const records: GFFRecord[] = [
+      {
+        seq_id: 'seq1',
+        source: 'x',
+        type: 'gene',
+        start: 5,
+        end: 50,
+        score: 0,
+        strand: '+',
+        phase: '.',
+        Name: 'GENEA',
+      },
+      {
+        seq_id: 'seq1',
+        source: 'x',
+        type: 'mRNA',
+        start: 60,
+        end: 90,
+        score: 0,
+        strand: '-',
+        phase: '.',
+        Name: 'GENEB',
+      },
+      {
+        seq_id: 'seq1',
+        source: 'x',
+        type: 'exon',
+        start: 5,
+        end: 20,
+        score: 0,
+        strand: '+',
+        phase: '.',
+        Name: 'exon-1',
+      },
+      {
+        seq_id: 'seq1',
+        source: 'x',
+        type: 'protein_match',
+        start: 5,
+        end: 20,
+        score: 0,
+        strand: '+',
+        phase: '.',
+        Name: 'PF00001',
+      },
+    ]
+    const result = gffToInterProResults(records)
+    const byAccession = Object.fromEntries(
+      result.seq1!.matches.map(m => [
+        m.signature.entry!.accession,
+        m.locations[0]!.strand,
+      ]),
+    )
+    expect(byAccession).toEqual({
+      GENEA: 1, // + gene -> arrow right
+      GENEB: -1, // - gene -> arrow left
+      'exon-1': undefined, // exon stays a block even though it is stranded
+      PF00001: undefined, // protein domain stays a block
+    })
+  })
+
   test('uses ID as fallback for Name', () => {
     const records: GFFRecord[] = [
       {

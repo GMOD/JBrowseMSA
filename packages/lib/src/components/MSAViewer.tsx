@@ -22,6 +22,8 @@ interface MSAViewerProps {
   height?: number
   /** initial per-column pixel width (zoom level) */
   colWidth?: number
+  /** initial per-row pixel height */
+  rowHeight?: number
   /** alignment columns (0-based) to highlight with a persistent overlay */
   highlightColumns?: number[]
   /** row name to diff every other row against (matches render as ".") */
@@ -38,6 +40,7 @@ export default function MSAViewer({
   colorScheme,
   height,
   colWidth,
+  rowHeight,
   highlightColumns,
   relativeTo,
 }: MSAViewerProps) {
@@ -55,6 +58,7 @@ export default function MSAViewer({
       ...(colorScheme ? { colorSchemeName: colorScheme } : {}),
       ...(height ? { height } : {}),
       ...(colWidth ? { colWidth } : {}),
+      ...(rowHeight ? { rowHeight } : {}),
       ...(highlightColumns ? { highlightColumns } : {}),
       ...(relativeTo ? { relativeTo } : {}),
     }),

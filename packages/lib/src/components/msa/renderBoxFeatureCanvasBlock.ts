@@ -68,7 +68,7 @@ function drawTiles({
 
     if (entry) {
       for (let j = 0, l2 = entry.length; j < l2; j++) {
-        const { start, end, accession } = entry[j]!
+        const { start, end, accession, strand } = entry[j]!
         // Convert sequence positions to visible column positions
         // seqPos is 1-based from InterPro, so subtract 1 for 0-based
         const m1 = model.seqPosToVisibleCol(name, start - 1)
@@ -82,9 +82,53 @@ function drawTiles({
         const h = subFeatureRows ? 4 : rowHeight
         const t = y - rowHeight + (subFeatureRows ? j * h : 0)
         const lw = colWidth * (m2 - m1)
-        ctx.fillRect(x, t, lw, h)
-        ctx.strokeRect(x, t, lw, h)
+        if (strand === undefined) {
+          ctx.fillRect(x, t, lw, h)
+          ctx.strokeRect(x, t, lw, h)
+        } else {
+          drawGeneArrow({ ctx, x, t, w: lw, h, strand })
+        }
       }
     }
   }
+}
+
+// A gggenes-style gene arrow: a rectangular body with a triangular head on the
+// strand-direction end (right for +, left for -), collapsing to a pure triangle
+// when the feature is narrower than the head. The arrow stays anchored to its
+// alignment columns, so it shows transcription direction without breaking the
+// column-by-column homology that makes the overlay readable down the rows.
+function drawGeneArrow({
+  ctx,
+  x,
+  t,
+  w,
+  h,
+  strand,
+}: {
+  ctx: RenderCtx
+  x: number
+  t: number
+  w: number
+  h: number
+  strand: number
+}) {
+  const head = Math.min(h, w)
+  ctx.beginPath()
+  if (strand > 0) {
+    ctx.moveTo(x, t)
+    ctx.lineTo(x + w - head, t)
+    ctx.lineTo(x + w, t + h / 2)
+    ctx.lineTo(x + w - head, t + h)
+    ctx.lineTo(x, t + h)
+  } else {
+    ctx.moveTo(x + w, t)
+    ctx.lineTo(x + head, t)
+    ctx.lineTo(x, t + h / 2)
+    ctx.lineTo(x + head, t + h)
+    ctx.lineTo(x + w, t + h)
+  }
+  ctx.closePath()
+  ctx.fill()
+  ctx.stroke()
 }

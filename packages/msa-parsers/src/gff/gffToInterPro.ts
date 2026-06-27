@@ -14,6 +14,32 @@ import type {
  * - start/end: domain positions (1-based)
  * - Attributes: Name (accession), signature_desc (name), Dbxref, etc.
  */
+// Feature types that read as a directional "gene" and get an arrowhead in the
+// overlay. Exon/CDS/UTR/domain features deliberately stay rectangular blocks —
+// turning every exon into an arrow is misleading, since exons are segments of a
+// single transcript, not independently-oriented genes.
+const GENE_LEVEL_TYPES = new Set([
+  'gene',
+  'pseudogene',
+  'mRNA',
+  'transcript',
+  'primary_transcript',
+  'ncRNA',
+  'tRNA',
+  'rRNA',
+  'snRNA',
+  'snoRNA',
+  'miRNA',
+  'lnc_RNA',
+])
+
+// +1/-1 for a stranded gene-level feature, undefined otherwise (which the
+// renderer draws as a plain block).
+function geneStrand({ type, strand }: GFFRecord): number | undefined {
+  const directional = strand === '+' ? 1 : strand === '-' ? -1 : undefined
+  return GENE_LEVEL_TYPES.has(type) ? directional : undefined
+}
+
 export function gffToInterProResults(
   gffRecords: GFFRecord[],
 ): Record<string, InterProScanResults> {
@@ -33,7 +59,7 @@ export function gffToInterProResults(
   for (const [seqId, records] of bySequence) {
     const matchesByAccession = new Map<
       string,
-      { start: number; end: number }[]
+      { start: number; end: number; strand?: number }[]
     >()
     const matchInfo = new Map<
       string,
@@ -59,13 +85,16 @@ export function gffToInterProResults(
         matchInfo.set(accession, { name, description, accession })
       }
 
+      const location = {
+        start: record.start,
+        end: record.end,
+        strand: geneStrand(record),
+      }
       const locations = matchesByAccession.get(accession)
       if (locations) {
-        locations.push({ start: record.start, end: record.end })
+        locations.push(location)
       } else {
-        matchesByAccession.set(accession, [
-          { start: record.start, end: record.end },
-        ])
+        matchesByAccession.set(accession, [location])
       }
     }
 

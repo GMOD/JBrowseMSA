@@ -40,7 +40,7 @@ export interface InterProScanMatch {
       accession: string
     }
   }
-  locations: { start: number; end: number }[]
+  locations: { start: number; end: number; strand?: number }[]
 }
 
 export interface InterProScanResults {

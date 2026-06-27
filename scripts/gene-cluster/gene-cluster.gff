@@ -1,0 +1,31 @@
+##gff-version 3
+# gene-arrow-map demo: a synthetic colinear gene cluster across 6 genomes — see scripts/gene-cluster/generate.mjs (gggenes-style, for illustration)
+Genome_1	demo	gene	25	204	.	+	.	ID=Genome_1.genA;Name=genA
+Genome_1	demo	gene	229	348	.	+	.	ID=Genome_1.genB;Name=genB
+Genome_1	demo	gene	373	522	.	-	.	ID=Genome_1.genC;Name=genC
+Genome_1	demo	gene	547	756	.	+	.	ID=Genome_1.genD;Name=genD
+Genome_1	demo	gene	781	870	.	-	.	ID=Genome_1.genE;Name=genE
+Genome_2	demo	gene	25	204	.	+	.	ID=Genome_2.genA;Name=genA
+Genome_2	demo	gene	229	348	.	+	.	ID=Genome_2.genB;Name=genB
+Genome_2	demo	gene	373	522	.	-	.	ID=Genome_2.genC;Name=genC
+Genome_2	demo	gene	547	756	.	+	.	ID=Genome_2.genD;Name=genD
+Genome_2	demo	gene	781	870	.	-	.	ID=Genome_2.genE;Name=genE
+Genome_3	demo	gene	25	204	.	+	.	ID=Genome_3.genA;Name=genA
+Genome_3	demo	gene	229	348	.	+	.	ID=Genome_3.genB;Name=genB
+Genome_3	demo	gene	373	522	.	-	.	ID=Genome_3.genC;Name=genC
+Genome_3	demo	gene	547	756	.	+	.	ID=Genome_3.genD;Name=genD
+Genome_3	demo	gene	781	870	.	-	.	ID=Genome_3.genE;Name=genE
+Genome_4	demo	gene	25	204	.	+	.	ID=Genome_4.genA;Name=genA
+Genome_4	demo	gene	229	348	.	+	.	ID=Genome_4.genB;Name=genB
+Genome_4	demo	gene	373	522	.	+	.	ID=Genome_4.genC;Name=genC
+Genome_4	demo	gene	547	756	.	+	.	ID=Genome_4.genD;Name=genD
+Genome_4	demo	gene	781	870	.	-	.	ID=Genome_4.genE;Name=genE
+Genome_5	demo	gene	25	204	.	+	.	ID=Genome_5.genA;Name=genA
+Genome_5	demo	gene	253	402	.	-	.	ID=Genome_5.genC;Name=genC
+Genome_5	demo	gene	427	636	.	+	.	ID=Genome_5.genD;Name=genD
+Genome_5	demo	gene	661	750	.	-	.	ID=Genome_5.genE;Name=genE
+Genome_6	demo	gene	25	204	.	+	.	ID=Genome_6.genA;Name=genA
+Genome_6	demo	gene	229	348	.	+	.	ID=Genome_6.genB;Name=genB
+Genome_6	demo	gene	373	522	.	-	.	ID=Genome_6.genC;Name=genC
+Genome_6	demo	gene	547	756	.	+	.	ID=Genome_6.genD;Name=genD
+Genome_6	demo	gene	781	870	.	+	.	ID=Genome_6.genE;Name=genE

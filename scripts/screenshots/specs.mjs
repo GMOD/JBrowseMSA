@@ -359,4 +359,27 @@ export const specs = [
     settle: 3500,
     clip: 'viewer',
   },
+  {
+    name: 'gene-arrow-map',
+    // gggenes-style gene arrow map over a real alignment: each gene one color
+    // down the columns, +/- strand drawn as a left/right arrowhead. genC is
+    // inverted in Genome_4 and genE in Genome_6 (the arrow flips); genB is
+    // deleted in Genome_5 — its columns gap out, yet the downstream genes stay
+    // column-aligned, the payoff of anchoring arrows to the alignment. colWidth
+    // 1 fits the whole cluster; tall rows so the arrowheads read clearly.
+    url: data({
+      height: 360,
+      treeAreaWidth: 170,
+      colWidth: 1,
+      rowHeight: 44,
+      colorSchemeName: 'nucleotide',
+      data: {
+        msa: readConst('geneClusterMSA'),
+        gff: readConst('geneClusterGFF'),
+      },
+    }),
+    viewportWidth: 1200,
+    settle: 2000,
+    clip: 'viewer',
+  },
 ]
