@@ -1,0 +1,43 @@
+---
+import GeneExplorer from '../components/GeneExplorer'
+import Base from '../layouts/Base.astro'
+---
+
+<Base
+  title="Gene explorer — JBrowseMSA"
+  description="Type any human gene and get a connected JBrowse session: a collapsed-intron gene view, its 100-way protein alignment, and the AlphaFold structure — synthesized in the browser from a parsed GFF."
+  wide
+>
+  <article class="prose">
+    <h1>Gene explorer</h1>
+    <p>
+      Type any human gene. This page resolves it to its canonical (MANE / RefSeq
+      Select) transcript, <strong>parses the GFF in your browser</strong>, and
+      synthesizes a <strong>connected JBrowse session</strong> on the fly:
+    </p>
+    <ul>
+      <li>
+        a <strong>collapsed-intron</strong> Linear Genome View — the introns are
+        squeezed out so the whole coding model fits at codon resolution,
+      </li>
+      <li>
+        the gene's <strong>100-way vertebrate protein alignment</strong> beside
+        it (react-msaview), connected so residues and codons share coordinates,
+      </li>
+      <li>
+        and the <strong>AlphaFold structure</strong>, connected to the same
+        genome view.
+      </li>
+    </ul>
+    <p>
+      There is no <code>collapseIntrons</code> option in JBrowse — the trick is
+      to give the Linear Genome View a <code>loc</code> made of the exon ranges,
+      space-separated. Each becomes one displayed region, rendered back-to-back,
+      so the introns disappear. Everything below is computed live from public
+      data (mygene.info, the UCSC RefSeq Select GFF over tabix, AlphaFold); only
+      the alignment slice comes from a hosted file.
+    </p>
+
+    <GeneExplorer client:only="react" />
+  </article>
+</Base>
