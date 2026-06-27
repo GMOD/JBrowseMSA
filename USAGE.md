@@ -104,38 +104,9 @@ model.fit() // fit both axes
 
 ## R package (msaviewr)
 
-An R htmlwidget package is available in `packages/r-msaview/`. It works with
-ape, Biostrings, ggtree, and treeio objects.
-
-```r
-library(msaviewr)
-
-# from strings
-msaview(msa = ">s1\nACGT\n>s2\nACGA", tree = "(s1,s2);")
-
-# from ape phylo
-library(ape)
-tree <- rtree(15)
-seqs <- setNames(
-  replicate(15, paste0(sample(c("A","C","G","T"), 300, TRUE), collapse = "")),
-  tree$tip.label
-)
-msaview(msa = seqs, tree = tree, color_scheme = "nucleotide")
-
-# from a ggtree plot object
-library(ggtree)
-p <- ggtree(tree) + geom_tiplab()
-msaview(msa = seqs, tree = p)
-
-# from Biostrings
-library(Biostrings)
-aa <- readAAStringSet("proteins.fasta")
-msaview(msa = aa, color_scheme = "clustal")
-```
-
-See
-[packages/r-msaview/README.md](https://github.com/GMOD/JBrowseMSA/tree/main/packages/r-msaview#readme)
-for full documentation.
+An R htmlwidget that takes ape, Biostrings, ggtree, and treeio objects directly.
+See the [R package guide](https://gmod.org/JBrowseMSA/r-package) for installation
+and examples.
 
 ## Color schemes
 
@@ -158,11 +129,7 @@ automatically re-render when observed model properties change.
 
 ## See also
 
-- [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer's
-  features (color schemes, tree, domains, sharing, SVG export).
-- [Interactive examples](https://gmod.org/JBrowseMSA/examples) — a live gallery
-  of usage patterns, each with copyable source.
-- [Genome browser guide](https://gmod.org/JBrowseMSA/genome-browser) — embed the
-  viewer inside JBrowse 2 beside annotation tracks.
+- [Interactive examples](https://gmod.org/JBrowseMSA/examples) — copyable source
+  for each usage pattern shown above.
 - [Model API reference](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/apidocs/MsaView.md)
   — the auto-generated state-model docs.
