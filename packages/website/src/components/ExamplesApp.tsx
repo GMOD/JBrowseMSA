@@ -10,9 +10,28 @@ import Typography from '@mui/material/Typography'
 
 import { examples } from '../../../examples/src/examples'
 
+const slugOf = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+
+// client:only island, so window is always available at render
+const indexFromHash = () => {
+  const hash = decodeURIComponent(window.location.hash.replace(/^#/, ''))
+  const i = examples.findIndex(e => slugOf(e.name) === hash)
+  return i === -1 ? 0 : i
+}
+
 export default function ExamplesApp() {
-  const [selected, setSelected] = useState(0)
+  const [selected, setSelected] = useState(indexFromHash)
   const example = examples[selected]!
+
+  const select = (i: number) => {
+    setSelected(i)
+    window.history.replaceState(null, '', `#${slugOf(examples[i]!.name)}`)
+  }
   const { Component } = example
   return (
     <Box sx={{ display: 'flex', height: '100%' }}>
@@ -38,7 +57,7 @@ export default function ExamplesApp() {
               key={e.name}
               selected={i === selected}
               onClick={() => {
-                setSelected(i)
+                select(i)
               }}
             >
               <ListItemText primary={e.name} />

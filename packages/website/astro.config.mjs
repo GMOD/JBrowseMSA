@@ -93,6 +93,49 @@ function wrapFigures() {
   }
 }
 
+// Give every h2/h3/h4 a stable slug id and a hover-reveal anchor link, so the
+// long docs pages (user guide, genome browser) are deep-linkable section by
+// section. Mirrors rehype-slug + rehype-autolink-headings without the deps.
+function headingAnchors() {
+  const slugify = text =>
+    text
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+  const textOf = node =>
+    node.type === 'text'
+      ? node.value
+      : (node.children ?? []).map(textOf).join('')
+  return tree => {
+    const seen = new Map()
+    const visit = node => {
+      if (node.type === 'element' && /^h[2-4]$/.test(node.tagName)) {
+        const slug = slugify(textOf(node))
+        const n = seen.get(slug) ?? 0
+        seen.set(slug, n + 1)
+        const id = n === 0 ? slug : `${slug}-${n}`
+        node.properties = { ...node.properties, id }
+        node.children.push({
+          type: 'element',
+          tagName: 'a',
+          properties: {
+            href: `#${id}`,
+            className: ['heading-anchor'],
+            'aria-hidden': 'true',
+            tabindex: -1,
+          },
+          children: [{ type: 'text', value: '#' }],
+        })
+      }
+      for (const child of node.children ?? []) {
+        visit(child)
+      }
+    }
+    visit(tree)
+  }
+}
+
 export default defineConfig({
   site: 'https://gmod.org',
   base: BASE,
@@ -100,7 +143,7 @@ export default defineConfig({
   integrations: [react()],
   markdown: {
     processor: unified({
-      rehypePlugins: [rewriteMarkdownImages, wrapFigures],
+      rehypePlugins: [rewriteMarkdownImages, wrapFigures, headingAnchors],
     }),
   },
   vite: {

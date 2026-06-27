@@ -179,6 +179,28 @@ body.app-layout .site-footer {
   border-radius: 4px;
 }
 
+/* offset the sticky header when jumping to a heading anchor */
+.prose :is(h1, h2, h3, h4) {
+  scroll-margin-top: 64px;
+}
+
+.heading-anchor {
+  margin-left: 0.4em;
+  color: var(--border);
+  text-decoration: none;
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.prose :is(h2, h3, h4):hover .heading-anchor {
+  opacity: 1;
+}
+
+.heading-anchor:hover {
+  color: var(--accent);
+}
+
 .prose figure {
   margin: 24px 0;
   padding: 12px;
