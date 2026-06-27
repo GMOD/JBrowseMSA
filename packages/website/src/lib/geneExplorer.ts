@@ -291,6 +291,8 @@ export function connectedFeature(transcript: Transcript) {
 export interface GeneMsa {
   fasta: string
   querySeqName: string
+  // the human (hg38) row, ungapped — the protein the ProteinView/AlphaFold needs
+  querySequence: string
   rowCount: number
 }
 
@@ -310,8 +312,15 @@ export async function fetchGeneMsa(
   return {
     fasta,
     querySeqName: 'hg38', // first row is the human reference
+    querySequence: firstSequence(fasta),
     rowCount: (fasta.match(/^>/gm) ?? []).length,
   }
+}
+
+// The first FASTA record's sequence (here hg38), ungapped.
+function firstSequence(fasta: string) {
+  const [, ...seqLines] = fasta.split(/\n>/)[0]!.split('\n')
+  return seqLines.join('').replaceAll('-', '')
 }
 
 export interface SpecOptions {
@@ -336,12 +345,21 @@ export function buildSessionSpec({
   const feature = connectedFeature(transcript)
   const lgvId = `lgv-${transcript.geneName}`
 
+  // MsaView <-> LinearGenomeView linking (connectedViewId + connectedFeature,
+  // and the MSA-by-name source): see "Communication with Linear Genome View" in
+  // https://github.com/GMOD/jbrowse-plugin-msaview/blob/main/DEVELOPERS.md
   const msaView = msaAvailable
     ? {
         type: 'MsaView',
         connectedViewId: lgvId,
         connectedFeature: feature,
         querySeqName: 'hg38',
+        // the alignment's own UniProt accession — without it the MsaView's
+        // autoConnectStructures bails (`if (!uniprotId) return`) and never links
+        // to the AlphaFold structure, so MSA-column hover can't highlight the 3D
+        // residue. The structure derives the same id from its AlphaFold url, so
+        // the two match and connect.
+        uniprotId,
         // declarative indexed-MSA source — jbrowse-plugin-msaview random-reads
         // this gene's FASTA block from the bgzip file by name (the gene symbol);
         // the .gzi/.idx are found by suffix.
@@ -354,6 +372,9 @@ export function buildSessionSpec({
       }
     : undefined
 
+  // ProteinView <-> LinearGenomeView linking (connectedViewId + feature, CDS
+  // strand/phase driving the genome<->residue map): see the "explicit form" in
+  // https://github.com/GMOD/jbrowse-plugin-protein3d/blob/main/DEVELOPERS.md
   const proteinView =
     msaAvailable && uniprotId && proteinSequence
       ? {
@@ -393,6 +414,8 @@ export function buildSessionSpec({
       }
     : undefined
 
+  // The `?config=…&session=spec-…` URL param API (a session spec is an array of
+  // views JBrowse opens on load): https://jbrowse.org/jb2/docs/urlparams/
   const spec = layout ? { views, layout } : { views }
   const url = `${JBROWSE}?config=${encodeURIComponent(
     JBROWSE_CONFIG,

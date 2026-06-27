@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import useMeasure from '@jbrowse/core/util/useMeasure'
@@ -8,6 +8,8 @@ import MSAModelF from '../model.ts'
 import Loading from './Loading.tsx'
 
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
+
+const theme = createJBrowseTheme()
 
 interface MSAViewerProps {
   msa?: string
@@ -33,23 +35,21 @@ export default function MSAViewer({
   height,
   relativeTo,
 }: MSAViewerProps) {
-  const theme = useMemo(() => createJBrowseTheme(), [])
-  const model = useMemo(
-    () =>
-      MSAModelF().create({
-        type: 'MsaView',
-        ...(msa || tree || gff
-          ? { data: { msa: msa ?? '', tree: tree ?? '', gff } }
-          : {}),
-        ...(msaFilehandle ? { msaFilehandle } : {}),
-        ...(treeFilehandle ? { treeFilehandle } : {}),
-        ...(gffFilehandle ? { gffFilehandle } : {}),
-        ...(colorScheme ? { colorSchemeName: colorScheme } : {}),
-        ...(height ? { height } : {}),
-        ...(relativeTo ? { relativeTo } : {}),
-      }),
-    // eslint-disable-next-line @eslint-react/exhaustive-deps
-    [],
+  // lazy initializer: the model is created exactly once from the initial props
+  // (a stable MST instance — not a value safe to recompute, so not useMemo)
+  const [model] = useState(() =>
+    MSAModelF().create({
+      type: 'MsaView',
+      ...(msa || tree || gff
+        ? { data: { msa: msa ?? '', tree: tree ?? '', gff } }
+        : {}),
+      ...(msaFilehandle ? { msaFilehandle } : {}),
+      ...(treeFilehandle ? { treeFilehandle } : {}),
+      ...(gffFilehandle ? { gffFilehandle } : {}),
+      ...(colorScheme ? { colorSchemeName: colorScheme } : {}),
+      ...(height ? { height } : {}),
+      ...(relativeTo ? { relativeTo } : {}),
+    }),
   )
 
   const [ref, { width }] = useMeasure()

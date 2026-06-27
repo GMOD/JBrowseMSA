@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
@@ -8,6 +8,7 @@ import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
+import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
@@ -32,7 +33,7 @@ interface Result {
   msa?: GeneMsa
   loc: string
   url: string
-  spec: unknown
+  spec: ReturnType<typeof buildSessionSpec>['spec']
 }
 
 // curated, all present in the 100-way index — chosen to span tumour
@@ -74,6 +75,9 @@ export default function GeneExplorer() {
   // the picked gene + its one-line "why it's interesting" note (for the curated
   // examples), shown on the page so it doesn't hide in a tooltip
   const [picked, setPicked] = useState<{ symbol: string; note?: string }>()
+  // monotonic id of the latest pick, so a slow earlier request can't overwrite
+  // the result of a later one if the user switches genes mid-fetch
+  const latestPick = useRef(0)
 
   async function onSearch(query: string) {
     if (query.length >= 2) {
@@ -85,11 +89,14 @@ export default function GeneExplorer() {
       } catch {
         // type-ahead is best-effort; keep the last options
       }
+    } else {
+      setOptions(EXAMPLE_SYMBOLS)
     }
   }
 
   async function onPick(symbol: string | null) {
     if (symbol) {
+      const pickId = ++latestPick.current
       setBusy(true)
       setError(undefined)
       setResult(undefined)
@@ -100,30 +107,61 @@ export default function GeneExplorer() {
         // the alignment slice is hosted separately; treat it as optional so the
         // genome view still works before/without it
         const msa = await fetchGeneMsa(transcript).catch(() => undefined)
-        const proteinSequence = msa?.fasta
-          ? degap(firstSeq(msa.fasta))
-          : undefined
         const { url, spec } = buildSessionSpec({
           transcript,
           uniprotId: locus.uniprotId,
-          proteinSequence,
+          proteinSequence: msa?.querySequence,
           msaAvailable: !!msa,
         })
-        setResult({
-          transcript,
-          uniprotId: locus.uniprotId,
-          msa,
-          loc: collapsedLoc(transcript),
-          url,
-          spec,
-        })
+        if (latestPick.current === pickId) {
+          setResult({
+            transcript,
+            uniprotId: locus.uniprotId,
+            msa,
+            loc: collapsedLoc(transcript),
+            url,
+            spec,
+          })
+        }
       } catch (e) {
-        setError(e instanceof Error ? e.message : String(e))
+        if (latestPick.current === pickId) {
+          setError(e instanceof Error ? e.message : String(e))
+        }
       } finally {
-        setBusy(false)
+        if (latestPick.current === pickId) {
+          setBusy(false)
+        }
       }
     }
   }
+
+  // Push the picked gene into the page URL (?gene=) so the selection is
+  // shareable, bookmarkable, and survives reload — then fetch it.
+  function navigate(symbol: string | null) {
+    if (symbol) {
+      const next = new URL(window.location.href)
+      next.searchParams.set('gene', symbol)
+      window.history.pushState(null, '', next)
+      void onPick(symbol)
+    }
+  }
+
+  // Drive picks from the URL: once on mount (deep link / reload) and on every
+  // back/forward navigation. onPick is stable (only touches setState + refs).
+  useEffect(() => {
+    function syncFromUrl() {
+      const symbol = new URLSearchParams(window.location.search).get('gene')
+      if (symbol) {
+        void onPick(symbol)
+      }
+    }
+    syncFromUrl()
+    window.addEventListener('popstate', syncFromUrl)
+    return () => {
+      window.removeEventListener('popstate', syncFromUrl)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <Box>
@@ -136,7 +174,7 @@ export default function GeneExplorer() {
             void onSearch(v)
           }}
           onChange={(_e, v) => {
-            void onPick(typeof v === 'string' ? v : null)
+            navigate(typeof v === 'string' ? v : null)
           }}
           renderInput={params => (
             <TextField
@@ -157,7 +195,7 @@ export default function GeneExplorer() {
                 component="button"
                 type="button"
                 onClick={() => {
-                  void onPick(g.symbol)
+                  navigate(g.symbol)
                 }}
               >
                 {g.symbol}
@@ -185,10 +223,20 @@ export default function GeneExplorer() {
 }
 
 function ResultPanel({ result }: { result: Result }) {
-  const { transcript, uniprotId, msa, loc, url } = result
+  const { transcript, uniprotId, msa, loc, url, spec } = result
   const exons = exonBp(transcript)
   const span = genomicSpanBp(transcript)
   const ratio = (span / exons).toFixed(1)
+  const [showJson, setShowJson] = useState(false)
+  // the message currently shown in the "copied" toast (undefined = hidden)
+  const [copied, setCopied] = useState<string>()
+  const specJson = JSON.stringify(spec, null, 2)
+
+  function copy(text: string, message: string) {
+    void navigator.clipboard.writeText(text)
+    setCopied(message)
+  }
+
   return (
     <Box sx={{ mt: 3 }}>
       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -217,15 +265,27 @@ function ResultPanel({ result }: { result: Result }) {
         ) : null}
       </Stack>
 
-      <Button
-        variant="contained"
-        href={url}
-        target="_blank"
-        rel="noopener"
-        sx={{ mt: 2 }}
-      >
-        Open in JBrowse ↗
-      </Button>
+      <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
+        <Button variant="contained" href={url} target="_blank" rel="noopener">
+          Open in JBrowse ↗
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            copy(window.location.href, 'Page link copied')
+          }}
+        >
+          Copy page link
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setShowJson(v => !v)
+          }}
+        >
+          {showJson ? 'Hide' : 'Show'} session JSON
+        </Button>
+      </Stack>
       <Typography
         variant="caption"
         display="block"
@@ -236,6 +296,50 @@ function ResultPanel({ result }: { result: Result }) {
         {msa ? ' + alignment' : ''}
         {msa && uniprotId ? ' + AlphaFold structure' : ''}.
       </Typography>
+
+      {showJson ? (
+        <Paper
+          variant="outlined"
+          sx={{ mt: 1, p: 1.5, bgcolor: 'action.hover' }}
+        >
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="caption" color="text.secondary">
+              Declarative JBrowse session spec (passed as
+              <code> &session=spec-…</code>)
+            </Typography>
+            <Button
+              size="small"
+              onClick={() => {
+                copy(specJson, 'Session JSON copied')
+              }}
+            >
+              Copy JSON
+            </Button>
+          </Stack>
+          <Box
+            component="pre"
+            sx={{
+              m: 0,
+              mt: 0.5,
+              maxHeight: 280,
+              overflow: 'auto',
+              fontSize: 11,
+              fontFamily: 'monospace',
+            }}
+          >
+            {specJson}
+          </Box>
+        </Paper>
+      ) : null}
+
+      <Snackbar
+        open={!!copied}
+        autoHideDuration={2000}
+        onClose={() => {
+          setCopied(undefined)
+        }}
+        message={copied}
+      />
 
       <Typography variant="subtitle2" sx={{ mt: 2 }}>
         Collapsed-intron regions ({transcript.exons.length} exons, introns
@@ -260,6 +364,7 @@ function ResultPanel({ result }: { result: Result }) {
           </Typography>
           <Box sx={{ border: '1px solid var(--border)', borderRadius: 1 }}>
             <MSAViewer
+              key={transcript.name}
               msa={msa.fasta}
               colorScheme="clustalx_protein_dynamic"
               height={340}
@@ -275,14 +380,4 @@ function ResultPanel({ result }: { result: Result }) {
       )}
     </Box>
   )
-}
-
-function firstSeq(fasta: string) {
-  const blocks = fasta.split('>').filter(Boolean)
-  const lines = (blocks[0] ?? '').split('\n')
-  return lines.slice(1).join('')
-}
-
-function degap(seq: string) {
-  return seq.replaceAll('-', '')
 }
