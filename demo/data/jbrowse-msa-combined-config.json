@@ -2,7 +2,11 @@
   "plugins": [
     {
       "name": "MsaView",
-      "url": "https://jbrowse.org/plugins/jbrowse-plugin-msaview/dist/jbrowse-plugin-msaview.umd.production.min.js"
+      "url": "https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/dist/jbrowse-plugin-msaview.umd.production.min.js"
+    },
+    {
+      "name": "Protein3d",
+      "url": "https://jbrowse.org/plugins/jbrowse-plugin-protein3d/latest/dist/jbrowse-plugin-protein3d.umd.production.min.js"
     }
   ],
   "assemblies": [
@@ -37,7 +41,7 @@
     {
       "type": "FeatureTrack",
       "trackId": "hg38-ncbiRefSeq",
-      "name": "NCBI RefSeq genes",
+      "name": "NCBI RefSeq genes (all transcripts)",
       "assemblyNames": [
         "hg38"
       ],
@@ -53,6 +57,29 @@
           "indexType": "CSI",
           "location": {
             "uri": "https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz.csi"
+          }
+        }
+      }
+    },
+    {
+      "type": "FeatureTrack",
+      "trackId": "hg38-ncbiRefSeqSelect",
+      "name": "NCBI RefSeq Select / MANE (canonical transcript)",
+      "assemblyNames": [
+        "hg38"
+      ],
+      "category": [
+        "Genes"
+      ],
+      "adapter": {
+        "type": "Gff3TabixAdapter",
+        "gffGzLocation": {
+          "uri": "https://jbrowse.org/ucsc/hg38/ncbiRefSeqSelect.gff.gz"
+        },
+        "index": {
+          "indexType": "CSI",
+          "location": {
+            "uri": "https://jbrowse.org/ucsc/hg38/ncbiRefSeqSelect.gff.gz.csi"
           }
         }
       }
@@ -75,6 +102,28 @@
         "index": {
           "location": {
             "uri": "https://gmod.org/JBrowseMSA/demo/data/tp53-clinvar-pathogenic.vcf.gz.tbi"
+          }
+        }
+      }
+    },
+    {
+      "type": "VariantTrack",
+      "trackId": "hg38-braf-clinvar-pathogenic",
+      "name": "ClinVar pathogenic variants (BRAF)",
+      "assemblyNames": [
+        "hg38"
+      ],
+      "category": [
+        "Variants"
+      ],
+      "adapter": {
+        "type": "VcfTabixAdapter",
+        "vcfGzLocation": {
+          "uri": "https://gmod.org/JBrowseMSA/demo/data/braf-clinvar-pathogenic.vcf.gz"
+        },
+        "index": {
+          "location": {
+            "uri": "https://gmod.org/JBrowseMSA/demo/data/braf-clinvar-pathogenic.vcf.gz.tbi"
           }
         }
       }

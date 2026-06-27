@@ -1,1 +1,0 @@
-function a(t){const o=navigator.clipboard;if(o?.writeText){o.writeText(t).catch(c=>{console.error("Failed to copy to clipboard:",c)});return}const e=document.createElement("textarea");e.value=t,e.style.position="fixed",e.style.opacity="0",document.body.append(e),e.select(),document.execCommand("copy"),e.remove()}export{a as c};

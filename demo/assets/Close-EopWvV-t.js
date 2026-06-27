@@ -1,2 +1,0 @@
-import{t as e}from"./jsx-runtime-BWRPWl8p.js";import{J as t}from"./Close-hCogd0-l.js";var n=t((0,e().jsx)(`path`,{d:`M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z`}),`Close`);export{n as t};
-//# sourceMappingURL=Close-EopWvV-t.js.map
