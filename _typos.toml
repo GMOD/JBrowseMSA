@@ -13,6 +13,7 @@ BLOSUM = "BLOSUM"
 Pase = "Pase"
 # UCSC species db names in comments, e.g. panTro4 (chimp)
 Tro = "Tro"
-# prose abbreviations the checker mis-reads (IIFEs, PNGs)
+# prose abbreviations the checker mis-reads (IIFEs, PNGs, ALS the disease)
 IIF = "IIF"
 PN = "PN"
+ALS = "ALS"
