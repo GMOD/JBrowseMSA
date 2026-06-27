@@ -68,8 +68,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href
         href="https://github.com/GMOD/JBrowseMSA"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="GitHub"
-      ></a>
+        aria-label="GitHub"></a>
     </header>
     <main class:list={{ wide, 'full-bleed': fullBleed }}>
       <slot />
@@ -77,8 +76,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href
     <footer class="site-footer">
       <span>
         react-msaview (JBrowseMSA) ·
-        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> ·
-        part of <a href="https://jbrowse.org">JBrowse</a>
+        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> · part of <a
+          href="https://jbrowse.org">JBrowse</a
+        >
       </span>
     </footer>
   </body>

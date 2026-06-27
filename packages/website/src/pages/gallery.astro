@@ -89,9 +89,9 @@ const tp53R248 =
   <article class="prose">
     <h1>Gallery</h1>
     <p>
-      Alignments and trees where the biology reads straight off the picture. Each
-      is built reproducibly from public data by the scripts in the repo. Build
-      your own from any gene on the
+      Alignments and trees where the biology reads straight off the picture.
+      Each is built reproducibly from public data by the scripts in the repo.
+      Build your own from any gene on the{' '}
       <a href={`${base}/gene-explorer`}>JBrowse integration</a> page.
     </p>
 
@@ -110,12 +110,13 @@ const tp53R248 =
 
     <h2 id="connected">Connected JBrowse sessions</h2>
     <p>
-      react-msaview also runs as a
-      <a href="https://github.com/GMOD/jbrowse-plugin-msaview">JBrowse 2 plugin</a>:
-      the alignment and tree open <em>inside</em> JBrowse, connected to a genome
-      view and — with
-      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a> —
-      the AlphaFold structure. Each link below is one declarative URL.
+      react-msaview also runs as a{' '}
+      <a href="https://github.com/GMOD/jbrowse-plugin-msaview"
+        >JBrowse 2 plugin</a
+      >: the alignment and tree open <em>inside</em> JBrowse, connected to a genome
+      view and — with{' '}
+      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a> — the
+      AlphaFold structure. Each link below is one declarative URL.
     </p>
 
     <figure>
@@ -130,7 +131,9 @@ const tp53R248 =
         p53 ortholog alignment, and the AlphaFold structure as one connected
         session, opened with the nuclear export signal motif (residues 339–350)
         lit across all three.{' '}
-        <a href={tp53Protein3d} target="_blank" rel="noopener">Open in JBrowse ↗</a>
+        <a href={tp53Protein3d} target="_blank" rel="noopener"
+          >Open in JBrowse ↗</a
+        >
       </figcaption>
     </figure>
 
@@ -143,27 +146,26 @@ const tp53R248 =
       </a>
       <figcaption>
         Built on the fly by the{' '}
-        <a href={`${base}/gene-explorer`}>gene explorer</a> for any human gene:
-        selecting a span of residues on the AlphaFold structure lights the exact
-        same codons on the collapsed-intron genome view (the yellow band) and the
-        100-way alignment — structure ↔ genome ↔ alignment, codon-precise.
+        <a href={`${base}/gene-explorer`}>gene explorer</a> for any human gene: selecting
+        a span of residues on the AlphaFold structure lights the exact same codons
+        on the collapsed-intron genome view (the yellow band) and the 100-way alignment
+        — structure ↔ genome ↔ alignment, codon-precise.
       </figcaption>
     </figure>
 
     <p>The same connected pattern without the structure view:</p>
     <ul>
       <li>
-        <a href={proteinLinked} target="_blank" rel="noopener">SRC ↗</a> — the
-        Src-family kinase alignment beside the SRC gene.
+        <a href={proteinLinked} target="_blank" rel="noopener">SRC ↗</a> — the Src-family
+        kinase alignment beside the SRC gene.
       </li>
       <li>
-        <a href={brafV600} target="_blank" rel="noopener">BRAF V600E ↗</a> — the
-        RAF family on the invariant V600 codon, with a ClinVar
-        pathogenic-variant track.
+        <a href={brafV600} target="_blank" rel="noopener">BRAF V600E ↗</a> — the RAF
+        family on the invariant V600 codon, with a ClinVar pathogenic-variant track.
       </li>
       <li>
-        <a href={tp53R248} target="_blank" rel="noopener">TP53 R248 ↗</a> — p53
-        across vertebrates on the R248 hotspot, with ClinVar.
+        <a href={tp53R248} target="_blank" rel="noopener">TP53 R248 ↗</a> — p53 across
+        vertebrates on the R248 hotspot, with ClinVar.
       </li>
     </ul>
   </article>

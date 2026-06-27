@@ -1,6 +1,46 @@
 ---
 import GeneExplorer from '../components/GeneExplorer'
 import Base from '../layouts/Base.astro'
+
+// Shown verbatim in the "Build the same thing yourself" section. Kept as a
+// frontmatter string (not inline JSX) so the braces/angle-brackets aren't
+// parsed as Astro expressions inside <pre>. Mirrors buildSessionSpec() in
+// src/lib/geneExplorer.ts.
+const buildSnippet = `
+// A JBrowse session is just an array of views, linked to each other by id.
+// You open one by putting the spec in the URL — no server, no build step.
+const spec = {
+  views: [
+    {
+      type: 'LinearGenomeView',
+      id: 'lgv',
+      assembly: 'hg38',
+      // the collapsed-intron trick: a loc made of the exon ranges,
+      // space-separated, so the exons render back-to-back
+      loc: 'chr17:7,673,534-7,673,608 chr17:7,673,700-7,673,837',
+      tracks: ['hg38-ncbiRefSeqSelect'],
+    },
+    {
+      type: 'MsaView',           // jbrowse-plugin-msaview
+      connectedViewId: 'lgv',    // <- this is what links it to the genome view
+      connectedFeature: feature, // the transcript model (CDS start/end/phase)
+      msaIndexedLocation: { uri: MSA_URL },
+      msaName: 'TP53',           // random-read this gene's block by name
+      treeFileLocation: { uri: TREE_URL },
+    },
+    {
+      type: 'ProteinView',       // jbrowse-plugin-protein3d
+      connectedViewId: 'lgv',
+      feature,
+      url: 'https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v6.cif',
+    },
+  ],
+}
+
+const url =
+  JBROWSE + '?config=' + encodeURIComponent(CONFIG) +
+  '&session=spec-' + encodeURIComponent(JSON.stringify(spec))
+`.trim()
 ---
 
 <Base
@@ -11,25 +51,80 @@ import Base from '../layouts/Base.astro'
   <article class="prose">
     <h1>JBrowse integration</h1>
     <p>
-      Type any human gene to build a connected JBrowse session: a
-      collapsed-intron genome view, its 100-way protein alignment, and the
-      AlphaFold structure.
+      Type a human gene name. You get a connected JBrowse session with three
+      linked views: the gene on the <strong>genome</strong> (introns collapsed so
+      the coding exons sit side by side), the same protein{' '}
+      <strong>aligned across 100 vertebrates</strong>, and its{' '}
+      <strong>AlphaFold 3D structure</strong>. Hover or select in any one view
+      and the other two light up the matching residue — codon-precise, across
+      genome, alignment, and structure.
     </p>
 
+    <GeneExplorer client:only="react" />
+
     <details>
-      <summary>How this works</summary>
+      <summary>How it works (under the hood)</summary>
       <p>
-        The page resolves the gene to its canonical (MANE / RefSeq Select)
-        transcript and parses the GFF in your browser. There is no
-        <code>collapseIntrons</code> option in JBrowse — the trick is to give the
-        Linear Genome View a <code>loc</code> made of the exon ranges,
-        space-separated, so each renders back-to-back and the introns disappear.
-        Everything is computed live from public data (mygene.info, the UCSC
-        RefSeq Select GFF over tabix, AlphaFold); only the alignment slice comes
-        from a hosted file.
+        Nothing is precomputed per gene — the whole session is synthesized live
+        in your browser from public data:
+      </p>
+      <ul>
+        <li>
+          <strong>mygene.info</strong> resolves the gene symbol to its hg38 locus
+          and UniProt accession (and powers the type-ahead).
+        </li>
+        <li>
+          The canonical (MANE / RefSeq Select) transcript is pulled by locus
+          from the UCSC <code>ncbiRefSeqSelect</code> GFF over{' '}
+          <strong>tabix</strong>, then the GFF is parsed in the browser — that
+          is where the exon/CDS model comes from.
+        </li>
+        <li>
+          The <strong>AlphaFold</strong> structure is fetched by UniProt accession.
+          Only the 100-way alignment is a hosted file (a slice of a genome-scale alignment),
+          random-read by gene name from an indexed bgzip FASTA.
+        </li>
+      </ul>
+      <p>
+        There is no <code>collapseIntrons</code> option in JBrowse. The trick is to
+        give the Linear Genome View a <code>loc</code> made of the exon ranges, space-separated,
+        so each renders back-to-back and the introns disappear. The alignment and
+        structure stay in sync because all three views share the same transcript model,
+        so a residue maps to its codon and back.
       </p>
     </details>
 
-    <GeneExplorer client:only="react" />
+    <details>
+      <summary>Build the same thing yourself</summary>
+      <p>
+        A JBrowse session is a declarative <em>spec</em>: an array of views,
+        each pointing at the others by <code>connectedViewId</code>. You don't
+        write any wiring code — you describe the views, put the spec in the URL,
+        and the{' '}
+        <a href="https://github.com/GMOD/jbrowse-plugin-msaview">msaview</a>{
+          ' '
+        }
+        and{' '}
+        <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a
+        >{' '}
+        plugins handle the linking. The shape:
+      </p>
+      <pre><code>{buildSnippet}</code></pre>
+      <p>
+        That's the entire mechanism — every link in the{' '}
+        <a href={`${import.meta.env.BASE_URL}/gallery#connected`}>gallery</a> is one
+        of these URLs. The explorer above just fills in the{' '}
+        <code>feature</code>, exon ranges, and accessions for whatever gene you
+        type. The full source is{' '}
+        <a
+          href="https://github.com/GMOD/JBrowseMSA/blob/main/packages/website/src/lib/geneExplorer.ts"
+          >geneExplorer.ts</a
+        >{' '}
+        (see <code>buildSessionSpec</code>), and the URL-param API is documented
+        under{' '}
+        <a href="https://jbrowse.org/jb2/docs/urlparams/">JBrowse URL params</a
+        >.
+      </p>
+    </details>
   </article>
 </Base>
