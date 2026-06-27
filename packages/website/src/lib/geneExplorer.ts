@@ -350,6 +350,17 @@ function paddedMergedExons(transcript: Transcript, padding: number): Exon[] {
   return merged
 }
 
+// hg38's sequence (and so its canonical refNames) is "1,2,…,X,Y" — "chr17" is
+// only an alias. Everything we put in the JBrowse session (the LGV `loc` →
+// displayedRegions, and the connectedFeature) must use the canonical name:
+// refName matching against displayed regions (bpToPx, hover/click highlights,
+// centerAt) is exact and does NOT alias-resolve, so an aliased displayed region
+// silently breaks those. We keep the friendly "chr17" for the UI and normalize
+// only at the session boundary. (mygene/UCSC give us the "chr"-prefixed form.)
+function toCanonicalRefName(refName: string) {
+  return refName.replace(/^chr/, '')
+}
+
 // A space-separated list of locstrings. When collapsing, each padded/merged exon
 // becomes one displayedRegion in the LinearGenomeView (via JBrowse's
 // navToLocations), so the introns between them squeeze out — there is no
@@ -360,7 +371,7 @@ export function collapsedLoc(
   transcript: Transcript,
   { collapse = true, padding = DEFAULT_WINDOW_SIZE }: CollapseOptions = {},
 ) {
-  const { refName } = transcript
+  const refName = toCanonicalRefName(transcript.refName)
   return collapse
     ? paddedMergedExons(transcript, padding)
         .map(e => `${refName}:${e.start + 1}-${e.end}`)
@@ -374,7 +385,7 @@ export function connectedFeature(transcript: Transcript) {
   return {
     uniqueId: transcript.name,
     type: 'mRNA',
-    refName: transcript.refName,
+    refName: toCanonicalRefName(transcript.refName),
     start: Math.min(...transcript.cds.map(c => c.start)),
     end: Math.max(...transcript.cds.map(c => c.end)),
     strand: transcript.strand,
