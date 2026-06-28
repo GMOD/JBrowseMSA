@@ -10,6 +10,8 @@ extend-exclude = [
 
 [default.extend-words]
 BLOSUM = "BLOSUM"
+# synteny term: conserved gene order across genomes (not geometric "collinear")
+colinear = "colinear"
 Pase = "Pase"
 # UCSC species db names in comments, e.g. panTro4 (chimp)
 Tro = "Tro"
