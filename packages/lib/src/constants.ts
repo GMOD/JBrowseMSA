@@ -9,6 +9,8 @@ export const defaultShowDomains = false
 export const defaultHideGaps = true
 export const defaultAllowedGappyness = 100
 export const defaultSubFeatureRows = false
+// row height for each stacked feature when subFeatureRows is on
+export const subFeatureRowHeight = 4
 export const defaultDrawMsaLetters = true
 export const defaultScrollZoom = false
 

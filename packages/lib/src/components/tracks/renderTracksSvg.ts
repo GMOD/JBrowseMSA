@@ -65,13 +65,13 @@ export function drawTextTrackContent({
 
   for (let i = 0; str && i < str.length; i++) {
     const letter = str[i]!
-    const color = colorScheme[letter.toUpperCase()]
+    const upper = letter.toUpperCase()
     if (bgColor) {
       const x = (xStart + i) * colWidth
-      ctx.fillStyle = color || 'white'
+      ctx.fillStyle = colorScheme[upper] || 'white'
       ctx.fillRect(x, 0, colWidth, rowHeight)
       if (rowHeight >= 10 && colWidth >= rowHeight / 2) {
-        ctx.fillStyle = contrastScheme[letter.toUpperCase()] || 'black'
+        ctx.fillStyle = contrastScheme[upper] || 'black'
         ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
       }
     }

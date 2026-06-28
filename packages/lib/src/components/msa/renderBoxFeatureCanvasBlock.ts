@@ -1,4 +1,5 @@
 import { getVisibleLeaves } from './getVisibleLeaves.ts'
+import { subFeatureRowHeight } from '../../constants.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -55,15 +56,12 @@ function drawTiles({
     strokePalette,
     tidyFilteredGatheredInterProAnnotations,
   } = model
+  const h = subFeatureRows ? subFeatureRowHeight : rowHeight
 
   for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
     const node = visibleLeaves[i]!
-    const {
-      x,
-      data: { name },
-    } = node
-    const y = x!
-
+    const { name } = node.data
+    const y = node.x!
     const entry = tidyFilteredGatheredInterProAnnotations[name]
 
     if (entry) {
@@ -73,20 +71,18 @@ function drawTiles({
         // seqPos is 1-based from InterPro, so subtract 1 for 0-based
         const m1 = model.seqPosToVisibleCol(name, start - 1)
         const m2 = model.seqPosToVisibleCol(name, end)
-        if (m1 === undefined || m2 === undefined) {
-          continue // Skip if either position is hidden
-        }
-        const x = m1 * colWidth
-        ctx.fillStyle = fillPalette[accession]!
-        ctx.strokeStyle = strokePalette[accession]!
-        const h = subFeatureRows ? 4 : rowHeight
-        const t = y - rowHeight + (subFeatureRows ? j * h : 0)
-        const lw = colWidth * (m2 - m1)
-        if (strand === undefined) {
-          ctx.fillRect(x, t, lw, h)
-          ctx.strokeRect(x, t, lw, h)
-        } else {
-          drawGeneArrow({ ctx, x, t, w: lw, h, strand })
+        if (m1 !== undefined && m2 !== undefined) {
+          const x = m1 * colWidth
+          const t = y - rowHeight + (subFeatureRows ? j * h : 0)
+          const lw = colWidth * (m2 - m1)
+          ctx.fillStyle = fillPalette[accession]!
+          ctx.strokeStyle = strokePalette[accession]!
+          if (strand === undefined) {
+            ctx.fillRect(x, t, lw, h)
+            ctx.strokeRect(x, t, lw, h)
+          } else {
+            drawGeneArrow({ ctx, x, t, w: lw, h, strand })
+          }
         }
       }
     }
@@ -114,21 +110,17 @@ function drawGeneArrow({
   h: number
   strand: number
 }) {
-  const head = h
+  // body spans bodyStart..bodyEnd (the exact columns); the head extends one
+  // row-height past bodyEnd in the strand direction
+  const dir = strand > 0 ? 1 : -1
+  const bodyStart = strand > 0 ? x : x + w
+  const bodyEnd = strand > 0 ? x + w : x
   ctx.beginPath()
-  if (strand > 0) {
-    ctx.moveTo(x, t)
-    ctx.lineTo(x + w, t)
-    ctx.lineTo(x + w + head, t + h / 2)
-    ctx.lineTo(x + w, t + h)
-    ctx.lineTo(x, t + h)
-  } else {
-    ctx.moveTo(x + w, t)
-    ctx.lineTo(x, t)
-    ctx.lineTo(x - head, t + h / 2)
-    ctx.lineTo(x, t + h)
-    ctx.lineTo(x + w, t + h)
-  }
+  ctx.moveTo(bodyStart, t)
+  ctx.lineTo(bodyEnd, t)
+  ctx.lineTo(bodyEnd + dir * h, t + h / 2)
+  ctx.lineTo(bodyEnd, t + h)
+  ctx.lineTo(bodyStart, t + h)
   ctx.closePath()
   ctx.fill()
   ctx.stroke()

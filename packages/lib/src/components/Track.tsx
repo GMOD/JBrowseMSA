@@ -26,6 +26,9 @@ const TrackLabel = observer(function TrackLabel({
   track: BasicTrack
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>()
+  const closeMenu = () => {
+    setAnchorEl(undefined)
+  }
   const { drawLabels, fontSize, treeAreaWidth: width } = model
   const {
     model: { name, height },
@@ -62,14 +65,14 @@ const TrackLabel = observer(function TrackLabel({
           transitionDuration={0}
           open
           onClose={() => {
-            setAnchorEl(undefined)
+            closeMenu()
           }}
         >
           <MenuItem
             dense
             onClick={() => {
               model.toggleTrack(track.model.id)
-              setAnchorEl(undefined)
+              closeMenu()
             }}
           >
             Close
@@ -81,7 +84,7 @@ const TrackLabel = observer(function TrackLabel({
                 TrackInfoDialog,
                 { onClose, model: track.model },
               ])
-              setAnchorEl(undefined)
+              closeMenu()
             }}
           >
             Get info
