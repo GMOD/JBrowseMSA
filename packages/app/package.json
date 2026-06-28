@@ -17,7 +17,7 @@
     "@mui/material": "^7.3.11",
     "@mui/system": "^7.3.11",
     "buffer": "^6.0.3",
-    "eslint": "^10.5.0",
+    "eslint": "^10.6.0",
     "gh-pages": "^6.3.0",
     "mobx": "^6.16.1",
     "mobx-react": "^9.2.2",
