@@ -96,7 +96,7 @@ pnpm screenshots:jbrowse --filter=protein3d --protein3d-dist=../jbrowse-plugin-p
 
 The figures are **declarative**: each is one entry in the `FIGURES` list in
 [`jbrowse-figures.mjs`](jbrowse-figures.mjs), naming a key in the `links` map of
-`packages/website/src/pages/genome-browser.astro` — _the same declarative URL
+`website/src/pages/genome-browser.astro` — _the same declarative URL
 the docs page ships_, so the figure and the live link can never drift. A single
 generic driver loads each link and screenshots it.
 

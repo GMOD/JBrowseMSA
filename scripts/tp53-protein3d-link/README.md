@@ -81,4 +81,4 @@ node scripts/tp53-protein3d-link/generate.mjs   # prints the declarative URL
 ```
 
 Requires `tabix` (htslib) on PATH and network access to EBI. The printed URL is
-the value pasted into `packages/website/src/pages/genome-browser.astro`.
+the value pasted into `website/src/pages/genome-browser.astro`.

@@ -3,7 +3,7 @@
  *   pages-dist/        -> the docs website  (gmod.org/JBrowseMSA)
  *   pages-dist/demo/   -> the demo app      (gmod.org/JBrowseMSA/demo)
  *
- * Run after building the website (packages/website/dist) and the app
+ * Run after building the website (website/dist) and the app
  * (packages/app/dist). `pnpm build:pages` does both then calls this.
  */
 import fs from 'node:fs'
@@ -14,7 +14,7 @@ const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
 )
-const websiteDist = path.join(repoRoot, 'packages', 'website', 'dist')
+const websiteDist = path.join(repoRoot, 'website', 'dist')
 const appDist = path.join(repoRoot, 'packages', 'app', 'dist')
 const out = path.join(repoRoot, 'pages-dist')
 

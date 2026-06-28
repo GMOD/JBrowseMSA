@@ -50,4 +50,4 @@ node scripts/src-protein-link/generate.mjs   # prints the declarative URL
 ```
 
 Requires `tabix` (htslib) on PATH for the remote RefSeq fetch. The printed URL
-is the value pasted into `packages/website/src/pages/genome-browser.astro`.
+is the value pasted into `website/src/pages/genome-browser.astro`.

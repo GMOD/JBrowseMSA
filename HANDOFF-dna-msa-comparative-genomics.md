@@ -111,7 +111,7 @@ ggtree/ggraph/gggenes).
   `drawGeneArrow` rendering (column-aligned overlay).
 - `packages/cli/src/genestructure.ts` — reference→column→per-row exon projection
   (the liftover math).
-- `packages/website/src/lib/geneExplorer.ts` — combined-session builder
+- `website/src/lib/geneExplorer.ts` — combined-session builder
   (`encodedSessionUrl`, `linearGenomeView`/`msaView`/`connectedFeature`).
 - `packages/app/public/data/jbrowse-msa-combined-config.json` — hg38 assembly +
   RefSeq tracks + `multiz470way` MAF track + MsaView/Protein3d plugins.

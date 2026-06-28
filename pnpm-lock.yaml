@@ -330,7 +330,7 @@ importers:
 
   packages/svgcanvas: {}
 
-  packages/website:
+  website:
     dependencies:
       '@astrojs/markdown-remark':
         specifier: ^7.2.0
@@ -376,7 +376,7 @@ importers:
         version: 9.2.2(mobx@6.16.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       msa-parsers:
         specifier: workspace:*
-        version: link:../msa-parsers
+        version: link:../packages/msa-parsers
       pako-esm2:
         specifier: ^2.0.2
         version: 2.0.2
@@ -388,7 +388,7 @@ importers:
         version: 19.2.7(react@19.2.7)
       react-msaview:
         specifier: workspace:*
-        version: link:../lib
+        version: link:../packages/lib
 
 packages:
 

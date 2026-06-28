@@ -76,7 +76,7 @@ labelled boxes on the alignment:
 | Package                                       | Description                                                |
 | --------------------------------------------- | ---------------------------------------------------------- |
 | [packages/lib](packages/lib/)                 | Main react-msaview React component                         |
-| [packages/website](packages/website/)         | Docs site (deployed at gmod.org/JBrowseMSA)                |
+| [website](website/)         | Docs site (deployed at gmod.org/JBrowseMSA)                |
 | [packages/app](packages/app/)                 | Demo application (deployed at gmod.org/JBrowseMSA/demo)    |
 | [packages/examples](packages/examples/)       | Live usage examples (deployed at the Storybook link above) |
 | [packages/cli](packages/cli/)                 | Command-line tools (batch InterProScan)                    |

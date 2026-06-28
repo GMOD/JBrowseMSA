@@ -2,13 +2,13 @@
 
 Status as of 2026-06-27. Spans three repos:
 
-- `~/src/react-msaview` — the website + gene explorer (`packages/website`) + the
+- `~/src/react-msaview` — the website + gene explorer (`website`) + the
   alignment build (`scripts/gene-explorer`)
 - `~/src/jb2plugins/jbrowse-plugin-msaview` — the MSA view JBrowse plugin
 - `~/src/jb2plugins/jbrowse-plugin-protein3d` — the 3D structure JBrowse plugin
 
 The gene explorer's "Open in JBrowse" builds a declarative JBrowse session spec
-(`packages/website/src/lib/geneExplorer.ts` → `buildSessionSpec`) with three views
+(`website/src/lib/geneExplorer.ts` → `buildSessionSpec`) with three views
 pinned to one `LinearGenomeView` (`id: lgv-<symbol>`): a collapsed-intron LGV, a
 connected MsaView, and a connected ProteinView (AlphaFold).
 
@@ -84,7 +84,7 @@ codon-spaced. Deterministic unit complement: protein3d `src/ProteinView/geneExpl
 
 ## STILL OPEN
 
-- **Deploy the website** (`packages/website`, gmod.org/JBrowseMSA, its own pipeline). Done
+- **Deploy the website** (`website`, gmod.org/JBrowseMSA, its own pipeline). Done
   2026-06-27; also includes the rejected-promise-cache fix (a failed `.idx`/`.cds` fetch no
   longer wedges every later lookup) and accurate "no alignment for this gene" copy.
 - **Confirm the live test passes** once the webgl-poc rebuild is deployed.

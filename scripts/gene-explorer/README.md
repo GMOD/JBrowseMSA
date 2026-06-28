@@ -1,6 +1,6 @@
 # Gene explorer data
 
-Backs the [Gene explorer](../../packages/website/src/pages/gene-explorer.astro)
+Backs the [Gene explorer](../../website/src/pages/gene-explorer.astro)
 page: type any human gene → a connected JBrowse session with a **collapsed-intron**
 gene view, its **100-way vertebrate protein alignment**, and the **AlphaFold
 structure**.
@@ -101,7 +101,7 @@ node scripts/gene-explorer/build-data.mjs <(gzip -c head.fa) ./out
 ## Host
 
 The four outputs go on the JBrowse demos bucket (the URL `MSA_BASE` in
-`packages/website/src/lib/geneExplorer.ts` points at):
+`website/src/lib/geneExplorer.ts` points at):
 
 ```sh
 aws s3 cp out/hg38.knownCanonical.multiz100way.aa.fa.gz \

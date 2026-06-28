@@ -20,7 +20,7 @@ export default defineConfig(
       'packages/lib/esbuild.mjs',
       'packages/lib/vite.config.ts',
       'packages/r-msaview',
-      'packages/website',
+      'website',
     ],
   },
   {
