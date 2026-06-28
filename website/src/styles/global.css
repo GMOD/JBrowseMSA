@@ -227,41 +227,6 @@ body.app-layout .site-footer {
   margin-top: 8px;
 }
 
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-  margin: 24px 0;
-}
-
-.gallery figure {
-  margin: 0;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-soft);
-}
-
-.gallery img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-
-.gallery figcaption {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.4;
-}
-
-.gallery figcaption strong {
-  color: var(--fg);
-}
-
 .prose pre {
   background: var(--bg-soft);
   padding: 14px;

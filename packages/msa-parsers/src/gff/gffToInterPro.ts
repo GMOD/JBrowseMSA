@@ -63,7 +63,12 @@ export function gffToInterProResults(
     >()
     const matchInfo = new Map<
       string,
-      { name: string; description: string; accession: string }
+      {
+        name: string
+        description: string
+        accession: string
+        featureType: string
+      }
     >()
 
     for (const record of records) {
@@ -82,7 +87,12 @@ export function gffToInterProResults(
         name
 
       if (!matchInfo.has(accession)) {
-        matchInfo.set(accession, { name, description, accession })
+        matchInfo.set(accession, {
+          name,
+          description,
+          accession,
+          featureType: record.type,
+        })
       }
 
       const location = {

@@ -13,6 +13,8 @@ export interface InterProScanResults {
         name: string
         description: string
         accession: string
+        // original GFF feature type (exon, CDS, ...) when sourced from GFF
+        featureType?: string
       }
     }
     locations: { start: number; end: number; strand?: number }[]

@@ -11,6 +11,22 @@ export const defaultAllowedGappyness = 100
 export const defaultSubFeatureRows = false
 // row height for each stacked feature when subFeatureRows is on
 export const subFeatureRowHeight = 4
+
+// Feature types that are ordinal *segments* of a single transcript (exons and
+// the like) rather than categorical domains. Their identity is their position,
+// so the overlay alternates two shades to mark boundaries and labels them by
+// number, instead of assigning every one a distinct hue + legend row.
+export const segmentFeatureTypes = new Set([
+  'exon',
+  'CDS',
+  'five_prime_UTR',
+  'three_prime_UTR',
+  'UTR',
+  'intron',
+])
+
+// the two shades alternated across adjacent segments (exons)
+export const segmentShades = ['#9fb6d4', '#d4dcea']
 export const defaultDrawMsaLetters = true
 export const defaultScrollZoom = false
 

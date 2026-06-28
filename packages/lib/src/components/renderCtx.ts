@@ -26,5 +26,6 @@ export type RenderCtx = Pick<
   | 'strokeRect'
   | 'strokeStyle'
   | 'textAlign'
+  | 'textBaseline'
   | 'translate'
 >

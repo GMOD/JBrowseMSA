@@ -5,9 +5,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const src = path.resolve(__dirname, '..', '..', '..', 'docs', 'media')
+const src = path.resolve(__dirname, '..', '..', 'docs', 'media')
 const dest = path.resolve(__dirname, '..', 'public', 'media')
 
+if (!fs.existsSync(src)) {
+  throw new Error(`sync-media: source media dir not found: ${src}`)
+}
 fs.rmSync(dest, { recursive: true, force: true })
 fs.mkdirSync(dest, { recursive: true })
 for (const file of fs.readdirSync(src)) {

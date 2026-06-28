@@ -711,7 +711,7 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           That's the entire mechanism — every link in the{' '}
-          <Link href={`${base}/gallery#connected`}>gallery</Link> is one of
+          <Link href={`${base}/gallery#jbrowse`}>gallery</Link> is one of
           these URLs. The explorer just fills in the <Code>feature</Code>, exon
           ranges, and accessions for whatever gene you type. The full source is{' '}
           <Link

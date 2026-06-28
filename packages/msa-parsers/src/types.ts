@@ -38,6 +38,10 @@ export interface InterProScanMatch {
       name: string
       description: string
       accession: string
+      // original GFF feature type (exon, CDS, gene, ...) when sourced from GFF;
+      // lets the viewer treat ordinal segments (exons) differently from
+      // categorical domains
+      featureType?: string
     }
   }
   locations: { start: number; end: number; strand?: number }[]

@@ -54,9 +54,15 @@ function drawTiles({
     rowHeight,
     fillPalette,
     strokePalette,
+    segmentLabels,
+    showMsaLetters,
     tidyFilteredGatheredInterProAnnotations,
   } = model
   const h = subFeatureRows ? subFeatureRowHeight : rowHeight
+  // exon numbers label the bands only when residue letters aren't drawn (zoomed
+  // out); when letters show, the alternating shades alone mark the boundaries
+  // and a number would collide with the sequence
+  const drawSegmentLabels = !showMsaLetters && !subFeatureRows && h >= 9
 
   for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
     const node = visibleLeaves[i]!
@@ -80,6 +86,19 @@ function drawTiles({
           if (strand === undefined) {
             ctx.fillRect(x, t, lw, h)
             ctx.strokeRect(x, t, lw, h)
+            // segment (exon) number drawn once per band, on the top visible row,
+            // so it reads as a column header for the whole band
+            const label = drawSegmentLabels ? segmentLabels.get(accession) : undefined
+            if (label !== undefined && i === 0) {
+              const fontSize = Math.min(h - 2, 11)
+              ctx.font = `${fontSize}px sans-serif`
+              if (ctx.measureText(label).width + 2 <= lw) {
+                ctx.fillStyle = '#222'
+                ctx.textAlign = 'center'
+                ctx.textBaseline = 'middle'
+                ctx.fillText(label, x + lw / 2, t + h / 2)
+              }
+            }
           } else {
             drawGeneArrow({ ctx, x, t, w: lw, h, strand })
           }

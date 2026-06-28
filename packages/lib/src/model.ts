@@ -43,6 +43,8 @@ import {
   maxCellSize,
   minColWidth,
   minRowHeight,
+  segmentFeatureTypes,
+  segmentShades,
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
 import { fetchTextWithProgress, isAbortError } from './fetchUtils.ts'
@@ -1615,6 +1617,7 @@ function stateModelFactory() {
                         name: entry.name,
                         accession: entry.accession,
                         description: entry.description,
+                        featureType: entry.featureType,
                         start,
                         end,
                         strand,
@@ -1649,8 +1652,38 @@ function stateModelFactory() {
       get verticalScrollbarWidth() {
         return self.showVerticalScrollbar ? 20 : 0
       },
+      /**
+       * #getter
+       * ordinal segment types (exons etc.), ordered by sequence position so
+       * exon-1..exon-14 read left-to-right; colored by alternating shade and
+       * labeled by number rather than each getting a distinct hue + legend row
+       */
+      get segmentDomainTypes() {
+        return [...self.tidyInterProAnnotationTypes.values()]
+          .filter(d => segmentFeatureTypes.has(d.featureType ?? ''))
+          .toSorted((a, b) => a.start - b.start)
+      },
+      /**
+       * #getter
+       * categorical feature types (InterPro domains and the like) that each get
+       * their own color and a legend entry
+       */
+      get categoricalDomainTypes() {
+        return [...self.tidyInterProAnnotationTypes.values()].filter(
+          d => !segmentFeatureTypes.has(d.featureType ?? ''),
+        )
+      },
       get fillPalette() {
-        return createPaletteMap([...self.tidyInterProAnnotationTypes.keys()])
+        const segments = Object.fromEntries(
+          this.segmentDomainTypes.map((d, i) => [
+            d.accession,
+            segmentShades[i % segmentShades.length]!,
+          ]),
+        )
+        const categorical = createPaletteMap(
+          this.categoricalDomainTypes.map(d => d.accession),
+        )
+        return { ...segments, ...categorical }
       },
       get strokePalette() {
         return transform(this.fillPalette, ([key, val]) => [
@@ -1661,13 +1694,29 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * accession -> number drawn on each segment band: the trailing number of
+       * the feature name ("exon-3" -> "3"), else its 1-based position
+       */
+      get segmentLabels() {
+        return new Map(
+          this.segmentDomainTypes.map((d, i) => {
+            const m = /(\d+)\s*$/.exec(d.name)
+            return [d.accession, m ? m[1]! : `${i + 1}`]
+          }),
+        )
+      },
+
+      /**
+       * #getter
        * the domain types currently drawn on the alignment (filtered-on), shared
-       * by the on-screen legend and the SVG export legend
+       * by the on-screen legend and the SVG export legend. Ordinal segments
+       * (exons) are excluded — they read as a numbered gene model, not a color
+       * key — so this is the categorical types ordered by sequence position
        */
       get visibleDomainTypes() {
-        return [...self.tidyInterProAnnotationTypes.values()].filter(d =>
-          self.featureFilters.get(d.accession),
-        )
+        return this.categoricalDomainTypes
+          .filter(d => self.featureFilters.get(d.accession))
+          .toSorted((a, b) => a.start - b.start)
       },
 
       /**

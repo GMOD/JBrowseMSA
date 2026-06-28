@@ -33,6 +33,7 @@ describe('gffToInterProResults', () => {
       accession: 'PF00001',
       name: '7tm_1',
       description: 'GPCR family',
+      featureType: 'protein_match',
     })
     expect(result.seq1?.matches[0]?.locations).toEqual([{ start: 10, end: 50 }])
     expect(result.seq1?.xref).toEqual([{ id: 'seq1' }])

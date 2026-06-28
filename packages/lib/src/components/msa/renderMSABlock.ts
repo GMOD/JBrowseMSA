@@ -46,6 +46,7 @@ export function renderMSABlock({
   ctx.scale(k, k)
   ctx.translate(-offsetX, rowHeight / 2 - offsetY)
   ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
   setFontSize(ctx, fontSize, !bgColor)
 
   const { xStart, xEnd } = visibleColRange({
