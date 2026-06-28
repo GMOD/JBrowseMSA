@@ -310,9 +310,9 @@ function ResultPanel({ result }: { result: GeneResult }) {
   // fallback. transcript.exons is coding-only for the former but full mRNA
   // (incl. UTR) for the latter, so it can't be labelled consistently.
   const codingBp = transcript.cds.reduce((s, c) => s + (c.end - c.start), 0)
-  const codingStart = Math.min(...transcript.cds.map(c => c.start))
-  const codingEnd = Math.max(...transcript.cds.map(c => c.end))
-  const span = codingEnd - codingStart
+  const span =
+    Math.max(...transcript.cds.map(c => c.end)) -
+    Math.min(...transcript.cds.map(c => c.start))
   const ratio = (span / codingBp).toFixed(1)
   const [detailsOpen, setDetailsOpen] = useState(false)
   // launch the genome view with introns squeezed out (default) vs. the whole

@@ -113,7 +113,7 @@ function isHits(v: unknown): v is { hits: { symbol?: unknown }[] } {
     typeof v === 'object' &&
     v !== null &&
     'hits' in v &&
-    Array.isArray((v as { hits: unknown }).hits)
+    Array.isArray((v).hits)
   )
 }
 
@@ -213,7 +213,7 @@ function getCdsIndex() {
             .split('\n')
             .map((line): [string, Transcript] => {
               const [symbol, name, refName, strand, spec] = line.split('\t')
-              const cds = spec!.split(',').map((s): CDS => {
+              const cds = spec.split(',').map((s): CDS => {
                 const [start, end, phase] = s.split(':')
                 return {
                   start: Number(start),
@@ -222,12 +222,12 @@ function getCdsIndex() {
                 }
               })
               return [
-                symbol!,
+                symbol,
                 {
-                  refName: refName!,
+                  refName: refName,
                   strand: strand === '-' ? -1 : 1,
-                  name: name!,
-                  geneName: symbol!,
+                  name: name,
+                  geneName: symbol,
                   // coding-only model: the collapsed view shows CDS exons, which
                   // is what the protein/MSA views align to
                   exons: cds.map(c => ({ start: c.start, end: c.end })),
@@ -299,7 +299,7 @@ export async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
       r =>
         attr(r, 'gene_id') === locus.symbol ||
         attr(r, 'gene_name') === locus.symbol,
-    ) ?? transcripts[0]
+    ) ?? transcripts.at(0)
   if (!mrna) {
     throw new Error(`No RefSeq Select transcript near ${locus.symbol}`)
   }
@@ -453,7 +453,7 @@ export async function fetchGeneMsa(
 
 // The first FASTA record's sequence (here hg38), ungapped.
 function firstSequence(fasta: string) {
-  const [, ...seqLines] = fasta.split(/\n>/)[0]!.split('\n')
+  const [, ...seqLines] = fasta.split(/\n>/)[0].split('\n')
   return seqLines.join('').replaceAll('-', '')
 }
 
