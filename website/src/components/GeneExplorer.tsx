@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import type { ReactNode } from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
@@ -25,10 +26,6 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { ThemeProvider } from '@mui/material/styles'
 
-import { theme } from '../lib/theme'
-
-import type { ReactNode } from 'react'
-
 import {
   DEFAULT_WINDOW_SIZE,
   buildSessionUrl,
@@ -36,6 +33,9 @@ import {
   loadGene,
   searchGenes,
 } from '../lib/geneExplorer'
+import { theme } from '../lib/theme'
+
+
 
 import type { GeneResult } from '../lib/geneExplorer'
 
@@ -70,6 +70,19 @@ const EXAMPLES: { symbol: string; note: string }[] = [
 const EXAMPLE_SYMBOLS = EXAMPLES.map(e => e.symbol)
 const NOTE_BY_SYMBOL = new Map(EXAMPLES.map(e => [e.symbol, e.note]))
 
+function subscribeGeneUrl(cb: () => void) {
+  window.addEventListener('popstate', cb)
+  window.addEventListener('gene-url-change', cb)
+  return () => {
+    window.removeEventListener('popstate', cb)
+    window.removeEventListener('gene-url-change', cb)
+  }
+}
+
+function getGeneFromUrl() {
+  return new URLSearchParams(window.location.search).get('gene')
+}
+
 export default function GeneExplorer() {
   const [options, setOptions] = useState<string[]>(EXAMPLE_SYMBOLS)
   const [busy, setBusy] = useState(false)
@@ -77,9 +90,10 @@ export default function GeneExplorer() {
   const [result, setResult] = useState<GeneResult>()
   const [helpOpen, setHelpOpen] = useState(false)
   const [picked, setPicked] = useState<{ symbol: string; note?: string }>()
-  // monotonic id of the latest pick, so a slow earlier request can't overwrite
-  // the result of a later one if the user switches genes mid-fetch
-  const latestPick = useRef(0)
+
+  // Reactive URL read: re-renders on popstate (back/forward) and pushState via
+  // the gene-url-change event dispatched by navigate() below.
+  const urlGene = useSyncExternalStore(subscribeGeneUrl, getGeneFromUrl, () => null)
 
   async function onSearch(query: string) {
     if (query.length >= 2) {
@@ -96,59 +110,42 @@ export default function GeneExplorer() {
     }
   }
 
-  async function onPick(symbol: string | null) {
-    if (symbol) {
-      const pickId = ++latestPick.current
-      setBusy(true)
-      setError(undefined)
-      // keep the previous result mounted (dimmed) while this one loads, so the
-      // page doesn't collapse and reflow on every pick — it's replaced or
-      // cleared once the outcome resolves below
-      setPicked({ symbol, note: NOTE_BY_SYMBOL.get(symbol) })
-      // resolve to a tagged outcome that never rejects, so the staleness guard
-      // (ignore a slow earlier pick once a newer one started) runs just once
-      const outcome = await loadGene(symbol).then(
-        result => ({ result, error: undefined }),
-        (e: unknown) => ({
-          result: undefined,
-          error: e instanceof Error ? e.message : String(e),
-        }),
-      )
-      if (latestPick.current === pickId) {
-        setResult(outcome.result)
-        setError(outcome.error)
-        setBusy(false)
-      }
+  const onPick = useCallback(async (symbol: string) => {
+    setBusy(true)
+    setError(undefined)
+    setPicked({ symbol, note: NOTE_BY_SYMBOL.get(symbol) })
+    const outcome = await loadGene(symbol).then(
+      result => ({ result, error: undefined }),
+      (e: unknown) => ({
+        result: undefined,
+        error: e instanceof Error ? e.message : String(e),
+      }),
+    )
+    // discard result if the URL moved on while this fetch was in flight
+    if (getGeneFromUrl() === symbol) {
+      setResult(outcome.result)
+      setError(outcome.error)
+      setBusy(false)
     }
-  }
+  }, [])
+
+  // Fetch whenever the URL gene changes (initial load, back/forward, navigate).
+  useEffect(() => {
+    if (urlGene) {
+      void onPick(urlGene)
+    }
+  }, [urlGene, onPick])
 
   // Push the picked gene into the page URL (?gene=) so the selection is
-  // shareable, bookmarkable, and survives reload — then fetch it.
+  // shareable, bookmarkable, and survives reload.
   function navigate(symbol: string | null) {
     if (symbol) {
       const next = new URL(window.location.href)
       next.searchParams.set('gene', symbol)
       window.history.pushState(null, '', next)
-      void onPick(symbol)
+      window.dispatchEvent(new Event('gene-url-change'))
     }
   }
-
-  // Drive picks from the URL: once on mount (deep link / reload) and on every
-  // back/forward navigation. onPick is stable (only touches setState + refs).
-  useEffect(() => {
-    function syncFromUrl() {
-      const symbol = new URLSearchParams(window.location.search).get('gene')
-      if (symbol) {
-        void onPick(symbol)
-      }
-    }
-    syncFromUrl()
-    window.addEventListener('popstate', syncFromUrl)
-    return () => {
-      window.removeEventListener('popstate', syncFromUrl)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   return (
     <ThemeProvider theme={theme}>
@@ -722,7 +719,7 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
           these URLs. The explorer just fills in the <Code>feature</Code>, exon
           ranges, and accessions for whatever gene you type. The full source is{' '}
           <Link
-            href="https://github.com/GMOD/JBrowseMSA/blob/main/packages/website/src/lib/geneExplorer.ts"
+            href="https://github.com/GMOD/JBrowseMSA/blob/main/website/src/lib/geneExplorer.ts"
             target="_blank"
             rel="noopener"
           >

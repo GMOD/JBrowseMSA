@@ -40,6 +40,7 @@ body {
   top: 0;
   background: var(--bg);
   z-index: 10;
+  overflow-x: auto;
 }
 
 .site-header .brand {
@@ -242,6 +243,7 @@ body.app-layout .site-footer {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 16 / 9;
   border: 1px solid var(--border);
   border-radius: 4px;
 }

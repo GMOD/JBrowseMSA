@@ -123,7 +123,7 @@ function headingAnchors() {
             href: `#${id}`,
             className: ['heading-anchor'],
             'aria-hidden': 'true',
-            tabindex: -1,
+            tabindex: '-1',
           },
           children: [{ type: 'text', value: '#' }],
         })
