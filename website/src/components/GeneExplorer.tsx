@@ -35,8 +35,6 @@ import {
 } from '../lib/geneExplorer'
 import { theme } from '../lib/theme'
 
-
-
 import type { GeneResult } from '../lib/geneExplorer'
 
 // curated, all present in the 100-way index — chosen to span tumour
@@ -89,7 +87,6 @@ export default function GeneExplorer() {
   const [error, setError] = useState<string>()
   const [result, setResult] = useState<GeneResult>()
   const [helpOpen, setHelpOpen] = useState(false)
-  const [picked, setPicked] = useState<{ symbol: string; note?: string }>()
 
   // Reactive URL read: re-renders on popstate (back/forward) and pushState via
   // the gene-url-change event dispatched by navigate() below.
@@ -113,7 +110,6 @@ export default function GeneExplorer() {
   const onPick = useCallback(async (symbol: string) => {
     setBusy(true)
     setError(undefined)
-    setPicked({ symbol, note: NOTE_BY_SYMBOL.get(symbol) })
     const outcome = await loadGene(symbol).then(
       result => ({ result, error: undefined }),
       (e: unknown) => ({
@@ -270,9 +266,9 @@ export default function GeneExplorer() {
             ))}
           </Box>
 
-          {picked?.note ? (
+          {urlGene && NOTE_BY_SYMBOL.get(urlGene) ? (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-              <strong>{picked.symbol}</strong> — {picked.note}
+              <strong>{urlGene}</strong> — {NOTE_BY_SYMBOL.get(urlGene)}
             </Typography>
           ) : null}
         </Paper>
