@@ -30,11 +30,10 @@ const DomainLegend = observer(function ({ model }: { model: MsaViewModel }) {
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           padding: '2px 4px 2px 8px',
         }}
       >
-        <Typography variant="caption">Domains ({visible.length})</Typography>
         <IconButton
           size="small"
           onClick={() => {

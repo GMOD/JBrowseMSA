@@ -116,7 +116,6 @@ test('domain legend is drawn in the svg export when domains are shown', async ()
     includeMinimap: false,
     includeTracks: false,
   })
-  expect(svg).toContain('Domains (1)')
   expect(svg).toContain('Kinase')
 })
 
@@ -131,5 +130,5 @@ test('no legend column when domains are hidden', async () => {
     includeMinimap: false,
     includeTracks: false,
   })
-  expect(svg).not.toContain('Domains (')
+  expect(svg).not.toContain('Kinase')
 })

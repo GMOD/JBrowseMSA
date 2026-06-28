@@ -26,12 +26,12 @@ const TrackLabel = observer(function TrackLabel({
   track: BasicTrack
 }) {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>()
-  const { drawLabels, rowHeight, treeAreaWidth: width } = model
+  const { drawLabels, fontSize, treeAreaWidth: width } = model
   const {
     model: { name, height },
   } = track
   const { classes } = useStyles()
-  const trackLabelHeight = Math.min(height, Math.max(8, rowHeight - 8))
+  const trackLabelHeight = Math.min(height, fontSize)
 
   return (
     <div

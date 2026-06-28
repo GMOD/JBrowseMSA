@@ -27,7 +27,6 @@ export interface ExportSvgOptions {
 const LEGEND_PAD = 8
 const LEGEND_ROW_H = 16
 const LEGEND_SWATCH = 12
-const LEGEND_TITLE_H = 20
 const LEGEND_FONT = 12
 const LEGEND_CHAR_W = 7
 
@@ -182,8 +181,7 @@ function MsaSvg({
 // alignment, mirroring the on-screen DomainLegend overlay
 function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
   const { visibleDomainTypes, fillPalette, strokePalette } = model
-  const boxHeight =
-    LEGEND_PAD * 2 + LEGEND_TITLE_H + visibleDomainTypes.length * LEGEND_ROW_H
+  const boxHeight = LEGEND_PAD * 2 + visibleDomainTypes.length * LEGEND_ROW_H
   return (
     <g>
       <rect
@@ -195,16 +193,8 @@ function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
         stroke="#ccc"
         rx={2}
       />
-      <text
-        x={LEGEND_PAD}
-        y={LEGEND_PAD + LEGEND_FONT}
-        fontSize={LEGEND_FONT}
-        fontWeight="bold"
-      >
-        Domains ({visibleDomainTypes.length})
-      </text>
       {visibleDomainTypes.map((d, i) => {
-        const y = LEGEND_PAD + LEGEND_TITLE_H + i * LEGEND_ROW_H
+        const y = LEGEND_PAD + i * LEGEND_ROW_H
         return (
           <g key={d.accession}>
             <rect

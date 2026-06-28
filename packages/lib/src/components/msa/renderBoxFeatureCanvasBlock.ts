@@ -93,11 +93,12 @@ function drawTiles({
   }
 }
 
-// A gggenes-style gene arrow: a rectangular body with a triangular head on the
-// strand-direction end (right for +, left for -), collapsing to a pure triangle
-// when the feature is narrower than the head. The arrow stays anchored to its
-// alignment columns, so it shows transcription direction without breaking the
-// column-by-column homology that makes the overlay readable down the rows.
+// A gene arrow: a full-width rectangular body spanning the feature's
+// start..end columns, plus a triangular head that points *beyond* that end in
+// the strand direction (right for +, left for -). Keeping the body aligned to
+// the exact start/end columns means + and - strand features read as having the
+// same boundaries; the arrow lives outside them purely to show transcription
+// direction, preserving the column-by-column homology down the rows.
 function drawGeneArrow({
   ctx,
   x,
@@ -113,19 +114,19 @@ function drawGeneArrow({
   h: number
   strand: number
 }) {
-  const head = Math.min(h, w)
+  const head = h
   ctx.beginPath()
   if (strand > 0) {
     ctx.moveTo(x, t)
-    ctx.lineTo(x + w - head, t)
-    ctx.lineTo(x + w, t + h / 2)
-    ctx.lineTo(x + w - head, t + h)
+    ctx.lineTo(x + w, t)
+    ctx.lineTo(x + w + head, t + h / 2)
+    ctx.lineTo(x + w, t + h)
     ctx.lineTo(x, t + h)
   } else {
     ctx.moveTo(x + w, t)
-    ctx.lineTo(x + head, t)
-    ctx.lineTo(x, t + h / 2)
-    ctx.lineTo(x + head, t + h)
+    ctx.lineTo(x, t)
+    ctx.lineTo(x - head, t + h / 2)
+    ctx.lineTo(x, t + h)
     ctx.lineTo(x + w, t + h)
   }
   ctx.closePath()

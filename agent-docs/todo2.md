@@ -1,8 +1,9 @@
-- link to primary f12 lit
-- example of transposon
-- better zoomed out view of f12
-- examples similar to gggenes
-- the 'arrow' is inside the start/end boundaries, which looks odd
-- the legend says domains
-- the 'convervation' text is too large, should be same size as per-row labels
-  basically
+# done
+
+- [x] arrow now extends strictly beyond the start/end; rectangular body fills
+  the exact start..end columns for both strands so +/- read with the same
+  boundaries (renderBoxFeatureCanvasBlock.ts)
+- [x] removed the "Domains (N)" legend title from both the on-screen
+  DomainLegend and the SVG export legend
+- [x] track label ("Conservation" etc.) font now matches per-row label size via
+  model.fontSize (Track.tsx)
