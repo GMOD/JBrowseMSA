@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro'
+import Figure from '../components/Figure.astro'
 import JBrowseFigure from '../components/JBrowseFigure.astro'
 import { f12CombinedCloseupUrl } from '../lib/f12CombinedLinks'
 
@@ -114,12 +115,9 @@ const tp53R248 =
 
     {
       figures.map(f => (
-        <figure>
-          <img src={`${base}/media/${f.src}`} alt={f.body} loading="lazy" />
-          <figcaption>
-            <strong>{f.title}</strong> — {f.body}
-          </figcaption>
-        </figure>
+        <Figure src={f.src} alt={f.body}>
+          <strong>{f.title}</strong> — {f.body}
+        </Figure>
       ))
     }
 
@@ -128,12 +126,11 @@ const tp53R248 =
       react-msaview also runs as a{' '}
       <a href="https://github.com/GMOD/jbrowse-plugin-msaview"
         >JBrowse 2 plugin</a
-      >: the alignment and tree open <em>inside</em> JBrowse, connected to a
-      genome view and — with{' '}
-      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a> —
-      the AlphaFold structure. Selecting a region in any view lights the matching
-      columns, codons, and residues in the others. Each example below is one
-      declarative URL.
+      >: the alignment and tree open <em>inside</em> JBrowse, connected to a genome
+      view and — with{' '}
+      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a> — the
+      AlphaFold structure. Selecting a region in any view lights the matching columns,
+      codons, and residues in the others. Each example below is one declarative URL.
     </p>
 
     <JBrowseFigure
@@ -150,36 +147,31 @@ const tp53R248 =
       body="Genome ↔ alignment ↔ 3D structure: the TP53 gene (RefSeq + ClinVar), the p53 ortholog alignment, and the AlphaFold structure as one connected session, opened with the nuclear export signal motif (residues 339–350) lit across all three — the same motif highlighted on the genome, the alignment column, and the folded structure at once."
     />
 
-    <figure>
-      <a href={`${base}/gene-explorer`}>
-        <img
-          src={`${base}/media/gene-explorer-protein3d-linkage.png`}
-          alt="The gene explorer's connected session for TP53: a span of residues selected on the AlphaFold structure lights the same codons on the collapsed-intron genome view and the 100-way alignment"
-        />
-      </a>
-      <figcaption>
-        Built on the fly by the{' '}
-        <a href={`${base}/gene-explorer`}>gene explorer</a> for any human gene:
-        selecting a span of residues on the AlphaFold structure lights the exact
-        same codons on the collapsed-intron genome view (the yellow band) and the
-        100-way alignment — structure ↔ genome ↔ alignment, codon-precise.
-      </figcaption>
-    </figure>
+    <Figure
+      src="gene-explorer-protein3d-linkage.png"
+      alt="The gene explorer's connected session for TP53: a span of residues selected on the AlphaFold structure lights the same codons on the collapsed-intron genome view and the 100-way alignment"
+      href={`${base}/gene-explorer`}
+    >
+      Built on the fly by the{' '}
+      <a href={`${base}/gene-explorer`}>gene explorer</a> for any human gene: selecting
+      a span of residues on the AlphaFold structure lights the exact same codons on
+      the collapsed-intron genome view (the yellow band) and the 100-way alignment
+      — structure ↔ genome ↔ alignment, codon-precise.
+    </Figure>
 
     <p>The same connected pattern without the structure view:</p>
     <ul>
       <li>
-        <a href={proteinLinked} target="_blank" rel="noopener">SRC ↗</a> — the
-        Src-family kinase alignment beside the SRC gene.
+        <a href={proteinLinked} target="_blank" rel="noopener">SRC ↗</a> — the Src-family
+        kinase alignment beside the SRC gene.
       </li>
       <li>
-        <a href={brafV600} target="_blank" rel="noopener">BRAF V600E ↗</a> — the
-        RAF family on the invariant V600 codon, with a ClinVar pathogenic-variant
-        track.
+        <a href={brafV600} target="_blank" rel="noopener">BRAF V600E ↗</a> — the RAF
+        family on the invariant V600 codon, with a ClinVar pathogenic-variant track.
       </li>
       <li>
-        <a href={tp53R248} target="_blank" rel="noopener">TP53 R248 ↗</a> — p53
-        across vertebrates on the R248 hotspot, with ClinVar.
+        <a href={tp53R248} target="_blank" rel="noopener">TP53 R248 ↗</a> — p53 across
+        vertebrates on the R248 hotspot, with ClinVar.
       </li>
     </ul>
   </article>

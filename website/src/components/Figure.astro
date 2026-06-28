@@ -1,0 +1,47 @@
+---
+// A documentation figure: an image rendered at its native resolution (real
+// width/height attributes, so the browser reserves the correct space and never
+// distorts the aspect ratio), with the caption supplied as the default slot.
+// `src` is a filename under public/media; an optional `href` wraps the image in
+// a link (opened in a new tab when external).
+import { pngSize } from '../lib/imageSize'
+
+interface Props {
+  src: string
+  alt: string
+  href?: string
+}
+const { src, alt, href } = Astro.props
+const base = import.meta.env.BASE_URL
+const { width, height } = pngSize(src)
+const external = href?.startsWith('http')
+---
+
+<figure>
+  {
+    href ? (
+      <a
+        href={href}
+        target={external ? '_blank' : undefined}
+        rel={external ? 'noopener' : undefined}
+      >
+        <img
+          src={`${base}/media/${src}`}
+          alt={alt}
+          width={width}
+          height={height}
+          loading="lazy"
+        />
+      </a>
+    ) : (
+      <img
+        src={`${base}/media/${src}`}
+        alt={alt}
+        width={width}
+        height={height}
+        loading="lazy"
+      />
+    )
+  }
+  <figcaption><slot /></figcaption>
+</figure>

@@ -214,7 +214,6 @@ body.app-layout .site-footer {
 .prose figure img {
   display: block;
   margin: 0 auto;
-  aspect-ratio: 16 / 9;
   width: 100%;
   height: auto;
 }
