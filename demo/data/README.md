@@ -23,6 +23,8 @@ node scripts/screenshots/writeExampleData.mjs
 | `kinase.nh`          | `kinaseTree`       | Newick              | Clustal Omega guide tree for the alignment above                                                           |
 | `kinase-domains.gff` | `kinaseDomainsGFF` | InterProScan GFF3   | `react-msaview-cli interproscan kinase.aln` against the EBI InterProScan API (PfamA, CDD)                  |
 | `lysine.stock`       | `lysineMSA`        | Stockholm (tree+SS) | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded |
+| `f12-cetacean-cds.stock` | `f12CdsMSA`    | Stockholm (tree)    | Coagulation factor XII coding alignment across mammals (UCSC cactus 241-way), tree embedded; F12 disabled in cetaceans, intact in the manatee — see `scripts/f12-cetacean` |
+| `f12-cetacean-exons.gff` | `f12ExonsGFF`  | GFF3 (gene structure) | F12 14-exon structure projected onto every alignment row (`react-msaview-cli genestructure --gene F12 --ref human`); each exon `Name=exon-N` so it is one color across species |
 
 The files below back the **Genome browser** docs page (JBrowse integration), built by
 `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`

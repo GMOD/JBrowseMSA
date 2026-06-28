@@ -1,1 +1,0 @@
-import{t as e}from"./jsx-runtime.Bn4Hx9ur.js";import{c as t,l as n,u as r}from"./exampleData.gKdZq7Fy.js";var i=e();function a(){return(0,i.jsx)(`div`,{style:{border:`1px solid var(--border)`,borderRadius:6},children:(0,i.jsx)(r,{msa:t,tree:n,colorScheme:`clustalx_protein_dynamic`,height:400})})}export{a as default};

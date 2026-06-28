@@ -100,6 +100,65 @@ datasets.</p>
 <li><code>PIRSF</code> - PIR SuperFamily</li>
 <li><code>MobiDBLite</code> - Disorder prediction</li>
 </ul>
+<h3 id="genestructure">genestructure<a href="#genestructure" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>Build a <strong>gene-structure GFF</strong> for a coding-sequence alignment from a RefSeq
+transcript, overlaid in react-msaview the same way InterProScan domains are. The
+exon model is fetched from the NCBI Datasets v2 API; each species’ Nth exon is
+named <code>exon-N</code>, so a given exon is the same color in every row and the exon
+architecture reads straight down the alignment.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> genestructure</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">input-ms</span><span style="color:#E1E4E8">a</span><span style="color:#F97583">></span><span style="color:#79B8FF"> --gene</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">symbo</span><span style="color:#E1E4E8">l</span><span style="color:#F97583">></span><span style="color:#79B8FF"> --ref</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">rownam</span><span style="color:#E1E4E8">e</span><span style="color:#F97583">></span><span style="color:#E1E4E8"> [options]</span></span></code></pre>
+<p>The exon boundaries of the chosen transcript are mapped onto the reference row’s
+columns, then projected into every other row’s own ungapped coordinates — so an
+exon that picks up a frameshifting indel in one lineage gets shorter on exactly
+that row while staying column-aligned with the rest. The reference row must be
+the transcript’s coding sequence (the CLI warns if its length doesn’t match).</p>
+<h4 id="options-1">Options<a href="#options-1" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>--gene &#x3C;symbol></code></td><td>Gene symbol to look up in RefSeq (e.g. <code>F12</code>)</td><td></td></tr><tr><td><code>--taxon &#x3C;name|id></code></td><td>Taxon for <code>--gene</code></td><td><code>human</code></td></tr><tr><td><code>--gene-id &#x3C;id></code></td><td>NCBI GeneID, instead of <code>--gene</code></td><td></td></tr><tr><td><code>--transcript &#x3C;acc></code></td><td>Specific transcript accession</td><td>MANE/RefSeq Select</td></tr><tr><td><code>--ref &#x3C;rowname></code></td><td>Reference row = the transcript’s CDS</td><td>first row</td></tr><tr><td><code>-o, --output &#x3C;file></code></td><td>Output GFF file path</td><td><code>genestructure.gff</code></td></tr></tbody></table>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># F12 coding alignment -> 14-exon overlay (MANE Select transcript, human row)</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> genestructure</span><span style="color:#9ECBFF"> f12-cds.stock</span><span style="color:#79B8FF"> --gene</span><span style="color:#9ECBFF"> F12</span><span style="color:#79B8FF"> --ref</span><span style="color:#9ECBFF"> human</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> exons.gff</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># pin a specific transcript</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> genestructure</span><span style="color:#9ECBFF"> aln.fa</span><span style="color:#79B8FF"> --transcript</span><span style="color:#9ECBFF"> NM_000505.4</span><span style="color:#79B8FF"> --ref</span><span style="color:#9ECBFF"> human</span></span></code></pre>
 <h2 id="examples">Examples<a href="#examples" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <h3 id="using-ebi-api-recommended-for-small-datasets">Using EBI API (recommended for small datasets)<a href="#using-ebi-api-recommended-for-small-datasets" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># Basic usage - runs Pfam analysis</span></span>
