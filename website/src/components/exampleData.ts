@@ -2,4 +2,4 @@
 export {
   proteinMSA,
   proteinTree,
-} from '../../../examples/src/examples/exampleData.ts'
+} from '../../../packages/examples/src/examples/exampleData.ts'

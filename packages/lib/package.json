@@ -66,6 +66,7 @@
     "@mui/material": "^7.3.11",
     "colord": "^2.9.3",
     "flatbush": "^4.6.2",
-    "msa-parsers": "workspace:*"
+    "msa-parsers": "workspace:*",
+    "tss-react": "^4.9.21"
   }
 }

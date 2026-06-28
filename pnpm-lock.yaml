@@ -304,6 +304,9 @@ importers:
       react-dom:
         specifier: '>=16.8.0'
         version: 19.2.7(react@19.2.7)
+      tss-react:
+        specifier: ^4.9.21
+        version: 4.9.21(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7))(@mui/material@7.3.11(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.17)(react@19.2.7))(@types/react@19.2.17)(react@19.2.7))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(@types/react@19.2.17)(react@19.2.7)
     devDependencies:
       '@types/node':
         specifier: ^26.0.1

@@ -9,7 +9,7 @@ import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import { ThemeProvider } from '@mui/material/styles'
 
-import { examples } from '../../../examples/src/examples'
+import { examples } from '../../../packages/examples/src/examples'
 import { theme } from '../lib/theme'
 
 const slugOf = (name: string) =>
