@@ -323,6 +323,16 @@ export async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
   }
 }
 
+// Best transcript model for a gene: the alignment-backing knownCanonical CDS
+// when available (so connectedFeature shares the alignment's coordinate space),
+// else the live RefSeq Select transcript for genes outside the 100-way set.
+export async function fetchGeneTranscript(
+  symbol: string,
+  locus: GeneLocus,
+): Promise<Transcript> {
+  return (await fetchGeneCds(symbol)) ?? fetchTranscript(locus)
+}
+
 function toBlocks(records: GFFRecord[]): Exon[] {
   return records
     .map(r => ({ start: r.start - 1, end: r.end }))
@@ -445,6 +455,23 @@ export async function fetchGeneMsa(
 function firstSequence(fasta: string) {
   const [, ...seqLines] = fasta.split(/\n>/)[0]!.split('\n')
   return seqLines.join('').replaceAll('-', '')
+}
+
+export interface GeneResult {
+  transcript: Transcript
+  uniprotId?: string
+  msa?: GeneMsa
+}
+
+// Resolve a gene symbol to everything the result panel renders: its transcript
+// model, UniProt accession, and 100-way alignment slice (undefined for genes
+// outside the knownCanonical set). One entry point so the UI guards staleness
+// once rather than around each await.
+export async function loadGene(symbol: string): Promise<GeneResult> {
+  const locus = await resolveGene(symbol)
+  const transcript = await fetchGeneTranscript(symbol, locus)
+  const msa = await fetchGeneMsa(symbol)
+  return { transcript, uniprotId: locus.uniprotId, msa }
 }
 
 export interface SessionOptions {

@@ -1,0 +1,4 @@
+- link to primary f12 lit
+- example of transposon
+- better zoomed out view of f12
+- examples similar to gggenes

@@ -1610,13 +1610,14 @@ function stateModelFactory() {
                 val.matches.flatMap(({ signature, locations }) => {
                   const { entry } = signature
                   return entry
-                    ? locations.map(({ start, end }) => ({
+                    ? locations.map(({ start, end, strand }) => ({
                         id,
                         name: entry.name,
                         accession: entry.accession,
                         description: entry.description,
                         start,
                         end,
+                        strand,
                       }))
                     : []
                 }),

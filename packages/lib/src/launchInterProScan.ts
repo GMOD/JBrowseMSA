@@ -15,7 +15,7 @@ export interface InterProScanResults {
         accession: string
       }
     }
-    locations: { start: number; end: number }[]
+    locations: { start: number; end: number; strand?: number }[]
   }[]
   xref: { id: string }[]
 }
