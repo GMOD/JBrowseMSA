@@ -1,0 +1,23 @@
+---
+// A figure whose image links to a live JBrowse session. `src` is a filename
+// under public/media; `href` is the full JBrowse session URL.
+interface Props {
+  src: string
+  alt: string
+  title?: string
+  body: string
+  href: string
+}
+const { src, alt, title, body, href } = Astro.props
+const base = import.meta.env.BASE_URL
+---
+
+<figure>
+  <a href={href} target="_blank" rel="noopener">
+    <img src={`${base}/media/${src}`} alt={alt} loading="lazy" />
+  </a>
+  <figcaption>
+    {title ? <><strong>{title}</strong> — </> : null}{body}{' '}
+    <a href={href} target="_blank" rel="noopener">Open in JBrowse ↗</a>
+  </figcaption>
+</figure>

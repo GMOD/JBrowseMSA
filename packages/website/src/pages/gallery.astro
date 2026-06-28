@@ -1,5 +1,10 @@
 ---
 import Base from '../layouts/Base.astro'
+import JBrowseFigure from '../components/JBrowseFigure.astro'
+import {
+  f12CombinedOverviewUrl,
+  f12CombinedCloseupUrl,
+} from '../lib/f12CombinedLinks'
 
 const base = import.meta.env.BASE_URL
 
@@ -147,6 +152,31 @@ const f12Genome =
         <a href={f12Genome} target="_blank" rel="noopener">Open in JBrowse ↗</a>
       </figcaption>
     </figure>
+
+    <h2 id="combined">Genome + MSA in one view</h2>
+    <p>
+      The same gene as a <em>combined</em> JBrowse view: a genome browser with the
+      gene annotation track on top, and the react-msaview MSA — DNA alignment,
+      species tree, and the 14-exon model projected across every species — below.
+      One JBrowse session, built by{' '}
+      <code>scripts/screenshots/f12-combined-figure.mjs</code>. This is the viewer
+      an MSA <em>editor</em> would build on: the exon model is already registered
+      to the alignment columns and lifted onto each species.
+    </p>
+
+    <JBrowseFigure
+      src="f12-combined-overview.png"
+      href={f12CombinedOverviewUrl}
+      alt="JBrowse combined view: the F12 locus with the RefSeq gene annotation track over a react-msaview panel showing the cetacean DNA coding alignment, the species tree, and the 14-exon model projected across every species as colored bands"
+      body="The F12 locus (RefSeq annotation track, top) beside the cetacean DNA coding alignment with its species tree and 14-exon model (bottom) — each exon the same color across species, so the gene's exon architecture reads straight down the alignment, with per-row notches where indels shift a boundary."
+    />
+
+    <JBrowseFigure
+      src="f12-combined-closeup.png"
+      href={f12CombinedCloseupUrl}
+      alt="The combined view zoomed to base resolution at exon 3: the four cetaceans show a gap where every other mammal has a C — the shared single-base frameshift — beside the exon-3/exon-4 boundary, with the species tree"
+      body="The same combined view at base resolution over exon 3: the four cetaceans (beluga, porpoise, dolphin, minke whale) carry a single-base deletion — a gap where every other mammal has a C — that disables the gene, shown at the nucleotide level beside the exon-3/exon-4 boundary."
+    />
 
     <h2 id="connected">Connected JBrowse sessions</h2>
     <p>
