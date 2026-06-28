@@ -239,11 +239,12 @@ export const examples: Example[] = [
     source: PrestinSrc,
   },
   {
-    name: 'Conservation within a protein (p53)',
+    name: 'Domain architecture (p53)',
     description:
-      'p53 diffed against human — the central DNA-binding domain collapses to ' +
-      'dots while the variable N/C-termini stay full of letters, showing where ' +
-      'selection acts within one protein.',
+      'p53 with its InterProScan domains overlaid — the central DNA-binding ' +
+      'domain (where most cancer mutations fall) forms the bulk of the protein, ' +
+      'flanked by the short N-terminal transactivation motifs, with the ' +
+      'reference diff showing as dots in the unannotated linkers.',
     Component: P53,
     source: P53Src,
   },

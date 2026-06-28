@@ -271,8 +271,11 @@ export const specs = [
   },
   {
     name: 'within-protein-conservation',
-    // p53 vs human: the central DNA-binding domain collapses to dots while the
-    // variable N/C-termini stay full of letters
+    // p53 with its InterProScan domains overlaid (diffed against human): the
+    // overlay maps the functional architecture onto the alignment — the central
+    // DNA-binding domain dominates, flanked by the short N-terminal motifs, with
+    // the reference diff showing as dots in the unannotated linkers. Domains
+    // read better at this whole-protein zoom than the raw rainbow ever could.
     url: data({
       height: 480,
       treeAreaWidth: 175,
@@ -282,6 +285,24 @@ export const specs = [
       data: {
         msa: readConst('p53MSA'),
         tree: readConst('p53Tree'),
+        gff: readConst('p53DomainsGFF'),
+      },
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
+    name: 'rna-secondary-structure',
+    // tRNA (Rfam RF00005): the Stockholm #=GC SS_cons cloverleaf renders as a
+    // dedicated Secondary-structure track above the alignment, the acceptor
+    // stem + D/anticodon/T arms colored by base-pairing. Tree comes from the
+    // embedded #=GF NH. A capability no other gallery figure shows.
+    url: data({
+      height: 450,
+      treeAreaWidth: 175,
+      colorSchemeName: 'nucleotide',
+      data: {
+        msa: readConst('trnaMSA'),
       },
     }),
     settle: 2500,

@@ -2,17 +2,15 @@ import { MSAViewer } from 'react-msaview'
 
 import { p53DomainsGFF, p53MSA, p53Tree } from './generatedData'
 
-// The tumor suppressor p53 (TP53) across mammals. Conservation is not uniform:
-// the central DNA-binding domain (where most cancer mutations fall) is highly
-// conserved while the N- and C-terminal regions vary. With relativeTo="Human"
-// the middle of the alignment collapses to dots while the flanks stay full of
-// letters — showing WHERE within a protein selection acts. The conserved core is
-// the "guardian of the genome" DNA-binding domain of Lane 1992, Nature
-// (https://doi.org/10.1038/358015a0).
-// Built by scripts/examples-gen (UniProt + ClustalW). The InterProScan overlay
-// lines its domains up with the conservation pattern: the transactivation
-// domain, the central DNA-binding domain (the conserved core) and the
-// C-terminal tetramerization domain.
+// The tumor suppressor p53 (TP53) across mammals, with its InterProScan domains
+// overlaid. The overlay maps the functional architecture onto the alignment:
+// the central DNA-binding domain (where most cancer mutations fall) forms the
+// bulk of the protein, flanked by the short N-terminal transactivation motifs
+// and the C-terminal tetramerisation motif. The DNA-binding domain is the
+// conserved "guardian of the genome" core of Lane 1992, Nature
+// (https://doi.org/10.1038/358015a0). With relativeTo="Human" the unannotated
+// linkers between the domains show the reference diff as dots. Built by
+// scripts/examples-gen (UniProt + ClustalW).
 export default function P53() {
   return (
     <MSAViewer
