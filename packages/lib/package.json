@@ -11,6 +11,7 @@
   },
   "exports": {
     ".": {
+      "types": "./src/index.ts",
       "node": "./dist/index.js",
       "default": "./src/index.ts"
     }
@@ -29,8 +30,8 @@
     "watch": "pnpm build:esm --watch",
     "format": "prettier --write .",
     "build:esm": "tsc --project tsconfig.build.json",
-    "build:bundle": "webpack",
-    "build": "pnpm clean && pnpm build:esm && pnpm build:bundle",
+    "build:umd": "node esbuild.mjs",
+    "build": "pnpm clean && pnpm build:esm && pnpm build:umd",
     "statedocs": "rm -rf apidocs && mkdir apidocs && node --experimental-strip-types docgen/generateStateModelDocs.ts",
     "poststatedocs": "pnpm format",
     "test": "vitest"
@@ -56,7 +57,8 @@
     "main": "dist/index.js"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1"
+    "@types/node": "^26.0.1",
+    "esbuild": "^0.28.1"
   },
   "dependencies": {
     "@jbrowse/svgcanvas": "workspace:*",
