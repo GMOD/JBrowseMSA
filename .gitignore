@@ -118,5 +118,8 @@ app/build
 lib/bundle
 pages-dist
 
-# Local MUI-v9 @jbrowse/core stopgap (see scripts/pack-local-jbrowse.mjs)
-vendor-jbrowse/
+# Local MUI-v9 @jbrowse/core stopgap (see scripts/pack-local-jbrowse.mjs).
+# Track the vendored tarballs (overriding the global *.tgz ignore above) so main
+# stays installable until a MUI-v9 @jbrowse/core is published to npm.
+!vendor-jbrowse/jbrowse-core.tgz
+!vendor-jbrowse/jbrowse-render-core.tgz
