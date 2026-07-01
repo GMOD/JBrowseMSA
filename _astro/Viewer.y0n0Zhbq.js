@@ -1,0 +1,1 @@
+import{xn as e}from"./parseGFF.BZcEivXX.js";import{f as t,m as n,p as r}from"./exampleData.BKmQLz-5.js";var i=e();function a(){return(0,i.jsx)(`div`,{style:{border:`1px solid var(--border)`,borderRadius:6},children:(0,i.jsx)(n,{msa:t,tree:r,colorScheme:`clustalx_protein_dynamic`,height:400})})}export{a as default};
