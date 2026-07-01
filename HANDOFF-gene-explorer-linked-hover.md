@@ -72,6 +72,25 @@ gene segments + HBB, partial in UCSC's own data).
   GFF tabix fetch for covered genes. tsc clean.
 - Source files cached at `~/data/gene-explorer/` to avoid re-downloading 474 MB.
 
+## SHIPPED — 3D structure for any gene (decoupled from the 100-way set)
+
+The ProteinView used to be gated on `msaAvailable`, so a gene outside UCSC's
+knownCanonical 100-way set got only a bare genome view — even though mygene
+already resolved a UniProt accession and AlphaFold had a structure. But the 3D
+linkage needs only the `connectedFeature` CDS model (built for any gene) and a
+`userProvidedTranscriptSequence`; the alignment is not required.
+
+Fix (`website/src/lib/geneExplorer.ts`): `loadGene` now resolves a
+`proteinSequence` — the aligned hg38 MSA row when the gene is covered (it's the
+knownCanonical CDS translation, so it shares `connectedFeature`'s codon
+ordinals), else the **UniProt canonical sequence** via the CORS-open
+`rest.uniprot.org/uniprotkb/<acc>.fasta`, which is exactly the sequence AlphaFold
+builds its structure from. `buildSessionUrl` gates the ProteinView on
+`uniprotId && proteinSequence` (not `msaAvailable`) and lays out genome
+(+alignment when present) on the left, structure on the right. So every human
+gene with a Swiss-Prot accession now gets a linked genome↔3D session; the MSA
+remains the only 100-way-gated view.
+
 ## ROOT CAUSE of "no LGV highlight" — stale webgl-poc (FOUND via puppeteer)
 
 A live puppeteer test (`scripts/gene-explorer/test-lgv-highlight.mjs`) proved
