@@ -386,22 +386,33 @@ export function collapsedLoc(
   { collapse = true, padding = DEFAULT_WINDOW_SIZE }: CollapseOptions = {},
 ) {
   const refName = toCanonicalRefName(transcript.refName)
-  return collapse
-    ? paddedMergedExons(transcript, padding)
-        .map(e => `${refName}:${e.start + 1}-${e.end}`)
-        .join(' ')
-    : `${refName}:${Math.min(...transcript.exons.map(e => e.start)) + 1}-${Math.max(...transcript.exons.map(e => e.end))}`
+  if (collapse) {
+    return paddedMergedExons(transcript, padding)
+      .map(e => `${refName}:${e.start + 1}-${e.end}`)
+      .join(' ')
+  }
+  const { start, end } = blockBounds(transcript.exons)
+  return `${refName}:${start + 1}-${end}`
+}
+
+// Genomic extent of a set of blocks (min start, max end).
+function blockBounds(blocks: Exon[]) {
+  return {
+    start: Math.min(...blocks.map(b => b.start)),
+    end: Math.max(...blocks.map(b => b.end)),
+  }
 }
 
 // The transcript model the MsaView and ProteinView use to map a residue to its
 // codon (and back). 0-based interbase coordinates, CDS subfeatures only.
 export function connectedFeature(transcript: Transcript) {
+  const { start, end } = blockBounds(transcript.cds)
   return {
     uniqueId: transcript.name,
     type: 'mRNA',
     refName: toCanonicalRefName(transcript.refName),
-    start: Math.min(...transcript.cds.map(c => c.start)),
-    end: Math.max(...transcript.cds.map(c => c.end)),
+    start,
+    end,
     strand: transcript.strand,
     name: transcript.name,
     subfeatures: transcript.cds.map(c => ({
@@ -452,10 +463,29 @@ function firstSequence(fasta: string) {
   return seqLines.join('').replaceAll('-', '')
 }
 
+// The UniProt canonical protein sequence by accession. AlphaFold builds its
+// structure from exactly this sequence, so it's the right
+// `userProvidedTranscriptSequence` for the 3D<->structure alignment — and it's
+// available for any gene with a Swiss-Prot accession, not just the 100-way set.
+// Best-effort: a failure just means no 3D view (undefined), never a load error.
+export async function fetchUniProtSeq(uniprotId: string) {
+  const res = await fetch(
+    `https://rest.uniprot.org/uniprotkb/${uniprotId}.fasta`,
+  ).catch(() => undefined)
+  if (!res?.ok) {
+    return undefined
+  }
+  const [, ...seqLines] = (await res.text()).trim().split('\n')
+  return seqLines.join('')
+}
+
 export interface GeneResult {
   transcript: Transcript
   uniprotId?: string
   msa?: GeneMsa
+  // the protein AlphaFold aligns to: the aligned hg38 row when in the 100-way
+  // set, else the UniProt canonical sequence — so 3D linkage works for any gene
+  proteinSequence?: string
 }
 
 // Resolve a gene symbol to everything the result panel renders: its transcript
@@ -470,7 +500,13 @@ export async function loadGene(symbol: string): Promise<GeneResult> {
     fetchGeneTranscript(symbol, locus),
     fetchGeneMsa(symbol),
   ])
-  return { transcript, uniprotId: locus.uniprotId, msa }
+  // Prefer the aligned hg38 MSA row: it's the knownCanonical CDS translation, so
+  // it shares connectedFeature's codon ordinals. For genes outside the 100-way
+  // set fall back to the UniProt sequence so the 3D view still links up.
+  const proteinSequence =
+    msa?.querySequence ??
+    (locus.uniprotId ? await fetchUniProtSeq(locus.uniprotId) : undefined)
+  return { transcript, uniprotId: locus.uniprotId, msa, proteinSequence }
 }
 
 export interface SessionOptions {
@@ -590,16 +626,24 @@ export function buildSessionUrl({
   const feature = connectedFeature(transcript)
   const lgv = linearGenomeView(transcript, collapseIntrons)
   const msa = msaAvailable ? msaView(transcript, feature, uniprotId) : undefined
+  // the 3D view needs only the structure accession + its protein sequence, not
+  // the alignment, so it links up for any gene with a UniProt entry
   const protein =
-    msaAvailable && uniprotId && proteinSequence
+    uniprotId && proteinSequence
       ? proteinView(transcript, feature, uniprotId, proteinSequence)
       : undefined
 
   const session = {
     name: `Gene explorer: ${transcript.geneName}`,
     views: [lgv, ...(msa ? [msa] : []), ...(protein ? [protein] : [])],
-    ...(msa && protein
-      ? { init: sideBySideLayout([lgv.id, msa.id], protein.id) }
+    // genome (+ alignment when present) on the left, structure on the right
+    ...(protein
+      ? {
+          init: sideBySideLayout(
+            [lgv.id, ...(msa ? [msa.id] : [])],
+            protein.id,
+          ),
+        }
       : {}),
   }
   return { session, url: encodedSessionUrl(session) }

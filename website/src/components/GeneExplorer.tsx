@@ -156,15 +156,17 @@ export default function GeneExplorer() {
     }
   }, [urlGene, onPick])
 
-  // Push the picked gene into the page URL (?gene=) so the selection is
-  // shareable, bookmarkable, and survives reload.
+  // Reflect the selection in the page URL (?gene=) so it's shareable,
+  // bookmarkable, and survives reload; clearing the Autocomplete removes it.
   function navigate(symbol: string | null) {
+    const next = new URL(window.location.href)
     if (symbol) {
-      const next = new URL(window.location.href)
       next.searchParams.set('gene', symbol)
-      window.history.pushState(null, '', next)
-      window.dispatchEvent(new Event('gene-url-change'))
+    } else {
+      next.searchParams.delete('gene')
     }
+    window.history.pushState(null, '', next)
+    window.dispatchEvent(new Event('gene-url-change'))
   }
 
   return (
@@ -303,12 +305,14 @@ export default function GeneExplorer() {
         </Paper>
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          {error ? (
+          {/* gate on urlGene so clearing the selection empties the panel
+              without syncing state in an effect */}
+          {urlGene && error ? (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
           ) : null}
-          {result ? (
+          {urlGene && result ? (
             <Box
               sx={{
                 opacity: busy ? 0.5 : 1,
@@ -333,7 +337,7 @@ export default function GeneExplorer() {
 }
 
 function ResultPanel({ result }: { result: GeneResult }) {
-  const { transcript, uniprotId, msa } = result
+  const { transcript, uniprotId, msa, proteinSequence } = result
   // Stats describe the CODING model (transcript.cds), so they mean the same
   // thing whether the transcript came from the .cds sidecar or the RefSeq
   // fallback. transcript.exons is coding-only for the former but full mRNA
@@ -352,11 +356,11 @@ function ResultPanel({ result }: { result: GeneResult }) {
       buildSessionUrl({
         transcript,
         uniprotId,
-        proteinSequence: msa?.querySequence,
+        proteinSequence,
         msaAvailable: !!msa,
         collapseIntrons: collapse,
       }),
-    [transcript, uniprotId, msa, collapse],
+    [transcript, uniprotId, msa, proteinSequence, collapse],
   )
   const loc = useMemo(
     () => collapsedLoc(transcript, { collapse }),
@@ -411,8 +415,9 @@ function ResultPanel({ result }: { result: GeneResult }) {
       {msa ? null : (
         <Alert severity="info" sx={{ mt: 2 }}>
           No 100-way alignment for {transcript.geneName} — it isn&apos;t in the
-          UCSC knownCanonical set. The collapsed genome view (and its JBrowse
-          link) still work.
+          UCSC knownCanonical set. The collapsed genome view
+          {uniprotId ? ' and AlphaFold structure' : ''} (and the JBrowse link)
+          still work.
         </Alert>
       )}
 
