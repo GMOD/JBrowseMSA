@@ -28,11 +28,11 @@ const indexFromHash = () => {
 
 export default function ExamplesApp() {
   const [selected, setSelected] = useState(indexFromHash)
-  const example = examples[selected]!
+  const example = examples[selected]
 
   const select = (i: number) => {
     setSelected(i)
-    window.history.replaceState(null, '', `#${slugOf(examples[i]!.name)}`)
+    window.history.replaceState(null, '', `#${slugOf(examples[i].name)}`)
   }
   const { Component } = example
   return (

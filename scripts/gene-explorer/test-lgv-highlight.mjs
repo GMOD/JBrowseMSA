@@ -77,22 +77,30 @@ async function main() {
           jbrowseUrl: anchor?.href,
           previewLoaded: txt.includes('100-way alignment'),
           notHostedMsg: txt.includes('once the alignment file is hosted'),
-          error: /error|failed|not found/i.test(txt) && txt.length < 400 ? txt : undefined,
+          error:
+            /error|failed|not found/i.test(txt) && txt.length < 400
+              ? txt
+              : undefined,
         }
       })
       if (pageState.jbrowseUrl) break
       await delay(1000)
     }
-    console.log('  page:', JSON.stringify({
-      gotUrl: !!pageState.jbrowseUrl,
-      previewLoaded: pageState.previewLoaded,
-      notHostedMsg: pageState.notHostedMsg,
-    }))
+    console.log(
+      '  page:',
+      JSON.stringify({
+        gotUrl: !!pageState.jbrowseUrl,
+        previewLoaded: pageState.previewLoaded,
+        notHostedMsg: pageState.notHostedMsg,
+      }),
+    )
     if (!pageState.jbrowseUrl) {
       failures.push('gene-explorer page never produced an Open-in-JBrowse URL')
     }
     if (pageState.notHostedMsg) {
-      failures.push('page shows stale "alignment not hosted" message (MSA preview did not load)')
+      failures.push(
+        'page shows stale "alignment not hosted" message (MSA preview did not load)',
+      )
     }
     jbrowseUrl = pageState.jbrowseUrl
     const hasProteinView = jbrowseUrl?.includes('ProteinView')
@@ -102,13 +110,19 @@ async function main() {
 
     // ---- 2. open the built session in live JBrowse, test 3D -> LGV ----------
     if (jbrowseUrl && hasProteinView) {
-      await page.goto(jbrowseUrl, { waitUntil: 'domcontentloaded', timeout: 60000 })
+      await page.goto(jbrowseUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 60000,
+      })
       for (let i = 0; i < 15; i++) {
         const clicked = await page.evaluate(() => {
           const b = [...document.querySelectorAll('button')].find(x =>
             /trust|yes|continue/i.test(x.textContent || ''),
           )
-          if (b) { b.click(); return true }
+          if (b) {
+            b.click()
+            return true
+          }
           return false
         })
         if (clicked) break
@@ -130,12 +144,19 @@ async function main() {
           }
         })
         lgvId = c.lgvId
-        if (c.anyConnected) { connected = true; break }
+        if (c.anyConnected) {
+          connected = true
+          break
+        }
         await delay(1500)
       }
-      console.log(`  LGV id=${lgvId} (spec pinned lgv-${SYMBOL})  connectedViewResolves=${connected}`)
+      console.log(
+        `  LGV id=${lgvId} (spec pinned lgv-${SYMBOL})  connectedViewResolves=${connected}`,
+      )
       if (!connected) {
-        failures.push(`no view resolved connectedView — LGV id "${lgvId}" != pinned "lgv-${SYMBOL}" (stale jbrowse build not preserving spec id?)`)
+        failures.push(
+          `no view resolved connectedView — LGV id "${lgvId}" != pinned "lgv-${SYMBOL}" (stale jbrowse build not preserving spec id?)`,
+        )
       }
 
       let ready = {}
@@ -154,47 +175,71 @@ async function main() {
               structureConnected: !!s?.connectedView,
               aligned: !!s?.pairwiseAlignment,
               seqCount: s?.structureSequences?.length ?? 0,
-              error: pv?.error ? String(pv.error) : s?.error ? String(s.error) : undefined,
+              error: pv?.error
+                ? String(pv.error)
+                : s?.error
+                  ? String(s.error)
+                  : undefined,
             }
           })
           if (ready.error) console.log('  [model error]', ready.error)
-          if (ready.structure && ready.aligned && ready.structureConnected) break
+          if (ready.structure && ready.aligned && ready.structureConnected)
+            break
           await delay(2000)
         }
         console.log('  jbrowse ready:', JSON.stringify(ready))
-        if (!ready?.aligned) failures.push('structure pairwiseAlignment never computed')
-        if (!ready?.structureConnected) failures.push('structure.connectedView never resolved')
+        if (!ready?.aligned)
+          failures.push('structure pairwiseAlignment never computed')
+        if (!ready?.structureConnected)
+          failures.push('structure.connectedView never resolved')
       }
 
       if (ready?.aligned && ready?.structureConnected) {
-        const probe = await page.evaluate((min, max) => {
-          const root = window.JBrowseRootModel
-          const s = root.session.views.find(v => v.type === 'ProteinView').structures[0]
-          const mid = Math.floor((s.userProvidedTranscriptSequence?.length ?? 200) / 2)
-          const read = pos => {
-            s.setHoveredPosition({ structureSeqPos: pos })
-            const h = s.hoverGenomeHighlights
-            return h?.length ? { ...h[0] } : undefined
-          }
-          const a = read(mid)
-          const b = read(mid + 1)
-          s.setClickedStructureRange({ start: mid, end: mid + 5 })
-          const click = s.clickGenomeHighlights
-          return {
-            mid,
-            a,
-            b,
-            click: click?.length ? { ...click[0] } : undefined,
-            inCds: a ? a.start >= min && a.start <= max : false,
-            codonGap: a && b ? Math.abs(a.start - b.start) : undefined,
-          }
-        }, cds.min, cds.max)
+        const probe = await page.evaluate(
+          (min, max) => {
+            const root = window.JBrowseRootModel
+            const s = root.session.views.find(v => v.type === 'ProteinView')
+              .structures[0]
+            const mid = Math.floor(
+              (s.userProvidedTranscriptSequence?.length ?? 200) / 2,
+            )
+            const read = pos => {
+              s.setHoveredPosition({ structureSeqPos: pos })
+              const h = s.hoverGenomeHighlights
+              return h?.length ? { ...h[0] } : undefined
+            }
+            const a = read(mid)
+            const b = read(mid + 1)
+            s.setClickedStructureRange({ start: mid, end: mid + 5 })
+            const click = s.clickGenomeHighlights
+            return {
+              mid,
+              a,
+              b,
+              click: click?.length ? { ...click[0] } : undefined,
+              inCds: a ? a.start >= min && a.start <= max : false,
+              codonGap: a && b ? Math.abs(a.start - b.start) : undefined,
+            }
+          },
+          cds.min,
+          cds.max,
+        )
         console.log('  probe:', JSON.stringify(probe))
 
-        if (!probe.a) failures.push('hoverGenomeHighlights empty for a mid-protein residue')
-        if (probe.a && !probe.inCds) failures.push(`highlight start ${probe.a.start} outside CDS [${cds.min},${cds.max}]`)
-        if (probe.a && probe.a.refName !== cds.refName) failures.push(`highlight refName ${probe.a.refName} != ${cds.refName}`)
-        if (probe.codonGap !== undefined && probe.codonGap !== 3) failures.push(`adjacent residues map ${probe.codonGap} bp apart, expected 3`)
+        if (!probe.a)
+          failures.push('hoverGenomeHighlights empty for a mid-protein residue')
+        if (probe.a && !probe.inCds)
+          failures.push(
+            `highlight start ${probe.a.start} outside CDS [${cds.min},${cds.max}]`,
+          )
+        if (probe.a && probe.a.refName !== cds.refName)
+          failures.push(
+            `highlight refName ${probe.a.refName} != ${cds.refName}`,
+          )
+        if (probe.codonGap !== undefined && probe.codonGap !== 3)
+          failures.push(
+            `adjacent residues map ${probe.codonGap} bp apart, expected 3`,
+          )
         if (!probe.click) failures.push('clickGenomeHighlights empty')
 
         // the model getter being right isn't enough — the LGV must actually
@@ -202,13 +247,19 @@ async function main() {
         // (correct coords, but the overlay can't place itself). Let mobx/React
         // flush, then look for the rendered highlight overlay in the DOM.
         await delay(2500)
-        const domHighlights = await page.evaluate(() =>
-          [...document.querySelectorAll('div')].filter(
-            d => getComputedStyle(d).backgroundColor === 'rgba(255, 255, 0, 0.2)',
-          ).length,
+        const domHighlights = await page.evaluate(
+          () =>
+            [...document.querySelectorAll('div')].filter(
+              d =>
+                getComputedStyle(d).backgroundColor ===
+                'rgba(255, 255, 0, 0.2)',
+            ).length,
         )
         console.log('  rendered highlight overlays in LGV:', domHighlights)
-        if (domHighlights === 0) failures.push('LGV rendered NO highlight overlay despite valid clickGenomeHighlights (refname alias / rendering bug)')
+        if (domHighlights === 0)
+          failures.push(
+            'LGV rendered NO highlight overlay despite valid clickGenomeHighlights (refname alias / rendering bug)',
+          )
       }
     }
   } finally {
@@ -219,7 +270,9 @@ async function main() {
     console.error(`\nFAIL (${SYMBOL}):\n - ${failures.join('\n - ')}`)
     process.exit(1)
   }
-  console.log(`\nPASS: ${SYMBOL} ProteinView -> LGV genome highlight is correct.`)
+  console.log(
+    `\nPASS: ${SYMBOL} ProteinView -> LGV genome highlight is correct.`,
+  )
 }
 
 main().catch(e => {

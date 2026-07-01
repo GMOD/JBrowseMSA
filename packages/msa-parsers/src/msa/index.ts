@@ -8,11 +8,7 @@ export { parseEmfTree } from 'emf-js'
 export { default as parseNewick } from './parseNewick.ts'
 
 export type MSAParserType =
-  | StockholmMSA
-  | A3mMSA
-  | FastaMSA
-  | EmfMSA
-  | ClustalMSA
+  StockholmMSA | A3mMSA | FastaMSA | EmfMSA | ClustalMSA
 
 export type MSAFormat = 'stockholm' | 'a3m' | 'fasta' | 'emf' | 'clustal'
 

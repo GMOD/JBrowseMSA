@@ -1,7 +1,7 @@
 # Gene explorer data
 
-Backs the [Gene explorer](../../website/src/pages/gene-explorer.astro)
-page: type any human gene → a connected JBrowse session with a **collapsed-intron**
+Backs the [Gene explorer](../../website/src/pages/gene-explorer.astro) page:
+type any human gene → a connected JBrowse session with a **collapsed-intron**
 gene view, its **100-way vertebrate protein alignment**, and the **AlphaFold
 structure**.
 
@@ -23,8 +23,8 @@ there is nothing per-gene to host:
 The one thing that cannot be fetched live is the alignment: the UCSC 100-way
 exon-amino-acid file is hundreds of MB. `build-data.mjs` reindexes it **once**
 into a single bgzip file plus a tiny name index, so any gene's whole alignment
-is one random read **by gene symbol** — no per-gene files, no coordinates, no
-91 MB faidx.
+is one random read **by gene symbol** — no per-gene files, no coordinates, no 91
+MB faidx.
 
 ## Build
 
@@ -36,7 +36,7 @@ node scripts/gene-explorer/build-data.mjs [exonAA-url] [outDir]
 
 Prefer a **local copy** of the exonAA input to avoid re-downloading ~474 MB each
 run (and to sidestep a harmless TLS socket-close the streamed fetch can emit
-*after* all output is written):
+_after_ all output is written):
 
 ```sh
 mkdir -p ~/data/gene-explorer && cd ~/data/gene-explorer
@@ -60,18 +60,20 @@ JBrowse's bam/bai shorthand):
 
 - `hg38.knownCanonical.multiz100way.aa.fa.gz` — bgzip of concatenated
   per-transcript FASTA blocks. One block = `>hg38\nSEQ\n>panTro4\nSEQ\n...`
-  (hg38 first; UCSC `db` names = the alignment rows and the species-tree leaves).
-  A species missing an exon is gap-filled so every row stays column-aligned.
+  (hg38 first; UCSC `db` names = the alignment rows and the species-tree
+  leaves). A species missing an exon is gap-filled so every row stays
+  column-aligned.
 - `hg38.knownCanonical.multiz100way.aa.fa.gz.gzi` — the `bgzip -i` index.
-- `hg38.knownCanonical.multiz100way.aa.fa.gz.idx` — TSV `SYMBOL <TAB> offset
-  <TAB> length`: the uncompressed byte offset + length of each block. ~1 MB,
-  fetched once by the browser, then random-read by name.
-- `hg38.knownCanonical.multiz100way.aa.fa.gz.cds` — TSV `SYMBOL <TAB> ENST <TAB>
-  refName <TAB> strand <TAB> start:end:phase,…`: the hg38 row's knownCanonical
-  CDS model (0-based interbase, genomic-ascending; phase recomputed from
-  cumulative coding length, the GFF3 definition). The whole CDS spans of a gene
-  sum to `3 × (its hg38 alignment-row length)`, so a feature built from it shares
-  the alignment's coordinate space exactly. ~2 MB, fetched once.
+- `hg38.knownCanonical.multiz100way.aa.fa.gz.idx` — TSV
+  `SYMBOL <TAB> offset <TAB> length`: the uncompressed byte offset + length of
+  each block. ~1 MB, fetched once by the browser, then random-read by name.
+- `hg38.knownCanonical.multiz100way.aa.fa.gz.cds` — TSV
+  `SYMBOL <TAB> ENST <TAB> refName <TAB> strand <TAB> start:end:phase,…`: the
+  hg38 row's knownCanonical CDS model (0-based interbase, genomic-ascending;
+  phase recomputed from cumulative coding length, the GFF3 definition). The
+  whole CDS spans of a gene sum to `3 × (its hg38 alignment-row length)`, so a
+  feature built from it shares the alignment's coordinate space exactly. ~2 MB,
+  fetched once.
 - `hg38.multiz100way.nh` — the 100-way species tree.
 
 ### How it works
@@ -88,8 +90,8 @@ that block.
 ### Testing on a slice
 
 You do not need the full download to test the pipeline. Grab a prefix, keep
-whole transcripts, and run the build on it (kgXref is still fetched in full —
-it is small):
+whole transcripts, and run the build on it (kgXref is still fetched in full — it
+is small):
 
 ```sh
 curl -s -r 0-400000 \

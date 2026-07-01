@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import type { ReactNode } from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
@@ -82,30 +88,48 @@ function getGeneFromUrl() {
 }
 
 export default function GeneExplorer() {
-  const [options, setOptions] = useState<string[]>(EXAMPLE_SYMBOLS)
+  const [hits, setHits] = useState<string[]>(EXAMPLE_SYMBOLS)
+  const [inputValue, setInputValue] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
   const [result, setResult] = useState<GeneResult>()
   const [helpOpen, setHelpOpen] = useState(false)
 
+  // show the curated examples until there's a real query to suggest against
+  const options = inputValue.length >= 2 ? hits : EXAMPLE_SYMBOLS
+
   // Reactive URL read: re-renders on popstate (back/forward) and pushState via
   // the gene-url-change event dispatched by navigate() below.
-  const urlGene = useSyncExternalStore(subscribeGeneUrl, getGeneFromUrl, () => null)
+  const urlGene = useSyncExternalStore(
+    subscribeGeneUrl,
+    getGeneFromUrl,
+    () => null,
+  )
 
-  async function onSearch(query: string) {
-    if (query.length >= 2) {
-      try {
-        const hits = await searchGenes(query)
-        if (hits.length > 0) {
-          setOptions(hits)
-        }
-      } catch {
-        // type-ahead is best-effort; keep the last options
-      }
-    } else {
-      setOptions(EXAMPLE_SYMBOLS)
+  // Debounced, race-safe type-ahead: query mygene.info 200ms after typing
+  // stops (not once per keystroke), and drop a response whose input has since
+  // changed so a slow earlier request can't clobber a newer one's suggestions.
+  useEffect(() => {
+    if (inputValue.length < 2) {
+      return
     }
-  }
+    let ignore = false
+    const timer = setTimeout(() => {
+      searchGenes(inputValue)
+        .then(found => {
+          if (!ignore && found.length > 0) {
+            setHits(found)
+          }
+        })
+        .catch(() => {
+          // type-ahead is best-effort; keep the last suggestions
+        })
+    }, 200)
+    return () => {
+      ignore = true
+      clearTimeout(timer)
+    }
+  }, [inputValue])
 
   const onPick = useCallback(async (symbol: string) => {
     setBusy(true)
@@ -189,8 +213,9 @@ export default function GeneExplorer() {
             fullWidth
             openOnFocus
             options={options}
+            inputValue={inputValue}
             onInputChange={(_e, v) => {
-              void onSearch(v)
+              setInputValue(v)
             }}
             onChange={(_e, v) => {
               navigate(typeof v === 'string' ? v : null)
@@ -227,16 +252,18 @@ export default function GeneExplorer() {
                 placeholder="e.g. TP53"
                 helperText="Type any human gene, or pick below"
                 size="small"
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {busy ? (
-                        <CircularProgress color="inherit" size={18} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {busy ? (
+                          <CircularProgress color="inherit" size={18} />
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  },
                 }}
               />
             )}
@@ -430,7 +457,13 @@ function DetailsDialog({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth scroll="paper">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      scroll="paper"
+    >
       <DialogTitle
         sx={{
           display: 'flex',
@@ -451,8 +484,8 @@ function DetailsDialog({
       </DialogTitle>
       <DialogContent dividers>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          {codingBp.toLocaleString()} CDS bp / {span.toLocaleString()} bp
-          coding span ({ratio}× collapsed)
+          {codingBp.toLocaleString()} CDS bp / {span.toLocaleString()} bp coding
+          span ({ratio}× collapsed)
           {uniprotId ? ` · UniProt ${uniprotId}` : ''}
         </Typography>
         <Stack
@@ -711,8 +744,8 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           That's the entire mechanism — every link in the{' '}
-          <Link href={`${base}/gallery#jbrowse`}>gallery</Link> is one of
-          these URLs. The explorer just fills in the <Code>feature</Code>, exon
+          <Link href={`${base}/gallery#jbrowse`}>gallery</Link> is one of these
+          URLs. The explorer just fills in the <Code>feature</Code>, exon
           ranges, and accessions for whatever gene you type. The full source is{' '}
           <Link
             href="https://github.com/GMOD/JBrowseMSA/blob/main/website/src/lib/geneExplorer.ts"

@@ -62,8 +62,6 @@
   },
   "dependencies": {
     "@jbrowse/svgcanvas": "workspace:*",
-    "@mui/icons-material": "^7.3.11",
-    "@mui/material": "^7.3.11",
     "colord": "^2.9.3",
     "flatbush": "^4.6.2",
     "msa-parsers": "workspace:*",

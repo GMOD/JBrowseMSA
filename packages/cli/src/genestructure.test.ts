@@ -56,7 +56,9 @@ describe('codingExons', () => {
       accession_version: 'NM_000505.4',
       length: 2036,
       cds: { range: [{ begin: '38', end: '1885' }] },
-      genomic_locations: [{ exons: exonLens.map((len, i) => exon(i + 1, len)) }],
+      genomic_locations: [
+        { exons: exonLens.map((len, i) => exon(i + 1, len)) },
+      ],
     }
     const out = codingExons(t)
     expect(out.map(e => e.cdsLen)).toEqual([

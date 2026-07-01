@@ -59,8 +59,7 @@ async function resolveGeneId(gene: string, taxon: string): Promise<string> {
     `${API}/gene/symbol/${encodeURIComponent(gene)}/taxon/${encodeURIComponent(taxon)}`,
   )
   const report = getReports(json)[0] as
-    | { gene?: { gene_id?: string } }
-    | undefined
+    { gene?: { gene_id?: string } } | undefined
   const id = report?.gene?.gene_id
   if (!id) {
     throw new Error(`no gene found for symbol "${gene}" in taxon "${taxon}"`)

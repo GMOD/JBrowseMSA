@@ -69,8 +69,8 @@ Open the palette menu in the header to switch schemes live.
 [![](media/color-scheme-menu.png)][live-color-scheme-menu]
 
 The color-scheme menu, with protein and nucleotide palettes (the
-[embedding guide](https://gmod.org/JBrowseMSA/embedding#color-schemes) lists them
-all).
+[embedding guide](https://gmod.org/JBrowseMSA/embedding#color-schemes) lists
+them all).
 
 Two schemes are **dynamic** — they color each column from statistics about the
 residues in that column rather than from a fixed per-letter table:
@@ -167,8 +167,8 @@ sized data.
 
 - [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — React, UMD-in-HTML,
   and the R package.
-- [Genome browser guide](https://gmod.org/JBrowseMSA/genome-browser) — the viewer
-  as a view inside JBrowse 2, beside annotation and DNA-alignment tracks.
+- [Genome browser guide](https://gmod.org/JBrowseMSA/genome-browser) — the
+  viewer as a view inside JBrowse 2, beside annotation and DNA-alignment tracks.
 - [jbrowse-plugin-msaview](https://github.com/GMOD/jbrowse-plugin-msaview) — the
   JBrowse 2 plugin ([demo](https://jbrowse.org/demos/app)).
 - [ProteinBrowser](https://github.com/GMOD/proteinbrowser) — a fuller

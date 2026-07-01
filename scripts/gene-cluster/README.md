@@ -11,19 +11,20 @@ This is **synthetic, illustrative data**, in the same spirit as the
 `example_genes` dataset (which is likewise synthetic — "for example purposes
 only"). It exists to exercise the rendering, not to assert any biology. A real
 colinear locus (e.g. the β-globin cluster, or a bacterial operon stitched from a
-genome alignment the way `scripts/f12-cetacean` stitches F12) is the natural next
-step.
+genome alignment the way `scripts/f12-cetacean` stitches F12) is the natural
+next step.
 
 ## What it shows
 
-- **Consistent color per gene down the columns** (`Name=<gene>`, like F12 exons).
+- **Consistent color per gene down the columns** (`Name=<gene>`, like F12
+  exons).
 - **Strand as direction**: `+` genes point right, `-` genes (genC, genE) point
-  left. Only gene-level GFF types get an arrowhead; exon/CDS/domain features stay
-  rectangular blocks.
+  left. Only gene-level GFF types get an arrowhead; exon/CDS/domain features
+  stay rectangular blocks.
 - **Inversions**: genC is inverted in `Genome_4` and genE in `Genome_6` — the
   arrow flips.
 - **Deletion + alignment anchoring**: genB is deleted in `Genome_5` (its columns
-  gap out and the gene drops from the overlay), yet the *downstream* genes stay
+  gap out and the gene drops from the overlay), yet the _downstream_ genes stay
   column-aligned. That is the whole point of anchoring arrows to a real
   alignment rather than to each genome's own coordinate the way gggenes facets
   do: vertical homology is exact, not a cosmetic shift.

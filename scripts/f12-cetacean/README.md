@@ -67,17 +67,17 @@ the reading frame is preserved across the join.
 
 ## Verification (human reading frame)
 
-| Lineage                                                | Premature stops in CDS | F12      |
-| ------------------------------------------------------ | ---------------------- | -------- |
-| minke whale, dolphin, beluga, porpoise (cetaceans)     | 3–4 each + frameshifts | disabled |
-| manatee (fully aquatic sirenian — the key control)     | 0                      | intact   |
-| hippopotamus (semi-aquatic, sister to cetaceans)       | 0                      | intact   |
-| cow, dog, horse, mouse, elephant, … (terrestrial)      | 0                      | intact   |
+| Lineage                                            | Premature stops in CDS | F12      |
+| -------------------------------------------------- | ---------------------- | -------- |
+| minke whale, dolphin, beluga, porpoise (cetaceans) | 3–4 each + frameshifts | disabled |
+| manatee (fully aquatic sirenian — the key control) | 0                      | intact   |
+| hippopotamus (semi-aquatic, sister to cetaceans)   | 0                      | intact   |
+| cow, dog, horse, mouse, elephant, … (terrestrial)  | 0                      | intact   |
 
 (Pig is intact too but is **dropped from the committed alignment**: it has ~57%
-gaps through the exon-3 frameshift window in this cactus alignment, so it read as
-a near-empty row in the figures. The `SPECIES` list in `cds_pipeline.py` reflects
-this.)
+gaps through the exon-3 frameshift window in this cactus alignment, so it read
+as a near-empty row in the figures. The `SPECIES` list in `cds_pipeline.py`
+reflects this.)
 
 ## Outputs
 

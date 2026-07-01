@@ -95,15 +95,15 @@ pnpm screenshots:jbrowse --filter=protein3d --protein3d-dist=../jbrowse-plugin-p
 ```
 
 The figures are **declarative**: each is one entry in the `FIGURES` list in
-[`jbrowse-figures.mjs`](jbrowse-figures.mjs), naming a key in the `links` map of
-`website/src/pages/genome-browser.astro` — _the same declarative URL
-the docs page ships_, so the figure and the live link can never drift. A single
-generic driver loads each link and screenshots it.
+[`jbrowse-figures.mjs`](jbrowse-figures.mjs), naming a connected-session const
+in `website/src/pages/gallery.astro` — _the same declarative URL the docs page
+ships_, so the figure and the live link can never drift. A single generic driver
+loads each link and screenshots it.
 
 ```js
 {
   out: 'genome-browser-braf-v600e', // → docs/media/genome-browser-braf-v600e.png
-  link: 'brafV600',                 // key in genome-browser.astro `links`
+  link: 'brafV600',                 // const name in gallery.astro
   settle: 9000,                     // ms to let tracks paint
   centerHighlight: true,            // scroll the MSA so the lit column is centered
   expect: { connected: true, colChar: 'V' }, // assertions (fail = no screenshot)

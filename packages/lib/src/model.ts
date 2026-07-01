@@ -279,8 +279,7 @@ function stateModelFactory() {
        * #volatile
        */
       status: undefined as
-        | { msg: string; url?: string; onCancel?: () => void }
-        | undefined,
+        { msg: string; url?: string; onCancel?: () => void } | undefined,
       /**
        * #volatile
        * high resolution scale factor, helps make canvas look better on hi-dpi
@@ -343,8 +342,7 @@ function stateModelFactory() {
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        | { nodeId: string; descendantNames: string[] }
-        | undefined,
+        { nodeId: string; descendantNames: string[] } | undefined,
 
       /**
        * #volatile
@@ -377,8 +375,7 @@ function stateModelFactory() {
        * #volatile
        */
       interProAnnotations: undefined as
-        | undefined
-        | Record<string, InterProScanResults>,
+        undefined | Record<string, InterProScanResults>,
     }))
     .actions(self => ({
       /**
@@ -2043,6 +2040,23 @@ function stateModelFactory() {
             }
             // eslint-disable-next-line  @typescript-eslint/no-unused-expressions
             self.columns
+          }),
+        )
+
+        // autorun: when autoTreeAreaWidth is set and no tree is drawn, shrink the
+        // tree area to fit the row labels rather than padding it to the fixed
+        // default. Gated on noTree/!drawTree so it never fights the treeWidth sync
+        // below (treeAreaWidth here depends only on labelsWidth, not treeWidth).
+        addDisposer(
+          self,
+          autorun(() => {
+            if (
+              self.autoTreeAreaWidth &&
+              (self.noTree || !self.drawTree) &&
+              self.labelsWidth
+            ) {
+              self.setTreeAreaWidth(self.labelsWidth + self.marginLeft + 12)
+            }
           }),
         )
 

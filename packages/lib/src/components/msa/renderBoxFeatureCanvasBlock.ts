@@ -88,7 +88,9 @@ function drawTiles({
             ctx.strokeRect(x, t, lw, h)
             // segment (exon) number drawn once per band, on the top visible row,
             // so it reads as a column header for the whole band
-            const label = drawSegmentLabels ? segmentLabels.get(accession) : undefined
+            const label = drawSegmentLabels
+              ? segmentLabels.get(accession)
+              : undefined
             if (label !== undefined && i === 0) {
               const fontSize = Math.min(h - 2, 11)
               ctx.font = `${fontSize}px sans-serif`

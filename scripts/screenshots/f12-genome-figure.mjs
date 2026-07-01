@@ -15,18 +15,20 @@
  * Usage: node scripts/screenshots/f12-genome-figure.mjs [--force] [--headed]
  *        [--jbrowse-url=https://jbrowse.org/code/jb2/webgl-poc]
  */
-import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import puppeteer from 'puppeteer-core'
 
 import { commitScreenshot, optimizePng } from './image-pipeline.mjs'
-import { delay, findChrome, flag, opt } from './lib.mjs'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(__dirname, '..', '..')
-const outDir = path.join(repoRoot, 'docs', 'media')
+import {
+  BROWSER_ARGS,
+  delay,
+  findChrome,
+  flag,
+  mediaDir,
+  opt,
+  tmpShot,
+} from './lib.mjs'
 
 const force = flag('force')
 const headed = flag('headed')
@@ -35,7 +37,8 @@ const jbrowseBase = (
   'https://jbrowse.org/code/jb2/webgl-poc'
 ).replace(/\/$/, '')
 
-const CONFIG = 'https://gmod.org/JBrowseMSA/demo/data/jbrowse-msa-combined-config.json'
+const CONFIG =
+  'https://gmod.org/JBrowseMSA/demo/data/jbrowse-msa-combined-config.json'
 
 // F12 spans chr5:177,402,141-177,409,564 (minus strand, 14 exons). Show the
 // whole locus so the exon/intron structure and the MAF conservation read at a
@@ -62,7 +65,7 @@ async function main() {
   const browser = await puppeteer.launch({
     headless: !headed,
     executablePath,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--hide-scrollbars'],
+    args: BROWSER_ARGS,
     defaultViewport: { width: 1600, height: 760, deviceScaleFactor: 2 },
   })
   try {
@@ -73,13 +76,15 @@ async function main() {
     // plugin render takes a while)
     await page.waitForSelector('canvas', { visible: true, timeout: 60000 })
     await delay(18000)
-    const tmp = path.join(os.tmpdir(), `f12-genome-${process.pid}.png`)
+    const tmp = tmpShot('genome-browser-f12')
     await page.screenshot({ path: tmp })
     optimizePng(tmp)
-    commitScreenshot(tmp, path.join(outDir, 'genome-browser-f12.png'), 'genome-browser-f12', {
-      force,
-      diffThreshold: 0.02,
-    })
+    commitScreenshot(
+      tmp,
+      path.join(mediaDir, 'genome-browser-f12.png'),
+      'genome-browser-f12',
+      { force, diffThreshold: 0.02 },
+    )
   } finally {
     await browser.close()
   }

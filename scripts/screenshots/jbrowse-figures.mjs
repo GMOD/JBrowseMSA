@@ -1,7 +1,7 @@
 /**
  * Capture the JBrowse-integration figures for the "Genome browser" docs page,
  * declaratively. Each figure is one entry in the FIGURES list below: it names a
- * docs link (the `links` map in genome-browser.astro — the same declarative URL
+ * docs link (a connected-session const in gallery.astro — the same declarative URL
  * the page ships, so figure and link can never drift) plus a few capture knobs
  * (settle time, whether to center the highlighted column, what to assert, an
  * optional annotation overlay). A single generic driver loads each link in a
@@ -40,34 +40,35 @@
  *   node scripts/screenshots/jbrowse-figures.mjs --force
  */
 import fs from 'node:fs'
-import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import puppeteer from 'puppeteer-core'
 
 import { commitScreenshot, optimizePng } from './image-pipeline.mjs'
 import {
+  BROWSER_ARGS,
+  appDataDir,
+  clickTrust,
   delay,
   findChrome,
   flag,
   listOpt,
+  mediaDir,
   numOpt,
   opt,
+  repoRoot,
   startStaticServer,
+  tmpShot,
 } from './lib.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(__dirname, '..', '..')
-const dataDir = path.join(repoRoot, 'packages', 'app', 'public', 'data')
-const outDir = path.join(repoRoot, 'docs', 'media')
+const dataDir = appDataDir
+const outDir = mediaDir
 const astroPage = path.join(
   repoRoot,
-  'packages',
   'website',
   'src',
   'pages',
-  'genome-browser.astro',
+  'gallery.astro',
 )
 
 const GMOD_DATA = 'https://gmod.org/JBrowseMSA/demo/data'
@@ -104,7 +105,7 @@ const protein3dPort = numOpt('protein3d-port', 9101)
 const filterTokens = listOpt('filter')
 
 // ---- the figures (declarative) --------------------------------------------
-// link:           key in the `links` map of genome-browser.astro (the shipped
+// link:           connected-session const name in gallery.astro (the shipped
 //                 declarative URL — single source of truth for the figure)
 // settle:         ms to wait for tracks to paint before capturing
 // centerHighlight:scroll the alignment so the pre-highlighted column is centered
@@ -152,11 +153,14 @@ const FIGURES = [
 ]
 
 // ---- helpers --------------------------------------------------------------
-// the `links` map literal in genome-browser.astro, parsed into { key: url }
+// the connected-session links in gallery.astro, declared as
+// `const NAME =\n  'url'`, parsed into { NAME: url }. Other const declarations
+// without a single-quoted string value (e.g. `const base = ...`) don't match,
+// and the URLs are percent-encoded so they never contain a single quote.
 function readLinks() {
   const astro = fs.readFileSync(astroPage, 'utf8')
   const links = {}
-  const re = /\n {2}(\w+):\n {4}'([^']*)'/g
+  const re = /const (\w+) =\s*'([^']*)'/g
   let m
   while ((m = re.exec(astro)) !== null) {
     links[m[1]] = m[2]
@@ -212,27 +216,8 @@ function localizeUrl(realUrl, { configUrl, dataBase }) {
   )
 }
 
-async function clickTrust(page) {
-  for (let i = 0; i < 20; i++) {
-    const clicked = await page.evaluate(() => {
-      const b = [...document.querySelectorAll('button')].find(x =>
-        /trust/i.test(x.textContent || ''),
-      )
-      if (b) {
-        b.click()
-        return true
-      }
-      return false
-    })
-    if (clicked) {
-      return
-    }
-    await delay(1000)
-  }
-}
-
 async function shootAndCommit(page, outName) {
-  const tmp = path.join(os.tmpdir(), `msa-jb-${process.pid}-${outName}.png`)
+  const tmp = tmpShot(outName)
   await page.screenshot({ path: tmp })
   optimizePng(tmp)
   commitScreenshot(tmp, path.join(outDir, `${outName}.png`), outName, {
@@ -326,7 +311,7 @@ function checkExpectations(fig, result, expectCol) {
 async function captureFigure(browser, fig, ctx, links) {
   const realUrl = links[fig.link]
   if (!realUrl) {
-    throw new Error(`docs link '${fig.link}' not found in genome-browser.astro`)
+    throw new Error(`docs link '${fig.link}' not found in gallery.astro`)
   }
   const msaView = decodeSpec(realUrl).views.find(v => v.type === 'MsaView')
   const highlightCols = msaView?.highlightColumns ?? []
@@ -438,19 +423,19 @@ async function main() {
   const browser = await puppeteer.launch({
     headless: true,
     executablePath,
+    // jbrowse-web fetches the local config/data cross-origin and needs a webgl
+    // context in headless Chrome
     args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
+      ...BROWSER_ARGS,
       '--disable-web-security',
       '--enable-unsafe-swiftshader',
-      '--hide-scrollbars',
     ],
   })
 
   const failures = []
   try {
     for (const fig of FIGURES.filter(wants)) {
-      // a figure whose docs link was removed from genome-browser.astro is
+      // a figure whose docs link was removed from gallery.astro is
       // skipped, not failed — the page is the source of truth for which
       // examples exist
       if (!links[fig.link]) {

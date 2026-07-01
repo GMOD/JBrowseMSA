@@ -9,7 +9,11 @@ import type { MsaViewModel } from '../../model.ts'
 
 const DomainLegend = observer(function ({ model }: { model: MsaViewModel }) {
   const [expanded, setExpanded] = useState(true)
-  const { actuallyShowDomains, visibleDomainTypes: visible, fillPalette } = model
+  const {
+    actuallyShowDomains,
+    visibleDomainTypes: visible,
+    fillPalette,
+  } = model
   const ExpandIcon = expanded ? ExpandLess : ExpandMore
 
   return actuallyShowDomains && visible.length > 0 ? (

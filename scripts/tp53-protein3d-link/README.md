@@ -2,11 +2,12 @@
 
 Builds the flagship example on the _Genome browser_ docs page: the human
 **TP53** gene on hg38, the **p53 ortholog alignment**, and the **AlphaFold p53
-structure** (via [jbrowse-plugin-protein3d](https://github.com/GMOD/jbrowse-plugin-protein3d)),
-all **connected to one genome view** and opened with a single annotated feature —
-the p53 **nuclear export signal motif** — highlighted across all three at once:
-magenta in the 3D structure, a band on the genome, and a column band in the
-alignment. A small motif rather than the whole DNA-binding domain reads as a
+structure** (via
+[jbrowse-plugin-protein3d](https://github.com/GMOD/jbrowse-plugin-protein3d)),
+all **connected to one genome view** and opened with a single annotated feature
+— the p53 **nuclear export signal motif** — highlighted across all three at
+once: magenta in the 3D structure, a band on the genome, and a column band in
+the alignment. A small motif rather than the whole DNA-binding domain reads as a
 crisp pinpoint highlight (and matches the "Motif" track the jbrowse-components
 protein3d example highlights).
 
@@ -30,18 +31,18 @@ three views, connected through one pinned genome-view id (`lgv-tp53-3d`):
   supplied, so it does not create its own LGV), carrying the AlphaFold structure
   URL and `initialSelection` — the structure-residue range pre-selected on load.
 
-`initialSelection` is a declarative protein3d prop (see the plugin's
-`Structure` model): it seeds the persistent selection on load exactly as a
-feature click would, so the structure / genome / alignment all light up from the
-URL with no interaction.
+`initialSelection` is a declarative protein3d prop (see the plugin's `Structure`
+model): it seeds the persistent selection on load exactly as a feature click
+would, so the structure / genome / alignment all light up from the URL with no
+interaction.
 
 ## Reproducible provenance
 
 Every coordinate is derived from a public source, not pasted as a blob:
 
 - **transcript model** (`connectedFeature` / ProteinView `feature`): the same
-  public RefSeq GFF the gene track uses (`ncbiRefSeq.gff.gz`, via `tabix`),
-  GFF 1-based → JBrowse 0-based interbase. TP53 `NM_000546.6` → `NP_000537.3`.
+  public RefSeq GFF the gene track uses (`ncbiRefSeq.gff.gz`, via `tabix`), GFF
+  1-based → JBrowse 0-based interbase. TP53 `NM_000546.6` → `NP_000537.3`.
 - **motif residue range**: the EBI UniProt features API
   (`proteins/api/features/P04637`, type `MOTIF`, description "Nuclear export
   signal") — the same source protein3d's own feature track reads. Currently
@@ -69,8 +70,8 @@ Every coordinate is derived from a public source, not pasted as a blob:
   example). Until published, the screenshot serves a local build
   (`scripts/screenshots/jbrowse-figures.mjs --protein3d-dist=…`).
 - **jbrowse-plugin-msaview** ≥ 2.5.1 (`connectedViewId` + `connectedFeature` +
-  `highlightColumns`). The bordered, clearly-visible `highlightColumns` band is a
-  `react-msaview` rendering change; until a release is published _and_ the
+  `highlightColumns`). The bordered, clearly-visible `highlightColumns` band is
+  a `react-msaview` rendering change; until a release is published _and_ the
   msaview plugin rebuilt against it, the screenshot serves a local plugin build
   (`--plugin-dist=…`, built against the local `react-msaview`).
 
@@ -81,4 +82,4 @@ node scripts/tp53-protein3d-link/generate.mjs   # prints the declarative URL
 ```
 
 Requires `tabix` (htslib) on PATH and network access to EBI. The printed URL is
-the value pasted into `website/src/pages/genome-browser.astro`.
+the value pasted into `website/src/pages/gallery.astro`.

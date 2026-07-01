@@ -58,6 +58,14 @@ export function TreeModelF() {
        * draw clickable node bubbles on the tree
        */
       drawNodeBubbles: defaultDrawNodeBubbles,
+
+      /**
+       * #property
+       * auto-size treeAreaWidth to fit the row labels (plus the tree, if drawn)
+       * instead of using a fixed width. useful when there is no tree, so the
+       * label gutter isn't padded out to the default 400px
+       */
+      autoTreeAreaWidth: types.optional(types.boolean, false),
     })
     .actions(self => ({
       /**
@@ -86,6 +94,12 @@ export function TreeModelF() {
        */
       setDrawTree(arg: boolean) {
         self.drawTree = arg
+      },
+      /**
+       * #action
+       */
+      setAutoTreeAreaWidth(arg: boolean) {
+        self.autoTreeAreaWidth = arg
       },
 
       /**

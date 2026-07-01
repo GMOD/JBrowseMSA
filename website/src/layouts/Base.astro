@@ -45,14 +45,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href
     <meta property="og:url" content={canonical} />
     <meta
       property="og:image"
-      content={new URL(`${base}/media/within-protein-conservation.png`, Astro.site).href}
+      content={new URL(
+        `${base}/media/within-protein-conservation.png`,
+        Astro.site,
+      ).href}
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
     <meta
       name="twitter:image"
-      content={new URL(`${base}/media/within-protein-conservation.png`, Astro.site).href}
+      content={new URL(
+        `${base}/media/within-protein-conservation.png`,
+        Astro.site,
+      ).href}
     />
   </head>
   <body class:list={{ 'app-layout': fullBleed }}>

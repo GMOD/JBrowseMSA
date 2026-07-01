@@ -20,7 +20,12 @@ export default defineConfig(
       'packages/lib/esbuild.mjs',
       'packages/lib/vite.config.ts',
       'packages/r-msaview',
-      'website',
+      // lint website/src TS/TSX, but not Astro files (needs a separate parser),
+      // generated types, or the Node build scripts/config
+      'website/**/*.astro',
+      'website/.astro/**',
+      'website/astro.config.mjs',
+      'website/scripts/**',
     ],
   },
   {

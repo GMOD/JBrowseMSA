@@ -28,6 +28,12 @@ interface MSAViewerProps {
   highlightColumns?: number[]
   /** row name to diff every other row against (matches render as ".") */
   relativeTo?: string
+  /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
+  drawTree?: boolean
+  /** fixed width (px) of the tree/label area */
+  treeAreaWidth?: number
+  /** auto-size the tree/label area to the labels (used when drawTree is false) */
+  autoTreeAreaWidth?: boolean
 }
 
 export default function MSAViewer({
@@ -43,6 +49,9 @@ export default function MSAViewer({
   rowHeight,
   highlightColumns,
   relativeTo,
+  drawTree,
+  treeAreaWidth,
+  autoTreeAreaWidth,
 }: MSAViewerProps) {
   // lazy initializer: the model is created exactly once from the initial props
   // (a stable MST instance — not a value safe to recompute, so not useMemo)
@@ -61,6 +70,9 @@ export default function MSAViewer({
       ...(rowHeight ? { rowHeight } : {}),
       ...(highlightColumns ? { highlightColumns } : {}),
       ...(relativeTo ? { relativeTo } : {}),
+      ...(drawTree !== undefined ? { drawTree } : {}),
+      ...(treeAreaWidth ? { treeAreaWidth } : {}),
+      ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),
     }),
   )
 

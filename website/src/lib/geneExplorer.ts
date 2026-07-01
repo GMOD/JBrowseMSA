@@ -110,10 +110,7 @@ export async function searchGenes(query: string): Promise<string[]> {
 
 function isHits(v: unknown): v is { hits: { symbol?: unknown }[] } {
   return (
-    typeof v === 'object' &&
-    v !== null &&
-    'hits' in v &&
-    Array.isArray((v).hits)
+    typeof v === 'object' && v !== null && 'hits' in v && Array.isArray(v.hits)
   )
 }
 
@@ -170,79 +167,77 @@ function getMsaBgzf() {
   return msaBgzf
 }
 
+// Fetch a text sidecar once and parse it into a lookup map, memoizing the
+// promise. The memo is cleared if the fetch fails, so a transient error doesn't
+// wedge every later lookup on a cached rejected promise (the placeholder-forever
+// bug); a later call retries.
+function memoizedTextIndex<T>(url: string, parse: (text: string) => T) {
+  let cached: Promise<T> | undefined
+  return () => {
+    cached ??= fetch(url)
+      .then(res => res.text())
+      .then(parse)
+      .catch((e: unknown) => {
+        cached = undefined
+        throw e
+      })
+    return cached
+  }
+}
+
 // The name index: gene symbol -> {offset,length} into the uncompressed bgzip
 // stream. ~1 MB, fetched once and cached.
-let msaIndex: Promise<Map<string, { offset: number; length: number }>> | undefined
-function getMsaIndex() {
-  // clear the memo if the fetch fails so a transient error doesn't wedge every
-  // later lookup on a cached rejected promise (the placeholder-forever bug)
-  msaIndex ??= fetch(`${MSA_GZ}.idx`)
-    .then(res => res.text())
-    .then(
-      text =>
-        new Map(
-          text
-            .trim()
-            .split('\n')
-            .map((line): [string, { offset: number; length: number }] => {
-              const [id, offset, length] = line.split('\t')
-              return [id, { offset: Number(offset), length: Number(length) }]
-            }),
-        ),
-    )
-    .catch((e: unknown) => {
-      msaIndex = undefined
-      throw e
-    })
-  return msaIndex
-}
+const getMsaIndex = memoizedTextIndex(
+  `${MSA_GZ}.idx`,
+  text =>
+    new Map(
+      text
+        .trim()
+        .split('\n')
+        .map((line): [string, { offset: number; length: number }] => {
+          const [id, offset, length] = line.split('\t')
+          return [id, { offset: Number(offset), length: Number(length) }]
+        }),
+    ),
+)
 
 // The knownCanonical CDS model index (`<fa.gz>.cds`): gene symbol -> the hg38
 // row's coding exons. Built by scripts/gene-explorer/build-data.mjs from the
 // SAME transcript as the alignment, so a feature built from it shares the
 // alignment's coordinate space (see fetchGeneCds). ~5 MB, fetched once.
-let cdsIndex: Promise<Map<string, Transcript>> | undefined
-function getCdsIndex() {
-  cdsIndex ??= fetch(`${MSA_GZ}.cds`)
-    .then(res => res.text())
-    .then(
-      text =>
-        new Map(
-          text
-            .trim()
-            .split('\n')
-            .map((line): [string, Transcript] => {
-              const [symbol, name, refName, strand, spec] = line.split('\t')
-              const cds = spec.split(',').map((s): CDS => {
-                const [start, end, phase] = s.split(':')
-                return {
-                  start: Number(start),
-                  end: Number(end),
-                  phase: Number(phase),
-                }
-              })
-              return [
-                symbol,
-                {
-                  refName: refName,
-                  strand: strand === '-' ? -1 : 1,
-                  name: name,
-                  geneName: symbol,
-                  // coding-only model: the collapsed view shows CDS exons, which
-                  // is what the protein/MSA views align to
-                  exons: cds.map(c => ({ start: c.start, end: c.end })),
-                  cds,
-                },
-              ]
-            }),
-        ),
-    )
-    .catch((e: unknown) => {
-      cdsIndex = undefined
-      throw e
-    })
-  return cdsIndex
-}
+const getCdsIndex = memoizedTextIndex(
+  `${MSA_GZ}.cds`,
+  text =>
+    new Map(
+      text
+        .trim()
+        .split('\n')
+        .map((line): [string, Transcript] => {
+          const [symbol, name, refName, strand, spec] = line.split('\t')
+          const cds = spec.split(',').map((s): CDS => {
+            const [start, end, phase] = s.split(':')
+            return {
+              start: Number(start),
+              end: Number(end),
+              phase: Number(phase),
+            }
+          })
+          return [
+            symbol,
+            {
+              refName: refName,
+              strand: strand === '-' ? -1 : 1,
+              name: name,
+              geneName: symbol,
+              // coding-only model: the collapsed view shows CDS exons, which
+              // is what the protein/MSA views align to
+              exons: cds.map(c => ({ start: c.start, end: c.end })),
+              cds,
+            },
+          ]
+        }),
+    ),
+)
 
 // The knownCanonical transcript model that backs the alignment, keyed by gene
 // symbol. Preferred over fetchTranscript (RefSeq Select) so connectedFeature
@@ -469,8 +464,12 @@ export interface GeneResult {
 // once rather than around each await.
 export async function loadGene(symbol: string): Promise<GeneResult> {
   const locus = await resolveGene(symbol)
-  const transcript = await fetchGeneTranscript(symbol, locus)
-  const msa = await fetchGeneMsa(symbol)
+  // independent once the locus is known, and each pulls a separate multi-MB
+  // index, so fetch them concurrently rather than one after the other
+  const [transcript, msa] = await Promise.all([
+    fetchGeneTranscript(symbol, locus),
+    fetchGeneMsa(symbol),
+  ])
   return { transcript, uniprotId: locus.uniprotId, msa }
 }
 

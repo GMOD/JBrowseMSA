@@ -128,7 +128,13 @@ for (const genome of GENOMES) {
       const start = nonGapCount(row, gene.colStart) + 1
       const len = gene.colEnd - gene.colStart
       const strand =
-        op === 'invert' ? (gene.strand === 1 ? '-' : '+') : gene.strand === 1 ? '+' : '-'
+        op === 'invert'
+          ? gene.strand === 1
+            ? '-'
+            : '+'
+          : gene.strand === 1
+            ? '+'
+            : '-'
       gffLines.push(
         `${genome.name}\tdemo\tgene\t${start}\t${start + len - 1}\t.\t${strand}\t.\t` +
           `ID=${genome.name}.${gene.name};Name=${gene.name}`,

@@ -1,13 +1,46 @@
 /**
  * Shared CLI + browser/server helpers for the puppeteer screenshot phases
- * (generate.mjs, jbrowse-figures.mjs) and the orchestrator.
+ * (generate.mjs, jbrowse-figures.mjs, the f12-*.mjs figures) and the
+ * orchestrator.
  */
 import fs from 'node:fs'
 import http from 'node:http'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import serveHandler from 'serve-handler'
 
 const args = process.argv.slice(2)
+
+// Repo layout, resolved once from this file's location (scripts/screenshots/).
+export const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+)
+export const mediaDir = path.join(repoRoot, 'docs', 'media')
+export const appDataDir = path.join(
+  repoRoot,
+  'packages',
+  'app',
+  'public',
+  'data',
+)
+
+// Temp path for a freshly captured PNG, namespaced by pid (concurrent specs) and
+// an optional suffix (a --check run captures the same spec twice).
+export const tmpShot = (name, suffix = '') =>
+  path.join(os.tmpdir(), `msa-shot-${process.pid}-${name}${suffix}.png`)
+
+// Puppeteer launch args shared by every capture: no sandbox (runs as root/CI),
+// hidden scrollbars (clean frames). Phases that need more (e.g. jbrowse-web's
+// cross-origin config + swiftshader webgl) spread this and append.
+export const BROWSER_ARGS = [
+  '--no-sandbox',
+  '--disable-setuid-sandbox',
+  '--hide-scrollbars',
+]
 
 export const flag = name => args.includes(`--${name}`)
 
@@ -27,6 +60,26 @@ export const listOpt = name =>
     .filter(Boolean)
 
 export const delay = ms => new Promise(r => setTimeout(r, ms))
+
+// A cross-origin config (local config/plugin served on a different port from the
+// jbrowse-web build) trips JBrowse's "this session contains unknown plugins"
+// trust gate. Poll for the Trust button for ~10s and click it so the session
+// actually loads; a session with no gate just falls through the loop.
+export async function clickTrust(page) {
+  let clicked = false
+  for (let i = 0; i < 20 && !clicked; i++) {
+    clicked = await page.evaluate(() => {
+      const button = [...document.querySelectorAll('button')].find(b =>
+        /trust/i.test(b.textContent || ''),
+      )
+      button?.click()
+      return !!button
+    })
+    if (!clicked) {
+      await delay(500)
+    }
+  }
+}
 
 const chromePaths = [
   '/usr/bin/google-chrome-stable',

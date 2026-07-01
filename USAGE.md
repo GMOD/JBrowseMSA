@@ -105,8 +105,8 @@ model.fit() // fit both axes
 ## R package (msaviewr)
 
 An R htmlwidget that takes ape, Biostrings, ggtree, and treeio objects directly.
-See the [R package guide](https://gmod.org/JBrowseMSA/r-package) for installation
-and examples.
+See the [R package guide](https://gmod.org/JBrowseMSA/r-package) for
+installation and examples.
 
 ## Color schemes
 

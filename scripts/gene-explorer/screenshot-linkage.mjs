@@ -21,7 +21,12 @@ import { delay, findChrome } from '../screenshots/lib.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '..', '..')
-const OUT = path.join(repoRoot, 'docs', 'media', 'gene-explorer-protein3d-linkage.png')
+const OUT = path.join(
+  repoRoot,
+  'docs',
+  'media',
+  'gene-explorer-protein3d-linkage.png',
+)
 
 const SYMBOL = process.argv[2] ?? 'TP53'
 const START = Number(process.argv[3] ?? 197)
@@ -64,7 +69,10 @@ try {
       const b = [...document.querySelectorAll('button')].find(x =>
         /trust|yes|continue/i.test(x.textContent || ''),
       )
-      if (b) { b.click(); return true }
+      if (b) {
+        b.click()
+        return true
+      }
       return false
     })
     if (clicked) break
@@ -74,8 +82,9 @@ try {
   // wait for the structure to load + align + connect
   for (let i = 0; i < 90; i++) {
     const ready = await page.evaluate(() => {
-      const s = window.JBrowseRootModel?.session?.views
-        ?.find(v => v.type === 'ProteinView')?.structures?.[0]
+      const s = window.JBrowseRootModel?.session?.views?.find(
+        v => v.type === 'ProteinView',
+      )?.structures?.[0]
       return !!s?.pairwiseAlignment && !!s?.connectedView
     })
     if (ready) break
@@ -86,8 +95,9 @@ try {
   // (clickGenomeHighlights), the MSA columns, and the 3D structure together
   const region = await page.evaluate(
     (start, end) => {
-      const s = window.JBrowseRootModel.session.views
-        .find(v => v.type === 'ProteinView').structures[0]
+      const s = window.JBrowseRootModel.session.views.find(
+        v => v.type === 'ProteinView',
+      ).structures[0]
       s.setClickedStructureRange({ start, end })
       const h = s.clickGenomeHighlights
       return h?.length ? { ...h[0] } : undefined

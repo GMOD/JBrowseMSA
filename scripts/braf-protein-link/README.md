@@ -77,4 +77,4 @@ node scripts/braf-protein-link/generate.mjs       # prints the declarative URL
 
 Requires `tabix`/`bgzip` (htslib) on PATH for the remote RefSeq + ClinVar
 fetches. The printed URL is the value pasted into
-`website/src/pages/genome-browser.astro`.
+`website/src/pages/gallery.astro`.

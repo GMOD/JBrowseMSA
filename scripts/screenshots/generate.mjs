@@ -16,9 +16,7 @@
  * (the pnpm script does this).
  */
 import fs from 'node:fs'
-import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import puppeteer from 'puppeteer-core'
 
@@ -28,19 +26,20 @@ import {
   pngDiffFraction,
 } from './image-pipeline.mjs'
 import {
+  BROWSER_ARGS,
   delay,
   findChrome,
   flag,
   listOpt,
+  mediaDir,
   numOpt,
+  repoRoot,
   startStaticServer,
+  tmpShot,
 } from './lib.mjs'
 import { specs } from './specs.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(__dirname, '..', '..')
 const appDist = path.join(repoRoot, 'packages', 'app', 'dist')
-const outDir = path.join(repoRoot, 'docs', 'media')
 const PORT = 5599
 // Below this fraction of differing pixels a re-render keeps the committed PNG.
 // Headless-Chrome sub-pixel glyph jitter drifts text-heavy shots ~0.2% run to
@@ -143,10 +142,7 @@ async function renderSpecToTemp(browser, spec, suffix = '') {
     }
     await delay(spec.settle ?? 1200)
     await assertViewerRendered(page, spec.name)
-    const tmp = path.join(
-      os.tmpdir(),
-      `msa-shot-${process.pid}-${spec.name}${suffix}.png`,
-    )
+    const tmp = tmpShot(spec.name, suffix)
     await shoot(page, spec, tmp)
     optimizePng(tmp)
     return tmp
@@ -159,7 +155,7 @@ function launch(executablePath, spec) {
   return puppeteer.launch({
     headless: !headed,
     executablePath,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--hide-scrollbars'],
+    args: BROWSER_ARGS,
     defaultViewport: {
       width: spec.viewportWidth ?? 1200,
       height: spec.viewportHeight ?? 720,
@@ -174,7 +170,7 @@ async function captureSpec(executablePath, spec) {
   const browser = await launch(executablePath, spec)
   try {
     const tmp = await renderSpecToTemp(browser, spec)
-    const out = path.join(outDir, `${spec.name}.png`)
+    const out = path.join(mediaDir, `${spec.name}.png`)
     commitScreenshot(tmp, out, spec.name, {
       force,
       diffThreshold: spec.diffThreshold ?? diffThreshold,
@@ -231,7 +227,7 @@ async function main() {
     process.exit(1)
   }
 
-  fs.mkdirSync(outDir, { recursive: true })
+  fs.mkdirSync(mediaDir, { recursive: true })
   console.log(
     `${check ? 'Checking' : 'Generating'} ${list.length} screenshot(s) with concurrency ${concurrency}`,
   )

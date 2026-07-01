@@ -36,22 +36,35 @@
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import zlib from 'node:zlib'
 
 import puppeteer from 'puppeteer-core'
 
 import { commitScreenshot, optimizePng } from './image-pipeline.mjs'
-import { delay, findChrome, opt, startStaticServer } from './lib.mjs'
+import {
+  BROWSER_ARGS,
+  appDataDir,
+  clickTrust,
+  findChrome,
+  flag,
+  mediaDir,
+  opt,
+  repoRoot,
+  startStaticServer,
+  tmpShot,
+} from './lib.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(__dirname, '..', '..')
-const outDir = path.join(repoRoot, 'docs', 'media')
-const force = process.argv.includes('--force')
+const outDir = mediaDir
+const force = flag('force')
 
-const DATA = path.join(repoRoot, 'packages', 'app', 'public', 'data')
-const msa = fs.readFileSync(path.join(DATA, 'f12-cetacean-cds.stock'), 'utf8')
-const gff = fs.readFileSync(path.join(DATA, 'f12-cetacean-exons.gff'), 'utf8')
+const msa = fs.readFileSync(
+  path.join(appDataDir, 'f12-cetacean-cds.stock'),
+  'utf8',
+)
+const gff = fs.readFileSync(
+  path.join(appDataDir, 'f12-cetacean-exons.gff'),
+  'utf8',
+)
 
 // published targets — these back the live, clickable gallery URLs
 const PUBLISHED_JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc'
@@ -60,7 +73,10 @@ const PUBLISHED_CONFIG =
 
 const PLUGIN_BUNDLE = 'jbrowse-plugin-msaview.umd.production.min.js'
 const HOME = os.homedir()
-const COMMITTED_CONFIG = path.join(DATA, 'jbrowse-msa-combined-config.json')
+const COMMITTED_CONFIG = path.join(
+  appDataDir,
+  'jbrowse-msa-combined-config.json',
+)
 
 // local build paths used only to render publication-grade figure PNGs; both
 // overridable, both fall back to the published target when absent.
@@ -115,7 +131,13 @@ const variants = [
     name: 'closeup',
     viewport: { width: 1500, height: 850 },
     // base resolution, scrolled so the cetacean-deletion column sits left-of-center
-    msa: { ...msaBase, colWidth: 22, scrollX: -3960, rowHeight: 20, height: 510 },
+    msa: {
+      ...msaBase,
+      colWidth: 22,
+      scrollX: -3960,
+      rowHeight: 20,
+      height: 510,
+    },
   },
 ]
 
@@ -139,28 +161,6 @@ function writeLocalConfig(scratchDir, pluginUrl) {
   return out
 }
 
-// A cross-origin config (local config + plugin on a different port from the
-// jbrowse-web build) trips JBrowse's "this link contains unknown plugins" trust
-// gate; click through it so the session actually loads.
-async function clickTrust(page) {
-  for (let i = 0; i < 20; i++) {
-    const clicked = await page.evaluate(() => {
-      const b = [...document.querySelectorAll('button')].find(x =>
-        /trust/i.test(x.textContent || ''),
-      )
-      if (b) {
-        b.click()
-        return true
-      }
-      return false
-    })
-    if (clicked) {
-      return
-    }
-    await delay(500)
-  }
-}
-
 async function capture(browser, jbrowseBase, configUrl, variant) {
   const page = await browser.newPage()
   await page.setViewport({ ...variant.viewport, deviceScaleFactor: 2 })
@@ -173,14 +173,11 @@ async function capture(browser, jbrowseBase, configUrl, variant) {
   await clickTrust(page)
   await page.waitForSelector('canvas', { visible: true, timeout: 60000 })
   await new Promise(r => setTimeout(r, 14000))
-  const tmp = path.join(
-    os.tmpdir(),
-    `f12-combined-${variant.name}-${process.pid}.png`,
-  )
+  const name = `f12-combined-${variant.name}`
+  const tmp = tmpShot(name)
   await page.screenshot({ path: tmp })
   await page.close()
   optimizePng(tmp)
-  const name = `f12-combined-${variant.name}`
   commitScreenshot(tmp, path.join(outDir, `${name}.png`), name, {
     force,
     diffThreshold: 0.02,
@@ -199,11 +196,8 @@ function writeLinksModule() {
         `export const ${constName(v.name)} = ${JSON.stringify(buildUrl(PUBLISHED_JBROWSE, PUBLISHED_CONFIG, v.msa))}`,
     )
     .join('\n')
-  const out = path.resolve(
-    __dirname,
-    '..',
-    '..',
-    'packages',
+  const out = path.join(
+    repoRoot,
     'website',
     'src',
     'lib',
@@ -242,7 +236,9 @@ async function setupCaptureTarget() {
     configUrl = `http://localhost:8133/${path.basename(localConfig)}`
     console.log(`local plugin dist: ${pluginDist}`)
   } else {
-    console.log('plugin dist not found, capturing palette-stale published plugin')
+    console.log(
+      'plugin dist not found, capturing palette-stale published plugin',
+    )
   }
 
   const cleanup = () => {
@@ -262,7 +258,7 @@ async function main() {
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: findChrome(),
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--hide-scrollbars'],
+    args: BROWSER_ARGS,
   })
   try {
     for (const v of variants) {
