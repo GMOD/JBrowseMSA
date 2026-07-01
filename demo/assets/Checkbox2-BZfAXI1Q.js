@@ -1,0 +1,2 @@
+import{n as e,t}from"./jsx-runtime-n5LQ9ujS.js";import{t as n}from"./Checkbox-DfG61Ukb.js";import{t as r}from"./FormControlLabel-D4skd9Ke.js";e();var i=t();function a({checked:e,label:t,disabled:a,onChange:o}){return(0,i.jsx)(`div`,{children:(0,i.jsx)(r,{control:(0,i.jsx)(n,{disabled:a,checked:e,onChange:()=>{o()}}),label:t})})}export{a as t};
+//# sourceMappingURL=Checkbox2-BZfAXI1Q.js.map
