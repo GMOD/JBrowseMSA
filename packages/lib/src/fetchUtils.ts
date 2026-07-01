@@ -1,4 +1,6 @@
-import { fetchAndMaybeUnzipText } from '@jbrowse/core/util'
+import { fetchAndMaybeUnzipText, statusMessageText } from '@jbrowse/core/util'
+
+import type { RpcStatus } from '@jbrowse/core/util'
 
 export interface FetchStatus {
   msg: string
@@ -10,7 +12,7 @@ type Filehandle = Parameters<typeof fetchAndMaybeUnzipText>[0]
 
 type ProgressFetcher = (
   loc: Filehandle,
-  opts: { signal: AbortSignal; statusCallback: (msg: string) => void },
+  opts: { signal: AbortSignal; statusCallback: (status: RpcStatus) => void },
 ) => Promise<string>
 
 /**
@@ -28,7 +30,8 @@ export async function fetchTextWithProgress(
   try {
     return await fetcher(loc, {
       signal: controller.signal,
-      statusCallback: msg => {
+      statusCallback: status => {
+        const msg = statusMessageText(status)
         setStatus(
           msg
             ? {

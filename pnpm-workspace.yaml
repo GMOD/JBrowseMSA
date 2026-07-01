@@ -1,7 +1,14 @@
 packages:
   - 'packages/*'
   - 'website'
+# Temporary: consume a local MUI-v9 @jbrowse/core built from a
+# jbrowse-components checkout (see scripts/pack-local-jbrowse.mjs). Remove this
+# block once a MUI-v9-compatible @jbrowse/core is published to npm.
+overrides:
+  '@jbrowse/core': file:./vendor-jbrowse/jbrowse-core.tgz
+  '@jbrowse/render-core': file:./vendor-jbrowse/jbrowse-render-core.tgz
 allowBuilds:
+  core-js-pure: false
   esbuild: true
   sharp: true
   unrs-resolver: true

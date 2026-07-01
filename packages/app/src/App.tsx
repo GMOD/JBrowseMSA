@@ -16,7 +16,7 @@ const urlParams = new URLSearchParams(window.location.search)
 const val = urlParams.get('data')
 
 function parseData(data: string | null) {
-  let result = { msaview: { type: 'MsaView' } }
+  let result = { msaview: { type: 'MsaView' as const } }
   if (data) {
     try {
       result = JSON.parse(data)

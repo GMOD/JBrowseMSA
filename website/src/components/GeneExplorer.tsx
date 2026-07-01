@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
@@ -188,9 +188,11 @@ export default function GeneExplorer() {
         >
           <Stack
             direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            sx={{ mb: 2 }}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+            }}
           >
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Explore a gene
@@ -254,13 +256,13 @@ export default function GeneExplorer() {
                 size="small"
                 slotProps={{
                   input: {
-                    ...params.InputProps,
+                    ...params.slotProps.input,
                     endAdornment: (
                       <>
                         {busy ? (
                           <CircularProgress color="inherit" size={18} />
                         ) : null}
-                        {params.InputProps.endAdornment}
+                        {params.slotProps.input.endAdornment}
                       </>
                     ),
                   },
@@ -376,7 +378,7 @@ function ResultPanel({ result }: { result: GeneResult }) {
         {msa ? ` · ${msa.rowCount}-species alignment` : ''}
       </Typography>
 
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 2 }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 2 }}>
         <Button variant="contained" href={url} target="_blank" rel="noopener">
           Open in JBrowse ↗
         </Button>
@@ -491,9 +493,8 @@ function DetailsDialog({
         <Stack
           direction="row"
           spacing={1}
-          flexWrap="wrap"
           useFlexGap
-          sx={{ mb: 1.5 }}
+          sx={{ flexWrap: 'wrap', mb: 1.5 }}
         >
           <Button
             size="small"

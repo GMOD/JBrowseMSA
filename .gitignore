@@ -117,3 +117,6 @@ dist
 app/build
 lib/bundle
 pages-dist
+
+# Local MUI-v9 @jbrowse/core stopgap (see scripts/pack-local-jbrowse.mjs)
+vendor-jbrowse/
