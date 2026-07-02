@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useSyncExternalStore,
-} from 'react'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
@@ -131,30 +125,39 @@ export default function GeneExplorer() {
     }
   }, [inputValue])
 
-  const onPick = useCallback(async (symbol: string) => {
-    setBusy(true)
-    setError(undefined)
-    const outcome = await loadGene(symbol).then(
-      result => ({ result, error: undefined }),
-      (e: unknown) => ({
-        result: undefined,
-        error: e instanceof Error ? e.message : String(e),
-      }),
-    )
-    // discard result if the URL moved on while this fetch was in flight
-    if (getGeneFromUrl() === symbol) {
-      setResult(outcome.result)
-      setError(outcome.error)
-      setBusy(false)
-    }
-  }, [])
-
   // Fetch whenever the URL gene changes (initial load, back/forward, navigate).
+  // The ignore flag flipped on cleanup makes this race-safe: switching genes or
+  // clearing the selection abandons the in-flight load rather than letting it
+  // land late — which would clobber newer state or wedge the spinner on.
   useEffect(() => {
-    if (urlGene) {
-      void onPick(urlGene)
+    let ignore = false
+    async function load() {
+      if (urlGene) {
+        setBusy(true)
+        setError(undefined)
+        const outcome = await loadGene(urlGene).then(
+          loaded => ({ result: loaded, error: undefined }),
+          (e: unknown) => ({
+            result: undefined,
+            error: e instanceof Error ? e.message : String(e),
+          }),
+        )
+        if (!ignore) {
+          setResult(outcome.result)
+          setError(outcome.error)
+          setBusy(false)
+        }
+      } else {
+        setResult(undefined)
+        setError(undefined)
+        setBusy(false)
+      }
     }
-  }, [urlGene, onPick])
+    void load()
+    return () => {
+      ignore = true
+    }
+  }, [urlGene])
 
   // Reflect the selection in the page URL (?gene=) so it's shareable,
   // bookmarkable, and survives reload; clearing the Autocomplete removes it.
@@ -165,8 +168,12 @@ export default function GeneExplorer() {
     } else {
       next.searchParams.delete('gene')
     }
-    window.history.pushState(null, '', next)
-    window.dispatchEvent(new Event('gene-url-change'))
+    // re-picking the current gene shouldn't stack a duplicate history entry (or
+    // re-fire a fetch); only navigate when the URL actually changes
+    if (next.href !== window.location.href) {
+      window.history.pushState(null, '', next)
+      window.dispatchEvent(new Event('gene-url-change'))
+    }
   }
 
   return (
