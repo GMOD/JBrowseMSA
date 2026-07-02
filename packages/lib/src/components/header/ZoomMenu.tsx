@@ -37,16 +37,6 @@ const ZoomMenu = observer(function ({ model }: { model: MsaViewModel }) {
             model.resetZoom()
           },
         },
-        {
-          label: 'Scroll zoom',
-          type: 'checkbox',
-          checked: model.scrollZoom,
-          onClick: () => {
-            model.setScrollZoom(!model.scrollZoom)
-          },
-          helpText:
-            'When enabled, scrolling the mouse wheel zooms in and out without holding ctrl. Hold shift to pan instead. Ctrl/⌘+wheel always zooms.',
-        },
       ]}
     >
       <MoreVert />
