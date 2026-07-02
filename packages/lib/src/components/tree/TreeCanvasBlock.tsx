@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material'
 import Flatbush from 'flatbush'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import { makeStyles } from 'tss-react/mui'
+import { makeStyles } from '@jbrowse/core/util/tss-react'
 
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'

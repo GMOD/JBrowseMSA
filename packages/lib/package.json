@@ -57,14 +57,13 @@
     "main": "dist/index.js"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "esbuild": "^0.28.1"
   },
   "dependencies": {
     "@jbrowse/svgcanvas": "workspace:*",
     "colord": "^2.9.3",
     "flatbush": "^4.6.2",
-    "msa-parsers": "workspace:*",
-    "tss-react": "^4.9.21"
+    "msa-parsers": "workspace:*"
   }
 }

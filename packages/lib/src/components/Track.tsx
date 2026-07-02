@@ -3,7 +3,7 @@ import React, { lazy, useCallback, useRef, useState } from 'react'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { IconButton, Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
-import { makeStyles } from 'tss-react/mui'
+import { makeStyles } from '@jbrowse/core/util/tss-react'
 
 import { useWheelScroll } from '../useWheelScroll.ts'
 

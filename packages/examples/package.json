@@ -11,8 +11,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@jbrowse/core": "^4.3.0",
-    "@jbrowse/mobx-state-tree": "^5.11.1",
+    "@jbrowse/core": "file:../../vendor-jbrowse/jbrowse-core.tgz",
+    "@jbrowse/mobx-state-tree": "^5.11.2",
     "@mui/icons-material": "^9.1.1",
     "@mui/material": "^9.1.2",
     "mobx": "^6.16.1",
