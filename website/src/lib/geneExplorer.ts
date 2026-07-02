@@ -457,10 +457,15 @@ export async function fetchGeneMsa(
   }
 }
 
+// The residues of a single FASTA record, with the '>' header line dropped.
+function fastaBody(record: string) {
+  const [, ...seqLines] = record.trim().split('\n')
+  return seqLines.join('')
+}
+
 // The first FASTA record's sequence (here hg38), ungapped.
 function firstSequence(fasta: string) {
-  const [, ...seqLines] = fasta.split(/\n>/)[0].split('\n')
-  return seqLines.join('').replaceAll('-', '')
+  return fastaBody(fasta.split(/\n>/)[0]).replaceAll('-', '')
 }
 
 // The UniProt canonical protein sequence by accession. AlphaFold builds its
@@ -475,8 +480,7 @@ export async function fetchUniProtSeq(uniprotId: string) {
   if (!res?.ok) {
     return undefined
   }
-  const [, ...seqLines] = (await res.text()).trim().split('\n')
-  return seqLines.join('')
+  return fastaBody(await res.text())
 }
 
 export interface GeneResult {

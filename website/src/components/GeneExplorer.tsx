@@ -111,12 +111,14 @@ export default function GeneExplorer() {
     const timer = setTimeout(() => {
       searchGenes(inputValue)
         .then(found => {
-          if (!ignore && found.length > 0) {
+          // set even when empty: a no-match query should clear the stale
+          // suggestions, not keep showing an unrelated earlier gene
+          if (!ignore) {
             setHits(found)
           }
         })
         .catch(() => {
-          // type-ahead is best-effort; keep the last suggestions
+          // type-ahead is best-effort; keep the last suggestions on network error
         })
     }, 200)
     return () => {
@@ -175,6 +177,8 @@ export default function GeneExplorer() {
       window.dispatchEvent(new Event('gene-url-change'))
     }
   }
+
+  const urlGeneNote = urlGene ? NOTE_BY_SYMBOL.get(urlGene) : undefined
 
   return (
     <ThemeProvider theme={theme}>
@@ -304,9 +308,9 @@ export default function GeneExplorer() {
             ))}
           </Box>
 
-          {urlGene && NOTE_BY_SYMBOL.get(urlGene) ? (
+          {urlGeneNote ? (
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-              <strong>{urlGene}</strong> — {NOTE_BY_SYMBOL.get(urlGene)}
+              <strong>{urlGene}</strong> — {urlGeneNote}
             </Typography>
           ) : null}
         </Paper>
