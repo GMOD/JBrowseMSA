@@ -17,9 +17,9 @@ const { src, alt, title, body, href } = Astro.props
   {
     title ? (
       <>
-        <strong>{title}</strong> —{' '}
+        <strong>{title}</strong> —
       </>
     ) : null
-  }{body}{' '}
+  }{body}
   <a href={href} target="_blank" rel="noopener">Open in JBrowse ↗</a>
 </Figure>
