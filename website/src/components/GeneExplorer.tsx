@@ -84,13 +84,18 @@ function getGeneFromUrl() {
 export default function GeneExplorer() {
   const [hits, setHits] = useState<string[]>(EXAMPLE_SYMBOLS)
   const [inputValue, setInputValue] = useState('')
+  // the text actually driving the type-ahead: only user keystrokes update it, so
+  // selecting a gene (which resets inputValue to the full symbol) doesn't re-fire
+  // a search for the gene we just resolved
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searching, setSearching] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
   const [result, setResult] = useState<GeneResult>()
   const [helpOpen, setHelpOpen] = useState(false)
 
   // show the curated examples until there's a real query to suggest against
-  const options = inputValue.length >= 2 ? hits : EXAMPLE_SYMBOLS
+  const options = searchTerm.length >= 2 ? hits : EXAMPLE_SYMBOLS
 
   // Reactive URL read: re-renders on popstate (back/forward) and pushState via
   // the gene-url-change event dispatched by navigate() below.
@@ -104,12 +109,14 @@ export default function GeneExplorer() {
   // stops (not once per keystroke), and drop a response whose input has since
   // changed so a slow earlier request can't clobber a newer one's suggestions.
   useEffect(() => {
-    if (inputValue.length < 2) {
+    if (searchTerm.length < 2) {
+      setSearching(false)
       return
     }
     let ignore = false
+    setSearching(true)
     const timer = setTimeout(() => {
-      searchGenes(inputValue)
+      searchGenes(searchTerm)
         .then(found => {
           // set even when empty: a no-match query should clear the stale
           // suggestions, not keep showing an unrelated earlier gene
@@ -120,12 +127,17 @@ export default function GeneExplorer() {
         .catch(() => {
           // type-ahead is best-effort; keep the last suggestions on network error
         })
+        .finally(() => {
+          if (!ignore) {
+            setSearching(false)
+          }
+        })
     }, 200)
     return () => {
       ignore = true
       clearTimeout(timer)
     }
-  }, [inputValue])
+  }, [searchTerm])
 
   // Fetch whenever the URL gene changes (initial load, back/forward, navigate).
   // The ignore flag flipped on cleanup makes this race-safe: switching genes or
@@ -229,8 +241,13 @@ export default function GeneExplorer() {
             openOnFocus
             options={options}
             inputValue={inputValue}
-            onInputChange={(_e, v) => {
+            onInputChange={(_e, v, reason) => {
               setInputValue(v)
+              // only a keystroke should drive a new type-ahead query; the 'reset'
+              // that fires when a gene is selected would re-search its full symbol
+              if (reason === 'input') {
+                setSearchTerm(v)
+              }
             }}
             onChange={(_e, v) => {
               navigate(typeof v === 'string' ? v : null)
@@ -272,7 +289,7 @@ export default function GeneExplorer() {
                     ...params.slotProps.input,
                     endAdornment: (
                       <>
-                        {busy ? (
+                        {busy || searching ? (
                           <CircularProgress color="inherit" size={18} />
                         ) : null}
                         {params.slotProps.input.endAdornment}
@@ -377,7 +394,7 @@ function ResultPanel({ result }: { result: GeneResult }) {
     () => collapsedLoc(transcript, { collapse }),
     [transcript, collapse],
   )
-  const sessionJson = JSON.stringify(session, null, 2)
+  const sessionJson = useMemo(() => JSON.stringify(session, null, 2), [session])
 
   return (
     <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>

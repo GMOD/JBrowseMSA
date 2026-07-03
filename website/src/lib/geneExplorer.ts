@@ -52,8 +52,8 @@ const alphafoldCif = (uniprotId: string) =>
 function toUrlSafeB64(str: string) {
   const deflated: Uint8Array = deflate(new TextEncoder().encode(str), undefined)
   const b64 = btoa(Array.from(deflated, b => String.fromCharCode(b)).join(''))
-  const pos = b64.indexOf('=')
-  return (pos > 0 ? b64.slice(0, pos) : b64)
+  return b64
+    .replace(/=+$/, '') // drop padding
     .replaceAll('+', '-')
     .replaceAll('/', '_')
 }

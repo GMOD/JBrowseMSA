@@ -24,6 +24,10 @@ const strip = (s: string) => s.replace(/\/$/, '')
 const current = strip(Astro.url.pathname)
 const isActive = (href: string) => strip(href) === current
 const canonical = new URL(Astro.url.pathname, Astro.site).href
+const socialImage = new URL(
+  `${base}/media/within-protein-conservation.png`,
+  Astro.site,
+).href
 ---
 
 <!doctype html>
@@ -43,23 +47,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:url" content={canonical} />
-    <meta
-      property="og:image"
-      content={new URL(
-        `${base}/media/within-protein-conservation.png`,
-        Astro.site,
-      ).href}
-    />
+    <meta property="og:image" content={socialImage} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     {description && <meta name="twitter:description" content={description} />}
-    <meta
-      name="twitter:image"
-      content={new URL(
-        `${base}/media/within-protein-conservation.png`,
-        Astro.site,
-      ).href}
-    />
+    <meta name="twitter:image" content={socialImage} />
   </head>
   <body class:list={{ 'app-layout': fullBleed }}>
     <header class="site-header">
