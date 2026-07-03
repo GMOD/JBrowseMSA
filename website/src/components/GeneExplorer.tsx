@@ -30,6 +30,7 @@ import {
   DEFAULT_WINDOW_SIZE,
   buildSessionUrl,
   collapsedLoc,
+  geneStats,
   loadGene,
   searchGenes,
 } from '../lib/geneExplorer'
@@ -81,97 +82,104 @@ function getGeneFromUrl() {
   return new URLSearchParams(window.location.search).get('gene')
 }
 
-export default function GeneExplorer() {
+// Debounced, race-safe gene-symbol type-ahead. Only user keystrokes feed `query`
+// (selecting a gene resets the input to the full symbol, which shouldn't re-search
+// what we just resolved), so suggestions stay a pure function of what was typed;
+// the cleanup drops a slow earlier response so it can't clobber a newer one.
+function useGeneSuggestions(query: string) {
   const [hits, setHits] = useState<string[]>(EXAMPLE_SYMBOLS)
-  const [inputValue, setInputValue] = useState('')
-  // the text actually driving the type-ahead: only user keystrokes update it, so
-  // selecting a gene (which resets inputValue to the full symbol) doesn't re-fire
-  // a search for the gene we just resolved
-  const [searchTerm, setSearchTerm] = useState('')
-  const [searching, setSearching] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string>()
-  const [result, setResult] = useState<GeneResult>()
-  const [helpOpen, setHelpOpen] = useState(false)
-
-  // show the curated examples until there's a real query to suggest against
-  const options = searchTerm.length >= 2 ? hits : EXAMPLE_SYMBOLS
-
-  // Reactive URL read: re-renders on popstate (back/forward) and pushState via
-  // the gene-url-change event dispatched by navigate() below.
-  const urlGene = useSyncExternalStore(
-    subscribeGeneUrl,
-    getGeneFromUrl,
-    () => null,
-  )
-
-  // Debounced, race-safe type-ahead: query mygene.info 200ms after typing
-  // stops (not once per keystroke), and drop a response whose input has since
-  // changed so a slow earlier request can't clobber a newer one's suggestions.
   useEffect(() => {
-    if (searchTerm.length < 2) {
-      setSearching(false)
+    if (query.length < 2) {
       return
     }
     let ignore = false
-    setSearching(true)
     const timer = setTimeout(() => {
-      searchGenes(searchTerm)
+      searchGenes(query)
         .then(found => {
-          // set even when empty: a no-match query should clear the stale
-          // suggestions, not keep showing an unrelated earlier gene
+          // set even when empty: a no-match query clears stale suggestions
           if (!ignore) {
             setHits(found)
           }
         })
         .catch(() => {
-          // type-ahead is best-effort; keep the last suggestions on network error
-        })
-        .finally(() => {
-          if (!ignore) {
-            setSearching(false)
-          }
+          // best-effort; keep the last suggestions on a network error
         })
     }, 200)
     return () => {
       ignore = true
       clearTimeout(timer)
     }
-  }, [searchTerm])
+  }, [query])
+  return hits
+}
 
-  // Fetch whenever the URL gene changes (initial load, back/forward, navigate).
-  // The ignore flag flipped on cleanup makes this race-safe: switching genes or
-  // clearing the selection abandons the in-flight load rather than letting it
-  // land late — which would clobber newer state or wedge the spinner on.
+interface GeneOutcome {
+  symbol: string | null // the gene this result/error describes
+  result?: GeneResult
+  error?: string
+}
+
+// Load everything the result panel renders for the gene named in the URL. The
+// only stored state is the last completed outcome; `busy` is DERIVED — we're
+// loading whenever the URL's gene isn't the one the outcome describes — so no
+// flag has to be kept in sync with a setState inside the effect. The effect just
+// fetches; the ignore flag makes switching genes race-safe.
+// https://react.dev/learn/you-might-not-need-an-effect
+function useGene(symbol: string | null) {
+  const [outcome, setOutcome] = useState<GeneOutcome>({ symbol: null })
   useEffect(() => {
-    let ignore = false
-    async function load() {
-      if (urlGene) {
-        setBusy(true)
-        setError(undefined)
-        const outcome = await loadGene(urlGene).then(
-          loaded => ({ result: loaded, error: undefined }),
-          (e: unknown) => ({
-            result: undefined,
-            error: e instanceof Error ? e.message : String(e),
-          }),
-        )
-        if (!ignore) {
-          setResult(outcome.result)
-          setError(outcome.error)
-          setBusy(false)
-        }
-      } else {
-        setResult(undefined)
-        setError(undefined)
-        setBusy(false)
-      }
+    if (!symbol) {
+      return
     }
-    void load()
+    let ignore = false
+    loadGene(symbol).then(
+      result => {
+        if (!ignore) {
+          setOutcome({ symbol, result })
+        }
+      },
+      (e: unknown) => {
+        if (!ignore) {
+          setOutcome({
+            symbol,
+            error: e instanceof Error ? e.message : String(e),
+          })
+        }
+      },
+    )
     return () => {
       ignore = true
     }
-  }, [urlGene])
+  }, [symbol])
+
+  return {
+    busy: symbol !== null && outcome.symbol !== symbol,
+    // keep the previous result as a stable placeholder while the next loads (the
+    // caller dims it); never surface an error for a gene the URL has left
+    result: outcome.result,
+    error: outcome.symbol === symbol ? outcome.error : undefined,
+  }
+}
+
+export default function GeneExplorer() {
+  const [inputValue, setInputValue] = useState('')
+  // the text driving the type-ahead: only keystrokes update it, so selecting a
+  // gene (which resets inputValue to the full symbol) doesn't re-fire a search
+  const [searchTerm, setSearchTerm] = useState('')
+  const [helpOpen, setHelpOpen] = useState(false)
+
+  // Reactive URL read: re-renders on popstate (back/forward) and on the
+  // gene-url-change event dispatched by navigate() below.
+  const urlGene = useSyncExternalStore(
+    subscribeGeneUrl,
+    getGeneFromUrl,
+    () => null,
+  )
+  const hits = useGeneSuggestions(searchTerm)
+  const { busy, result, error } = useGene(urlGene)
+
+  // show the curated examples until there's a real query to suggest against
+  const options = searchTerm.length >= 2 ? hits : EXAMPLE_SYMBOLS
 
   // Reflect the selection in the page URL (?gene=) so it's shareable,
   // bookmarkable, and survives reload; clearing the Autocomplete removes it.
@@ -289,7 +297,7 @@ export default function GeneExplorer() {
                     ...params.slotProps.input,
                     endAdornment: (
                       <>
-                        {busy || searching ? (
+                        {busy ? (
                           <CircularProgress color="inherit" size={18} />
                         ) : null}
                         {params.slotProps.input.endAdornment}
@@ -366,15 +374,7 @@ export default function GeneExplorer() {
 
 function ResultPanel({ result }: { result: GeneResult }) {
   const { transcript, uniprotId, msa, proteinSequence } = result
-  // Stats describe the CODING model (transcript.cds), so they mean the same
-  // thing whether the transcript came from the .cds sidecar or the RefSeq
-  // fallback. transcript.exons is coding-only for the former but full mRNA
-  // (incl. UTR) for the latter, so it can't be labelled consistently.
-  const codingBp = transcript.cds.reduce((s, c) => s + (c.end - c.start), 0)
-  const span =
-    Math.max(...transcript.cds.map(c => c.end)) -
-    Math.min(...transcript.cds.map(c => c.start))
-  const ratio = (span / codingBp).toFixed(1)
+  const { codingBp, span, ratio } = geneStats(transcript)
   const [detailsOpen, setDetailsOpen] = useState(false)
   // launch the genome view with introns squeezed out (default) vs. the whole
   // gene; recomputes the loc/url/session spec below

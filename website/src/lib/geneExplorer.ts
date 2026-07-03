@@ -403,6 +403,23 @@ function blockBounds(blocks: Exon[]) {
   }
 }
 
+export interface GeneStats {
+  codingBp: number // total CDS length
+  span: number // genomic distance the CDS spans (introns included)
+  ratio: string // span / codingBp, i.e. how much the collapsed view squeezes out
+}
+
+// The CODING-model summary shown in the result panel. Derived from transcript.cds
+// so it means the same thing whether the transcript came from the .cds sidecar or
+// the RefSeq Select fallback (transcript.exons differs between the two; cds does
+// not).
+export function geneStats(transcript: Transcript): GeneStats {
+  const codingBp = transcript.cds.reduce((sum, c) => sum + (c.end - c.start), 0)
+  const { start, end } = blockBounds(transcript.cds)
+  const span = end - start
+  return { codingBp, span, ratio: (span / codingBp).toFixed(1) }
+}
+
 // The transcript model the MsaView and ProteinView use to map a residue to its
 // codon (and back). 0-based interbase coordinates, CDS subfeatures only.
 export function connectedFeature(transcript: Transcript) {
