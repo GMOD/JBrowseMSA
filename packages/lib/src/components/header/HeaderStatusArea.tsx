@@ -1,9 +1,9 @@
 import React from 'react'
 
 import { LoadingEllipses } from '@jbrowse/core/ui'
+import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { Button, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
-import { makeStyles } from '@jbrowse/core/util/tss-react'
 
 import type { MsaViewModel } from '../../model.ts'
 

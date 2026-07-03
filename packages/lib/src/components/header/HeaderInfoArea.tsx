@@ -1,8 +1,8 @@
 import React from 'react'
 
+import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
-import { makeStyles } from '@jbrowse/core/util/tss-react'
 
 import type { MsaViewModel } from '../../model.ts'
 
