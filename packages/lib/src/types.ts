@@ -15,9 +15,15 @@ export interface TextTrackModel extends BasicTrackModel {
   data?: string
 }
 
+// a track that draws a per-column bar chart (conservation, property
+// conservation). `barColor` doubles as the marker that a track is a bar track.
+export interface BarTrackModel extends BasicTrackModel {
+  barColor?: string
+}
+
 export interface BasicTrack {
   ReactComponent: React.FC<any>
-  model: TextTrackModel
+  model: TextTrackModel & BarTrackModel
 }
 
 export interface Node {

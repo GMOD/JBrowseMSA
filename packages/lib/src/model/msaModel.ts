@@ -1,6 +1,10 @@
 import { types } from '@jbrowse/mobx-state-tree'
 
-import { defaultBgColor, defaultColorSchemeName } from '../constants.ts'
+import {
+  defaultBgColor,
+  defaultColorSchemeName,
+  defaultShowColumnStats,
+} from '../constants.ts'
 
 import type { MSAFormat } from 'msa-parsers'
 
@@ -26,6 +30,13 @@ export function MSAModelF() {
 
       /**
        * #property
+       * show a per-column statistics tooltip (consensus, conservation, gaps,
+       * residue distribution) while hovering the alignment
+       */
+      showColumnStats: defaultShowColumnStats,
+
+      /**
+       * #property
        * force the MSA data to be parsed as a specific format instead of relying
        * on auto-detection (which is ambiguous between e.g. fasta and a3m)
        */
@@ -47,6 +58,13 @@ export function MSAModelF() {
        */
       setBgColor(arg: boolean) {
         self.bgColor = arg
+      },
+
+      /**
+       * #action
+       */
+      setShowColumnStats(arg: boolean) {
+        self.showColumnStats = arg
       },
 
       /**

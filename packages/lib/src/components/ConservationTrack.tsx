@@ -4,17 +4,22 @@ import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { ConservationTrackResizeHandle } from './ResizeHandles.tsx'
-import { drawConservationBars } from './tracks/renderTracksSvg.ts'
+import {
+  barTrackValues,
+  drawConservationBars,
+} from './tracks/renderTracksSvg.ts'
 
 import type { MsaViewModel } from '../model.ts'
 import type { BasicTrack } from '../types.ts'
 
 const ConservationBlock = observer(function ({
   model,
+  track,
   offsetX,
   trackHeight,
 }: {
   model: MsaViewModel
+  track: BasicTrack
   offsetX: number
   trackHeight: number
 }) {
@@ -28,7 +33,7 @@ const ConservationBlock = observer(function ({
       return
     }
     return autorun(() => {
-      const { blockSize, colWidth, highResScaleFactor, conservation } = model
+      const { blockSize, colWidth, highResScaleFactor } = model
       ctx.resetTransform()
       ctx.scale(highResScaleFactor, highResScaleFactor)
       ctx.clearRect(0, 0, blockSize, trackHeight)
@@ -36,14 +41,15 @@ const ConservationBlock = observer(function ({
 
       drawConservationBars({
         ctx,
-        conservation,
+        values: barTrackValues(model, track.model.id),
+        color: track.model.barColor ?? 'gray',
         colWidth,
         trackHeight,
         offsetX,
         blockSize,
       })
     })
-  }, [model, offsetX, trackHeight])
+  }, [model, track, offsetX, trackHeight])
 
   return (
     <canvas
@@ -83,6 +89,7 @@ const ConservationTrack = observer(function ({
         <ConservationBlock
           key={bx}
           model={model}
+          track={track}
           offsetX={bx}
           trackHeight={trackHeight}
         />

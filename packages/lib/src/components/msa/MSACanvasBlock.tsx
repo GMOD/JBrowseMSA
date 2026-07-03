@@ -4,6 +4,7 @@ import { BaseTooltip } from '@jbrowse/core/ui'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
+import ColumnStats from './ColumnStats.tsx'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
 import { useColorContrast } from '../../useColorContrast.ts'
@@ -89,7 +90,7 @@ const MSACanvasBlock = observer(function ({
   ])
 
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>()
-  const { hoveredInsertion, mouseOverDomains } = model
+  const { hoveredInsertion, mouseOverDomains, showColumnStats } = model
 
   return (
     <>
@@ -117,12 +118,15 @@ const MSACanvasBlock = observer(function ({
               model.setMousePos(undefined, undefined)
             }
             // only track client coords when there's something to show in the
-            // tooltip (insertion or a domain under the cursor); avoids a
-            // re-render on every move over plain alignment cells
+            // tooltip: an insertion, a domain under the cursor, or column stats
+            // (when that option is enabled). avoids a re-render on every move
+            // when nothing would be shown
+            const hasTooltip =
+              model.hoveredInsertion ||
+              model.mouseOverDomains.length > 0 ||
+              (model.showColumnStats && !!model.mouseOverColumnStats)
             setMousePosition(
-              model.hoveredInsertion || model.mouseOverDomains.length > 0
-                ? { x: event.clientX, y: event.clientY }
-                : undefined,
+              hasTooltip ? { x: event.clientX, y: event.clientY } : undefined,
             )
           }
         }}
@@ -168,7 +172,9 @@ const MSACanvasBlock = observer(function ({
             : hoveredInsertion.letters}
         </BaseTooltip>
       ) : null}
-      {!hoveredInsertion && mouseOverDomains.length > 0 && mousePosition ? (
+      {!hoveredInsertion &&
+      mousePosition &&
+      (mouseOverDomains.length > 0 || showColumnStats) ? (
         <BaseTooltip
           clientPoint={{ x: mousePosition.x, y: mousePosition.y + 15 }}
         >
@@ -183,6 +189,7 @@ const MSACanvasBlock = observer(function ({
               ) : null}
             </div>
           ))}
+          {showColumnStats ? <ColumnStats model={model} /> : null}
         </BaseTooltip>
       ) : null}
     </>

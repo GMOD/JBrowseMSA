@@ -2,8 +2,16 @@ import type { MsaViewModel } from '../../model.ts'
 import type { MenuItem } from '@jbrowse/core/ui/Menu'
 
 export function msaSettingsMenuItems(model: MsaViewModel): MenuItem[] {
-  const { drawMsaLetters, hideGaps, bgColor } = model
+  const { drawMsaLetters, hideGaps, bgColor, showColumnStats } = model
   return [
+    {
+      label: 'Show column statistics on hover',
+      type: 'checkbox',
+      checked: showColumnStats,
+      onClick: () => {
+        model.setShowColumnStats(!showColumnStats)
+      },
+    },
     {
       label: 'Draw letters',
       type: 'checkbox',

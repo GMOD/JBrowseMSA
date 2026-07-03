@@ -7,14 +7,16 @@ import type { RenderCtx } from '../renderCtx.ts'
 
 export function drawConservationBars({
   ctx,
-  conservation,
+  values,
+  color,
   colWidth,
   trackHeight,
   offsetX,
   blockSize,
 }: {
   ctx: RenderCtx
-  conservation: number[]
+  values: number[]
+  color: string
   colWidth: number
   trackHeight: number
   offsetX: number
@@ -26,13 +28,21 @@ export function drawConservationBars({
     colWidth,
   })
 
-  ctx.fillStyle = 'gray'
-  for (let i = xStart; i < xEnd && i < conservation.length; i++) {
-    const value = conservation[i]!
+  ctx.fillStyle = color
+  for (let i = xStart; i < xEnd && i < values.length; i++) {
+    const value = values[i]!
     const barHeight = value * trackHeight
     const x = i * colWidth
     ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
   }
+}
+
+// the bar-track values live on model getters (kept off the plain track object so
+// the live canvas autorun stays reactive); select the right one by track id
+export function barTrackValues(model: MsaViewModel, trackId: string) {
+  return trackId === 'property-conservation'
+    ? model.propertyConservation
+    : model.conservation
 }
 
 export function drawTextTrackContent({
@@ -81,6 +91,7 @@ export function drawTextTrackContent({
 export function renderConservationTrack({
   model,
   ctx,
+  track,
   offsetX,
   offsetY,
   trackHeight,
@@ -89,13 +100,14 @@ export function renderConservationTrack({
 }: {
   model: MsaViewModel
   ctx: RenderCtx
+  track: BasicTrack
   offsetX: number
   offsetY: number
   trackHeight: number
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
 }) {
-  const { blockSize, colWidth, highResScaleFactor, conservation } = model
+  const { blockSize, colWidth, highResScaleFactor } = model
   const bx = blockSizeXOverride ?? blockSize
   const k = highResScaleFactorOverride ?? highResScaleFactor
 
@@ -105,7 +117,8 @@ export function renderConservationTrack({
 
   drawConservationBars({
     ctx,
-    conservation,
+    values: barTrackValues(model, track.model.id),
+    color: track.model.barColor ?? 'gray',
     colWidth,
     trackHeight,
     offsetX,
@@ -191,10 +204,11 @@ export function renderAllTracks({
   for (const track of turnedOnTracks) {
     const trackHeight = track.model.height
 
-    if (track.model.id === 'conservation') {
+    if (track.model.barColor !== undefined) {
       renderConservationTrack({
         model,
         ctx,
+        track,
         offsetX,
         offsetY: currentY,
         trackHeight,

@@ -36,6 +36,7 @@ import {
   defaultScrollY,
   defaultScrollZoom,
   defaultShowBranchLen,
+  defaultShowColumnStats,
   defaultShowDomains,
   defaultSubFeatureRows,
   defaultTreeAreaWidth,
@@ -72,6 +73,7 @@ import { MSAModelF } from './model/msaModel.ts'
 import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { parseAsn1 } from './parseAsn1.ts'
+import { calculatePropertyConservation } from './propertyConservation.ts'
 import {
   globalColToVisibleCol,
   visibleColToGlobalCol,
@@ -1043,6 +1045,17 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * Per-column conservation of physicochemical property class (amino acids
+       * only). Surfaces conservative-substitution sites that identity-based
+       * conservation misses. Empty for nucleotide alignments.
+       */
+      get propertyConservation() {
+        return this.sequenceType === 'amino'
+          ? calculatePropertyConservation(this.colStats, this.colStatsSums)
+          : []
+      },
+      /**
+       * #getter
        * generates a new tree that is clustered with x,y positions
        */
       get hierarchy(): HierarchyNode<NodeWithIdsAndLength> {
@@ -1463,10 +1476,24 @@ function stateModelFactory() {
             id: 'conservation',
             name: 'Conservation',
             height: self.conservationTrackHeight,
+            barColor: 'gray',
           },
           ReactComponent: ConservationTrack,
         }
-        return [...this.adapterTrackModels, conservationTrack]
+        const propertyConservationTrack: BasicTrack = {
+          model: {
+            id: 'property-conservation',
+            name: 'Property conservation',
+            height: self.conservationTrackHeight,
+            barColor: '#6a51a3',
+          },
+          ReactComponent: ConservationTrack,
+        }
+        return [
+          ...this.adapterTrackModels,
+          conservationTrack,
+          ...(self.sequenceType === 'amino' ? [propertyConservationTrack] : []),
+        ]
       },
 
       /**
@@ -1738,6 +1765,41 @@ function stateModelFactory() {
           })
         }
         return []
+      },
+
+      /**
+       * #getter
+       * per-column summary statistics for the hovered column: consensus residue
+       * and its identity fraction, conservation score, gap fraction, and the
+       * sorted non-gap residue distribution. undefined when nothing is hovered.
+       */
+      get mouseOverColumnStats() {
+        const { mouseCol } = self
+        if (mouseCol === undefined) {
+          return undefined
+        }
+        const stats = self.colStats[mouseCol]
+        const total = self.colStatsSums[mouseCol]
+        if (!stats || !total) {
+          return undefined
+        }
+        const gaps = (stats['-'] ?? 0) + (stats['.'] ?? 0)
+        const distribution = Object.entries(stats)
+          .filter(([letter]) => letter !== '-' && letter !== '.')
+          .sort((a, b) => b[1] - a[1])
+        const consensus = distribution[0]
+        return {
+          col: mouseCol,
+          total,
+          gaps,
+          gapFraction: gaps / total,
+          conservation: self.conservation[mouseCol] ?? 0,
+          propertyConservation: self.propertyConservation[mouseCol],
+          consensusLetter: consensus?.[0] ?? '',
+          consensusCount: consensus?.[1] ?? 0,
+          consensusFraction: consensus ? consensus[1] / total : 0,
+          distribution,
+        }
       },
 
       /**
@@ -2098,6 +2160,7 @@ function stateModelFactory() {
         // MSA model properties
         bgColor,
         colorSchemeName,
+        showColumnStats,
         // Tree model properties
         drawLabels,
         labelsAlignRight,
@@ -2124,6 +2187,7 @@ function stateModelFactory() {
         currentAlignment: defaultCurrentAlignment,
         bgColor: defaultBgColor,
         colorSchemeName: defaultColorSchemeName,
+        showColumnStats: defaultShowColumnStats,
         drawLabels: defaultDrawLabels,
         labelsAlignRight: defaultLabelsAlignRight,
         treeAreaWidth: defaultTreeAreaWidth,

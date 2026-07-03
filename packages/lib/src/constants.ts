@@ -40,6 +40,7 @@ export const maxCellSize = 80
 // MSA model defaults
 export const defaultBgColor = true
 export const defaultColorSchemeName = 'maeditor'
+export const defaultShowColumnStats = true
 
 // Tree model defaults
 export const defaultDrawLabels = true
