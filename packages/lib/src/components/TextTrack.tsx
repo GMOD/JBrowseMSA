@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { setFontSize } from '../setFontSize.ts'
+import { useCanvasAutorun } from '../useCanvasAutorun.ts'
 import { useColorContrast } from '../useColorContrast.ts'
 import { drawTextTrackContent } from './tracks/renderTracksSvg.ts'
 
@@ -31,14 +31,9 @@ const AnnotationBlock = observer(function ({
   } = track
 
   const colorScheme = customColorScheme ?? modelColorScheme
-  const ref = useRef<HTMLCanvasElement>(null)
   const { contrastScheme } = useColorContrast(colorScheme)
-  useEffect(() => {
-    const ctx = ref.current?.getContext('2d')
-    if (!ctx) {
-      return
-    }
-    return autorun(() => {
+  const ref = useCanvasAutorun(
+    ctx => {
       const {
         blockSize,
         bgColor,
@@ -65,8 +60,9 @@ const AnnotationBlock = observer(function ({
         offsetX,
         blockSize,
       })
-    })
-  }, [model, offsetX, contrastScheme, colorScheme, data])
+    },
+    [model, offsetX, contrastScheme, colorScheme, data],
+  )
   return (
     <canvas
       ref={ref}

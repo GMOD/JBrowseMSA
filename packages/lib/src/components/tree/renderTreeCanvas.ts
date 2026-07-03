@@ -5,6 +5,7 @@ import {
 } from '../../hierarchy.ts'
 import { setFontSize } from '../../setFontSize.ts'
 
+import type { ClickMapIndex } from './clickMap.ts'
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
@@ -15,6 +16,12 @@ export const padding = 600
 const extendBounds = 5
 const radius = 2.5
 const d = radius * 2
+
+// whether a node's row-center y falls within the block being drawn, padded by
+// extendBounds so bubbles/labels/triangles straddling the edge still render
+function inYBlock(y: number, offsetY: number, by: number) {
+  return y > offsetY - extendBounds && y < offsetY + by + extendBounds
+}
 
 // Calculate node x-coordinate for both phylogram (with branch lengths) and cladogram (topology only) modes
 // For cladograms: x = (maxDepthToLeaf - nodeDepthToLeaf) / maxDepthToLeaf * maxWidth
@@ -34,28 +41,6 @@ function getNodeX(
   }
   const depthToLeaf = calcDepthToLeaf(node)
   return ((maxDepthToLeaf - depthToLeaf) / maxDepthToLeaf) * maxBranchLen
-}
-
-interface ClickEntry {
-  name: string
-  id: string
-  branch?: boolean
-  minX: number
-  maxX: number
-  minY: number
-  maxY: number
-}
-
-interface ClickMapIndex {
-  clear(): void
-  insert(entry: ClickEntry): void
-  finish(): void
-  search(box: {
-    minX: number
-    maxX: number
-    minY: number
-    maxY: number
-  }): ClickEntry[]
 }
 
 export function renderTree({
@@ -137,8 +122,7 @@ export function renderCollapsedTriangles({
     if (collapsed.includes(id)) {
       const apexX = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
       const y = node.x!
-      const inBlock =
-        y > offsetY - extendBounds && y < offsetY + by + extendBounds
+      const inBlock = inYBlock(y, offsetY, by)
       // in cladogram mode the hidden tips align at the right edge, otherwise use
       // the branch-length extent recorded in the model's hierarchy getter
       const baseX = showBranchLen
@@ -214,11 +198,7 @@ export function renderNodeBubbles({
     const { data } = node
     const y = node.x!
     const { id, name } = data
-    if (
-      node.height >= 1 &&
-      y > offsetY - extendBounds &&
-      y < offsetY + by + extendBounds
-    ) {
+    if (node.height >= 1 && inYBlock(y, offsetY, by)) {
       const isCollapsed = collapsed.includes(id)
       ctx.strokeStyle = 'black'
       ctx.fillStyle = isCollapsed ? 'black' : 'white'
@@ -296,11 +276,7 @@ export function renderTreeLabels({
     // a collapsed clade is drawn as a triangle + tip count; suppress its leaf
     // label when the "name" is just the auto-generated internal-node id
     const isAnonymousCollapsed = collapsed.includes(id) && name === id
-    if (
-      !isAnonymousCollapsed &&
-      y > offsetY - extendBounds &&
-      y < offsetY + by + extendBounds
-    ) {
+    if (!isAnonymousCollapsed && inYBlock(y, offsetY, by)) {
       // note: +rowHeight/4 matches with -rowHeight/4 in msa
       const yp = y + fontSize / 4
       let xp = 0

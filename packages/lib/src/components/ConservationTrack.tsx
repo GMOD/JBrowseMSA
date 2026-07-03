@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { ConservationTrackResizeHandle } from './ResizeHandles.tsx'
+import { useCanvasAutorun } from '../useCanvasAutorun.ts'
 import {
   barTrackValues,
   drawConservationBars,
@@ -25,14 +25,8 @@ const ConservationBlock = observer(function ({
 }) {
   const { blockSize, scrollX, highResScaleFactor } = model
 
-  const ref = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const ctx = ref.current?.getContext('2d')
-    if (!ctx) {
-      return
-    }
-    return autorun(() => {
+  const ref = useCanvasAutorun(
+    ctx => {
       const { blockSize, colWidth, highResScaleFactor } = model
       ctx.resetTransform()
       ctx.scale(highResScaleFactor, highResScaleFactor)
@@ -48,8 +42,9 @@ const ConservationBlock = observer(function ({
         offsetX,
         blockSize,
       })
-    })
-  }, [model, track, offsetX, trackHeight])
+    },
+    [model, track, offsetX, trackHeight],
+  )
 
   return (
     <canvas

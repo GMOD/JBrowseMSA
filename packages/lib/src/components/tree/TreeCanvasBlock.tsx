@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-import { useTheme } from '@mui/material'
-import Flatbush from 'flatbush'
-import { autorun } from 'mobx'
-import { observer } from 'mobx-react'
 import { makeStyles } from '@jbrowse/core/util/tss-react'
+import { useTheme } from '@mui/material'
+import { observer } from 'mobx-react'
 
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'
+import { ClickMapIndex } from './clickMap.ts'
 import { padding, renderTreeCanvas } from './renderTreeCanvas.ts'
+import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 
+import type { ClickEntry } from './clickMap.ts'
 import type { MsaViewModel } from '../../model.ts'
 
 const useStyles = makeStyles()(theme => ({
@@ -36,55 +37,6 @@ interface TooltipData {
   y: number
 }
 
-interface ClickEntry {
-  name: string
-  id: string
-  branch?: boolean
-  minX: number
-  maxX: number
-  minY: number
-  maxY: number
-}
-
-class ClickMapIndex {
-  private flatbush: Flatbush | null = null
-  private entries: ClickEntry[] = []
-
-  clear() {
-    this.flatbush = null
-    this.entries = []
-  }
-
-  insert(entry: ClickEntry) {
-    this.entries.push(entry)
-  }
-
-  finish() {
-    if (this.entries.length === 0) {
-      this.flatbush = null
-    } else {
-      this.flatbush = new Flatbush(this.entries.length)
-      for (const entry of this.entries) {
-        this.flatbush.add(entry.minX, entry.minY, entry.maxX, entry.maxY)
-      }
-      this.flatbush.finish()
-    }
-  }
-
-  search(box: {
-    minX: number
-    maxX: number
-    minY: number
-    maxY: number
-  }): ClickEntry[] {
-    return (
-      this.flatbush
-        ?.search(box.minX, box.minY, box.maxX, box.maxY)
-        .map(i => this.entries[i]!) ?? []
-    )
-  }
-}
-
 const TreeCanvasBlock = observer(function ({
   model,
   offsetY,
@@ -94,7 +46,6 @@ const TreeCanvasBlock = observer(function ({
 }) {
   const { classes } = useStyles()
   const theme = useTheme()
-  const ref = useRef<HTMLCanvasElement>(null)
   const clickMap = useRef(new ClickMapIndex())
   const mouseoverRef = useRef<HTMLCanvasElement>(null)
   const [branchMenu, setBranchMenu] = useState<TooltipData>()
@@ -113,20 +64,10 @@ const TreeCanvasBlock = observer(function ({
   const w2 = width * highResScaleFactor
   const h2 = height * highResScaleFactor
 
-  useEffect(() => {
-    const ctx = ref.current?.getContext('2d')
-    if (!ctx) {
-      return
-    }
-
-    return autorun(() => {
+  const ref = useCanvasAutorun(
+    ctx => {
       ctx.resetTransform()
-      ctx.clearRect(
-        0,
-        0,
-        (treeAreaWidth + padding) * highResScaleFactor,
-        blockSize * highResScaleFactor,
-      )
+      ctx.clearRect(0, 0, w2, h2)
       renderTreeCanvas({
         ctx,
         model,
@@ -134,8 +75,9 @@ const TreeCanvasBlock = observer(function ({
         clickMap: clickMap.current,
         theme,
       })
-    })
-  }, [model, blockSize, highResScaleFactor, treeAreaWidth, offsetY, theme])
+    },
+    [model, blockSize, highResScaleFactor, treeAreaWidth, offsetY, theme],
+  )
 
   useEffect(() => {
     const ctx = mouseoverRef.current?.getContext('2d')

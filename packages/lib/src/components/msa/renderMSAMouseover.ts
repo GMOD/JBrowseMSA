@@ -1,3 +1,5 @@
+import { multiRowHoverColor, referenceColor } from '../overlayColors.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
 const hoverColor = 'rgba(0,0,0,0.15)'
@@ -7,8 +9,6 @@ const highlightColor = 'rgba(128,128,0,0.2)'
 // faint hover-style wash alone is invisible against clustalx coloring)
 const highlightColumnsFill = 'rgba(255,140,0,0.28)'
 const highlightColumnsBorder = 'rgba(210,90,0,0.95)'
-const referenceColor = 'rgba(0,128,255,0.3)' // Blue highlight for reference row
-const multiRowHoverColor = 'rgba(255,165,0,0.15)' // Orange highlight for multi-row tree hover
 
 // Collapse sorted column indices into contiguous [start,end] runs so a run of
 // highlighted columns draws as one bordered band rather than per-column slices

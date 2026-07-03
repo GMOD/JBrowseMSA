@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 
 import { BaseTooltip } from '@jbrowse/core/ui'
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import ColumnStats from './ColumnStats.tsx'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
+import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { useColorContrast } from '../../useColorContrast.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -48,13 +48,8 @@ const MSACanvasBlock = observer(function ({
   } = model
   const { theme, contrastScheme } = useColorContrast(colorScheme)
 
-  const ref = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const ctx = ref.current?.getContext('2d')
-    if (!ctx) {
-      return
-    }
-    return autorun(() => {
+  const ref = useCanvasAutorun(
+    ctx => {
       ctx.resetTransform()
       ctx.clearRect(
         0,
@@ -78,16 +73,9 @@ const MSACanvasBlock = observer(function ({
         contrastScheme,
         model,
       })
-    })
-  }, [
-    model,
-    offsetX,
-    offsetY,
-    theme,
-    blockSize,
-    highResScaleFactor,
-    contrastScheme,
-  ])
+    },
+    [model, offsetX, offsetY, theme, blockSize, highResScaleFactor, contrastScheme],
+  )
 
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>()
   const { hoveredInsertion, mouseOverDomains, showColumnStats } = model

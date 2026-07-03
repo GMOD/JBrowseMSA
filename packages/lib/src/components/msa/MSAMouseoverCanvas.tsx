@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 
 import { isAlive } from '@jbrowse/mobx-state-tree'
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { renderMouseover } from './renderMSAMouseover.ts'
+import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -13,19 +13,13 @@ const MSAMouseoverCanvas = observer(function ({
 }: {
   model: MsaViewModel
 }) {
-  const ref = useRef<HTMLCanvasElement>(null)
   const { height, msaAreaWidth, verticalScrollbarWidth, highResScaleFactor } =
     model
   const width = msaAreaWidth - verticalScrollbarWidth
-  useEffect(() => {
-    const ctx = ref.current?.getContext('2d')
-    return ctx
-      ? autorun(() => {
-          if (isAlive(model)) {
-            renderMouseover({ ctx, model })
-          }
-        })
-      : undefined
+  const ref = useCanvasAutorun(ctx => {
+    if (isAlive(model)) {
+      renderMouseover({ ctx, model })
+    }
   }, [model])
 
   return (
