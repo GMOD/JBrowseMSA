@@ -162,12 +162,6 @@ function useGene(symbol: string | null) {
 }
 
 export default function GeneExplorer() {
-  const [inputValue, setInputValue] = useState('')
-  // the text driving the type-ahead: only keystrokes update it, so selecting a
-  // gene (which resets inputValue to the full symbol) doesn't re-fire a search
-  const [searchTerm, setSearchTerm] = useState('')
-  const [helpOpen, setHelpOpen] = useState(false)
-
   // Reactive URL read: re-renders on popstate (back/forward) and on the
   // gene-url-change event dispatched by navigate() below.
   const urlGene = useSyncExternalStore(
@@ -175,6 +169,25 @@ export default function GeneExplorer() {
     getGeneFromUrl,
     () => null,
   )
+
+  const [inputValue, setInputValue] = useState(urlGene ?? '')
+  // the text driving the type-ahead: only keystrokes update it, so selecting a
+  // gene (which resets inputValue to the full symbol) doesn't re-fire a search
+  const [searchTerm, setSearchTerm] = useState('')
+  const [helpOpen, setHelpOpen] = useState(false)
+
+  // Keep the search box showing the gene the URL points at, whatever moved it
+  // there — an Example chip, browser back/forward, or a shared ?gene= link — not
+  // just Autocomplete selections. Adjusting state during render (vs. an effect)
+  // is the idiomatic sync here: searchTerm is deliberately untouched so restoring
+  // the symbol doesn't re-fire the type-ahead.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [syncedGene, setSyncedGene] = useState(urlGene)
+  if (urlGene !== syncedGene) {
+    setSyncedGene(urlGene)
+    setInputValue(urlGene ?? '')
+  }
+
   const hits = useGeneSuggestions(searchTerm)
   const { busy, result, error } = useGene(urlGene)
 
@@ -198,8 +211,6 @@ export default function GeneExplorer() {
     }
   }
 
-  const urlGeneNote = urlGene ? NOTE_BY_SYMBOL.get(urlGene) : undefined
-
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -211,155 +222,33 @@ export default function GeneExplorer() {
           maxWidth: 900,
         }}
       >
-        <Paper
-          variant="outlined"
-          sx={{
-            p: { xs: 2, sm: 2.5 },
-            flex: '0 0 auto',
-            width: { xs: '100%', sm: 300 },
+        <GeneSearchPanel
+          inputValue={inputValue}
+          options={options}
+          busy={busy}
+          urlGene={urlGene}
+          onInputChange={(value, isKeystroke) => {
+            setInputValue(value)
+            // only a keystroke should drive a new type-ahead query; the 'reset'
+            // fired when a gene is selected would re-search its full symbol
+            if (isKeystroke) {
+              setSearchTerm(value)
+            }
           }}
-        >
-          <Stack
-            direction="row"
-            sx={{
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              mb: 2,
-            }}
-          >
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Explore a gene
-            </Typography>
-            <Tooltip title="How it works">
-              <IconButton
-                size="small"
-                aria-label="How the gene explorer works"
-                onClick={() => {
-                  setHelpOpen(true)
-                }}
-              >
-                <HelpOutlineIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+          onSelect={symbol => {
+            navigate(symbol)
+          }}
+          onOpenHelp={() => {
+            setHelpOpen(true)
+          }}
+        />
 
-          <Autocomplete
-            freeSolo
-            fullWidth
-            openOnFocus
-            options={options}
-            inputValue={inputValue}
-            onInputChange={(_e, v, reason) => {
-              setInputValue(v)
-              // only a keystroke should drive a new type-ahead query; the 'reset'
-              // that fires when a gene is selected would re-search its full symbol
-              if (reason === 'input') {
-                setSearchTerm(v)
-              }
-            }}
-            onChange={(_e, v) => {
-              navigate(typeof v === 'string' ? v : null)
-            }}
-            renderOption={(props, option) => {
-              const { key, ...optionProps } = props
-              const note = NOTE_BY_SYMBOL.get(option)
-              return (
-                <li key={key} {...optionProps}>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 600, lineHeight: 1.3 }}
-                    >
-                      {option}
-                    </Typography>
-                    {note ? (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: 'block' }}
-                      >
-                        {note}
-                      </Typography>
-                    ) : null}
-                  </Box>
-                </li>
-              )
-            }}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="Gene symbol"
-                placeholder="e.g. TP53"
-                helperText="Type any human gene, or pick below"
-                size="small"
-                slotProps={{
-                  input: {
-                    ...params.slotProps.input,
-                    endAdornment: (
-                      <>
-                        {busy ? (
-                          <CircularProgress color="inherit" size={18} />
-                        ) : null}
-                        {params.slotProps.input.endAdornment}
-                      </>
-                    ),
-                  },
-                }}
-              />
-            )}
-          />
-
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: 'block', mt: 1.5, mb: 0.5 }}
-          >
-            Examples
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {EXAMPLES.map(ex => (
-              <Tooltip key={ex.symbol} title={ex.note}>
-                <Button
-                  size="small"
-                  variant="text"
-                  sx={{ minWidth: 0, px: 1, py: 0.25, textTransform: 'none' }}
-                  onClick={() => {
-                    navigate(ex.symbol)
-                  }}
-                >
-                  {ex.symbol}
-                </Button>
-              </Tooltip>
-            ))}
-          </Box>
-
-          {urlGeneNote ? (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-              <strong>{urlGene}</strong> — {urlGeneNote}
-            </Typography>
-          ) : null}
-        </Paper>
-
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          {/* gate on urlGene so clearing the selection empties the panel
-              without syncing state in an effect */}
-          {urlGene && error ? (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          ) : null}
-          {urlGene && result ? (
-            <Box
-              sx={{
-                opacity: busy ? 0.5 : 1,
-                transition: 'opacity 0.2s',
-                pointerEvents: busy ? 'none' : 'auto',
-              }}
-            >
-              <ResultPanel result={result} />
-            </Box>
-          ) : null}
-        </Box>
+        <GeneResultArea
+          urlGene={urlGene}
+          error={error}
+          result={result}
+          busy={busy}
+        />
       </Box>
 
       <HelpDialog
@@ -369,6 +258,192 @@ export default function GeneExplorer() {
         }}
       />
     </ThemeProvider>
+  )
+}
+
+// Left column: gene-symbol type-ahead, the curated Example chips, and a note for
+// the current gene. Purely presentational — all state lives in GeneExplorer.
+function GeneSearchPanel({
+  inputValue,
+  options,
+  busy,
+  urlGene,
+  onInputChange,
+  onSelect,
+  onOpenHelp,
+}: {
+  inputValue: string
+  options: string[]
+  busy: boolean
+  urlGene: string | null
+  // isKeystroke distinguishes typing (drives the type-ahead) from the 'reset'
+  // that fires when a value is selected
+  onInputChange: (value: string, isKeystroke: boolean) => void
+  onSelect: (symbol: string | null) => void
+  onOpenHelp: () => void
+}) {
+  const urlGeneNote = urlGene ? NOTE_BY_SYMBOL.get(urlGene) : undefined
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: { xs: 2, sm: 2.5 },
+        flex: '0 0 auto',
+        width: { xs: '100%', sm: 300 },
+      }}
+    >
+      <Stack
+        direction="row"
+        sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          Explore a gene
+        </Typography>
+        <Tooltip title="How it works">
+          <IconButton
+            size="small"
+            aria-label="How the gene explorer works"
+            onClick={() => {
+              onOpenHelp()
+            }}
+          >
+            <HelpOutlineIcon />
+          </IconButton>
+        </Tooltip>
+      </Stack>
+
+      <Autocomplete
+        freeSolo
+        fullWidth
+        openOnFocus
+        options={options}
+        inputValue={inputValue}
+        onInputChange={(_e, v, reason) => {
+          onInputChange(v, reason === 'input')
+        }}
+        onChange={(_e, v) => {
+          onSelect(typeof v === 'string' ? v : null)
+        }}
+        renderOption={(props, option) => {
+          const { key, ...optionProps } = props
+          return (
+            <li key={key} {...optionProps}>
+              <GeneOption symbol={option} />
+            </li>
+          )
+        }}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Gene symbol"
+            placeholder="e.g. TP53"
+            helperText="Type any human gene, or pick below"
+            size="small"
+            slotProps={{
+              input: {
+                ...params.slotProps.input,
+                endAdornment: (
+                  <>
+                    {busy ? (
+                      <CircularProgress color="inherit" size={18} />
+                    ) : null}
+                    {params.slotProps.input.endAdornment}
+                  </>
+                ),
+              },
+            }}
+          />
+        )}
+      />
+
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ display: 'block', mt: 1.5, mb: 0.5 }}
+      >
+        Examples
+      </Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+        {EXAMPLES.map(ex => (
+          <Tooltip key={ex.symbol} title={ex.note}>
+            <Button
+              size="small"
+              variant="text"
+              sx={{ minWidth: 0, px: 1, py: 0.25, textTransform: 'none' }}
+              onClick={() => {
+                onSelect(ex.symbol)
+              }}
+            >
+              {ex.symbol}
+            </Button>
+          </Tooltip>
+        ))}
+      </Box>
+
+      {urlGeneNote ? (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+          <strong>{urlGene}</strong> — {urlGeneNote}
+        </Typography>
+      ) : null}
+    </Paper>
+  )
+}
+
+// One type-ahead row: the symbol, with its curated note underneath when it's one
+// of the examples (typed hits have no note).
+function GeneOption({ symbol }: { symbol: string }) {
+  const note = NOTE_BY_SYMBOL.get(symbol)
+  return (
+    <Box>
+      <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+        {symbol}
+      </Typography>
+      {note ? (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block' }}
+        >
+          {note}
+        </Typography>
+      ) : null}
+    </Box>
+  )
+}
+
+// Right column: the loaded gene's panel or its error, both gated on urlGene so
+// clearing the selection empties the column without syncing state in an effect.
+// The previous result stays mounted and dimmed while the next gene loads.
+function GeneResultArea({
+  urlGene,
+  error,
+  result,
+  busy,
+}: {
+  urlGene: string | null
+  error: string | undefined
+  result: GeneResult | undefined
+  busy: boolean
+}) {
+  return (
+    <Box sx={{ flex: 1, minWidth: 0 }}>
+      {urlGene && error ? (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      ) : null}
+      {urlGene && result ? (
+        <Box
+          sx={{
+            opacity: busy ? 0.5 : 1,
+            transition: 'opacity 0.2s',
+            pointerEvents: busy ? 'none' : 'auto',
+          }}
+        >
+          <ResultPanel result={result} />
+        </Box>
+      ) : null}
+    </Box>
   )
 }
 
@@ -499,24 +574,7 @@ function DetailsDialog({
       fullWidth
       scroll="paper"
     >
-      <DialogTitle
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          pr: 1,
-        }}
-      >
-        Session details
-        <IconButton
-          aria-label="Close"
-          onClick={() => {
-            onClose()
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+      <DialogHeader title="Session details" onClose={onClose} />
       <DialogContent dividers>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           {codingBp.toLocaleString()} CDS bp / {span.toLocaleString()} bp coding
@@ -557,21 +615,9 @@ function DetailsDialog({
             {loc}
           </Box>
         </Paper>
-        <Box
-          component="pre"
-          sx={{
-            m: 0,
-            p: 1.5,
-            maxHeight: 280,
-            overflow: 'auto',
-            fontSize: 11,
-            fontFamily: 'monospace',
-            bgcolor: 'action.hover',
-            borderRadius: 1,
-          }}
-        >
+        <CodeBlock fontSize={11} maxHeight={280}>
           {sessionJson}
-        </Box>
+        </CodeBlock>
       </DialogContent>
       <DialogActions>
         <Button
@@ -591,6 +637,66 @@ function DetailsDialog({
         message={copied}
       />
     </Dialog>
+  )
+}
+
+// Dialog title row with a close button pinned to the right — shared by both
+// modals so the header layout stays identical.
+function DialogHeader({
+  title,
+  onClose,
+}: {
+  title: ReactNode
+  onClose: () => void
+}) {
+  return (
+    <DialogTitle
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        pr: 1,
+      }}
+    >
+      {title}
+      <IconButton
+        aria-label="Close"
+        onClick={() => {
+          onClose()
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    </DialogTitle>
+  )
+}
+
+// A scrollable monospace <pre> block tinted to match the surrounding paper.
+function CodeBlock({
+  children,
+  fontSize = 12,
+  maxHeight,
+}: {
+  children: ReactNode
+  fontSize?: number
+  maxHeight?: number
+}) {
+  return (
+    <Box
+      component="pre"
+      sx={{
+        m: 0,
+        p: 1.5,
+        overflow: 'auto',
+        fontSize,
+        fontFamily: 'monospace',
+        bgcolor: 'action.hover',
+        borderRadius: 1,
+        maxHeight,
+      }}
+    >
+      {children}
+    </Box>
   )
 }
 
@@ -663,24 +769,7 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
       fullWidth
       scroll="paper"
     >
-      <DialogTitle
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          pr: 1,
-        }}
-      >
-        How the gene explorer works
-        <IconButton
-          aria-label="Close"
-          onClick={() => {
-            onClose()
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+      <DialogHeader title="How the gene explorer works" onClose={onClose} />
       <DialogContent dividers>
         <Typography variant="subtitle2" gutterBottom>
           Under the hood
@@ -761,20 +850,7 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
           >
             {copied ? 'Copied' : 'Copy'}
           </Button>
-          <Box
-            component="pre"
-            sx={{
-              m: 0,
-              p: 1.5,
-              overflow: 'auto',
-              fontSize: 12,
-              fontFamily: 'monospace',
-              bgcolor: 'action.hover',
-              borderRadius: 1,
-            }}
-          >
-            {BUILD_SNIPPET}
-          </Box>
+          <CodeBlock>{BUILD_SNIPPET}</CodeBlock>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
           That's the entire mechanism — every link in the{' '}
