@@ -225,9 +225,9 @@ const getCdsIndex = memoizedTextIndex(
           return [
             symbol,
             {
-              refName: refName,
+              refName,
               strand: strand === '-' ? -1 : 1,
-              name: name,
+              name,
               geneName: symbol,
               // coding-only model: the collapsed view shows CDS exons, which
               // is what the protein/MSA views align to
