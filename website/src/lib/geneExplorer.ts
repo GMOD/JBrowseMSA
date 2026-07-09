@@ -21,10 +21,10 @@ const MYGENE = 'https://mygene.info/v3'
 
 // Canonical (MANE / RefSeq Select) transcripts — one per gene, the same set as
 // the hg38-ncbiRefSeqSelect genome track, so codons line up with the alignment.
-export const REFSEQ_SELECT_GFF =
+const REFSEQ_SELECT_GFF =
   'https://jbrowse.org/ucsc/hg38/ncbiRefSeqSelect.gff.gz'
 
-export const DATA_BASE = 'https://gmod.org/JBrowseMSA/demo/data'
+const DATA_BASE = 'https://gmod.org/JBrowseMSA/demo/data'
 
 // One bgzip `.fa.gz` of per-transcript FASTA blocks (hg38 + 99 vertebrates),
 // built by scripts/gene-explorer/build-data.mjs from the UCSC knownCanonical
@@ -33,14 +33,14 @@ export const DATA_BASE = 'https://gmod.org/JBrowseMSA/demo/data'
 // the same symbol resolved from mygene.info, unique per gene — so no
 // coordinates / overlap matching is needed.
 const MSA_BASE = 'https://jbrowse.org/demos/msaview/100way'
-export const MSA_GZ = `${MSA_BASE}/hg38.knownCanonical.multiz100way.aa.fa.gz`
-export const TREE_URI = `${MSA_BASE}/hg38.multiz100way.nh`
+const MSA_GZ = `${MSA_BASE}/hg38.knownCanonical.multiz100way.aa.fa.gz`
+const TREE_URI = `${MSA_BASE}/hg38.multiz100way.nh`
 
 // The JBrowse build + config that bundle jbrowse-plugin-msaview and
 // jbrowse-plugin-protein3d (see scripts/gene-explorer/config additions).
-export const JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc/'
-export const JBROWSE_CONFIG = `${DATA_BASE}/jbrowse-msa-combined-config.json`
-export const GENE_TRACK = 'hg38-ncbiRefSeqSelect'
+const JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc/'
+const JBROWSE_CONFIG = `${DATA_BASE}/jbrowse-msa-combined-config.json`
+const GENE_TRACK = 'hg38-ncbiRefSeqSelect'
 
 const alphafoldCif = (uniprotId: string) =>
   `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v6.cif`
@@ -115,7 +115,7 @@ function isHits(v: unknown): v is { hits: { symbol?: unknown }[] } {
 }
 
 // Gene symbol -> hg38 locus + UniProt accession.
-export async function resolveGene(symbol: string): Promise<GeneLocus> {
+async function resolveGene(symbol: string): Promise<GeneLocus> {
   const q = encodeURIComponent(`symbol:${symbol}`)
   const url = `${MYGENE}/query?q=${q}&species=human&fields=symbol,genomic_pos,uniprot`
   const res = await fetch(url)
@@ -243,7 +243,7 @@ const getCdsIndex = memoizedTextIndex(
 // symbol. Preferred over fetchTranscript (RefSeq Select) so connectedFeature
 // shares the alignment's transcript and the genome<->MSA / genome<->3D mappings
 // stay coordinate-consistent for every gene.
-export async function fetchGeneCds(
+async function fetchGeneCds(
   geneName: string,
 ): Promise<Transcript | undefined> {
   // an unreachable .cds index is just another "no CDS for this gene" as far as
@@ -276,7 +276,7 @@ function attr(r: GFFRecord, key: string) {
 
 // Pull the canonical transcript's exon/CDS structure live from the RefSeq
 // Select GFF and parse it in the browser.
-export async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
+async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
   const lines = await tabixLines(
     getGffTabix(),
     locus.refName,
@@ -321,7 +321,7 @@ export async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
 // Best transcript model for a gene: the alignment-backing knownCanonical CDS
 // when available (so connectedFeature shares the alignment's coordinate space),
 // else the live RefSeq Select transcript for genes outside the 100-way set.
-export async function fetchGeneTranscript(
+async function fetchGeneTranscript(
   symbol: string,
   locus: GeneLocus,
 ): Promise<Transcript> {
@@ -454,7 +454,7 @@ export interface GeneMsa {
 // the gene symbol in the name index, random-read its FASTA block, and return it
 // as-is — the block is already valid FASTA (`>hg38\nSEQ\n>panTro4\nSEQ\n...`,
 // hg38 first).
-export async function fetchGeneMsa(
+async function fetchGeneMsa(
   geneName: string,
 ): Promise<GeneMsa | undefined> {
   // the alignment slice is hosted separately and is optional; an unreachable
@@ -490,7 +490,7 @@ function firstSequence(fasta: string) {
 // `userProvidedTranscriptSequence` for the 3D<->structure alignment — and it's
 // available for any gene with a Swiss-Prot accession, not just the 100-way set.
 // Best-effort: a failure just means no 3D view (undefined), never a load error.
-export async function fetchUniProtSeq(uniprotId: string) {
+async function fetchUniProtSeq(uniprotId: string) {
   const res = await fetch(
     `https://rest.uniprot.org/uniprotkb/${uniprotId}.fasta`,
   ).catch(() => undefined)

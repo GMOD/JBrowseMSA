@@ -6,20 +6,13 @@ import Figure from './Figure.astro'
 interface Props {
   src: string
   alt: string
-  title?: string
   body: string
   href: string
 }
-const { src, alt, title, body, href } = Astro.props
+const { src, alt, body, href } = Astro.props
 ---
 
 <Figure src={src} alt={alt} href={href}>
-  {
-    title ? (
-      <>
-        <strong>{title}</strong> —
-      </>
-    ) : null
-  }{body}
+  {body}
   <a href={href} target="_blank" rel="noopener">Open in JBrowse ↗</a>
 </Figure>
