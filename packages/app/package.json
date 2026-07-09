@@ -12,7 +12,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@jbrowse/core": "file:../../vendor-jbrowse/jbrowse-core.tgz",
-    "@jbrowse/mobx-state-tree": "^5.11.2",
+    "@jbrowse/mobx-state-tree": "^5.12.0",
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
     "@mui/system": "^9.2.0",
