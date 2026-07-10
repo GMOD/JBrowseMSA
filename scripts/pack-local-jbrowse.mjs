@@ -23,7 +23,10 @@ const outDir = join(repoRoot, 'vendor-jbrowse')
 
 const packages = [
   { name: 'jbrowse-core', dir: join(jbrowseRoot, 'packages/core') },
-  { name: 'jbrowse-render-core', dir: join(jbrowseRoot, 'packages/render-core') },
+  {
+    name: 'jbrowse-render-core',
+    dir: join(jbrowseRoot, 'packages/render-core'),
+  },
 ]
 
 function esmFromSrc(srcPath) {
@@ -36,10 +39,15 @@ mkdirSync(outDir, { recursive: true })
 
 for (const { name, dir } of packages) {
   if (!existsSync(dir)) {
-    throw new Error(`missing ${dir} — pass your jbrowse-components path as arg 1`)
+    throw new Error(
+      `missing ${dir} — pass your jbrowse-components path as arg 1`,
+    )
   }
   // prepack runs the esm build
-  execSync(`npm pack --pack-destination ${outDir}`, { cwd: dir, stdio: 'inherit' })
+  execSync(`npm pack --pack-destination ${outDir}`, {
+    cwd: dir,
+    stdio: 'inherit',
+  })
 
   const work = join(outDir, `unpack-${name}`)
   mkdirSync(work, { recursive: true })

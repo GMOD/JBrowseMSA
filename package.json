@@ -30,7 +30,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.4",
     "@emotion/react": "^11.14.0",
-    "@eslint-react/eslint-plugin": "^5.12.1",
+    "@eslint-react/eslint-plugin": "^5.13.2",
     "@eslint/js": "^10.0.1",
     "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
     "@jbrowse/mobx-state-tree": "^5.12.0",

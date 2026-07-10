@@ -3,7 +3,6 @@ import type React from 'react'
 
 import { autorun } from 'mobx'
 
-
 // Wires a canvas ref to a mobx autorun: grabs the 2d context once the canvas
 // mounts and re-runs `draw` whenever any observable it reads changes. Collapses
 // the getContext/null-guard/autorun-dispose boilerplate repeated by every

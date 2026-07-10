@@ -16,11 +16,11 @@ pnpm --filter website preview   # preview the build
 
 - **`src/pages/index.astro`** — landing page: hero, a live `MSAViewer`
   (`src/components/Viewer.tsx`, rendered `client:only="react"`), and link cards.
-- **`src/pages/guide.astro`, `embedding.astro`, `cli.astro`,
-  `r-package.astro`** — render the repo's existing markdown
-  (`docs/user_guide.md`, `USAGE.md`, the CLI and R-package READMEs) directly, so
-  the docs are not duplicated. A small rehype plugin in `astro.config.mjs`
-  rewrites every markdown `<img>` to `/{base}/media/<file>`.
+- **`src/pages/guide.astro`, `embedding.astro`, `cli.astro`, `r-package.astro`**
+  — render the repo's existing markdown (`docs/user_guide.md`, `USAGE.md`, the
+  CLI and R-package READMEs) directly, so the docs are not duplicated. A small
+  rehype plugin in `astro.config.mjs` rewrites every markdown `<img>` to
+  `/{base}/media/<file>`.
 - **`scripts/sync-media.mjs`** copies `docs/media/*` into `public/media/` (run
   automatically by `dev`/`build`); `public/media` is git-ignored.
 

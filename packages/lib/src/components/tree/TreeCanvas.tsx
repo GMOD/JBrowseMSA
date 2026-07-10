@@ -22,51 +22,54 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   )
   const { onMouseDown, onMouseUp } = useWheelScroll({ ref, onScrollY })
 
-  const mouseoverRef = useCanvasAutorun(ctx => {
-    if (isAlive(model)) {
-      const {
-        relativeTo,
-        leaves,
-        rowHeight,
-        hoveredTreeNode,
-        treeAreaWidth: w,
-        height: h,
-        scrollY: sy,
-        mouseOverRowName,
-      } = model
-      ctx.resetTransform()
-      ctx.clearRect(0, 0, w, h)
+  const mouseoverRef = useCanvasAutorun(
+    ctx => {
+      if (isAlive(model)) {
+        const {
+          relativeTo,
+          leaves,
+          rowHeight,
+          hoveredTreeNode,
+          treeAreaWidth: w,
+          height: h,
+          scrollY: sy,
+          mouseOverRowName,
+        } = model
+        ctx.resetTransform()
+        ctx.clearRect(0, 0, w, h)
 
-      const leafByName = new Map(leaves.map(leaf => [leaf.data.name, leaf]))
-      const fillRow = (name: string) => {
-        const leaf = leafByName.get(name)
-        if (leaf) {
-          ctx.fillRect(0, leaf.x! + sy - rowHeight / 2, w, rowHeight)
+        const leafByName = new Map(leaves.map(leaf => [leaf.data.name, leaf]))
+        const fillRow = (name: string) => {
+          const leaf = leafByName.get(name)
+          if (leaf) {
+            ctx.fillRect(0, leaf.x! + sy - rowHeight / 2, w, rowHeight)
+          }
+        }
+
+        if (relativeTo) {
+          ctx.fillStyle = referenceColor
+          fillRow(relativeTo)
+        }
+
+        if (hoveredTreeNode) {
+          ctx.fillStyle = treeHoverColor
+          for (const descendantName of hoveredTreeNode.descendantNames) {
+            fillRow(descendantName)
+          }
+        }
+
+        if (
+          mouseOverRowName &&
+          mouseOverRowName !== relativeTo &&
+          !hoveredTreeNode?.descendantNames.includes(mouseOverRowName)
+        ) {
+          ctx.fillStyle = treeHoverColor
+          fillRow(mouseOverRowName)
         }
       }
-
-      if (relativeTo) {
-        ctx.fillStyle = referenceColor
-        fillRow(relativeTo)
-      }
-
-      if (hoveredTreeNode) {
-        ctx.fillStyle = treeHoverColor
-        for (const descendantName of hoveredTreeNode.descendantNames) {
-          fillRow(descendantName)
-        }
-      }
-
-      if (
-        mouseOverRowName &&
-        mouseOverRowName !== relativeTo &&
-        !hoveredTreeNode?.descendantNames.includes(mouseOverRowName)
-      ) {
-        ctx.fillStyle = treeHoverColor
-        fillRow(mouseOverRowName)
-      }
-    }
-  }, [model])
+    },
+    [model],
+  )
 
   return (
     <div

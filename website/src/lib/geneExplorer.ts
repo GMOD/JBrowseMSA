@@ -243,9 +243,7 @@ const getCdsIndex = memoizedTextIndex(
 // symbol. Preferred over fetchTranscript (RefSeq Select) so connectedFeature
 // shares the alignment's transcript and the genome<->MSA / genome<->3D mappings
 // stay coordinate-consistent for every gene.
-async function fetchGeneCds(
-  geneName: string,
-): Promise<Transcript | undefined> {
+async function fetchGeneCds(geneName: string): Promise<Transcript | undefined> {
   // an unreachable .cds index is just another "no CDS for this gene" as far as
   // the caller is concerned (it falls back to RefSeq Select either way), so
   // collapse the network failure into the undefined the return type already
@@ -454,9 +452,7 @@ export interface GeneMsa {
 // the gene symbol in the name index, random-read its FASTA block, and return it
 // as-is — the block is already valid FASTA (`>hg38\nSEQ\n>panTro4\nSEQ\n...`,
 // hg38 first).
-async function fetchGeneMsa(
-  geneName: string,
-): Promise<GeneMsa | undefined> {
+async function fetchGeneMsa(geneName: string): Promise<GeneMsa | undefined> {
   // the alignment slice is hosted separately and is optional; an unreachable
   // index reads as "no MSA for this gene", same as a missing entry
   const index = await getMsaIndex().catch(() => undefined)

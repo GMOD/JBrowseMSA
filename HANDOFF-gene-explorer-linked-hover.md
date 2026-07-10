@@ -31,19 +31,22 @@ the other two views resolves nothing otherwise.
   `gene-explorer-3d-any-gene`): the ProteinView is no longer gated on
   `msaAvailable`, so genes outside the 100-way set get a linked genome↔3D
   session using the UniProt canonical sequence
-  (`rest.uniprot.org/uniprotkb/<acc>.fasta`) as `userProvidedTranscriptSequence`.
-- **Confirm the live three-way hover** once the rebuilt `jbrowse.org/code/jb2/webgl-poc/`
-  is deployed. The deployed build must honor the pinned LGV `id` (current
-  jbrowse-components `LaunchView-LinearGenomeView` does; an older build assigned
-  a random id, which silently broke every `connectedViewId`). Verify:
-  `node scripts/gene-explorer/test-lgv-highlight.mjs TP53` (drives the real page,
-  opens its JBrowse URL headless, waits for `connectedView`, asserts
-  `structure.hoverGenomeHighlights` lands in the CDS, codon-spaced). Deterministic
-  unit complement: protein3d `src/ProteinView/geneExplorerLinkage.test.ts`.
+  (`rest.uniprot.org/uniprotkb/<acc>.fasta`) as
+  `userProvidedTranscriptSequence`.
+- **Confirm the live three-way hover** once the rebuilt
+  `jbrowse.org/code/jb2/webgl-poc/` is deployed. The deployed build must honor
+  the pinned LGV `id` (current jbrowse-components `LaunchView-LinearGenomeView`
+  does; an older build assigned a random id, which silently broke every
+  `connectedViewId`). Verify:
+  `node scripts/gene-explorer/test-lgv-highlight.mjs TP53` (drives the real
+  page, opens its JBrowse URL headless, waits for `connectedView`, asserts
+  `structure.hoverGenomeHighlights` lands in the CDS, codon-spaced).
+  Deterministic unit complement: protein3d
+  `src/ProteinView/geneExplorerLinkage.test.ts`.
 - Cosmetic: the LGV displays the RefSeq Select track while the connected feature
-  + collapsed regions are knownCanonical (coding-only). For the ~10% of genes
-  where knownCanonical diverges from RefSeq, the visible glyph won't perfectly
-  match; a knownGene track in the hosted jbrowse config would align them.
+  - collapsed regions are knownCanonical (coding-only). For the ~10% of genes
+    where knownCanonical diverges from RefSeq, the visible glyph won't perfectly
+    match; a knownGene track in the hosted jbrowse config would align them.
 - HBB build truncation (alignment row 91 of 147 aa) is a UCSC-data issue,
   gene-specific.
 

@@ -74,7 +74,15 @@ const MSACanvasBlock = observer(function ({
         model,
       })
     },
-    [model, offsetX, offsetY, theme, blockSize, highResScaleFactor, contrastScheme],
+    [
+      model,
+      offsetX,
+      offsetY,
+      theme,
+      blockSize,
+      highResScaleFactor,
+      contrastScheme,
+    ],
   )
 
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>()

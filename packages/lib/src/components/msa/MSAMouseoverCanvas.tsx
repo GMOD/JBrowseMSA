@@ -16,11 +16,14 @@ const MSAMouseoverCanvas = observer(function ({
   const { height, msaAreaWidth, verticalScrollbarWidth, highResScaleFactor } =
     model
   const width = msaAreaWidth - verticalScrollbarWidth
-  const ref = useCanvasAutorun(ctx => {
-    if (isAlive(model)) {
-      renderMouseover({ ctx, model })
-    }
-  }, [model])
+  const ref = useCanvasAutorun(
+    ctx => {
+      if (isAlive(model)) {
+        renderMouseover({ ctx, model })
+      }
+    },
+    [model],
+  )
 
   return (
     <canvas

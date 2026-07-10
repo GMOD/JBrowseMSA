@@ -117,7 +117,11 @@ describe('connectedFeature', () => {
 describe('geneStats', () => {
   it('sums CDS length and measures the collapse ratio off the coding model', () => {
     // CDS lengths 80 + 80 = 160; span from 120 to 1080 = 960; ratio 960/160 = 6.0
-    expect(geneStats(twoExon)).toEqual({ codingBp: 160, span: 960, ratio: '6.0' })
+    expect(geneStats(twoExon)).toEqual({
+      codingBp: 160,
+      span: 960,
+      ratio: '6.0',
+    })
   })
 })
 

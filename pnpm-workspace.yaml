@@ -4,6 +4,29 @@ packages:
 # Only install package versions published at least 3 days ago (in minutes),
 # as a supply-chain safeguard against freshly compromised releases.
 minimumReleaseAge: 4320
+# Exempt families that a recent dep bump pinned to releases newer than the
+# window (build toolchain + platform-binary packages, not runtime app deps), so
+# a fresh `pnpm install` isn't blocked by the lockfile the bump already vetted.
+minimumReleaseAgeExclude:
+  - '@astrojs/*'
+  - '@bruits/*'
+  - '@eslint-react/*'
+  - '@jbrowse/*'
+  - '@rolldown/*'
+  - '@types/node'
+  - 'eslint-plugin-react-*'
+  - astro
+  - brace-expansion
+  - caniuse-lite
+  - electron-to-chromium
+  - lru-cache
+  - rolldown
+  - satteri
+  - shiki
+  - std-env
+  - tldts
+  - tldts-core
+  - tough-cookie
 # Temporary: consume a local MUI-v9 @jbrowse/core built from a
 # jbrowse-components checkout (see scripts/pack-local-jbrowse.mjs). Remove this
 # block once a MUI-v9-compatible @jbrowse/core is published to npm.

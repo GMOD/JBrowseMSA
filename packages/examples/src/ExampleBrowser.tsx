@@ -100,7 +100,9 @@ function useHashSlug() {
         : decodeURIComponent(window.location.hash.replace(/^#/, ''))
     return examples.some(e => slugOf(e.name) === hash) ? hash : ''
   }
-  const [slug, setSlug] = useState(() => readHash() || slugOf(examples[0]!.name))
+  const [slug, setSlug] = useState(
+    () => readHash() || slugOf(examples[0]!.name),
+  )
 
   useEffect(() => {
     const onHashChange = () => {
@@ -156,8 +158,7 @@ export default function ExampleBrowser({
   height: string
 }) {
   const [slug, select] = useHashSlug()
-  const example =
-    examples.find(e => slugOf(e.name) === slug) ?? examples[0]!
+  const example = examples.find(e => slugOf(e.name) === slug) ?? examples[0]!
   const { Component } = example
   return (
     <Box sx={{ display: 'flex', height }}>
@@ -176,9 +177,7 @@ export default function ExampleBrowser({
           <List
             key={category}
             dense
-            subheader={
-              <ListSubheader disableSticky>{category}</ListSubheader>
-            }
+            subheader={<ListSubheader disableSticky>{category}</ListSubheader>}
           >
             {examples
               .filter(e => e.category === category)
