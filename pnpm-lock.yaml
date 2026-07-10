@@ -259,6 +259,9 @@ importers:
       react-msaview:
         specifier: workspace:*
         version: link:../lib
+      shiki:
+        specifier: 4.3.1
+        version: 4.3.1
     devDependencies:
       '@vitejs/plugin-react':
         specifier: ^6.0.3
