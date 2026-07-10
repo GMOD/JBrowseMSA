@@ -1,0 +1,2 @@
+import{n as e,t}from"./jsx-runtime-n5LQ9ujS.js";import{R as n}from"./Close-vkncmuUy.js";import{t as r}from"./Checkbox-q1UqlKAw.js";import{t as i}from"./FormControlLabel-Dm67Xnbw.js";var a=t(),o=n((0,a.jsx)(`path`,{d:`M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z`}),`Close`);e();function s({checked:e,label:t,disabled:n,onChange:o}){return(0,a.jsx)(`div`,{children:(0,a.jsx)(i,{control:(0,a.jsx)(r,{disabled:n,checked:e,onChange:()=>{o()}}),label:t})})}export{o as n,s as t};
+//# sourceMappingURL=Checkbox2-kB1fQl_J.js.map
