@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import ViewInArIcon from '@mui/icons-material/ViewInAr'
 import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
@@ -34,9 +35,20 @@ import {
   loadGene,
   searchGenes,
 } from '../lib/geneExplorer'
+import { fetchProteinStl } from '../lib/proteinStl'
 import { theme } from '../lib/theme'
 
 import type { GeneResult } from '../lib/geneExplorer'
+
+// Save generated STL bytes to the user's disk via a throwaway object URL.
+function triggerDownload(bytes: Uint8Array<ArrayBuffer>, filename: string) {
+  const url = URL.createObjectURL(new Blob([bytes], { type: 'model/stl' }))
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = filename
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
 
 // curated, all present in the 100-way index — chosen to span tumour
 // suppressors, oncogenes/drug targets, classic disease genes, and size extremes
@@ -451,6 +463,24 @@ function ResultPanel({ result }: { result: GeneResult }) {
   const { transcript, uniprotId, msa, proteinSequence } = result
   const { codingBp, span, ratio } = geneStats(transcript)
   const [detailsOpen, setDetailsOpen] = useState(false)
+  // STL export runs on click (fetch AlphaFold + build mesh), so it's a plain
+  // async handler — busy drives the spinner, stlError surfaces failures.
+  const [stlBusy, setStlBusy] = useState(false)
+  const [stlError, setStlError] = useState<string>()
+
+  function downloadStl(accession: string) {
+    setStlBusy(true)
+    fetchProteinStl(accession)
+      .then(bytes => {
+        triggerDownload(bytes, `${transcript.geneName}-${accession}.stl`)
+      })
+      .catch((e: unknown) => {
+        setStlError(e instanceof Error ? e.message : String(e))
+      })
+      .finally(() => {
+        setStlBusy(false)
+      })
+  }
   // launch the genome view with introns squeezed out (default) vs. the whole
   // gene; recomputes the loc/url/session spec below
   const [collapse, setCollapse] = useState(true)
@@ -489,6 +519,28 @@ function ResultPanel({ result }: { result: GeneResult }) {
         <Button variant="contained" href={url} target="_blank" rel="noopener">
           Open in JBrowse ↗
         </Button>
+        {uniprotId ? (
+          <Tooltip title="Download a 3D-printable STL of the AlphaFold structure (a solid tube swept along the protein backbone)">
+            <span>
+              <Button
+                variant="outlined"
+                disabled={stlBusy}
+                startIcon={
+                  stlBusy ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <ViewInArIcon />
+                  )
+                }
+                onClick={() => {
+                  downloadStl(uniprotId)
+                }}
+              >
+                {stlBusy ? 'Preparing STL…' : '3D print (STL)'}
+              </Button>
+            </span>
+          </Tooltip>
+        ) : null}
         <Tooltip title="Session details">
           <IconButton
             size="small"
@@ -535,6 +587,15 @@ function ResultPanel({ result }: { result: GeneResult }) {
         span={span}
         ratio={ratio}
         uniprotId={uniprotId}
+      />
+
+      <Snackbar
+        open={!!stlError}
+        autoHideDuration={5000}
+        onClose={() => {
+          setStlError(undefined)
+        }}
+        message={stlError ? `Couldn't build STL: ${stlError}` : undefined}
       />
     </Paper>
   )
