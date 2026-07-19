@@ -3,7 +3,9 @@
 Command-line tools for [react-msaview](../) (JBrowseMSA), including batch
 InterProScan processing for multiple sequence alignments.
 
-Uses [msa-parsers](../msa-parsers/) for file format support.
+Uses
+[msa-parsers](https://github.com/GMOD/JBrowseMSA/tree/main/packages/msa-parsers)
+for file format support.
 
 ## Installation
 
@@ -45,7 +47,7 @@ REST API one at a time. `--local`, `--docker`, and `--singularity` instead run
 InterProScan on the whole alignment locally, which is much faster for large
 datasets.
 
-#### Supported MSA Formats
+#### Supported MSA formats
 
 The CLI automatically detects the input format:
 
@@ -55,7 +57,7 @@ The CLI automatically detects the input format:
 - **A3M** (`.a3m`) - AlphaFold/ColabFold format
 - **EMF** (`.emf`) - Ensembl Multi Format
 
-#### Available InterProScan Programs
+#### Available InterProScan programs
 
 When using `--programs`, you can specify any combination of:
 
@@ -72,6 +74,35 @@ When using `--programs`, you can specify any combination of:
 - `PRINTS` - Protein fingerprints
 - `PIRSF` - PIR SuperFamily
 - `MobiDBLite` - Disorder prediction
+
+### interpro
+
+Build a domain GFF from InterPro's **precomputed** matches for UniProtKB
+accessions, instead of submitting sequences to a live InterProScan job. Every
+UniProtKB sequence already has InterPro matches computed and served by the EBI
+InterPro API, so for inputs that are real UniProt accessions this is instant,
+deterministic, and version-pinnable — no email or rate-limited job submission.
+Prefer this over `interproscan` whenever your rows are UniProt accessions.
+
+```bash
+react-msaview-cli interpro <accessions.tsv> [options]
+```
+
+The input is one accession per line, with an optional whitespace-separated row
+label (`<accession>\t<label>`); lines starting with `#` are ignored. The output
+GFF is byte-for-byte compatible with the `interproscan` command.
+
+#### Options
+
+| Option                | Description                | Default       |
+| --------------------- | -------------------------- | ------------- |
+| `-o, --output <file>` | Output GFF file path       | `domains.gff` |
+| `--database <name>`   | InterPro member db to read | `pfam`        |
+
+```bash
+react-msaview-cli interpro accessions.tsv -o domains.gff
+react-msaview-cli interpro accessions.tsv -o domains.gff --database cdd
+```
 
 ### genestructure
 
@@ -110,21 +141,51 @@ react-msaview-cli genestructure f12-cds.stock --gene F12 --ref human -o exons.gf
 react-msaview-cli genestructure aln.fa --transcript NM_000505.4 --ref human
 ```
 
-## Examples
+### export-svg
 
-### Using EBI API (recommended for small datasets)
+Render an alignment (with an optional tree and domain overlay) straight to a
+standalone SVG — no browser required. This is what the R package shells out to
+for vector export.
 
 ```bash
-# Basic usage - runs Pfam analysis
+react-msaview-cli export-svg --msa <file> [options]
+```
+
+#### Options
+
+| Option                   | Description                             | Default         |
+| ------------------------ | --------------------------------------- | --------------- |
+| `--msa <file>`           | MSA file (FASTA, Stockholm, or Clustal) | _required_      |
+| `--tree <file>`          | Newick tree file                        |                 |
+| `--gff <file>`           | InterProScan domain GFF file            |                 |
+| `-o, --output <file>`    | Output SVG file path                    | `alignment.svg` |
+| `--color-scheme <name>`  | Color scheme                            | `maeditor`      |
+| `--width <px>`           | Canvas width in pixels                  | `1200`          |
+| `--height <px>`          | Canvas height in pixels                 | `600`           |
+| `--tree-area-width <px>` | Tree panel width in pixels              |                 |
+
+```bash
+react-msaview-cli export-svg --msa alignment.fasta -o alignment.svg
+react-msaview-cli export-svg --msa alignment.fasta --tree tree.nwk -o alignment.svg
+react-msaview-cli export-svg --msa alignment.fasta --gff domains.gff \
+  --color-scheme clustalx_protein_dynamic -o alignment.svg
+```
+
+## Examples
+
+### Using the EBI API (recommended for small datasets)
+
+```bash
+# Basic usage - runs the default PfamA + CDD analysis
 react-msaview-cli interproscan alignment.fasta -o domains.gff --email your@email.com
 
 # Multiple programs
 react-msaview-cli interproscan alignment.fasta -o domains.gff \
-  --programs Pfam,SMART,Gene3D \
+  --programs PfamA,SMART,Gene3D \
   --email your@email.com
 ```
 
-### Using Local InterProScan
+### Using local InterProScan
 
 For large datasets or frequent usage, install InterProScan locally:
 
@@ -140,7 +201,7 @@ react-msaview-cli interproscan alignment.fasta -o domains.gff \
 # With specific programs
 react-msaview-cli interproscan alignment.fasta -o domains.gff \
   --local \
-  --programs Pfam,SMART
+  --programs PfamA,SMART
 ```
 
 ### Using Docker
@@ -168,7 +229,7 @@ react-msaview-cli interproscan alignment.fasta -o domains.gff \
   --singularity-image /path/to/interproscan.sif
 ```
 
-### Different Input Formats
+### Different input formats
 
 ```bash
 # Clustal format
@@ -196,7 +257,7 @@ Writing output to domains.gff...
 Done!
 ```
 
-## Output Format
+## Output format
 
 The output is standard GFF3, with one `protein_match` line per domain hit.
 `start`/`end` are 1-based positions in the **ungapped** sequence (gaps are
@@ -210,7 +271,7 @@ seq1	InterProScan	protein_match	200	350	.	.	.	Name=PF00002;signature_desc=7tm_2;
 seq2	InterProScan	protein_match	5	120	.	.	.	Name=PF00001;signature_desc=7tm_1;description=7 transmembrane receptor (rhodopsin family)
 ```
 
-## Loading Results in react-msaview
+## Loading results in react-msaview
 
 After generating the GFF file, you can load it in react-msaview:
 
@@ -237,7 +298,7 @@ The domains render as labelled boxes over the matching rows:
 
 ## Troubleshooting
 
-### EBI API Timeout
+### EBI API timeout
 
 If you get timeout errors with the EBI API:
 
@@ -245,7 +306,7 @@ If you get timeout errors with the EBI API:
 - Check your internet connection
 - For large datasets, a local/container backend is much faster than the API
 
-### Local InterProScan Not Found
+### Local InterProScan not found
 
 ```
 Error: Failed to run Local: spawn interproscan.sh ENOENT. Is interproscan.sh installed and on PATH?
@@ -257,13 +318,13 @@ Make sure InterProScan is installed and specify the full path:
 --interproscan-path /full/path/to/interproscan-5.xx/interproscan.sh
 ```
 
-### No Results in Output
+### No results in output
 
 - Check that your sequences are protein sequences (not nucleotide)
 - Try different programs (some may not have hits for your sequences)
 - Verify the input file is valid MSA format
 
-## API Rate Limits
+## API rate limits
 
 The EBI InterProScan API has usage limits:
 

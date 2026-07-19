@@ -131,5 +131,5 @@ automatically re-render when observed model properties change.
 
 - [Interactive examples](https://gmod.org/JBrowseMSA/examples) — copyable source
   for each usage pattern shown above.
-- [Model API reference](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/apidocs/MsaView.md)
-  — the auto-generated state-model docs.
+- [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the app, file
+  formats, and features.

@@ -167,8 +167,8 @@ sized data.
 
 - [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — React, UMD-in-HTML,
   and the R package.
-- [Genome browser guide](https://gmod.org/JBrowseMSA/genome-browser) — the
-  viewer as a view inside JBrowse 2, beside annotation and DNA-alignment tracks.
+- [Gallery](https://gmod.org/JBrowseMSA/gallery#jbrowse) — the viewer as a view
+  inside JBrowse 2, connected to a genome view and 3D structure.
 - [jbrowse-plugin-msaview](https://github.com/GMOD/jbrowse-plugin-msaview) — the
   JBrowse 2 plugin ([demo](https://jbrowse.org/demos/app)).
 - [ProteinBrowser](https://github.com/GMOD/proteinbrowser) — a fuller

@@ -107,3 +107,36 @@ jobs:
 
       - name: Check types with attw
         run: pnpm attw
+
+  link-check:
+    name: Check docs links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build pages bundle (docs + /demo app)
+        run: pnpm build:pages
+
+      # The site is served under /JBrowseMSA, so stage it at that path before
+      # checking — otherwise the absolute /JBrowseMSA/... links won't resolve.
+      - name: Stage site under its base path
+        run: |
+          mkdir -p _linkcheck/JBrowseMSA
+          cp -r pages-dist/. _linkcheck/JBrowseMSA/
+
+      - name: Check internal links and anchors
+        uses: untitaker/hyperlink@0.3.2
+        with:
+          args: _linkcheck/ --check-anchors --github-actions

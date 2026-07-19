@@ -8,12 +8,11 @@ in RStudio, R Markdown, Quarto, and Shiny.
 
 ## Installation
 
-```r
-# Install from the local package
-devtools::install("packages/r-msaview")
+The only hard dependency is `htmlwidgets`:
 
-# Or install dependencies and load directly
+```r
 install.packages("htmlwidgets")
+devtools::install("packages/r-msaview")
 ```
 
 For Bioconductor interop:
