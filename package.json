@@ -14,6 +14,7 @@
     "clean": "pnpm -r run clean",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest",
     "figures": "vitest run --config vitest.figures.config.ts",
     "examples:gen": "node scripts/examples-gen/generate.mjs",

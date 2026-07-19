@@ -31,7 +31,8 @@ const normalize = (a: Vec3): Vec3 => {
   const l = length(a)
   return l > 1e-9 ? scale(a, 1 / l) : [0, 0, 0]
 }
-const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x))
+const clamp = (x: number, lo: number, hi: number) =>
+  Math.min(hi, Math.max(lo, x))
 
 // Rodrigues' rotation of v about a unit axis by `angle`.
 function rotateAbout(v: Vec3, axis: Vec3, angle: number): Vec3 {

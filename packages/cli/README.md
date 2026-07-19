@@ -88,9 +88,9 @@ Prefer this over `interproscan` whenever your rows are UniProt accessions.
 react-msaview-cli interpro <accessions.tsv> [options]
 ```
 
-The input is one accession per line, with an optional whitespace-separated row
-label (`<accession>\t<label>`); lines starting with `#` are ignored. The output
-GFF is byte-for-byte compatible with the `interproscan` command.
+The input is one accession per line, optionally followed by a tab- or
+space-separated row label; lines starting with `#` are ignored. The output GFF
+is byte-for-byte compatible with the `interproscan` command.
 
 #### Options
 
