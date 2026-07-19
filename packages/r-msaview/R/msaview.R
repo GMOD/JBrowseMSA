@@ -29,9 +29,11 @@
 #'   }
 #' @param color_scheme Color scheme name. Options include \code{"maeditor"}
 #'   (default), \code{"clustal"}, \code{"lesk"}, \code{"cinema"}, \code{"flower"},
-#'   \code{"buried"}, \code{"taylor"}, \code{"hydrophobicity"}, \code{"helix"},
-#'   \code{"strand"}, \code{"turn"}, \code{"nucleotide"}, \code{"purine_pyrimidine"},
-#'   \code{"rainbow_dna"}, \code{"rainbow_rna"},
+#'   \code{"clustalx_protein"}, \code{"jalview_taylor"}, \code{"jalview_zappo"},
+#'   \code{"jalview_hydrophobicity"}, \code{"jalview_buried"},
+#'   \code{"jalview_prophelix"}, \code{"jalview_propstrand"},
+#'   \code{"jalview_propturn"}, \code{"nucleotide"}, \code{"jbrowse_dna"},
+#'   \code{"rainbow_dna"}, \code{"clustalx_dna"},
 #'   \code{"clustalx_protein_dynamic"}, \code{"percent_identity_dynamic"}.
 #' @param show_branch_len Logical. If \code{TRUE}, draw branch lengths
 #'   (phylogram). If \code{FALSE}, draw a cladogram.

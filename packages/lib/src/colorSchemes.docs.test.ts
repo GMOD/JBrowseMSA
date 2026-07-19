@@ -29,3 +29,27 @@ test('color schemes listed in USAGE.md all exist', () => {
     `documented but not registered: ${unknown.join(', ')}`,
   ).toEqual([])
 })
+
+// Same guard for the R package docs, whose color_scheme names pass straight
+// through as colorSchemeName with no remapping — a name that isn't registered
+// silently renders with no coloring.
+test('color schemes listed in the R README all exist', () => {
+  const registered = new Set(Object.keys(colorSchemes))
+  const readme = readFileSync(
+    new URL('../../r-msaview/README.md', import.meta.url),
+    'utf8',
+  )
+
+  const section = (/## Color schemes\n([\s\S]*?)\n## /.exec(readme))?.[1]
+  expect(section, 'could not find the "## Color schemes" section').toBeTruthy()
+
+  // names are backtick-quoted, e.g. `jalview_taylor`
+  const names = [...section!.matchAll(/`([a-z][a-z0-9_]+)`/g)].map(m => m[1])
+  expect(names.length).toBeGreaterThan(0)
+
+  const unknown = names.filter(name => !registered.has(name))
+  expect(
+    unknown,
+    `documented but not registered: ${unknown.join(', ')}`,
+  ).toEqual([])
+})

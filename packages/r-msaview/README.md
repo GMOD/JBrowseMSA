@@ -1,7 +1,7 @@
 # msaviewr
 
 Interactive multiple sequence alignment viewer for R, powered by
-[react-msaview](https://github.com/GMOD/react-msaview). Renders as an htmlwidget
+[react-msaview](https://github.com/GMOD/JBrowseMSA). Renders as an htmlwidget
 in RStudio, R Markdown, Quarto, and Shiny.
 
 ![MSA Viewer screenshot](../../docs/media/example-protein.svg)
@@ -226,7 +226,7 @@ ui <- fluidPage(
                 accept = c(".nwk", ".nh", ".newick")),
       selectInput("color_scheme", "Color scheme",
                   choices = c("maeditor", "clustal", "lesk", "cinema",
-                              "flower", "nucleotide", "purine_pyrimidine",
+                              "flower", "nucleotide", "jbrowse_dna",
                               "clustalx_protein_dynamic",
                               "percent_identity_dynamic"),
                   selected = "maeditor"),

@@ -14,7 +14,7 @@ ui <- fluidPage(
                 accept = c(".nwk", ".nh", ".newick", ".tree")),
       selectInput("color_scheme", "Color scheme",
                   choices = c("maeditor", "clustal", "lesk", "cinema", "flower",
-                              "nucleotide", "purine_pyrimidine",
+                              "nucleotide", "jbrowse_dna",
                               "clustalx_protein_dynamic",
                               "percent_identity_dynamic"),
                   selected = "maeditor"),
