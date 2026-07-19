@@ -52,11 +52,9 @@
 in RStudio, R Markdown, Quarto, and Shiny.</p>
 <p><img src="/JBrowseMSA/media/example-protein.svg" alt="MSA Viewer screenshot"></p>
 <h2 id="installation">Installation<a href="#installation" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="r"><code><span class="line"><span style="color:#6A737D"># Install from the local package</span></span>
-<span class="line"><span style="color:#FFAB70">devtools</span><span style="color:#F97583">::</span><span style="color:#B392F0">install</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"packages/r-msaview"</span><span style="color:#E1E4E8">)</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Or install dependencies and load directly</span></span>
-<span class="line"><span style="color:#B392F0">install.packages</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"htmlwidgets"</span><span style="color:#E1E4E8">)</span></span></code></pre>
+<p>The only hard dependency is <code>htmlwidgets</code>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="r"><code><span class="line"><span style="color:#B392F0">install.packages</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"htmlwidgets"</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#FFAB70">devtools</span><span style="color:#F97583">::</span><span style="color:#B392F0">install</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"packages/r-msaview"</span><span style="color:#E1E4E8">)</span></span></code></pre>
 <p>For Bioconductor interop:</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="r"><code><span class="line"><span style="color:#FFAB70">BiocManager</span><span style="color:#F97583">::</span><span style="color:#B392F0">install</span><span style="color:#E1E4E8">(</span><span style="color:#B392F0">c</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"Biostrings"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "ggtree"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "treeio"</span><span style="color:#E1E4E8">))</span></span></code></pre>
 <h2 id="quick-start">Quick start<a href="#quick-start" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
