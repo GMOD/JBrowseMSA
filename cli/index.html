@@ -158,9 +158,9 @@ InterPro API, so for inputs that are real UniProt accessions this is instant,
 deterministic, and version-pinnable — no email or rate-limited job submission.
 Prefer this over <code>interproscan</code> whenever your rows are UniProt accessions.</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interpro</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">accessions.ts</span><span style="color:#E1E4E8">v</span><span style="color:#F97583">></span><span style="color:#E1E4E8"> [options]</span></span></code></pre>
-<p>The input is one accession per line, with an optional whitespace-separated row
-label (<code>&#x3C;accession>\t&#x3C;label></code>); lines starting with <code>#</code> are ignored. The output
-GFF is byte-for-byte compatible with the <code>interproscan</code> command.</p>
+<p>The input is one accession per line, optionally followed by a tab- or
+space-separated row label; lines starting with <code>#</code> are ignored. The output GFF
+is byte-for-byte compatible with the <code>interproscan</code> command.</p>
 <h4 id="options-1">Options<a href="#options-1" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
 
 
