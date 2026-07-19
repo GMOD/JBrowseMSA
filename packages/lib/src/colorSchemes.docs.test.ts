@@ -40,7 +40,7 @@ test('color schemes listed in the R README all exist', () => {
     'utf8',
   )
 
-  const section = (/## Color schemes\n([\s\S]*?)\n## /.exec(readme))?.[1]
+  const section = /## Color schemes\n([\s\S]*?)\n## /.exec(readme)?.[1]
   expect(section, 'could not find the "## Color schemes" section').toBeTruthy()
 
   // names are backtick-quoted, e.g. `jalview_taylor`
