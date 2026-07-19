@@ -48,8 +48,8 @@
   <article class="prose">
     <h1 id="msaviewr">msaviewr</h1>
 <p>Interactive multiple sequence alignment viewer for R, powered by
-<a href="https://github.com/GMOD/react-msaview">react-msaview</a>. Renders as an htmlwidget
-in RStudio, R Markdown, Quarto, and Shiny.</p>
+<a href="https://github.com/GMOD/JBrowseMSA">react-msaview</a>. Renders as an htmlwidget in
+RStudio, R Markdown, Quarto, and Shiny.</p>
 <p><img src="/JBrowseMSA/media/example-protein.svg" alt="MSA Viewer screenshot"></p>
 <h2 id="installation">Installation<a href="#installation" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <p>The only hard dependency is <code>htmlwidgets</code>:</p>
@@ -206,7 +206,7 @@ ggtree-specific annotations (colors, labels, metadata) stay in ggtree.</p>
 <span class="line"><span style="color:#FFAB70">                accept</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> c</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">".nwk"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> ".nh"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> ".newick"</span><span style="color:#E1E4E8">))</span><span style="color:#F97583">,</span></span>
 <span class="line"><span style="color:#B392F0">      selectInput</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"color_scheme"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "Color scheme"</span><span style="color:#F97583">,</span></span>
 <span class="line"><span style="color:#FFAB70">                  choices</span><span style="color:#F97583"> =</span><span style="color:#B392F0"> c</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">"maeditor"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "clustal"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "lesk"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "cinema"</span><span style="color:#F97583">,</span></span>
-<span class="line"><span style="color:#9ECBFF">                              "flower"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "nucleotide"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "purine_pyrimidine"</span><span style="color:#F97583">,</span></span>
+<span class="line"><span style="color:#9ECBFF">                              "flower"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "nucleotide"</span><span style="color:#F97583">,</span><span style="color:#9ECBFF"> "jbrowse_dna"</span><span style="color:#F97583">,</span></span>
 <span class="line"><span style="color:#9ECBFF">                              "clustalx_protein_dynamic"</span><span style="color:#F97583">,</span></span>
 <span class="line"><span style="color:#9ECBFF">                              "percent_identity_dynamic"</span><span style="color:#E1E4E8">)</span><span style="color:#F97583">,</span></span>
 <span class="line"><span style="color:#FFAB70">                  selected</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "maeditor"</span><span style="color:#E1E4E8">)</span><span style="color:#F97583">,</span></span>
