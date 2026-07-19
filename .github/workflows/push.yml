@@ -139,4 +139,5 @@ jobs:
       - name: Check internal links and anchors
         uses: untitaker/hyperlink@0.3.2
         with:
-          args: _linkcheck/ --check-anchors --github-actions
+          # the action already passes --github-actions; don't repeat it here
+          args: _linkcheck/ --check-anchors
