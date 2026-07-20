@@ -10,6 +10,7 @@ import type { MsaViewModel } from '../../model.ts'
 const ZoomMenu = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <CascadingMenuButton
+      tooltip="Fit / zoom options"
       menuItems={[
         {
           label: 'Fit both vertically/horizontally',

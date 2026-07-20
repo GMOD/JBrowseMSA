@@ -13,9 +13,10 @@ const nav = [
   { href: base, label: 'Home' },
   { href: `${base}/guide`, label: 'User guide' },
   { href: `${base}/embedding`, label: 'Embedding' },
-  { href: `${base}/examples`, label: 'Examples' },
-  { href: `${base}/gallery`, label: 'Gallery' },
   { href: `${base}/gene-explorer`, label: 'JBrowse integration' },
+  { href: `${base}/gallery`, label: 'Gallery' },
+  { href: `${base}/examples`, label: 'Examples' },
+  { href: `${base}/demo/`, label: 'Demo' },
   { href: `${base}/r-package`, label: 'R package' },
   { href: `${base}/cli`, label: 'CLI' },
 ]
@@ -56,7 +57,7 @@ const socialImage = new URL(
   <body class:list={{ 'app-layout': fullBleed }}>
     <header class="site-header">
       <a class="brand" href={base}>JBrowseMSA</a>
-      <nav>
+      <nav aria-label="Primary">
         {
           nav.map(item => (
             <a

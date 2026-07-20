@@ -2,7 +2,7 @@ import React, { lazy, useEffect } from 'react'
 
 import useMeasure from '@jbrowse/core/util/useMeasure'
 import Help from '@mui/icons-material/Help'
-import { IconButton } from '@mui/material'
+import { IconButton, Tooltip } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import ColorSchemeMenu from './ColorSchemeMenu.tsx'
@@ -40,13 +40,16 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <HeaderInfoArea model={model} />
       <Spacer />
       <HeaderStatusArea model={model} />
-      <IconButton
-        onClick={() => {
-          model.queueDialog(onClose => [AboutDialog, { onClose }])
-        }}
-      >
-        <Help />
-      </IconButton>
+      <Tooltip title="About">
+        <IconButton
+          aria-label="About"
+          onClick={() => {
+            model.queueDialog(onClose => [AboutDialog, { onClose }])
+          }}
+        >
+          <Help />
+        </IconButton>
+      </Tooltip>
     </div>
   )
 })

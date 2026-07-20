@@ -275,3 +275,50 @@ body.app-layout .site-footer {
   filter: brightness(1.08);
   transform: translateY(-1px);
 }
+
+@media (max-width: 640px) {
+  /* Header: brand + GitHub on the first row, nav becomes a single
+     horizontally-scrollable strip below so it never stacks into a tall bar. */
+  .site-header {
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    padding: 10px 16px;
+    overflow-x: hidden;
+  }
+  .site-header nav {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .site-header nav a {
+    white-space: nowrap;
+  }
+  .github-icon {
+    margin-left: auto;
+  }
+
+  main {
+    padding: 16px;
+  }
+  .hero h1 {
+    font-size: 1.9rem;
+  }
+  .hero .tagline {
+    font-size: 1rem;
+  }
+  .embed {
+    margin: 24px -16px;
+  }
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Keep wide content from forcing the whole page to scroll sideways */
+  .prose :is(table, pre) {
+    display: block;
+    overflow-x: auto;
+  }
+}

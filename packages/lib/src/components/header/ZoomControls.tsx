@@ -1,9 +1,9 @@
 import React from 'react'
 
+import Mouse from '@mui/icons-material/Mouse'
 import ZoomIn from '@mui/icons-material/ZoomIn'
-import ZoomInMap from '@mui/icons-material/ZoomInMap'
 import ZoomOut from '@mui/icons-material/ZoomOut'
-import { IconButton, ToggleButton } from '@mui/material'
+import { IconButton, ToggleButton, Tooltip } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -15,23 +15,30 @@ const ZoomControls = observer(function ZoomControls({
 }) {
   return (
     <>
-      <IconButton
-        onClick={() => {
-          model.zoomIn()
-        }}
-      >
-        <ZoomIn />
-      </IconButton>
-      <IconButton
-        onClick={() => {
-          model.zoomOut()
-        }}
-      >
-        <ZoomOut />
-      </IconButton>
+      <Tooltip title="Zoom in">
+        <IconButton
+          aria-label="Zoom in"
+          onClick={() => {
+            model.zoomIn()
+          }}
+        >
+          <ZoomIn />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Zoom out">
+        <IconButton
+          aria-label="Zoom out"
+          onClick={() => {
+            model.zoomOut()
+          }}
+        >
+          <ZoomOut />
+        </IconButton>
+      </Tooltip>
       <ToggleButton
         value="scrollZoom"
         selected={model.scrollZoom}
+        aria-label="Toggle scroll-to-zoom"
         title="Toggle scroll-to-zoom (zoom on plain mouse wheel; ctrl+wheel always zooms)"
         size="small"
         sx={{ border: 'none' }}
@@ -39,7 +46,7 @@ const ZoomControls = observer(function ZoomControls({
           model.setScrollZoom(!model.scrollZoom)
         }}
       >
-        <ZoomInMap />
+        <Mouse />
       </ToggleButton>
     </>
   )

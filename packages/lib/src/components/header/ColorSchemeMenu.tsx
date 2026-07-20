@@ -13,6 +13,7 @@ const ColorSchemeMenu = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <CascadingMenuButton
       data-testid="color_scheme_menu"
+      tooltip="Color scheme"
       closeAfterItemClick
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}

@@ -18,6 +18,7 @@ const FileMenu = observer(({ model }: { model: MsaViewModel }) => {
   return (
     <CascadingMenuButton
       data-testid="file_menu"
+      tooltip="File"
       menuItems={[
         {
           label: 'Return to import form',

@@ -17,6 +17,7 @@ const TreeSettingsMenu = observer(function ({
   return (
     <CascadingMenuButton
       data-testid="tree_settings_menu"
+      tooltip="Tree settings"
       closeAfterItemClick={false}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
