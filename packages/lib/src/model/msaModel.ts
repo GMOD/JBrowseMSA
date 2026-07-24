@@ -20,20 +20,20 @@ export function MSAModelF() {
        * #property
        * draw MSA tiles with a background color
        */
-      bgColor: defaultBgColor,
+      bgColor: types.stripDefault(types.boolean, defaultBgColor),
 
       /**
        * #property
        * default color scheme name
        */
-      colorSchemeName: defaultColorSchemeName,
+      colorSchemeName: types.stripDefault(types.string, defaultColorSchemeName),
 
       /**
        * #property
        * show a per-column statistics tooltip (consensus, conservation, gaps,
        * residue distribution) while hovering the alignment
        */
-      showColumnStats: defaultShowColumnStats,
+      showColumnStats: types.stripDefault(types.boolean, defaultShowColumnStats),
 
       /**
        * #property

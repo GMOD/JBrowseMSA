@@ -20,27 +20,18 @@ import ConservationTrack from './components/ConservationTrack.tsx'
 import TextTrack from './components/TextTrack.tsx'
 import {
   defaultAllowedGappyness,
-  defaultBgColor,
   defaultColWidth,
   defaultColorSchemeName,
   defaultCurrentAlignment,
-  defaultDrawLabels,
   defaultDrawMsaLetters,
-  defaultDrawNodeBubbles,
-  defaultDrawTree,
   defaultHeight,
   defaultHideGaps,
-  defaultLabelsAlignRight,
   defaultRowHeight,
   defaultScrollX,
   defaultScrollY,
   defaultScrollZoom,
-  defaultShowBranchLen,
-  defaultShowColumnStats,
   defaultShowDomains,
   defaultSubFeatureRows,
-  defaultTreeAreaWidth,
-  defaultTreeWidth,
   maxCellSize,
   minColWidth,
   minRowHeight,
@@ -133,19 +124,22 @@ function stateModelFactory() {
         /**
          * #property
          */
-        showDomains: defaultShowDomains,
+        showDomains: types.stripDefault(types.boolean, defaultShowDomains),
         /**
          * #property
          */
-        hideGaps: defaultHideGaps,
+        hideGaps: types.stripDefault(types.boolean, defaultHideGaps),
         /**
          * #property
          */
-        allowedGappyness: defaultAllowedGappyness,
+        allowedGappyness: types.stripDefault(
+          types.number,
+          defaultAllowedGappyness,
+        ),
         /**
          * #property
          */
-        subFeatureRows: defaultSubFeatureRows,
+        subFeatureRows: types.stripDefault(types.boolean, defaultSubFeatureRows),
 
         /**
          * #property
@@ -156,43 +150,43 @@ function stateModelFactory() {
         /**
          * #property
          */
-        drawMsaLetters: defaultDrawMsaLetters,
+        drawMsaLetters: types.stripDefault(types.boolean, defaultDrawMsaLetters),
 
         /**
          * #property
          * zoom in/out on plain mouse-wheel without holding ctrl
          */
-        scrollZoom: defaultScrollZoom,
+        scrollZoom: types.stripDefault(types.boolean, defaultScrollZoom),
 
         /**
          * #property
          * height of the div containing the view, px
          */
-        height: types.optional(types.number, defaultHeight),
+        height: types.stripDefault(types.number, defaultHeight),
 
         /**
          * #property
          * height of each row, px
          */
-        rowHeight: defaultRowHeight,
+        rowHeight: types.stripDefault(types.number, defaultRowHeight),
 
         /**
          * #property
          * scroll position, Y-offset, px
          */
-        scrollY: defaultScrollY,
+        scrollY: types.stripDefault(types.number, defaultScrollY),
 
         /**
          * #property
          * scroll position, X-offset, px
          */
-        scrollX: defaultScrollX,
+        scrollX: types.stripDefault(types.number, defaultScrollX),
 
         /**
          * #property
          * width of columns, px
          */
-        colWidth: defaultColWidth,
+        colWidth: types.stripDefault(types.number, defaultColWidth),
 
         /**
          * #property
@@ -222,14 +216,17 @@ function stateModelFactory() {
         /**
          * #property
          */
-        currentAlignment: defaultCurrentAlignment,
+        currentAlignment: types.stripDefault(
+          types.number,
+          defaultCurrentAlignment,
+        ),
 
         /**
          * #property
          * array of tree parent nodes that are 'collapsed' (all children are
          * hidden)
          */
-        collapsed: types.array(types.string),
+        collapsed: types.stripDefault(types.array(types.string), []),
 
         /**
          * #property
@@ -240,7 +237,7 @@ function stateModelFactory() {
          * #property
          * turned off tracks
          */
-        turnedOffTracks: types.map(types.boolean),
+        turnedOffTracks: types.stripDefault(types.map(types.boolean), {}),
 
         /**
          * #property
@@ -256,7 +253,7 @@ function stateModelFactory() {
         /**
          * #property
          */
-        featureFilters: types.map(types.boolean),
+        featureFilters: types.stripDefault(types.map(types.boolean), {}),
         /**
          * #property
          */
@@ -2136,95 +2133,19 @@ function stateModelFactory() {
         )
       },
     }))
-    .postProcessSnapshot(result => {
-      const snap = result as Omit<typeof result, symbol>
-      const {
-        data: { tree, msa, treeMetadata },
-        // Main model properties
-        showDomains,
-        hideGaps,
-        allowedGappyness,
-        subFeatureRows,
-        drawMsaLetters,
-        height,
-        rowHeight,
-        scrollY,
-        scrollX,
-        colWidth,
-        currentAlignment,
-        collapsed,
-        showOnly,
-        turnedOffTracks,
-        featureFilters,
-        relativeTo,
-        // MSA model properties
-        bgColor,
-        colorSchemeName,
-        showColumnStats,
-        // Tree model properties
-        drawLabels,
-        labelsAlignRight,
-        treeAreaWidth,
-        treeWidth,
-        showBranchLen,
-        drawTree,
-        drawNodeBubbles,
-        // Always include
-        ...rest
-      } = snap
-
-      const defaults: Record<string, unknown> = {
-        showDomains: defaultShowDomains,
-        hideGaps: defaultHideGaps,
-        allowedGappyness: defaultAllowedGappyness,
-        subFeatureRows: defaultSubFeatureRows,
-        drawMsaLetters: defaultDrawMsaLetters,
-        height: defaultHeight,
-        rowHeight: defaultRowHeight,
-        scrollY: defaultScrollY,
-        scrollX: defaultScrollX,
-        colWidth: defaultColWidth,
-        currentAlignment: defaultCurrentAlignment,
-        bgColor: defaultBgColor,
-        colorSchemeName: defaultColorSchemeName,
-        showColumnStats: defaultShowColumnStats,
-        drawLabels: defaultDrawLabels,
-        labelsAlignRight: defaultLabelsAlignRight,
-        treeAreaWidth: defaultTreeAreaWidth,
-        treeWidth: defaultTreeWidth,
-        showBranchLen: defaultShowBranchLen,
-        drawTree: defaultDrawTree,
-        drawNodeBubbles: defaultDrawNodeBubbles,
-      }
-
-      const nonDefaults = Object.fromEntries(
-        Object.entries(defaults)
-          .filter(([key, def]) => snap[key as keyof typeof snap] !== def)
-          .map(([key]) => [key, snap[key as keyof typeof snap]]),
-      )
-
-      return {
-        ...rest,
-        data: {
-          ...(result.treeFilehandle ? {} : { tree }),
-          ...(result.msaFilehandle ? {} : { msa }),
-          ...(result.treeMetadataFilehandle ? {} : { treeMetadata }),
-        },
-        ...nonDefaults,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        ...(collapsed?.length ? { collapsed } : {}),
-        ...(showOnly !== undefined ? { showOnly } : {}),
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        ...(turnedOffTracks && Object.keys(turnedOffTracks).length > 0
-          ? { turnedOffTracks }
-          : {}),
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        ...(featureFilters && Object.keys(featureFilters).length > 0
-          ? { featureFilters }
-          : {}),
-        ...(relativeTo !== undefined ? { relativeTo } : {}),
-      } as typeof snap
-    })
+    .postProcessSnapshot(({ data, ...rest }) => ({
+      // per-property defaults are stripped by types.stripDefault; the only thing
+      // it can't express is this cross-field rule: drop inline tree/msa/metadata
+      // when a sibling filehandle can refetch them, keeping sessions/URLs small
+      ...rest,
+      data: {
+        ...(rest.treeFilehandle ? {} : { tree: data.tree }),
+        ...(rest.msaFilehandle ? {} : { msa: data.msa }),
+        ...(rest.treeMetadataFilehandle
+          ? {}
+          : { treeMetadata: data.treeMetadata }),
+      },
+    }))
 }
 
 export default stateModelFactory
