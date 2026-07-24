@@ -1,6 +1,6 @@
-# TODO / backlog
+# Ideas / backlog
 
-Ideas captured for later, not yet required.
+Captured for later, not yet required.
 
 ## Color rows by group / annotation (publication-style figures)
 
@@ -22,14 +22,9 @@ group color, with a small legend. Reuse the existing color infrastructure in
   illustration). Document/support an optional upgrade path to MAFFT/MUSCLE +
   IQ-TREE/FastTree for publication-grade trees in `scripts/examples-gen`.
 
-## cap size of 'conservation track' track label
-
-when zoom in gets too large. should be max size of other text labels
-
 ## Code review backlog (noted, deferred)
 
-From a repo-wide review pass. These are real but lower-priority or judgment
-calls left unfixed.
+From a repo-wide review pass. Real but lower-priority or judgment calls.
 
 ### InterPro domain box stacking overflow
 

@@ -29,7 +29,7 @@
  *       - the committed config, rewritten so its MsaView plugin URL is the local
  *         bundle (Protein3d dropped — unused here).
  *     The plugin dist must be built against THIS branch's react-msaview for the
- *     palette fix (see HANDOFF-dna-msa-comparative-genomics.md). If a local path
+ *     palette fix (see agent-docs/dna-msa-comparative-genomics.md). If a local path
  *     is missing the capture falls back to the published target, so it still runs
  *     anywhere — just palette-stale.
  */
