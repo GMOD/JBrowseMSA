@@ -24,6 +24,9 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22.x
+          # setup-node v5 auto-caches based on the packageManager field, but
+          # that runs pnpm before Corepack has provisioned it; disable it here.
+          package-manager-cache: false
 
       # Corepack pins pnpm to the packageManager field in package.json; run it
       # after setup-node so node lives in the user-owned toolcache and no sudo
