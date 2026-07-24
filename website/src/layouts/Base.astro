@@ -82,10 +82,7 @@ const socialImage = new URL(
             const menuId = `nav-menu-${group.label.toLowerCase()}`
             return (
               <div
-                class:list={[
-                  'nav-group',
-                  { active: groupActive(group.items) },
-                ]}
+                class:list={['nav-group', { active: groupActive(group.items) }]}
               >
                 <button
                   type="button"
@@ -140,27 +137,88 @@ const socialImage = new URL(
     </footer>
     <script>
       // Button + aria-expanded disclosure (the WAI-ARIA APG pattern for nav
-      // dropdowns of links). Only one group opens at a time; clicking outside
-      // or pressing Escape closes them. Navigation is a full reload here, so no
+      // dropdowns of links), with the keyboard interaction that pattern
+      // specifies: arrows/Home/End move among a group's links, Escape closes and
+      // restores focus to the button, and tabbing out closes the group. Only one
+      // group opens at a time. Navigation is a full reload here, so no
       // route-change handling is needed.
       const buttons = [
         ...document.querySelectorAll<HTMLButtonElement>(
           '.site-header .nav-group-btn',
         ),
       ]
-      const closeAll = (except?: HTMLButtonElement) =>
+      const isOpen = (btn: HTMLButtonElement) =>
+        btn.getAttribute('aria-expanded') === 'true'
+      const setOpen = (btn: HTMLButtonElement, open: boolean) => {
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false')
+      }
+      const closeAll = (except?: HTMLButtonElement) => {
         buttons.forEach(b => {
           if (b !== except) {
-            b.setAttribute('aria-expanded', 'false')
+            setOpen(b, false)
           }
         })
-      buttons.forEach(btn =>
+      }
+      const open = (btn: HTMLButtonElement) => {
+        closeAll(btn)
+        setOpen(btn, true)
+      }
+
+      buttons.forEach(btn => {
+        const group = btn.closest('.nav-group')
+        const menuId = btn.getAttribute('aria-controls')
+        const links = menuId
+          ? [...document.querySelectorAll<HTMLAnchorElement>(`#${menuId} a`)]
+          : []
+
         btn.addEventListener('click', () => {
-          const wasOpen = btn.getAttribute('aria-expanded') === 'true'
-          closeAll(btn)
-          btn.setAttribute('aria-expanded', wasOpen ? 'false' : 'true')
-        }),
-      )
+          if (isOpen(btn)) {
+            closeAll()
+          } else {
+            open(btn)
+          }
+        })
+
+        if (group instanceof HTMLElement) {
+          group.addEventListener('keydown', e => {
+            const onButton = document.activeElement === btn
+            const i = links.findIndex(link => link === document.activeElement)
+            if (e.key === 'ArrowDown') {
+              e.preventDefault()
+              if (onButton) {
+                open(btn)
+                links[0]?.focus()
+              } else if (i >= 0) {
+                links[Math.min(i + 1, links.length - 1)].focus()
+              }
+            } else if (e.key === 'ArrowUp' && i === 0) {
+              e.preventDefault()
+              btn.focus()
+            } else if (e.key === 'ArrowUp' && i > 0) {
+              e.preventDefault()
+              links[i - 1].focus()
+            } else if (e.key === 'Home' && i >= 0) {
+              e.preventDefault()
+              links[0].focus()
+            } else if (e.key === 'End' && i >= 0) {
+              e.preventDefault()
+              links[links.length - 1].focus()
+            } else if (e.key === 'Escape' && isOpen(btn)) {
+              setOpen(btn, false)
+              btn.focus()
+            }
+          })
+          // Close once focus leaves the group entirely (e.g. Tab past the last
+          // link); relatedTarget is where focus is heading.
+          group.addEventListener('focusout', e => {
+            const to = e.relatedTarget
+            if (!(to instanceof Node) || !group.contains(to)) {
+              setOpen(btn, false)
+            }
+          })
+        }
+      })
+
       document.addEventListener('click', e => {
         if (
           !(e.target instanceof Element) ||
