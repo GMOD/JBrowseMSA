@@ -24,7 +24,10 @@ export function TreeModelF() {
        * #property
        * right-align the labels
        */
-      labelsAlignRight: types.stripDefault(types.boolean, defaultLabelsAlignRight),
+      labelsAlignRight: types.stripDefault(
+        types.boolean,
+        defaultLabelsAlignRight,
+      ),
 
       /**
        * #property
@@ -57,7 +60,10 @@ export function TreeModelF() {
        * #property
        * draw clickable node bubbles on the tree
        */
-      drawNodeBubbles: types.stripDefault(types.boolean, defaultDrawNodeBubbles),
+      drawNodeBubbles: types.stripDefault(
+        types.boolean,
+        defaultDrawNodeBubbles,
+      ),
 
       /**
        * #property

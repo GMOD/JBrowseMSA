@@ -33,7 +33,10 @@ export function MSAModelF() {
        * show a per-column statistics tooltip (consensus, conservation, gaps,
        * residue distribution) while hovering the alignment
        */
-      showColumnStats: types.stripDefault(types.boolean, defaultShowColumnStats),
+      showColumnStats: types.stripDefault(
+        types.boolean,
+        defaultShowColumnStats,
+      ),
 
       /**
        * #property

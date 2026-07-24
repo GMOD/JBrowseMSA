@@ -139,7 +139,10 @@ function stateModelFactory() {
         /**
          * #property
          */
-        subFeatureRows: types.stripDefault(types.boolean, defaultSubFeatureRows),
+        subFeatureRows: types.stripDefault(
+          types.boolean,
+          defaultSubFeatureRows,
+        ),
 
         /**
          * #property
@@ -150,7 +153,10 @@ function stateModelFactory() {
         /**
          * #property
          */
-        drawMsaLetters: types.stripDefault(types.boolean, defaultDrawMsaLetters),
+        drawMsaLetters: types.stripDefault(
+          types.boolean,
+          defaultDrawMsaLetters,
+        ),
 
         /**
          * #property

@@ -45,7 +45,10 @@ test('inline data is stripped when a filehandle can refetch it', () => {
   const model = MsaView.create({
     type: 'MsaView',
     data: { msa: '>s1\nACGT', tree: '(a,b);' },
-    msaFilehandle: { uri: 'http://example.com/x.fa', locationType: 'UriLocation' },
+    msaFilehandle: {
+      uri: 'http://example.com/x.fa',
+      locationType: 'UriLocation',
+    },
   })
   const snap = getSnapshot(model)
   // msa dropped (msaFilehandle present), tree kept (no treeFilehandle)

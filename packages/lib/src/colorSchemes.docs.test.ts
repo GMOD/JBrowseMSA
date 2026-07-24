@@ -44,7 +44,9 @@ test('color schemes listed in the R README all exist', () => {
   expect(section, 'could not find the "## Color schemes" section').toBeTruthy()
 
   // names are backtick-quoted, e.g. `jalview_taylor`
-  const names = [...section!.matchAll(/`([a-z][a-z0-9_]+)`/g)].map(m => m[1])
+  const names = [...section!.matchAll(/`([a-z][a-z0-9_]+)`/g)].flatMap(m =>
+    m[1] ? [m[1]] : [],
+  )
   expect(names.length).toBeGreaterThan(0)
 
   const unknown = names.filter(name => !registered.has(name))
