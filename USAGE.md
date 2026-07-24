@@ -123,8 +123,8 @@ jalview_prophelix, jalview_propstrand, jalview_propturn
 See the auto-generated API docs:
 [packages/lib/apidocs/MsaView.md](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/apidocs/MsaView.md)
 
-The model source is in `packages/lib/src/model.ts`. The React-MSAView package
-uses MobX-state-tree models. Components wrapped with `observer` from mobx-react
+The model source is in `packages/lib/src/model.ts`. react-msaview uses
+MobX-state-tree models; components wrapped with `observer` from mobx-react
 automatically re-render when observed model properties change.
 
 ## See also

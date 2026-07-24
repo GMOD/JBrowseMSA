@@ -40,6 +40,26 @@ import { theme } from '../lib/theme'
 
 import type { GeneResult } from '../lib/geneExplorer'
 
+// Copy text to the clipboard, exposing a transient message for a Snackbar. A
+// success shows the caller's message; a rejected write (insecure context or
+// denied permission) shows a failure notice rather than a false confirmation.
+function useCopy() {
+  const [message, setMessage] = useState<string>()
+  const copy = (text: string, successMessage: string) =>
+    navigator.clipboard.writeText(text).then(
+      () => {
+        setMessage(successMessage)
+      },
+      () => {
+        setMessage('Copy failed — clipboard access was blocked')
+      },
+    )
+  const dismiss = () => {
+    setMessage(undefined)
+  }
+  return { copy, message, dismiss }
+}
+
 // Save generated STL bytes to the user's disk via a throwaway object URL.
 function triggerDownload(bytes: Uint8Array<ArrayBuffer>, filename: string) {
   const url = URL.createObjectURL(new Blob([bytes], { type: 'model/stl' }))
@@ -439,6 +459,26 @@ function GeneResultArea({
 }) {
   return (
     <Box sx={{ flex: 1, minWidth: 0 }}>
+      {urlGene ? null : (
+        <Paper
+          variant="outlined"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 220,
+            p: 3,
+            textAlign: 'center',
+            color: 'text.secondary',
+          }}
+        >
+          <Typography variant="body2">
+            Search for a gene or pick an example to build a connected JBrowse
+            session — a collapsed-intron genome view, its 100-way protein
+            alignment, and the AlphaFold structure.
+          </Typography>
+        </Paper>
+      )}
       {urlGene && error ? (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
@@ -452,7 +492,7 @@ function GeneResultArea({
             pointerEvents: busy ? 'none' : 'auto',
           }}
         >
-          <ResultPanel result={result} />
+          <ResultPanel key={urlGene} result={result} />
         </Box>
       ) : null}
     </Box>
@@ -498,7 +538,13 @@ function ResultPanel({ result }: { result: GeneResult }) {
       </Typography>
 
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 2 }}>
-        <Button variant="contained" href={url} target="_blank" rel="noopener">
+        <Button
+          variant="contained"
+          href={url}
+          target="_blank"
+          rel="noopener"
+          aria-label="Open in JBrowse (opens in a new tab)"
+        >
           Open in JBrowse ↗
         </Button>
         <Tooltip title="Session details">
@@ -574,16 +620,11 @@ function DetailsDialog({
   uniprotId: string | undefined
   geneName: string
 }) {
-  const [copied, setCopied] = useState<string>()
+  const { copy, message: copyMessage, dismiss: dismissCopy } = useCopy()
   // STL export runs on click (fetch AlphaFold + build mesh), so it's a plain
   // async handler — busy drives the spinner, stlError surfaces failures.
   const [stlBusy, setStlBusy] = useState(false)
   const [stlError, setStlError] = useState<string>()
-
-  function copy(text: string, message: string) {
-    void navigator.clipboard.writeText(text)
-    setCopied(message)
-  }
 
   function downloadStl(accession: string) {
     setStlBusy(true)
@@ -623,7 +664,7 @@ function DetailsDialog({
           <Button
             size="small"
             onClick={() => {
-              copy(window.location.href, 'Page link copied')
+              void copy(window.location.href, 'Page link copied')
             }}
           >
             Copy page link
@@ -631,7 +672,7 @@ function DetailsDialog({
           <Button
             size="small"
             onClick={() => {
-              copy(sessionJson, 'Session JSON copied')
+              void copy(sessionJson, 'Session JSON copied')
             }}
           >
             Copy session JSON
@@ -684,12 +725,12 @@ function DetailsDialog({
         </Button>
       </DialogActions>
       <Snackbar
-        open={!!copied}
+        open={!!copyMessage}
         autoHideDuration={2000}
         onClose={() => {
-          setCopied(undefined)
+          dismissCopy()
         }}
-        message={copied}
+        message={copyMessage}
       />
       <Snackbar
         open={!!stlError}
@@ -823,7 +864,7 @@ const url =
 
 function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const base = import.meta.env.BASE_URL
-  const [copied, setCopied] = useState(false)
+  const { copy, message: copyMessage, dismiss: dismissCopy } = useCopy()
   return (
     <Dialog
       open={open}
@@ -898,11 +939,7 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
             size="small"
             startIcon={<ContentCopyIcon fontSize="small" />}
             onClick={() => {
-              void navigator.clipboard.writeText(BUILD_SNIPPET)
-              setCopied(true)
-              setTimeout(() => {
-                setCopied(false)
-              }, 1500)
+              void copy(BUILD_SNIPPET, 'Snippet copied')
             }}
             sx={{
               position: 'absolute',
@@ -911,7 +948,7 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
               bgcolor: 'background.paper',
             }}
           >
-            {copied ? 'Copied' : 'Copy'}
+            Copy
           </Button>
           <CodeBlock>{BUILD_SNIPPET}</CodeBlock>
         </Box>
@@ -948,6 +985,14 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
           Close
         </Button>
       </DialogActions>
+      <Snackbar
+        open={!!copyMessage}
+        autoHideDuration={2000}
+        onClose={() => {
+          dismissCopy()
+        }}
+        message={copyMessage}
+      />
     </Dialog>
   )
 }

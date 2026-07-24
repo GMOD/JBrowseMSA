@@ -292,7 +292,7 @@ From R, pass the file (or string) as the `gff` argument:
 msaview(msa = "alignment.fasta", gff = "domains.gff")
 ```
 
-The domains render as labelled boxes over the matching rows:
+The domains render as labeled boxes over the matching rows:
 
 ![InterProScan domains rendered over an alignment](../../docs/media/example-domains.svg)
 
