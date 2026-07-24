@@ -17,30 +17,60 @@
     <meta name="twitter:title" content="Embedding — JBrowseMSA">
     <meta name="twitter:description" content="Embed the react-msaview component: props, the model-based API, the UMD bundle, and R.">
     <meta name="twitter:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
-  <link rel="stylesheet" href="/JBrowseMSA/_astro/Base.DMj9-6Fy.css"></head>
+  <link rel="stylesheet" href="/JBrowseMSA/_astro/Base.DWALGsgO.css"></head>
   <body>
     <header class="site-header">
       <a class="brand" href="/JBrowseMSA">JBrowseMSA</a>
       <nav aria-label="Primary">
         <a href="/JBrowseMSA">
-              Home
-            </a><a href="/JBrowseMSA/guide">
-              User guide
-            </a><a href="/JBrowseMSA/embedding" class="active" aria-current="page">
-              Embedding
-            </a><a href="/JBrowseMSA/gene-explorer">
-              JBrowse integration
-            </a><a href="/JBrowseMSA/gallery">
-              Gallery
-            </a><a href="/JBrowseMSA/examples">
-              Examples
-            </a><a href="/JBrowseMSA/demo/">
-              Demo
-            </a><a href="/JBrowseMSA/r-package">
-              R package
-            </a><a href="/JBrowseMSA/cli">
-              CLI
-            </a>
+          Home
+        </a>
+        <div class="nav-group active">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-docs">
+                  Docs
+                </button>
+                <ul class="nav-menu" id="nav-menu-docs">
+                  <li>
+                      <a href="/JBrowseMSA/guide">
+                        User guide
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/embedding" class="active" aria-current="page">
+                        Embedding
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/r-package">
+                        R package
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/cli">
+                        CLI
+                      </a>
+                    </li>
+                </ul>
+              </div><div class="nav-group">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-showcase">
+                  Showcase
+                </button>
+                <ul class="nav-menu" id="nav-menu-showcase">
+                  <li>
+                      <a href="/JBrowseMSA/gallery">
+                        Gallery
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/examples">
+                        Examples
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/gene-explorer">
+                        JBrowse integration
+                      </a>
+                    </li>
+                </ul>
+              </div>
+        <a href="/JBrowseMSA/demo/">
+          Demo
+        </a>
       </nav>
       <a class="github-icon" href="https://github.com/GMOD/JBrowseMSA" target="_blank" rel="noopener noreferrer" aria-label="GitHub"></a>
     </header>
@@ -200,5 +230,5 @@ formats, and features.</li>
         <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> · part of <a href="https://jbrowse.org">JBrowse</a>
       </span>
     </footer>
-  </body>
+    <script type="module">var e=[...document.querySelectorAll(`.site-header .nav-group-btn`)],t=t=>e.forEach(e=>{e!==t&&e.setAttribute(`aria-expanded`,`false`)});e.forEach(e=>e.addEventListener(`click`,()=>{let n=e.getAttribute(`aria-expanded`)===`true`;t(e),e.setAttribute(`aria-expanded`,n?`false`:`true`)})),document.addEventListener(`click`,e=>{(!(e.target instanceof Element)||!e.target.closest(`.site-header .nav-group`))&&t()}),document.addEventListener(`keydown`,e=>{e.key===`Escape`&&t()});</script></body>
 </html>
