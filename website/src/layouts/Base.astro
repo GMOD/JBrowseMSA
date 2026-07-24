@@ -9,21 +9,33 @@ interface Props {
 }
 const { title, description, wide, fullBleed } = Astro.props
 const base = import.meta.env.BASE_URL
-const nav = [
-  { href: base, label: 'Home' },
-  { href: `${base}/guide`, label: 'User guide' },
-  { href: `${base}/embedding`, label: 'Embedding' },
-  { href: `${base}/gene-explorer`, label: 'JBrowse integration' },
-  { href: `${base}/gallery`, label: 'Gallery' },
-  { href: `${base}/examples`, label: 'Examples' },
-  { href: `${base}/demo/`, label: 'Demo' },
-  { href: `${base}/r-package`, label: 'R package' },
-  { href: `${base}/cli`, label: 'CLI' },
+const home = { href: base, label: 'Home' }
+const demo = { href: `${base}/demo/`, label: 'Demo' }
+const groups = [
+  {
+    label: 'Docs',
+    items: [
+      { href: `${base}/guide`, label: 'User guide' },
+      { href: `${base}/embedding`, label: 'Embedding' },
+      { href: `${base}/r-package`, label: 'R package' },
+      { href: `${base}/cli`, label: 'CLI' },
+    ],
+  },
+  {
+    label: 'Showcase',
+    items: [
+      { href: `${base}/gallery`, label: 'Gallery' },
+      { href: `${base}/examples`, label: 'Examples' },
+      { href: `${base}/gene-explorer`, label: 'JBrowse integration' },
+    ],
+  },
 ]
 
 const strip = (s: string) => s.replace(/\/$/, '')
 const current = strip(Astro.url.pathname)
 const isActive = (href: string) => strip(href) === current
+const groupActive = (items: { href: string }[]) =>
+  items.some(item => isActive(item.href))
 const canonical = new URL(Astro.url.pathname, Astro.site).href
 const socialImage = new URL(
   `${base}/media/within-protein-conservation.png`,
@@ -58,17 +70,55 @@ const socialImage = new URL(
     <header class="site-header">
       <a class="brand" href={base}>JBrowseMSA</a>
       <nav aria-label="Primary">
+        <a
+          href={home.href}
+          class:list={{ active: isActive(home.href) }}
+          aria-current={isActive(home.href) ? 'page' : undefined}
+        >
+          {home.label}
+        </a>
         {
-          nav.map(item => (
-            <a
-              href={item.href}
-              class:list={{ active: isActive(item.href) }}
-              aria-current={isActive(item.href) ? 'page' : undefined}
-            >
-              {item.label}
-            </a>
-          ))
+          groups.map(group => {
+            const menuId = `nav-menu-${group.label.toLowerCase()}`
+            return (
+              <div
+                class:list={[
+                  'nav-group',
+                  { active: groupActive(group.items) },
+                ]}
+              >
+                <button
+                  type="button"
+                  class="nav-group-btn"
+                  aria-expanded="false"
+                  aria-controls={menuId}
+                >
+                  {group.label}
+                </button>
+                <ul class="nav-menu" id={menuId}>
+                  {group.items.map(item => (
+                    <li>
+                      <a
+                        href={item.href}
+                        class:list={{ active: isActive(item.href) }}
+                        aria-current={isActive(item.href) ? 'page' : undefined}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })
         }
+        <a
+          href={demo.href}
+          class:list={{ active: isActive(demo.href) }}
+          aria-current={isActive(demo.href) ? 'page' : undefined}
+        >
+          {demo.label}
+        </a>
       </nav>
       <a
         class="github-icon"
@@ -88,5 +138,42 @@ const socialImage = new URL(
         >
       </span>
     </footer>
+    <script>
+      // Button + aria-expanded disclosure (the WAI-ARIA APG pattern for nav
+      // dropdowns of links). Only one group opens at a time; clicking outside
+      // or pressing Escape closes them. Navigation is a full reload here, so no
+      // route-change handling is needed.
+      const buttons = [
+        ...document.querySelectorAll<HTMLButtonElement>(
+          '.site-header .nav-group-btn',
+        ),
+      ]
+      const closeAll = (except?: HTMLButtonElement) =>
+        buttons.forEach(b => {
+          if (b !== except) {
+            b.setAttribute('aria-expanded', 'false')
+          }
+        })
+      buttons.forEach(btn =>
+        btn.addEventListener('click', () => {
+          const wasOpen = btn.getAttribute('aria-expanded') === 'true'
+          closeAll(btn)
+          btn.setAttribute('aria-expanded', wasOpen ? 'false' : 'true')
+        }),
+      )
+      document.addEventListener('click', e => {
+        if (
+          !(e.target instanceof Element) ||
+          !e.target.closest('.site-header .nav-group')
+        ) {
+          closeAll()
+        }
+      })
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          closeAll()
+        }
+      })
+    </script>
   </body>
 </html>

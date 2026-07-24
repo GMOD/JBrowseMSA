@@ -40,7 +40,6 @@ body {
   top: 0;
   background: var(--bg);
   z-index: 10;
-  overflow-x: auto;
 }
 
 .site-header .brand {
@@ -53,24 +52,107 @@ body {
 .site-header nav {
   display: flex;
   gap: 18px;
-  flex-wrap: wrap;
+  align-items: center;
   flex: 1;
 }
 
-.site-header nav a {
+.site-header nav > a {
   color: var(--fg);
   text-decoration: none;
   font-size: 0.95rem;
 }
 
-.site-header nav a:hover {
+.site-header nav > a:hover {
   color: var(--accent);
 }
 
-.site-header nav a.active {
+.site-header nav > a.active {
   color: var(--accent);
   font-weight: 600;
   box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+/* Grouped dropdowns as a button + aria-expanded disclosure (WAI-ARIA APG
+   pattern for nav): the button is the trigger, the menu is an absolutely
+   positioned panel that escapes the header. */
+.site-header .nav-group {
+  position: relative;
+  display: flex;
+}
+
+.site-header .nav-group-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--fg);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.site-header .nav-group-btn::after {
+  content: '';
+  border: 4px solid transparent;
+  border-top-color: currentColor;
+  border-bottom: 0;
+  transition: transform 0.15s;
+}
+
+.site-header .nav-group-btn[aria-expanded='true']::after {
+  transform: rotate(180deg);
+}
+
+.site-header .nav-group-btn:hover,
+.site-header .nav-group.active .nav-group-btn {
+  color: var(--accent);
+}
+
+.site-header .nav-group.active .nav-group-btn {
+  font-weight: 600;
+}
+
+.site-header .nav-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  display: none;
+  flex-direction: column;
+  min-width: 180px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 20;
+}
+
+.site-header .nav-group-btn[aria-expanded='true'] + .nav-menu {
+  display: flex;
+}
+
+.site-header .nav-menu a {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.site-header .nav-menu a:hover {
+  color: var(--accent);
+  background: var(--border);
+}
+
+.site-header .nav-menu a.active {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .github-icon {
@@ -277,24 +359,14 @@ body.app-layout .site-footer {
 }
 
 @media (max-width: 640px) {
-  /* Header: brand + GitHub on the first row, nav becomes a single
-     horizontally-scrollable strip below so it never stacks into a tall bar. */
+  /* The grouped nav stays compact enough to keep the single row; just tighten
+     spacing and let the GitHub icon sit at the far right. */
   .site-header {
-    flex-wrap: wrap;
-    gap: 12px 16px;
+    gap: 16px;
     padding: 10px 16px;
-    overflow-x: hidden;
   }
   .site-header nav {
-    order: 3;
-    flex-basis: 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 16px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .site-header nav a {
-    white-space: nowrap;
+    gap: 14px;
   }
   .github-icon {
     margin-left: auto;
