@@ -9,14 +9,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
       - name: Use Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22.x
-          cache: 'pnpm'
+          # pnpm is provisioned by Corepack below, after this step
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: pnpm install
@@ -42,14 +43,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
       - name: Use Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22.x
-          cache: 'pnpm'
+          # pnpm is provisioned by Corepack below, after this step
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: pnpm install
@@ -90,14 +92,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
       - name: Use Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22.x
-          cache: 'pnpm'
+          # pnpm is provisioned by Corepack below, after this step
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: pnpm install
@@ -114,14 +117,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-
       - name: Use Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22.x
-          cache: 'pnpm'
+          # pnpm is provisioned by Corepack below, after this step
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: pnpm install
