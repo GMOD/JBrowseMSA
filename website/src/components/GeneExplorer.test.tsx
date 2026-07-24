@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import GeneExplorer from './GeneExplorer'
 import { loadGene, searchGenes } from '../lib/geneExplorer'
+import { DEFAULT_SPECIES } from '../lib/speciesGenes'
 
 import type * as GeneExplorerLib from '../lib/geneExplorer'
 import type { GeneResult, Transcript } from '../lib/geneExplorer'
@@ -43,6 +44,7 @@ const transcript: Transcript = {
 
 function geneResult(geneName: string): GeneResult {
   return {
+    species: DEFAULT_SPECIES,
     transcript: { ...transcript, geneName, name: `NM_${geneName}` },
     uniprotId: 'P04637',
     msa: {
@@ -121,7 +123,7 @@ describe('GeneExplorer', () => {
     render()
 
     setGene('TP53')
-    expect(loadGene).toHaveBeenCalledWith('TP53')
+    expect(loadGene).toHaveBeenCalledWith('TP53', DEFAULT_SPECIES)
     expect(spinner()).toBeTruthy() // busy is derived: URL gene != loaded gene
 
     d.resolve(geneResult('TP53'))

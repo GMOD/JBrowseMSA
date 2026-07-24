@@ -180,4 +180,50 @@ describe('buildSessionUrl', () => {
       'ProteinView',
     ])
   })
+
+  it('embeds a GenArk assembly and names the LGV by it for non-human genes', () => {
+    const { session } = buildSessionUrl({
+      transcript: twoExon,
+      assemblyAccession: 'GCF_000001635.27',
+    })
+    const decoded = session as unknown as {
+      sessionAssemblies?: { name: string }[]
+      views: { init?: { assembly?: string } }[]
+    }
+    expect(decoded.sessionAssemblies?.[0].name).toBe('GCF_000001635.27')
+    expect(decoded.views[0].init?.assembly).toBe('GCF_000001635.27')
+  })
+
+  it('leaves human on the hosted hg38 config assembly (no sessionAssemblies)', () => {
+    const { session } = buildSessionUrl({ transcript: twoExon })
+    expect('sessionAssemblies' in session).toBe(false)
+  })
+
+  it('carries an inline ortholog alignment as a connected MsaView with data', () => {
+    const { url } = buildSessionUrl({
+      transcript: twoExon,
+      uniprotId: 'P04637',
+      proteinSequence: 'MEEPQSDPSV',
+      assemblyAccession: 'GCF_000001635.27',
+      inlineMsa: {
+        fasta: '>Mouse\nMEEP\n>Human\nMEEP',
+        newick: '(Mouse,Human);',
+        querySeqName: 'Mouse',
+      },
+    })
+    const decoded = decodeSession(url) as unknown as {
+      views: {
+        id: string
+        type: string
+        connectedViewId?: string
+        data?: { msa?: string; tree?: string }
+      }[]
+    }
+    const lgv = decoded.views[0]
+    const msa = decoded.views.find(v => v.type === 'MsaView')
+    expect(msa?.data?.msa).toContain('>Mouse')
+    expect(msa?.data?.tree).toBe('(Mouse,Human);')
+    // the alignment links back to the genome view
+    expect(msa?.connectedViewId).toBe(lgv.id)
+  })
 })

@@ -4,6 +4,16 @@ import { RemoteFile } from 'generic-filehandle2'
 import { parseGFF } from 'msa-parsers'
 import { deflate } from 'pako-esm2'
 
+import {
+  DEFAULT_SPECIES,
+  fetchTranscriptNcbi,
+  fetchUniProtAccession,
+  genArkAssembly,
+  resolveGeneNcbi,
+  searchGenesNcbi,
+} from './speciesGenes'
+
+import type { Species } from './speciesGenes'
 import type { GFFRecord } from 'msa-parsers'
 
 // Everything here is fetched live from CORS-enabled public services, so the
@@ -95,8 +105,15 @@ interface GenomicPos {
   end: number
 }
 
-// Type-ahead: gene symbols starting with the typed prefix.
-export async function searchGenes(query: string): Promise<string[]> {
+// Type-ahead: gene symbols starting with the typed prefix. Human uses mygene
+// (fast); other species use NCBI E-utils (see speciesGenes).
+export async function searchGenes(
+  query: string,
+  species: Species = DEFAULT_SPECIES,
+): Promise<string[]> {
+  if (!species.humanFastPath) {
+    return searchGenesNcbi(query, species.taxId)
+  }
   const q = encodeURIComponent(`symbol:${query}*`)
   const url = `${MYGENE}/query?q=${q}&species=human&fields=symbol&size=10`
   const res = await fetch(url)
@@ -497,19 +514,34 @@ async function fetchUniProtSeq(uniprotId: string) {
 }
 
 export interface GeneResult {
+  species: Species
   transcript: Transcript
   uniprotId?: string
+  // NCBI GeneID (non-human) — the key the ortholog endpoint needs
+  geneId?: string
   msa?: GeneMsa
   // the protein AlphaFold aligns to: the aligned hg38 row when in the 100-way
   // set, else the UniProt canonical sequence — so 3D linkage works for any gene
   proteinSequence?: string
+  // GenArk accession to embed as the session assembly; undefined for human,
+  // which uses the hosted hg38 config assembly
+  assemblyAccession?: string
 }
 
-// Resolve a gene symbol to everything the result panel renders: its transcript
-// model, UniProt accession, and 100-way alignment slice (undefined for genes
-// outside the knownCanonical set). One entry point so the UI guards staleness
-// once rather than around each await.
-export async function loadGene(symbol: string): Promise<GeneResult> {
+// Resolve a gene to everything the result panel renders. Human uses the bespoke
+// hg38 + 100-way fast path; every other species is synthesized live from NCBI +
+// GenArk + UniProt (see speciesGenes). One entry point so the UI guards
+// staleness once rather than around each await.
+export async function loadGene(
+  symbol: string,
+  species: Species = DEFAULT_SPECIES,
+): Promise<GeneResult> {
+  return species.humanFastPath
+    ? loadHumanGene(symbol)
+    : loadSpeciesGene(symbol, species)
+}
+
+async function loadHumanGene(symbol: string): Promise<GeneResult> {
   const locus = await resolveGene(symbol)
   // independent once the locus is known, and each pulls a separate multi-MB
   // index, so fetch them concurrently rather than one after the other
@@ -523,17 +555,58 @@ export async function loadGene(symbol: string): Promise<GeneResult> {
   const proteinSequence =
     msa?.querySequence ??
     (locus.uniprotId ? await fetchUniProtSeq(locus.uniprotId) : undefined)
-  return { transcript, uniprotId: locus.uniprotId, msa, proteinSequence }
+  return {
+    species: DEFAULT_SPECIES,
+    transcript,
+    uniprotId: locus.uniprotId,
+    msa,
+    proteinSequence,
+  }
+}
+
+// Non-human: NCBI locus -> UniProt accession/sequence (steers the isoform pick
+// and drives the 3D view) -> the canonical transcript's genomic exon/CDS model.
+// No precomputed alignment; the cross-species MSA is built on demand.
+async function loadSpeciesGene(
+  symbol: string,
+  species: Species,
+): Promise<GeneResult> {
+  const locus = await resolveGeneNcbi(symbol, species.taxId)
+  const uniprotId =
+    locus.uniprotId ?? (await fetchUniProtAccession(symbol, species.taxId))
+  const proteinSequence = uniprotId
+    ? await fetchUniProtSeq(uniprotId)
+    : undefined
+  const transcript = await fetchTranscriptNcbi(locus, proteinSequence?.length)
+  return {
+    species,
+    transcript,
+    uniprotId,
+    geneId: locus.geneId,
+    proteinSequence,
+    assemblyAccession: locus.assemblyAccession,
+  }
+}
+
+export interface InlineMsa {
+  fasta: string
+  newick: string
+  querySeqName: string // the reference row the MSA maps back to the genome through
 }
 
 export interface SessionOptions {
   transcript: Transcript
   uniprotId?: string
   proteinSequence?: string
-  // include the connected MsaView only when the alignment slice is available
+  // include the connected hosted 100-way MsaView (human only)
   msaAvailable?: boolean
+  // an alignment computed on the fly (non-human), carried inline in the session
+  inlineMsa?: InlineMsa
   // false launches a whole-gene view (introns intact) instead of collapsed exons
   collapseIntrons?: boolean
+  // GenArk accession to embed as the session's assembly (non-human); undefined
+  // uses the hosted hg38 config assembly
+  assemblyAccession?: string
 }
 
 type Feature = ReturnType<typeof connectedFeature>
@@ -546,24 +619,30 @@ type Feature = ReturnType<typeof connectedFeature>
 
 // loc/tracks/assembly under `init`: navToLocations expands the space-separated
 // collapsed-exon loc into one displayedRegion per exon, squeezing introns out.
-function linearGenomeView(transcript: Transcript, collapseIntrons: boolean) {
+// Human references the hosted hg38 gene track; other species show the collapsed
+// regions alone (the connectedFeature carries the codon mapping either way).
+function linearGenomeView(
+  transcript: Transcript,
+  collapseIntrons: boolean,
+  assemblyName: string,
+  tracks: string[],
+) {
   return {
     id: `lgv-${transcript.geneName}`,
     type: 'LinearGenomeView',
     colorByCDS: true,
     init: {
-      assembly: 'hg38',
+      assembly: assemblyName,
       loc: collapsedLoc(transcript, { collapse: collapseIntrons }),
-      tracks: [GENE_TRACK],
+      tracks,
     },
   }
 }
 
-// jbrowse-plugin-msaview random-reads this gene's FASTA block from the bgzip
-// file by name (the gene symbol); the .gzi/.idx are found by suffix. uniprotId
-// lets MsaView.autoConnectStructures link to the AlphaFold structure (it derives
-// the same id from the structure's url, so the two match).
-function msaView(transcript: Transcript, feature: Feature, uniprotId?: string) {
+// Fields every MsaView shares regardless of where its alignment comes from.
+// uniprotId lets MsaView.autoConnectStructures link to the AlphaFold structure
+// (it derives the same id from the structure's url, so the two match).
+function msaViewBase(transcript: Transcript, feature: Feature, uniprotId?: string) {
   return {
     id: `msa-${transcript.geneName}`,
     type: 'MsaView',
@@ -573,12 +652,40 @@ function msaView(transcript: Transcript, feature: Feature, uniprotId?: string) {
     colorSchemeName: 'percent_identity_dynamic',
     labelsAlignRight: true,
     treeAreaWidth: 200,
+  }
+}
+
+// Human: jbrowse-plugin-msaview random-reads this gene's FASTA block from the
+// hosted bgzip file by name (the gene symbol); the .gzi/.idx are found by suffix.
+function msaViewHosted(
+  transcript: Transcript,
+  feature: Feature,
+  uniprotId?: string,
+) {
+  return {
+    ...msaViewBase(transcript, feature, uniprotId),
     treeFilehandle: { uri: TREE_URI, locationType: 'UriLocation' },
     init: {
       msaIndexedLocation: { uri: MSA_GZ },
       msaName: transcript.geneName,
       querySeqName: 'hg38',
     },
+  }
+}
+
+// Non-human: an ortholog alignment built on the fly, carried inline in the
+// session as MSA + guide tree (no hosted file). querySeqName names the reference
+// row the connectedFeature maps genome coordinates through.
+function msaViewInline(
+  transcript: Transcript,
+  feature: Feature,
+  inlineMsa: InlineMsa,
+  uniprotId?: string,
+) {
+  return {
+    ...msaViewBase(transcript, feature, uniprotId),
+    querySeqName: inlineMsa.querySeqName,
+    data: { msa: inlineMsa.fasta, tree: inlineMsa.newick },
   }
 }
 
@@ -638,11 +745,25 @@ export function buildSessionUrl({
   uniprotId,
   proteinSequence,
   msaAvailable,
+  inlineMsa,
   collapseIntrons = true,
+  assemblyAccession,
 }: SessionOptions) {
   const feature = connectedFeature(transcript)
-  const lgv = linearGenomeView(transcript, collapseIntrons)
-  const msa = msaAvailable ? msaView(transcript, feature, uniprotId) : undefined
+  // human references the hosted hg38 config assembly + gene track; non-human
+  // embeds its GenArk assembly in the session and shows the collapsed regions
+  // without a hosted track
+  const assemblyName = assemblyAccession ?? 'hg38'
+  const tracks = assemblyAccession ? [] : [GENE_TRACK]
+  const lgv = linearGenomeView(transcript, collapseIntrons, assemblyName, tracks)
+
+  // one MSA source at most: the hosted 100-way (human) or an inline ortholog
+  // alignment (non-human, built on demand)
+  const msa = msaAvailable
+    ? msaViewHosted(transcript, feature, uniprotId)
+    : inlineMsa
+      ? msaViewInline(transcript, feature, inlineMsa, uniprotId)
+      : undefined
   // the 3D view needs only the structure accession + its protein sequence, not
   // the alignment, so it links up for any gene with a UniProt entry
   const protein =
@@ -652,6 +773,10 @@ export function buildSessionUrl({
 
   const session = {
     name: `Gene explorer: ${transcript.geneName}`,
+    // a GenArk assembly the hosted config never defined, supplied inline
+    ...(assemblyAccession
+      ? { sessionAssemblies: [genArkAssembly(assemblyAccession)] }
+      : {}),
     views: [lgv, ...(msa ? [msa] : []), ...(protein ? [protein] : [])],
     // genome (+ alignment when present) on the left, structure on the right
     ...(protein

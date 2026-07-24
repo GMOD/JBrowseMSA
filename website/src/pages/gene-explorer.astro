@@ -11,13 +11,15 @@ import Base from '../layouts/Base.astro'
   <article class="prose">
     <h1>JBrowse integration</h1>
     <p>
-      Type a human gene name. You get a connected JBrowse session with three
-      linked views: the gene on the <strong>genome</strong> (introns collapsed so
-      the coding exons sit side by side), the same protein
-      <strong>aligned across 100 vertebrates</strong>, and its
-      <strong>AlphaFold 3D structure</strong>. Hover or select in any one view
-      and the other two light up the matching residue — codon-precise, across
-      genome, alignment, and structure.
+      Pick a species — human, mouse, zebrafish, fly, worm, plant, or yeast — and
+      type a gene name. You get a connected JBrowse session: the gene on the
+      <strong>genome</strong> (introns collapsed so the coding exons sit side by
+      side) and its <strong>AlphaFold 3D structure</strong>, with human genes
+      also carrying a <strong>100-vertebrate protein alignment</strong>. Hover or
+      select in any view and the others light up the matching residue —
+      codon-precise, across genome, alignment, and structure. Everything is
+      synthesized in the browser from public NCBI, UCSC GenArk, and AlphaFold
+      data, with no per-gene files to host.
     </p>
 
     <GeneExplorer client:only="react" />

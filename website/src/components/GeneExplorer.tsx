@@ -11,6 +11,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
+import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
@@ -19,6 +20,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import Link from '@mui/material/Link'
+import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
 import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
@@ -35,10 +37,17 @@ import {
   loadGene,
   searchGenes,
 } from '../lib/geneExplorer'
+import { buildOrthologMsa } from '../lib/orthologMsa'
 import { fetchProteinStl } from '../lib/proteinStl'
+import {
+  DEFAULT_SPECIES,
+  SPECIES,
+  speciesByTaxId,
+} from '../lib/speciesGenes'
 import { theme } from '../lib/theme'
 
-import type { GeneResult } from '../lib/geneExplorer'
+import type { GeneResult, InlineMsa } from '../lib/geneExplorer'
+import type { Species } from '../lib/speciesGenes'
 
 // Copy text to the clipboard, exposing a transient message for a Snackbar. A
 // success shows the caller's message; a rejected write (insecure context or
@@ -70,36 +79,76 @@ function triggerDownload(bytes: Uint8Array<ArrayBuffer>, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-// curated, all present in the 100-way index — chosen to span tumour
-// suppressors, oncogenes/drug targets, classic disease genes, and size extremes
-// (tiny HBB vs. titin, the largest human gene) so the collapsed-intron ratio and
-// the conservation vary visibly between picks
-const EXAMPLES: { symbol: string; note: string }[] = [
-  {
-    symbol: 'TP53',
-    note: 'Tumour suppressor — mutated in ~half of all cancers',
-  },
-  {
-    symbol: 'KRAS',
-    note: 'Oncogene — small and almost invariant across vertebrates',
-  },
-  { symbol: 'BRAF', note: 'Melanoma V600E kinase' },
-  { symbol: 'EGFR', note: 'Receptor tyrosine kinase and major drug target' },
-  { symbol: 'PTEN', note: 'Tumour-suppressor phosphatase' },
-  {
-    symbol: 'BRCA1',
-    note: 'Hereditary breast/ovarian cancer — large multi-exon gene',
-  },
-  { symbol: 'CFTR', note: 'Cystic fibrosis chloride channel' },
-  { symbol: 'HBB', note: 'β-globin (sickle cell) — tiny 3-exon gene' },
-  {
-    symbol: 'TTN',
-    note: 'Titin — the largest human gene, extreme intron collapse',
-  },
-  { symbol: 'SOD1', note: 'ALS — small and highly conserved' },
-]
-const EXAMPLE_SYMBOLS = EXAMPLES.map(e => e.symbol)
-const NOTE_BY_SYMBOL = new Map(EXAMPLES.map(e => [e.symbol, e.note]))
+interface Example {
+  symbol: string
+  note: string
+}
+
+// Curated per species. Human picks all sit in the 100-way index and span tumour
+// suppressors, drug targets, disease genes, and size extremes (tiny HBB vs.
+// titin). The others are textbook genes for each organism, chosen to resolve in
+// NCBI and carry an AlphaFold structure.
+const EXAMPLES_BY_TAXON: Record<number, Example[]> = {
+  9606: [
+    { symbol: 'TP53', note: 'Tumour suppressor — mutated in ~half of all cancers' },
+    { symbol: 'KRAS', note: 'Oncogene — small and almost invariant across vertebrates' },
+    { symbol: 'BRAF', note: 'Melanoma V600E kinase' },
+    { symbol: 'EGFR', note: 'Receptor tyrosine kinase and major drug target' },
+    { symbol: 'PTEN', note: 'Tumour-suppressor phosphatase' },
+    { symbol: 'BRCA1', note: 'Hereditary breast/ovarian cancer — large multi-exon gene' },
+    { symbol: 'CFTR', note: 'Cystic fibrosis chloride channel' },
+    { symbol: 'HBB', note: 'β-globin (sickle cell) — tiny 3-exon gene' },
+    { symbol: 'TTN', note: 'Titin — the largest human gene, extreme intron collapse' },
+    { symbol: 'SOD1', note: 'ALS — small and highly conserved' },
+  ],
+  10090: [
+    { symbol: 'Trp53', note: 'p53 tumour suppressor — the mouse orthologue' },
+    { symbol: 'Shh', note: 'Sonic hedgehog — limb and neural patterning' },
+    { symbol: 'Brca1', note: 'Breast-cancer susceptibility gene' },
+    { symbol: 'Mecp2', note: 'Rett syndrome — X-linked chromatin regulator' },
+    { symbol: 'Pax6', note: 'Master eye-development transcription factor' },
+    { symbol: 'Cftr', note: 'Cystic fibrosis chloride channel' },
+  ],
+  7955: [
+    { symbol: 'shha', note: 'Sonic hedgehog a — fin and floor-plate signalling' },
+    { symbol: 'pax6a', note: 'Eye-development transcription factor' },
+    { symbol: 'tp53', note: 'p53 tumour suppressor' },
+    { symbol: 'myca', note: 'MYC proto-oncogene a' },
+    { symbol: 'sox2', note: 'Stem-cell / neural transcription factor' },
+  ],
+  7227: [
+    { symbol: 'Antp', note: 'Antennapedia — Hox homeotic gene' },
+    { symbol: 'Ubx', note: 'Ultrabithorax — Hox gene' },
+    { symbol: 'wg', note: 'wingless — founding Wnt ligand' },
+    { symbol: 'N', note: 'Notch — receptor of the Notch pathway' },
+    { symbol: 'dpp', note: 'decapentaplegic — a BMP morphogen' },
+    { symbol: 'w', note: 'white — the classic eye-colour gene' },
+  ],
+  6239: [
+    { symbol: 'lin-12', note: 'Notch-family receptor — cell-fate decisions' },
+    { symbol: 'unc-54', note: 'Muscle myosin heavy chain' },
+    { symbol: 'daf-16', note: 'FOXO transcription factor — lifespan' },
+    { symbol: 'let-60', note: 'Ras orthologue — vulval induction' },
+  ],
+  3702: [
+    { symbol: 'AG', note: 'AGAMOUS — floral organ identity (MADS-box)' },
+    { symbol: 'LFY', note: 'LEAFY — floral meristem identity' },
+    { symbol: 'AP1', note: 'APETALA1 — floral organ identity' },
+    { symbol: 'CO', note: 'CONSTANS — photoperiodic flowering' },
+    { symbol: 'PHYB', note: 'Phytochrome B — red-light photoreceptor' },
+  ],
+  559292: [
+    { symbol: 'CDC28', note: 'Cyclin-dependent kinase — the cell-cycle engine' },
+    { symbol: 'ACT1', note: 'Actin — highly conserved cytoskeleton' },
+    { symbol: 'GAL4', note: 'Transcriptional activator (two-hybrid fame)' },
+    { symbol: 'RAD51', note: 'Homologous-recombination recombinase' },
+    { symbol: 'TUB1', note: 'Alpha-tubulin' },
+  ],
+}
+
+function examplesFor(species: Species): Example[] {
+  return EXAMPLES_BY_TAXON[species.taxId] ?? []
+}
 
 function subscribeGeneUrl(cb: () => void) {
   window.addEventListener('popstate', cb)
@@ -110,23 +159,39 @@ function subscribeGeneUrl(cb: () => void) {
   }
 }
 
-function getGeneFromUrl() {
-  return new URLSearchParams(window.location.search).get('gene')
+// The whole query string — a stable snapshot for useSyncExternalStore (returning
+// a fresh object each read would loop). The component parses gene + species out.
+function getSearchString() {
+  return window.location.search
+}
+
+interface UrlState {
+  gene: string | null
+  species: Species
+}
+
+function parseUrl(search: string): UrlState {
+  const params = new URLSearchParams(search)
+  const taxon = Number(params.get('taxon'))
+  return {
+    gene: params.get('gene'),
+    species: speciesByTaxId(taxon) ?? DEFAULT_SPECIES,
+  }
 }
 
 // Debounced, race-safe gene-symbol type-ahead. Only user keystrokes feed `query`
 // (selecting a gene resets the input to the full symbol, which shouldn't re-search
 // what we just resolved), so suggestions stay a pure function of what was typed;
 // the cleanup drops a slow earlier response so it can't clobber a newer one.
-function useGeneSuggestions(query: string) {
-  const [hits, setHits] = useState<string[]>(EXAMPLE_SYMBOLS)
+function useGeneSuggestions(query: string, species: Species) {
+  const [hits, setHits] = useState<string[]>([])
   useEffect(() => {
     if (query.length < 2) {
       return
     }
     let ignore = false
     const timer = setTimeout(() => {
-      searchGenes(query)
+      searchGenes(query, species)
         .then(found => {
           // set even when empty: a no-match query clears stale suggestions
           if (!ignore) {
@@ -141,12 +206,13 @@ function useGeneSuggestions(query: string) {
       ignore = true
       clearTimeout(timer)
     }
-  }, [query])
+  }, [query, species])
   return hits
 }
 
 interface GeneOutcome {
   symbol: string | null // the gene this result/error describes
+  taxId: number | null // the species it was loaded for
   result?: GeneResult
   error?: string
 }
@@ -157,23 +223,27 @@ interface GeneOutcome {
 // flag has to be kept in sync with a setState inside the effect. The effect just
 // fetches; the ignore flag makes switching genes race-safe.
 // https://react.dev/learn/you-might-not-need-an-effect
-function useGene(symbol: string | null) {
-  const [outcome, setOutcome] = useState<GeneOutcome>({ symbol: null })
+function useGene(symbol: string | null, species: Species) {
+  const [outcome, setOutcome] = useState<GeneOutcome>({
+    symbol: null,
+    taxId: null,
+  })
   useEffect(() => {
     if (!symbol) {
       return
     }
     let ignore = false
-    loadGene(symbol).then(
+    loadGene(symbol, species).then(
       result => {
         if (!ignore) {
-          setOutcome({ symbol, result })
+          setOutcome({ symbol, taxId: species.taxId, result })
         }
       },
       (e: unknown) => {
         if (!ignore) {
           setOutcome({
             symbol,
+            taxId: species.taxId,
             error: e instanceof Error ? e.message : String(e),
           })
         }
@@ -182,25 +252,29 @@ function useGene(symbol: string | null) {
     return () => {
       ignore = true
     }
-  }, [symbol])
+  }, [symbol, species])
 
+  const isCurrent =
+    outcome.symbol === symbol && outcome.taxId === species.taxId
   return {
-    busy: symbol !== null && outcome.symbol !== symbol,
+    busy: symbol !== null && !isCurrent,
     // keep the previous result as a stable placeholder while the next loads (the
     // caller dims it); never surface an error for a gene the URL has left
     result: outcome.result,
-    error: outcome.symbol === symbol ? outcome.error : undefined,
+    error: isCurrent ? outcome.error : undefined,
   }
 }
 
 export default function GeneExplorer() {
   // Reactive URL read: re-renders on popstate (back/forward) and on the
-  // gene-url-change event dispatched by navigate() below.
-  const urlGene = useSyncExternalStore(
+  // gene-url-change event dispatched by navigate() below. The gene AND the
+  // species both live in the URL so a picked example is fully shareable.
+  const search = useSyncExternalStore(
     subscribeGeneUrl,
-    getGeneFromUrl,
-    () => null,
+    getSearchString,
+    () => '',
   )
+  const { gene: urlGene, species } = useMemo(() => parseUrl(search), [search])
 
   const [inputValue, setInputValue] = useState(urlGene ?? '')
   // the text driving the type-ahead: only keystrokes update it, so selecting a
@@ -220,20 +294,27 @@ export default function GeneExplorer() {
     setInputValue(urlGene ?? '')
   }
 
-  const hits = useGeneSuggestions(searchTerm)
-  const { busy, result, error } = useGene(urlGene)
+  const hits = useGeneSuggestions(searchTerm, species)
+  const { busy, result, error } = useGene(urlGene, species)
 
+  const exampleSymbols = examplesFor(species).map(e => e.symbol)
   // show the curated examples until there's a real query to suggest against
-  const options = searchTerm.length >= 2 ? hits : EXAMPLE_SYMBOLS
+  const options = searchTerm.length >= 2 ? hits : exampleSymbols
 
-  // Reflect the selection in the page URL (?gene=) so it's shareable,
-  // bookmarkable, and survives reload; clearing the Autocomplete removes it.
-  function navigate(symbol: string | null) {
+  // Reflect the gene + species in the page URL so it's shareable, bookmarkable,
+  // and survives reload; clearing the Autocomplete removes the gene but keeps the
+  // species. taxon is omitted for human, keeping human links clean.
+  function navigate(symbol: string | null, taxId: number) {
     const next = new URL(window.location.href)
     if (symbol) {
       next.searchParams.set('gene', symbol)
     } else {
       next.searchParams.delete('gene')
+    }
+    if (taxId === DEFAULT_SPECIES.taxId) {
+      next.searchParams.delete('taxon')
+    } else {
+      next.searchParams.set('taxon', String(taxId))
     }
     // re-picking the current gene shouldn't stack a duplicate history entry (or
     // re-fire a fetch); only navigate when the URL actually changes
@@ -259,6 +340,14 @@ export default function GeneExplorer() {
           options={options}
           busy={busy}
           urlGene={urlGene}
+          species={species}
+          onSpeciesChange={taxId => {
+            // switching species drops the current gene (symbols don't carry
+            // across organisms) and resets the type-ahead
+            setSearchTerm('')
+            setInputValue('')
+            navigate(null, taxId)
+          }}
           onInputChange={(value, isKeystroke) => {
             setInputValue(value)
             // only a keystroke should drive a new type-ahead query; the 'reset'
@@ -268,7 +357,7 @@ export default function GeneExplorer() {
             }
           }}
           onSelect={symbol => {
-            navigate(symbol)
+            navigate(symbol, species.taxId)
           }}
           onOpenHelp={() => {
             setHelpOpen(true)
@@ -293,13 +382,16 @@ export default function GeneExplorer() {
   )
 }
 
-// Left column: gene-symbol type-ahead, the curated Example chips, and a note for
-// the current gene. Purely presentational — all state lives in GeneExplorer.
+// Left column: a species picker, gene-symbol type-ahead, the curated Example
+// chips, and a note for the current gene. Purely presentational — all state
+// lives in GeneExplorer.
 function GeneSearchPanel({
   inputValue,
   options,
   busy,
   urlGene,
+  species,
+  onSpeciesChange,
   onInputChange,
   onSelect,
   onOpenHelp,
@@ -308,13 +400,17 @@ function GeneSearchPanel({
   options: string[]
   busy: boolean
   urlGene: string | null
+  species: Species
+  onSpeciesChange: (taxId: number) => void
   // isKeystroke distinguishes typing (drives the type-ahead) from the 'reset'
   // that fires when a value is selected
   onInputChange: (value: string, isKeystroke: boolean) => void
   onSelect: (symbol: string | null) => void
   onOpenHelp: () => void
 }) {
-  const urlGeneNote = urlGene ? NOTE_BY_SYMBOL.get(urlGene) : undefined
+  const examples = examplesFor(species)
+  const noteBySymbol = new Map(examples.map(e => [e.symbol, e.note]))
+  const urlGeneNote = urlGene ? noteBySymbol.get(urlGene) : undefined
   return (
     <Paper
       variant="outlined"
@@ -344,6 +440,32 @@ function GeneSearchPanel({
         </Tooltip>
       </Stack>
 
+      <TextField
+        select
+        fullWidth
+        size="small"
+        label="Species"
+        value={species.taxId}
+        onChange={event => {
+          onSpeciesChange(Number(event.target.value))
+        }}
+        sx={{ mb: 2 }}
+      >
+        {SPECIES.map(s => (
+          <MenuItem key={s.taxId} value={s.taxId}>
+            {s.label}
+            <Typography
+              component="span"
+              variant="caption"
+              color="text.secondary"
+              sx={{ ml: 1, fontStyle: 'italic' }}
+            >
+              {s.scientificName}
+            </Typography>
+          </MenuItem>
+        ))}
+      </TextField>
+
       <Autocomplete
         freeSolo
         fullWidth
@@ -360,7 +482,7 @@ function GeneSearchPanel({
           const { key, ...optionProps } = props
           return (
             <li key={key} {...optionProps}>
-              <GeneOption symbol={option} />
+              <GeneOption symbol={option} note={noteBySymbol.get(option)} />
             </li>
           )
         }}
@@ -368,8 +490,8 @@ function GeneSearchPanel({
           <TextField
             {...params}
             label="Gene symbol"
-            placeholder="e.g. TP53"
-            helperText="Type any human gene, or pick below"
+            placeholder={examples[0] ? `e.g. ${examples[0].symbol}` : 'e.g. TP53'}
+            helperText={`Type any ${species.label} gene, or pick below`}
             size="small"
             slotProps={{
               input: {
@@ -396,7 +518,7 @@ function GeneSearchPanel({
         Examples
       </Typography>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-        {EXAMPLES.map(ex => (
+        {examples.map(ex => (
           <Tooltip key={ex.symbol} title={ex.note}>
             <Button
               size="small"
@@ -423,8 +545,7 @@ function GeneSearchPanel({
 
 // One type-ahead row: the symbol, with its curated note underneath when it's one
 // of the examples (typed hits have no note).
-function GeneOption({ symbol }: { symbol: string }) {
-  const note = NOTE_BY_SYMBOL.get(symbol)
+function GeneOption({ symbol, note }: { symbol: string; note?: string }) {
   return (
     <Box>
       <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
@@ -473,9 +594,9 @@ function GeneResultArea({
           }}
         >
           <Typography variant="body2">
-            Search for a gene or pick an example to build a connected JBrowse
-            session — a collapsed-intron genome view, its 100-way protein
-            alignment, and the AlphaFold structure.
+            Pick a species, then search for a gene or choose an example to build
+            a connected JBrowse session — a collapsed-intron genome view, its
+            protein alignment across species, and the AlphaFold structure.
           </Typography>
         </Paper>
       )}
@@ -500,12 +621,23 @@ function GeneResultArea({
 }
 
 function ResultPanel({ result }: { result: GeneResult }) {
-  const { transcript, uniprotId, msa, proteinSequence } = result
+  const {
+    species,
+    transcript,
+    uniprotId,
+    geneId,
+    msa,
+    proteinSequence,
+    assemblyAccession,
+  } = result
   const { codingBp, span, ratio } = geneStats(transcript)
   const [detailsOpen, setDetailsOpen] = useState(false)
   // launch the genome view with introns squeezed out (default) vs. the whole
   // gene; recomputes the loc/url/session spec below
   const [collapse, setCollapse] = useState(true)
+  // a cross-species alignment built on demand (non-human); once present it's
+  // folded into the launched session as a connected MsaView
+  const [inlineMsa, setInlineMsa] = useState<InlineMsa>()
   const { url, session } = useMemo(
     () =>
       buildSessionUrl({
@@ -513,15 +645,66 @@ function ResultPanel({ result }: { result: GeneResult }) {
         uniprotId,
         proteinSequence,
         msaAvailable: !!msa,
+        inlineMsa,
         collapseIntrons: collapse,
+        assemblyAccession,
       }),
-    [transcript, uniprotId, msa, proteinSequence, collapse],
+    [
+      transcript,
+      uniprotId,
+      msa,
+      proteinSequence,
+      inlineMsa,
+      collapse,
+      assemblyAccession,
+    ],
   )
   const loc = useMemo(
     () => collapsedLoc(transcript, { collapse }),
     [transcript, collapse],
   )
   const sessionJson = useMemo(() => JSON.stringify(session, null, 2), [session])
+
+  // human uses the hosted hg38 assembly; non-human embeds its GenArk accession
+  const assemblyLabel = assemblyAccession ?? 'hg38'
+  const alignRows = inlineMsa
+    ? (inlineMsa.fasta.match(/^>/gm) ?? []).length
+    : msa?.rowCount
+  const stats = [
+    `${transcript.cds.length} coding exons`,
+    `${codingBp.toLocaleString()} bp CDS`,
+    `${ratio}× collapsed`,
+    alignRows ? `${alignRows}-species alignment` : undefined,
+    uniprotId ? 'AlphaFold structure' : undefined,
+  ].filter((s): s is string => !!s)
+
+  // build the cross-species alignment on demand (non-human): resolve orthologs,
+  // fetch proteins, align at EBI, then fold the result into the session
+  const [aligning, setAligning] = useState(false)
+  const [alignStatus, setAlignStatus] = useState<string>()
+  const [alignError, setAlignError] = useState<string>()
+  function buildAlignment() {
+    if (geneId && proteinSequence) {
+      setAligning(true)
+      setAlignError(undefined)
+      buildOrthologMsa(geneId, species.taxId, proteinSequence, setAlignStatus)
+        .then(result => {
+          setInlineMsa({
+            fasta: result.fasta,
+            newick: result.newick,
+            querySeqName: result.querySeqName,
+          })
+        })
+        .catch((e: unknown) => {
+          setAlignError(e instanceof Error ? e.message : String(e))
+        })
+        .finally(() => {
+          setAligning(false)
+        })
+    }
+  }
+  // non-human genes can offer an on-demand alignment once a query protein exists
+  const canBuildAlignment = !msa && !!geneId && !!proteinSequence
 
   return (
     <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
@@ -532,10 +715,18 @@ function ResultPanel({ result }: { result: GeneResult }) {
         </Typography>
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        {transcript.refName} {transcript.strand === 1 ? '+' : '−'} ·{' '}
-        {transcript.cds.length} coding exons
-        {msa ? ` · ${msa.rowCount}-species alignment` : ''}
+        <Box component="span" sx={{ fontStyle: 'italic' }}>
+          {species.scientificName}
+        </Box>{' '}
+        · {assemblyLabel} · {transcript.refName}{' '}
+        {transcript.strand === 1 ? '+' : '−'}
       </Typography>
+
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 1.5 }}>
+        {stats.map(s => (
+          <Chip key={s} label={s} size="small" variant="outlined" />
+        ))}
+      </Box>
 
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 2 }}>
         <Button
@@ -573,14 +764,58 @@ function ResultPanel({ result }: { result: GeneResult }) {
         label={`Collapse introns (±${DEFAULT_WINDOW_SIZE} bp around exons)`}
       />
 
-      {msa ? null : (
+      {species.humanFastPath && !msa ? (
         <Alert severity="info" sx={{ mt: 2 }}>
           No 100-way alignment for {transcript.geneName} — it isn&apos;t in the
           UCSC knownCanonical set. The collapsed genome view
           {uniprotId ? ' and AlphaFold structure' : ''} (and the JBrowse link)
           still work.
         </Alert>
-      )}
+      ) : null}
+      {canBuildAlignment ? (
+        <Box sx={{ mt: 2 }}>
+          {inlineMsa ? (
+            <Alert severity="success">
+              Cross-species alignment ready — {alignRows} species. It&apos;s now
+              part of the session; open it in JBrowse.
+            </Alert>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={aligning}
+                startIcon={
+                  aligning ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : null
+                }
+                onClick={() => {
+                  buildAlignment()
+                }}
+              >
+                {aligning
+                  ? 'Building alignment…'
+                  : 'Build cross-species alignment'}
+              </Button>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mt: 0.5 }}
+              >
+                {aligning && alignStatus
+                  ? alignStatus
+                  : `Aligns ${species.label} orthologs across species live via NCBI + EBI (can take a minute), then adds a connected alignment view to the session.`}
+              </Typography>
+            </>
+          )}
+          {alignError ? (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              Couldn&apos;t build the alignment: {alignError}
+            </Alert>
+          ) : null}
+        </Box>
+      ) : null}
 
       <DetailsDialog
         open={detailsOpen}
@@ -884,20 +1119,23 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
         </Typography>
         <Box component="ul" sx={{ pl: 3, m: 0, mb: 2, '& li': { mb: 1 } }}>
           <Typography component="li" variant="body2" color="text.secondary">
-            <strong>mygene.info</strong> resolves the gene symbol to its hg38
-            locus and UniProt accession (and powers the type-ahead).
+            <strong>Human</strong> resolves through <strong>mygene.info</strong>{' '}
+            (hg38 locus + UniProt), with the canonical transcript pulled from the
+            UCSC <Code>ncbiRefSeqSelect</Code> GFF over <strong>tabix</strong>.
           </Typography>
           <Typography component="li" variant="body2" color="text.secondary">
-            The canonical (MANE / RefSeq Select) transcript is pulled by locus
-            from the UCSC <Code>ncbiRefSeqSelect</Code> GFF over{' '}
-            <strong>tabix</strong>, then the GFF is parsed in the browser — that
-            is where the exon/CDS model comes from.
+            <strong>Other species</strong> resolve through{' '}
+            <strong>NCBI Datasets</strong> (GeneID, assembly, Swiss-Prot); the
+            genomic exon/CDS model is parsed from the E-utils{' '}
+            <Code>gene_table</Code>. The genome itself comes from the{' '}
+            <strong>UCSC GenArk</strong> 2bit on genomes.jbrowse.org, embedded
+            straight into the session — no config change needed.
           </Typography>
           <Typography component="li" variant="body2" color="text.secondary">
             The <strong>AlphaFold</strong> structure is fetched by UniProt
-            accession. Only the 100-way alignment is a hosted file (a slice of a
-            genome-scale alignment), random-read by gene name from an indexed
-            bgzip FASTA.
+            accession. The alignment is the hosted 100-way for human, or —
+            outside human — built on demand from NCBI orthologs aligned at{' '}
+            <strong>EBI Clustal Omega</strong> and carried inline in the session.
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
