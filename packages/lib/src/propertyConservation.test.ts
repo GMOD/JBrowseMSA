@@ -1,21 +1,10 @@
 import { describe, expect, test } from 'vitest'
 
+import { columnCountsFromColumns } from './columnCounts.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
 
-function counts(letters: string) {
-  const stats: Record<string, number> = {}
-  for (const c of letters) {
-    stats[c] = (stats[c] ?? 0) + 1
-  }
-  return stats
-}
-
 function propertyConservation(columns: string[]) {
-  const colStats = columns.map(counts)
-  const colStatsSums = colStats.map(s =>
-    Object.values(s).reduce((a, b) => a + b, 0),
-  )
-  return calculatePropertyConservation(colStats, colStatsSums)
+  return calculatePropertyConservation(columnCountsFromColumns(columns))
 }
 
 describe('property conservation', () => {

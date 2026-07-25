@@ -4,6 +4,7 @@ import {
   forEachLink,
 } from '../../hierarchy.ts'
 import { setFontSize } from '../../setFontSize.ts'
+import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 
 import type { ClickMapIndex } from './clickMap.ts'
 import type { HierarchyNode } from '../../hierarchy.ts'
@@ -27,7 +28,7 @@ function inYBlock(y: number, offsetY: number, by: number) {
 // For cladograms: x = (maxDepthToLeaf - nodeDepthToLeaf) / maxDepthToLeaf * maxWidth
 // This positions: leaves at maxWidth (rightmost), root at 0 (leftmost), internal nodes proportionally in between
 // Matches ape's: xx <- max(xx) - xx (where xx is depth from each node to tips)
-function getNodeX(
+export function getNodeX(
   node: HierarchyNode,
   showBranchLen: boolean,
   maxBranchLen: number,
@@ -253,20 +254,27 @@ export function renderTreeLabels({
     treeAreaWidth,
     treeAreaWidthMinusMargin,
     marginLeft,
-    leaves,
     noTree,
     labelWidthMap,
     collapsed,
   } = model
+  // labels only exist for leaves, which are laid out top to bottom, so take the
+  // same slice the MSA renderer uses instead of walking every tip per block
+  const visibleLeaves = getVisibleLeaves({
+    model,
+    offsetY,
+    blockSizeY: blockSizeYOverride ?? model.blockSize,
+  })
   const by = blockSizeYOverride ?? blockSize
   const emHeight = ctx.measureText('M').width
   if (labelsAlignRight) {
     ctx.textAlign = 'right'
     ctx.setLineDash([1, 3])
+    ctx.strokeStyle = theme.palette.text.primary
   } else {
     ctx.textAlign = 'start'
   }
-  for (const node of leaves) {
+  for (const node of visibleLeaves) {
     const {
       data: { name, id },
     } = node
@@ -292,6 +300,9 @@ export function renderTreeLabels({
         const smallPadding = 2
         const offset = treeAreaWidthMinusMargin - smallPadding
         if (drawTree && !noTree) {
+          // beginPath is load-bearing: without it every leader line re-strokes
+          // all the ones before it, which is quadratic in the label count
+          ctx.beginPath()
           ctx.moveTo(xp + radius + 2, y)
           ctx.lineTo(offset - smallPadding - width, y)
           ctx.stroke()

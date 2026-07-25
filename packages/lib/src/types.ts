@@ -26,6 +26,29 @@ export interface BasicTrack {
   model: TextTrackModel & BarTrackModel
 }
 
+// one InterProScan/GFF annotation location flattened onto a single row, as
+// produced by the model's tidyInterProAnnotations
+export interface TidyDomainAnnotation {
+  id: string
+  name: string
+  accession: string
+  description: string
+  featureType?: string
+  start: number
+  end: number
+  strand?: number
+}
+
+// a tidy annotation resolved to the visible column span it is drawn across.
+// stackIndex is its position within its row's annotation list, which the
+// sub-row layout uses to stack boxes.
+export interface DomainBand {
+  annotation: TidyDomainAnnotation
+  startCol: number
+  endCol: number
+  stackIndex: number
+}
+
 export interface Node {
   children?: Node[]
   name?: string

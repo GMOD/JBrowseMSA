@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { BaseTooltip } from '@jbrowse/core/ui'
 import { observer } from 'mobx-react'
@@ -6,25 +6,11 @@ import { observer } from 'mobx-react'
 import ColumnStats from './ColumnStats.tsx'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
+import { useMsaBlockMouse } from './useMsaBlockMouse.ts'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { useColorContrast } from '../../useColorContrast.ts'
 
 import type { MsaViewModel } from '../../model.ts'
-
-function eventToColRow(
-  event: React.MouseEvent,
-  el: HTMLCanvasElement,
-  offsetX: number,
-  offsetY: number,
-  colWidth: number,
-  rowHeight: number,
-) {
-  const { left, top } = el.getBoundingClientRect()
-  return {
-    col: Math.floor((event.clientX - left + offsetX) / colWidth),
-    row: Math.floor((event.clientY - top + offsetY) / rowHeight),
-  }
-}
 
 const MSACanvasBlock = observer(function ({
   model,
@@ -35,21 +21,19 @@ const MSACanvasBlock = observer(function ({
   offsetX: number
   offsetY: number
 }) {
-  const {
-    colWidth,
-    rowHeight,
-    scrollY,
-    scrollX,
-    colorScheme,
-    blockSize,
-    mouseClickCol,
-    mouseClickRow,
-    highResScaleFactor,
-  } = model
+  const { scrollY, scrollX, colorScheme, blockSize, highResScaleFactor } = model
   const { theme, contrastScheme } = useColorContrast(colorScheme)
+  const { tooltipPoint, onMouseMove, onClick, onMouseLeave } = useMsaBlockMouse(
+    {
+      model,
+      offsetX,
+      offsetY,
+    },
+  )
 
   const ref = useCanvasAutorun(
     ctx => {
+      const { blockSize, highResScaleFactor, actuallyShowDomains } = model
       ctx.resetTransform()
       ctx.clearRect(
         0,
@@ -57,7 +41,7 @@ const MSACanvasBlock = observer(function ({
         blockSize * highResScaleFactor,
         blockSize * highResScaleFactor,
       )
-      if (model.actuallyShowDomains) {
+      if (actuallyShowDomains) {
         renderBoxFeatureCanvasBlock({
           ctx,
           offsetX,
@@ -74,18 +58,9 @@ const MSACanvasBlock = observer(function ({
         model,
       })
     },
-    [
-      model,
-      offsetX,
-      offsetY,
-      theme,
-      blockSize,
-      highResScaleFactor,
-      contrastScheme,
-    ],
+    [model, offsetX, offsetY, theme, contrastScheme],
   )
 
-  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>()
   const { hoveredInsertion, mouseOverDomains, showColumnStats } = model
 
   return (
@@ -94,58 +69,16 @@ const MSACanvasBlock = observer(function ({
         ref={ref}
         onMouseMove={event => {
           if (ref.current) {
-            const { col, row } = eventToColRow(
-              event,
-              ref.current,
-              offsetX,
-              offsetY,
-              colWidth,
-              rowHeight,
-            )
-            // Only set mouse position if within valid MSA bounds
-            if (
-              col >= 0 &&
-              col < model.numColumns &&
-              row >= 0 &&
-              row < model.numRows
-            ) {
-              model.setMousePos(col, row)
-            } else {
-              model.setMousePos(undefined, undefined)
-            }
-            // only track client coords when there's something to show in the
-            // tooltip: an insertion, a domain under the cursor, or column stats
-            // (when that option is enabled). avoids a re-render on every move
-            // when nothing would be shown
-            const hasTooltip =
-              model.hoveredInsertion ||
-              model.mouseOverDomains.length > 0 ||
-              (model.showColumnStats && !!model.mouseOverColumnStats)
-            setMousePosition(
-              hasTooltip ? { x: event.clientX, y: event.clientY } : undefined,
-            )
+            onMouseMove(event, ref.current)
           }
         }}
         onClick={event => {
           if (ref.current) {
-            const { col, row } = eventToColRow(
-              event,
-              ref.current,
-              offsetX,
-              offsetY,
-              colWidth,
-              rowHeight,
-            )
-            if (col === mouseClickCol && row === mouseClickRow) {
-              model.setMouseClickPos(undefined, undefined)
-            } else {
-              model.setMouseClickPos(col, row)
-            }
+            onClick(event, ref.current)
           }
         }}
         onMouseLeave={() => {
-          model.setMousePos()
-          setMousePosition(undefined)
+          onMouseLeave()
         }}
         width={blockSize * highResScaleFactor}
         height={blockSize * highResScaleFactor}
@@ -157,35 +90,34 @@ const MSACanvasBlock = observer(function ({
           height: blockSize,
         }}
       />
-      {hoveredInsertion && mousePosition ? (
+      {tooltipPoint ? (
         <BaseTooltip
-          clientPoint={{ x: mousePosition.x, y: mousePosition.y + 15 }}
+          clientPoint={{ x: tooltipPoint.x, y: tooltipPoint.y + 15 }}
         >
-          Insertion ({hoveredInsertion.letters.length}
-          {model.sequenceType === 'amino' ? 'aa' : 'bp'}):{' '}
-          {hoveredInsertion.letters.length > 20
-            ? `${hoveredInsertion.letters.slice(0, 20)}...`
-            : hoveredInsertion.letters}
-        </BaseTooltip>
-      ) : null}
-      {!hoveredInsertion &&
-      mousePosition &&
-      (mouseOverDomains.length > 0 || showColumnStats) ? (
-        <BaseTooltip
-          clientPoint={{ x: mousePosition.x, y: mousePosition.y + 15 }}
-        >
-          {mouseOverDomains.map(d => (
-            <div key={`${d.accession}-${d.start}-${d.end}`}>
-              <b>{d.name}</b> ({d.accession}) {d.start}-{d.end}
-              {d.description ? (
-                <>
-                  <br />
-                  {d.description}
-                </>
-              ) : null}
-            </div>
-          ))}
-          {showColumnStats ? <ColumnStats model={model} /> : null}
+          {hoveredInsertion ? (
+            <>
+              Insertion ({hoveredInsertion.letters.length}
+              {model.sequenceType === 'amino' ? 'aa' : 'bp'}):{' '}
+              {hoveredInsertion.letters.length > 20
+                ? `${hoveredInsertion.letters.slice(0, 20)}...`
+                : hoveredInsertion.letters}
+            </>
+          ) : (
+            <>
+              {mouseOverDomains.map(d => (
+                <div key={`${d.accession}-${d.start}-${d.end}`}>
+                  <b>{d.name}</b> ({d.accession}) {d.start}-{d.end}
+                  {d.description ? (
+                    <>
+                      <br />
+                      {d.description}
+                    </>
+                  ) : null}
+                </div>
+              ))}
+              {showColumnStats ? <ColumnStats model={model} /> : null}
+            </>
+          )}
         </BaseTooltip>
       ) : null}
     </>

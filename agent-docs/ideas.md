@@ -41,13 +41,6 @@ drag-mousemove handler. They're mutually exclusive in practice (you don't wheel
 mid-drag), so no live bug, but the coupling is fragile — separate flags or a
 documented assumption would be safer.
 
-### TreeCanvasBlock hover redraw via state+effect
-
-`TreeCanvasBlock.tsx` keeps `hoverElt` in React state purely to drive an
-imperative mouseover-canvas redraw in a `useEffect`; the value never reaches
-JSX. Could draw directly in the `onMouseMove` handler and drop both the state
-and the effect (event-driven, not display-driven).
-
 ### Duplicated FASTA defline parsing
 
 The `>`-splitting + id/defline extraction loop is copy-pasted across

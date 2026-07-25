@@ -1,4 +1,4 @@
-import type { MsaViewModel } from '../../model.ts'
+import type { MsaViewModel } from '../model.ts'
 
 // The slice of leaves whose rows intersect a block of height blockSizeY at
 // vertical offset offsetY, padded by one row on each side.

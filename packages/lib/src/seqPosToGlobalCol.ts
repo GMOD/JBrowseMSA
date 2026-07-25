@@ -15,6 +15,24 @@ import { isBlank } from './util.ts'
  * seqPosToGlobalCol({ row: "A-TG-C", seqPos: 2 }) // → 3 (G)
  * seqPosToGlobalCol({ row: "A-TG-C", seqPos: 3 }) // → 5 (C)
  */
+/**
+ * The global column of every ungapped sequence position in a row, i.e.
+ * index[seqPos] is the column holding the seqPos-th non-gap character. Amortizes
+ * repeated seqPosToGlobalCol lookups (the domain overlay does one per feature
+ * per row) into a single pass per row.
+ */
+export function buildSeqPosIndex(row: string) {
+  const index = new Int32Array(row.length)
+  let n = 0
+  for (let col = 0; col < row.length; col++) {
+    // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
+    if (!((row.charCodeAt(col) - 45) >>> 0 <= 1)) {
+      index[n++] = col
+    }
+  }
+  return index.subarray(0, n)
+}
+
 export function seqPosToGlobalCol({
   row,
   seqPos,

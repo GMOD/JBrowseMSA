@@ -16,6 +16,7 @@ import {
 import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
+import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
 import ConservationTrack from './components/ConservationTrack.tsx'
 import TextTrack from './components/TextTrack.tsx'
 import {
@@ -70,13 +71,18 @@ import {
   visibleColToGlobalCol,
   visibleColToSeqPosForRow,
 } from './rowCoordinateCalculations.ts'
-import { seqPosToGlobalCol } from './seqPosToGlobalCol.ts'
+import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
 import { computeRowInsertions, len, skipBlanks, transform } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
 import type { InterProScanResults } from './launchInterProScan.ts'
-import type { BasicTrack, NodeWithIds, NodeWithIdsAndLength } from './types.ts'
+import type {
+  BasicTrack,
+  DomainBand,
+  NodeWithIds,
+  NodeWithIdsAndLength,
+} from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
@@ -826,15 +832,19 @@ function stateModelFactory() {
         if (strs.length === 0) {
           return []
         }
-        const numCols = strs[0]!.length
+        // ragged input (a3m, hand-edited fasta) can have rows shorter than the
+        // alignment; the widest row defines the column count and a row that
+        // stops early counts as gapped for the remainder
+        const numCols = strs.reduce((max, str) => Math.max(max, str.length), 0)
         const numRows = strs.length
         const threshold = Math.ceil((realAllowedGappyness / 100) * numRows)
-        const blankCounts = new Uint16Array(numCols)
+        const blankCounts = new Uint32Array(numCols)
         for (let j = 0; j < numRows; j++) {
           const str = strs[j]!
+          const len = str.length
           for (let i = 0; i < numCols; i++) {
             // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
-            if ((str.charCodeAt(i) - 45) >>> 0 <= 1) {
+            if (i >= len || (str.charCodeAt(i) - 45) >>> 0 <= 1) {
               blankCounts[i]!++
             }
           }
@@ -882,9 +892,27 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * number of rows the alignment occupies on screen. This is the leaf count,
+       * not `rows.length`: a tree leaf with no matching MSA row still takes up a
+       * row of vertical space (drawn blank), so row hit-testing and fit-to-height
+       * must count it.
        */
       get numRows() {
-        return this.rows.length
+        return this.leaves.length
+      },
+
+      /**
+       * #getter
+       * per-row index of the global column holding each ungapped sequence
+       * position, so seqPos -> column is a lookup rather than a scan of the row.
+       * The domain overlay resolves thousands of these per redraw.
+       */
+      get seqPosGlobalColIndex() {
+        return new Map(
+          this.rows.map(
+            ([name, seq]) => [name, buildSeqPosIndex(seq)] as const,
+          ),
+        )
       },
 
       /**
@@ -924,23 +952,15 @@ function stateModelFactory() {
        * #getter
        */
       get colStats() {
-        const r: Record<string, number>[] = []
-        const columns = this.columns2d
-        for (const column of columns) {
-          for (let j = 0; j < column.length; j++) {
-            const l = (r[j] ??= {})
-            const cj = column[j]!
-            l[cj] = (l[cj] ?? 0) + 1
-          }
-        }
-        return r
+        return columnCountsFromRows(this.columns2d)
       },
 
       /**
        * #getter
+       * per-column residue totals (gaps included)
        */
       get colStatsSums() {
-        return this.colStats.map(col => sum(Object.values(col)))
+        return this.colStats.totals
       },
 
       /**
@@ -949,14 +969,7 @@ function stateModelFactory() {
        * Returns 'dna', 'rna', or 'amino'.
        */
       get sequenceType(): 'dna' | 'rna' | 'amino' {
-        const letters = new Set<string>()
-        for (const stats of this.colStats) {
-          for (const letter of Object.keys(stats)) {
-            if (letter !== '-' && letter !== '.') {
-              letters.add(letter)
-            }
-          }
-        }
+        const letters = this.colStats.lettersPresent
         // isDna already excludes U (not in the DNA set) and isRna excludes T,
         // so the set membership alone disambiguates the two
         const dna = new Set(['A', 'C', 'G', 'T', 'N'])
@@ -972,21 +985,18 @@ function stateModelFactory() {
        * Used by percent_identity_dynamic color scheme.
        */
       get colConsensus() {
-        const { colStats, colStatsSums } = this
-        return colStats.map((stats, i) => {
-          const total = colStatsSums[i]
-          if (!total) {
-            return { letter: '', color: undefined }
-          }
+        const { colStats } = this
+        return Array.from({ length: colStats.numColumns }, (_, col) => {
+          const total = colStats.total(col)
           let maxCount = 0
           let letter = ''
-          for (const [key, val] of Object.entries(stats)) {
-            if (val > maxCount && key !== '-' && key !== '.') {
-              maxCount = val
-              letter = key
+          colStats.forEachResidue(col, (slot, count) => {
+            if (count > maxCount) {
+              maxCount = count
+              letter = letterOfResidueSlot(slot)
             }
-          }
-          const proportion = maxCount / total
+          })
+          const proportion = total ? maxCount / total : 0
           return {
             letter,
             color:
@@ -1004,9 +1014,9 @@ function stateModelFactory() {
        * ref http://www.jalview.org/help/html/colourSchemes/clustal.html
        */
       get colClustalX() {
-        const { colStats, colStatsSums } = this
-        return colStats.map((stats, i) =>
-          clustalXColumnColors(stats, colStatsSums[i]!),
+        const { colStats } = this
+        return Array.from({ length: colStats.numColumns }, (_, col) =>
+          clustalXColumnColors(colStats, col),
         )
       },
 
@@ -1017,33 +1027,25 @@ function stateModelFactory() {
        * Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
        */
       get conservation() {
-        const { colStats, colStatsSums, sequenceType } = this
+        const { colStats, sequenceType } = this
         const alphabetSize = sequenceType === 'amino' ? 20 : 4
         const maxEntropy = Math.log2(alphabetSize)
 
-        return colStats.map((stats, i) => {
-          const total = colStatsSums[i]
-          if (!total) {
-            return 0
-          }
-
-          const gapCount = (stats['-'] ?? 0) + (stats['.'] ?? 0)
+        return Array.from({ length: colStats.numColumns }, (_, col) => {
+          const total = colStats.total(col)
+          const gapCount = colStats.gapCount(col)
           const nonGapTotal = total - gapCount
-          if (nonGapTotal === 0) {
-            return 0
-          }
-
-          let entropy = 0
-          for (const [letter, count] of Object.entries(stats)) {
-            if (letter !== '-' && letter !== '.') {
+          let score = 0
+          if (nonGapTotal > 0) {
+            let entropy = 0
+            colStats.forEachResidue(col, (_slot, count) => {
               const freq = count / nonGapTotal
               entropy -= freq * Math.log2(freq)
-            }
+            })
+            score =
+              Math.max(0, 1 - entropy / maxEntropy) * (1 - gapCount / total)
           }
-
-          const gapFraction = gapCount / total
-          const conservation = Math.max(0, 1 - entropy / maxEntropy)
-          return conservation * (1 - gapFraction)
+          return score
         })
       },
       /**
@@ -1054,7 +1056,7 @@ function stateModelFactory() {
        */
       get propertyConservation() {
         return this.sequenceType === 'amino'
-          ? calculatePropertyConservation(this.colStats, this.colStatsSums)
+          ? calculatePropertyConservation(this.colStats)
           : []
       },
       /**
@@ -1590,7 +1592,13 @@ function stateModelFactory() {
        */
       seqPosToGlobalCol(rowName: string, seqPos: number) {
         const seq = self.rowMap.get(rowName)
-        return seq ? seqPosToGlobalCol({ row: seq, seqPos }) : 0
+        if (seq === undefined) {
+          return 0
+        }
+        const col = self.seqPosGlobalColIndex.get(rowName)?.[seqPos]
+        // past the end of the ungapped sequence: 0 for the degenerate empty-row
+        // case, otherwise one past the last column, as the scan version returned
+        return col ?? (seqPos === 0 ? 0 : seq.length)
       },
 
       /**
@@ -1748,26 +1756,120 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * every filtered-on domain annotation resolved to the visible column span
+       * it is drawn across, keyed by row name and in draw order (largest first,
+       * as tidyInterProAnnotations orders them). Resolving these once here rather
+       * than inside each canvas block removes a per-feature, per-block sequence
+       * position conversion from every redraw, and gives the letter renderer the
+       * band colors it needs to keep residues readable on top of the boxes.
+       */
+      get domainBands() {
+        const bands = new Map<string, DomainBand[]>()
+        for (const [name, annotations] of Object.entries(
+          self.tidyFilteredGatheredInterProAnnotations,
+        )) {
+          const rowBands = annotations
+            .map((annotation, stackIndex) => {
+              // InterPro positions are 1-based and inclusive; endCol is the
+              // exclusive column *after* the last residue, taken from that
+              // residue rather than from the next one, so a band stops at its own
+              // last residue instead of stretching across a following gap run
+              const startCol = self.seqPosToVisibleCol(
+                name,
+                annotation.start - 1,
+              )
+              const lastCol = self.seqPosToVisibleCol(name, annotation.end - 1)
+              return startCol !== undefined && lastCol !== undefined
+                ? { annotation, startCol, endCol: lastCol + 1, stackIndex }
+                : undefined
+            })
+            .filter(notEmpty)
+          if (rowBands.length > 0) {
+            bands.set(name, rowBands)
+          }
+        }
+        return bands
+      },
+
+      /**
+       * #getter
+       * the same bands ordered by start column, for left-to-right sweeps (the
+       * letter renderer walks columns and needs the band covering each one)
+       */
+      get domainBandsByStart() {
+        return new Map(
+          [...this.domainBands].map(
+            ([name, bands]) =>
+              [
+                name,
+                bands.toSorted((a, b) => a.startCol - b.startCol),
+              ] as const,
+          ),
+        )
+      },
+
+      /**
+       * #getter
        * domain annotations under the mouse, hit-tested against the exact visible
        * column span each box is drawn at (so it matches the overlay across gaps)
        */
       get mouseOverDomains() {
         const { mouseCol } = self
         const name = self.mouseOverRowName
-        if (name !== undefined && mouseCol !== undefined) {
-          const entry = self.tidyFilteredGatheredInterProAnnotations[name] ?? []
-          return entry.filter(d => {
-            const m1 = self.seqPosToVisibleCol(name, d.start - 1)
-            const m2 = self.seqPosToVisibleCol(name, d.end)
-            return (
-              m1 !== undefined &&
-              m2 !== undefined &&
-              mouseCol >= m1 &&
-              mouseCol < m2
-            )
-          })
+        return name !== undefined && mouseCol !== undefined
+          ? (this.domainBands.get(name) ?? [])
+              .filter(b => mouseCol >= b.startCol && mouseCol < b.endCol)
+              .map(b => b.annotation)
+          : []
+      },
+
+      /**
+       * #getter
+       * row index of the reference row (`relativeTo`), undefined when unset
+       */
+      get referenceRowIndex() {
+        const { relativeTo } = self
+        return relativeTo === undefined
+          ? undefined
+          : self.rowNamesSet.get(relativeTo)
+      },
+
+      /**
+       * #getter
+       * row indices highlighted by the current tree hover (a hovered internal
+       * node highlights every tip below it). Shared by the tree and MSA overlay
+       * canvases so they cannot disagree, and resolved through the memoized
+       * name->index map rather than rebuilding a lookup on each mouse move.
+       */
+      get hoveredRowIndices() {
+        const { hoveredTreeNode, rowNamesSet } = self
+        return hoveredTreeNode
+          ? hoveredTreeNode.descendantNames
+              .map(name => rowNamesSet.get(name))
+              .filter(notEmpty)
+          : []
+      },
+
+      /**
+       * #getter
+       * contiguous runs of `highlightedColumns`, so a run of highlighted columns
+       * draws as one bordered band. Computed here because the overlay canvas
+       * redraws on every mouse move while the highlight itself rarely changes.
+       */
+      get highlightedColumnRuns() {
+        const { highlightedColumns } = self
+        const runs: { start: number; end: number }[] = []
+        for (const col of [...(highlightedColumns ?? [])].sort(
+          (a, b) => a - b,
+        )) {
+          const last = runs.at(-1)
+          if (last && col === last.end + 1) {
+            last.end = col
+          } else {
+            runs.push({ start: col, end: col })
+          }
         }
-        return []
+        return runs
       },
 
       /**
@@ -1781,14 +1883,14 @@ function stateModelFactory() {
         if (mouseCol === undefined) {
           return undefined
         }
-        const stats = self.colStats[mouseCol]
-        const total = self.colStatsSums[mouseCol]
-        if (!stats || !total) {
+        const { colStats } = self
+        const total = colStats.total(mouseCol)
+        if (mouseCol >= colStats.numColumns || !total) {
           return undefined
         }
-        const gaps = (stats['-'] ?? 0) + (stats['.'] ?? 0)
-        const distribution = Object.entries(stats)
-          .filter(([letter]) => letter !== '-' && letter !== '.')
+        const gaps = colStats.gapCount(mouseCol)
+        const distribution = colStats
+          .residueEntries(mouseCol)
           .sort((a, b) => b[1] - a[1])
         const consensus = distribution[0]
         return {
@@ -1919,6 +2021,29 @@ function stateModelFactory() {
             }
           }),
         )
+
+        // track the live device pixel ratio so canvas backing stores re-scale
+        // when the window moves between monitors or the browser zooms. The
+        // matchMedia query is pinned to the current ratio, so each change
+        // re-registers against the new one to keep tracking further moves.
+        if (
+          typeof window !== 'undefined' &&
+          typeof window.matchMedia === 'function'
+        ) {
+          const query = () =>
+            window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
+          let mql = query()
+          const onChange = () => {
+            self.setHighResScaleFactor(window.devicePixelRatio)
+            mql.removeEventListener('change', onChange)
+            mql = query()
+            mql.addEventListener('change', onChange)
+          }
+          mql.addEventListener('change', onChange)
+          addDisposer(self, () => {
+            mql.removeEventListener('change', onChange)
+          })
+        }
 
         // autorun opens treeFilehandle. generation guard: if the filehandle
         // changes mid-fetch, a slower earlier request must not clobber the data
@@ -2090,18 +2215,32 @@ function stateModelFactory() {
 
         // Keep the parse chain warm: reading self.columns transitively holds
         // self.MSA (parseMSA) computed alive, so it is parsed once per data
-        // change rather than re-parsed on every non-reactive access. colStats is
-        // additionally held for dynamic color schemes. Do not remove.
+        // change rather than re-parsed on every non-reactive access. Do not
+        // remove.
         // xref solution https://github.com/mobxjs/mobx/issues/266#issuecomment-222007278
         // xref problem https://github.com/GMOD/react-msaview/issues/75
+        //
+        // The column statistics are held for the same reason whenever something
+        // reads them off the reactive path: dynamic color schemes, and the hover
+        // tooltip, which is read from a mousemove handler. Without this the
+        // tooltip's cost depends on whether some visible track happens to be
+        // observing them, so closing the conservation track would silently turn
+        // every mouse move into a full-alignment recount.
         addDisposer(
           self,
           autorun(() => {
             if (self.colorSchemeName.includes('dynamic')) {
               // eslint-disable-next-line  @typescript-eslint/no-unused-expressions
               self.colStats
+            }
+            if (self.showColumnStats) {
+              // everything the hover tooltip reads per column
               // eslint-disable-next-line  @typescript-eslint/no-unused-expressions
-              self.colStatsSums
+              self.colStats
+              // eslint-disable-next-line  @typescript-eslint/no-unused-expressions
+              self.conservation
+              // eslint-disable-next-line  @typescript-eslint/no-unused-expressions
+              self.propertyConservation
             }
             // eslint-disable-next-line  @typescript-eslint/no-unused-expressions
             self.columns

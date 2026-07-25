@@ -1,3 +1,7 @@
+import { numResidueSlots, residueSlotOfLetter } from './columnCounts.ts'
+
+import type { ColumnCounts } from './columnCounts.ts'
+
 // Disjoint physicochemical classes for the 20 standard amino acids. Property
 // conservation asks a different question than identity conservation: a column
 // can vary in exact residue yet stay within one property class (a conservative
@@ -29,8 +33,15 @@ const aminoPropertyClass: Record<string, string> = {
   P: 'special',
 }
 
-const numPropertyClasses = new Set(Object.values(aminoPropertyClass)).size
-const maxPropertyEntropy = Math.log2(numPropertyClasses)
+const propertyClasses = [...new Set(Object.values(aminoPropertyClass))]
+const maxPropertyEntropy = Math.log2(propertyClasses.length)
+
+// residue slot -> index into propertyClasses (-1 for residues with no class,
+// e.g. X or '*'), so the per-column tally needs no string lookups
+const classOfSlot = new Int8Array(numResidueSlots).fill(-1)
+for (const [letter, cls] of Object.entries(aminoPropertyClass)) {
+  classOfSlot[residueSlotOfLetter(letter)] = propertyClasses.indexOf(cls)
+}
 
 /**
  * Per-column property conservation using Shannon entropy over physicochemical
@@ -38,36 +49,34 @@ const maxPropertyEntropy = Math.log2(numPropertyClasses)
  * residue shares one property class. Mirrors the identity-conservation formula
  * so the two tracks are directly comparable: (1 - H/Hmax) * (1 - gapFraction).
  */
-export function calculatePropertyConservation(
-  colStats: Record<string, number>[],
-  colStatsSums: number[],
-) {
-  return colStats.map((stats, i) => {
-    const total = colStatsSums[i]
-    if (!total) {
-      return 0
-    }
-
-    let nonGapTotal = 0
-    const classCounts: Record<string, number> = {}
-    for (const [letter, count] of Object.entries(stats)) {
-      const cls = aminoPropertyClass[letter]
-      if (cls) {
-        classCounts[cls] = (classCounts[cls] ?? 0) + count
-        nonGapTotal += count
+export function calculatePropertyConservation(counts: ColumnCounts) {
+  const classCounts = new Float64Array(propertyClasses.length)
+  return Array.from({ length: counts.numColumns }, (_, col) => {
+    const total = counts.total(col)
+    let score = 0
+    if (total) {
+      classCounts.fill(0)
+      let nonGapTotal = 0
+      counts.forEachResidue(col, (slot, count) => {
+        const cls = classOfSlot[slot]!
+        if (cls >= 0) {
+          classCounts[cls]! += count
+          nonGapTotal += count
+        }
+      })
+      if (nonGapTotal > 0) {
+        let entropy = 0
+        for (const count of classCounts) {
+          if (count > 0) {
+            const freq = count / nonGapTotal
+            entropy -= freq * Math.log2(freq)
+          }
+        }
+        const gapFraction = (total - nonGapTotal) / total
+        score =
+          Math.max(0, 1 - entropy / maxPropertyEntropy) * (1 - gapFraction)
       }
     }
-    if (nonGapTotal === 0) {
-      return 0
-    }
-
-    let entropy = 0
-    for (const count of Object.values(classCounts)) {
-      const freq = count / nonGapTotal
-      entropy -= freq * Math.log2(freq)
-    }
-
-    const gapFraction = (total - nonGapTotal) / total
-    return Math.max(0, 1 - entropy / maxPropertyEntropy) * (1 - gapFraction)
+    return score
   })
 }

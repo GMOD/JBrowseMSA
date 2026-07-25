@@ -1,5 +1,5 @@
-import { getVisibleLeaves } from './getVisibleLeaves.ts'
 import { subFeatureRowHeight } from '../../constants.ts'
+import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -12,6 +12,7 @@ export function renderBoxFeatureCanvasBlock({
   offsetY,
   ctx,
   highResScaleFactorOverride,
+  blockSizeXOverride,
   blockSizeYOverride,
 }: {
   offsetX: number
@@ -19,22 +20,24 @@ export function renderBoxFeatureCanvasBlock({
   model: MsaViewModel
   ctx: RenderCtx
   highResScaleFactorOverride?: number
+  blockSizeXOverride?: number
   blockSizeYOverride?: number
 }) {
   const { blockSize, rowHeight, highResScaleFactor, showDomains } = model
   if (showDomains) {
     const k = highResScaleFactorOverride ?? highResScaleFactor
+    const bx = blockSizeXOverride ?? blockSize
     const by = blockSizeYOverride ?? blockSize
     ctx.resetTransform()
     ctx.scale(k, k)
     ctx.translate(-offsetX, rowHeight / 2 - offsetY)
 
-    const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
-
     drawTiles({
       model,
       ctx,
-      visibleLeaves,
+      visibleLeaves: getVisibleLeaves({ model, offsetY, blockSizeY: by }),
+      offsetX,
+      blockWidth: bx,
     })
   }
 }
@@ -43,10 +46,14 @@ function drawTiles({
   model,
   ctx,
   visibleLeaves,
+  offsetX,
+  blockWidth,
 }: {
   model: MsaViewModel
   ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
+  offsetX: number
+  blockWidth: number
 }) {
   const {
     subFeatureRows,
@@ -56,31 +63,31 @@ function drawTiles({
     strokePalette,
     segmentLabels,
     showMsaLetters,
-    tidyFilteredGatheredInterProAnnotations,
+    domainBands,
   } = model
   const h = subFeatureRows ? subFeatureRowHeight : rowHeight
   // exon numbers label the bands only when residue letters aren't drawn (zoomed
   // out); when letters show, the alternating shades alone mark the boundaries
   // and a number would collide with the sequence
   const drawSegmentLabels = !showMsaLetters && !subFeatureRows && h >= 9
+  // gene arrow heads stick out one row-height past the band, so pad the cull
+  // window enough that a band just outside the block still draws its head
+  const cull = h + colWidth
+  const xMin = offsetX - cull
+  const xMax = offsetX + blockWidth + cull
 
   for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
     const node = visibleLeaves[i]!
-    const { name } = node.data
     const y = node.x!
-    const entry = tidyFilteredGatheredInterProAnnotations[name]
+    const bands = domainBands.get(node.data.name)
 
-    if (entry) {
-      for (let j = 0, l2 = entry.length; j < l2; j++) {
-        const { start, end, accession, strand } = entry[j]!
-        // Convert sequence positions to visible column positions
-        // seqPos is 1-based from InterPro, so subtract 1 for 0-based
-        const m1 = model.seqPosToVisibleCol(name, start - 1)
-        const m2 = model.seqPosToVisibleCol(name, end)
-        if (m1 !== undefined && m2 !== undefined) {
-          const x = m1 * colWidth
-          const t = y - rowHeight + (subFeatureRows ? j * h : 0)
-          const lw = colWidth * (m2 - m1)
+    if (bands) {
+      for (const { annotation, startCol, endCol, stackIndex } of bands) {
+        const { accession, strand } = annotation
+        const x = startCol * colWidth
+        const lw = colWidth * (endCol - startCol)
+        if (x + lw >= xMin && x <= xMax) {
+          const t = y - rowHeight + (subFeatureRows ? stackIndex * h : 0)
           ctx.fillStyle = fillPalette[accession]!
           ctx.strokeStyle = strokePalette[accession]!
           if (strand === undefined) {

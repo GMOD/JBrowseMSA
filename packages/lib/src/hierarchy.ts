@@ -288,17 +288,23 @@ export function collapsedSubtreeLengthExtent<T extends { length?: number }>(
 // x. Memoizes onto node.depthToLeaf since the layout walks the tree repeatedly.
 // See https://github.com/emmanuelparadis/ape/blob/master/R/plot.phylo.R
 export function calcDepthToLeaf<T>(node: HierarchyNode<T>): number {
-  const nodes = descendants(node)
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    const n = nodes[i]!
-    if (n.depthToLeaf === undefined) {
-      let maxDepth = 0
-      if (n.children) {
-        for (const child of n.children) {
-          maxDepth = Math.max(maxDepth, 1 + child.depthToLeaf!)
+  // the memo check has to guard the traversal, not just the arithmetic: the tree
+  // renderer asks for the depth of every node on every pass, and re-walking each
+  // subtree makes that quadratic (a 5000-tip caterpillar tree spent >1s per draw
+  // here). Once a node is memoized so are all of its descendants.
+  if (node.depthToLeaf === undefined) {
+    const nodes = descendants(node)
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const n = nodes[i]!
+      if (n.depthToLeaf === undefined) {
+        let maxDepth = 0
+        if (n.children) {
+          for (const child of n.children) {
+            maxDepth = Math.max(maxDepth, 1 + child.depthToLeaf!)
+          }
         }
+        n.depthToLeaf = maxDepth
       }
-      n.depthToLeaf = maxDepth
     }
   }
   return node.depthToLeaf!

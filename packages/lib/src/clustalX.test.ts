@@ -1,13 +1,11 @@
 import { describe, expect, test } from 'vitest'
 
 import { clustalXColumnColors } from './clustalX.ts'
+import { columnCountsFromColumns } from './columnCounts.ts'
 
-function counts(letters: string) {
-  const stats: Record<string, number> = {}
-  for (const c of letters) {
-    stats[c] = (stats[c] ?? 0) + 1
-  }
-  return stats
+// one alignment column, given top-to-bottom
+function column(letters: string) {
+  return clustalXColumnColors(columnCountsFromColumns([letters]), 0)
 }
 
 const BLUE = 'rgb(128,179,230)'
@@ -20,7 +18,7 @@ const CYAN = 'rgb(26, 179, 179)'
 
 describe('clustalXColumnColors', () => {
   test('hydrophobic column (all L) colors the hydrophobic group', () => {
-    expect(clustalXColumnColors(counts('LLLLLLLLLL'), 10)).toEqual({
+    expect(column('LLLLLLLLLL')).toEqual({
       W: BLUE,
       L: BLUE,
       V: BLUE,
@@ -37,13 +35,13 @@ describe('clustalXColumnColors', () => {
   })
 
   test('glycine is always colored when present', () => {
-    expect(clustalXColumnColors(counts('GGGGGGGGGG'), 10)).toEqual({
+    expect(column('GGGGGGGGGG')).toEqual({
       G: ORANGE,
     })
   })
 
   test('proline is always colored, and counts as hydrophobic', () => {
-    expect(clustalXColumnColors(counts('PPPPPPPPPP'), 10)).toEqual({
+    expect(column('PPPPPPPPPP')).toEqual({
       W: BLUE,
       L: BLUE,
       V: BLUE,
@@ -61,7 +59,7 @@ describe('clustalXColumnColors', () => {
   })
 
   test('positively charged column (all K)', () => {
-    expect(clustalXColumnColors(counts('KKKKKKKKKK'), 10)).toEqual({
+    expect(column('KKKKKKKKKK')).toEqual({
       K: RED,
       R: RED,
       E: 'rgb(192, 72, 192)',
@@ -71,6 +69,6 @@ describe('clustalXColumnColors', () => {
   })
 
   test('unconserved column produces no colors', () => {
-    expect(clustalXColumnColors(counts('XXXXXXXXXX'), 10)).toEqual({})
+    expect(column('XXXXXXXXXX')).toEqual({})
   })
 })

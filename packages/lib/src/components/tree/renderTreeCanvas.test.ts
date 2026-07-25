@@ -1,205 +1,115 @@
 import { describe, expect, it } from 'vitest'
 
-function calcDepthToLeaf(node: any): number {
-  if (node.depthToLeaf !== undefined) {
-    return node.depthToLeaf
+import { getNodeX } from './renderTreeCanvas.ts'
+import { calcDepthToLeaf, findMaxBranchLen } from '../../hierarchy.ts'
+
+import type { HierarchyNode } from '../../hierarchy.ts'
+
+function leaf(id: string, len?: number): HierarchyNode {
+  return {
+    data: { id, name: id, children: [] },
+    children: null,
+    parent: null,
+    depth: 0,
+    height: 0,
+    len,
   }
-  if (!node.children || node.children.length === 0) {
-    node.depthToLeaf = 0
-  } else {
-    let maxDepth = 0
-    for (const child of node.children) {
-      maxDepth = Math.max(maxDepth, 1 + calcDepthToLeaf(child))
-    }
-    node.depthToLeaf = maxDepth
-  }
-  return node.depthToLeaf
 }
 
-function findMaxBranchLen(node: any): number {
-  let maxLen = node.len || 0
-  if (node.children) {
-    for (const child of node.children) {
-      maxLen = Math.max(maxLen, findMaxBranchLen(child))
-    }
+function internal(
+  id: string,
+  children: HierarchyNode[],
+  len?: number,
+): HierarchyNode {
+  const node: HierarchyNode = {
+    data: { id, name: id, children: children.map(c => c.data) },
+    children,
+    parent: null,
+    depth: 0,
+    height: 1,
+    len,
   }
-  return maxLen
+  for (const child of children) {
+    child.parent = node
+  }
+  return node
 }
 
-function getNodeX(
-  node: any,
-  showBranchLen: boolean,
-  maxBranchLen: number,
-  maxDepthToLeaf: number,
-): number | undefined {
-  if (showBranchLen) {
-    return node.len
-  }
-  const depthToLeaf = calcDepthToLeaf(node)
-  return ((maxDepthToLeaf - depthToLeaf) / maxDepthToLeaf) * maxBranchLen
-}
-
-describe('Tree rendering positioning', () => {
-  describe('calcDepthToLeaf', () => {
-    it('should return 0 for leaf nodes', () => {
-      const leaf: any = { id: 'leaf', data: { id: 'leaf' }, children: null }
-      expect(calcDepthToLeaf(leaf)).toBe(0)
-    })
-
-    it('should return 1 for nodes with only leaf children', () => {
-      const leaf1: any = { id: 'leaf1', data: { id: 'leaf1' }, children: null }
-      const leaf2: any = { id: 'leaf2', data: { id: 'leaf2' }, children: null }
-      const parent: any = {
-        id: 'parent',
-        data: { id: 'parent' },
-        children: [leaf1, leaf2],
-      }
-      expect(calcDepthToLeaf(parent)).toBe(1)
-    })
-
-    it('should return correct depth for nested tree', () => {
-      const leaf1: any = { id: 'leaf1', data: { id: 'leaf1' }, children: null }
-      const leaf2: any = { id: 'leaf2', data: { id: 'leaf2' }, children: null }
-      const intermediate: any = {
-        id: 'int',
-        data: { id: 'int' },
-        children: [leaf1, leaf2],
-      }
-      const root: any = {
-        id: 'root',
-        data: { id: 'root' },
-        children: [intermediate],
-      }
-
-      expect(calcDepthToLeaf(leaf1)).toBe(0)
-      expect(calcDepthToLeaf(intermediate)).toBe(1)
-      expect(calcDepthToLeaf(root)).toBe(2)
-    })
-
-    it('should cache result', () => {
-      const leaf: any = { id: 'leaf', data: { id: 'leaf' }, children: null }
-      const depth1 = calcDepthToLeaf(leaf)
-      const depth2 = calcDepthToLeaf(leaf)
-      expect(depth1).toBe(depth2)
-      expect(leaf.depthToLeaf).toBeDefined()
-    })
+describe('calcDepthToLeaf', () => {
+  it('is 0 for a leaf', () => {
+    expect(calcDepthToLeaf(leaf('a'))).toBe(0)
   })
 
-  describe('findMaxBranchLen', () => {
-    it('should return node len for leaf', () => {
-      const leaf: any = {
-        id: 'leaf',
-        data: { id: 'leaf' },
-        len: 1.5,
-        children: null,
-      }
-      expect(findMaxBranchLen(leaf)).toBe(1.5)
-    })
+  it('counts steps to the deepest tip', () => {
+    const tips = [leaf('a'), leaf('b')]
+    const intermediate = internal('int', tips)
+    const root = internal('root', [intermediate])
 
-    it('should return max len from descendants', () => {
-      const leaf1: any = {
-        id: 'leaf1',
-        data: { id: 'leaf1' },
-        len: 0.5,
-        children: null,
-      }
-      const leaf2: any = {
-        id: 'leaf2',
-        data: { id: 'leaf2' },
-        len: 1.5,
-        children: null,
-      }
-      const parent: any = {
-        id: 'parent',
-        data: { id: 'parent' },
-        len: 0.3,
-        children: [leaf1, leaf2],
-      }
-      expect(findMaxBranchLen(parent)).toBe(1.5)
-    })
-
-    it('should handle undefined len', () => {
-      const leaf: any = { id: 'leaf', data: { id: 'leaf' }, children: null }
-      expect(findMaxBranchLen(leaf)).toBe(0)
-    })
+    expect(calcDepthToLeaf(tips[0]!)).toBe(0)
+    expect(calcDepthToLeaf(intermediate)).toBe(1)
+    expect(calcDepthToLeaf(root)).toBe(2)
   })
 
-  describe('getNodeX cladogram positioning', () => {
-    it('should position all leaves at rightmost for cladogram', () => {
-      const leaf1: any = { id: 'leaf1', data: { id: 'leaf1' }, children: null }
-      const leaf2: any = { id: 'leaf2', data: { id: 'leaf2' }, children: null }
-      const root: any = {
-        id: 'root',
-        data: { id: 'root' },
-        children: [leaf1, leaf2],
-      }
+  it('memoizes without re-walking the subtree', () => {
+    // the renderer asks for every node's depth on every pass, so the memo has to
+    // short-circuit the traversal itself, not just the arithmetic. A sentinel
+    // planted on an already-computed child must survive a second root call.
+    const child = leaf('a')
+    const root = internal('root', [child])
+    expect(calcDepthToLeaf(root)).toBe(1)
 
-      calcDepthToLeaf(root)
-      const maxBranchLen = 100
-      const maxDepthToLeaf = 1
+    child.depthToLeaf = 99
+    expect(calcDepthToLeaf(root)).toBe(1)
+    expect(child.depthToLeaf).toBe(99)
+  })
+})
 
-      const x1 = getNodeX(leaf1, false, maxBranchLen, maxDepthToLeaf)
-      const x2 = getNodeX(leaf2, false, maxBranchLen, maxDepthToLeaf)
+describe('findMaxBranchLen', () => {
+  it('uses the node itself when it is a leaf', () => {
+    expect(findMaxBranchLen(leaf('a', 1.5))).toBe(1.5)
+  })
 
-      expect(x1).toBe(maxBranchLen)
-      expect(x2).toBe(maxBranchLen)
-      expect(x1).toBe(x2)
-    })
+  it('takes the max across descendants', () => {
+    expect(
+      findMaxBranchLen(internal('p', [leaf('a', 0.5), leaf('b', 1.5)], 0.3)),
+    ).toBe(1.5)
+  })
 
-    it('should position root at leftmost for cladogram', () => {
-      const leaf1: any = { id: 'leaf1', data: { id: 'leaf1' }, children: null }
-      const leaf2: any = { id: 'leaf2', data: { id: 'leaf2' }, children: null }
-      const root: any = {
-        id: 'root',
-        data: { id: 'root' },
-        children: [leaf1, leaf2],
-      }
+  it('treats a missing len as 0', () => {
+    expect(findMaxBranchLen(leaf('a'))).toBe(0)
+  })
+})
 
-      calcDepthToLeaf(root)
-      const maxBranchLen = 100
-      const maxDepthToLeaf = 1
+describe('getNodeX cladogram positioning', () => {
+  it('aligns every tip at the rightmost x', () => {
+    const tips = [leaf('a'), leaf('b')]
+    calcDepthToLeaf(internal('root', tips))
 
-      const xRoot = getNodeX(root, false, maxBranchLen, maxDepthToLeaf)
-      expect(xRoot).toBe(0)
-    })
+    const xs = tips.map(tip => getNodeX(tip, false, 100, 1))
+    expect(xs).toEqual([100, 100])
+  })
 
-    it('should position internal nodes between root and leaves', () => {
-      const leaf1: any = { id: 'leaf1', data: { id: 'leaf1' }, children: null }
-      const leaf2: any = { id: 'leaf2', data: { id: 'leaf2' }, children: null }
-      const intermediate: any = {
-        id: 'int',
-        data: { id: 'int' },
-        children: [leaf1, leaf2],
-      }
-      const root: any = {
-        id: 'root',
-        data: { id: 'root' },
-        children: [intermediate],
-      }
+  it('puts the root at the leftmost x and internal nodes in between', () => {
+    const tips = [leaf('a'), leaf('b')]
+    const intermediate = internal('int', tips)
+    const root = internal('root', [intermediate])
+    calcDepthToLeaf(root)
 
-      calcDepthToLeaf(root)
-      const maxBranchLen = 100
-      const maxDepthToLeaf = 2
+    const xRoot = getNodeX(root, false, 100, 2)!
+    const xInt = getNodeX(intermediate, false, 100, 2)!
+    const xTip = getNodeX(tips[0]!, false, 100, 2)!
 
-      const xRoot = getNodeX(root, false, maxBranchLen, maxDepthToLeaf)!
-      const xInt = getNodeX(intermediate, false, maxBranchLen, maxDepthToLeaf)!
-      const xLeaf = getNodeX(leaf1, false, maxBranchLen, maxDepthToLeaf)!
+    expect(xRoot).toBe(0)
+    expect(xInt).toBeGreaterThan(xRoot)
+    expect(xTip).toBeGreaterThan(xInt)
+    expect(xTip).toBe(100)
+  })
 
-      expect(xRoot).toBe(0)
-      expect(xInt).toBeGreaterThan(xRoot)
-      expect(xLeaf).toBeGreaterThan(xInt)
-      expect(xLeaf).toBe(maxBranchLen)
-    })
+  it('collapses to the root x when there is no topological depth', () => {
+    expect(getNodeX(leaf('a'), false, 100, 0)).toBe(0)
+  })
 
-    it('should use branch length when showBranchLen is true', () => {
-      const leaf: any = {
-        id: 'leaf',
-        data: { id: 'leaf' },
-        len: 2.5,
-        children: null,
-      }
-      const x = getNodeX(leaf, true, 100, 1)
-      expect(x).toBe(2.5)
-    })
+  it('uses branch length in phylogram mode', () => {
+    expect(getNodeX(leaf('a', 2.5), true, 100, 1)).toBe(2.5)
   })
 })

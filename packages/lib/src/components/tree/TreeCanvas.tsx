@@ -26,45 +26,38 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
     ctx => {
       if (isAlive(model)) {
         const {
-          relativeTo,
-          leaves,
           rowHeight,
-          hoveredTreeNode,
           treeAreaWidth: w,
           height: h,
           scrollY: sy,
-          mouseOverRowName,
+          mouseRow,
+          referenceRowIndex,
+          hoveredRowIndices,
         } = model
         ctx.resetTransform()
         ctx.clearRect(0, 0, w, h)
 
-        const leafByName = new Map(leaves.map(leaf => [leaf.data.name, leaf]))
-        const fillRow = (name: string) => {
-          const leaf = leafByName.get(name)
-          if (leaf) {
-            ctx.fillRect(0, leaf.x! + sy - rowHeight / 2, w, rowHeight)
-          }
+        // rows are laid out at a fixed pitch, so a row index is all that is
+        // needed to place its band (leaf.x is rowHeight*(index+0.5))
+        const fillRow = (index: number) => {
+          ctx.fillRect(0, index * rowHeight + sy, w, rowHeight)
         }
 
-        if (relativeTo) {
+        if (referenceRowIndex !== undefined) {
           ctx.fillStyle = referenceColor
-          fillRow(relativeTo)
+          fillRow(referenceRowIndex)
         }
 
-        if (hoveredTreeNode) {
-          ctx.fillStyle = treeHoverColor
-          for (const descendantName of hoveredTreeNode.descendantNames) {
-            fillRow(descendantName)
-          }
+        ctx.fillStyle = treeHoverColor
+        for (const index of hoveredRowIndices) {
+          fillRow(index)
         }
-
         if (
-          mouseOverRowName &&
-          mouseOverRowName !== relativeTo &&
-          !hoveredTreeNode?.descendantNames.includes(mouseOverRowName)
+          mouseRow !== undefined &&
+          mouseRow !== referenceRowIndex &&
+          !hoveredRowIndices.includes(mouseRow)
         ) {
-          ctx.fillStyle = treeHoverColor
-          fillRow(mouseOverRowName)
+          fillRow(mouseRow)
         }
       }
     },

@@ -1,7 +1,7 @@
-import { getVisibleLeaves } from './getVisibleLeaves.ts'
 import { visibleColRange } from './visibleColRange.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { adjustColorForContrast } from '../../util.ts'
+import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -60,27 +60,19 @@ export function renderMSABlock({
     ? columns.get(relativeTo)?.slice(xStart, xEnd)
     : null
 
-  if (!actuallyShowDomains) {
-    drawTilesAndText({
-      model,
-      ctx,
-      theme,
-      contrastScheme,
-      xStart,
-      xEnd,
-      visibleLeaves,
-      referenceSeq,
-    })
-  } else {
-    drawText({
-      model,
-      ctx,
-      xStart,
-      xEnd,
-      visibleLeaves,
-      referenceSeq,
-    })
-  }
+  drawTilesAndText({
+    model,
+    ctx,
+    theme,
+    contrastScheme,
+    xStart,
+    xEnd,
+    visibleLeaves,
+    referenceSeq,
+    // when domains are shown the background tiles come from
+    // renderBoxFeatureCanvasBlock, so only the letters are drawn here
+    drawTiles: !actuallyShowDomains,
+  })
   drawInsertionIndicators({
     model,
     ctx,
@@ -89,6 +81,35 @@ export function renderMSABlock({
     visibleLeaves,
   })
   ctx.resetTransform()
+}
+
+// Per-cell tile color for the active scheme. The scheme is fixed for the whole
+// block, so resolve which rule applies once rather than re-testing the scheme
+// name inside the innermost loop.
+function tileColorFn(model: MsaViewModel) {
+  const { colorSchemeName, colorScheme, colClustalX, colConsensus } = model
+  if (colorSchemeName === 'clustalx_protein_dynamic') {
+    return (col: number, letter: string) => colClustalX[col]![letter]
+  }
+  if (colorSchemeName === 'percent_identity_dynamic') {
+    return (col: number, letter: string) => {
+      const consensus = colConsensus[col]!
+      return letter === consensus.letter ? consensus.color : undefined
+    }
+  }
+  return (_col: number, letter: string) => colorScheme[letter]
+}
+
+// Letter color to use over a domain box, keyed by accession. Domain fills come
+// from a categorical palette that has no fixed lightness, so ask the theme for a
+// readable text color per fill instead of assuming dark-on-light.
+function domainLetterColors(model: MsaViewModel, theme: Theme) {
+  return new Map(
+    Object.entries(model.fillPalette).map(([accession, fill]) => [
+      accession,
+      theme.palette.getContrastText(fill),
+    ]),
+  )
 }
 
 function drawTilesAndText({
@@ -100,6 +121,7 @@ function drawTilesAndText({
   xStart,
   xEnd,
   referenceSeq,
+  drawTiles,
 }: {
   model: MsaViewModel
   theme: Theme
@@ -109,124 +131,90 @@ function drawTilesAndText({
   xStart: number
   xEnd: number
   referenceSeq: string | null | undefined
+  drawTiles: boolean
 }) {
   const {
     bgColor,
-    colorSchemeName,
-    colorScheme,
     columns,
     colWidth,
     rowHeight,
     relativeTo,
     showMsaLetters,
-    colClustalX,
-    colConsensus,
+    subFeatureRows,
+    domainBandsByStart,
   } = model
 
-  const isClustalX = colorSchemeName === 'clustalx_protein_dynamic'
-  const isPercentIdentity = colorSchemeName === 'percent_identity_dynamic'
-  if (!bgColor && !showMsaLetters) {
-    return
-  }
-  const offsetXAligned = xStart * colWidth
-  const halfColWidth = colWidth / 2
-  const quarterRowHeight = rowHeight / 4
+  const tiles = drawTiles && bgColor
+  if (tiles || showMsaLetters) {
+    const tileColor = tileColorFn(model)
+    const offsetXAligned = xStart * colWidth
+    const halfColWidth = colWidth / 2
+    // note: -rowHeight/4 matches +rowHeight/4 in tree
+    const quarterRowHeight = rowHeight / 4
+    // with the tiles coming from the domain overlay instead, letters sit either
+    // on a domain box or on the plain background; sub-row layout stacks the boxes
+    // above the letters, so those rows are all plain background
+    const overDomains = !drawTiles && !subFeatureRows
+    const domainColors = overDomains
+      ? domainLetterColors(model, theme)
+      : undefined
 
-  for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
-    const node = visibleLeaves[i]!
-    const { name } = node.data
-    const y = node.x!
-    const str = columns.get(name)?.slice(xStart, xEnd)
-    if (!str) {
-      continue
-    }
-    const tileY = y - rowHeight
-    const textY = y - quarterRowHeight
+    for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
+      const node = visibleLeaves[i]!
+      const { name } = node.data
+      const y = node.x!
+      const str = columns.get(name)?.slice(xStart, xEnd)
+      if (str) {
+        const tileY = y - rowHeight
+        const textY = y - quarterRowHeight
+        const bands = overDomains ? domainBandsByStart.get(name) : undefined
+        let band = 0
 
-    for (let j = 0, l2 = str.length; j < l2; j++) {
-      const letter = str[j]!
-      const x = j * colWidth + offsetXAligned
-      const isMatchingReference =
-        referenceSeq && name !== relativeTo && letter === referenceSeq[j]
+        for (let j = 0, l2 = str.length; j < l2; j++) {
+          const col = xStart + j
+          const letter = str[j]!
+          const x = j * colWidth + offsetXAligned
+          const isMatchingReference =
+            referenceSeq && name !== relativeTo && letter === referenceSeq[j]
+          const color = tileColor(col, letter)
 
-      let color: string | undefined
-      if (isClustalX) {
-        color = colClustalX[xStart + j]![letter]
-      } else if (isPercentIdentity) {
-        const consensus = colConsensus[xStart + j]!
-        color = letter === consensus.letter ? consensus.color : undefined
-      } else {
-        color = colorScheme[letter]
+          if (tiles) {
+            ctx.fillStyle = isMatchingReference
+              ? theme.palette.action.hover
+              : color || theme.palette.background.default
+            ctx.fillRect(x, tileY, colWidth, rowHeight)
+          }
+
+          if (showMsaLetters) {
+            // bands are sorted by start column and the sweep is left to right,
+            // so one forward-only cursor finds the band covering each column
+            while (bands && band < bands.length && bands[band]!.endCol <= col) {
+              band++
+            }
+            const covering = bands?.[band]
+            ctx.fillStyle =
+              covering && covering.startCol <= col
+                ? // on top of a domain box: contrast against the box fill
+                  domainColors!.get(covering.annotation.accession)!
+                : tiles
+                  ? // on top of a colored tile
+                    (contrastScheme[letter] ?? 'black')
+                  : !drawTiles || !color
+                    ? // plain background, uncolored letters
+                      theme.palette.text.primary
+                    : // letter-color mode: darken/lighten to stay readable
+                      adjustColorForContrast(
+                        color,
+                        theme.palette.background.default,
+                      )
+            ctx.fillText(
+              isMatchingReference ? '.' : letter,
+              x + halfColWidth,
+              textY,
+            )
+          }
+        }
       }
-
-      if (bgColor) {
-        ctx.fillStyle = isMatchingReference
-          ? theme.palette.action.hover
-          : color || theme.palette.background.default
-        ctx.fillRect(x, tileY, colWidth, rowHeight)
-      }
-
-      if (showMsaLetters) {
-        ctx.fillStyle = bgColor
-          ? (contrastScheme[letter] ?? 'black')
-          : color
-            ? adjustColorForContrast(color, theme.palette.background.default)
-            : theme.palette.text.primary
-        ctx.fillText(
-          isMatchingReference ? '.' : letter,
-          x + halfColWidth,
-          textY,
-        )
-      }
-    }
-  }
-}
-
-// When domains are shown the background tiles come from renderBoxFeatureCanvasBlock,
-// so we only need to draw text here.
-function drawText({
-  model,
-  ctx,
-  visibleLeaves,
-  xStart,
-  xEnd,
-  referenceSeq,
-}: {
-  model: MsaViewModel
-  ctx: RenderCtx
-  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
-  xStart: number
-  xEnd: number
-  referenceSeq: string | null | undefined
-}) {
-  const { showMsaLetters, columns, colWidth, rowHeight, relativeTo } = model
-
-  if (!showMsaLetters) {
-    return
-  }
-  const offsetXAligned = xStart * colWidth
-  const halfColWidth = colWidth / 2
-  const quarterRowHeight = rowHeight / 4
-  // note: -rowHeight/4 matches +rowHeight/4 in tree
-  ctx.fillStyle = 'black'
-
-  for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
-    const node = visibleLeaves[i]!
-    const { name } = node.data
-    const y = node.x! - quarterRowHeight
-    const str = columns.get(name)?.slice(xStart, xEnd)
-    if (!str) {
-      continue
-    }
-    for (let j = 0, l2 = str.length; j < l2; j++) {
-      const letter = str[j]!
-      const isMatchingReference =
-        referenceSeq && name !== relativeTo && letter === referenceSeq[j]
-      ctx.fillText(
-        isMatchingReference ? '.' : letter,
-        j * colWidth + offsetXAligned + halfColWidth,
-        y,
-      )
     }
   }
 }

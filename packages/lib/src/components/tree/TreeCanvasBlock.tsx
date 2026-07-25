@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 
 import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { useTheme } from '@mui/material'
@@ -6,11 +6,10 @@ import { observer } from 'mobx-react'
 
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'
-import { ClickMapIndex } from './clickMap.ts'
 import { padding, renderTreeCanvas } from './renderTreeCanvas.ts'
+import { useTreeHover } from './useTreeHover.ts'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 
-import type { ClickEntry } from './clickMap.ts'
 import type { MsaViewModel } from '../../model.ts'
 
 const useStyles = makeStyles()(theme => ({
@@ -28,9 +27,15 @@ const useStyles = makeStyles()(theme => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  hover: {
+    position: 'absolute',
+    pointerEvents: 'none',
+    zIndex: 100,
+    background: 'rgba(0,0,0,0.1)',
+  },
 }))
 
-interface TooltipData {
+interface MenuData {
   name: string
   id: string
   x: number
@@ -46,88 +51,35 @@ const TreeCanvasBlock = observer(function ({
 }) {
   const { classes } = useStyles()
   const theme = useTheme()
-  const clickMap = useRef(new ClickMapIndex())
-  const mouseoverRef = useRef<HTMLCanvasElement>(null)
-  const [branchMenu, setBranchMenu] = useState<TooltipData>()
-  const [toggleNodeMenu, setToggleNodeMenu] = useState<TooltipData>()
-  const [hoverElt, setHoverElt] = useState<ClickEntry>()
-  const [tooltipInfo, setTooltipInfo] = useState<{
-    name: string
-    x: number
-    y: number
-  }>()
+  const [branchMenu, setBranchMenu] = useState<MenuData>()
+  const [nodeMenu, setNodeMenu] = useState<MenuData>()
+  const { clickMap, hovered, hitTest, onMouseMove, onMouseLeave } =
+    useTreeHover({ model, offsetY })
 
   const { scrollY, treeAreaWidth, blockSize, highResScaleFactor } = model
-
   const width = treeAreaWidth + padding
   const height = blockSize
-  const w2 = width * highResScaleFactor
-  const h2 = height * highResScaleFactor
 
   const ref = useCanvasAutorun(
     ctx => {
       ctx.resetTransform()
-      ctx.clearRect(0, 0, w2, h2)
+      ctx.clearRect(
+        0,
+        0,
+        width * highResScaleFactor,
+        height * highResScaleFactor,
+      )
       renderTreeCanvas({
         ctx,
         model,
         offsetY,
-        clickMap: clickMap.current,
+        clickMap,
         theme,
       })
     },
-    [model, blockSize, highResScaleFactor, treeAreaWidth, offsetY, theme],
+    [model, clickMap, offsetY, theme],
   )
 
-  useEffect(() => {
-    const ctx = mouseoverRef.current?.getContext('2d')
-    if (!ctx) {
-      return
-    }
-
-    ctx.resetTransform()
-    ctx.clearRect(0, 0, treeAreaWidth + padding, blockSize)
-    ctx.translate(0, -offsetY)
-
-    // Highlight tree element being directly hovered
-    if (hoverElt) {
-      const { minX, maxX, minY, maxY } = hoverElt
-
-      ctx.fillStyle = 'rgba(0,0,0,0.1)'
-      ctx.fillRect(minX, minY, maxX - minX, maxY - minY)
-    }
-  }, [hoverElt, offsetY, blockSize, treeAreaWidth])
-
-  function hoverBranchClickMap(event: React.MouseEvent) {
-    const x = event.nativeEvent.offsetX
-    const y = event.nativeEvent.offsetY
-
-    const [entry] = clickMap.current.search({
-      minX: x,
-      maxX: x + 1,
-      minY: y + offsetY,
-      maxY: y + 1 + offsetY,
-    })
-
-    return entry?.branch
-      ? { ...entry, x: event.clientX, y: event.clientY }
-      : undefined
-  }
-
-  function hoverNameClickMap(event: React.MouseEvent) {
-    const x = event.nativeEvent.offsetX
-    const y = event.nativeEvent.offsetY
-    const [entry] = clickMap.current.search({
-      minX: x,
-      maxX: x + 1,
-      minY: y + offsetY,
-      maxY: y + 1 + offsetY,
-    })
-
-    return entry && !entry.branch
-      ? { ...entry, x: event.clientX, y: event.clientY }
-      : undefined
-  }
   const style = {
     width,
     height,
@@ -135,9 +87,10 @@ const TreeCanvasBlock = observer(function ({
     left: 0,
     position: 'absolute',
   } as const
+
   return (
     <>
-      {branchMenu?.id ? (
+      {branchMenu ? (
         <TreeBranchMenu
           node={branchMenu}
           model={model}
@@ -147,98 +100,64 @@ const TreeCanvasBlock = observer(function ({
         />
       ) : null}
 
-      {toggleNodeMenu?.id ? (
+      {nodeMenu ? (
         <TreeNodeMenu
-          node={toggleNodeMenu}
+          node={nodeMenu}
           model={model}
           onClose={() => {
-            setToggleNodeMenu(undefined)
+            setNodeMenu(undefined)
           }}
         />
       ) : null}
 
       <canvas
-        width={w2}
-        height={h2}
-        style={style}
+        ref={ref}
+        width={width * highResScaleFactor}
+        height={height * highResScaleFactor}
+        style={{ ...style, cursor: hovered ? 'pointer' : 'default' }}
         onMouseMove={event => {
-          if (!ref.current) {
-            return
-          }
-
-          const hoveredLeaf = hoverNameClickMap(event)
-          const hoveredBranch = hoverBranchClickMap(event)
-          const hoveredAny = hoveredLeaf || hoveredBranch
-
-          ref.current.style.cursor = hoveredAny ? 'pointer' : 'default'
-          setHoverElt(hoveredLeaf) // Only show direct hover highlight for leaf nodes
-
-          // Set tooltip info
-          if (hoveredAny) {
-            setTooltipInfo({
-              name: hoveredAny.name,
-              x: event.clientX,
-              y: event.clientY,
-            })
-          } else {
-            setTooltipInfo(undefined)
-          }
-
-          // Handle tree node hover for multi-row highlighting
-          if (hoveredAny) {
-            model.setHoveredTreeNode(hoveredAny.id)
-
-            // For leaf nodes, also set single row highlight for backward compatibility
-            if (hoveredLeaf?.name) {
-              const rowIndex = model.rowNamesSet.get(hoveredLeaf.name)
-              if (rowIndex !== undefined) {
-                model.setMousePos(undefined, rowIndex)
-              }
-            }
-          } else {
-            // Clear all highlighting when not hovering over any tree node
-            model.setHoveredTreeNode(undefined)
-            model.setMousePos(undefined, undefined)
-          }
-        }}
-        onClick={event => {
-          const { clientX: x, clientY: y } = event
-
-          const data = hoverBranchClickMap(event)
-          if (data?.id) {
-            setBranchMenu({ x, y, id: data.id, name: data.name })
-          }
-
-          const data2 = hoverNameClickMap(event)
-          if (data2?.id) {
-            setToggleNodeMenu({ ...data2, x, y })
-          }
+          onMouseMove(event)
         }}
         onMouseLeave={() => {
-          setHoverElt(undefined)
-          setTooltipInfo(undefined)
-          // Clear all highlighting when leaving tree area
-          model.setHoveredTreeNode(undefined)
-          model.setMousePos(undefined, undefined)
+          onMouseLeave()
         }}
-        ref={ref}
-      />
-      <canvas
-        style={{
-          ...style,
-          pointerEvents: 'none',
-          zIndex: 100,
+        onClick={event => {
+          const entry = hitTest(event)
+          if (entry) {
+            const menu = {
+              x: event.clientX,
+              y: event.clientY,
+              id: entry.id,
+              name: entry.name,
+            }
+            if (entry.branch) {
+              setBranchMenu(menu)
+            } else {
+              setNodeMenu(menu)
+            }
+          }
         }}
-        width={width}
-        height={height}
-        ref={mouseoverRef}
       />
-      {tooltipInfo ? (
+
+      {/* direct-hover highlight, drawn only for leaf labels */}
+      {hovered && !hovered.branch ? (
+        <div
+          className={classes.hover}
+          style={{
+            left: hovered.minX,
+            top: hovered.minY + scrollY,
+            width: hovered.maxX - hovered.minX,
+            height: hovered.maxY - hovered.minY,
+          }}
+        />
+      ) : null}
+
+      {hovered ? (
         <div
           className={classes.tooltip}
-          style={{ left: tooltipInfo.x + 12, top: tooltipInfo.y + 12 }}
+          style={{ left: hovered.clientX + 12, top: hovered.clientY + 12 }}
         >
-          {tooltipInfo.name}
+          {hovered.name}
         </div>
       ) : null}
     </>

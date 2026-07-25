@@ -10,23 +10,6 @@ const highlightColor = 'rgba(128,128,0,0.2)'
 const highlightColumnsFill = 'rgba(255,140,0,0.28)'
 const highlightColumnsBorder = 'rgba(210,90,0,0.95)'
 
-// Collapse sorted column indices into contiguous [start,end] runs so a run of
-// highlighted columns draws as one bordered band rather than per-column slices
-// (which would draw internal borders).
-function contiguousRuns(columns: number[]) {
-  const sorted = [...columns].sort((a, b) => a - b)
-  const runs: { start: number; end: number }[] = []
-  for (const col of sorted) {
-    const last = runs.at(-1)
-    if (last && col === last.end + 1) {
-      last.end = col
-    } else {
-      runs.push({ start: col, end: col })
-    }
-  }
-  return runs
-}
-
 export function renderMouseover({
   ctx,
   model,
@@ -46,10 +29,10 @@ export function renderMouseover({
     mouseRow,
     mouseClickRow,
     mouseClickCol,
-    relativeTo,
-    hoveredTreeNode,
-    highlightedColumns,
     highResScaleFactor,
+    referenceRowIndex,
+    hoveredRowIndices,
+    highlightedColumnRuns,
   } = model
   const width = msaAreaWidth - verticalScrollbarWidth
   ctx.resetTransform()
@@ -57,30 +40,24 @@ export function renderMouseover({
   ctx.scale(highResScaleFactor, highResScaleFactor)
 
   // Highlight reference row (relativeTo) persistently
-  if (relativeTo) {
-    const referenceRowIndex = model.rowNamesSet.get(relativeTo)
-    if (referenceRowIndex !== undefined) {
-      ctx.fillStyle = referenceColor
-      ctx.fillRect(0, referenceRowIndex * rowHeight + scrollY, width, rowHeight)
-    }
+  if (referenceRowIndex !== undefined) {
+    ctx.fillStyle = referenceColor
+    ctx.fillRect(0, referenceRowIndex * rowHeight + scrollY, width, rowHeight)
   }
 
   // Highlight multiple rows when hovering over tree nodes with children
-  if (hoveredTreeNode) {
+  if (hoveredRowIndices.length > 0) {
     ctx.fillStyle = multiRowHoverColor
-    for (const descendantName of hoveredTreeNode.descendantNames) {
-      const rowIndex = model.rowNamesSet.get(descendantName)
-      if (rowIndex !== undefined) {
-        ctx.fillRect(0, rowIndex * rowHeight + scrollY, width, rowHeight)
-      }
+    for (const rowIndex of hoveredRowIndices) {
+      ctx.fillRect(0, rowIndex * rowHeight + scrollY, width, rowHeight)
     }
   }
 
   // Highlight multiple columns — draw each contiguous run as a filled, bordered
   // band so a domain/motif highlight is clearly visible over the alignment
-  if (highlightedColumns?.length) {
+  if (highlightedColumnRuns.length > 0) {
     ctx.lineWidth = 2
-    for (const { start, end } of contiguousRuns(highlightedColumns)) {
+    for (const { start, end } of highlightedColumnRuns) {
       const x = start * colWidth + scrollX
       const w = (end - start + 1) * colWidth
       ctx.fillStyle = highlightColumnsFill
