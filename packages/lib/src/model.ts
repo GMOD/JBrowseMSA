@@ -13,6 +13,7 @@ import {
   parseNewick,
 } from 'msa-parsers'
 
+
 import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
@@ -72,6 +73,7 @@ import {
   visibleColToSeqPosForRow,
 } from './rowCoordinateCalculations.ts'
 import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
+import { stripDefault } from './stripDefault.ts'
 import { computeRowInsertions, len, skipBlanks, transform } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
@@ -130,25 +132,19 @@ function stateModelFactory() {
         /**
          * #property
          */
-        showDomains: types.stripDefault(types.boolean, defaultShowDomains),
+        showDomains: stripDefault(types.boolean, defaultShowDomains),
         /**
          * #property
          */
-        hideGaps: types.stripDefault(types.boolean, defaultHideGaps),
+        hideGaps: stripDefault(types.boolean, defaultHideGaps),
         /**
          * #property
          */
-        allowedGappyness: types.stripDefault(
-          types.number,
-          defaultAllowedGappyness,
-        ),
+        allowedGappyness: stripDefault(types.number, defaultAllowedGappyness),
         /**
          * #property
          */
-        subFeatureRows: types.stripDefault(
-          types.boolean,
-          defaultSubFeatureRows,
-        ),
+        subFeatureRows: stripDefault(types.boolean, defaultSubFeatureRows),
 
         /**
          * #property
@@ -159,46 +155,43 @@ function stateModelFactory() {
         /**
          * #property
          */
-        drawMsaLetters: types.stripDefault(
-          types.boolean,
-          defaultDrawMsaLetters,
-        ),
+        drawMsaLetters: stripDefault(types.boolean, defaultDrawMsaLetters),
 
         /**
          * #property
          * zoom in/out on plain mouse-wheel without holding ctrl
          */
-        scrollZoom: types.stripDefault(types.boolean, defaultScrollZoom),
+        scrollZoom: stripDefault(types.boolean, defaultScrollZoom),
 
         /**
          * #property
          * height of the div containing the view, px
          */
-        height: types.stripDefault(types.number, defaultHeight),
+        height: stripDefault(types.number, defaultHeight),
 
         /**
          * #property
          * height of each row, px
          */
-        rowHeight: types.stripDefault(types.number, defaultRowHeight),
+        rowHeight: stripDefault(types.number, defaultRowHeight),
 
         /**
          * #property
          * scroll position, Y-offset, px
          */
-        scrollY: types.stripDefault(types.number, defaultScrollY),
+        scrollY: stripDefault(types.number, defaultScrollY),
 
         /**
          * #property
          * scroll position, X-offset, px
          */
-        scrollX: types.stripDefault(types.number, defaultScrollX),
+        scrollX: stripDefault(types.number, defaultScrollX),
 
         /**
          * #property
          * width of columns, px
          */
-        colWidth: types.stripDefault(types.number, defaultColWidth),
+        colWidth: stripDefault(types.number, defaultColWidth),
 
         /**
          * #property
@@ -228,17 +221,14 @@ function stateModelFactory() {
         /**
          * #property
          */
-        currentAlignment: types.stripDefault(
-          types.number,
-          defaultCurrentAlignment,
-        ),
+        currentAlignment: stripDefault(types.number, defaultCurrentAlignment),
 
         /**
          * #property
          * array of tree parent nodes that are 'collapsed' (all children are
          * hidden)
          */
-        collapsed: types.stripDefault(types.array(types.string), []),
+        collapsed: stripDefault(types.array(types.string), []),
 
         /**
          * #property
@@ -249,7 +239,7 @@ function stateModelFactory() {
          * #property
          * turned off tracks
          */
-        turnedOffTracks: types.stripDefault(types.map(types.boolean), {}),
+        turnedOffTracks: stripDefault(types.map(types.boolean), {}),
 
         /**
          * #property
@@ -265,7 +255,7 @@ function stateModelFactory() {
         /**
          * #property
          */
-        featureFilters: types.stripDefault(types.map(types.boolean), {}),
+        featureFilters: stripDefault(types.map(types.boolean), {}),
         /**
          * #property
          */
@@ -2279,7 +2269,7 @@ function stateModelFactory() {
       },
     }))
     .postProcessSnapshot(({ data, ...rest }) => ({
-      // per-property defaults are stripped by types.stripDefault; the only thing
+      // per-property defaults are stripped by the stripDefault helper; the only thing
       // it can't express is this cross-field rule: drop inline tree/msa/metadata
       // when a sibling filehandle can refetch them, keeping sessions/URLs small
       ...rest,

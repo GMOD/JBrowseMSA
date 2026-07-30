@@ -9,6 +9,7 @@ import {
   defaultTreeAreaWidth,
   defaultTreeWidth,
 } from '../constants.ts'
+import { stripDefault } from '../stripDefault.ts'
 
 /**
  * #stateModel Tree
@@ -19,28 +20,25 @@ export function TreeModelF() {
       /**
        * #property
        */
-      drawLabels: types.stripDefault(types.boolean, defaultDrawLabels),
+      drawLabels: stripDefault(types.boolean, defaultDrawLabels),
       /**
        * #property
        * right-align the labels
        */
-      labelsAlignRight: types.stripDefault(
-        types.boolean,
-        defaultLabelsAlignRight,
-      ),
+      labelsAlignRight: stripDefault(types.boolean, defaultLabelsAlignRight),
 
       /**
        * #property
        * width of the area the tree is drawn in, px
        */
-      treeAreaWidth: types.stripDefault(types.number, defaultTreeAreaWidth),
+      treeAreaWidth: stripDefault(types.number, defaultTreeAreaWidth),
 
       /**
        * #property
        * width of the tree within the treeArea, px. automatically synced to
        * fit within treeAreaWidth
        */
-      treeWidth: types.stripDefault(types.number, defaultTreeWidth),
+      treeWidth: stripDefault(types.number, defaultTreeWidth),
 
       /**
        * #property
@@ -48,22 +46,19 @@ export function TreeModelF() {
        * lengths. if false, the layout is a "cladogram" that does not take into
        * account evolutionary distances
        */
-      showBranchLen: types.stripDefault(types.boolean, defaultShowBranchLen),
+      showBranchLen: stripDefault(types.boolean, defaultShowBranchLen),
 
       /**
        * #property
        * draw tree, boolean
        */
-      drawTree: types.stripDefault(types.boolean, defaultDrawTree),
+      drawTree: stripDefault(types.boolean, defaultDrawTree),
 
       /**
        * #property
        * draw clickable node bubbles on the tree
        */
-      drawNodeBubbles: types.stripDefault(
-        types.boolean,
-        defaultDrawNodeBubbles,
-      ),
+      drawNodeBubbles: stripDefault(types.boolean, defaultDrawNodeBubbles),
 
       /**
        * #property
@@ -71,7 +66,7 @@ export function TreeModelF() {
        * instead of using a fixed width. useful when there is no tree, so the
        * label gutter isn't padded out to the default 400px
        */
-      autoTreeAreaWidth: types.stripDefault(types.boolean, false),
+      autoTreeAreaWidth: stripDefault(types.boolean, false),
     })
     .actions(self => ({
       /**

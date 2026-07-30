@@ -5,6 +5,7 @@ import {
   defaultColorSchemeName,
   defaultShowColumnStats,
 } from '../constants.ts'
+import { stripDefault } from '../stripDefault.ts'
 
 import type { MSAFormat } from 'msa-parsers'
 
@@ -20,23 +21,20 @@ export function MSAModelF() {
        * #property
        * draw MSA tiles with a background color
        */
-      bgColor: types.stripDefault(types.boolean, defaultBgColor),
+      bgColor: stripDefault(types.boolean, defaultBgColor),
 
       /**
        * #property
        * default color scheme name
        */
-      colorSchemeName: types.stripDefault(types.string, defaultColorSchemeName),
+      colorSchemeName: stripDefault(types.string, defaultColorSchemeName),
 
       /**
        * #property
        * show a per-column statistics tooltip (consensus, conservation, gaps,
        * residue distribution) while hovering the alignment
        */
-      showColumnStats: types.stripDefault(
-        types.boolean,
-        defaultShowColumnStats,
-      ),
+      showColumnStats: stripDefault(types.boolean, defaultShowColumnStats),
 
       /**
        * #property
