@@ -12,12 +12,19 @@ export { type MsaViewModel, default as MSAModelF } from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
 export type { HierarchyNode } from './hierarchy.ts'
 export type { InterProScanResults } from './launchInterProScan.ts'
+// ColumnCounts, DomainBand and TidyDomainAnnotation surface in the inferred type
+// of the composed state model, so a downstream plugin cannot emit declarations
+// for its own stateModelFactory without being able to name them (TS2883).
+// jbrowse-plugin-msaview already re-exports MSAFormat for exactly this reason.
+export type { ColumnCounts } from './columnCounts.ts'
 export type {
   Accession,
   BasicTrack,
   BasicTrackModel,
+  DomainBand,
   Node,
   NodeWithIds,
   NodeWithIdsAndLength,
   TextTrackModel,
+  TidyDomainAnnotation,
 } from './types.ts'
