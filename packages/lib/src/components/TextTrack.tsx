@@ -31,7 +31,7 @@ const AnnotationBlock = observer(function ({
   } = track
 
   const colorScheme = customColorScheme ?? modelColorScheme
-  const { contrastScheme } = useColorContrast(colorScheme)
+  const { theme, contrastScheme } = useColorContrast(colorScheme)
   const ref = useCanvasAutorun(
     ctx => {
       const {
@@ -55,13 +55,14 @@ const AnnotationBlock = observer(function ({
         colorScheme,
         contrastScheme,
         bgColor,
+        textColor: theme.palette.text.primary,
         colWidth,
         rowHeight,
         offsetX,
         blockSize,
       })
     },
-    [model, offsetX, contrastScheme, colorScheme, data],
+    [model, offsetX, theme, contrastScheme, colorScheme, data],
   )
   return (
     <canvas

@@ -4,6 +4,7 @@ import { visibleColRange } from '../msa/visibleColRange.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { BasicTrack } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
+import type { Theme } from '@mui/material'
 
 export function drawConservationBars({
   ctx,
@@ -51,6 +52,7 @@ export function drawTextTrackContent({
   colorScheme,
   contrastScheme,
   bgColor,
+  textColor,
   colWidth,
   rowHeight,
   offsetX,
@@ -61,6 +63,7 @@ export function drawTextTrackContent({
   colorScheme: Record<string, string>
   contrastScheme: Record<string, string>
   bgColor: boolean
+  textColor: string
   colWidth: number
   rowHeight: number
   offsetX: number
@@ -72,18 +75,23 @@ export function drawTextTrackContent({
     colWidth,
   })
   const str = data?.slice(xStart, xEnd)
+  const drawLetters = rowHeight >= 10 && colWidth >= rowHeight / 2
 
   for (let i = 0; str && i < str.length; i++) {
     const letter = str[i]!
     const upper = letter.toUpperCase()
-    if (bgColor) {
-      const x = (xStart + i) * colWidth
-      ctx.fillStyle = colorScheme[upper] || 'white'
+    const color = colorScheme[upper]
+    const x = (xStart + i) * colWidth
+    const filled = bgColor && !!color
+    if (filled) {
+      ctx.fillStyle = color!
       ctx.fillRect(x, 0, colWidth, rowHeight)
-      if (rowHeight >= 10 && colWidth >= rowHeight / 2) {
-        ctx.fillStyle = contrastScheme[upper] || 'black'
-        ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
-      }
+    }
+    if (drawLetters) {
+      // a letter on a colored tile needs the tile's contrast color; otherwise it
+      // sits on the plain background and takes the theme's text color
+      ctx.fillStyle = filled ? (contrastScheme[upper] ?? 'black') : textColor
+      ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
     }
   }
 }
@@ -135,6 +143,7 @@ export function renderTextTrack({
   offsetX,
   offsetY,
   contrastScheme,
+  theme,
   blockSizeXOverride,
   highResScaleFactorOverride,
 }: {
@@ -144,6 +153,7 @@ export function renderTextTrack({
   offsetX: number
   offsetY: number
   contrastScheme: Record<string, string>
+  theme: Theme
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
 }) {
@@ -174,6 +184,7 @@ export function renderTextTrack({
     colorScheme,
     contrastScheme,
     bgColor,
+    textColor: theme.palette.text.primary,
     colWidth,
     rowHeight,
     offsetX,
@@ -188,6 +199,7 @@ export function renderAllTracks({
   ctx,
   offsetX,
   contrastScheme,
+  theme,
   blockSizeXOverride,
   highResScaleFactorOverride,
 }: {
@@ -195,6 +207,7 @@ export function renderAllTracks({
   ctx: RenderCtx
   offsetX: number
   contrastScheme: Record<string, string>
+  theme: Theme
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
 }) {
@@ -223,6 +236,7 @@ export function renderAllTracks({
         offsetX,
         offsetY: currentY,
         contrastScheme,
+        theme,
         blockSizeXOverride,
         highResScaleFactorOverride,
       })
