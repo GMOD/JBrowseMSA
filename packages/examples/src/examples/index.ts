@@ -1,5 +1,3 @@
-import type { ComponentType } from 'react'
-
 import Ace2 from './Ace2'
 import Ace2Src from './Ace2.tsx?raw'
 import Aquaporin from './Aquaporin'
@@ -34,6 +32,8 @@ import ModelApi from './ModelApi'
 import ModelApiSrc from './ModelApi.tsx?raw'
 import Myd88 from './Myd88'
 import Myd88Src from './Myd88.tsx?raw'
+import Nextstrain from './Nextstrain'
+import NextstrainSrc from './Nextstrain.tsx?raw'
 import NucleotideAlignment from './NucleotideAlignment'
 import NucleotideAlignmentSrc from './NucleotideAlignment.tsx?raw'
 import Opsins from './Opsins'
@@ -52,6 +52,8 @@ import Trna from './Trna'
 import TrnaSrc from './Trna.tsx?raw'
 import ZeroConfig from './ZeroConfig'
 import ZeroConfigSrc from './ZeroConfig.tsx?raw'
+
+import type { ComponentType } from 'react'
 
 // Sidebar groups, in display order. Every example carries one of these.
 export const categoryOrder = [
@@ -285,6 +287,17 @@ export const examples: Example[] = [
       'full inferred tree — shows the canvas tiling holds up past toy data.',
     Component: LargeTree,
     source: LargeTreeSrc,
+  },
+  {
+    name: 'Nextstrain pathogens',
+    category: 'Phylogeny',
+    description:
+      'Real Nextstrain phylogenies (SARS-CoV-2, Zika, Ebola, measles, RSV-A) ' +
+      'reconstructed into a gap-free reference-coordinate MSA — no aligner ' +
+      'needed since Nextstrain tips are stored as mutations against the ' +
+      'reference.',
+    Component: Nextstrain,
+    source: NextstrainSrc,
   },
   {
     name: 'RNA secondary structure (tRNA)',
