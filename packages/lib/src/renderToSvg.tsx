@@ -348,7 +348,6 @@ function ClipGroup({
       <g
         clipPath={`url(#${clipId})`}
         transform={transform}
-        // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
         dangerouslySetInnerHTML={{ __html: ctx.getSvg().innerHTML }}
       />
     </>

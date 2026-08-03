@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -12,6 +11,7 @@ import Typography from '@mui/material/Typography'
 
 import { categoryOrder, examples, slugOf } from './examples'
 
+import type { ReactNode } from 'react'
 import type { HighlighterCore } from 'shiki/core'
 
 // One highlighter for the whole app, loaded lazily. The fine-grained Shiki core
@@ -71,7 +71,6 @@ function SourceView({ source }: { source: string }) {
         '& pre': { m: 0, p: 2, fontSize: 13, fontFamily: 'monospace' },
       }}
       // Shiki output for our own bundled example source — no user input.
-      // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
       dangerouslySetInnerHTML={{ __html: html }}
     />
   ) : (
