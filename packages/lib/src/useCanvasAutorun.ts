@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
-import type React from 'react'
 
 import { autorun } from 'mobx'
+
+import type React from 'react'
 
 // Wires a canvas ref to a mobx autorun: grabs the 2d context once the canvas
 // mounts and re-runs `draw` whenever any observable it reads changes. Collapses
@@ -22,7 +23,7 @@ export function useCanvasAutorun(
           draw(ctx)
         })
       : undefined
-    // eslint-disable-next-line @eslint-react/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
   return ref
 }

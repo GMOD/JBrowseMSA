@@ -1,5 +1,5 @@
 // Types
-export * from './types.ts'
+export type * from './types.ts'
 
 // Utilities
 export { generateNodeIds } from './util.ts'

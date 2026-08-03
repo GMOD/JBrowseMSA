@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "avoid",
+  "proseWrap": "always",
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "sortImports": {
+    "customGroups": [
+      {
+        "groupName": "react",
+        "elementNamePattern": ["react"],
+        "modifiers": ["value"]
+      }
+    ],
+    "groups": [
+      ["side_effect", "side_effect_style"],
+      "react",
+      "value-builtin",
+      "value-external",
+      ["value-parent", "value-sibling", "value-index"],
+      "type",
+      "unknown"
+    ],
+    "newlinesBetween": true,
+    "ignoreCase": false
+  },
+  "ignorePatterns": [
+    "pnpm-lock.yaml",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/esm",
+    "**/bundle",
+    "**/public",
+    "**/*.astro",
+    "packages/r-msaview/inst/htmlwidgets/lib/react-msaview.umd.js"
+  ]
+}
