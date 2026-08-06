@@ -27,6 +27,14 @@ canvas with a tiled rendering system for scalability.
 - InterProScan domain visualization is a core feature — do not remove it.
 - The `hierarchy.ts` file is a custom d3-hierarchy replacement (no d3
   dependency).
+- `@jbrowse/core` is an **external** in the downstream jbrowse-plugin-msaview
+  UMD build — it is not bundled, it resolves at runtime against whatever core
+  the host jbrowse-web ships, which is often much older than the one in this
+  workspace. Importing a freshly-added core export therefore typechecks and
+  tests green here but lands as `undefined` on a deployed host (`TypeError: X is
+  not a function`). Prefer long-established core exports; when a new one is a
+  trivial helper, inline it instead (see `statusMessageText` in
+  `packages/lib/src/fetchUtils.ts`).
 
 ## Key entry points
 

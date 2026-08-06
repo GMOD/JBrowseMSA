@@ -30,6 +30,23 @@ describe('fetchTextWithProgress', () => {
     ])
   })
 
+  test('reports the message from a determinate progress status', async () => {
+    const statuses: (FetchStatus | undefined)[] = []
+    await fetchTextWithProgress(
+      loc,
+      s => statuses.push(s),
+      async (_loc, opts) => {
+        opts.statusCallback({
+          message: 'Downloading file',
+          current: 5,
+          total: 10,
+        })
+        return 'GREETINGS'
+      },
+    )
+    expect(statuses[0]?.msg).toBe('Downloading file')
+  })
+
   test('clears status even when the fetch throws', async () => {
     const statuses: (FetchStatus | undefined)[] = []
     await expect(

@@ -1,6 +1,21 @@
-import { fetchAndMaybeUnzipText, statusMessageText } from '@jbrowse/core/util'
+import { fetchAndMaybeUnzipText } from '@jbrowse/core/util'
 
 import type { RpcStatus } from '@jbrowse/core/util'
+
+/**
+ * Extract the human-readable text from a status value, which core reports
+ * either as a bare string or as a `{message, current, total}` progress object.
+ *
+ * Inlined rather than imported from `@jbrowse/core/util` on purpose:
+ * `statusMessageText` is a recent core export, and in the UMD plugin build
+ * `@jbrowse/core/util` is an external resolved against whatever core the host
+ * jbrowse-web ships. Against an older host this import lands as `undefined` and
+ * every download tick throws `statusMessageText is not a function`. Keeping the
+ * one-liner local makes the viewer work on old and new hosts alike.
+ */
+function statusMessageText(status: RpcStatus | undefined) {
+  return typeof status === 'string' ? status : status?.message
+}
 
 export interface FetchStatus {
   msg: string
