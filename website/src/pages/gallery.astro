@@ -33,6 +33,16 @@ const figures = [
     body: 'p53’s InterProScan domains overlaid: the central DNA-binding domain (red) — where most cancer mutations cluster — forms the bulk of the protein, flanked by the short N-terminal transactivation motifs. The overlay maps the functional architecture onto the alignment.',
   },
   {
+    src: 'domain-loss.png',
+    title: 'Domain loss across orthologs',
+    body: 'Twelve NLRP1 orthologs. Every row carries the same core — NACHT, winged helix, HD2, then FIIND/UPA and the CARD — and every one of those blocks lines up in the same columns. The N-terminal PYD (cyan) is there in only five rows, so the blank space under it is a module the other seven lack. Those core domains sit up to 391 residues apart between rows in their own coordinates; column-locking is what stacks them.',
+  },
+  {
+    src: 'column-lock.png',
+    title: 'Why the domain overlay is column-locked',
+    body: 'The same twelve NLRP1 orthologs, the same domain GFF, the same palette and tree — the only difference is whether the input was aligned. Unaligned (top), column N is residue N and the shared domains scatter into a staircase. Aligned (bottom), they land in the same columns: NACHT starts at residue 328 in human and 93 in hamster, and both are drawn within one column of each other.',
+  },
+  {
     src: 'extreme-conservation.png',
     title: 'Reference comparison (dots)',
     body: 'Diffing against a reference (relativeTo) collapses identical residues to dots so only the changes stand out. Histone H4, one of the most conserved proteins known, is almost entirely dots relative to human — only the most distant lineages differ.',

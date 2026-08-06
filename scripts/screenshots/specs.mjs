@@ -96,6 +96,175 @@ export const specs = [
     clip: 'viewer',
   },
   {
+    name: 'domain-loss',
+    // whole 1666-column alignment on screen (colWidth < 1) so the architecture
+    // reads as blocks: every row carries the NACHT/WH/HD2 + FIIND/UPA/CARD core
+    // in the same columns, and the N-terminal PYD block is present in only five
+    // of the twelve rows — the gap under it is the missing module.
+    // Wider viewport + colWidth chosen so 1666 columns end left of the domain
+    // legend (absolutely positioned top-right, 260px), which would otherwise
+    // cover the C-terminal CARD block that completes the shared core.
+    viewportWidth: 1600,
+    url: fileSnap({
+      height: 340,
+      treeAreaWidth: 150,
+      colWidth: 0.7,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: { uri: 'data/nlrp1.aln' },
+      treeFilehandle: { uri: 'data/nlrp1.nh' },
+      gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+  },
+  {
+    name: 'domain-loss-annotated',
+    // The same capture as domain-loss, with the reading annotated: what is
+    // missing on the left, and what lines up on the right. Every callout is
+    // anchored to an alignment COLUMN range, so it tracks the domain rather
+    // than a pixel — re-running the aligner moves the boxes with the data.
+    // Column ranges are the Human row's domain spans (scripts/examples-gen).
+    viewportWidth: 1600,
+    url: fileSnap({
+      height: 430,
+      treeAreaWidth: 150,
+      colWidth: 0.7,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: { uri: 'data/nlrp1.aln' },
+      treeFilehandle: { uri: 'data/nlrp1.nh' },
+      gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+    annotations: [
+      { type: 'box', anchor: { col: 38, colEnd: 112 }, pad: 3 },
+      {
+        type: 'box',
+        anchor: { col: 370, colEnd: 1636 },
+        color: '#1565c0',
+        pad: 3,
+      },
+      {
+        type: 'text',
+        text: 'PYD annotated in 5 of 12 rows\n(the other 7 have sequence here — just no pyrin domain)',
+        fontSize: 15,
+        maxWidth: 340,
+        anchor: { col: 38, colEnd: 112, alignY: 'bottom', dy: 46 },
+      },
+      {
+        type: 'text',
+        text: 'the other six domains: all 12 rows, same columns',
+        fontSize: 15,
+        color: '#1565c0',
+        anchor: { col: 370, colEnd: 1636, alignY: 'bottom', dy: 46 },
+      },
+    ],
+  },
+  // The controlled pair behind docs/media/column-lock.png. Same twelve
+  // sequences, same domain GFF, same component, same palette, same tree (so the
+  // rows sit in the same order in both). The ONLY difference is whether the
+  // input was aligned — which is exactly the variable the figure is about.
+  //
+  // colWidth is set per panel so both span the same ~1166px (1666 aligned
+  // columns vs 1537 unaligned), putting the two x-axes on a common scale: each
+  // panel spans the full extent of its own data, which is how the comparison
+  // would be drawn by hand.
+  {
+    name: 'column-lock-residues',
+    part: true,
+    viewportWidth: 1600,
+    // No gaps inserted, so column N is residue N: this draws each protein's
+    // domains against its own residue ruler, anchored at residue 1 — what a
+    // domain-architecture cartoon shows.
+    url: fileSnap({
+      height: 390,
+      treeAreaWidth: 150,
+      colWidth: 0.7586,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: { uri: 'data/nlrp1-unaligned.aln' },
+      treeFilehandle: { uri: 'data/nlrp1.nh' },
+      gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+    annotations: [
+      {
+        type: 'text',
+        text: 'UNALIGNED — domains at their own residue positions',
+        fontSize: 17,
+        anchor: { col: 0, alignX: 'left', alignY: 'bottom', dy: 34 },
+      },
+    ],
+  },
+  {
+    name: 'column-lock-columns',
+    part: true,
+    viewportWidth: 1600,
+    url: fileSnap({
+      height: 390,
+      treeAreaWidth: 150,
+      colWidth: 0.7,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: { uri: 'data/nlrp1.aln' },
+      treeFilehandle: { uri: 'data/nlrp1.nh' },
+      gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+    annotations: [
+      {
+        type: 'text',
+        text: 'ALIGNED — the same domains, column-locked',
+        fontSize: 17,
+        color: '#1565c0',
+        anchor: { col: 0, alignX: 'left', alignY: 'bottom', dy: 34 },
+      },
+    ],
+  },
+  {
+    name: 'column-lock',
+    parts: ['column-lock-residues', 'column-lock-columns'],
+  },
+  {
+    name: 'domain-loss-closeup',
+    // Base resolution at the PYD block's left edge (alignment column 38), to
+    // substantiate what the overview only asserts: the seven rows without a PYD
+    // are not empty there. Mouse is mostly gap but Cow and Zebrafish carry real
+    // residues — they simply have no pyrin domain called over them. An overview
+    // drawn at colWidth 0.7 cannot show that, and a figure that claimed
+    // "missing sequence" instead of "no domain annotated" would be wrong.
+    viewportWidth: 1600,
+    // tall enough for all 12 rows plus the label: zoomed in, the minimap and
+    // both conservation tracks take ~180px before the first row, and Hedgehog
+    // (the last row, and one of the five that HAS a PYD) is the one a short
+    // panel drops
+    viewportHeight: 900,
+    url: fileSnap({
+      height: 520,
+      treeAreaWidth: 150,
+      colWidth: 14,
+      rowHeight: 20,
+      // scrollX is a negative px offset: put column 34 at the left edge, so the
+      // PYD block (col 38) starts just inside the frame
+      scrollX: -34 * 14,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: { uri: 'data/nlrp1.aln' },
+      treeFilehandle: { uri: 'data/nlrp1.nh' },
+      gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
+    }),
+    settle: 2000,
+    clip: 'viewer',
+    annotations: [
+      {
+        type: 'text',
+        text: 'same columns, base resolution: the PYD-less rows carry sequence here — there is just no pyrin domain over it',
+        fontSize: 15,
+        maxWidth: 900,
+        anchor: { col: 38, alignX: 'left', alignY: 'bottom', dy: 34 },
+      },
+    ],
+  },
+  {
     name: 'large-tree',
     url: fileSnap({
       height: 480,

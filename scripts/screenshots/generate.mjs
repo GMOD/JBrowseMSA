@@ -15,11 +15,13 @@
  * the content actually changed (see image-pipeline.mjs). Build the app first
  * (the pnpm script does this).
  */
+import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
 import puppeteer from 'puppeteer-core'
 
+import { applyAnnotations } from './annotations.mjs'
 import {
   commitScreenshot,
   optimizePng,
@@ -142,6 +144,9 @@ async function renderSpecToTemp(browser, spec, suffix = '') {
     }
     await delay(spec.settle ?? 1200)
     await assertViewerRendered(page, spec.name)
+    // after the settle, so a col/row anchor resolves against the geometry the
+    // capture will actually show
+    await applyAnnotations(page, spec.annotations, spec.name)
     const tmp = tmpShot(spec.name, suffix)
     await shoot(page, spec, tmp)
     optimizePng(tmp)
@@ -164,12 +169,19 @@ function launch(executablePath, spec) {
   })
 }
 
-async function captureSpec(executablePath, spec) {
+async function captureSpec(executablePath, spec, partFiles) {
   console.log(`→ ${spec.name}`)
   // Fresh browser per spec avoids service-worker caching between navigations.
   const browser = await launch(executablePath, spec)
   try {
     const tmp = await renderSpecToTemp(browser, spec)
+    // A `part` spec exists only to be stacked into a compose spec, so it keeps
+    // its capture in temp and commits no PNG of its own — docs/media holds
+    // finished figures, not the halves they were built from.
+    if (spec.part) {
+      partFiles.set(spec.name, tmp)
+      return
+    }
     const out = path.join(mediaDir, `${spec.name}.png`)
     commitScreenshot(tmp, out, spec.name, {
       force,
@@ -178,6 +190,30 @@ async function captureSpec(executablePath, spec) {
   } finally {
     await browser.close()
   }
+}
+
+// Stack a compose spec's already-captured parts into one figure. ImageMagick
+// pads the narrower part to the wider one's width, so parts that differ in
+// width (an unaligned block is fewer columns than the alignment built from it)
+// stack left-aligned rather than being rescaled.
+function composeSpec(spec, partFiles) {
+  console.log(`→ ${spec.name} (compose)`)
+  const missing = spec.parts.filter(p => !partFiles.has(p))
+  if (missing.length > 0) {
+    throw new Error(`missing part capture(s): ${missing.join(', ')}`)
+  }
+  const out = path.join(mediaDir, `${spec.name}.png`)
+  const tmp = tmpShot(spec.name, '-composed')
+  execFileSync('magick', [
+    ...spec.parts.map(p => partFiles.get(p)),
+    spec.direction === 'horizontal' ? '+append' : '-append',
+    tmp,
+  ])
+  optimizePng(tmp)
+  commitScreenshot(tmp, out, spec.name, {
+    force,
+    diffThreshold: spec.diffThreshold ?? diffThreshold,
+  })
 }
 
 // Render the spec twice (fresh browser each) and compare the two captures to
@@ -216,7 +252,7 @@ async function main() {
   }
   const executablePath = findChrome()
 
-  const list =
+  let list =
     filterTokens.length > 0
       ? specs.filter(s =>
           filterTokens.some(t => (exact ? s.name === t : s.name.includes(t))),
@@ -226,6 +262,11 @@ async function main() {
     console.error(`No specs match filter: ${filterTokens.join(',')}`)
     process.exit(1)
   }
+  // A filter that selects a compose spec has to pull in the parts it stacks,
+  // which the filter itself won't have matched by name.
+  const needed = new Set(list.flatMap(s => s.parts ?? []))
+  const pulled = specs.filter(s => needed.has(s.name) && !list.includes(s))
+  list = [...list, ...pulled]
 
   fs.mkdirSync(mediaDir, { recursive: true })
   console.log(
@@ -235,7 +276,12 @@ async function main() {
   const server = await startStaticServer(PORT, appDist)
   const failures = []
   const flaky = []
-  const queue = [...list]
+  const partFiles = new Map()
+  // Compose specs stack parts, so they run after the render pool. Under --check
+  // they're skipped: the append is deterministic given its parts, so there is
+  // nothing to re-render and compare.
+  const composeSpecs = check ? [] : list.filter(s => s.parts)
+  const queue = list.filter(s => !s.parts)
   const worker = async () => {
     while (queue.length > 0) {
       const spec = queue.shift()
@@ -245,7 +291,7 @@ async function main() {
             flaky.push(spec.name)
           }
         } else {
-          await captureSpec(executablePath, spec)
+          await captureSpec(executablePath, spec, partFiles)
         }
       } catch (e) {
         failures.push({ name: spec.name, error: e.message })
@@ -255,7 +301,18 @@ async function main() {
   }
   try {
     await Promise.all(Array.from({ length: concurrency }, () => worker()))
+    for (const spec of composeSpecs) {
+      try {
+        composeSpec(spec, partFiles)
+      } catch (e) {
+        failures.push({ name: spec.name, error: e.message })
+        console.error(`  ✗ ${spec.name}: ${e.message}`)
+      }
+    }
   } finally {
+    for (const file of partFiles.values()) {
+      fs.rmSync(file, { force: true })
+    }
     server.close()
   }
 

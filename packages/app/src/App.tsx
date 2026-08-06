@@ -29,6 +29,18 @@ function parseData(data: string | null) {
 
 const mymodel = AppGlobal.create(parseData(val))
 
+// Published for the screenshot harness the way jbrowse-web publishes
+// window.JBrowseSession: a callout that wants to point at alignment column 38
+// resolves it here (colWidth/scrollX/rowHeight/scrollY) at capture time, rather
+// than hardcoding a pixel that silently goes stale when the viewport width,
+// colWidth or scroll position changes. See scripts/screenshots/annotations.mjs.
+declare global {
+  interface Window {
+    MSAVIEW_MODEL?: typeof mymodel.msaview
+  }
+}
+window.MSAVIEW_MODEL = mymodel.msaview
+
 // used in ViewContainer files to get the width
 function useWidthSetter(view: { setWidth: (arg: number) => void }) {
   const [ref, { width }] = useMeasure()

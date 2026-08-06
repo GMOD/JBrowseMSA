@@ -36,6 +36,19 @@ if (missing.length) {
     `guide references figures with no spec: ${missing.join(', ')}`,
   )
 }
+// A compose spec has no url of its own — it stacks other specs' captures — so a
+// live link for one would silently resolve to the bare demo app instead of the
+// state the figure shows. Embed those figures without a [live-*] ref.
+// (url: '' is a real state — the import form is the demo app's landing page —
+// so this tests for the absent url of a compose spec, not a falsy one)
+const composed = unique.filter(
+  n => specs.find(s => s.name === n)?.url === undefined,
+)
+if (composed.length) {
+  throw new Error(
+    `guide references composed figures, which have no live state to link to: ${composed.join(', ')}`,
+  )
+}
 
 const block = [
   MARKER,
