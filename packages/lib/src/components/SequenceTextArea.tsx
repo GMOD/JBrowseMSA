@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { Button, TextField } from '@mui/material'
 
-import Checkbox2 from './Checkbox2.tsx'
 import copy from '../vendor/copyToClipboard.ts'
+import Checkbox2 from './Checkbox2.tsx'
 
 const useStyles = makeStyles()({
   textAreaFont: {

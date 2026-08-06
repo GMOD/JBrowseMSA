@@ -2,8 +2,8 @@ import React from 'react'
 
 import { observer } from 'mobx-react'
 
-import { ConservationTrackResizeHandle } from './ResizeHandles.tsx'
 import { useCanvasAutorun } from '../useCanvasAutorun.ts'
+import { ConservationTrackResizeHandle } from './ResizeHandles.tsx'
 import {
   barTrackValues,
   drawConservationBars,

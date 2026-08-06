@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react'
-import type React from 'react'
 
 import { ClickMapIndex } from './clickMap.ts'
 
-import type { ClickEntry } from './clickMap.ts'
 import type { MsaViewModel } from '../../model.ts'
+import type { ClickEntry } from './clickMap.ts'
+import type React from 'react'
 
 export interface TreeHoverTarget extends ClickEntry {
   clientX: number

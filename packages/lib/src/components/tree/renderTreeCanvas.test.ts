@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { getNodeX } from './renderTreeCanvas.ts'
 import { calcDepthToLeaf, findMaxBranchLen } from '../../hierarchy.ts'
+import { getNodeX } from './renderTreeCanvas.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 

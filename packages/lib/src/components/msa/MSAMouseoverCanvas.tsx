@@ -3,8 +3,8 @@ import React from 'react'
 import { isAlive } from '@jbrowse/mobx-state-tree'
 import { observer } from 'mobx-react'
 
-import { renderMouseover } from './renderMSAMouseover.ts'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
+import { renderMouseover } from './renderMSAMouseover.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 

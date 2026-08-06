@@ -4,11 +4,11 @@ import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'
 import { padding, renderTreeCanvas } from './renderTreeCanvas.ts'
 import { useTreeHover } from './useTreeHover.ts'
-import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 

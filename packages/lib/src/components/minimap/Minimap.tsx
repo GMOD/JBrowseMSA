@@ -2,8 +2,8 @@ import React, { useCallback, useState } from 'react'
 
 import { observer } from 'mobx-react'
 
-import { MINIMAP_BAR_HEIGHT, getMinimapLayout } from './minimapLayout.ts'
 import { useDragScroll } from '../../useDragScroll.ts'
+import { MINIMAP_BAR_HEIGHT, getMinimapLayout } from './minimapLayout.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 

@@ -6,11 +6,11 @@ import Palette from '@mui/icons-material/Palette'
 import Settings from '@mui/icons-material/Settings'
 import { observer } from 'mobx-react'
 
+import colorSchemes from '../../colorSchemes.ts'
 import {
   msaSettingsMenuItems,
   treeSettingsMenuItems,
 } from './settingsMenuItems.ts'
-import colorSchemes from '../../colorSchemes.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 

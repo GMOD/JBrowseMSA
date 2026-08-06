@@ -1,7 +1,7 @@
-import parseNewick from './parseNewick.ts'
-import { parseAll } from './stockholmParser.ts'
 import { generateNodeIds } from '../util.ts'
 import BaseMSA from './BaseMSA.ts'
+import parseNewick from './parseNewick.ts'
+import { parseAll } from './stockholmParser.ts'
 
 import type { NodeWithIds } from '../types.ts'
 import type { StockholmData } from './stockholmParser.ts'

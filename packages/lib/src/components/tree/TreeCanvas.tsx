@@ -3,11 +3,11 @@ import React, { useCallback, useRef } from 'react'
 import { isAlive } from '@jbrowse/mobx-state-tree'
 import { observer } from 'mobx-react'
 
-import TreeCanvasBlock from './TreeCanvasBlock.tsx'
-import { padding } from './renderTreeCanvas.ts'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { useWheelScroll } from '../../useWheelScroll.ts'
 import { referenceColor, treeHoverColor } from '../overlayColors.ts'
+import TreeCanvasBlock from './TreeCanvasBlock.tsx'
+import { padding } from './renderTreeCanvas.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 

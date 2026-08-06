@@ -6,10 +6,10 @@ import {
 import { setFontSize } from '../../setFontSize.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 
-import type { ClickMapIndex } from './clickMap.ts'
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
+import type { ClickMapIndex } from './clickMap.ts'
 import type { Theme } from '@mui/material'
 
 export const padding = 600

@@ -1,14 +1,14 @@
 import React from 'react'
 
-import { BaseTooltip } from '@jbrowse/core/ui'
+import BaseTooltip from '@jbrowse/core/ui/BaseTooltip'
 import { observer } from 'mobx-react'
 
+import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
+import { useColorContrast } from '../../useColorContrast.ts'
 import ColumnStats from './ColumnStats.tsx'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
 import { useMsaBlockMouse } from './useMsaBlockMouse.ts'
-import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
-import { useColorContrast } from '../../useColorContrast.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 

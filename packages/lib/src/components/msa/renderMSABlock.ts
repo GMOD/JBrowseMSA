@@ -1,7 +1,7 @@
-import { visibleColRange } from './visibleColRange.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { adjustColorForContrast } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
+import { visibleColRange } from './visibleColRange.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'

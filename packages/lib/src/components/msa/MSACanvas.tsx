@@ -2,9 +2,9 @@ import React, { useCallback, useRef } from 'react'
 
 import { observer } from 'mobx-react'
 
+import { useWheelScroll } from '../../useWheelScroll.ts'
 import Loading from './Loading.tsx'
 import MSACanvasBlock from './MSACanvasBlock.tsx'
-import { useWheelScroll } from '../../useWheelScroll.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -48,6 +48,11 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <div
       ref={ref}
+      // the MSA viewport: its rect is the origin every column/row offset is
+      // measured from (col*colWidth + scrollX, row*rowHeight + scrollY), which
+      // is what lets a screenshot callout anchor to an alignment column instead
+      // of a hand-measured pixel
+      data-testid="msa_canvas"
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
       onMouseLeave={event => {
