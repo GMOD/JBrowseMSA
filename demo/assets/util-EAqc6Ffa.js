@@ -1,0 +1,2 @@
+function e(e){return`${e.start}-${e.end}`}function t(t){return t.filter((t,n,r)=>!n||e(t)!==e(r[n-1]))}function n(e){return e.length>20?`${e.slice(0,20)}...`:e}function r(e){return e===-1?`(-)`:e===1?`(+)`:``}export{t as n,r,n as t};
+//# sourceMappingURL=util-EAqc6Ffa.js.map

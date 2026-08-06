@@ -1,0 +1,2 @@
+import{a as e,t}from"./jsx-runtime-B-hcVAMW.js";import{t as n}from"./BaseCard-C_hfjKGw.js";import{t as r}from"./Attributes-VnDa0MmV.js";var i=e(t(),1);function a(e){let{title:t=`Attributes`,defaultExpanded:a,feature:o}=e;return(0,i.jsx)(n,{title:t,defaultExpanded:a,children:(0,i.jsx)(r,{...e,attributes:o})})}export{a as default};
+//# sourceMappingURL=BaseAttributes-DiR_18jn.js.map

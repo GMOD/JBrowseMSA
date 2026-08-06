@@ -1,0 +1,2 @@
+function e(e){for(let t of e.querySelectorAll(`a`))t.setAttribute(`rel`,`noopener noreferrer`),t.setAttribute(`target`,`_blank`)}export{e as t};
+//# sourceMappingURL=rewriteExternalAnchors-CAQqrMpQ.js.map

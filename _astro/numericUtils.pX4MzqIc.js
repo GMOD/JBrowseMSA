@@ -1,1 +1,0 @@
-function e(e,t,n){return e<t?t:e>n?n:e}function t(e,t=-1/0){let n=t;for(let t=0;t<e.length;t++)n=Math.max(e[t],n);return n}function n(e){let t=0;for(let n=0;n<e.length;n++)t+=e[n];return t}180/Math.PI;export{t as n,n as r,e as t};

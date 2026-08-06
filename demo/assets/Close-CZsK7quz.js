@@ -1,0 +1,2 @@
+import{a as e,t}from"./jsx-runtime-B-hcVAMW.js";import{n}from"./ButtonBase-28MMfDMx.js";var r=e(t(),1),i=n((0,r.jsx)(`path`,{d:`M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z`}),`Close`);export{i as t};
+//# sourceMappingURL=Close-CZsK7quz.js.map

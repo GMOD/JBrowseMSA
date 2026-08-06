@@ -1,0 +1,2 @@
+import{a as e,n as t,t as n}from"./jsx-runtime-B-hcVAMW.js";var r=e(n(),1),i=e(t(),1),a=class extends i.Component{constructor(e){super(e),this.state={error:void 0}}componentDidCatch(e,t){console.error(`ErrorBoundary caught an error:`,e,t),this.setState({error:e,componentStack:t.componentStack??void 0})}render(){return this.state.error?(0,r.jsx)(this.props.FallbackComponent,{error:this.state.error,componentStack:this.state.componentStack}):this.props.children}};export{a as t};
+//# sourceMappingURL=ErrorBoundary-D2QtQfPc.js.map
