@@ -27,7 +27,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@jbrowse/core": "file:../../vendor-jbrowse/jbrowse-core.tgz",
+    "@jbrowse/core": "^4.3.0",
     "@mui/material": "^9.2.0",
     "jsdom": "^29.1.1",
     "mobx": "^6.16.1",
