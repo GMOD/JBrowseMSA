@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import type React from 'react'
 
 import type { MsaViewModel } from '../../model.ts'
+import type React from 'react'
 
 function eventToColRow({
   event,
@@ -49,11 +49,17 @@ export function useMsaBlockMouse({
     return eventToColRow({ event, el, offsetX, offsetY, colWidth, rowHeight })
   }
 
+  // a block can extend past the alignment (the last block is a full tile wide,
+  // and the panel is taller than the rows when there are few of them), so a
+  // pointer inside the block is not necessarily over a cell
+  function inBounds({ col, row }: { col: number; row: number }) {
+    return col >= 0 && col < model.numColumns && row >= 0 && row < model.numRows
+  }
+
   function onMouseMove(event: React.MouseEvent, el: HTMLElement) {
-    const { col, row } = colRow(event, el)
-    const inBounds =
-      col >= 0 && col < model.numColumns && row >= 0 && row < model.numRows
-    model.setMousePos(inBounds ? col : undefined, inBounds ? row : undefined)
+    const pos = colRow(event, el)
+    const hit = inBounds(pos)
+    model.setMousePos(hit ? pos.col : undefined, hit ? pos.row : undefined)
 
     const hasTooltip =
       !!model.hoveredInsertion ||
@@ -65,11 +71,14 @@ export function useMsaBlockMouse({
   }
 
   function onClick(event: React.MouseEvent, el: HTMLElement) {
-    const { col, row } = colRow(event, el)
+    const pos = colRow(event, el)
+    const { col, row } = pos
     const { mouseClickCol, mouseClickRow } = model
-    // clicking the same cell again clears the pinned crosshair
+    // clicking the same cell again clears the pinned crosshair, and so does
+    // clicking past the end of the alignment -- there is no cell to pin there
     const same = col === mouseClickCol && row === mouseClickRow
-    model.setMouseClickPos(same ? undefined : col, same ? undefined : row)
+    const keep = inBounds(pos) && !same
+    model.setMouseClickPos(keep ? col : undefined, keep ? row : undefined)
   }
 
   function onMouseLeave() {

@@ -13,7 +13,6 @@ import {
   parseNewick,
 } from 'msa-parsers'
 
-
 import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
@@ -280,7 +279,8 @@ function stateModelFactory() {
        * #volatile
        */
       status: undefined as
-        { msg: string; url?: string; onCancel?: () => void } | undefined,
+        | { msg: string; url?: string; onCancel?: () => void }
+        | undefined,
       /**
        * #volatile
        * high resolution scale factor, helps make canvas look better on hi-dpi
@@ -343,7 +343,8 @@ function stateModelFactory() {
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        { nodeId: string; descendantNames: string[] } | undefined,
+        | { nodeId: string; descendantNames: string[] }
+        | undefined,
 
       /**
        * #volatile
@@ -376,7 +377,8 @@ function stateModelFactory() {
        * #volatile
        */
       interProAnnotations: undefined as
-        undefined | Record<string, InterProScanResults>,
+        | undefined
+        | Record<string, InterProScanResults>,
     }))
     .actions(self => ({
       /**
@@ -681,9 +683,26 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * extra per-row attributes, keyed by row name. Parsed defensively: the
+       * source is a user-supplied document (treeMetadataFilehandle, or a
+       * session snapshot), and this computed is read by labelWidthMap on every
+       * layout, so a malformed file would otherwise throw out of rendering and
+       * take the whole view down over a decorative field.
        */
-      get treeMetadata() {
-        return self.data.treeMetadata ? JSON.parse(self.data.treeMetadata) : {}
+      get treeMetadata(): Record<string, Record<string, string> | undefined> {
+        const text = self.data.treeMetadata
+        if (!text) {
+          return {}
+        }
+        try {
+          const parsed: unknown = JSON.parse(text)
+          return typeof parsed === 'object' && parsed !== null
+            ? (parsed as Record<string, Record<string, string> | undefined>)
+            : {}
+        } catch (e) {
+          console.error('failed to parse treeMetadata', e)
+          return {}
+        }
       },
       /**
        * #getter
