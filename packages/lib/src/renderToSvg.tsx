@@ -306,6 +306,7 @@ function TrackRendering({
     model,
     ctx,
     contrastScheme,
+    theme,
     offsetX,
     blockSizeXOverride: msaAreaWidth,
     highResScaleFactorOverride: 1,
