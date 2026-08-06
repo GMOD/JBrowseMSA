@@ -9,7 +9,8 @@ objects in our source code.
 ## Links
 
 - [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/treeModel.ts)
-- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this model in React, HTML, and R
+- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this
+  model in React, HTML, and R
 - [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
 
 ## Overview
@@ -60,9 +61,9 @@ labelsAlignRight: defaultLabelsAlignRight
 
 #### property: showBranchLen
 
-use "branch length" e.g. evolutionary distance to draw tree branch
-lengths. if false, the layout is a "cladogram" that does not take into
-account evolutionary distances
+use "branch length" e.g. evolutionary distance to draw tree branch lengths. if
+false, the layout is a "cladogram" that does not take into account evolutionary
+distances
 
 ```js
 // type signature
@@ -84,8 +85,8 @@ treeAreaWidth: types.optional(types.number, defaultTreeAreaWidth)
 
 #### property: treeWidth
 
-width of the tree within the treeArea, px. automatically synced to
-fit within treeAreaWidth
+width of the tree within the treeArea, px. automatically synced to fit within
+treeAreaWidth
 
 ```js
 // type signature

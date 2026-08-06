@@ -5,9 +5,9 @@ import { createTheme } from '@mui/material/styles'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import GeneExplorer from './GeneExplorer'
 import { loadGene, searchGenes } from '../lib/geneExplorer'
 import { DEFAULT_SPECIES } from '../lib/speciesGenes'
+import GeneExplorer from './GeneExplorer'
 
 import type * as GeneExplorerLib from '../lib/geneExplorer'
 import type { GeneResult, Transcript } from '../lib/geneExplorer'

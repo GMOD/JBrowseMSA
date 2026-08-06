@@ -9,7 +9,8 @@ objects in our source code.
 ## Links
 
 - [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model.ts)
-- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this model in React, HTML, and R
+- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this
+  model in React, HTML, and R
 - [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
 
 ## Example usage
@@ -27,14 +28,16 @@ root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
 
 The main MSAView state model. Holds the loaded alignment, tree, and optional
 InterProScan domain annotations, plus all display state (color scheme, zoom,
-scroll, collapsed clades). It composes in members from `DialogQueueSessionMixin`,
-`Tree`, and `MSAModel` (see Inherited members below). Data is loaded reactively
-from the `msaFilehandle` / `treeFilehandle` / `gffFilehandle` properties, or set
-directly with `setData`. Most state is persisted into the shareable URL.
+scroll, collapsed clades). It composes in members from
+`DialogQueueSessionMixin`, `Tree`, and `MSAModel` (see Inherited members below).
+Data is loaded reactively from the `msaFilehandle` / `treeFilehandle` /
+`gffFilehandle` properties, or set directly with `setData`. Most state is
+persisted into the shareable URL.
 
 ## Inherited members
 
-Available on this model via composition. Follow each link for full signatures and docs.
+Available on this model via composition. Follow each link for full signatures
+and docs.
 
 ### Available via [DialogQueueSessionMixin](../dialogqueuesessionmixin)
 
@@ -44,9 +47,11 @@ Available on this model via composition. Follow each link for full signatures an
 
 ### Available via [Tree](../tree)
 
-**Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth, showBranchLen, drawTree, drawNodeBubbles
+**Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth,
+showBranchLen, drawTree, drawNodeBubbles
 
-**Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree, setShowBranchLen, setDrawNodeBubbles, setDrawLabels
+**Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree,
+setShowBranchLen, setDrawNodeBubbles, setDrawLabels
 
 ### Available via [MSAModel](../msamodel)
 
@@ -67,8 +72,7 @@ allowedGappyness: defaultAllowedGappyness
 
 #### property: collapsed
 
-array of tree parent nodes that are 'collapsed' (all children are
-hidden)
+array of tree parent nodes that are 'collapsed' (all children are hidden)
 
 ```js
 // type signature
@@ -99,8 +103,7 @@ currentAlignment: defaultCurrentAlignment
 
 #### property: data
 
-data from the loaded tree/msa/treeMetadata, generally loaded by
-autorun
+data from the loaded tree/msa/treeMetadata, generally loaded by autorun
 
 ```js
 // type signature
@@ -164,11 +167,10 @@ hideGaps: defaultHideGaps
 
 #### property: highlightColumns
 
-declarative seed for the highlighted-columns overlay (visible column
-indices). Unlike the volatile `highlightedColumns` (driven by
-transient genome-hover sync), this persists in the snapshot/URL so a
-shared link can open with specific columns highlighted. Applied once
-in afterCreate.
+declarative seed for the highlighted-columns overlay (visible column indices).
+Unlike the volatile `highlightedColumns` (driven by transient genome-hover
+sync), this persists in the snapshot/URL so a shared link can open with specific
+columns highlighted. Applied once in afterCreate.
 
 ```js
 // type signature
@@ -190,8 +192,8 @@ id: ElementId
 
 #### property: msaFilehandle
 
-filehandle object for the MSA (which could contain a tree e.g. with
-stockholm files)
+filehandle object for the MSA (which could contain a tree e.g. with stockholm
+files)
 
 ```js
 // type signature
@@ -379,9 +381,9 @@ highlightedColumns: undefined as number[] | undefined
 
 #### volatile: highResScaleFactor
 
-high resolution scale factor, helps make canvas look better on hi-dpi
-screens. derived from the device pixel ratio so canvases are crisp on
-retina/4k displays and not needlessly oversized on standard ones
+high resolution scale factor, helps make canvas look better on hi-dpi screens.
+derived from the device pixel ratio so canvases are crisp on retina/4k displays
+and not needlessly oversized on standard ones
 
 ```js
 // type signature
@@ -592,9 +594,8 @@ number[]
 
 #### getter: colClustalX
 
-Pre-computed ClustalX colors per column.
-Returns a map of letter -> color for each column.
-ref http://www.jalview.org/help/html/colourSchemes/clustal.html
+Pre-computed ClustalX colors per column. Returns a map of letter -> color for
+each column. ref http://www.jalview.org/help/html/colourSchemes/clustal.html
 
 ```js
 // type
@@ -603,8 +604,8 @@ ref http://www.jalview.org/help/html/colourSchemes/clustal.html
 
 #### getter: colConsensus
 
-Pre-computed consensus letter and percent identity color per column.
-Used by percent_identity_dynamic color scheme.
+Pre-computed consensus letter and percent identity color per column. Used by
+percent_identity_dynamic color scheme.
 
 ```js
 // type
@@ -653,8 +654,8 @@ string[]
 #### getter: conservation
 
 Conservation score per column using Shannon entropy (biojs-msa style).
-Conservation = (1 - H/Hmax) \* (1 - gapFraction)
-Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
+Conservation = (1 - H/Hmax) \* (1 - gapFraction) Returns values 0-1 where 1 =
+fully conserved, 0 = no conservation.
 
 ```js
 // type
@@ -711,7 +712,8 @@ Returns insertion info if mouse is hovering over an insertion indicator
 
 #### getter: insertionPositions
 
-Returns a map of row name to array of insertions with display position and letters
+Returns a map of row name to array of insertions with display position and
+letters
 
 ```js
 // type
@@ -766,9 +768,9 @@ number
 
 #### getter: maxScrollY
 
-most-negative allowed scrollY, keeping the last row in view rather than
-letting the whole alignment scroll off the top. visible MSA height is
-computed inline here because msaAreaHeight is defined later in the chain.
+most-negative allowed scrollY, keeping the last row in view rather than letting
+the whole alignment scroll off the top. visible MSA height is computed inline
+here because msaAreaHeight is defined later in the chain.
 
 ```js
 // type
@@ -851,8 +853,8 @@ Map<string, string>
 
 #### getter: rowNames
 
-Returns the list of row (sequence) names in display order.
-Part of the public API used by downstream consumers (e.g. jbrowse plugins).
+Returns the list of row (sequence) names in display order. Part of the public
+API used by downstream consumers (e.g. jbrowse plugins).
 
 ```js
 // type
@@ -889,8 +891,8 @@ string | undefined
 
 #### getter: sequenceType
 
-Detects sequence type based on letters present in the alignment.
-Returns 'dna', 'rna', or 'amino'.
+Detects sequence type based on letters present in the alignment. Returns 'dna',
+'rna', or 'amino'.
 
 ```js
 // type
@@ -1026,9 +1028,8 @@ getRowData: (name: string) => { data: { name?: string | undefined; accession?: s
 
 #### method: globalColToVisibleCol
 
-Convert a global column index to a visible column index.
-Returns undefined if the column is hidden (in blanks).
-This is the inverse of visibleColToGlobalCol.
+Convert a global column index to a visible column index. Returns undefined if
+the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 
 ```js
 // type signature
@@ -1046,8 +1047,8 @@ seqPosToGlobalCol: (rowName: string, seqPos: number) => number
 
 #### method: seqPosToVisibleCol
 
-Convert a sequence position (ungapped) directly to a visible column index.
-This combines seqPosToGlobalCol and globalColToVisibleCol.
+Convert a sequence position (ungapped) directly to a visible column index. This
+combines seqPosToGlobalCol and globalColToVisibleCol.
 
 ```js
 // type signature
@@ -1065,12 +1066,12 @@ visibleColToRowLetter: (rowName: string, visibleCol: number) => string | undefin
 
 #### method: visibleColToSeqPos
 
-Convert a visible column to a row-specific sequence position (0-based).
-Returns undefined if the position is a gap in the sequence.
+Convert a visible column to a row-specific sequence position (0-based). Returns
+undefined if the position is a gap in the sequence.
 
 CROSS-REPO CONTRACT: this and the sibling coordinate converters
-(seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) are used
-by jbrowse-plugin-protein3d to translate between alignment columns and
+(seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) are used by
+jbrowse-plugin-protein3d to translate between alignment columns and
 structure/sequence residue positions across gaps. Keep them stable.
 
 ```js
@@ -1080,8 +1081,8 @@ visibleColToSeqPos: (rowName: string, visibleCol: number) => number | undefined
 
 #### method: visibleColToSeqPosOneBased
 
-Convert a visible column to a row-specific sequence position (1-based).
-Returns undefined if the position is a gap in the sequence.
+Convert a visible column to a row-specific sequence position (1-based). Returns
+undefined if the position is a gap in the sequence.
 
 ```js
 // type signature
@@ -1115,8 +1116,8 @@ doScrollY: (deltaY: number) => void
 
 #### action: drawRelativeTo
 
-draw the alignment with positions numbered relative to the given row's
-sequence (its node id), instead of in raw MSA-column coordinates
+draw the alignment with positions numbered relative to the given row's sequence
+(its node id), instead of in raw MSA-column coordinates
 
 ```js
 // type signature
@@ -1199,8 +1200,8 @@ setCurrentAlignment: (n: number) => void
 
 #### action: setData
 
-set the alignment/tree/metadata/domain data directly from strings,
-bypassing the filehandle loaders
+set the alignment/tree/metadata/domain data directly from strings, bypassing the
+filehandle loaders
 
 ```js
 // type signature
@@ -1209,9 +1210,9 @@ setData: (data: { msa?: string | undefined; tree?: string | undefined; treeMetad
 
 #### action: setDomains
 
-Set domain annotations and reveal the overlay in a single step (or clear
-both when passed undefined). Shared by every domain source: InterProScan,
-GFF, user-provided uploads, and NCBI CDD.
+Set domain annotations and reveal the overlay in a single step (or clear both
+when passed undefined). Shared by every domain source: InterProScan, GFF,
+user-provided uploads, and NCBI CDD.
 
 ```js
 // type signature
@@ -1270,9 +1271,9 @@ setHideGaps: (arg: boolean) => void
 
 set highlighted columns
 
-CROSS-REPO CONTRACT: called by jbrowse-plugin-msaview
-(afterCreateAutoruns.ts) to highlight alignment columns. It has no
-in-repo caller, so do not flag it as dead code — it is public API.
+CROSS-REPO CONTRACT: called by jbrowse-plugin-msaview (afterCreateAutoruns.ts)
+to highlight alignment columns. It has no in-repo caller, so do not flag it as
+dead code — it is public API.
 
 ```js
 // type signature
@@ -1281,8 +1282,8 @@ setHighlightedColumns: (columns?: number[] | undefined) => void
 
 #### action: setHighResScaleFactor
 
-high-res scale factor, tracks the device pixel ratio so canvases stay
-crisp when the window moves between monitors or the browser zooms
+high-res scale factor, tracks the device pixel ratio so canvases stay crisp when
+the window moves between monitors or the browser zooms
 
 ```js
 // type signature
@@ -1391,8 +1392,8 @@ setShowDomains: (arg: boolean) => void
 
 #### action: setShowOnly
 
-show only the subtree rooted at the given node id (pass undefined to
-show the whole tree again)
+show only the subtree rooted at the given node id (pass undefined to show the
+whole tree again)
 
 ```js
 // type signature
@@ -1502,12 +1503,11 @@ zoomOutVertical: () => void
 #### action: zoomToPos
 
 Smoothly zoom by a continuous scaleFactor. The column under the cursor
-(offsetX/offsetY, px relative to the MSA area) stays anchored
-horizontally. Vertically the anchor is biased toward the top: when the
-alignment nearly fits the viewport, snap to y=0 rather than pinning a
-random row under the cursor, with the bias fading out as the alignment
-grows taller than the viewport (where cursor-anchoring is useful).
-Drives wheel/trackpad-pinch zoom.
+(offsetX/offsetY, px relative to the MSA area) stays anchored horizontally.
+Vertically the anchor is biased toward the top: when the alignment nearly fits
+the viewport, snap to y=0 rather than pinning a random row under the cursor,
+with the bias fading out as the alignment grows taller than the viewport (where
+cursor-anchoring is useful). Drives wheel/trackpad-pinch zoom.
 
 ```js
 // type signature

@@ -22,9 +22,8 @@ import {
   proteinMSA,
   proteinTree,
 } from '../../examples/src/examples/exampleData.ts'
-import { renderToSvg } from '../src/renderToSvg.tsx'
-
 import MSAModelF from '../src/model.ts'
+import { renderToSvg } from '../src/renderToSvg.tsx'
 
 // minimal 2d-affine DOMMatrix: [a c e / b d f / 0 0 1]
 class Mat {

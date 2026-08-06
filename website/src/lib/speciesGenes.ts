@@ -44,8 +44,16 @@ export const SPECIES: Species[] = [
   },
   { taxId: 10090, label: 'Mouse', scientificName: 'Mus musculus' },
   { taxId: 7955, label: 'Zebrafish', scientificName: 'Danio rerio' },
-  { taxId: 7227, label: 'Fruit fly', scientificName: 'Drosophila melanogaster' },
-  { taxId: 6239, label: 'C. elegans', scientificName: 'Caenorhabditis elegans' },
+  {
+    taxId: 7227,
+    label: 'Fruit fly',
+    scientificName: 'Drosophila melanogaster',
+  },
+  {
+    taxId: 6239,
+    label: 'C. elegans',
+    scientificName: 'Caenorhabditis elegans',
+  },
   { taxId: 3702, label: 'Arabidopsis', scientificName: 'Arabidopsis thaliana' },
   { taxId: 559292, label: 'Yeast', scientificName: 'Saccharomyces cerevisiae' },
 ]
@@ -87,7 +95,9 @@ async function ncbiFetch(url: string): Promise<Response> {
     let attempt = 0
     while ((res.status === 429 || res.status >= 500) && attempt < 4) {
       attempt += 1
-      await new Promise(resolve => setTimeout(resolve, MIN_GAP_MS * 2 ** attempt))
+      await new Promise(resolve =>
+        setTimeout(resolve, MIN_GAP_MS * 2 ** attempt),
+      )
       res = await fetch(url)
     }
     return res
@@ -148,9 +158,14 @@ interface DatasetsGeneReport {
 // First annotation carrying a placed genomic range. NCBI can list several
 // assemblies; we take the one it reports coordinates against, since that is the
 // coordinate space the exon/CDS structure and the GenArk 2bit share.
-function pickAnnotation(gene: NonNullable<DatasetsGeneReport['reports']>[number]['gene']) {
+function pickAnnotation(
+  gene: NonNullable<DatasetsGeneReport['reports']>[number]['gene'],
+) {
   return gene?.annotations
-    ?.map(a => ({ a, loc: a.genomic_locations?.find(l => l.genomic_range?.begin) }))
+    ?.map(a => ({
+      a,
+      loc: a.genomic_locations?.find(l => l.genomic_range?.begin),
+    }))
     .find(({ loc }) => loc)
 }
 
@@ -230,10 +245,15 @@ export interface ParsedTranscript {
 
 // Parse "a-b" as {start,end} with start <= end. Minus-strand rows list the
 // interval high-to-low (e.g. 6932840-6931519), so normalize to genomic ascending.
-function parseInterval(token: string): { start: number; end: number } | undefined {
+function parseInterval(
+  token: string,
+): { start: number; end: number } | undefined {
   const m = /^(\d+)-(\d+)$/.exec(token)
   return m
-    ? { start: Math.min(Number(m[1]), Number(m[2])), end: Math.max(Number(m[1]), Number(m[2])) }
+    ? {
+        start: Math.min(Number(m[1]), Number(m[2])),
+        end: Math.max(Number(m[1]), Number(m[2])),
+      }
     : undefined
 }
 
@@ -241,14 +261,13 @@ function parseInterval(token: string): { start: number; end: number } | undefine
 // inside the first (the exon interval). UTR-only rows carry a "gene interval"
 // token there instead, which falls outside the genomic exon and is skipped.
 // Curated + predicted rows share this shape.
-function codingFromRow(line: string): { start: number; end: number } | undefined {
+function codingFromRow(
+  line: string,
+): { start: number; end: number } | undefined {
   const tokens = line.split(/\t+/).map(t => t.trim())
   const exon = parseInterval(tokens[0] ?? '')
   const second = parseInterval(tokens[1] ?? '')
-  return exon &&
-    second &&
-    second.start >= exon.start &&
-    second.end <= exon.end
+  return exon && second && second.start >= exon.start && second.end <= exon.end
     ? second
     : undefined
 }
@@ -256,9 +275,11 @@ function codingFromRow(line: string): { start: number; end: number } | undefined
 // Phase per CDS in translation order: how many bases of the previous codon spill
 // into this exon (GFF3 phase). A complete CDS starts in frame, so the running
 // coding length before an exon fixes its phase.
-function assignPhases(cds: { start: number; end: number }[], strand: 1 | -1): CDS[] {
-  const inTranslationOrder =
-    strand === 1 ? cds : [...cds].reverse()
+function assignPhases(
+  cds: { start: number; end: number }[],
+  strand: 1 | -1,
+): CDS[] {
+  const inTranslationOrder = strand === 1 ? cds : [...cds].reverse()
   let coded = 0
   const phased = inTranslationOrder.map(c => {
     const phase = (3 - (coded % 3)) % 3

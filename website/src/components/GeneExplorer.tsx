@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
-import type { ReactNode } from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
@@ -39,15 +38,12 @@ import {
 } from '../lib/geneExplorer'
 import { buildOrthologMsa } from '../lib/orthologMsa'
 import { fetchProteinStl } from '../lib/proteinStl'
-import {
-  DEFAULT_SPECIES,
-  SPECIES,
-  speciesByTaxId,
-} from '../lib/speciesGenes'
+import { DEFAULT_SPECIES, SPECIES, speciesByTaxId } from '../lib/speciesGenes'
 import { theme } from '../lib/theme'
 
 import type { GeneResult, InlineMsa } from '../lib/geneExplorer'
 import type { Species } from '../lib/speciesGenes'
+import type { ReactNode } from 'react'
 
 // Copy text to the clipboard, exposing a transient message for a Snackbar. A
 // success shows the caller's message; a rejected write (insecure context or
@@ -90,15 +86,27 @@ interface Example {
 // NCBI and carry an AlphaFold structure.
 const EXAMPLES_BY_TAXON: Record<number, Example[]> = {
   9606: [
-    { symbol: 'TP53', note: 'Tumour suppressor — mutated in ~half of all cancers' },
-    { symbol: 'KRAS', note: 'Oncogene — small and almost invariant across vertebrates' },
+    {
+      symbol: 'TP53',
+      note: 'Tumour suppressor — mutated in ~half of all cancers',
+    },
+    {
+      symbol: 'KRAS',
+      note: 'Oncogene — small and almost invariant across vertebrates',
+    },
     { symbol: 'BRAF', note: 'Melanoma V600E kinase' },
     { symbol: 'EGFR', note: 'Receptor tyrosine kinase and major drug target' },
     { symbol: 'PTEN', note: 'Tumour-suppressor phosphatase' },
-    { symbol: 'BRCA1', note: 'Hereditary breast/ovarian cancer — large multi-exon gene' },
+    {
+      symbol: 'BRCA1',
+      note: 'Hereditary breast/ovarian cancer — large multi-exon gene',
+    },
     { symbol: 'CFTR', note: 'Cystic fibrosis chloride channel' },
     { symbol: 'HBB', note: 'β-globin (sickle cell) — tiny 3-exon gene' },
-    { symbol: 'TTN', note: 'Titin — the largest human gene, extreme intron collapse' },
+    {
+      symbol: 'TTN',
+      note: 'Titin — the largest human gene, extreme intron collapse',
+    },
     { symbol: 'SOD1', note: 'ALS — small and highly conserved' },
   ],
   10090: [
@@ -110,7 +118,10 @@ const EXAMPLES_BY_TAXON: Record<number, Example[]> = {
     { symbol: 'Cftr', note: 'Cystic fibrosis chloride channel' },
   ],
   7955: [
-    { symbol: 'shha', note: 'Sonic hedgehog a — fin and floor-plate signalling' },
+    {
+      symbol: 'shha',
+      note: 'Sonic hedgehog a — fin and floor-plate signalling',
+    },
     { symbol: 'pax6a', note: 'Eye-development transcription factor' },
     { symbol: 'tp53', note: 'p53 tumour suppressor' },
     { symbol: 'myca', note: 'MYC proto-oncogene a' },
@@ -138,7 +149,10 @@ const EXAMPLES_BY_TAXON: Record<number, Example[]> = {
     { symbol: 'PHYB', note: 'Phytochrome B — red-light photoreceptor' },
   ],
   559292: [
-    { symbol: 'CDC28', note: 'Cyclin-dependent kinase — the cell-cycle engine' },
+    {
+      symbol: 'CDC28',
+      note: 'Cyclin-dependent kinase — the cell-cycle engine',
+    },
     { symbol: 'ACT1', note: 'Actin — highly conserved cytoskeleton' },
     { symbol: 'GAL4', note: 'Transcriptional activator (two-hybrid fame)' },
     { symbol: 'RAD51', note: 'Homologous-recombination recombinase' },
@@ -254,8 +268,7 @@ function useGene(symbol: string | null, species: Species) {
     }
   }, [symbol, species])
 
-  const isCurrent =
-    outcome.symbol === symbol && outcome.taxId === species.taxId
+  const isCurrent = outcome.symbol === symbol && outcome.taxId === species.taxId
   return {
     busy: symbol !== null && !isCurrent,
     // keep the previous result as a stable placeholder while the next loads (the
@@ -490,7 +503,9 @@ function GeneSearchPanel({
           <TextField
             {...params}
             label="Gene symbol"
-            placeholder={examples[0] ? `e.g. ${examples[0].symbol}` : 'e.g. TP53'}
+            placeholder={
+              examples[0] ? `e.g. ${examples[0].symbol}` : 'e.g. TP53'
+            }
             helperText={`Type any ${species.label} gene, or pick below`}
             size="small"
             slotProps={{
@@ -1120,8 +1135,9 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
         <Box component="ul" sx={{ pl: 3, m: 0, mb: 2, '& li': { mb: 1 } }}>
           <Typography component="li" variant="body2" color="text.secondary">
             <strong>Human</strong> resolves through <strong>mygene.info</strong>{' '}
-            (hg38 locus + UniProt), with the canonical transcript pulled from the
-            UCSC <Code>ncbiRefSeqSelect</Code> GFF over <strong>tabix</strong>.
+            (hg38 locus + UniProt), with the canonical transcript pulled from
+            the UCSC <Code>ncbiRefSeqSelect</Code> GFF over{' '}
+            <strong>tabix</strong>.
           </Typography>
           <Typography component="li" variant="body2" color="text.secondary">
             <strong>Other species</strong> resolve through{' '}
@@ -1135,7 +1151,8 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
             The <strong>AlphaFold</strong> structure is fetched by UniProt
             accession. The alignment is the hosted 100-way for human, or —
             outside human — built on demand from NCBI orthologs aligned at{' '}
-            <strong>EBI Clustal Omega</strong> and carried inline in the session.
+            <strong>EBI Clustal Omega</strong> and carried inline in the
+            session.
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>

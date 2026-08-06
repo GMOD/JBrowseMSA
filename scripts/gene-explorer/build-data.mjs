@@ -43,14 +43,14 @@
 // a handful of transcripts (see scripts/gene-explorer/README.md).
 
 import { spawnSync } from 'node:child_process'
+import { once } from 'node:events'
 import { createReadStream, createWriteStream } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
-import { createGunzip } from 'node:zlib'
-import { once } from 'node:events'
-import readline from 'node:readline'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import readline from 'node:readline'
 import { Readable } from 'node:stream'
+import { fileURLToPath } from 'node:url'
+import { createGunzip } from 'node:zlib'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const UCSC = 'https://hgdownload.soe.ucsc.edu/goldenPath/hg38'

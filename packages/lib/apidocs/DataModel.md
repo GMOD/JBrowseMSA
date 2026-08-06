@@ -9,15 +9,16 @@ objects in our source code.
 ## Links
 
 - [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/DataModel.ts)
-- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this model in React, HTML, and R
+- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this
+  model in React, HTML, and R
 - [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
 
 ## Overview
 
-the data stored for the model. this is sometimes temporary in the case that
-e.g. msaFilehandle is available on the parent model, because then the msa
-data will not be persisted in saved session snapshots, it will be fetched
-from msaFilehandle at startup
+the data stored for the model. this is sometimes temporary in the case that e.g.
+msaFilehandle is available on the parent model, because then the msa data will
+not be persisted in saved session snapshots, it will be fetched from
+msaFilehandle at startup
 
 ### DataModel - Properties
 

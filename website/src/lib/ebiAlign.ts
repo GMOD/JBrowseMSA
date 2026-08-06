@@ -54,7 +54,9 @@ export async function clustalOmega(
       throw new Error(`EBI alignment job ${status}`)
     }
     const secs = Math.round((Date.now() - start) / 1000)
-    onProgress(`Aligning at EBI Clustal Omega… (${status.toLowerCase()}, ${secs}s)`)
+    onProgress(
+      `Aligning at EBI Clustal Omega… (${status.toLowerCase()}, ${secs}s)`,
+    )
     await wait(2000)
   }
   throw new Error('EBI alignment timed out')

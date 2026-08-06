@@ -9,7 +9,8 @@ objects in our source code.
 ## Links
 
 - [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/msaModel.ts)
-- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this model in React, HTML, and R
+- [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this
+  model in React, HTML, and R
 - [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
 
 ## Overview
@@ -40,8 +41,8 @@ colorSchemeName: defaultColorSchemeName
 
 #### property: msaFormat
 
-force the MSA data to be parsed as a specific format instead of relying
-on auto-detection (which is ambiguous between e.g. fasta and a3m)
+force the MSA data to be parsed as a specific format instead of relying on
+auto-detection (which is ambiguous between e.g. fasta and a3m)
 
 ```js
 // type signature

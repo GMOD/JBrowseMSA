@@ -642,7 +642,11 @@ function linearGenomeView(
 // Fields every MsaView shares regardless of where its alignment comes from.
 // uniprotId lets MsaView.autoConnectStructures link to the AlphaFold structure
 // (it derives the same id from the structure's url, so the two match).
-function msaViewBase(transcript: Transcript, feature: Feature, uniprotId?: string) {
+function msaViewBase(
+  transcript: Transcript,
+  feature: Feature,
+  uniprotId?: string,
+) {
   return {
     id: `msa-${transcript.geneName}`,
     type: 'MsaView',
@@ -755,7 +759,12 @@ export function buildSessionUrl({
   // without a hosted track
   const assemblyName = assemblyAccession ?? 'hg38'
   const tracks = assemblyAccession ? [] : [GENE_TRACK]
-  const lgv = linearGenomeView(transcript, collapseIntrons, assemblyName, tracks)
+  const lgv = linearGenomeView(
+    transcript,
+    collapseIntrons,
+    assemblyName,
+    tracks,
+  )
 
   // one MSA source at most: the hosted 100-way (human) or an inline ortholog
   // alignment (non-human, built on demand)

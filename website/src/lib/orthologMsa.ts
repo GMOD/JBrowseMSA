@@ -102,7 +102,9 @@ async function fetchRepresentativeProteins(
           len: t.protein?.length ?? 0,
           mane: /select/i.test(t.select_category ?? ''),
         }))
-        .filter((c): c is { acc: string; len: number; mane: boolean } => !!c.acc)
+        .filter(
+          (c): c is { acc: string; len: number; mane: boolean } => !!c.acc,
+        )
       const best =
         candidates.find(c => c.mane) ??
         [...candidates].sort((a, b) => b.len - a.len).at(0)
