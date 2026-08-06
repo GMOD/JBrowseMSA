@@ -83,7 +83,9 @@ async function main() {
               : undefined,
         }
       })
-      if (pageState.jbrowseUrl) break
+      if (pageState.jbrowseUrl) {
+        break
+      }
       await delay(1000)
     }
     console.log(
@@ -125,7 +127,9 @@ async function main() {
           }
           return false
         })
-        if (clicked) break
+        if (clicked) {
+          break
+        }
         await delay(1000)
       }
 
@@ -164,7 +168,9 @@ async function main() {
         for (let i = 0; i < 90; i++) {
           ready = await page.evaluate(() => {
             const root = window.JBrowseRootModel
-            if (!root) return { stage: 'no-root' }
+            if (!root) {
+              return { stage: 'no-root' }
+            }
             const views = root.session?.views ?? []
             const pv = views.find(v => v.type === 'ProteinView')
             const msa = views.find(v => v.type === 'MsaView')
@@ -182,16 +188,21 @@ async function main() {
                   : undefined,
             }
           })
-          if (ready.error) console.log('  [model error]', ready.error)
-          if (ready.structure && ready.aligned && ready.structureConnected)
+          if (ready.error) {
+            console.log('  [model error]', ready.error)
+          }
+          if (ready.structure && ready.aligned && ready.structureConnected) {
             break
+          }
           await delay(2000)
         }
         console.log('  jbrowse ready:', JSON.stringify(ready))
-        if (!ready?.aligned)
+        if (!ready?.aligned) {
           failures.push('structure pairwiseAlignment never computed')
-        if (!ready?.structureConnected)
+        }
+        if (!ready?.structureConnected) {
           failures.push('structure.connectedView never resolved')
+        }
       }
 
       if (ready?.aligned && ready?.structureConnected) {
@@ -226,21 +237,27 @@ async function main() {
         )
         console.log('  probe:', JSON.stringify(probe))
 
-        if (!probe.a)
+        if (!probe.a) {
           failures.push('hoverGenomeHighlights empty for a mid-protein residue')
-        if (probe.a && !probe.inCds)
+        }
+        if (probe.a && !probe.inCds) {
           failures.push(
             `highlight start ${probe.a.start} outside CDS [${cds.min},${cds.max}]`,
           )
-        if (probe.a && probe.a.refName !== cds.refName)
+        }
+        if (probe.a && probe.a.refName !== cds.refName) {
           failures.push(
             `highlight refName ${probe.a.refName} != ${cds.refName}`,
           )
-        if (probe.codonGap !== undefined && probe.codonGap !== 3)
+        }
+        if (probe.codonGap !== undefined && probe.codonGap !== 3) {
           failures.push(
             `adjacent residues map ${probe.codonGap} bp apart, expected 3`,
           )
-        if (!probe.click) failures.push('clickGenomeHighlights empty')
+        }
+        if (!probe.click) {
+          failures.push('clickGenomeHighlights empty')
+        }
 
         // the model getter being right isn't enough — the LGV must actually
         // RENDER the highlight. This catches the refname-aliasing class of bug
@@ -256,10 +273,11 @@ async function main() {
             ).length,
         )
         console.log('  rendered highlight overlays in LGV:', domHighlights)
-        if (domHighlights === 0)
+        if (domHighlights === 0) {
           failures.push(
             'LGV rendered NO highlight overlay despite valid clickGenomeHighlights (refname alias / rendering bug)',
           )
+        }
       }
     }
   } finally {

@@ -58,10 +58,14 @@ try {
           (a.href || '').includes('session=spec-'),
         )?.href,
     )
-    if (url) break
+    if (url) {
+      break
+    }
     await delay(1000)
   }
-  if (!url) throw new Error('gene-explorer page did not produce a JBrowse URL')
+  if (!url) {
+    throw new Error('gene-explorer page did not produce a JBrowse URL')
+  }
 
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 })
   for (let i = 0; i < 15; i++) {
@@ -75,7 +79,9 @@ try {
       }
       return false
     })
-    if (clicked) break
+    if (clicked) {
+      break
+    }
     await delay(1000)
   }
 
@@ -87,7 +93,9 @@ try {
       )?.structures?.[0]
       return !!s?.pairwiseAlignment && !!s?.connectedView
     })
-    if (ready) break
+    if (ready) {
+      break
+    }
     await delay(2000)
   }
 
