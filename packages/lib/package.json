@@ -38,11 +38,11 @@
   },
   "peerDependencies": {
     "@jbrowse/core": ">=2.0.0",
-    "@jbrowse/mobx-state-tree": "^5.0.0",
+    "@jbrowse/mobx-state-tree": "^6.0.0",
     "@mui/icons-material": ">=5.0.0",
     "@mui/material": ">=5.0.0",
-    "mobx": ">=6.0.0",
-    "mobx-react": ">=7.0.0",
+    "mobx": ">=7.0.0",
+    "mobx-react": ">=9.0.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
@@ -57,7 +57,8 @@
     "main": "dist/index.js"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
+    "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
+    "@types/node": "^26.1.2",
     "esbuild": "^0.28.1"
   },
   "dependencies": {
