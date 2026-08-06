@@ -69,13 +69,21 @@ export const specs = [
     clip: 'viewer',
   },
   {
-    name: 'settings-dialog',
+    // Was 'settings-dialog', driving file menu -> "More settings" -> a modal
+    // with "Tree options"/"MSA options" sections. That dialog is gone: Header
+    // now renders TreeSettingsMenu and MSASettingsMenu as their own dropdowns
+    // (the combined SettingsMenu.tsx isn't mounted at all), so the old spec had
+    // been failing on a menu item that exists nowhere in the source.
+    name: 'settings-menu',
     url: data({ colorSchemeName: 'maeditor' }),
     actions: [
-      { click: '[data-testid="file_menu"]' },
-      { click: '::-p-text(More settings)' },
-      { waitFor: '::-p-text(Tree options)' },
+      { click: '[data-testid="msa_settings_menu"]' },
+      { waitFor: '::-p-text(Draw letters)' },
     ],
+    // clip: 'full' is required (the menu renders in a portal outside the
+    // viewer), so the viewport is sized to the content instead — a four-item
+    // dropdown in the default 720px frame is mostly empty space.
+    viewportHeight: 380,
     clip: 'full',
   },
   {
