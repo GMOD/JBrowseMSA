@@ -1,0 +1,37 @@
+# NLRP1 inflammasome sensor across vertebrates — a true ortholog set whose
+# members differ in domain architecture.
+#
+# Every row shares the same core, in the same order: NACHT nucleotide-binding
+# domain, winged helix, HD2 helical domain, then FIIND / UPA-FIIND / CARD at the
+# C terminus. What varies is the N terminus: a PYD (pyrin) death-fold domain is
+# present in primates, dog and hedgehog and absent in rodents, artiodactyls,
+# horse and fish. Rodent Nlrp1 lacking the PYD that human NLRP1 carries is the
+# well-documented case (mouse Nlrp1a/b); the wider pattern here is as annotated
+# by Pfam, and some rows are unreviewed entries whose gene models may under-call
+# domains (cow has no LRRs called at all).
+#
+# The point for the viewer: in ungapped residue coordinates the shared NACHT sits
+# at ~aa 328 in human and ~aa 134 in mouse, so a residue-anchored domain cartoon
+# renders these orthologs as if their architectures disagreed. Column-locked,
+# they stack — and the gap under the human PYD is where the missing module is.
+#
+# Human first so relativeTo="Human" is available, though the domain overlay,
+# not the identity diff, is the story here.
+#
+# Tree caveat: ClustalW neighbor-joining recovers the primate, rodent and
+# artiodactyl groupings, but pulls zebrafish (branch length 0.57, by far the
+# longest) in beside the rodents rather than out as the outgroup — ordinary
+# long-branch attraction. The tree is illustrative, as for every dataset here;
+# the domain overlay is what this example is demonstrating.
+Q9C000	Human
+H2QC06	Chimp
+A0A1D5QWR0	Rhesus
+A0A8I3MJ75	Dog
+A0ABM3YGI7	Hedgehog
+E1BNN6	Cow
+K9IW94	Pig
+A0A9L0RFW2	Horse
+Q2LKU9	Mouse
+D9I2G4	Rat
+A0ABM2XMM7	Hamster
+A0A386CAB9	Zebrafish

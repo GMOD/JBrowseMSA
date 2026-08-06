@@ -34,6 +34,8 @@ import Myd88 from './Myd88'
 import Myd88Src from './Myd88.tsx?raw'
 import Nextstrain from './Nextstrain'
 import NextstrainSrc from './Nextstrain.tsx?raw'
+import Nlrp1 from './Nlrp1'
+import Nlrp1Src from './Nlrp1.tsx?raw'
 import NucleotideAlignment from './NucleotideAlignment'
 import NucleotideAlignmentSrc from './NucleotideAlignment.tsx?raw'
 import Opsins from './Opsins'
@@ -169,6 +171,18 @@ export const examples: Example[] = [
       'reference diff showing as dots in the unannotated linkers.',
     Component: P53,
     source: P53Src,
+  },
+  {
+    name: 'Domain loss across orthologs (NLRP1)',
+    category: 'Protein domains',
+    description:
+      'Twelve NLRP1 orthologs that share a six-domain core but differ at the ' +
+      'N terminus: the PYD is present in primates, dog and hedgehog and absent ' +
+      'in rodents, artiodactyls, horse and fish. The core domains sit up to 391 ' +
+      'residues apart between rows yet land within 2 alignment columns — which ' +
+      'is why the overlay is column-locked and not drawn per-protein.',
+    Component: Nlrp1,
+    source: Nlrp1Src,
   },
   {
     name: 'One conserved domain (Hox homeodomain)',
