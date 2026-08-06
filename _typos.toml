@@ -19,3 +19,7 @@ Tro = "Tro"
 IIF = "IIF"
 PN = "PN"
 ALS = "ALS"
+# gene names the checker reads as misspellings: Wnt (Wingless/Int-1 ligand
+# family) and CONSTANS (the Arabidopsis flowering-time gene, symbol CO)
+Wnt = "Wnt"
+CONSTANS = "CONSTANS"
