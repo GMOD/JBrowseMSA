@@ -100,7 +100,22 @@ pnpm install
 | `pnpm test`                          | Run the test suite                                                                  |
 | `pnpm figures`                       | Regenerate the README figures (headless SVG, `packages/lib/scripts`)                |
 | `pnpm screenshots`                   | Regenerate the user-guide app screenshots (diff-gated; only changed images rewrite) |
-| `pnpm lint` / `format` / `typecheck` | Lint, format with Prettier, typecheck all packages                                  |
+| `pnpm lint` / `format` / `typecheck` | Lint (oxlint), format (oxfmt, plus Prettier for `.astro`), typecheck all packages   |
+
+The workspace is **pnpm-only** — `pnpm-lock.yaml` at the root is the single
+lockfile, and a `preinstall` guard
+([scripts/only-pnpm.mjs](scripts/only-pnpm.mjs)) stops an accidental
+`npm install`/`yarn` from producing a second, unvetted dependency tree. Get pnpm
+with `corepack enable`.
+
+You'll also notice `@jbrowse/core` and `@jbrowse/render-core` resolved from
+tarballs in `vendor-jbrowse/` via `overrides` in
+[pnpm-workspace.yaml](pnpm-workspace.yaml). This is a **temporary stopgap**: the
+workspace is on MUI v9 and there is no MUI-v9-compatible `@jbrowse/core` on npm
+yet. The tarballs are built from a local jbrowse-components checkout with
+[scripts/pack-local-jbrowse.mjs](scripts/pack-local-jbrowse.mjs) and are checked
+in so `main` stays installable. Both the override block and the tarballs go away
+once a compatible version is published.
 
 Architecture notes live in [CLAUDE.md](CLAUDE.md); the core state model is
 `packages/lib/src/model.ts` (MobX-state-tree), and `observer`-wrapped components
@@ -115,7 +130,9 @@ re-render when observed model properties change.
   the `gh-pages` branch on every push to `main`. To deploy by hand:
   `pnpm deploy:pages`.
 - **Examples gallery → jbrowse.org/storybook/msa** is deployed separately and
-  **must be run locally** (it needs AWS credentials): `pnpm deploy:storybook`.
+  **must be run locally** (it needs AWS credentials). Build it with
+  `pnpm --filter examples build`, then upload `packages/examples/dist/` by hand
+  — there is no `deploy:` script for this one yet.
 
 ## Releasing
 

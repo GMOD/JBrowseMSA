@@ -45,5 +45,6 @@ Astro's `_astro/` assets survive). The
 `pnpm deploy:pages` does the same by hand.
 
 The interactive **examples gallery** (`packages/examples`,
-jbrowse.org/storybook/msa) deploys separately and must be run locally
-(`pnpm deploy:storybook`, needs AWS credentials).
+jbrowse.org/storybook/msa) deploys separately and must be run locally (needs AWS
+credentials): `pnpm --filter examples build`, then upload
+`packages/examples/dist/` by hand. There is no `deploy:` script for it yet.

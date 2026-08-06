@@ -29,7 +29,7 @@ jobs:
         run: pnpm --filter app build
 
       - name: Build CLI
-        run: pnpm --filter @react-msaview/cli build
+        run: pnpm --filter react-msaview-cli build
 
       - name: Typecheck
         run: pnpm typecheck

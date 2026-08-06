@@ -1,4 +1,4 @@
-# @react-msaview/cli
+# react-msaview-cli
 
 Command-line tools for [react-msaview](../) (JBrowseMSA), including batch
 InterProScan processing for multiple sequence alignments.
@@ -12,10 +12,10 @@ for file format support.
 ```bash
 # From the monorepo root
 pnpm install
-pnpm --filter @react-msaview/cli build
+pnpm --filter react-msaview-cli build
 
 # Or install globally (after publishing)
-pnpm add -g @react-msaview/cli
+pnpm add -g react-msaview-cli
 ```
 
 ## Commands
