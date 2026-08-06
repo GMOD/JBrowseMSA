@@ -6,7 +6,7 @@ The simplest way to use react-msaview in a React app. Handles model creation,
 width measurement, and theming automatically.
 
 ```sh
-npm install react-msaview @jbrowse/core @mui/material react react-dom @emotion/styled @emotion/react
+pnpm add react-msaview @jbrowse/core @mui/material react react-dom @emotion/styled @emotion/react
 ```
 
 ```tsx

@@ -8,9 +8,7 @@ Part of [react-msaview](../) (JBrowseMSA).
 ## Installation
 
 ```bash
-npm install msa-parsers
-# or
-yarn add msa-parsers
+pnpm add msa-parsers
 ```
 
 ## Supported formats

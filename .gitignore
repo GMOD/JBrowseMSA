@@ -108,6 +108,13 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
+# pnpm-only workspace: pnpm-lock.yaml is the single source of truth, so keep
+# stray yarn/npm lockfiles from ever being committed again.
+yarn.lock
+package-lock.json
+npm-shrinkwrap.json
+bun.lockb
+
 # yarn v2
 .yarn/cache
 .yarn/unplugged

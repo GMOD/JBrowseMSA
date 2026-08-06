@@ -9,7 +9,7 @@ many color schemes, and SVG export.
 ## Install
 
 ```sh
-npm install react-msaview @jbrowse/core @mui/material @emotion/react @emotion/styled react react-dom
+pnpm add react-msaview @jbrowse/core @mui/material @emotion/react @emotion/styled react react-dom
 ```
 
 ## Quick start

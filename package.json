@@ -3,7 +3,12 @@
   "type": "module",
   "license": "MIT",
   "packageManager": "pnpm@11.4.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=11"
+  },
   "scripts": {
+    "preinstall": "node scripts/only-pnpm.mjs",
     "dev": "pnpm --filter app dev",
     "watch": "pnpm -r --parallel --filter svgcanvas --filter msa-parsers --filter react-msaview --filter app run '/^(watch|dev)$/'",
     "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build",

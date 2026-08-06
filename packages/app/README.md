@@ -7,5 +7,5 @@ Deployed at https://gmod.org/JBrowseMSA
 ## Development
 
 ```bash
-yarn dev
+pnpm dev
 ```

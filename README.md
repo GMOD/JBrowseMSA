@@ -29,7 +29,7 @@ Jump to what you need:
 ## Quick start (React)
 
 ```sh
-npm install react-msaview @jbrowse/core @mui/material @emotion/react @emotion/styled react react-dom
+pnpm add react-msaview @jbrowse/core @mui/material @emotion/react @emotion/styled react react-dom
 ```
 
 ```tsx

@@ -15,7 +15,7 @@ pnpm install
 pnpm --filter @react-msaview/cli build
 
 # Or install globally (after publishing)
-npm install -g @react-msaview/cli
+pnpm add -g @react-msaview/cli
 ```
 
 ## Commands
