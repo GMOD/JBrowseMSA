@@ -26,40 +26,31 @@ group color, with a small legend. Reuse the existing color infrastructure in
 
 From a repo-wide review pass. Real but lower-priority or judgment calls.
 
-### The domain legend is capped against the content box, not the visible one
+### The domain legend is NOT clipped, and this is here so nobody re-opens it
 
-`DomainLegend.tsx` already carries `maxHeight: '60%'` and `overflow: 'auto'`, so
-the obvious reading (it needs scrolling) is wrong and should not be acted on.
-Measured in a real page instead, with `getComputedStyle` over the box tree:
+A long-running claim downstream in JBrowse held that `DomainLegend.tsx` gets cut
+off by the view's fixed height once an alignment carries more distinct CDD
+domains than fit, and that the fix was to scroll or cap it. Measured on a real
+page (a twelve-row NLRP1 ortholog alignment, 18 legend entries, MsaView under an
+LGV in a 878px viewport) it is none of those things:
 
-- the Paper's positioned containing block is `MSAPanel`'s
-  `position: relative` wrapper, whose height is the **alignment content**
-  height (686px in the probe)
-- that wrapper sits inside an `overflow: hidden` box which is the **visible**
-  area (550px, `scrollHeight` 724)
+- `maxHeight: '60%'` resolves. The Paper is 330px, which is 60% of the 550px
+  `MSAPanel` wrapper. Percentage max-height does resolve against a positioned
+  ancestor even when that ancestor's own height is content-derived, because the
+  Paper is absolutely positioned.
+- Nothing clips it. Paper bottom 813, nearest `overflow: hidden` ancestor bottom
+  855, and zero legend rows fall past that edge.
+- The inner `overflow: 'auto'` div really does scroll: `clientHeight` 296 against
+  `scrollHeight` 313.
 
-So `60%` is 60% of 686, not of 550. The cap grows with the alignment while the
-space to draw in does not, and past the crossover the legend runs off the bottom
-and is cut by the hidden ancestor without its own `overflow: auto` ever
-engaging, since it never reached its max-height. More rows makes it worse, and
-more rows is also what puts more distinct domain types in the legend, so the two
-move together. The model already has the right number: `msaAreaHeight` is the
-visible height (`height - headerHeight - minimapHeight`), and
-`showVerticalScrollbar` is `msaAreaHeight < totalHeight`, i.e. exactly this
-distinction, drawn correctly elsewhere.
+So the component behaves as designed. What it looks like is a scrollable list
+whose last row is half-visible, and in a **screenshot** that is indistinguishable
+from truncation, which is where the claim came from. Raising the embedding
+frame does not help, correctly: the legend is sized off the view, not the page.
 
-There is a second defect in the same place, and it is why this is a design
-decision rather than swapping one number. Being positioned inside the content
-wrapper pins the legend to the content, so it scrolls away when the alignment is
-scrolled vertically. A key that leaves the screen is arguably wrong for an
-overlay whose whole job is to stay readable, so the fix is probably to position
-it against the visible box and cap it there, which is one change, not two.
-
-Seen from JBrowse: a twelve-row NLRP1 ortholog alignment carries more distinct
-CDD domains than the fixed view height can show, and the last entries are cut
-off. Raising the embedding frame does nothing, because it is this element
-clipping and not the frame (measured: +130px of frame gave 128px of blank page
-and the same clipping).
+If the last entries should be readable without scrolling, that is a design
+change (a taller cap, a wider two-column key, or drawing the key outside the
+alignment area), not a bug fix, and it should be argued on its own merits.
 
 ### InterPro domain box stacking overflow
 
