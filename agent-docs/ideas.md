@@ -26,6 +26,41 @@ group color, with a small legend. Reuse the existing color infrastructure in
 
 From a repo-wide review pass. Real but lower-priority or judgment calls.
 
+### The domain legend is capped against the content box, not the visible one
+
+`DomainLegend.tsx` already carries `maxHeight: '60%'` and `overflow: 'auto'`, so
+the obvious reading (it needs scrolling) is wrong and should not be acted on.
+Measured in a real page instead, with `getComputedStyle` over the box tree:
+
+- the Paper's positioned containing block is `MSAPanel`'s
+  `position: relative` wrapper, whose height is the **alignment content**
+  height (686px in the probe)
+- that wrapper sits inside an `overflow: hidden` box which is the **visible**
+  area (550px, `scrollHeight` 724)
+
+So `60%` is 60% of 686, not of 550. The cap grows with the alignment while the
+space to draw in does not, and past the crossover the legend runs off the bottom
+and is cut by the hidden ancestor without its own `overflow: auto` ever
+engaging, since it never reached its max-height. More rows makes it worse, and
+more rows is also what puts more distinct domain types in the legend, so the two
+move together. The model already has the right number: `msaAreaHeight` is the
+visible height (`height - headerHeight - minimapHeight`), and
+`showVerticalScrollbar` is `msaAreaHeight < totalHeight`, i.e. exactly this
+distinction, drawn correctly elsewhere.
+
+There is a second defect in the same place, and it is why this is a design
+decision rather than swapping one number. Being positioned inside the content
+wrapper pins the legend to the content, so it scrolls away when the alignment is
+scrolled vertically. A key that leaves the screen is arguably wrong for an
+overlay whose whole job is to stay readable, so the fix is probably to position
+it against the visible box and cap it there, which is one change, not two.
+
+Seen from JBrowse: a twelve-row NLRP1 ortholog alignment carries more distinct
+CDD domains than the fixed view height can show, and the last entries are cut
+off. Raising the embedding frame does nothing, because it is this element
+clipping and not the frame (measured: +130px of frame gave 128px of blank page
+and the same clipping).
+
 ### InterPro domain box stacking overflow
 
 `renderBoxFeatureCanvasBlock.ts` draws stacked sub-feature boxes at a hardcoded
