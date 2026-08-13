@@ -124,6 +124,34 @@ describe('FastaMSA duplicate deflines', () => {
   })
 })
 
+describe('ClustalMSA row lookup', () => {
+  const clustal = `CLUSTAL W (1.83) multiple sequence alignment
+
+seq1      ACDEFGHIKL
+seq2      MNPQRSTVWY
+`
+
+  test('getRow returns the right row', () => {
+    const msa = new ClustalMSA(clustal)
+    expect(msa.getRow('seq1')).toBe('ACDEFGHIKL')
+    expect(msa.getRow('seq2')).toBe('MNPQRSTVWY')
+    expect(msa.getRow('nope')).toBe('')
+  })
+
+  test('a repeated name resolves to the first row', () => {
+    // The name->row map replaced a find(), which returned the first match;
+    // building the map naively would silently flip this to the last. Only
+    // malformed input reaches here -- clustal-js already merges the repeated
+    // names of a normal interleaved file into one aln per id.
+    const dup = `CLUSTAL W (1.83) multiple sequence alignment
+
+seq1      AAAAAAAAAA
+seq1      CCCCCCCCCC
+`
+    expect(new ClustalMSA(dup).getRow('seq1')).toBe('AAAAAAAAAA')
+  })
+})
+
 describe('StockholmMSA row order', () => {
   test('preserves file order for numeric sequence names', () => {
     // object key order hoists integer-like keys, so Object.keys(seqdata) would
