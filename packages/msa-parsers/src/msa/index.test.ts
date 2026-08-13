@@ -114,6 +114,31 @@ describe('FastaMSA CRLF line endings', () => {
   })
 })
 
+describe('FastaMSA duplicate deflines', () => {
+  test('keeps the first record rather than emitting a phantom row', () => {
+    // getNames drives the row list while seqdata is keyed by id, so a repeated
+    // id used to render twice, both rows showing the last record's residues
+    const msa = new FastaMSA('>a\nAAAAA\n>b\nBBBBB\n>a\nCCCCC')
+    expect(msa.getNames()).toEqual(['a', 'b'])
+    expect(msa.getRow('a')).toBe('AAAAA')
+  })
+})
+
+describe('StockholmMSA row order', () => {
+  test('preserves file order for numeric sequence names', () => {
+    // object key order hoists integer-like keys, so Object.keys(seqdata) would
+    // return 1, 2, 10 regardless of how the file is written
+    const stockholm = `# STOCKHOLM 1.0
+10  ACDEF
+2   GHIKL
+1   MNPQR
+//`
+    const msa = parseMSA(stockholm)
+    expect(msa.getNames()).toEqual(['10', '2', '1'])
+    expect(msa.getRow('10')).toBe('ACDEF')
+  })
+})
+
 describe('parseNewick single-quoted names', () => {
   test('parses quoted name containing a colon', () => {
     const tree = parseNewick(
@@ -133,6 +158,24 @@ describe('parseNewick single-quoted names', () => {
     const tree = parseNewick('(seq1:0.1,seq2:0.2);')
     const names = tree.children.map((c: Record<string, unknown>) => c.name)
     expect(names).toEqual(['seq1', 'seq2'])
+  })
+
+  test('restores a quote that covers only part of a name', () => {
+    // the placeholder is embedded in a larger token here, so an anchored
+    // restore left the raw __Q0__ marker in the name
+    const tree = parseNewick("(foo'a b':0.1,seq2:0.2);")
+    const names = tree.children.map((c: Record<string, unknown>) => c.name)
+    expect(names).toEqual(['fooa b', 'seq2'])
+  })
+})
+
+describe('parseNewick unnamed nodes', () => {
+  test('leaves an unnamed internal node without a name', () => {
+    const tree = parseNewick('((A:0.1,B:0.2):0.5,C:0.3);')
+    expect(tree.name).toBeUndefined()
+    expect(tree.children[0].name).toBeUndefined()
+    expect(tree.children[0].length).toBe(0.5)
+    expect(tree.children[1].name).toBe('C')
   })
 })
 

@@ -69,11 +69,15 @@ export default function parse(s: string) {
   })
 
   let tree = {} as Record<string, any>
-  const tokens = preprocessed.split(/\s*(;|\(|\)|,|:)\s*/)
+  // adjacent delimiters split to empty strings; dropping them keeps the
+  // tokens[i-1] lookback meaningful and stops unnamed internal nodes from
+  // picking up a spurious empty name
+  const tokens = preprocessed.split(/\s*(;|\(|\)|,|:)\s*/).filter(t => t !== '')
   for (let i = 0; i < tokens.length; i++) {
-    const raw = tokens[i]!
-    const token = raw.replace(
-      /^__Q(\d+)__$/,
+    // global, not anchored: a partially-quoted name like foo'a b' leaves the
+    // placeholder embedded in a larger token
+    const token = tokens[i]!.replaceAll(
+      /__Q(\d+)__/g,
       (_, idx: string) => quotedNames[Number(idx)]!,
     )
     const subtree = {}
@@ -91,6 +95,8 @@ export default function parse(s: string) {
         tree = ancestors.pop()!
         break
       case ':': // optional length next
+        break
+      case ';': // end of tree; never a name, even directly after a ')'
         break
       default: {
         const x = tokens[i - 1]!
