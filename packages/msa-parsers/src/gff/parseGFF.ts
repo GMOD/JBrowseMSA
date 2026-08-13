@@ -53,7 +53,10 @@ export function parseGFF(str?: string): GFFRecord[] {
       const [seq_id, source, type, start, end, score, strand, phase] = parts
       const col9 = parts[8]
 
+      // attributes first, so a column-9 key colliding with a core column (e.g.
+      // "start=") can't turn a number field into a string
       return {
+        ...parseAttributes(col9),
         seq_id: seq_id ?? '',
         source: source ?? '',
         type: type ?? '',
@@ -62,7 +65,6 @@ export function parseGFF(str?: string): GFFRecord[] {
         score: Number(score) || 0,
         strand: strand ?? '.',
         phase: phase ?? '.',
-        ...parseAttributes(col9),
       }
     })
 }

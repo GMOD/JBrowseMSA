@@ -43,17 +43,7 @@ function geneStrand({ type, strand }: GFFRecord): number | undefined {
 export function gffToInterProResults(
   gffRecords: GFFRecord[],
 ): Record<string, InterProScanResults> {
-  const bySequence = new Map<string, GFFRecord[]>()
-
-  for (const record of gffRecords) {
-    const existing = bySequence.get(record.seq_id)
-    if (existing) {
-      existing.push(record)
-    } else {
-      bySequence.set(record.seq_id, [record])
-    }
-  }
-
+  const bySequence = Map.groupBy(gffRecords, record => record.seq_id)
   const results: Record<string, InterProScanResults> = {}
 
   for (const [seqId, records] of bySequence) {
@@ -95,32 +85,23 @@ export function gffToInterProResults(
         })
       }
 
-      const location = {
+      let locations = matchesByAccession.get(accession)
+      if (!locations) {
+        locations = []
+        matchesByAccession.set(accession, locations)
+      }
+      locations.push({
         start: record.start,
         end: record.end,
         strand: geneStrand(record),
-      }
-      const locations = matchesByAccession.get(accession)
-      if (locations) {
-        locations.push(location)
-      } else {
-        matchesByAccession.set(accession, [location])
-      }
-    }
-
-    const matches = []
-    for (const [accession, locations] of matchesByAccession) {
-      const info = matchInfo.get(accession)!
-      matches.push({
-        signature: {
-          entry: info,
-        },
-        locations,
       })
     }
 
     results[seqId] = {
-      matches,
+      matches: [...matchesByAccession].map(([accession, locations]) => ({
+        signature: { entry: matchInfo.get(accession)! },
+        locations,
+      })),
       xref: [{ id: seqId }],
     }
   }

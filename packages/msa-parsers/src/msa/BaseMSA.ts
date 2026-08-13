@@ -19,10 +19,10 @@ export default abstract class BaseMSA {
     }
   }
 
-  getRowData(_name: string) {
-    return undefined as
-      | { name?: string; accession?: string; dbxref?: string }
-      | undefined
+  getRowData(
+    _name: string,
+  ): { name?: string; accession?: string; dbxref?: string } | undefined {
+    return undefined
   }
 
   getStructures(): Record<string, unknown> {
