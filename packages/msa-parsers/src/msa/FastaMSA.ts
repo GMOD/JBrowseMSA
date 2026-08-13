@@ -1,4 +1,5 @@
 import BaseMSA from './BaseMSA.ts'
+import { splitFastaRecords } from './fastaRecords.ts'
 
 export default class FastaMSA extends BaseMSA {
   private MSA: {
@@ -8,31 +9,22 @@ export default class FastaMSA extends BaseMSA {
 
   // explicit insertion-ordered ids: object key order reorders integer-like
   // keys (e.g. a numeric ">123" defline) to the front, scrambling row order
-  private orderedNames: string[] = []
+  private orderedNames: string[]
 
   constructor(text: string) {
     super()
+    const records = splitFastaRecords(text)
     const seqdata: Record<string, string> = {}
     const colonNormalized: Record<string, string> = {}
-    for (const entry of text.split('>')) {
-      if (!/\S/.test(entry)) {
-        continue
-      }
-      const newlineIdx = entry.indexOf('\n')
-      if (newlineIdx === -1) {
-        continue
-      }
-      const defLine = entry.slice(0, newlineIdx).replace(/\r$/, '')
-      const spaceIdx = defLine.indexOf(' ')
-      const id = spaceIdx === -1 ? defLine : defLine.slice(0, spaceIdx)
-      if (id) {
-        seqdata[id] = entry.slice(newlineIdx + 1).replaceAll(/\s/g, '')
-        this.orderedNames.push(id)
-        if (id.includes(':')) {
-          colonNormalized[id.replaceAll(':', '_')] = id
-        }
+
+    for (const { id, seq } of records) {
+      seqdata[id] = seq
+      if (id.includes(':')) {
+        colonNormalized[id.replaceAll(':', '_')] = id
       }
     }
+
+    this.orderedNames = records.map(r => r.id)
     this.MSA = { seqdata, colonNormalized }
   }
 

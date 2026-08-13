@@ -1,4 +1,5 @@
 import BaseMSA from './BaseMSA.ts'
+import { splitFastaRecords } from './fastaRecords.ts'
 
 /**
  * A3M Format Parser
@@ -27,10 +28,42 @@ const CODE_Z = 90 // 'Z'
 const CODE_a = 97 // 'a'
 const CODE_z = 122 // 'z'
 const CODE_DASH = 45 // '-'
-const CODE_DOT = 46 // '.'
 
 function isLower(code: number): boolean {
   return code >= CODE_a && code <= CODE_z
+}
+
+function isMatch(code: number): boolean {
+  return (code >= CODE_A && code <= CODE_Z) || code === CODE_DASH
+}
+
+interface ParsedRow {
+  // one entry per match column, in order
+  matches: string[]
+  // inserts[k] is the run of insert residues sitting immediately BEFORE match
+  // column k, already uppercased; inserts[matches.length] holds the trailing
+  // run. An insert must never consume a match column, or a row that opens with
+  // an insert falls a column out of register with every other row.
+  inserts: string[]
+}
+
+function parseRow(seq: string): ParsedRow {
+  const matches: string[] = []
+  const inserts = ['']
+
+  for (const ch of seq) {
+    const code = ch.charCodeAt(0)
+    if (isMatch(code)) {
+      matches.push(ch)
+      inserts.push('')
+    } else if (isLower(code)) {
+      inserts[inserts.length - 1] += ch.toUpperCase()
+    }
+    // '.' is padding aligned to some other row's insert, and anything else is
+    // unrecognized -- neither carries alignment information
+  }
+
+  return { matches, inserts }
 }
 
 export default class A3mMSA extends BaseMSA {
@@ -39,28 +72,14 @@ export default class A3mMSA extends BaseMSA {
 
   constructor(text: string) {
     super()
-    const rawSeqs: string[] = []
-    const names: string[] = []
-
-    for (const entry of text.split('>')) {
-      if (!/\S/.test(entry)) {
-        continue
-      }
-      const newlineIdx = entry.indexOf('\n')
-      if (newlineIdx === -1) {
-        continue
-      }
-      const defLine = entry.slice(0, newlineIdx).replace(/\r$/, '')
-      const spaceIdx = defLine.indexOf(' ')
-      const id = spaceIdx === -1 ? defLine : defLine.slice(0, spaceIdx)
-      if (id) {
-        rawSeqs.push(entry.slice(newlineIdx + 1).replaceAll(/\s/g, ''))
-        names.push(id)
-      }
+    const records = splitFastaRecords(text)
+    this.orderedNames = records.map(r => r.id)
+    this.MSA = {
+      seqdata: expandA3M(
+        records.map(r => r.seq),
+        this.orderedNames,
+      ),
     }
-
-    this.orderedNames = names
-    this.MSA = { seqdata: this.expandA3M(rawSeqs, names) }
   }
 
   static sniff(text: string): boolean {
@@ -68,20 +87,9 @@ export default class A3mMSA extends BaseMSA {
       return false
     }
 
-    const seqs: string[] = []
-    for (const entry of text.split('>')) {
-      if (!/\S/.test(entry)) {
-        continue
-      }
-      const newlineIdx = entry.indexOf('\n')
-      if (newlineIdx === -1) {
-        continue
-      }
-      const seq = entry.slice(newlineIdx + 1).replaceAll(/\s/g, '')
-      if (seq) {
-        seqs.push(seq)
-      }
-    }
+    const seqs = splitFastaRecords(text)
+      .map(r => r.seq)
+      .filter(s => !!s)
 
     if (seqs.length < 2) {
       return false
@@ -96,147 +104,11 @@ export default class A3mMSA extends BaseMSA {
       return false
     }
 
-    let hasLowercase = false
-    let firstMatchLen = -1
-    let sameMatchLength = true
-
-    for (const seq of seqs) {
-      let matchLen = 0
-      for (let i = 0; i < seq.length; i++) {
-        const code = seq.charCodeAt(i)
-        if (isLower(code)) {
-          hasLowercase = true
-        } else if ((code >= CODE_A && code <= CODE_Z) || code === CODE_DASH) {
-          matchLen++
-        }
-      }
-
-      if (firstMatchLen === -1) {
-        firstMatchLen = matchLen
-      } else {
-        if (matchLen !== firstMatchLen) {
-          sameMatchLength = false
-        }
-      }
-    }
+    const rows = seqs.map(parseRow)
+    const hasLowercase = rows.some(r => r.inserts.some(i => !!i))
+    const sameMatchLength = new Set(rows.map(r => r.matches.length)).size === 1
 
     return hasLowercase && sameMatchLength
-  }
-
-  private expandA3M(
-    rawSeqs: string[],
-    names: string[],
-  ): Record<string, string> {
-    const numSeqs = names.length
-    if (numSeqs === 0) {
-      return {}
-    }
-
-    const matchChars: string[][] = []
-    const insertContent: string[][] = []
-
-    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
-      const seq = rawSeqs[seqIdx]!
-      const matches: string[] = []
-      const inserts: string[] = []
-      let i = 0
-
-      while (i < seq.length) {
-        const code = seq.charCodeAt(i)
-
-        if ((code >= CODE_A && code <= CODE_Z) || code === CODE_DASH) {
-          matches.push(seq[i]!)
-          let ins = ''
-          let j = i + 1
-          while (j < seq.length) {
-            const c = seq.charCodeAt(j)
-            if (isLower(c) || c === CODE_DOT) {
-              ins += seq[j]!
-              j++
-            } else {
-              break
-            }
-          }
-          inserts.push(ins)
-          i = j
-        } else if (code === CODE_DOT) {
-          i++
-        } else if (isLower(code)) {
-          let ins = ''
-          while (i < seq.length && isLower(seq.charCodeAt(i))) {
-            ins += seq[i]!
-            i++
-          }
-          matches.push('')
-          inserts.push(ins)
-        } else {
-          i++
-        }
-      }
-
-      matchChars.push(matches)
-      insertContent.push(inserts)
-    }
-
-    const numPositions = Math.max(...matchChars.map(m => m.length), 0)
-
-    const maxInserts = new Array<number>(numPositions).fill(0)
-    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
-      const inserts = insertContent[seqIdx]!
-      for (let pos = 0; pos < inserts.length; pos++) {
-        let lcCount = 0
-        for (const c of inserts[pos]!) {
-          if (isLower(c.charCodeAt(0))) {
-            lcCount++
-          }
-        }
-        if (lcCount > maxInserts[pos]!) {
-          maxInserts[pos] = lcCount
-        }
-      }
-    }
-
-    const expanded: Record<string, string> = {}
-
-    for (let seqIdx = 0; seqIdx < numSeqs; seqIdx++) {
-      const matches = matchChars[seqIdx]!
-      const inserts = insertContent[seqIdx]!
-      const result: string[] = []
-
-      for (let pos = 0; pos < numPositions; pos++) {
-        const maxIns = maxInserts[pos]!
-
-        if (pos < matches.length) {
-          const matchChar = matches[pos]!
-          const insContent = inserts[pos] || ''
-
-          result.push(matchChar || '-')
-
-          let lcContent = ''
-          for (const c of insContent) {
-            if (isLower(c.charCodeAt(0))) {
-              lcContent += c.toUpperCase()
-            }
-          }
-
-          result.push(lcContent)
-
-          const padding = maxIns - lcContent.length
-          if (padding > 0) {
-            result.push('.'.repeat(padding))
-          }
-        } else {
-          result.push('-')
-          if (maxIns > 0) {
-            result.push('.'.repeat(maxIns))
-          }
-        }
-      }
-
-      expanded[names[seqIdx]!] = result.join('')
-    }
-
-    return expanded
   }
 
   getMSA() {
@@ -248,11 +120,46 @@ export default class A3mMSA extends BaseMSA {
   }
 
   getRow(name: string) {
-    return this.MSA.seqdata[name] || ''
+    return this.MSA.seqdata[name] ?? ''
   }
 
   getWidth() {
-    const name = Object.keys(this.MSA.seqdata)[0]
-    return name ? this.getRow(name).length : 0
+    const name = this.orderedNames[0]
+    return name === undefined ? 0 : this.getRow(name).length
   }
+}
+
+/**
+ * Expand A3M rows into a rectangular alignment: every insert slot is widened to
+ * the longest insert any row places there, and rows without one are padded with
+ * '.' so all rows stay in register.
+ */
+function expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
+  const rows = rawSeqs.map(parseRow)
+  const numPositions = Math.max(...rows.map(r => r.matches.length), 0)
+
+  // one insert slot before each match column, plus one trailing slot
+  const maxInserts = new Array<number>(numPositions + 1).fill(0)
+  for (const { inserts } of rows) {
+    for (const [pos, ins] of inserts.entries()) {
+      maxInserts[pos] = Math.max(maxInserts[pos]!, ins.length)
+    }
+  }
+
+  const expanded: Record<string, string> = {}
+
+  for (const [seqIdx, { matches, inserts }] of rows.entries()) {
+    const result: string[] = []
+    for (let pos = 0; pos <= numPositions; pos++) {
+      const ins = inserts[pos] ?? ''
+      result.push(ins, '.'.repeat(maxInserts[pos]! - ins.length))
+      if (pos < numPositions) {
+        // a row with fewer match columns than the widest is padded out
+        result.push(matches[pos] ?? '-')
+      }
+    }
+    expanded[names[seqIdx]!] = result.join('')
+  }
+
+  return expanded
 }

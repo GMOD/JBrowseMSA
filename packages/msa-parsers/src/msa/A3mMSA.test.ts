@@ -232,6 +232,58 @@ ACDEFghiKLMNPQ
       expect(seq2).toBe('--DEF...KLM--Q')
     })
 
+    test('a leading insert does not shift the row out of register', () => {
+      // seq2 opens with a lowercase insert. That insert belongs in a new column
+      // BEFORE match column 0 -- it must not consume a match column, or every
+      // one of seq2's residues lands one column left of its true partner.
+      const a3m = `>query
+ABC
+>seq2
+aABC`
+      const msa = new A3mMSA(a3m)
+
+      // query: . + A + B + C   (dot padding for seq2's insert)
+      // seq2:  A + A + B + C   (insert uppercased)
+      expect(msa.getRow('query')).toBe('.ABC')
+      expect(msa.getRow('seq2')).toBe('AABC')
+    })
+
+    test('a trailing insert widens only the final column', () => {
+      const a3m = `>query
+ABC
+>seq2
+ABCde`
+      const msa = new A3mMSA(a3m)
+
+      expect(msa.getRow('query')).toBe('ABC..')
+      expect(msa.getRow('seq2')).toBe('ABCDE')
+    })
+
+    test('dots in the input are padding, not columns', () => {
+      // '.' marks a gap aligned to another row's insert, so a row already
+      // carrying them must expand to the same width as one without
+      const a3m = `>query
+AC..DEF
+>seq2
+ACghDEF`
+      const msa = new A3mMSA(a3m)
+
+      expect(msa.getRow('query')).toBe('AC..DEF')
+      expect(msa.getRow('seq2')).toBe('ACGHDEF')
+    })
+
+    test('keeps the first record when a name repeats', () => {
+      // ids index the row data, so a repeated defline must not emit two rows
+      const a3m = `>seq1
+ACDEF
+>seq1
+GHIKL`
+      const msa = new A3mMSA(a3m)
+
+      expect(msa.getNames()).toEqual(['seq1'])
+      expect(msa.getRow('seq1')).toBe('ACDEF')
+    })
+
     test('getWidth returns correct width', () => {
       const a3m = `>seq1
 ACDEF
