@@ -40,13 +40,14 @@ LGV in a 878px viewport) it is none of those things:
   Paper is absolutely positioned.
 - Nothing clips it. Paper bottom 813, nearest `overflow: hidden` ancestor bottom
   855, and zero legend rows fall past that edge.
-- The inner `overflow: 'auto'` div really does scroll: `clientHeight` 296 against
-  `scrollHeight` 313.
+- The inner `overflow: 'auto'` div really does scroll: `clientHeight` 296
+  against `scrollHeight` 313.
 
 So the component behaves as designed. What it looks like is a scrollable list
-whose last row is half-visible, and in a **screenshot** that is indistinguishable
-from truncation, which is where the claim came from. Raising the embedding
-frame does not help, correctly: the legend is sized off the view, not the page.
+whose last row is half-visible, and in a **screenshot** that is
+indistinguishable from truncation, which is where the claim came from. Raising
+the embedding frame does not help, correctly: the legend is sized off the view,
+not the page.
 
 If the last entries should be readable without scrolling, that is a design
 change (a taller cap, a wider two-column key, or drawing the key outside the
