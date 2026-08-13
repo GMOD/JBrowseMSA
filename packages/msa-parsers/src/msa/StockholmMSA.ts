@@ -30,7 +30,7 @@ export default class StockholmMSA extends BaseMSA {
   }
 
   getWidth() {
-    const name = Object.keys(this.MSA.seqdata)[0]
+    const name = this.MSA.seqname[0]
     return name === undefined ? 0 : this.getRow(name).length
   }
 
@@ -61,7 +61,9 @@ export default class StockholmMSA extends BaseMSA {
   }
 
   getNames() {
-    return Object.keys(this.MSA.seqdata)
+    // seqname, not Object.keys(seqdata): object key order hoists integer-like
+    // keys (a numeric sequence name) to the front, scrambling row order
+    return this.MSA.seqname
   }
 
   getStructures() {

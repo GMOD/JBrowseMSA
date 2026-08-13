@@ -45,7 +45,10 @@ const gfRegex = /^#=GF\s+(\S+)\s+(.*?)\s*$/
 const gcRegex = /^#=GC\s+(\S+)\s+(.*?)\s*$/
 const gsRegex = /^#=GS\s+(\S+)\s+(\S+)\s+(.*?)\s*$/
 const grRegex = /^#=GR\s+(\S+)\s+(\S+)\s+(.*?)\s*$/
-const lineRegex = /^\s*(\S+)\s+(\S+)\s*$/
+// a sequence line is "<name> <residues>". The leading [^#\s] guards against a
+// two-word comment ("# note") being taken as a sequence named '#'; every
+// meaningful '#' line is a #=GF/#=GC/#=GS/#=GR record already matched above.
+const lineRegex = /^\s*([^#\s]\S*)\s+(\S+)\s*$/
 const nonwhiteRegex = /\S/
 
 export function sniff(text: string): boolean {
@@ -54,7 +57,7 @@ export function sniff(text: string): boolean {
 
 export function parseAll(
   text: string,
-  opts?: { strict?: boolean; quiet?: boolean },
+  opts?: { strict?: boolean },
 ): StockholmData[] {
   const options = opts ?? {}
   const db: StockholmData[] = []
@@ -73,42 +76,18 @@ export function parseAll(
       stock = null
     } else if ((match = gfRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
-      const tag = match[1]!
-      if (!stock.gf[tag]) {
-        stock.gf[tag] = []
-      }
-      stock.gf[tag].push(match[2]!)
+      ;(stock.gf[match[1]!] ??= []).push(match[2]!)
     } else if ((match = gcRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
-      const tag = match[1]!
-      if (!stock.gc[tag]) {
-        stock.gc[tag] = ''
-      }
-      stock.gc[tag] += match[2]!
+      stock.gc[match[1]!] = (stock.gc[match[1]!] ?? '') + match[2]!
     } else if ((match = gsRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
-      const seqname = match[1]!
-      const tag = match[2]!
-      const value = match[3]!
-      if (!stock.gs[tag]) {
-        stock.gs[tag] = {}
-      }
-      if (!stock.gs[tag][seqname]) {
-        stock.gs[tag][seqname] = []
-      }
-      stock.gs[tag][seqname].push(value)
+      const byName = (stock.gs[match[2]!] ??= {})
+      ;(byName[match[1]!] ??= []).push(match[3]!)
     } else if ((match = grRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
-      const seqname = match[1]!
-      const tag = match[2]!
-      const value = match[3]!
-      if (!stock.gr[tag]) {
-        stock.gr[tag] = {}
-      }
-      if (!stock.gr[tag][seqname]) {
-        stock.gr[tag][seqname] = ''
-      }
-      stock.gr[tag][seqname] += value
+      const byName = (stock.gr[match[2]!] ??= {})
+      byName[match[1]!] = (byName[match[1]!] ?? '') + match[3]!
     } else if ((match = lineRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
       const seqname = match[1]!
@@ -134,7 +113,7 @@ export function parseAll(
 
 export function parse(
   text: string,
-  opts?: { strict?: boolean; quiet?: boolean },
+  opts?: { strict?: boolean },
 ): StockholmData {
   const db = parseAll(text, opts)
   if (db.length === 0) {

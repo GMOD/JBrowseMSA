@@ -95,6 +95,18 @@ seq1  ACDEF`
       expect(result).toHaveLength(1)
       expect(result[0]?.seqdata.seq1).toBe('ACDEF')
     })
+
+    test('does not read a two-word # comment as a sequence', () => {
+      // "# note" has the same <token> <token> shape as a sequence line, and
+      // used to be stored as a sequence named '#'
+      const stockholm = `# STOCKHOLM 1.0
+# note
+seq1  ACDEF
+//`
+      const result = parseAll(stockholm)
+      expect(result[0]?.seqname).toEqual(['seq1'])
+      expect(result[0]?.seqdata).toEqual({ seq1: 'ACDEF' })
+    })
   })
 
   describe('parse', () => {
