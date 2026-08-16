@@ -25,11 +25,19 @@ export function interProToGFF(
         const line = [
           seqId,
           'InterProScan',
-          'protein_match',
+          // GFF-sourced annotations carry their original type; writing every
+          // feature back out as protein_match would turn an exon overlay into
+          // generic domains on the next read, losing the numbered-segment
+          // rendering and the gene arrowheads
+          entry.featureType ?? 'protein_match',
           location.start,
           location.end,
           '.',
-          '.',
+          location.strand === undefined
+            ? '.'
+            : location.strand > 0
+              ? '+'
+              : '-',
           '.',
           attributes,
         ].join('\t')

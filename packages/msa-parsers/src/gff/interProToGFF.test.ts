@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
+import { gffToInterProResults } from './gffToInterPro.ts'
 import { interProResponseToGFF, interProToGFF } from './interProToGFF.ts'
+import { parseGFF } from './parseGFF.ts'
 
 import type { InterProScanResults } from '../types.ts'
 
@@ -129,6 +131,24 @@ describe('interProToGFF', () => {
 
     expect(lines).toHaveLength(1)
     expect(lines[0]).toBe('##gff-version 3')
+  })
+
+  test('round-trips the feature type and strand of a gene-structure overlay', () => {
+    const gff = [
+      'seq1\tRefSeq\tmRNA\t1\t99\t.\t+\t.\tName=NM_1',
+      'seq1\tRefSeq\texon\t1\t30\t.\t+\t.\tName=exon-1',
+    ].join('\n')
+    const rows = interProToGFF(gffToInterProResults(parseGFF(gff)))
+      .split('\n')
+      .slice(1)
+      .map(l => l.split('\t'))
+
+    // the gene keeps its type and direction (it draws as an arrow); the exon
+    // keeps its type (it draws as a numbered segment, not a categorical domain)
+    expect(rows.map(r => [r[2], r[6]])).toEqual([
+      ['mRNA', '+'],
+      ['exon', '.'],
+    ])
   })
 
   test('URL-encodes special characters in attributes', () => {
