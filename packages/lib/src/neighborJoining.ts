@@ -44,6 +44,14 @@ function getBlosum62Score(a: string, b: string) {
   return BLOSUM62.get(a.toUpperCase())?.get(b.toUpperCase()) ?? -4
 }
 
+// stockholm and a3m write gaps as '.', not just '-'. Scoring a '.' as a residue
+// charges the pair the unknown-symbol penalty on every padded column, so two
+// sequences that differ only in where an unrelated row forced padding come out
+// as divergent.
+function isGap(c: string) {
+  return c === '-' || c === '.'
+}
+
 function computePairwiseDistance(seq1: string, seq2: string) {
   if (seq1.length !== seq2.length) {
     throw new Error('Sequences must have the same length (aligned)')
@@ -58,11 +66,13 @@ function computePairwiseDistance(seq1: string, seq2: string) {
     const a = seq1[i]!
     const b = seq2[i]!
 
-    if (a === '-' && b === '-') {
+    const aGap = isGap(a)
+    const bGap = isGap(b)
+    if (aGap && bGap) {
       continue
     }
 
-    if (a === '-' || b === '-') {
+    if (aGap || bGap) {
       mismatches++
       continue
     }

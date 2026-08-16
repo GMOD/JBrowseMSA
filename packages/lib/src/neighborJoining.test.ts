@@ -81,6 +81,21 @@ describe('calculateNeighborJoiningTree', () => {
     expect(tree).toContain('seq3')
   })
 
+  test('treats a dot gap the same as a dash gap', () => {
+    // stockholm and a3m pad with '.', so the two spellings have to score alike
+    const withDashes: [string, string][] = [
+      ['seq1', 'MK-AYLSMFG'],
+      ['seq2', 'MKAAYLSMFG'],
+      ['seq3', 'MKA-YLSMFG'],
+    ]
+    const withDots = withDashes.map(
+      ([name, seq]) => [name, seq.replaceAll('-', '.')] as [string, string],
+    )
+    expect(calculateNeighborJoiningTree(withDots)).toBe(
+      calculateNeighborJoiningTree(withDashes),
+    )
+  })
+
   test('names with special characters round-trip through Newick parsing', () => {
     const rows: [string, string][] = [
       ['EU105457.1|chr09:67680268..67675529_LTR/Copia', 'MKAA'],
