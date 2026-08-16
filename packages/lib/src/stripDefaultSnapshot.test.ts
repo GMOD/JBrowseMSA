@@ -55,3 +55,22 @@ test('inline data is stripped when a filehandle can refetch it', () => {
   expect(snap.data.msa).toBeUndefined()
   expect(snap.data.tree).toBe('(a,b);')
 })
+
+test('inline gff survives the snapshot when no gffFilehandle can refetch it', () => {
+  const gff = 's1\tx\tprotein_match\t1\t3\t.\t.\t.\tName=PF1'
+  const withInlineGff = MsaView.create({
+    type: 'MsaView',
+    data: { msa: '>s1\nACGT', gff },
+  })
+  expect(getSnapshot(withInlineGff).data.gff).toBe(gff)
+
+  const withFilehandle = MsaView.create({
+    type: 'MsaView',
+    data: { msa: '>s1\nACGT', gff },
+    gffFilehandle: {
+      uri: 'http://example.com/x.gff',
+      locationType: 'UriLocation',
+    },
+  })
+  expect(getSnapshot(withFilehandle).data.gff).toBeUndefined()
+})

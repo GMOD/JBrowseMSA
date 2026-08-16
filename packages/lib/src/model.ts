@@ -2298,6 +2298,7 @@ function stateModelFactory() {
         ...(rest.treeMetadataFilehandle
           ? {}
           : { treeMetadata: data.treeMetadata }),
+        ...(rest.gffFilehandle ? {} : { gff: data.gff }),
       },
     }))
 }
