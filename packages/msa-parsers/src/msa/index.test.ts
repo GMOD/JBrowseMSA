@@ -6,6 +6,8 @@ import FastaMSA from './FastaMSA.ts'
 import { getUngappedSequence, parseMSA } from './index.ts'
 import parseNewick from './parseNewick.ts'
 
+import type { NewickNode } from '@gmod/newick'
+
 describe('parseMSA', () => {
   test('parses FASTA format', () => {
     const fasta = `>seq1
@@ -167,33 +169,56 @@ describe('StockholmMSA row order', () => {
   })
 })
 
+const leafNames = (tree: NewickNode) => (tree.children ?? []).map(c => c.name)
+
 describe('parseNewick single-quoted names', () => {
   test('parses quoted name containing a colon', () => {
     const tree = parseNewick(
       "('EU105457.1|chr09:67680268..67675529_LTR/Copia':0.5,seq2:0.3);",
     )
-    const names = tree.children.map((c: Record<string, unknown>) => c.name)
+    const names = leafNames(tree)
     expect(names).toContain('EU105457.1|chr09:67680268..67675529_LTR/Copia')
   })
 
   test('parses quoted name containing a single quote', () => {
     const tree = parseNewick("('it''s a name':0.1,seq2:0.2);")
-    const names = tree.children.map((c: Record<string, unknown>) => c.name)
+    const names = leafNames(tree)
     expect(names).toContain("it's a name")
   })
 
   test('unquoted names still parse correctly', () => {
     const tree = parseNewick('(seq1:0.1,seq2:0.2);')
-    const names = tree.children.map((c: Record<string, unknown>) => c.name)
+    const names = leafNames(tree)
     expect(names).toEqual(['seq1', 'seq2'])
   })
 
-  test('restores a quote that covers only part of a name', () => {
-    // the placeholder is embedded in a larger token here, so an anchored
-    // restore left the raw __Q0__ marker in the name
+  test('a quote covering only part of a name yields the quoted run', () => {
+    // malformed -- a label is quoted or it isn't -- so the only requirement is
+    // that it degrades to something. This used to read 'fooa b': the parser
+    // substituted a __Q0__ placeholder for the quoted run and spliced it back,
+    // and the test existed to pin that the raw marker didn't survive into the
+    // name. Nothing substitutes anything now, so the hazard is gone and the
+    // scanner just lets the quoted run own the token.
     const tree = parseNewick("(foo'a b':0.1,seq2:0.2);")
-    const names = tree.children.map((c: Record<string, unknown>) => c.name)
-    expect(names).toEqual(['fooa b', 'seq2'])
+    const names = leafNames(tree)
+    expect(names).toEqual(['a b', 'seq2'])
+  })
+
+  test('an unquoted colon is a branch length, which is why names get quoted', () => {
+    // not a regression and not fixable: ':' is the grammar's length delimiter,
+    // so a region-style name has to be quoted to survive. Pinned because it is
+    // the reason the quoting above is load-bearing rather than cosmetic.
+    const tree = parseNewick('(chr1:1-100,seq2:0.2);')
+    const names = leafNames(tree)
+    expect(names).toEqual(['chr1', 'seq2'])
+    expect(tree.children![0]!.length).toBe(1)
+  })
+
+  test('names a tree that is a single bare node', () => {
+    // the old parser looked at the preceding token to decide whether a label was
+    // a name, and with nothing preceding it dropped the name entirely -- so a
+    // one-row tree produced a root leaf matching no row
+    expect(parseNewick('A;').name).toBe('A')
   })
 })
 
@@ -201,9 +226,9 @@ describe('parseNewick unnamed nodes', () => {
   test('leaves an unnamed internal node without a name', () => {
     const tree = parseNewick('((A:0.1,B:0.2):0.5,C:0.3);')
     expect(tree.name).toBeUndefined()
-    expect(tree.children[0].name).toBeUndefined()
-    expect(tree.children[0].length).toBe(0.5)
-    expect(tree.children[1].name).toBe('C')
+    expect(tree.children![0]!.name).toBeUndefined()
+    expect(tree.children![0]!.length).toBe(0.5)
+    expect(tree.children![1]!.name).toBe('C')
   })
 })
 

@@ -3,6 +3,8 @@ import { describe, expect, test } from 'vitest'
 
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 
+import type { NewickNode } from '@gmod/newick'
+
 describe('calculateNeighborJoiningTree', () => {
   test('generates valid Newick tree for 2 sequences', () => {
     const rows: [string, string][] = [
@@ -104,12 +106,10 @@ describe('calculateNeighborJoiningTree', () => {
     const newick = calculateNeighborJoiningTree(rows)
     const tree = parseNewick(newick)
 
-    function getLeafNames(node: Record<string, unknown>): string[] {
-      const children = node.children as Record<string, unknown>[] | undefined
-      if (!children?.length) {
-        return [node.name as string]
-      }
-      return children.flatMap(c => getLeafNames(c))
+    function getLeafNames(node: NewickNode): (string | undefined)[] {
+      return node.children?.length
+        ? node.children.flatMap(c => getLeafNames(c))
+        : [node.name]
     }
     const names = getLeafNames(tree)
     expect(names).toContain('EU105457.1|chr09:67680268..67675529_LTR/Copia')

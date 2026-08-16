@@ -23,6 +23,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@gmod/newick": "^1.0.0",
     "clustal-js": "^2.0.17",
     "emf-js": "^2.0.0"
   },

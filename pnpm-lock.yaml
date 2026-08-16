@@ -263,6 +263,9 @@ importers:
 
   packages/lib:
     dependencies:
+      '@gmod/newick':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@jbrowse/core':
         specifier: file:../../vendor-jbrowse/jbrowse-core.tgz
         version: file:vendor-jbrowse/jbrowse-core.tgz(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -309,6 +312,9 @@ importers:
 
   packages/msa-parsers:
     dependencies:
+      '@gmod/newick':
+        specifier: ^1.0.0
+        version: 1.0.0
       clustal-js:
         specifier: ^2.0.17
         version: 2.0.17
@@ -1005,6 +1011,9 @@ packages:
 
   '@gmod/bgzf-filehandle@6.3.1':
     resolution: {integrity: sha512-gmRZCyn3ZiffeAGVhf9sgVO3PZlVpI5RBDj/ypzgCa311PkYoQiVaW5AARMGKKLjJLFlAycSI1Jgs3gByVZ2sQ==}
+
+  '@gmod/newick@1.0.0':
+    resolution: {integrity: sha512-oh6N5aFrbrpWS7sOrlJM6q8VbychLUwEdCxybDBRr/R8zAtTB5KvHDT9M+gvu9D1berQ7IsHXrfFCmBU7NrXbA==}
 
   '@gmod/tabix@3.5.1':
     resolution: {integrity: sha512-441rX9a5MtSIf+k65PhEKo4XsQFn1plOpa7s/u06TMncVDZhowupFfi0PF7yt4sV5WdI36MCri7qvQePO3TPKQ==}
@@ -4915,6 +4924,8 @@ snapshots:
     dependencies:
       generic-filehandle2: 2.2.1
       pako-esm2: 2.0.2
+
+  '@gmod/newick@1.0.0': {}
 
   '@gmod/tabix@3.5.1':
     dependencies:

@@ -7,10 +7,15 @@ minimumReleaseAge: 4320
 # Exempt families that a recent dep bump pinned to releases newer than the
 # window (build toolchain + platform-binary packages, not runtime app deps), so
 # a fresh `pnpm install` isn't blocked by the lockfile the bump already vetted.
+# Our own scopes are exempt for a different reason: a bump there is normally
+# made minutes after the dependency's own release, from source in the next
+# directory over, and the quarantine exists to catch a compromised third-party
+# release rather than to delay that. Same exemption jbrowse-components carries.
 minimumReleaseAgeExclude:
   - '@astrojs/*'
   - '@bruits/*'
   - '@eslint-react/*'
+  - '@gmod/*'
   - '@jbrowse/*'
   - '@rolldown/*'
   - '@types/node'

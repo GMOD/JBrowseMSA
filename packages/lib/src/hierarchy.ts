@@ -1,12 +1,28 @@
-import type { NodeWithIds } from './types.ts'
+import {
+  descendants,
+  find,
+  forEachDescendant,
+  forEachLink,
+  hierarchy as coreHierarchy,
+  leaves,
+  links,
+  sort,
+  sum,
+} from '@gmod/newick'
 
-export interface HierarchyNode<T = NodeWithIds> {
-  data: T
+import type { NodeWithIds } from './types.ts'
+import type { HierarchyNode as CoreHierarchyNode } from '@gmod/newick'
+
+/**
+ * A hierarchy node plus the fields this viewer hangs off it during layout.
+ *
+ * The traversals in `@gmod/newick` are generic over the node type rather than
+ * over its data, so they take and return this extended node rather than the base
+ * one, and no call site has to cast.
+ */
+export interface HierarchyNode<T = NodeWithIds> extends CoreHierarchyNode<T> {
   children: HierarchyNode<T>[] | null
   parent: HierarchyNode<T> | null
-  depth: number
-  height: number
-  value?: number
   x?: number
   y?: number
   len?: number
@@ -18,183 +34,32 @@ export interface HierarchyNode<T = NodeWithIds> {
   collapsedTipXFar?: number
 }
 
-export interface HierarchyLink<T = NodeWithIds> {
-  source: HierarchyNode<T>
-  target: HierarchyNode<T>
+// The generic traversals live in @gmod/newick now, shared with the tree sidebar
+// in jbrowse-components. They are iterative there for the reason they were here:
+// a phylogenetic tree can be a caterpillar, whose depth equals its leaf count,
+// and the recursive form overflows the stack somewhere past 5000 tips.
+export {
+  descendants,
+  find,
+  forEachDescendant,
+  forEachLink,
+  leaves,
+  links,
+  sort,
+  sum,
 }
+export type { HierarchyLink } from '@gmod/newick'
 
-// All traversals below are iterative (explicit stack / reversed-preorder) rather
-// than recursive: phylogenetic trees can be deeply unbalanced (a caterpillar tree
-// has depth ~= leaf count), which overflows the JS call stack on recursion.
-
-// Pre-order: every parent precedes all of its descendants. Iterating the result
-// in reverse therefore yields a valid post-order (children before parents), which
-// the accumulation helpers rely on.
-export function descendants<T>(node: HierarchyNode<T>): HierarchyNode<T>[] {
-  const result: HierarchyNode<T>[] = []
-  const stack = [node]
-  while (stack.length > 0) {
-    const n = stack.pop()!
-    result.push(n)
-    if (n.children) {
-      for (let i = n.children.length - 1; i >= 0; i--) {
-        stack.push(n.children[i]!)
-      }
-    }
-  }
-  return result
-}
-
-function computeHeight<T>(node: HierarchyNode<T>) {
-  const nodes = descendants(node)
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    const n = nodes[i]!
-    let h = 0
-    if (n.children) {
-      for (const child of n.children) {
-        if (child.height + 1 > h) {
-          h = child.height + 1
-        }
-      }
-    }
-    n.height = h
-  }
-}
-
+// coreHierarchy builds base nodes, and the layout fields above are written onto
+// them afterwards by this package. Every one of those fields is optional, so the
+// two node types are mutually assignable and this needs no cast -- it exists
+// only to declare the wider return type, which is what lets those later
+// assignments typecheck.
 export function hierarchy<T>(
   data: T,
   childrenAccessor: (d: T) => T[] | undefined,
 ): HierarchyNode<T> {
-  const root: HierarchyNode<T> = {
-    data,
-    children: null,
-    parent: null,
-    depth: 0,
-    height: 0,
-  }
-  const stack = [root]
-  while (stack.length > 0) {
-    const node = stack.pop()!
-    const kids = childrenAccessor(node.data)
-    if (kids?.length) {
-      node.children = kids.map(d => ({
-        data: d,
-        children: null,
-        parent: node,
-        depth: node.depth + 1,
-        height: 0,
-      }))
-      for (const child of node.children) {
-        stack.push(child)
-      }
-    }
-  }
-  computeHeight(root)
-  return root
-}
-
-export function sum<T>(
-  node: HierarchyNode<T>,
-  valueFn: (d: T) => number,
-): HierarchyNode<T> {
-  const nodes = descendants(node)
-  for (let i = nodes.length - 1; i >= 0; i--) {
-    const n = nodes[i]!
-    let s = valueFn(n.data)
-    if (n.children) {
-      for (const child of n.children) {
-        s += child.value!
-      }
-    }
-    n.value = s
-  }
-  return node
-}
-
-export function sort<T>(
-  node: HierarchyNode<T>,
-  compareFn: (a: HierarchyNode<T>, b: HierarchyNode<T>) => number,
-): HierarchyNode<T> {
-  const stack = [node]
-  while (stack.length > 0) {
-    const n = stack.pop()!
-    if (n.children) {
-      n.children.sort(compareFn)
-      for (const child of n.children) {
-        stack.push(child)
-      }
-    }
-  }
-  return node
-}
-
-export function find<T>(
-  node: HierarchyNode<T>,
-  predicate: (n: HierarchyNode<T>) => boolean,
-): HierarchyNode<T> | undefined {
-  const stack = [node]
-  let found: HierarchyNode<T> | undefined
-  while (stack.length > 0 && found === undefined) {
-    const n = stack.pop()!
-    if (predicate(n)) {
-      found = n
-    } else if (n.children) {
-      for (let i = n.children.length - 1; i >= 0; i--) {
-        stack.push(n.children[i]!)
-      }
-    }
-  }
-  return found
-}
-
-export function leaves<T>(node: HierarchyNode<T>): HierarchyNode<T>[] {
-  const result: HierarchyNode<T>[] = []
-  const stack = [node]
-  while (stack.length > 0) {
-    const n = stack.pop()!
-    if (n.children) {
-      for (let i = n.children.length - 1; i >= 0; i--) {
-        stack.push(n.children[i]!)
-      }
-    } else {
-      result.push(n)
-    }
-  }
-  return result
-}
-
-export function links<T>(node: HierarchyNode<T>): HierarchyLink<T>[] {
-  const result: HierarchyLink<T>[] = []
-  forEachLink(node, (source, target) => {
-    result.push({ source, target })
-  })
-  return result
-}
-
-export function forEachLink<T>(
-  node: HierarchyNode<T>,
-  cb: (source: HierarchyNode<T>, target: HierarchyNode<T>) => void,
-) {
-  const stack = [node]
-  while (stack.length > 0) {
-    const n = stack.pop()!
-    if (n.children) {
-      for (let i = n.children.length - 1; i >= 0; i--) {
-        const child = n.children[i]!
-        cb(n, child)
-        stack.push(child)
-      }
-    }
-  }
-}
-
-export function forEachDescendant<T>(
-  node: HierarchyNode<T>,
-  cb: (n: HierarchyNode<T>) => void,
-) {
-  for (const n of descendants(node)) {
-    cb(n)
-  }
+  return coreHierarchy(data, childrenAccessor)
 }
 
 export function clusterLayout<T>(

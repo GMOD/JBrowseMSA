@@ -1,112 +1,19 @@
+import { parseNewick } from '@gmod/newick'
+
+import type { NewickNode } from '@gmod/newick'
+
 /**
- * Newick format parser in JavaScript.
+ * Newick parsing for phylogenetic trees.
  *
- * Copyright (c) Jason Davies 2010.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * Example tree (from http://en.wikipedia.org/wiki/Newick_format):
- *
- * +--0.1--A
- * F-----0.2-----B            +-------0.3----C
- * +------------------0.5-----E
- *                            +---------0.4------D
- *
- * Newick format:
- * (A:0.1,B:0.2,(C:0.3,D:0.4)E:0.5)F;
- *
- * Converted to JSON:
- * {
- *   name: "F",
- *   children: [
- *     {name: "A", length: 0.1},
- *     {name: "B", length: 0.2},
- *     {
- *       name: "E",
- *       length: 0.5,
- *       children: [
- *         {name: "C", length: 0.3},
- *         {name: "D", length: 0.4}
- *       ]
- *     }
- *   ]
- * }
- *
- * Converted to JSON, but with no names or lengths:
- * {
- *   children: [
- *     {}, {}, {
- *       children: [{}, {}]
- *     }
- *   ]
- * }
+ * `postParenNumeric: 'name'` is the whole reason this wrapper exists. A bare
+ * number after a `)` is an internal node label in standard Newick -- typically a
+ * bootstrap support value -- but `@gmod/hclust` reuses that slot for a cluster's
+ * merge height, and the parser's default guesses between the two by whether the
+ * tree carries any `:` branch length. Everything reaching this package is a
+ * phylogeny (newick, the tree embedded in Stockholm `#=GF NH`, EMF, ASN.1), so
+ * the guess is settled here instead: reading `((A,B)95,(C,D)80);` as lengths
+ * would draw a phylogram scaled by support values.
  */
-export default function parse(s: string) {
-  const ancestors = []
-
-  // Replace single-quoted names with placeholders so ':' inside them isn't tokenized
-  const quotedNames: string[] = []
-  const preprocessed = s.replace(/'((?:[^']|'')*)'/g, (_, inner: string) => {
-    const idx = quotedNames.length
-    quotedNames.push(inner.replaceAll("''", "'"))
-    return `__Q${idx}__`
-  })
-
-  let tree = {} as Record<string, any>
-  // adjacent delimiters split to empty strings; dropping them keeps the
-  // tokens[i-1] lookback meaningful and stops unnamed internal nodes from
-  // picking up a spurious empty name
-  const tokens = preprocessed.split(/\s*(;|\(|\)|,|:)\s*/).filter(t => t !== '')
-  for (let i = 0; i < tokens.length; i++) {
-    // global, not anchored: a partially-quoted name like foo'a b' leaves the
-    // placeholder embedded in a larger token
-    const token = tokens[i]!.replaceAll(
-      /__Q(\d+)__/g,
-      (_, idx: string) => quotedNames[Number(idx)]!,
-    )
-    const subtree = {}
-    switch (token) {
-      case '(': // new children
-        tree.children = [subtree]
-        ancestors.push(tree)
-        tree = subtree
-        break
-      case ',': // another branch
-        ancestors.at(-1)?.children.push(subtree)
-        tree = subtree
-        break
-      case ')': // optional name next
-        tree = ancestors.pop()!
-        break
-      case ':': // optional length next
-        break
-      case ';': // end of tree; never a name, even directly after a ')'
-        break
-      default: {
-        const x = tokens[i - 1]!
-        if (x === ')' || x === '(' || x === ',') {
-          tree.name = token
-        } else if (x === ':') {
-          tree.length = Number.parseFloat(token)
-        }
-      }
-    }
-  }
-  return tree
+export default function parse(s: string): NewickNode {
+  return parseNewick(s, { postParenNumeric: 'name' })
 }
