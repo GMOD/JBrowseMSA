@@ -1448,8 +1448,18 @@ function stateModelFactory() {
       },
 
       get labelsWidth() {
-        const widths = this.labelWidthMap
-        return widths.size === 0 ? 0 : Math.max(...widths.values())
+        // a loop, not Math.max(...widths.values()): spreading a map of every
+        // leaf passes one argument per row, and the argument limit is somewhere
+        // around 125k -- so the bundled 230k-tip COVID tree threw
+        // "RangeError: Maximum call stack size exceeded" out of a getter the
+        // treeWidth autorun reads on load
+        let max = 0
+        for (const width of this.labelWidthMap.values()) {
+          if (width > max) {
+            max = width
+          }
+        }
+        return max
       },
 
       /**
