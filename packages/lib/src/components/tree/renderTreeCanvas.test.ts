@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import { calcDepthToLeaf, findMaxBranchLen } from '../../hierarchy.ts'
-import { getNodeX } from './renderTreeCanvas.ts'
+import stateModelFactory from '../../model.ts'
+import { getNodeX, renderTreeCanvas } from './renderTreeCanvas.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
+import type { RenderCtx } from '../renderCtx.ts'
+import type { Theme } from '@mui/material'
 
 function leaf(id: string, len?: number): HierarchyNode {
   return {
@@ -111,5 +114,55 @@ describe('getNodeX cladogram positioning', () => {
 
   it('uses branch length in phylogram mode', () => {
     expect(getNodeX(leaf('a', 2.5), true, 100, 1)).toBe(2.5)
+  })
+})
+
+// the x values the tree pass actually strokes, for a model built from newick
+function drawnTreeXs(newick: string) {
+  const model = stateModelFactory().create({
+    type: 'MsaView',
+    data: { msa: '>a\nA\n>b\nA\n>c\nA\n>d\nA', tree: newick },
+  })
+  model.setWidth(1000)
+  // labels would need a canvas to measure; the branch geometry is the subject
+  model.setDrawLabels(false)
+  model.setDrawNodeBubbles(false)
+
+  const xs: number[] = []
+  const ctx = {
+    font: '12px sans-serif',
+    beginPath() {},
+    stroke() {},
+    resetTransform() {},
+    scale() {},
+    translate() {},
+    moveTo(x: number) {
+      xs.push(x)
+    },
+    lineTo(x: number) {
+      xs.push(x)
+    },
+  } as unknown as RenderCtx
+
+  renderTreeCanvas({
+    model,
+    ctx,
+    offsetY: 0,
+    theme: { palette: { text: { primary: '#000' } } } as Theme,
+  })
+  return xs
+}
+
+describe('renderTreeCanvas horizontal extent', () => {
+  it('spreads a cladogram across the tree area when branch lengths are absent', () => {
+    // a lengthless newick forces cladogram mode; scaling it by the (zero) max
+    // branch length would stack every node on x=0 as one vertical line
+    const xs = drawnTreeXs('((a,b),(c,d));')
+    expect(Math.max(...xs)).toBe(300)
+  })
+
+  it('scales a phylogram by branch length', () => {
+    const xs = drawnTreeXs('((a:0.1,b:0.2):0.3,(c:0.4,d:0.5):0.6);')
+    expect(Math.max(...xs)).toBeCloseTo(300)
   })
 })

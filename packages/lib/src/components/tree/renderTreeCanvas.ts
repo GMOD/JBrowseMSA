@@ -24,14 +24,15 @@ function inYBlock(y: number, offsetY: number, by: number) {
   return y > offsetY - extendBounds && y < offsetY + by + extendBounds
 }
 
-// Calculate node x-coordinate for both phylogram (with branch lengths) and cladogram (topology only) modes
-// For cladograms: x = (maxDepthToLeaf - nodeDepthToLeaf) / maxDepthToLeaf * maxWidth
-// This positions: leaves at maxWidth (rightmost), root at 0 (leftmost), internal nodes proportionally in between
+// Calculate node x-coordinate for both phylogram (with branch lengths) and
+// cladogram (topology only) modes. tipX is the pixel x the tips sit at.
+// For cladograms: x = (maxDepthToLeaf - nodeDepthToLeaf) / maxDepthToLeaf * tipX
+// This positions: leaves at tipX (rightmost), root at 0 (leftmost), internal nodes proportionally in between
 // Matches ape's: xx <- max(xx) - xx (where xx is depth from each node to tips)
 export function getNodeX(
   node: HierarchyNode,
   showBranchLen: boolean,
-  maxBranchLen: number,
+  tipX: number,
   maxDepthToLeaf: number,
 ): number | undefined {
   if (showBranchLen) {
@@ -41,7 +42,7 @@ export function getNodeX(
     return 0
   }
   const depthToLeaf = calcDepthToLeaf(node)
-  return ((maxDepthToLeaf - depthToLeaf) / maxDepthToLeaf) * maxBranchLen
+  return ((maxDepthToLeaf - depthToLeaf) / maxDepthToLeaf) * tipX
 }
 
 export function renderTree({
@@ -49,7 +50,7 @@ export function renderTree({
   ctx,
   model,
   theme,
-  maxBranchLen,
+  tipX,
   maxDepthToLeaf,
   blockSizeYOverride,
 }: {
@@ -57,7 +58,7 @@ export function renderTree({
   ctx: RenderCtx
   model: MsaViewModel
   theme: Theme
-  maxBranchLen: number
+  tipX: number
   maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
@@ -67,8 +68,8 @@ export function renderTree({
   forEachLink(hierarchy, (source, target) => {
     const sy = source.x!
     const ty = target.x!
-    const tx = getNodeX(target, showBranchLen, maxBranchLen, maxDepthToLeaf)
-    const sx = getNodeX(source, showBranchLen, maxBranchLen, maxDepthToLeaf)
+    const tx = getNodeX(target, showBranchLen, tipX, maxDepthToLeaf)
+    const sx = getNodeX(source, showBranchLen, tipX, maxDepthToLeaf)
     if (tx === undefined || sx === undefined) {
       return
     }
@@ -94,7 +95,7 @@ export function renderCollapsedTriangles({
   offsetY,
   model,
   theme,
-  maxBranchLen,
+  tipX,
   maxDepthToLeaf,
   blockSizeYOverride,
 }: {
@@ -103,7 +104,7 @@ export function renderCollapsedTriangles({
   offsetY: number
   model: MsaViewModel
   theme: Theme
-  maxBranchLen: number
+  tipX: number
   maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
@@ -116,19 +117,23 @@ export function renderCollapsedTriangles({
     fontSize,
     marginLeft: ml,
   } = model
+  // nothing collapsed is the common case, and the traversal below visits every
+  // node in the tree on every block of every redraw
+  if (collapsed.length === 0) {
+    return
+  }
+  const collapsedSet = new Set(collapsed)
   const by = blockSizeYOverride ?? blockSize
   const halfHeight = Math.max(2, rowHeight * 0.42)
   forEachDescendant(hierarchy, node => {
     const { id, name } = node.data
-    if (collapsed.includes(id)) {
-      const apexX = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
+    if (collapsedSet.has(id)) {
+      const apexX = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
       const y = node.x!
       const inBlock = inYBlock(y, offsetY, by)
       // in cladogram mode the hidden tips align at the right edge, otherwise use
       // the branch-length extent recorded in the model's hierarchy getter
-      const baseX = showBranchLen
-        ? (node.collapsedTipXFar ?? maxBranchLen)
-        : maxBranchLen
+      const baseX = showBranchLen ? (node.collapsedTipXFar ?? tipX) : tipX
       if (apexX !== undefined && inBlock && baseX > apexX) {
         ctx.beginPath()
         ctx.moveTo(apexX, y)
@@ -171,7 +176,7 @@ export function renderNodeBubbles({
   clickMap,
   offsetY,
   model,
-  maxBranchLen,
+  tipX,
   maxDepthToLeaf,
   blockSizeYOverride,
 }: {
@@ -179,7 +184,7 @@ export function renderNodeBubbles({
   clickMap?: ClickMapIndex
   offsetY: number
   model: MsaViewModel
-  maxBranchLen: number
+  tipX: number
   maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
@@ -191,8 +196,9 @@ export function renderNodeBubbles({
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride ?? blockSize
+  const collapsedSet = new Set(collapsed)
   forEachDescendant(hierarchy, node => {
-    const x = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf)
+    const x = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
     if (x === undefined) {
       return
     }
@@ -200,7 +206,7 @@ export function renderNodeBubbles({
     const y = node.x!
     const { id, name } = data
     if (node.height >= 1 && inYBlock(y, offsetY, by)) {
-      const isCollapsed = collapsed.includes(id)
+      const isCollapsed = collapsedSet.has(id)
       ctx.strokeStyle = 'black'
       ctx.fillStyle = isCollapsed ? 'black' : 'white'
       ctx.beginPath()
@@ -231,7 +237,7 @@ export function renderTreeLabels({
   offsetY,
   ctx,
   clickMap,
-  maxBranchLen,
+  tipX,
   maxDepthToLeaf,
   blockSizeYOverride,
 }: {
@@ -240,7 +246,7 @@ export function renderTreeLabels({
   ctx: RenderCtx
   clickMap?: ClickMapIndex
   theme: Theme
-  maxBranchLen: number
+  tipX: number
   maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
@@ -289,7 +295,7 @@ export function renderTreeLabels({
       const yp = y + fontSize / 4
       let xp = 0
       if (!noTree) {
-        xp = getNodeX(node, showBranchLen, maxBranchLen, maxDepthToLeaf) ?? 0
+        xp = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf) ?? 0
       }
 
       const width =
@@ -375,7 +381,13 @@ export function renderTreeCanvas({
 
   // memoized on the model and shared across the tree/bubble/label passes (and
   // across all tree blocks) rather than re-traversing the hierarchy in each
-  const { maxBranchLength: maxBranchLen, maxDepthToLeaf } = model
+  const { maxBranchLength, maxDepthToLeaf, showBranchLenEffective } = model
+  // pixel x of the tips. A phylogram scales branch lengths so the longest
+  // root-to-tip path lands at maxBranchLength; a cladogram ignores lengths and
+  // spreads topological depth across the whole tree area instead. Reusing
+  // maxBranchLength for the cladogram would pin every node to x=0 for a tree
+  // with no branch lengths -- which is exactly what forces cladogram mode.
+  const tipX = showBranchLenEffective ? maxBranchLength : model.treeWidth
 
   if (!noTree && drawTree) {
     renderTree({
@@ -383,7 +395,7 @@ export function renderTreeCanvas({
       offsetY,
       model,
       theme,
-      maxBranchLen,
+      tipX,
       maxDepthToLeaf,
       blockSizeYOverride,
     })
@@ -394,7 +406,7 @@ export function renderTreeCanvas({
       offsetY,
       model,
       theme,
-      maxBranchLen,
+      tipX,
       maxDepthToLeaf,
       blockSizeYOverride,
     })
@@ -405,7 +417,7 @@ export function renderTreeCanvas({
         offsetY,
         clickMap,
         model,
-        maxBranchLen,
+        tipX,
         maxDepthToLeaf,
         blockSizeYOverride,
       })
@@ -419,7 +431,7 @@ export function renderTreeCanvas({
       model,
       clickMap,
       theme,
-      maxBranchLen,
+      tipX,
       maxDepthToLeaf,
       blockSizeYOverride,
     })
