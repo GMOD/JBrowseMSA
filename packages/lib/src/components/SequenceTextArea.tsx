@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 
 import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { Button, TextField } from '@mui/material'
+import { getUngappedSequence } from 'msa-parsers'
 
 import copy from '../vendor/copyToClipboard.ts'
 import Checkbox2 from './Checkbox2.tsx'
@@ -24,9 +25,8 @@ export default function SequenceTextArea({ str }: { str: [string, string][] }) {
   const [showGaps, setShowGaps] = useState(false)
   const [showEmpty, setShowEmpty] = useState(false)
 
-  const removeGaps = (s: string) => s.replaceAll('-', '').replaceAll('.', '')
   const disp = str
-    .map(([s1, s2]) => [s1, showGaps ? s2 : removeGaps(s2)] as const)
+    .map(([s1, s2]) => [s1, showGaps ? s2 : getUngappedSequence(s2)] as const)
     .filter(([, s2]) => showEmpty || !!s2)
     .map(([s1, s2]) => `>${s1}\n${s2}`)
     .join('\n')
