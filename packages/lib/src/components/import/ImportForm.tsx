@@ -57,15 +57,12 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
         <div>
           <Button
             onClick={() => {
-              // eslint-disable-next-line @typescript-eslint/no-floating-promises
-              ;(async () => {
-                try {
-                  await load(model, msaFile, treeFile, gffFile)
-                } catch (e) {
-                  console.error(e)
-                  model.setError(e)
-                }
-              })()
+              try {
+                load(model, msaFile, treeFile, gffFile)
+              } catch (e) {
+                console.error(e)
+                model.setError(e)
+              }
             }}
             variant="contained"
             color="primary"

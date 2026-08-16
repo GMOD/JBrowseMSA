@@ -49,7 +49,7 @@ export function getDomainMenu({ model }: { model: MsaViewModel }) {
       label: `Show domains${noDomains ? ' (no domains loaded)' : ''}`,
       disabled: noDomains,
       icon: Visibility,
-      checked: actuallyShowDomains ? showDomains : false,
+      checked: actuallyShowDomains,
       type: 'checkbox' as const,
       onClick: () => {
         model.setShowDomains(!showDomains)

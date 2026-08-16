@@ -33,11 +33,7 @@ export function interProToGFF(
           location.start,
           location.end,
           '.',
-          location.strand === undefined
-            ? '.'
-            : location.strand > 0
-              ? '+'
-              : '-',
+          location.strand === undefined ? '.' : location.strand > 0 ? '+' : '-',
           '.',
           attributes,
         ].join('\t')

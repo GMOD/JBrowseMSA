@@ -23,8 +23,9 @@ export function renderBoxFeatureCanvasBlock({
   blockSizeXOverride?: number
   blockSizeYOverride?: number
 }) {
-  const { blockSize, rowHeight, highResScaleFactor, showDomains } = model
-  if (showDomains) {
+  const { blockSize, rowHeight, highResScaleFactor, actuallyShowDomains } =
+    model
+  if (actuallyShowDomains) {
     const k = highResScaleFactorOverride ?? highResScaleFactor
     const bx = blockSizeXOverride ?? blockSize
     const by = blockSizeYOverride ?? blockSize

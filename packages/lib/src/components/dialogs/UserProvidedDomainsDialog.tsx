@@ -112,8 +112,15 @@ const UserProvidedDomainsDialog = observer(function ({
                   ? JSON.parse(await file.text())
                   : await jsonfetch(interProURL)
 
+                // key each result by its xref id; a result without one has no
+                // row to attach to, and keying it `undefined` would draw a
+                // phantom row's worth of domains
                 model.setDomains(
-                  Object.fromEntries(ret.results.map(r => [r.xref[0]!.id, r])),
+                  Object.fromEntries(
+                    ret.results
+                      .map(r => [r.xref[0]?.id, r] as const)
+                      .filter(e => e[0] !== undefined),
+                  ),
                 )
                 getSession(model).notify(
                   'Loaded interproscan results',

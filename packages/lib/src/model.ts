@@ -1438,7 +1438,10 @@ function stateModelFactory() {
           : new Map(
               leaves.map(node => {
                 const { name } = node.data
-                const displayName = treeMetadata[name]?.genome ?? name
+                // `||`, matching renderTreeLabels: an empty genome falls back
+                // to the row name, and measuring '' would size the gutter (and
+                // the label's click target) to nothing
+                const displayName = treeMetadata[name]?.genome || name
                 return [name, measureTextCanvas(displayName, fontSize)] as const
               }),
             )

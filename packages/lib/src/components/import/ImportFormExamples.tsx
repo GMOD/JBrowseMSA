@@ -49,20 +49,17 @@ const ImportFormExamples = observer(function ({
     tree?: string
     gff?: string
   }) {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      try {
-        await load(
-          model,
-          msa ? { uri: msa, locationType: 'UriLocation' } : undefined,
-          tree ? { uri: tree, locationType: 'UriLocation' } : undefined,
-          gff ? { uri: gff, locationType: 'UriLocation' } : undefined,
-        )
-      } catch (e) {
-        console.error(e)
-        model.setError(e)
-      }
-    })()
+    try {
+      load(
+        model,
+        msa ? { uri: msa, locationType: 'UriLocation' } : undefined,
+        tree ? { uri: tree, locationType: 'UriLocation' } : undefined,
+        gff ? { uri: gff, locationType: 'UriLocation' } : undefined,
+      )
+    } catch (e) {
+      console.error(e)
+      model.setError(e)
+    }
   }
   return (
     <ul>
