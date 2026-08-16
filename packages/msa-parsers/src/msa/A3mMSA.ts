@@ -122,11 +122,6 @@ export default class A3mMSA extends BaseMSA {
   getRow(name: string) {
     return this.MSA.seqdata[name] ?? ''
   }
-
-  getWidth() {
-    const name = this.orderedNames[0]
-    return name === undefined ? 0 : this.getRow(name).length
-  }
 }
 
 /**

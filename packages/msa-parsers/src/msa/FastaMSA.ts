@@ -43,9 +43,4 @@ export default class FastaMSA extends BaseMSA {
       ''
     )
   }
-
-  getWidth() {
-    const name = this.orderedNames[0]
-    return name === undefined ? 0 : this.getRow(name).length
-  }
 }

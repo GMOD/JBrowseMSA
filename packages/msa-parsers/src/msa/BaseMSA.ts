@@ -3,8 +3,26 @@ import type { NodeWithIds } from '../types.ts'
 export default abstract class BaseMSA {
   abstract getMSA(): unknown
   abstract getRow(name: string): string
-  abstract getWidth(): number
   abstract getNames(): string[]
+
+  private width?: number
+
+  /**
+   * Column count of the alignment: the length of its widest row.
+   *
+   * Not the first row's length. Ragged input is real -- a hand-edited fasta, or
+   * an aligner that stops a row at its last residue -- and taking row 0 makes
+   * every column past it unreachable when row 0 is the short one. The viewer's
+   * gap analysis already defines the column count this way, so anything else
+   * disagrees with it.
+   */
+  getWidth(): number {
+    this.width ??= this.getNames().reduce(
+      (max, name) => Math.max(max, this.getRow(name).length),
+      0,
+    )
+    return this.width
+  }
 
   getTree(): NodeWithIds {
     return {

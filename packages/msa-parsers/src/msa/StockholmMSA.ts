@@ -29,11 +29,6 @@ export default class StockholmMSA extends BaseMSA {
     return this.MSA.seqdata[name] ?? ''
   }
 
-  getWidth() {
-    const name = this.MSA.seqname[0]
-    return name === undefined ? 0 : this.getRow(name).length
-  }
-
   get alignmentNames() {
     return this.data.map((aln, idx) => aln.gf.DE?.[0] ?? `Alignment ${idx + 1}`)
   }

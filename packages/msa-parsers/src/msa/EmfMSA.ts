@@ -29,11 +29,6 @@ export default class EmfMSA extends BaseMSA {
     return this.byName.get(name) ?? ''
   }
 
-  getWidth() {
-    // 0 for an empty alignment rather than crashing on MSA[0]
-    return this.MSA[0]?.seq.length ?? 0
-  }
-
   getNames() {
     return this.MSA.map(aln => aln.protein)
   }

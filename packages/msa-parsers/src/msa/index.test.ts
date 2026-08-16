@@ -232,3 +232,15 @@ describe('getUngappedSequence', () => {
     expect(getUngappedSequence('ACDEF')).toBe('ACDEF')
   })
 })
+
+describe('getWidth', () => {
+  test('is the widest row, not the first', () => {
+    // a ragged fasta whose first row is the short one: taking row 0 would make
+    // every column past it unreachable in the viewer
+    expect(parseMSA('>a\nACGT\n>b\nACGTACGTAC').getWidth()).toBe(10)
+  })
+
+  test('is 0 when there are no rows', () => {
+    expect(parseMSA('>').getWidth()).toBe(0)
+  })
+})
