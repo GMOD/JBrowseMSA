@@ -2084,79 +2084,100 @@ function stateModelFactory() {
           })
         }
 
-        // autorun opens treeFilehandle. generation guard: if the filehandle
-        // changes mid-fetch, a slower earlier request must not clobber the data
-        // (or loading flag) set by the newer one
-        let treeGeneration = 0
-        addDisposer(
-          self,
-          autorun(async () => {
-            const { treeFilehandle } = self
-            if (treeFilehandle) {
-              const generation = ++treeGeneration
+        /**
+         * Fetch a filehandle whenever it changes, and hand the text to
+         * `onLoad`.
+         *
+         * Every loader carries a generation guard: the filehandle can change
+         * mid-fetch (a second file picked while the first is still in flight),
+         * and the slower earlier request must not clobber the data, status, or
+         * loading flag belonging to the newer one.
+         *
+         * `clearFilehandle` serves two purposes for the loaders that pass it.
+         * A local file has no URL to refetch from, so the handle is dropped
+         * once its bytes are in the model; and a fetch the user cancels drops
+         * it too, returning the view to the import form rather than leaving a
+         * stuck spinner.
+         */
+        const loadOnFilehandleChange = ({
+          getFilehandle,
+          onLoad,
+          setLoading,
+          clearFilehandle,
+        }: {
+          getFilehandle: () => FileLocationType | undefined
+          onLoad: (text: string) => void
+          setLoading?: (arg: boolean) => void
+          clearFilehandle?: () => void
+        }) => {
+          let generation = 0
+          addDisposer(
+            self,
+            autorun(async () => {
+              const filehandle = getFilehandle()
+              if (!filehandle) {
+                return
+              }
+              const current = ++generation
+              const isCurrent = () => current === generation
               try {
-                self.setLoadingTree(true)
+                setLoading?.(true)
+                self.setError(undefined)
                 const text = await fetchTextWithProgress(
-                  openLocation(treeFilehandle),
+                  openLocation(filehandle),
                   status => {
-                    if (generation === treeGeneration) {
+                    if (isCurrent()) {
                       self.setStatus(status)
                     }
                   },
                 )
-                if (generation === treeGeneration) {
+                if (isCurrent()) {
                   transaction(() => {
-                    self.setTree(text)
-                    if (treeFilehandle.locationType === 'BlobLocation') {
-                      // clear filehandle after loading if from a local file
-                      self.setTreeFilehandle(undefined)
+                    onLoad(text)
+                    if (filehandle.locationType === 'BlobLocation') {
+                      clearFilehandle?.()
                     }
                   })
                 }
               } catch (e) {
-                if (generation === treeGeneration) {
+                if (isCurrent()) {
                   if (isAbortError(e)) {
-                    // cancelled by the user: drop the filehandle so the view
-                    // returns to the import form instead of a stuck spinner
-                    self.setTreeFilehandle(undefined)
+                    clearFilehandle?.()
                   } else {
                     console.error(e)
                     self.setError(e)
                   }
                 }
               } finally {
-                if (generation === treeGeneration) {
-                  self.setLoadingTree(false)
+                if (isCurrent()) {
+                  setLoading?.(false)
                 }
               }
-            }
-          }),
-        )
-        // autorun opens treeMetadataFilehandle
-        addDisposer(
-          self,
-          autorun(async () => {
-            const { treeMetadataFilehandle } = self
-            if (treeMetadataFilehandle) {
-              try {
-                self.setTreeMetadata(
-                  await fetchTextWithProgress(
-                    openLocation(treeMetadataFilehandle),
-                    status => {
-                      self.setStatus(status)
-                    },
-                  ),
-                )
-              } catch (e) {
-                // ignore user cancel (isAbortError); treeMetadata is optional
-                if (!isAbortError(e)) {
-                  console.error(e)
-                  self.setError(e)
-                }
-              }
-            }
-          }),
-        )
+            }),
+          )
+        }
+
+        loadOnFilehandleChange({
+          getFilehandle: () => self.treeFilehandle,
+          onLoad: text => {
+            self.setTree(text)
+          },
+          setLoading: arg => {
+            self.setLoadingTree(arg)
+          },
+          clearFilehandle: () => {
+            self.setTreeFilehandle(undefined)
+          },
+        })
+
+        // treeMetadata is decorative and has no import-form step of its own, so
+        // it keeps no loading flag and nothing to return to on cancel
+        loadOnFilehandleChange({
+          getFilehandle: () => self.treeMetadataFilehandle,
+          onLoad: text => {
+            self.setTreeMetadata(text)
+          },
+        })
 
         // autorun parses inline gff text from data.gff
         addDisposer(
@@ -2174,83 +2195,29 @@ function stateModelFactory() {
           }),
         )
 
-        // autorun opens gffFilehandle for InterProScan domains
-        addDisposer(
-          self,
-          autorun(async () => {
-            const { gffFilehandle } = self
-            if (gffFilehandle) {
-              try {
-                const gffText = await fetchTextWithProgress(
-                  openLocation(gffFilehandle),
-                  status => {
-                    self.setStatus(status)
-                  },
-                )
-                self.applyGFFText(gffText)
-                if (gffFilehandle.locationType === 'BlobLocation') {
-                  self.setGFFFilehandle(undefined)
-                }
-              } catch (e) {
-                // on user cancel (isAbortError) drop the filehandle
-                if (isAbortError(e)) {
-                  self.setGFFFilehandle(undefined)
-                } else {
-                  console.error(e)
-                  self.setError(e)
-                }
-              }
-            }
-          }),
-        )
+        // gffFilehandle carries InterProScan domains
+        loadOnFilehandleChange({
+          getFilehandle: () => self.gffFilehandle,
+          onLoad: text => {
+            self.applyGFFText(text)
+          },
+          clearFilehandle: () => {
+            self.setGFFFilehandle(undefined)
+          },
+        })
 
-        // autorun opens msaFilehandle. generation guard: see treeFilehandle
-        let msaGeneration = 0
-        addDisposer(
-          self,
-          autorun(async () => {
-            const { msaFilehandle } = self
-            if (msaFilehandle) {
-              const generation = ++msaGeneration
-              try {
-                self.setLoadingMSA(true)
-                self.setError(undefined)
-                const txt = await fetchTextWithProgress(
-                  openLocation(msaFilehandle),
-                  status => {
-                    if (generation === msaGeneration) {
-                      self.setStatus(status)
-                    }
-                  },
-                )
-                if (generation === msaGeneration) {
-                  transaction(() => {
-                    self.setMSA(txt)
-                    if (msaFilehandle.locationType === 'BlobLocation') {
-                      // clear filehandle after loading if from a local file
-                      self.setMSAFilehandle(undefined)
-                    }
-                  })
-                }
-              } catch (e) {
-                if (generation === msaGeneration) {
-                  if (isAbortError(e)) {
-                    // cancelled by the user: drop the filehandle so the view
-                    // returns to the import form instead of a stuck spinner
-                    self.setMSAFilehandle(undefined)
-                  } else {
-                    console.error(e)
-                    self.setError(e)
-                  }
-                }
-              } finally {
-                if (generation === msaGeneration) {
-                  self.setLoadingMSA(false)
-                }
-              }
-            }
-          }),
-        )
+        loadOnFilehandleChange({
+          getFilehandle: () => self.msaFilehandle,
+          onLoad: text => {
+            self.setMSA(text)
+          },
+          setLoading: arg => {
+            self.setLoadingMSA(arg)
+          },
+          clearFilehandle: () => {
+            self.setMSAFilehandle(undefined)
+          },
+        })
 
         // Keep the parse chain warm: reading self.columns transitively holds
         // self.MSA (parseMSA) computed alive, so it is parsed once per data
