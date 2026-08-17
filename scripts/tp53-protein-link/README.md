@@ -46,10 +46,9 @@ config), pointing at the hosted VCF; the VCF keeps refName `17`, resolved to
 
 ## Dependencies in the rest of the stack
 
-Same as the SRC/BRAF examples: the jbrowse-components `main`
-(forwards a spec `id` to `LaunchView-LinearGenomeView`) and
-`jbrowse-plugin-msaview` ≥ 2.5.1 (which forwards `connectedViewId`,
-`connectedFeature` and `highlightColumns`).
+Same as the SRC/BRAF examples: the jbrowse-components `main` (forwards a spec
+`id` to `LaunchView-LinearGenomeView`) and `jbrowse-plugin-msaview` ≥ 2.5.1
+(which forwards `connectedViewId`, `connectedFeature` and `highlightColumns`).
 
 ## Usage
 
