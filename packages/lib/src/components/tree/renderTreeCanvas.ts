@@ -264,14 +264,10 @@ export function renderTreeLabels({
     labelWidthMap,
     collapsed,
   } = model
+  const by = blockSizeYOverride ?? blockSize
   // labels only exist for leaves, which are laid out top to bottom, so take the
   // same slice the MSA renderer uses instead of walking every tip per block
-  const visibleLeaves = getVisibleLeaves({
-    model,
-    offsetY,
-    blockSizeY: blockSizeYOverride ?? model.blockSize,
-  })
-  const by = blockSizeYOverride ?? blockSize
+  const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
   const emHeight = ctx.measureText('M').width
   if (labelsAlignRight) {
     ctx.textAlign = 'right'

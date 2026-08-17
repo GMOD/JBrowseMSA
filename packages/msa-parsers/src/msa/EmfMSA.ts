@@ -29,7 +29,9 @@ export default class EmfMSA extends BaseMSA {
     return this.byName.get(name) ?? ''
   }
 
+  // deduped, matching the first-wins byName map: emitting a repeated id twice
+  // renders a phantom duplicate row showing the first record's residues
   getNames() {
-    return this.MSA.map(aln => aln.protein)
+    return [...this.byName.keys()]
   }
 }

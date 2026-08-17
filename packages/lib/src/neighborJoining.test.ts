@@ -149,4 +149,16 @@ describe('calculateNeighborJoiningTree', () => {
     expect(tree).toContain('similar2')
     expect(tree).toContain('different')
   })
+
+  test('handles ragged rows, treating a short row as gapped past its end', () => {
+    const rows: [string, string][] = [
+      ['full', 'MKAAYLSMFGKED'],
+      ['short', 'MKAAYL'],
+      ['other', 'WWWWWWWWWWWWW'],
+    ]
+    const tree = calculateNeighborJoiningTree(rows)
+
+    expect(tree).toMatch(/;$/)
+    expect(tree).toContain('short')
+  })
 })

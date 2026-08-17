@@ -33,8 +33,10 @@ export default class ClustalMSA extends BaseMSA {
     return this.MSA.header
   }
 
+  // deduped, matching the first-wins byName map: emitting a repeated id twice
+  // renders a phantom duplicate row showing the first record's residues
   getNames() {
-    return this.MSA.alns.map(aln => aln.id)
+    return [...this.byName.keys()]
   }
 
   get seqConsensus() {

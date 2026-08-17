@@ -53,18 +53,18 @@ function isGap(c: string) {
 }
 
 function computePairwiseDistance(seq1: string, seq2: string) {
-  if (seq1.length !== seq2.length) {
-    throw new Error('Sequences must have the same length (aligned)')
-  }
-
-  let matches = 0
-  let mismatches = 0
+  // ragged input is real -- a3m and hand-edited fasta both produce rows shorter
+  // than the alignment -- so a row that stops early counts as gapped for the
+  // remainder, the same rule the model's `blanks` getter applies. Requiring
+  // equal lengths here instead made "build tree from MSA" throw on those files.
+  const len = Math.max(seq1.length, seq2.length)
+  let compared = 0
   let totalScore = 0
   let maxPossibleScore = 0
 
-  for (let i = 0; i < seq1.length; i++) {
-    const a = seq1[i]!
-    const b = seq2[i]!
+  for (let i = 0; i < len; i++) {
+    const a = seq1[i] ?? '-'
+    const b = seq2[i] ?? '-'
 
     const aGap = isGap(a)
     const bGap = isGap(b)
@@ -72,24 +72,16 @@ function computePairwiseDistance(seq1: string, seq2: string) {
       continue
     }
 
+    compared++
     if (aGap || bGap) {
-      mismatches++
       continue
     }
 
-    const score = getBlosum62Score(a, b)
-    totalScore += score
+    totalScore += getBlosum62Score(a, b)
     maxPossibleScore += Math.max(getBlosum62Score(a, a), getBlosum62Score(b, b))
-
-    if (a.toUpperCase() === b.toUpperCase()) {
-      matches++
-    } else {
-      mismatches++
-    }
   }
 
-  const total = matches + mismatches
-  if (total === 0) {
+  if (compared === 0) {
     return 1
   }
 

@@ -33,7 +33,7 @@ const MSACanvasBlock = observer(function ({
 
   const ref = useCanvasAutorun(
     ctx => {
-      const { blockSize, highResScaleFactor, actuallyShowDomains } = model
+      const { blockSize, highResScaleFactor } = model
       ctx.resetTransform()
       ctx.clearRect(
         0,
@@ -41,14 +41,12 @@ const MSACanvasBlock = observer(function ({
         blockSize * highResScaleFactor,
         blockSize * highResScaleFactor,
       )
-      if (actuallyShowDomains) {
-        renderBoxFeatureCanvasBlock({
-          ctx,
-          offsetX,
-          offsetY,
-          model,
-        })
-      }
+      renderBoxFeatureCanvasBlock({
+        ctx,
+        offsetX,
+        offsetY,
+        model,
+      })
       renderMSABlock({
         ctx,
         theme,

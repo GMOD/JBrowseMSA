@@ -150,7 +150,11 @@ seq2      MNPQRSTVWY
 seq1      AAAAAAAAAA
 seq1      CCCCCCCCCC
 `
-    expect(new ClustalMSA(dup).getRow('seq1')).toBe('AAAAAAAAAA')
+    const msa = new ClustalMSA(dup)
+    expect(msa.getRow('seq1')).toBe('AAAAAAAAAA')
+    // and the name is listed once: getNames drives the row layout, so a
+    // repeated id would otherwise draw a phantom second row of the same residues
+    expect(msa.getNames()).toEqual(['seq1'])
   })
 })
 
