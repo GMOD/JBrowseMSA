@@ -1,25 +1,14 @@
-import { isBlank } from './util.ts'
-
 /**
- * Convert a sequence position (ungapped, 0-based) to a global column index.
- * This finds the global column that contains the Nth non-gap character.
+ * The global column of every ungapped sequence position in a row, i.e.
+ * index[seqPos] is the column holding the seqPos-th non-gap character.
  *
- * @param row - The row's sequence string (including gaps)
- * @param seqPos - The sequence position (0-based count of non-gap characters)
- * @returns The global column index containing the seqPos-th non-gap character
+ * A row is indexed once and then answers seqPos -> column by lookup, which is
+ * what makes the domain overlay affordable: it resolves one position per feature
+ * per row on every redraw, and scanning the row for each would be quadratic.
  *
  * @example
  * // Row: "A-TG-C" (A at 0, T at 2, G at 3, C at 5)
- * seqPosToGlobalCol({ row: "A-TG-C", seqPos: 0 }) // → 0 (A)
- * seqPosToGlobalCol({ row: "A-TG-C", seqPos: 1 }) // → 2 (T)
- * seqPosToGlobalCol({ row: "A-TG-C", seqPos: 2 }) // → 3 (G)
- * seqPosToGlobalCol({ row: "A-TG-C", seqPos: 3 }) // → 5 (C)
- */
-/**
- * The global column of every ungapped sequence position in a row, i.e.
- * index[seqPos] is the column holding the seqPos-th non-gap character. Amortizes
- * repeated seqPosToGlobalCol lookups (the domain overlay does one per feature
- * per row) into a single pass per row.
+ * buildSeqPosIndex('A-TG-C') // → [0, 2, 3, 5]
  */
 export function buildSeqPosIndex(row: string) {
   const index = new Int32Array(row.length)
@@ -31,28 +20,4 @@ export function buildSeqPosIndex(row: string) {
     }
   }
   return index.subarray(0, n)
-}
-
-export function seqPosToGlobalCol({
-  row,
-  seqPos,
-}: {
-  row: string
-  seqPos: number
-}) {
-  let nonGapCount = 0
-  let globalCol = 0
-  // Find the seqPos-th non-gap character
-  while (globalCol < row.length) {
-    if (!isBlank(row[globalCol])) {
-      if (nonGapCount === seqPos) {
-        return globalCol
-      }
-      nonGapCount++
-    }
-    globalCol++
-  }
-  // If seqPos is 0 and we didn't find any non-gap character, return 0
-  // Otherwise return globalCol (which is row.length at this point)
-  return seqPos === 0 ? 0 : globalCol
 }

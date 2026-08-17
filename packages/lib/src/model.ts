@@ -1635,8 +1635,8 @@ function stateModelFactory() {
           return 0
         }
         const col = self.seqPosGlobalColIndex.get(rowName)?.[seqPos]
-        // past the end of the ungapped sequence: 0 for the degenerate empty-row
-        // case, otherwise one past the last column, as the scan version returned
+        // past the end of the ungapped sequence: 0 for the degenerate all-gap
+        // row, otherwise one past the last column
         return col ?? (seqPos === 0 ? 0 : seq.length)
       },
 
