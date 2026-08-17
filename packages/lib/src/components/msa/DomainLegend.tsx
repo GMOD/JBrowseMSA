@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
@@ -8,11 +8,11 @@ import { observer } from 'mobx-react'
 import type { MsaViewModel } from '../../model.ts'
 
 const DomainLegend = observer(function ({ model }: { model: MsaViewModel }) {
-  const [expanded, setExpanded] = useState(true)
   const {
     actuallyShowDomains,
     visibleDomainTypes: visible,
     fillPalette,
+    showDomainLegend: expanded,
   } = model
   const ExpandIcon = expanded ? ExpandLess : ExpandMore
 
@@ -41,8 +41,9 @@ const DomainLegend = observer(function ({ model }: { model: MsaViewModel }) {
       >
         <IconButton
           size="small"
+          title={expanded ? 'Collapse domain key' : 'Expand domain key'}
           onClick={() => {
-            setExpanded(!expanded)
+            model.setShowDomainLegend(!expanded)
           }}
         >
           <ExpandIcon fontSize="small" />

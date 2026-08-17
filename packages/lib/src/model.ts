@@ -31,6 +31,7 @@ import {
   defaultScrollX,
   defaultScrollY,
   defaultScrollZoom,
+  defaultShowDomainLegend,
   defaultShowDomains,
   defaultSubFeatureRows,
   maxCellSize,
@@ -132,6 +133,15 @@ function stateModelFactory() {
          * #property
          */
         showDomains: stripDefault(types.boolean, defaultShowDomains),
+        /**
+         * #property
+         * whether the domain legend is expanded. The legend floats over the
+         * top-right of the alignment, so on a tall panel it covers real
+         * residues -- persisting the state is what lets a reader collapse it
+         * and keep it collapsed, and what lets a session or a figure open with
+         * it already out of the way.
+         */
+        showDomainLegend: stripDefault(types.boolean, defaultShowDomainLegend),
         /**
          * #property
          */
@@ -474,6 +484,13 @@ function stateModelFactory() {
        */
       setShowDomains(arg: boolean) {
         self.showDomains = arg
+      },
+      /**
+       * #action
+       * expand or collapse the domain legend that floats over the alignment
+       */
+      setShowDomainLegend(arg: boolean) {
+        self.showDomainLegend = arg
       },
       /**
        * #action

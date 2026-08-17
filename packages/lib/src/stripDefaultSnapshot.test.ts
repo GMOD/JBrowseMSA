@@ -74,3 +74,14 @@ test('inline gff survives the snapshot when no gffFilehandle can refetch it', ()
   })
   expect(getSnapshot(withFilehandle).data.gff).toBeUndefined()
 })
+
+// The legend floats over the top-right of the alignment, so collapsing it is a
+// way of seeing the residues under it. As component state that choice was lost
+// on every reload and could not be set by a session or a figure at all.
+test('a collapsed domain legend survives into the snapshot', () => {
+  const model = MsaView.create({ type: 'MsaView' })
+  expect(getSnapshot(model).showDomainLegend).toBeUndefined()
+  model.setShowDomainLegend(false)
+  expect(getSnapshot(model).showDomainLegend).toBe(false)
+  expect(MsaView.create(getSnapshot(model)).showDomainLegend).toBe(false)
+})
