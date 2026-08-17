@@ -45,7 +45,7 @@ export function getNodeX(
   return ((maxDepthToLeaf - depthToLeaf) / maxDepthToLeaf) * tipX
 }
 
-export function renderTree({
+function renderTree({
   offsetY,
   ctx,
   model,
@@ -89,7 +89,7 @@ export function renderTree({
   })
 }
 
-export function renderCollapsedTriangles({
+function renderCollapsedTriangles({
   ctx,
   clickMap,
   offsetY,
@@ -98,6 +98,7 @@ export function renderCollapsedTriangles({
   tipX,
   maxDepthToLeaf,
   blockSizeYOverride,
+  collapsedSet,
 }: {
   ctx: RenderCtx
   clickMap?: ClickMapIndex
@@ -107,11 +108,11 @@ export function renderCollapsedTriangles({
   tipX: number
   maxDepthToLeaf: number
   blockSizeYOverride?: number
+  collapsedSet: Set<string>
 }) {
   const {
     hierarchy,
     showBranchLenEffective: showBranchLen,
-    collapsed,
     blockSize,
     rowHeight,
     fontSize,
@@ -119,10 +120,9 @@ export function renderCollapsedTriangles({
   } = model
   // nothing collapsed is the common case, and the traversal below visits every
   // node in the tree on every block of every redraw
-  if (collapsed.length === 0) {
+  if (collapsedSet.size === 0) {
     return
   }
-  const collapsedSet = new Set(collapsed)
   const by = blockSizeYOverride ?? blockSize
   const halfHeight = Math.max(2, rowHeight * 0.42)
   forEachDescendant(hierarchy, node => {
@@ -171,7 +171,7 @@ export function renderCollapsedTriangles({
   })
 }
 
-export function renderNodeBubbles({
+function renderNodeBubbles({
   ctx,
   clickMap,
   offsetY,
@@ -179,6 +179,7 @@ export function renderNodeBubbles({
   tipX,
   maxDepthToLeaf,
   blockSizeYOverride,
+  collapsedSet,
 }: {
   ctx: RenderCtx
   clickMap?: ClickMapIndex
@@ -187,16 +188,15 @@ export function renderNodeBubbles({
   tipX: number
   maxDepthToLeaf: number
   blockSizeYOverride?: number
+  collapsedSet: Set<string>
 }) {
   const {
     hierarchy,
     showBranchLenEffective: showBranchLen,
-    collapsed,
     blockSize,
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride ?? blockSize
-  const collapsedSet = new Set(collapsed)
   forEachDescendant(hierarchy, node => {
     const x = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
     if (x === undefined) {
@@ -231,7 +231,7 @@ export function renderNodeBubbles({
   })
 }
 
-export function renderTreeLabels({
+function renderTreeLabels({
   theme,
   model,
   offsetY,
@@ -240,6 +240,7 @@ export function renderTreeLabels({
   tipX,
   maxDepthToLeaf,
   blockSizeYOverride,
+  collapsedSet,
 }: {
   model: MsaViewModel
   offsetY: number
@@ -249,6 +250,7 @@ export function renderTreeLabels({
   tipX: number
   maxDepthToLeaf: number
   blockSizeYOverride?: number
+  collapsedSet: Set<string>
 }) {
   const {
     fontSize,
@@ -262,7 +264,6 @@ export function renderTreeLabels({
     marginLeft,
     noTree,
     labelWidthMap,
-    collapsed,
   } = model
   const by = blockSizeYOverride ?? blockSize
   // labels only exist for leaves, which are laid out top to bottom, so take the
@@ -285,7 +286,7 @@ export function renderTreeLabels({
     const displayName = treeMetadata[name]?.genome || name
     // a collapsed clade is drawn as a triangle + tip count; suppress its leaf
     // label when the "name" is just the auto-generated internal-node id
-    const isAnonymousCollapsed = collapsed.includes(id) && name === id
+    const isAnonymousCollapsed = collapsedSet.has(id) && name === id
     if (!isAnonymousCollapsed && inYBlock(y, offsetY, by)) {
       // note: +rowHeight/4 matches with -rowHeight/4 in msa
       const yp = y + fontSize / 4
@@ -385,6 +386,9 @@ export function renderTreeCanvas({
   // maxBranchLength for the cladogram would pin every node to x=0 for a tree
   // with no branch lengths -- which is exactly what forces cladogram mode.
   const tipX = showBranchLenEffective ? maxBranchLength : treeWidth
+  // built once for all three passes: each of them asks about a different node on
+  // every block of every redraw, and `collapsed` is a list
+  const collapsedSet = new Set(model.collapsed)
 
   if (!noTree && drawTree) {
     renderTree({
@@ -406,6 +410,7 @@ export function renderTreeCanvas({
       tipX,
       maxDepthToLeaf,
       blockSizeYOverride,
+      collapsedSet,
     })
 
     if (drawNodeBubbles) {
@@ -417,6 +422,7 @@ export function renderTreeCanvas({
         tipX,
         maxDepthToLeaf,
         blockSizeYOverride,
+        collapsedSet,
       })
     }
   }
@@ -431,6 +437,7 @@ export function renderTreeCanvas({
       tipX,
       maxDepthToLeaf,
       blockSizeYOverride,
+      collapsedSet,
     })
   }
 
