@@ -77,8 +77,13 @@ function drawTiles({
   const xMin = offsetX - cull
   const xMax = offsetX + blockWidth + cull
 
-  for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
-    const node = visibleLeaves[i]!
+  // a segment (exon) number labels its band once per block, on the topmost
+  // visible row carrying that segment, so it reads as a column header for the
+  // whole band. Keyed by accession rather than drawn on row 0, because the rows
+  // carrying the gene model are often not the first ones in the alignment
+  const labelled = drawSegmentLabels ? new Set<string>() : undefined
+
+  for (const node of visibleLeaves) {
     const y = node.x!
     const bands = domainBands.get(node.data.name)
 
@@ -94,15 +99,15 @@ function drawTiles({
           if (strand === undefined) {
             ctx.fillRect(x, t, lw, h)
             ctx.strokeRect(x, t, lw, h)
-            // segment (exon) number drawn once per band, on the top visible row,
-            // so it reads as a column header for the whole band
-            const label = drawSegmentLabels
-              ? segmentLabels.get(accession)
-              : undefined
-            if (label !== undefined && i === 0) {
+            const label =
+              labelled && !labelled.has(accession)
+                ? segmentLabels.get(accession)
+                : undefined
+            if (label !== undefined) {
               const fontSize = Math.min(h - 2, 11)
               ctx.font = `${fontSize}px sans-serif`
               if (ctx.measureText(label).width + 2 <= lw) {
+                labelled!.add(accession)
                 ctx.fillStyle = '#222'
                 ctx.textAlign = 'center'
                 ctx.textBaseline = 'middle'

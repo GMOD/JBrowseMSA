@@ -251,6 +251,9 @@ function CoreRendering({
     ctx: msaCtx,
     offsetX,
     offsetY,
+    // the overlay culls bands to this width; without it the export falls back
+    // to the on-screen 500px block size and drops every band past it
+    blockSizeXOverride: msaAreaWidth,
     blockSizeYOverride: contentHeight,
     highResScaleFactorOverride: 1,
   })
