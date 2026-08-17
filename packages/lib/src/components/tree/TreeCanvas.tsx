@@ -22,8 +22,8 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   )
   const { onMouseDown, onMouseUp } = useWheelScroll({ ref, onScrollY })
 
-  const mouseoverRef = useCanvasAutorun(
-    ctx => {
+  const mouseoverRef = useCanvasAutorun({
+    draw: ctx => {
       if (isAlive(model)) {
         const {
           rowHeight,
@@ -61,8 +61,10 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
         }
       }
     },
-    [model],
-  )
+    width: treeAreaWidth,
+    height,
+    deps: [model],
+  })
 
   return (
     <div

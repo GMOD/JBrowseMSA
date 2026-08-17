@@ -25,9 +25,9 @@ const ConservationBlock = observer(function ({
 }) {
   const { blockSize, scrollX, highResScaleFactor } = model
 
-  const ref = useCanvasAutorun(
-    ctx => {
-      const { blockSize, colWidth, highResScaleFactor } = model
+  const ref = useCanvasAutorun({
+    draw: ctx => {
+      const { colWidth } = model
       ctx.resetTransform()
       ctx.scale(highResScaleFactor, highResScaleFactor)
       ctx.clearRect(0, 0, blockSize, trackHeight)
@@ -43,8 +43,10 @@ const ConservationBlock = observer(function ({
         blockSize,
       })
     },
-    [model, track, offsetX, trackHeight],
-  )
+    width: blockSize * highResScaleFactor,
+    height: trackHeight * highResScaleFactor,
+    deps: [model, track, offsetX, trackHeight],
+  })
 
   return (
     <canvas

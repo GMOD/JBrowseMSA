@@ -16,21 +16,25 @@ const MSAMouseoverCanvas = observer(function ({
   const { height, msaAreaWidth, verticalScrollbarWidth, highResScaleFactor } =
     model
   const width = msaAreaWidth - verticalScrollbarWidth
-  const ref = useCanvasAutorun(
-    ctx => {
+  const canvasWidth = width * highResScaleFactor
+  const canvasHeight = height * highResScaleFactor
+  const ref = useCanvasAutorun({
+    draw: ctx => {
       if (isAlive(model)) {
         renderMouseover({ ctx, model })
       }
     },
-    [model],
-  )
+    width: canvasWidth,
+    height: canvasHeight,
+    deps: [model],
+  })
 
   return (
     <canvas
       ref={ref}
       id="mouseover"
-      width={width * highResScaleFactor}
-      height={height * highResScaleFactor}
+      width={canvasWidth}
+      height={canvasHeight}
       style={{
         position: 'absolute',
         top: 0,

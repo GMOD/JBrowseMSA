@@ -32,16 +32,9 @@ const AnnotationBlock = observer(function ({
 
   const colorScheme = customColorScheme ?? modelColorScheme
   const { theme, contrastScheme } = useColorContrast(colorScheme)
-  const ref = useCanvasAutorun(
-    ctx => {
-      const {
-        blockSize,
-        bgColor,
-        colWidth,
-        fontSize,
-        rowHeight,
-        highResScaleFactor,
-      } = model
+  const ref = useCanvasAutorun({
+    draw: ctx => {
+      const { bgColor, colWidth, fontSize } = model
       ctx.resetTransform()
       ctx.scale(highResScaleFactor, highResScaleFactor)
       ctx.clearRect(0, 0, blockSize, rowHeight)
@@ -62,8 +55,10 @@ const AnnotationBlock = observer(function ({
         blockSize,
       })
     },
-    [model, offsetX, theme, contrastScheme, colorScheme, data],
-  )
+    width: blockSize * highResScaleFactor,
+    height: rowHeight * highResScaleFactor,
+    deps: [model, offsetX, theme, contrastScheme, colorScheme, data],
+  })
   return (
     <canvas
       ref={ref}

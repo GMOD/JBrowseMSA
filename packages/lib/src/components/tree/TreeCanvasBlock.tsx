@@ -60,15 +60,12 @@ const TreeCanvasBlock = observer(function ({
   const width = treeAreaWidth + padding
   const height = blockSize
 
-  const ref = useCanvasAutorun(
-    ctx => {
+  const canvasWidth = width * highResScaleFactor
+  const canvasHeight = height * highResScaleFactor
+  const ref = useCanvasAutorun({
+    draw: ctx => {
       ctx.resetTransform()
-      ctx.clearRect(
-        0,
-        0,
-        width * highResScaleFactor,
-        height * highResScaleFactor,
-      )
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight)
       renderTreeCanvas({
         ctx,
         model,
@@ -77,8 +74,10 @@ const TreeCanvasBlock = observer(function ({
         theme,
       })
     },
-    [model, clickMap, offsetY, theme],
-  )
+    width: canvasWidth,
+    height: canvasHeight,
+    deps: [model, clickMap, offsetY, theme],
+  })
 
   const style = {
     width,
@@ -112,8 +111,8 @@ const TreeCanvasBlock = observer(function ({
 
       <canvas
         ref={ref}
-        width={width * highResScaleFactor}
-        height={height * highResScaleFactor}
+        width={canvasWidth}
+        height={canvasHeight}
         style={{ ...style, cursor: hovered ? 'pointer' : 'default' }}
         onMouseMove={event => {
           onMouseMove(event)

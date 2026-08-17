@@ -31,16 +31,11 @@ const MSACanvasBlock = observer(function ({
     },
   )
 
-  const ref = useCanvasAutorun(
-    ctx => {
-      const { blockSize, highResScaleFactor } = model
+  const canvasSize = blockSize * highResScaleFactor
+  const ref = useCanvasAutorun({
+    draw: ctx => {
       ctx.resetTransform()
-      ctx.clearRect(
-        0,
-        0,
-        blockSize * highResScaleFactor,
-        blockSize * highResScaleFactor,
-      )
+      ctx.clearRect(0, 0, canvasSize, canvasSize)
       renderBoxFeatureCanvasBlock({
         ctx,
         offsetX,
@@ -56,8 +51,10 @@ const MSACanvasBlock = observer(function ({
         model,
       })
     },
-    [model, offsetX, offsetY, theme, contrastScheme],
-  )
+    width: canvasSize,
+    height: canvasSize,
+    deps: [model, offsetX, offsetY, theme, contrastScheme],
+  })
 
   const { hoveredInsertion, mouseOverDomains, showColumnStats } = model
 
@@ -78,8 +75,8 @@ const MSACanvasBlock = observer(function ({
         onMouseLeave={() => {
           onMouseLeave()
         }}
-        width={blockSize * highResScaleFactor}
-        height={blockSize * highResScaleFactor}
+        width={canvasSize}
+        height={canvasSize}
         style={{
           position: 'absolute',
           top: scrollY + offsetY,
