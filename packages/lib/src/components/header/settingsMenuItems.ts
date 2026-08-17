@@ -1,41 +1,34 @@
 import type { MsaViewModel } from '../../model.ts'
 import type { MenuItem } from '@jbrowse/core/ui/Menu'
 
+function toggle(label: string, checked: boolean, set: (arg: boolean) => void) {
+  return {
+    label,
+    type: 'checkbox' as const,
+    checked,
+    onClick: () => {
+      set(!checked)
+    },
+  }
+}
+
 export function msaSettingsMenuItems(model: MsaViewModel): MenuItem[] {
   const { drawMsaLetters, hideGaps, bgColor, showColumnStats } = model
   return [
-    {
-      label: 'Show column statistics on hover',
-      type: 'checkbox',
-      checked: showColumnStats,
-      onClick: () => {
-        model.setShowColumnStats(!showColumnStats)
-      },
-    },
-    {
-      label: 'Draw letters',
-      type: 'checkbox',
-      checked: drawMsaLetters,
-      onClick: () => {
-        model.setDrawMsaLetters(!drawMsaLetters)
-      },
-    },
-    {
-      label: 'Color letters instead of background of tiles',
-      type: 'checkbox',
-      checked: !bgColor,
-      onClick: () => {
-        model.setBgColor(!bgColor)
-      },
-    },
-    {
-      label: 'Enable hiding gappy columns?',
-      type: 'checkbox',
-      checked: hideGaps,
-      onClick: () => {
-        model.setHideGaps(!hideGaps)
-      },
-    },
+    toggle('Show column statistics on hover', showColumnStats, arg => {
+      model.setShowColumnStats(arg)
+    }),
+    toggle('Draw letters', drawMsaLetters, arg => {
+      model.setDrawMsaLetters(arg)
+    }),
+    // the checkbox reads as the inverse of the property it sets: bgColor draws
+    // the tile, and turning it off is what leaves the letter itself colored
+    toggle('Color letters instead of background of tiles', !bgColor, arg => {
+      model.setBgColor(!arg)
+    }),
+    toggle('Enable hiding gappy columns?', hideGaps, arg => {
+      model.setHideGaps(arg)
+    }),
   ]
 }
 
@@ -48,45 +41,20 @@ export function treeSettingsMenuItems(model: MsaViewModel): MenuItem[] {
     drawLabels,
   } = model
   return [
-    {
-      label: 'Show branch length',
-      type: 'checkbox',
-      checked: showBranchLen,
-      onClick: () => {
-        model.setShowBranchLen(!showBranchLen)
-      },
-    },
-    {
-      label: 'Show tree',
-      type: 'checkbox',
-      checked: drawTree,
-      onClick: () => {
-        model.setDrawTree(!drawTree)
-      },
-    },
-    {
-      label: 'Draw clickable bubbles on tree branches',
-      type: 'checkbox',
-      checked: drawNodeBubbles,
-      onClick: () => {
-        model.setDrawNodeBubbles(!drawNodeBubbles)
-      },
-    },
-    {
-      label: 'Tree labels align right',
-      type: 'checkbox',
-      checked: labelsAlignRight,
-      onClick: () => {
-        model.setLabelsAlignRight(!labelsAlignRight)
-      },
-    },
-    {
-      label: 'Draw labels',
-      type: 'checkbox',
-      checked: drawLabels,
-      onClick: () => {
-        model.setDrawLabels(!drawLabels)
-      },
-    },
+    toggle('Show branch length', showBranchLen, arg => {
+      model.setShowBranchLen(arg)
+    }),
+    toggle('Show tree', drawTree, arg => {
+      model.setDrawTree(arg)
+    }),
+    toggle('Draw clickable bubbles on tree branches', drawNodeBubbles, arg => {
+      model.setDrawNodeBubbles(arg)
+    }),
+    toggle('Tree labels align right', labelsAlignRight, arg => {
+      model.setLabelsAlignRight(arg)
+    }),
+    toggle('Draw labels', drawLabels, arg => {
+      model.setDrawLabels(arg)
+    }),
   ]
 }

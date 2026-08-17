@@ -10,3 +10,9 @@ export const referenceColor = 'rgba(0,128,255,0.3)'
 // while the alignment cells are already colored so a lighter wash reads better.
 export const treeHoverColor = 'rgba(255,165,0,0.2)'
 export const multiRowHoverColor = 'rgba(255,165,0,0.15)'
+
+// the hovered column/row, and the one pinned by a click. Drawn on the alignment
+// overlay canvas and again as plain divs over the track area, which have to
+// match or the crosshair appears to change color as it crosses the tracks.
+export const hoverColor = 'rgba(0,0,0,0.15)'
+export const clickColor = 'rgba(128,128,0,0.2)'

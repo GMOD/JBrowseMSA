@@ -11,6 +11,7 @@ import VerticalScrollbar from './VerticalScrollbar.tsx'
 import Header from './header/Header.tsx'
 import Minimap from './minimap/Minimap.tsx'
 import MSAPanel from './msa/MSAPanel.tsx'
+import { clickColor, hoverColor } from './overlayColors.ts'
 import TreePanel from './tree/TreePanel.tsx'
 import TreeRuler from './tree/TreeRuler.tsx'
 
@@ -43,47 +44,40 @@ const TrackColumnIndicator = observer(function ({
     verticalScrollbarWidth,
   } = model
 
-  const left = treeAreaWidth + resizeHandleWidth
-  const clipWidth = msaAreaWidth - verticalScrollbarWidth
+  // hovered column, then the pinned one, matching the alignment's own overlay
+  const bands = [
+    { col: mouseCol, color: hoverColor },
+    { col: mouseClickCol, color: clickColor },
+  ]
 
   return (
     <div
       style={{
         position: 'absolute',
-        left,
+        left: treeAreaWidth + resizeHandleWidth,
         top: 0,
-        width: clipWidth,
+        width: msaAreaWidth - verticalScrollbarWidth,
         height: totalTrackAreaHeight,
         overflow: 'hidden',
         pointerEvents: 'none',
       }}
     >
-      {mouseCol !== undefined ? (
-        <div
-          style={{
-            position: 'absolute',
-            left: mouseCol * colWidth + scrollX,
-            top: 0,
-            width: colWidth,
-            height: totalTrackAreaHeight,
-            backgroundColor: 'rgba(0,0,0,0.15)',
-            zIndex: 100,
-          }}
-        />
-      ) : null}
-      {mouseClickCol !== undefined ? (
-        <div
-          style={{
-            position: 'absolute',
-            left: mouseClickCol * colWidth + scrollX,
-            top: 0,
-            width: colWidth,
-            height: totalTrackAreaHeight,
-            backgroundColor: 'rgba(128,128,0,0.2)',
-            zIndex: 100,
-          }}
-        />
-      ) : null}
+      {bands.map(({ col, color }) =>
+        col === undefined ? null : (
+          <div
+            key={color}
+            style={{
+              position: 'absolute',
+              left: col * colWidth + scrollX,
+              top: 0,
+              width: colWidth,
+              height: totalTrackAreaHeight,
+              backgroundColor: color,
+              zIndex: 100,
+            }}
+          />
+        ),
+      )}
     </div>
   )
 })
