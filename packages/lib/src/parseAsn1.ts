@@ -32,37 +32,10 @@ const remap: Record<string, string> = {
   'leaf-count': 'leafCount',
 }
 
-function extractBracedBlocks(str: string): string[] {
-  const blocks: string[] = []
-  let pos = 0
-  while (pos < str.length) {
-    pos = str.indexOf('{', pos)
-    if (pos === -1) {
-      break
-    }
-    let depth = 1
-    const start = pos + 1
-    pos++
-    while (pos < str.length && depth > 0) {
-      if (str[pos] === '{') {
-        depth++
-      } else if (str[pos] === '}') {
-        depth--
-      }
-      pos++
-    }
-    if (depth === 0) {
-      blocks.push(str.slice(start, pos - 1).trim())
-    }
-  }
-  return blocks
-}
-
-function findBracedContent(str: string, after: number) {
-  const openIdx = str.indexOf('{', after)
-  if (openIdx === -1) {
-    return undefined
-  }
+// index just past the '}' closing the '{' at openIdx, or -1 when it never
+// closes. Braces nest (a node holds features, which hold values), so finding the
+// end of a block means counting depth rather than taking the next '}'.
+function afterMatchingBrace(str: string, openIdx: number) {
   let depth = 1
   let pos = openIdx + 1
   while (pos < str.length && depth > 0) {
@@ -73,7 +46,35 @@ function findBracedContent(str: string, after: number) {
     }
     pos++
   }
-  return depth === 0 ? str.slice(openIdx + 1, pos - 1).trim() : undefined
+  return depth === 0 ? pos : -1
+}
+
+// the contents of each top-level {...} block in str, siblings only
+function extractBracedBlocks(str: string): string[] {
+  const blocks: string[] = []
+  let pos = 0
+  while (pos < str.length) {
+    const openIdx = str.indexOf('{', pos)
+    if (openIdx === -1) {
+      break
+    }
+    const end = afterMatchingBrace(str, openIdx)
+    if (end === -1) {
+      break
+    }
+    blocks.push(str.slice(openIdx + 1, end - 1).trim())
+    pos = end
+  }
+  return blocks
+}
+
+function findBracedContent(str: string, after: number) {
+  const openIdx = str.indexOf('{', after)
+  if (openIdx === -1) {
+    return undefined
+  }
+  const end = afterMatchingBrace(str, openIdx)
+  return end === -1 ? undefined : str.slice(openIdx + 1, end - 1).trim()
 }
 
 export function parseAsn1(
@@ -163,22 +164,13 @@ function extractSections(asnString: string): Record<string, string> {
       continue
     }
 
-    let depth = 1
-    const start = pos + 1
-    pos++
-    while (pos < content.length && depth > 0) {
-      if (content[pos] === '{') {
-        depth++
-      } else if (content[pos] === '}') {
-        depth--
-      }
-      pos++
+    const end = afterMatchingBrace(content, pos)
+    if (end === -1) {
+      break
     }
-    if (depth === 0) {
-      sections[name] = content.slice(start, pos - 1).trim()
-    }
+    sections[name] = content.slice(pos + 1, end - 1).trim()
 
-    pos = content.indexOf(',', pos)
+    pos = content.indexOf(',', end)
     pos = pos === -1 ? content.length : pos + 1
   }
 

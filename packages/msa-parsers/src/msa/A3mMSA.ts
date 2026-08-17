@@ -131,7 +131,13 @@ export default class A3mMSA extends BaseMSA {
  */
 function expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
   const rows = rawSeqs.map(parseRow)
-  const numPositions = Math.max(...rows.map(r => r.matches.length), 0)
+  // a loop, not Math.max(...): an a3m from an hhblits search routinely carries
+  // six figures of hits, and spreading one argument per row throws
+  // "Maximum call stack size exceeded" somewhere past ~125k of them
+  let numPositions = 0
+  for (const { matches } of rows) {
+    numPositions = Math.max(numPositions, matches.length)
+  }
 
   // one insert slot before each match column, plus one trailing slot
   const maxInserts = new Array<number>(numPositions + 1).fill(0)
