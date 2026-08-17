@@ -4,7 +4,7 @@
  *
  * Drives the real gene-explorer page (so the session spec is exactly what the
  * site builds — MSA row, knownCanonical feature, AlphaFold url and all), grabs
- * its "Open in JBrowse" URL, opens it in the live webgl-poc JBrowse in a real
+ * its "Open in JBrowse" URL, opens it in the live JBrowse at code/jb2/main in a real
  * (headless, swiftshader-WebGL) Chrome, waits for the AlphaFold structure to load
  * and align, then drives the structure model's hover directly
  * (structure.setHoveredPosition — exactly what molstar's hover handler does) and

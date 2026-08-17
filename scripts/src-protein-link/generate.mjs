@@ -23,7 +23,7 @@ const REGION = 'chr20:37340000-37410000'
 const QUERY_SEQ = 'SRC_HUMAN' // the matching row in kinase.aln (UniProt P12931, 536 aa)
 const DATA = 'https://gmod.org/JBrowseMSA/demo/data'
 const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
-const JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc/'
+const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 
 const lines = execFileSync('tabix', [GFF, REGION], { encoding: 'utf8' })
   .trim()

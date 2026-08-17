@@ -48,7 +48,7 @@ const TREE_URI = `${MSA_BASE}/hg38.multiz100way.nh`
 
 // The JBrowse build + config that bundle jbrowse-plugin-msaview and
 // jbrowse-plugin-protein3d (see scripts/gene-explorer/config additions).
-const JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc/'
+const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 const JBROWSE_CONFIG = `${DATA_BASE}/jbrowse-msa-combined-config.json`
 const GENE_TRACK = 'hg38-ncbiRefSeqSelect'
 

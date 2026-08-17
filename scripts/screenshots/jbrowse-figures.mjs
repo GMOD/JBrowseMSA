@@ -15,8 +15,8 @@
  *
  * Unlike the app screenshots (scripts/screenshots/generate.mjs, which serves the
  * self-contained demo app), these run the react-msaview JBrowse plugin *inside*
- * a real jbrowse-web. That needs a running jbrowse-web built from the webgl-poc
- * branch (LaunchView-LinearGenomeView id forwarding); the orchestrator
+ * a real jbrowse-web. That needs a running jbrowse-web built from main
+ * (LaunchView-LinearGenomeView id forwarding); the orchestrator
  * (generate-screenshots.mjs) points us at it via --jbrowse-url.
  *
  * To reflect the exact repo state (not whatever is deployed to gmod.org), we
@@ -205,7 +205,7 @@ function retarget(obj, dataBase) {
   }
 }
 
-// Take a real webgl-poc docs URL (?config=<gmod>&session=spec-<…>) and re-point
+// Take a real docs URL (?config=<gmod>&session=spec-<…>) and re-point
 // it at the local jbrowse-web + local config + local data.
 function localizeUrl(realUrl, { configUrl, dataBase }) {
   const spec = decodeSpec(realUrl)
@@ -375,7 +375,7 @@ async function main() {
     .catch(() => false)
   if (!reachable) {
     console.error(
-      `\njbrowse-web not reachable at ${jbrowseBase}. Start the webgl-poc build, e.g.\n` +
+      `\njbrowse-web not reachable at ${jbrowseBase}. Start the main build, e.g.\n` +
         `  cd ~/src/jbrowse-components/products/jbrowse-web && pnpm start\n` +
         `then re-run (or pass --jbrowse-url=...). Skipping JBrowse figures.`,
     )

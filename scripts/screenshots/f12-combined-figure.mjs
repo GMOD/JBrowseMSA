@@ -67,7 +67,7 @@ const gff = fs.readFileSync(
 )
 
 // published targets — these back the live, clickable gallery URLs
-const PUBLISHED_JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc'
+const PUBLISHED_JBROWSE = 'https://jbrowse.org/code/jb2/main'
 const PUBLISHED_CONFIG =
   'https://gmod.org/JBrowseMSA/demo/data/jbrowse-msa-combined-config.json'
 

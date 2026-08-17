@@ -52,7 +52,7 @@ alignment twice (one alignment representation, the on-message one).
   `session` in the **hash** (`#config=...&session=encoded-...`). Mixing
   query-config with hash-session, or top-level `assembly/loc/tracks` on the LGV,
   fails union matching.
-- LGV snapshot uses `init: { assembly, loc, tracks }` (resolved by the webgl-poc
+- LGV snapshot uses `init: { assembly, loc, tracks }` (resolved by the main
   build's afterAttach), with `colorByCDS` top-level.
 - MsaView accepts inline `data: { msa, tree, gff }` plus native snapshot props:
   `colorSchemeName`, `colWidth`, `rowHeight`, `height`, `scrollX`,

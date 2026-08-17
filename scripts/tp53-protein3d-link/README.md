@@ -64,7 +64,7 @@ Every coordinate is derived from a public source, not pasted as a blob:
 
 ## Dependencies in the rest of the stack
 
-- **jbrowse-components** `webgl-poc` branch (forwards a spec `id` to
+- **jbrowse-components** `main` branch (forwards a spec `id` to
   `LaunchView-LinearGenomeView` so `connectedViewId` resolves).
 - **jbrowse-plugin-protein3d** with the `initialSelection` prop (added for this
   example). Until published, the screenshot serves a local build

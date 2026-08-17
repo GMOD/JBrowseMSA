@@ -35,7 +35,7 @@ const HIGHLIGHT_RESIDUE = 248 // R248 (the DNA-contact mutation hotspot)
 const DATA = 'https://gmod.org/JBrowseMSA/demo/data'
 const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
 const CLINVAR_TRACK = 'hg38-tp53-clinvar-pathogenic'
-const JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc/'
+const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 
 // 0-based aligned column of the query row's HIGHLIGHT_RESIDUE, read from the same
 // FASTA alignment we serve, so the link can never drift from the data.

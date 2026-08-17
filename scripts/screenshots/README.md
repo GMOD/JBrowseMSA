@@ -21,7 +21,7 @@ deterministic), so a full regen leaves unchanged figures untouched.
 | `app`     | `pnpm screenshots`         | demo-app PNGs (color schemes, dialogs, phylogeny gallery)       | yes               |
 | `jbrowse` | `pnpm screenshots:jbrowse` | the genome-browser figures, via the JBrowse plugin              | yes + jbrowse-web |
 
-The `jbrowse` phase needs a running jbrowse-web (the `webgl-poc` branch). If it
+The `jbrowse` phase needs a running jbrowse-web (the `main` branch). If it
 isn't reachable that phase is **skipped** (not failed), so the self-contained
 figures still regenerate without the jbrowse checkout.
 
@@ -76,7 +76,7 @@ menu items / dialog text are reached with puppeteer's `::-p-text(...)` selector.
 ## `jbrowse` phase — genome-browser figures
 
 These run the react-msaview JBrowse plugin _inside_ a real jbrowse-web, so they
-need one running (the `webgl-poc` branch, for the `LaunchView-LinearGenomeView`
+need one running (the `main` branch, for the `LaunchView-LinearGenomeView`
 id forwarding):
 
 ```sh
@@ -138,7 +138,7 @@ captures against the **published** jbrowse-web, with no local build:
 node scripts/screenshots/f12-genome-figure.mjs --force
 ```
 
-It defaults to `https://jbrowse.org/code/jb2/webgl-poc` and the hosted combined
+It defaults to `https://jbrowse.org/code/jb2/main` and the hosted combined
 config; the session URL mirrors the `f12Genome` link in `gallery.astro`.
 
 ---

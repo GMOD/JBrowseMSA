@@ -38,8 +38,8 @@ exactly with the transcript's codon _i_, and column 647 maps to V600 = `c.1799`.
 
 ## Dependencies in the rest of the stack
 
-Same as `scripts/src-protein-link/`: needs the `webgl-poc` jbrowse-components
-branch (forwards a spec `id` to `LaunchView-LinearGenomeView` so
+Same as `scripts/src-protein-link/`: needs jbrowse-components `main`
+(forwards a spec `id` to `LaunchView-LinearGenomeView` so
 `connectedViewId` resolves) and `jbrowse-plugin-msaview` ≥ 2.5.1 (forwards
 `connectedViewId` + `connectedFeature` + `highlightColumns`).
 

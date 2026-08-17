@@ -7,7 +7,7 @@
  *              phylogeny gallery), via puppeteer against a built app.
  *                                              -> scripts/screenshots/generate.mjs
  *   jbrowse  — the genome-browser figures, via the react-msaview plugin
- *              running inside a real jbrowse-web (needs the webgl-poc build).
+ *              running inside a real jbrowse-web (needs the main build).
  *                                              -> scripts/screenshots/jbrowse-figures.mjs
  *
  * Each phase writes into docs/media and self-gates: a re-render only overwrites a
@@ -22,7 +22,7 @@
  *   pnpm screenshots:all --skip-build          reuse the existing app build
  *   pnpm screenshots:all --jbrowse-url=http://localhost:3000
  *
- * The jbrowse phase needs a running jbrowse-web (webgl-poc branch). If it isn't
+ * The jbrowse phase needs a running jbrowse-web (main branch). If it isn't
  * reachable that phase is skipped with a note, not failed, so the self-contained
  * figures still regenerate on a machine without the jbrowse checkout.
  */

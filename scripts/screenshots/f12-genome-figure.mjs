@@ -9,11 +9,11 @@
  * connected session.
  *
  * Unlike the connected genome+MSA figures (jbrowse-figures.mjs, which needs a
- * local webgl-poc build), this is a plain genome view, so it captures cleanly
+ * local main build), this is a plain genome view, so it captures cleanly
  * against the published jbrowse-web + the hosted combined config.
  *
  * Usage: node scripts/screenshots/f12-genome-figure.mjs [--force] [--headed]
- *        [--jbrowse-url=https://jbrowse.org/code/jb2/webgl-poc]
+ *        [--jbrowse-url=https://jbrowse.org/code/jb2/main]
  */
 import path from 'node:path'
 
@@ -34,7 +34,7 @@ const force = flag('force')
 const headed = flag('headed')
 const jbrowseBase = (
   opt('jbrowse-url', process.env.JBROWSE_WEB_URL) ||
-  'https://jbrowse.org/code/jb2/webgl-poc'
+  'https://jbrowse.org/code/jb2/main'
 ).replace(/\/$/, '')
 
 const CONFIG =

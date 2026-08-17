@@ -59,7 +59,7 @@ if (HIGHLIGHT_COLUMN === undefined) {
   throw new Error(`residue ${HIGHLIGHT_RESIDUE} not found in ${QUERY_SEQ}`)
 }
 const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
-const JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc/'
+const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 
 const lines = execFileSync('tabix', [GFF, REGION], { encoding: 'utf8' })
   .trim()

@@ -29,8 +29,7 @@ transcript's codon _i_.
 - **jbrowse-components**: `LaunchView-LinearGenomeView` must forward a spec `id`
   to the created view so `connectedViewId` can reference it. Without it the
   spec's LGV gets an auto-generated id and the connection can't resolve. (Landed
-  on the `webgl-poc` branch; the docs link targets
-  `jbrowse.org/code/jb2/webgl-poc`.)
+  on `main`; the docs link targets `jbrowse.org/code/jb2/main`.)
 - **jbrowse-plugin-msaview** (≥ 2.5.0): the `LaunchView-MsaView` extension point
   already forwards `connectedViewId` + `connectedFeature`.
 

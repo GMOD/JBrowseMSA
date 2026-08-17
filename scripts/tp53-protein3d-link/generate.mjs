@@ -47,7 +47,7 @@ const ALPHAFOLD_VERSION = 'v6'
 const DATA = 'https://gmod.org/JBrowseMSA/demo/data'
 const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
 const CLINVAR_TRACK = 'hg38-tp53-clinvar-pathogenic'
-const JBROWSE = 'https://jbrowse.org/code/jb2/webgl-poc/'
+const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 
 // --- the alignment row (protein sequence + residue->column map) --------------
 const seqs = {}
