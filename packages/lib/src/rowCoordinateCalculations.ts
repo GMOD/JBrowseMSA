@@ -19,6 +19,25 @@ import { isBlank } from './util.ts'
  */
 
 /**
+ * Index of the first element in `[0, len)` for which `pred` holds, over a range
+ * where `pred` is false up to some point and true from there on. Both
+ * conversions below are that shape, since `blanks` is sorted ascending.
+ */
+function partitionPoint(len: number, pred: (i: number) => boolean) {
+  let left = 0
+  let right = len
+  while (left < right) {
+    const mid = (left + right) >>> 1
+    if (pred(mid)) {
+      right = mid
+    } else {
+      left = mid + 1
+    }
+  }
+  return left
+}
+
+/**
  * Convert a visible column index to a global column index.
  * This is used when translating mouse/screen coordinates to MSA coordinates.
  *
@@ -27,32 +46,12 @@ import { isBlank } from './util.ts'
  * @returns The corresponding global column index in the full MSA
  */
 export function visibleColToGlobalCol(blanks: number[], visibleCol: number) {
-  let currentVisibleCol = 0
-  let blankArrayIndex = 0
-  let globalCol = 0
-  const blanksLen = blanks.length
-
-  // Skip any leading blank columns (blanks at the very beginning)
-  while (blankArrayIndex < blanksLen && blanks[blankArrayIndex] === globalCol) {
-    blankArrayIndex++
-    globalCol++
-  }
-
-  while (currentVisibleCol < visibleCol) {
-    currentVisibleCol++
-    globalCol++
-
-    // Skip any blank columns after incrementing
-    while (
-      blankArrayIndex < blanksLen &&
-      blanks[blankArrayIndex] === globalCol
-    ) {
-      blankArrayIndex++
-      globalCol++
-    }
-  }
-
-  return globalCol
+  // `blanks[i] - i` counts the visible columns before the i-th blank, so the
+  // first blank with more than visibleCol of them in front of it is the first
+  // one sitting past this column. Its index is how many blanks shift it right.
+  return (
+    visibleCol + partitionPoint(blanks.length, i => blanks[i]! - i > visibleCol)
+  )
 }
 
 /**
@@ -67,25 +66,13 @@ export function globalColToVisibleCol(
   blanks: number[],
   globalCol: number,
 ): number | undefined {
-  // Check if this column is hidden
-  // Use binary search since blanks is sorted
-  let left = 0
-  let right = blanks.length - 1
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2)
-    if (blanks[mid] === globalCol) {
-      return undefined // Column is hidden
-    }
-    if (blanks[mid]! < globalCol) {
-      left = mid + 1
-    } else {
-      right = mid - 1
-    }
-  }
-
-  // Count blanks before this column (left is now the insertion point)
-  const blanksBefore = left
-  return globalCol - blanksBefore
+  const blanksBefore = partitionPoint(
+    blanks.length,
+    i => blanks[i]! >= globalCol,
+  )
+  return blanks[blanksBefore] === globalCol
+    ? undefined // Column is hidden
+    : globalCol - blanksBefore
 }
 
 /**

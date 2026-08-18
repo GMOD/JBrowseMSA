@@ -20,34 +20,34 @@ const CYAN = 'rgb(26, 179, 179)'
  */
 export function clustalXColumnColors(counts: ColumnCounts, col: number) {
   const total = counts.total(col)
-  const n = (letter: string) => counts.count(col, letter)
-  const W = n('W')
-  const L = n('L')
-  const V = n('V')
-  const I = n('I')
-  const M = n('M')
-  const A = n('A')
-  const F = n('F')
-  const C = n('C')
-  const H = n('H')
-  const P = n('P')
-  const R = n('R')
-  const K = n('K')
-  const Q = n('Q')
-  const E = n('E')
-  const D = n('D')
-  const T = n('T')
-  const S = n('S')
-  const G = n('G')
-  const Y = n('Y')
-  const N = n('N')
+  const count = (letter: string) => counts.count(col, letter)
+  const W = count('W')
+  const L = count('L')
+  const V = count('V')
+  const I = count('I')
+  const M = count('M')
+  const A = count('A')
+  const F = count('F')
+  const C = count('C')
+  const H = count('H')
+  const P = count('P')
+  const R = count('R')
+  const K = count('K')
+  const Q = count('Q')
+  const E = count('E')
+  const D = count('D')
+  const T = count('T')
+  const S = count('S')
+  const G = count('G')
+  const Y = count('Y')
+  const N = count('N')
 
   const hydrophobic = W + L + V + I + M + A + F + C + H + P + Y
   const KR = K + R
   const QE = Q + E
   const ED = E + D
   const TS = T + S
-  const p = (n: number) => n / total
+  const p = (subtotal: number) => subtotal / total
 
   const colors: Record<string, string> = {}
 

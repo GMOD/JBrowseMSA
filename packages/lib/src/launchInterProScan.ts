@@ -25,6 +25,20 @@ export interface InterProScanResponse {
   results: InterProScanResults[]
 }
 
+/**
+ * Key each result by its xref id, which is the row name the domains attach to.
+ * A result without one is dropped rather than keyed `undefined`, which would
+ * draw a phantom row's worth of domains (and rather than throwing, which would
+ * lose every other result over one malformed one).
+ */
+export function indexResultsByXref(response: InterProScanResponse) {
+  return Object.fromEntries(
+    response.results
+      .map(r => [r.xref[0]?.id, r] as const)
+      .filter((e): e is [string, InterProScanResults] => e[0] !== undefined),
+  )
+}
+
 async function runInterProScan({
   seq,
   onProgress,
@@ -169,17 +183,7 @@ async function loadInterProScanResultsWithStatus({
       url: `https://www.ebi.ac.uk/Tools/services/rest/iprscan5/result/${jobId}/json`,
     })
     const ret = await loadInterProScanResults(jobId, signal)
-    // key each result by its xref id; skip any result lacking an xref entry
-    // rather than crashing the whole load on one malformed result
-    model.setDomains(
-      Object.fromEntries(
-        ret.results
-          .map(r => [r.xref[0]?.id, r] as const)
-          .filter(
-            (e): e is [string, InterProScanResults] => e[0] !== undefined,
-          ),
-      ),
-    )
+    model.setDomains(indexResultsByXref(ret))
     getSession(model).notify(`Loaded interproscan ${jobId} results`, 'success')
   } catch (e) {
     if (isAbortError(e)) {

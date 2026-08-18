@@ -1,61 +1,47 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 
-import { clamp } from '@jbrowse/core/util'
 import { observer } from 'mobx-react'
 
-import { useDragScroll } from '../useDragScroll.ts'
+import ScrollbarThumb from './ScrollbarThumb.tsx'
 
 import type { MsaViewModel } from '../model.ts'
 
+const width = 20
+
 const VerticalScrollbar = observer(({ model }: { model: MsaViewModel }) => {
   const { msaAreaHeight, scrollY, totalHeight } = model
-  const [hovered, setHovered] = useState(false)
-  const fill = 'rgba(66, 119, 127, 0.3)'
   const unit = msaAreaHeight / totalHeight
-  const top = -scrollY
-  const bottom = top + msaAreaHeight
-  const t = top * unit
-  const b = bottom * unit
-  const { startDrag } = useDragScroll(
-    'y',
-    useCallback(
-      (delta: number, startScroll: number) => {
-        model.setScrollY(clamp(startScroll - delta / unit, model.maxScrollY, 0))
-      },
-      [model, unit],
-    ),
+  const t = -scrollY * unit
+  const b = (-scrollY + msaAreaHeight) * unit
+
+  const onDrag = useCallback(
+    (delta: number, startScroll: number) => {
+      model.setScrollY(startScroll - delta / unit)
+    },
+    [model, unit],
   )
+
   return (
     <div
       style={{
         position: 'relative',
-        width: 20,
+        width,
         height: msaAreaHeight,
         borderLeft: '1px solid #555',
         borderTop: '1px solid #555',
         boxSizing: 'border-box',
       }}
     >
-      <div
+      <ScrollbarThumb
+        axis="y"
+        getStart={() => model.scrollY}
+        onDrag={onDrag}
         style={{
-          position: 'absolute',
           top: Math.max(0, t),
           left: 0,
-          background: hovered ? 'rgba(66,119,127,0.6)' : fill,
-          cursor: 'pointer',
           boxSizing: 'border-box',
-          width: 20,
+          width,
           height: Math.max(b - t, 20),
-          zIndex: 100,
-        }}
-        onMouseOver={() => {
-          setHovered(true)
-        }}
-        onMouseOut={() => {
-          setHovered(false)
-        }}
-        onMouseDown={event => {
-          startDrag(event, model.scrollY)
         }}
       />
     </div>

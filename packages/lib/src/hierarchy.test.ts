@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   calcDepthToLeaf,
   collapse,
-  collapsedSubtreeLengthExtent,
+  collapsedSubtreeMaxLength,
   find,
   findMaxBranchLen,
   hierarchy,
@@ -124,7 +124,7 @@ describe('collapse', () => {
   })
 })
 
-describe('collapsedSubtreeLengthExtent', () => {
+describe('collapsedSubtreeMaxLength', () => {
   // root → A(1) → [ A1(2), C(3) → [ C1(1), C2(10) ] ]
   function makeLenTree(): NodeWithIds {
     return {
@@ -152,18 +152,18 @@ describe('collapsedSubtreeLengthExtent', () => {
     }
   }
 
-  test('min/max cumulative branch length to the tips below a node', () => {
+  test('cumulative branch length to the farthest tip below a node', () => {
     const h = hierarchy(makeLenTree(), d => d.children)
     const nodeA = find(h, n => n.data.id === 'A')!
     collapse(nodeA)
-    // excludes A's own branch: nearest tip A1 = 2, farthest tip C2 = 3 + 10 = 13
-    expect(collapsedSubtreeLengthExtent(nodeA)).toEqual({ min: 2, max: 13 })
+    // excludes A's own branch: farthest tip C2 = 3 + 10 = 13, vs A1 = 2
+    expect(collapsedSubtreeMaxLength(nodeA)).toBe(13)
   })
 
-  test('returns zero extent for a node with no descendants', () => {
+  test('returns zero for a node with no descendants', () => {
     const h = hierarchy(makeLenTree(), d => d.children)
     const leaf = find(h, n => n.data.id === 'A1')!
-    expect(collapsedSubtreeLengthExtent(leaf)).toEqual({ min: 0, max: 0 })
+    expect(collapsedSubtreeMaxLength(leaf)).toBe(0)
   })
 })
 

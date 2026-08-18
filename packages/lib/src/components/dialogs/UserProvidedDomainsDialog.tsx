@@ -16,6 +16,7 @@ import {
 import { observer } from 'mobx-react'
 
 import { jsonfetch } from '../../fetchUtils.ts'
+import { indexResultsByXref } from '../../launchInterProScan.ts'
 
 import type { InterProScanResponse } from '../../launchInterProScan.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -112,16 +113,7 @@ const UserProvidedDomainsDialog = observer(function ({
                   ? JSON.parse(await file.text())
                   : await jsonfetch(interProURL)
 
-                // key each result by its xref id; a result without one has no
-                // row to attach to, and keying it `undefined` would draw a
-                // phantom row's worth of domains
-                model.setDomains(
-                  Object.fromEntries(
-                    ret.results
-                      .map(r => [r.xref[0]?.id, r] as const)
-                      .filter(e => e[0] !== undefined),
-                  ),
-                )
+                model.setDomains(indexResultsByXref(ret))
                 getSession(model).notify(
                   'Loaded interproscan results',
                   'success',

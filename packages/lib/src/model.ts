@@ -47,7 +47,7 @@ import {
   calcDepthToLeaf,
   clusterLayout,
   collapse,
-  collapsedSubtreeLengthExtent,
+  collapsedSubtreeMaxLength,
   find,
   findMaxBranchLen,
   forEachDescendant,
@@ -525,14 +525,6 @@ function stateModelFactory() {
 
       /**
        * #action
-       * set scroll Y-offset (px)
-       */
-      setScrollY(n: number) {
-        self.scrollY = n
-      },
-
-      /**
-       * #action
        *
        */
       setCurrentAlignment(n: number) {
@@ -885,12 +877,6 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       */
-      get blanksSet() {
-        return new Set(this.blanks)
-      },
-      /**
-       * #getter
        * Returns a map of row name to array of insertions with display position and letters
        */
       get insertionPositions() {
@@ -979,14 +965,6 @@ function stateModelFactory() {
        */
       get colStats() {
         return columnCountsFromRows(this.columns2d)
-      },
-
-      /**
-       * #getter
-       * per-column residue totals (gaps included)
-       */
-      get colStatsSums() {
-        return this.colStats.totals
       },
 
       /**
@@ -1096,14 +1074,13 @@ function stateModelFactory() {
         const max = maxLength(r)
         const k = max ? self.treeWidth / max : 0
         setBrLength(r, 0, k)
-        // for each collapsed clade, record the pixel x-positions of its
-        // nearest/farthest tips so the renderer can draw a triangle that spans
-        // the branch-length extent of the hidden subtree
+        // for each collapsed clade, record the pixel x-position of its farthest
+        // tip so the renderer can draw a triangle spanning the branch-length
+        // extent of the hidden subtree
         forEachDescendant(r, node => {
           if (node._children) {
-            const { min, max: mx } = collapsedSubtreeLengthExtent(node)
-            node.collapsedTipXNear = (node.len ?? 0) + min * k
-            node.collapsedTipXFar = (node.len ?? 0) + mx * k
+            node.collapsedTipXFar =
+              (node.len ?? 0) + collapsedSubtreeMaxLength(node) * k
           }
         })
         return r as HierarchyNode<NodeWithIdsAndLength>
@@ -1394,7 +1371,15 @@ function stateModelFactory() {
        * #action
        */
       doScrollY(deltaY: number) {
-        self.scrollY = clamp(self.scrollY + deltaY, self.maxScrollY, 0)
+        this.setScrollY(self.scrollY + deltaY)
+      },
+
+      /**
+       * #action
+       * set scroll Y-offset (px), clamped to keep the alignment in view
+       */
+      setScrollY(n: number) {
+        self.scrollY = clamp(n, self.maxScrollY, 0)
       },
 
       /**

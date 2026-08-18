@@ -28,9 +28,8 @@ export interface HierarchyNode<T = NodeWithIds> extends CoreHierarchyNode<T> {
   len?: number
   depthToLeaf?: number
   _children?: HierarchyNode<T>[] | null
-  // pixel x-positions of the nearest/farthest tips of a collapsed subtree, used
-  // to draw the collapsed-clade triangle. Set in the model's hierarchy getter.
-  collapsedTipXNear?: number
+  // pixel x-position of the farthest tip of a collapsed subtree, where the base
+  // of the collapsed-clade triangle goes. Set in the model's hierarchy getter.
   collapsedTipXFar?: number
 }
 
@@ -115,14 +114,13 @@ export function collapse<T>(node: HierarchyNode<T>) {
   }
 }
 
-// Min/max cumulative raw branch length from a collapsed node down to the tips of
-// its detached subtree (excludes the node's own branch). Used to size the
+// Cumulative raw branch length from a collapsed node down to the farthest tip of
+// its detached subtree (excludes the node's own branch). Sizes the base of the
 // collapsed-clade triangle in phylogram mode.
-export function collapsedSubtreeLengthExtent<T extends { length?: number }>(
+export function collapsedSubtreeMaxLength<T extends { length?: number }>(
   node: HierarchyNode<T>,
 ) {
   const roots = node._children ?? node.children
-  let min = Infinity
   let max = 0
   if (roots) {
     const stack = roots.map(child => ({
@@ -140,12 +138,11 @@ export function collapsedSubtreeLengthExtent<T extends { length?: number }>(
           })
         }
       } else {
-        min = Math.min(min, acc)
         max = Math.max(max, acc)
       }
     }
   }
-  return { min: min === Infinity ? 0 : min, max }
+  return max
 }
 
 // Cladogram positioning based on ape's plot.phylo: uses topological depth (max
