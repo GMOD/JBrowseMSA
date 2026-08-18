@@ -202,27 +202,34 @@ describe('sum', () => {
   })
 })
 
-describe('deep (caterpillar) trees do not overflow the stack', () => {
-  const depth = 100_000
+// a 100k-node traversal takes seconds by itself, which is most of vitest's
+// default per-test budget; these are about not overflowing the stack, so give
+// them room rather than letting a loaded machine fail them
+describe(
+  'deep (caterpillar) trees do not overflow the stack',
+  { timeout: 30_000 },
+  () => {
+    const depth = 100_000
 
-  test('build, height, leaf count, and ordering', () => {
-    const h = hierarchy(makeDeepTree(depth), d => d.children)
-    expect(h.height).toBe(depth)
-    const l = leaves(h)
-    expect(l.length).toBe(depth + 1)
-    // each level contributes its own leafN before descending; deepest leaf last
-    expect(l[0]!.data.name).toBe(`leaf${depth}`)
-    expect(l.at(-1)!.data.name).toBe('leaf0')
-  })
+    test('build, height, leaf count, and ordering', () => {
+      const h = hierarchy(makeDeepTree(depth), d => d.children)
+      expect(h.height).toBe(depth)
+      const l = leaves(h)
+      expect(l.length).toBe(depth + 1)
+      // each level contributes its own leafN before descending; deepest leaf last
+      expect(l[0]!.data.name).toBe(`leaf${depth}`)
+      expect(l.at(-1)!.data.name).toBe('leaf0')
+    })
 
-  test('accumulation helpers (sum, find, maxLength, setBrLength, depth)', () => {
-    const h = hierarchy(makeDeepTree(depth), d => d.children)
-    sum(h, d => (d.children.length > 0 ? 0 : 1))
-    expect(h.value).toBe(depth + 1)
-    expect(find(h, n => n.data.id === 'leaf0')?.data.name).toBe('leaf0')
-    expect(maxLength(h)).toBe(depth)
-    expect(calcDepthToLeaf(h)).toBe(depth)
-    setBrLength(h, 0, 1)
-    expect(findMaxBranchLen(h)).toBe(depth)
-  })
-})
+    test('accumulation helpers (sum, find, maxLength, setBrLength, depth)', () => {
+      const h = hierarchy(makeDeepTree(depth), d => d.children)
+      sum(h, d => (d.children.length > 0 ? 0 : 1))
+      expect(h.value).toBe(depth + 1)
+      expect(find(h, n => n.data.id === 'leaf0')?.data.name).toBe('leaf0')
+      expect(maxLength(h)).toBe(depth)
+      expect(calcDepthToLeaf(h)).toBe(depth)
+      setBrLength(h, 0, 1)
+      expect(findMaxBranchLen(h)).toBe(depth)
+    })
+  },
+)
