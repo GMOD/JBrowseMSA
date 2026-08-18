@@ -17,13 +17,26 @@ objects in our source code.
 
 ### Tree - Properties
 
+#### property: autoTreeAreaWidth
+
+auto-size treeAreaWidth to fit the row labels (plus the tree, if drawn) instead
+of using a fixed width. useful when there is no tree, so the label gutter isn't
+padded out to the default 400px
+
+```js
+// type signature
+IOptionalIType<ISimpleType<boolean>, [undefined]>
+// code
+autoTreeAreaWidth: stripDefault(types.boolean, false)
+```
+
 #### property: drawLabels
 
 ```js
 // type signature
-true
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-drawLabels: defaultDrawLabels
+drawLabels: stripDefault(types.boolean, defaultDrawLabels)
 ```
 
 #### property: drawNodeBubbles
@@ -32,9 +45,9 @@ draw clickable node bubbles on the tree
 
 ```js
 // type signature
-true
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-drawNodeBubbles: defaultDrawNodeBubbles
+drawNodeBubbles: stripDefault(types.boolean, defaultDrawNodeBubbles)
 ```
 
 #### property: drawTree
@@ -43,9 +56,9 @@ draw tree, boolean
 
 ```js
 // type signature
-true
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-drawTree: defaultDrawTree
+drawTree: stripDefault(types.boolean, defaultDrawTree)
 ```
 
 #### property: labelsAlignRight
@@ -54,9 +67,9 @@ right-align the labels
 
 ```js
 // type signature
-false
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-labelsAlignRight: defaultLabelsAlignRight
+labelsAlignRight: stripDefault(types.boolean, defaultLabelsAlignRight)
 ```
 
 #### property: showBranchLen
@@ -67,9 +80,9 @@ distances
 
 ```js
 // type signature
-true
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-showBranchLen: defaultShowBranchLen
+showBranchLen: stripDefault(types.boolean, defaultShowBranchLen)
 ```
 
 #### property: treeAreaWidth
@@ -80,7 +93,7 @@ width of the area the tree is drawn in, px
 // type signature
 IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-treeAreaWidth: types.optional(types.number, defaultTreeAreaWidth)
+treeAreaWidth: stripDefault(types.number, defaultTreeAreaWidth)
 ```
 
 #### property: treeWidth
@@ -92,10 +105,17 @@ treeAreaWidth
 // type signature
 IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-treeWidth: types.optional(types.number, defaultTreeWidth)
+treeWidth: stripDefault(types.number, defaultTreeWidth)
 ```
 
 ### Tree - Actions
+
+#### action: setAutoTreeAreaWidth
+
+```js
+// type signature
+setAutoTreeAreaWidth: (arg: boolean) => void
+```
 
 #### action: setDrawLabels
 

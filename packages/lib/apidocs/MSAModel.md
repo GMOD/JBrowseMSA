@@ -23,9 +23,9 @@ draw MSA tiles with a background color
 
 ```js
 // type signature
-true
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-bgColor: defaultBgColor
+bgColor: stripDefault(types.boolean, defaultBgColor)
 ```
 
 #### property: colorSchemeName
@@ -34,9 +34,9 @@ default color scheme name
 
 ```js
 // type signature
-string
+IOptionalIType<ISimpleType<string>, [undefined]>
 // code
-colorSchemeName: defaultColorSchemeName
+colorSchemeName: stripDefault(types.string, defaultColorSchemeName)
 ```
 
 #### property: msaFormat
@@ -51,6 +51,18 @@ IMaybe<ISimpleType<MSAFormat>>
 msaFormat: types.maybe(
         types.enumeration<MSAFormat>('MSAFormat', msaFormats),
       )
+```
+
+#### property: showColumnStats
+
+show a per-column statistics tooltip (consensus, conservation, gaps, residue
+distribution) while hovering the alignment
+
+```js
+// type signature
+IOptionalIType<ISimpleType<boolean>, [undefined]>
+// code
+showColumnStats: stripDefault(types.boolean, defaultShowColumnStats)
 ```
 
 ### MSAModel - Actions
@@ -77,5 +89,12 @@ force a specific MSA parser, or pass undefined to auto-detect
 
 ```js
 // type signature
-setMSAFormat: (arg?: MSAFormat | undefined) => void
+setMSAFormat: (arg?: MSAFormat) => void
+```
+
+#### action: setShowColumnStats
+
+```js
+// type signature
+setShowColumnStats: (arg: boolean) => void
 ```

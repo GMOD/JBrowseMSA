@@ -14,12 +14,12 @@ import {
   Typography,
 } from '@mui/material'
 import { observer } from 'mobx-react'
+import { interProScanResponseToAnnotations } from 'msa-parsers'
 
 import { jsonfetch } from '../../fetchUtils.ts'
-import { indexResultsByXref } from '../../launchInterProScan.ts'
 
-import type { InterProScanResponse } from '../../launchInterProScan.ts'
 import type { MsaViewModel } from '../../model.ts'
+import type { InterProScanResponse } from 'msa-parsers'
 
 const UserProvidedDomainsDialog = observer(function ({
   handleClose,
@@ -113,7 +113,7 @@ const UserProvidedDomainsDialog = observer(function ({
                   ? JSON.parse(await file.text())
                   : await jsonfetch(interProURL)
 
-                model.setDomains(indexResultsByXref(ret))
+                model.setAnnotations(interProScanResponseToAnnotations(ret))
                 getSession(model).notify(
                   'Loaded interproscan results',
                   'success',

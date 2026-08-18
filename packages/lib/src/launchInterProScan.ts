@@ -1,43 +1,12 @@
 import { getSession } from '@jbrowse/core/util'
+import { interProScanResponseToAnnotations } from 'msa-parsers'
 
 import { isAbortError, jsonfetch, textfetch, timeout } from './fetchUtils.ts'
 
 import type { MsaViewModel } from './model.ts'
+import type { InterProScanResponse } from 'msa-parsers'
 
 const base = 'https://www.ebi.ac.uk/Tools/services/rest'
-
-export interface InterProScanResults {
-  matches: {
-    signature: {
-      entry?: {
-        name: string
-        description: string
-        accession: string
-        // original GFF feature type (exon, CDS, ...) when sourced from GFF
-        featureType?: string
-      }
-    }
-    locations: { start: number; end: number; strand?: number }[]
-  }[]
-  xref: { id: string }[]
-}
-export interface InterProScanResponse {
-  results: InterProScanResults[]
-}
-
-/**
- * Key each result by its xref id, which is the row name the domains attach to.
- * A result without one is dropped rather than keyed `undefined`, which would
- * draw a phantom row's worth of domains (and rather than throwing, which would
- * lose every other result over one malformed one).
- */
-export function indexResultsByXref(response: InterProScanResponse) {
-  return Object.fromEntries(
-    response.results
-      .map(r => [r.xref[0]?.id, r] as const)
-      .filter((e): e is [string, InterProScanResults] => e[0] !== undefined),
-  )
-}
 
 async function runInterProScan({
   seq,
@@ -183,7 +152,7 @@ async function loadInterProScanResultsWithStatus({
       url: `https://www.ebi.ac.uk/Tools/services/rest/iprscan5/result/${jobId}/json`,
     })
     const ret = await loadInterProScanResults(jobId, signal)
-    model.setDomains(indexResultsByXref(ret))
+    model.setAnnotations(interProScanResponseToAnnotations(ret))
     getSession(model).notify(`Loaded interproscan ${jobId} results`, 'success')
   } catch (e) {
     if (isAbortError(e)) {

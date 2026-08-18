@@ -27,12 +27,11 @@ root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
 ## Overview
 
 The main MSAView state model. Holds the loaded alignment, tree, and optional
-InterProScan domain annotations, plus all display state (color scheme, zoom,
-scroll, collapsed clades). It composes in members from
-`DialogQueueSessionMixin`, `Tree`, and `MSAModel` (see Inherited members below).
-Data is loaded reactively from the `msaFilehandle` / `treeFilehandle` /
-`gffFilehandle` properties, or set directly with `setData`. Most state is
-persisted into the shareable URL.
+overlay annotations, plus all display state (color scheme, zoom, scroll,
+collapsed clades). It composes in members from `DialogQueueSessionMixin`,
+`Tree`, and `MSAModel` (see Inherited members below). Data is loaded reactively
+from the `msaFilehandle` / `treeFilehandle` / `gffFilehandle` properties, or set
+directly with `setData`. Most state is persisted into the shareable URL.
 
 ## Inherited members
 
@@ -48,16 +47,16 @@ and docs.
 ### Available via [Tree](../tree)
 
 **Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth,
-showBranchLen, drawTree, drawNodeBubbles
+showBranchLen, drawTree, drawNodeBubbles, autoTreeAreaWidth
 
 **Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree,
-setShowBranchLen, setDrawNodeBubbles, setDrawLabels
+setAutoTreeAreaWidth, setShowBranchLen, setDrawNodeBubbles, setDrawLabels
 
 ### Available via [MSAModel](../msamodel)
 
-**Properties:** bgColor, colorSchemeName, msaFormat
+**Properties:** bgColor, colorSchemeName, showColumnStats, msaFormat
 
-**Actions:** setColorSchemeName, setBgColor, setMSAFormat
+**Actions:** setColorSchemeName, setBgColor, setShowColumnStats, setMSAFormat
 
 ### MsaView - Properties
 
@@ -65,9 +64,9 @@ setShowBranchLen, setDrawNodeBubbles, setDrawLabels
 
 ```js
 // type signature
-number
+IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-allowedGappyness: defaultAllowedGappyness
+allowedGappyness: stripDefault(types.number, defaultAllowedGappyness)
 ```
 
 #### property: collapsed
@@ -76,9 +75,9 @@ array of tree parent nodes that are 'collapsed' (all children are hidden)
 
 ```js
 // type signature
-IArrayType<ISimpleType<string>>
+IOptionalIType<IArrayType<ISimpleType<string>>, [undefined]>
 // code
-collapsed: types.array(types.string)
+collapsed: stripDefault(types.array(types.string), [])
 ```
 
 #### property: colWidth
@@ -87,18 +86,18 @@ width of columns, px
 
 ```js
 // type signature
-number
+IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-colWidth: defaultColWidth
+colWidth: stripDefault(types.number, defaultColWidth)
 ```
 
 #### property: currentAlignment
 
 ```js
 // type signature
-number
+IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-currentAlignment: defaultCurrentAlignment
+currentAlignment: stripDefault(types.number, defaultCurrentAlignment)
 ```
 
 #### property: data
@@ -120,27 +119,27 @@ data: types.optional(DataModelF(), {
 
 ```js
 // type signature
-true
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-drawMsaLetters: defaultDrawMsaLetters
+drawMsaLetters: stripDefault(types.boolean, defaultDrawMsaLetters)
 ```
 
 #### property: featureFilters
 
 ```js
 // type signature
-IMapType<ISimpleType<boolean>>
+IOptionalIType<IMapType<ISimpleType<boolean>>, [undefined]>
 // code
-featureFilters: types.map(types.boolean)
+featureFilters: stripDefault(types.map(types.boolean), {})
 ```
 
 #### property: gffFilehandle
 
-filehandle object for InterProScan GFF file
+filehandle object for a GFF file of overlay annotations
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
+IMaybe<any>
 // code
 gffFilehandle: types.maybe(FileLocation)
 ```
@@ -153,16 +152,16 @@ height of the div containing the view, px
 // type signature
 IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-height: types.optional(types.number, defaultHeight)
+height: stripDefault(types.number, defaultHeight)
 ```
 
 #### property: hideGaps
 
 ```js
 // type signature
-true
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-hideGaps: defaultHideGaps
+hideGaps: stripDefault(types.boolean, defaultHideGaps)
 ```
 
 #### property: highlightColumns
@@ -174,7 +173,7 @@ columns highlighted. Applied once in afterCreate.
 
 ```js
 // type signature
-IType<number[] | undefined, number[] | undefined, number[] | undefined>
+IType<number[], number[], number[]>
 // code
 highlightColumns: types.frozen<number[] | undefined>()
 ```
@@ -185,7 +184,7 @@ id of view, randomly generated if not provided
 
 ```js
 // type signature
-IOptionalIType<ISimpleType<string>, [undefined]>
+any
 // code
 id: ElementId
 ```
@@ -197,7 +196,7 @@ files)
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
+IMaybe<any>
 // code
 msaFilehandle: types.maybe(FileLocation)
 ```
@@ -217,9 +216,9 @@ height of each row, px
 
 ```js
 // type signature
-number
+IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-rowHeight: defaultRowHeight
+rowHeight: stripDefault(types.number, defaultRowHeight)
 ```
 
 #### property: scrollX
@@ -228,9 +227,9 @@ scroll position, X-offset, px
 
 ```js
 // type signature
-number
+IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-scrollX: defaultScrollX
+scrollX: stripDefault(types.number, defaultScrollX)
 ```
 
 #### property: scrollY
@@ -239,9 +238,9 @@ scroll position, Y-offset, px
 
 ```js
 // type signature
-number
+IOptionalIType<ISimpleType<number>, [undefined]>
 // code
-scrollY: defaultScrollY
+scrollY: stripDefault(types.number, defaultScrollY)
 ```
 
 #### property: scrollZoom
@@ -250,18 +249,32 @@ zoom in/out on plain mouse-wheel without holding ctrl
 
 ```js
 // type signature
-false
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-scrollZoom: defaultScrollZoom
+scrollZoom: stripDefault(types.boolean, defaultScrollZoom)
+```
+
+#### property: showDomainLegend
+
+whether the domain legend is expanded. The legend floats over the top-right of
+the alignment, so on a tall panel it covers real residues -- persisting the
+state is what lets a reader collapse it and keep it collapsed, and what lets a
+session or a figure open with it already out of the way.
+
+```js
+// type signature
+IOptionalIType<ISimpleType<boolean>, [undefined]>
+// code
+showDomainLegend: stripDefault(types.boolean, defaultShowDomainLegend)
 ```
 
 #### property: showDomains
 
 ```js
 // type signature
-false
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-showDomains: defaultShowDomains
+showDomains: stripDefault(types.boolean, defaultShowDomains)
 ```
 
 #### property: showOnly
@@ -279,9 +292,9 @@ showOnly: types.maybe(types.string)
 
 ```js
 // type signature
-false
+IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
-subFeatureRows: defaultSubFeatureRows
+subFeatureRows: stripDefault(types.boolean, defaultSubFeatureRows)
 ```
 
 #### property: treeFilehandle
@@ -290,7 +303,7 @@ filehandle object for the tree
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
+IMaybe<any>
 // code
 treeFilehandle: types.maybe(FileLocation)
 ```
@@ -301,7 +314,7 @@ filehandle object for tree metadata
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<any, { locationType: "UriLocation"; uri: string; internetAccountId: string | undefined; internetAccountPreAuthorization: ModelSnapshotType<{ internetAccountType: ISimpleType<string>; authInfo: IType<...>; }> | undefined; } | ModelSnapshotType<...> | ModelSnapshotType<...> | Model...
+IMaybe<any>
 // code
 treeMetadataFilehandle: types.maybe(FileLocation)
 ```
@@ -312,9 +325,9 @@ turned off tracks
 
 ```js
 // type signature
-IMapType<ISimpleType<boolean>>
+IOptionalIType<IMapType<ISimpleType<boolean>>, [undefined]>
 // code
-turnedOffTracks: types.map(types.boolean)
+turnedOffTracks: stripDefault(types.map(types.boolean), {})
 ```
 
 #### property: type
@@ -329,6 +342,19 @@ type: types.literal('MsaView')
 ```
 
 ### MsaView - Volatiles
+
+#### volatile: annotations
+
+overlay annotations drawn on the alignment, whatever their source. Every source
+-- InterProScan, GFF, a user upload -- converts to this flat list before it
+reaches the model, so nothing downstream of here knows which one it came from
+
+```js
+// type signature
+Annotation[]
+// code
+annotations: [] as Annotation[]
+```
 
 #### volatile: blockSize
 
@@ -374,7 +400,7 @@ array of column indices to highlight
 
 ```js
 // type signature
-number[] | undefined
+number[]
 // code
 highlightedColumns: undefined as number[] | undefined
 ```
@@ -398,22 +424,10 @@ the currently hovered tree node ID and its descendant leaf names
 
 ```js
 // type signature
-{ nodeId: string; descendantNames: string[]; } | undefined
+{ nodeId: string; descendantNames: string[]; }
 // code
 hoveredTreeNode: undefined as
-        | { nodeId: string; descendantNames: string[] }
-        | undefined
-```
-
-#### volatile: interProAnnotations
-
-```js
-// type signature
-Record<string, InterProScanResults> | undefined
-// code
-interProAnnotations: undefined as
-        | undefined
-        | Record<string, InterProScanResults>
+        { nodeId: string; descendantNames: string[] } | undefined
 ```
 
 #### volatile: loadingMSA
@@ -458,7 +472,7 @@ the currently mouse-click column
 
 ```js
 // type signature
-number | undefined
+number
 // code
 mouseClickCol: undefined as number | undefined
 ```
@@ -469,7 +483,7 @@ the currently mouse-click row
 
 ```js
 // type signature
-number | undefined
+number
 // code
 mouseClickRow: undefined as number | undefined
 ```
@@ -480,7 +494,7 @@ the currently mouse-hovered column
 
 ```js
 // type signature
-number | undefined
+number
 // code
 mouseCol: undefined as number | undefined
 ```
@@ -491,7 +505,7 @@ the currently mouse-hovered row
 
 ```js
 // type signature
-number | undefined
+number
 // code
 mouseRow: undefined as number | undefined
 ```
@@ -511,18 +525,17 @@ resizeHandleWidth: 5
 
 ```js
 // type signature
-{ msg: string; url?: string | undefined; onCancel?: (() => void) | undefined; } | undefined
+{ msg: string; url?: string; onCancel?: () => void; }
 // code
 status: undefined as
-        | { msg: string; url?: string; onCancel?: () => void }
-        | undefined
+        { msg: string; url?: string; onCancel?: () => void } | undefined
 ```
 
 #### volatile: volatileWidth
 
 ```js
 // type signature
-number | undefined
+number
 // code
 volatileWidth: undefined as number | undefined
 ```
@@ -547,7 +560,7 @@ BasicTrack[]
 
 ```js
 // type
-string[]
+any
 ```
 
 #### getter: allBranchesLength0
@@ -561,35 +574,38 @@ boolean
 
 ```js
 // type
-number[]
-```
-
-#### getter: blanksSet
-
-```js
-// type
-Set<number>
+any[]
 ```
 
 #### getter: blocks2d
 
 ```js
 // type
-(readonly [number, number])[]
+(readonly [any, any])[]
 ```
 
 #### getter: blocksX
 
 ```js
 // type
-number[]
+any[]
 ```
 
 #### getter: blocksY
 
 ```js
 // type
-number[]
+any[]
+```
+
+#### getter: categoricalDomainTypes
+
+categorical feature types (InterPro domains and the like) that each get their
+own color and a legend entry
+
+```js
+// type
+any[]
 ```
 
 #### getter: colClustalX
@@ -611,7 +627,7 @@ percent_identity_dynamic color scheme.
 // type
 {
   letter: string
-  color: string | undefined
+  color: string
 }
 ;[]
 ```
@@ -627,34 +643,27 @@ Record<string, string>
 
 ```js
 // type
-;(Record < string, number > [])
-```
-
-#### getter: colStatsSums
-
-```js
-// type
-number[]
+ColumnCounts
 ```
 
 #### getter: columns
 
 ```js
 // type
-Map<string, string>
+Map<unknown, unknown>
 ```
 
 #### getter: columns2d
 
 ```js
 // type
-string[]
+any
 ```
 
 #### getter: conservation
 
 Conservation score per column using Shannon entropy (biojs-msa style).
-Conservation = (1 - H/Hmax) \* (1 - gapFraction) Returns values 0-1 where 1 =
+Conservation = (1 - H/Hmax) * (1 - gapFraction) Returns values 0-1 where 1 =
 fully conserved, 0 = no conservation.
 
 ```js
@@ -669,6 +678,30 @@ number[]
 boolean
 ```
 
+#### getter: domainBands
+
+every filtered-on annotation resolved to the visible column span it is drawn
+across, keyed by row name. Each row is ordered longest-first so a short domain
+nested inside a long one draws on top of it rather than under it. Resolving
+these once here rather than inside each canvas block removes a per-feature,
+per-block sequence position conversion from every redraw, and gives the letter
+renderer the band colors it needs to keep residues readable on top of the boxes.
+
+```js
+// type
+Map<string, DomainBand[]>
+```
+
+#### getter: domainBandsByStart
+
+the same bands ordered by start column, for left-to-right sweeps (the letter
+renderer walks columns and needs the band covering each one)
+
+```js
+// type
+Map<any, any>
+```
+
 #### getter: fontSize
 
 ```js
@@ -680,7 +713,7 @@ number
 
 ```js
 // type
-{ info: string; version: string | undefined; } | Record<string, unknown> | { General: Record<string, string[]>; Accessions: { [k: string]: string; }; Dbxref: { [k: string]: string; }; }
+any
 ```
 
 #### getter: hideGapsEffective
@@ -701,13 +734,44 @@ generates a new tree that is clustered with x,y positions
 HierarchyNode<NodeWithIdsAndLength>
 ```
 
+#### getter: highlightedColumnRuns
+
+contiguous runs of `highlightedColumns`, so a run of highlighted columns draws
+as one bordered band. Computed here because the overlay canvas redraws on every
+mouse move while the highlight itself rarely changes.
+
+```js
+// type
+{
+  start: number
+  end: number
+}
+;[]
+```
+
 #### getter: hoveredInsertion
 
 Returns insertion info if mouse is hovering over an insertion indicator
 
 ```js
 // type
-{ rowName: string; col: number; letters: string; } | undefined
+{
+  rowName: any
+  col: number
+  letters: any
+}
+```
+
+#### getter: hoveredRowIndices
+
+row indices highlighted by the current tree hover (a hovered internal node
+highlights every tip below it). Shared by the tree and MSA overlay canvases so
+they cannot disagree, and resolved through the memoized name->index map rather
+than rebuilding a lookup on each mouse move.
+
+```js
+// type
+unknown[]
 ```
 
 #### getter: insertionPositions
@@ -731,14 +795,14 @@ boolean
 
 ```js
 // type
-Map<string, number>
+Map<any, number>
 ```
 
 #### getter: leaves
 
 ```js
 // type
-HierarchyNode < NodeWithIdsAndLength > []
+any[]
 ```
 
 #### getter: maxBranchLength
@@ -777,18 +841,39 @@ here because msaAreaHeight is defined later in the chain.
 number
 ```
 
+#### getter: mouseOverColumnStats
+
+per-column summary statistics for the hovered column: consensus residue and its
+identity fraction, conservation score, gap fraction, and the sorted non-gap
+residue distribution. undefined when nothing is hovered.
+
+```js
+// type
+{ col: number; total: number; gaps: number; gapFraction: number; conservation: number; propertyConservation: number; consensusLetter: string; consensusCount: number; consensusFraction: number; distribution: [...][]; }
+```
+
+#### getter: mouseOverDomains
+
+domain annotations under the mouse, hit-tested against the exact visible column
+span each box is drawn at (so it matches the overlay across gaps)
+
+```js
+// type
+any
+```
+
 #### getter: mouseOverRowName
 
 ```js
 // type
-string | undefined
+any
 ```
 
 #### getter: MSA
 
 ```js
 // type
-MSAParserType | null
+MSAParserType
 ```
 
 #### getter: msaAreaHeight
@@ -803,6 +888,17 @@ number
 #### getter: msaAreaWidth
 
 widget width minus the tree area gives the space for the MSA
+
+```js
+// type
+number
+```
+
+#### getter: msaCanvasWidth
+
+width of the alignment canvas itself: the msa area less the vertical scrollbar
+sitting in it. Not usable from showHorizontalScrollbar, which feeds
+msaAreaHeight -> showVerticalScrollbar and would close a cycle
 
 ```js
 // type
@@ -825,9 +921,25 @@ number
 
 #### getter: numRows
 
+number of rows the alignment occupies on screen. This is the leaf count, not
+`rows.length`: a tree leaf with no matching MSA row still takes up a row of
+vertical space (drawn blank), so row hit-testing and fit-to-height must count
+it.
+
 ```js
 // type
-number
+any
+```
+
+#### getter: propertyConservation
+
+Per-column conservation of physicochemical property class (amino acids only).
+Surfaces conservative-substitution sites that identity-based conservation
+misses. Empty for nucleotide alignments.
+
+```js
+// type
+number[]
 ```
 
 #### getter: realAllowedGappyness
@@ -837,18 +949,27 @@ number
 number
 ```
 
+#### getter: referenceRowIndex
+
+row index of the reference row (`relativeTo`), undefined when unset
+
+```js
+// type
+unknown
+```
+
 #### getter: root
 
 ```js
 // type
-HierarchyNode<NodeWithIds>
+HierarchyNode<any>
 ```
 
 #### getter: rowMap
 
 ```js
 // type
-Map<string, string>
+Map<unknown, unknown>
 ```
 
 #### getter: rowNames
@@ -865,28 +986,60 @@ string[]
 
 ```js
 // type
-Map<string, number>
+Map<unknown, unknown>
 ```
 
 #### getter: rows
 
 ```js
 // type
-[string, string][]
+any
 ```
 
 #### getter: secondaryStructureConsensus
 
 ```js
 // type
-string | undefined
+string
+```
+
+#### getter: segmentDomainTypes
+
+ordinal segment types (exons etc.), ordered by sequence position so
+exon-1..exon-14 read left-to-right; colored by alternating shade and labeled by
+number rather than each getting a distinct hue + legend row
+
+```js
+// type
+any
+```
+
+#### getter: segmentLabels
+
+accession -> number drawn on each segment band: the trailing number of the
+feature name ("exon-3" -> "3"), else its 1-based position
+
+```js
+// type
+Map<unknown, unknown>
 ```
 
 #### getter: seqConsensus
 
 ```js
 // type
-string | undefined
+string
+```
+
+#### getter: seqPosGlobalColIndex
+
+per-row index of the global column holding each ungapped sequence position, so
+seqPos -> column is a lookup rather than a scan of the row. The domain overlay
+resolves thousands of these per redraw.
+
+```js
+// type
+Map<unknown, unknown>
 ```
 
 #### getter: sequenceType
@@ -949,7 +1102,7 @@ total height of track area (px)
 
 ```js
 // type
-number
+any
 ```
 
 #### getter: totalWidth
@@ -982,16 +1135,22 @@ number
 
 #### getter: treeMetadata
 
+extra per-row attributes, keyed by row name. Parsed defensively: the source is a
+user-supplied document (treeMetadataFilehandle, or a session snapshot), and this
+computed is read by labelWidthMap on every layout, so a malformed file would
+otherwise throw out of rendering and take the whole view down over a decorative
+field.
+
 ```js
 // type
-any
+Record<string, Record<string, string>>
 ```
 
 #### getter: turnedOnTracks
 
 ```js
 // type
-BasicTrack[]
+any
 ```
 
 #### getter: verticalScrollbarWidth
@@ -999,6 +1158,18 @@ BasicTrack[]
 ```js
 // type
 0 | 20
+```
+
+#### getter: visibleDomainTypes
+
+the domain types currently drawn on the alignment (filtered-on), shared by the
+on-screen legend and the SVG export legend. Ordinal segments (exons) are
+excluded — they read as a numbered gene model, not a color key — so this is the
+categorical types ordered by sequence position
+
+```js
+// type
+any
 ```
 
 #### getter: width
@@ -1016,14 +1187,14 @@ unused here, but can be used by derived classes to add extra items
 
 ```js
 // type signature
-extraViewMenuItems: () => never[]
+extraViewMenuItems: () => any[]
 ```
 
 #### method: getRowData
 
 ```js
 // type signature
-getRowData: (name: string) => { data: { name?: string | undefined; accession?: string | undefined; dbxref?: string | undefined; } | undefined; treeMetadata: any; }
+getRowData: (name: string) => { data: { name?: string; accession?: string; dbxref?: string; }; treeMetadata: Record<string, string>; }
 ```
 
 #### method: globalColToVisibleCol
@@ -1033,7 +1204,7 @@ the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 
 ```js
 // type signature
-globalColToVisibleCol: (globalCol: number) => number | undefined
+globalColToVisibleCol: (globalCol: number) => number
 ```
 
 #### method: seqPosToGlobalCol
@@ -1042,7 +1213,7 @@ Convert a sequence position (ungapped) to a global column index.
 
 ```js
 // type signature
-seqPosToGlobalCol: (rowName: string, seqPos: number) => number
+seqPosToGlobalCol: (rowName: string, seqPos: number) => any
 ```
 
 #### method: seqPosToVisibleCol
@@ -1052,7 +1223,7 @@ combines seqPosToGlobalCol and globalColToVisibleCol.
 
 ```js
 // type signature
-seqPosToVisibleCol: (rowName: string, seqPos: number) => number | undefined
+seqPosToVisibleCol: (rowName: string, seqPos: number) => any
 ```
 
 #### method: visibleColToRowLetter
@@ -1061,7 +1232,7 @@ Return a row-specific letter at a visible column, or undefined if gap.
 
 ```js
 // type signature
-visibleColToRowLetter: (rowName: string, visibleCol: number) => string | undefined
+visibleColToRowLetter: (rowName: string, visibleCol: number) => any
 ```
 
 #### method: visibleColToSeqPos
@@ -1076,7 +1247,7 @@ structure/sequence residue positions across gaps. Keep them stable.
 
 ```js
 // type signature
-visibleColToSeqPos: (rowName: string, visibleCol: number) => number | undefined
+visibleColToSeqPos: (rowName: string, visibleCol: number) => number
 ```
 
 #### method: visibleColToSeqPosOneBased
@@ -1086,7 +1257,7 @@ undefined if the position is a gap in the sequence.
 
 ```js
 // type signature
-visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => number | undefined
+visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => any
 ```
 
 ### MsaView - Actions
@@ -1121,14 +1292,14 @@ draw the alignment with positions numbered relative to the given row's sequence
 
 ```js
 // type signature
-drawRelativeTo: (id: string | undefined) => void
+drawRelativeTo: (id: string) => void
 ```
 
 #### action: exportSVG
 
 ```js
 // type signature
-exportSVG: (opts: { theme: Theme; includeMinimap?: boolean | undefined; includeTracks?: boolean | undefined; exportType: "entire" | "viewport"; }) => Promise<void>
+exportSVG: (opts: { theme: Theme; includeMinimap?: boolean; includeTracks?: boolean; exportType: "entire" | "viewport"; }) => Promise<void>
 ```
 
 #### action: fit
@@ -1175,6 +1346,17 @@ resetZoom: () => void
 setAllowedGappyness: (arg: number) => void
 ```
 
+#### action: setAnnotations
+
+Set the overlay annotations and reveal the overlay in a single step (an empty
+list clears both). Every source funnels through here after its own adapter has
+flattened it: InterProScan, GFF, user uploads, NCBI CDD.
+
+```js
+// type signature
+setAnnotations: (annotations: Annotation[]) => void
+```
+
 #### action: setColWidth
 
 set col width (px)
@@ -1205,18 +1387,18 @@ filehandle loaders
 
 ```js
 // type signature
-setData: (data: { msa?: string | undefined; tree?: string | undefined; treeMetadata?: string | undefined; gff?: string | undefined; }) => void
+setData: (data: { msa?: string; tree?: string; treeMetadata?: string; gff?: string; }) => void
 ```
 
 #### action: setDomains
 
-Set domain annotations and reveal the overlay in a single step (or clear both
-when passed undefined). Shared by every domain source: InterProScan, GFF,
-user-provided uploads, and NCBI CDD.
+set the overlay from raw InterProScan results keyed by row name. Kept for
+downstream plugins that hold the EBI wire format; new code should adapt to
+Annotation[] and call setAnnotations.
 
 ```js
 // type signature
-setDomains: (data?: Record<string, InterProScanResults> | undefined) => void
+setDomains: (data?: Record<string, InterProScanResults>) => void
 ```
 
 #### action: setDrawMsaLetters
@@ -1239,7 +1421,7 @@ setError: (error?: unknown) => void
 
 ```js
 // type signature
-setGFFFilehandle: (gffFilehandle?: FileLocation | undefined) => void
+setGFFFilehandle: (gffFilehandle?: FileLocationType) => void
 ```
 
 #### action: setHeaderHeight
@@ -1277,7 +1459,7 @@ dead code — it is public API.
 
 ```js
 // type signature
-setHighlightedColumns: (columns?: number[] | undefined) => void
+setHighlightedColumns: (columns?: number[]) => void
 ```
 
 #### action: setHighResScaleFactor
@@ -1296,7 +1478,7 @@ set hovered tree node and its descendants
 
 ```js
 // type signature
-setHoveredTreeNode: (nodeId?: string | undefined) => void
+setHoveredTreeNode: (nodeId?: string) => void
 ```
 
 #### action: setLoadingMSA
@@ -1319,7 +1501,7 @@ set mouse click position (row, column) in the MSA
 
 ```js
 // type signature
-setMouseClickPos: (col?: number | undefined, row?: number | undefined) => void
+setMouseClickPos: (col?: number, row?: number) => void
 ```
 
 #### action: setMousePos
@@ -1332,7 +1514,7 @@ signature stable; see that repo's ProteinToMsaHoverSync.tsx.
 
 ```js
 // type signature
-setMousePos: (col?: number | undefined, row?: number | undefined) => void
+setMousePos: (col?: number, row?: number) => void
 ```
 
 #### action: setMSA
@@ -1346,7 +1528,7 @@ setMSA: (result: string) => void
 
 ```js
 // type signature
-setMSAFilehandle: (msaFilehandle?: FileLocation | undefined) => void
+setMSAFilehandle: (msaFilehandle?: FileLocationType) => void
 ```
 
 #### action: setRowHeight
@@ -1367,7 +1549,7 @@ setScrollX: (n: number) => void
 
 #### action: setScrollY
 
-set scroll Y-offset (px)
+set scroll Y-offset (px), clamped to keep the alignment in view
 
 ```js
 // type signature
@@ -1381,9 +1563,18 @@ setScrollY: (n: number) => void
 setScrollZoom: (arg: boolean) => void
 ```
 
+#### action: setShowDomainLegend
+
+expand or collapse the domain legend that floats over the alignment
+
+```js
+// type signature
+setShowDomainLegend: (arg: boolean) => void
+```
+
 #### action: setShowDomains
 
-toggle the InterProScan protein-domain overlay on the alignment
+toggle the annotation overlay on the alignment
 
 ```js
 // type signature
@@ -1397,14 +1588,14 @@ whole tree again)
 
 ```js
 // type signature
-setShowOnly: (node?: string | undefined) => void
+setShowOnly: (node?: string) => void
 ```
 
 #### action: setStatus
 
 ```js
 // type signature
-setStatus: (status?: { msg: string; url?: string | undefined; onCancel?: (() => void) | undefined; } | undefined) => void
+setStatus: (status?: { msg: string; url?: string; onCancel?: () => void; }) => void
 ```
 
 #### action: setSubFeatureRows
@@ -1425,7 +1616,7 @@ setTree: (result: string) => void
 
 ```js
 // type signature
-setTreeFilehandle: (treeFilehandle?: FileLocation | undefined) => void
+setTreeFilehandle: (treeFilehandle?: FileLocationType) => void
 ```
 
 #### action: setTreeMetadata

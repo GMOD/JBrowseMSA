@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import { gffToInterProResults } from './gffToInterPro.ts'
+import { annotationsToGFF } from './annotationsToGFF.ts'
+import { gffToAnnotations } from './gffToAnnotations.ts'
 import { interProResponseToGFF, interProToGFF } from './interProToGFF.ts'
 import { parseGFF } from './parseGFF.ts'
 
@@ -138,7 +139,7 @@ describe('interProToGFF', () => {
       'seq1\tRefSeq\tmRNA\t1\t99\t.\t+\t.\tName=NM_1',
       'seq1\tRefSeq\texon\t1\t30\t.\t+\t.\tName=exon-1',
     ].join('\n')
-    const rows = interProToGFF(gffToInterProResults(parseGFF(gff)))
+    const rows = annotationsToGFF(gffToAnnotations(parseGFF(gff)))
       .split('\n')
       .slice(1)
       .map(l => l.split('\t'))

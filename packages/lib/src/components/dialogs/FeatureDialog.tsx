@@ -43,10 +43,9 @@ const Toggles = observer(function ({ model }: { model: MsaViewModel }) {
 })
 
 const FeatureTable = observer(function ({ model }: { model: MsaViewModel }) {
-  const { tidyInterProAnnotationTypes, tidyInterProAnnotations, fillPalette } =
-    model
+  const { annotationTypes, annotations, fillPalette } = model
   const counts = new Map<string, number>()
-  for (const annot of tidyInterProAnnotations) {
+  for (const annot of annotations) {
     counts.set(annot.accession, (counts.get(annot.accession) ?? 0) + 1)
   }
   return (
@@ -64,7 +63,7 @@ const FeatureTable = observer(function ({ model }: { model: MsaViewModel }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {[...tidyInterProAnnotationTypes.values()].map(
+          {[...annotationTypes.values()].map(
             ({ accession, name, description }) => (
               <TableRow key={accession}>
                 <TableCell padding="checkbox">

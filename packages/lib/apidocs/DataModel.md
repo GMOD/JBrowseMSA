@@ -64,26 +64,26 @@ treeMetadata: types.maybe(types.string)
 
 ```js
 // type signature
-setGFF: (gff?: string | undefined) => void
+setGFF: (gff?: string) => void
 ```
 
 #### action: setMSA
 
 ```js
 // type signature
-setMSA: (msa?: string | undefined) => void
+setMSA: (msa?: string) => void
 ```
 
 #### action: setTree
 
 ```js
 // type signature
-setTree: (tree?: string | undefined) => void
+setTree: (tree?: string) => void
 ```
 
 #### action: setTreeMetadata
 
 ```js
 // type signature
-setTreeMetadata: (treeMetadata?: string | undefined) => void
+setTreeMetadata: (treeMetadata?: string) => void
 ```

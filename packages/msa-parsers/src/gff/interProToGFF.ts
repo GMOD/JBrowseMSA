@@ -1,63 +1,24 @@
+import {
+  indexResultsByXref,
+  interProScanToAnnotations,
+} from '../interProScanToAnnotations.ts'
+import { annotationsToGFF } from './annotationsToGFF.ts'
+
 import type { InterProScanResults } from '../types.ts'
 
 /**
- * Convert InterProScan results to GFF3 format
+ * Convert InterProScan results, keyed by the row name they attach to, to GFF3.
  */
 export function interProToGFF(
   results: Record<string, InterProScanResults>,
 ): string {
-  const lines: string[] = ['##gff-version 3']
-
-  for (const [seqId, data] of Object.entries(results)) {
-    for (const match of data.matches) {
-      const entry = match.signature.entry
-      if (!entry) {
-        continue
-      }
-
-      for (const location of match.locations) {
-        const attributes = [
-          `Name=${encodeURIComponent(entry.accession)}`,
-          `signature_desc=${encodeURIComponent(entry.name)}`,
-          `description=${encodeURIComponent(entry.description)}`,
-        ].join(';')
-
-        const line = [
-          seqId,
-          'InterProScan',
-          // GFF-sourced annotations carry their original type; writing every
-          // feature back out as protein_match would turn an exon overlay into
-          // generic domains on the next read, losing the numbered-segment
-          // rendering and the gene arrowheads
-          entry.featureType ?? 'protein_match',
-          location.start,
-          location.end,
-          '.',
-          location.strand === undefined ? '.' : location.strand > 0 ? '+' : '-',
-          '.',
-          attributes,
-        ].join('\t')
-
-        lines.push(line)
-      }
-    }
-  }
-
-  return lines.join('\n')
+  return annotationsToGFF(interProScanToAnnotations(results))
 }
 
 /**
- * Convert InterProScan JSON response to GFF3 format
+ * Convert a list of InterProScan results to GFF3, taking each one's row name
+ * from its xref.
  */
 export function interProResponseToGFF(results: InterProScanResults[]): string {
-  const resultsMap: Record<string, InterProScanResults> = {}
-
-  for (const result of results) {
-    const seqId = result.xref[0]?.id
-    if (seqId) {
-      resultsMap[seqId] = result
-    }
-  }
-
-  return interProToGFF(resultsMap)
+  return interProToGFF(indexResultsByXref(results))
 }

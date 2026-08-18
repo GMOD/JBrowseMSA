@@ -19,10 +19,17 @@ export {
 } from './msa/index.ts'
 export type { MSAFormat, MSAParserType } from './msa/index.ts'
 
+// Overlay annotations: the canonical shape, and the adapters onto it
+export {
+  indexResultsByXref,
+  interProScanResponseToAnnotations,
+  interProScanToAnnotations,
+} from './interProScanToAnnotations.ts'
+
 // GFF parsing
 export {
-  gffToInterProResponse,
-  gffToInterProResults,
+  annotationsToGFF,
+  gffToAnnotations,
   interProResponseToGFF,
   interProToGFF,
   parseGFF,

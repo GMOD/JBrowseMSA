@@ -6,7 +6,8 @@ import { colord } from 'colord'
 import { autorun, transaction } from 'mobx'
 import {
   generateNodeIds,
-  gffToInterProResults,
+  gffToAnnotations,
+  interProScanToAnnotations,
   parseEmfTree,
   parseGFF,
   parseMSA,
@@ -79,8 +80,8 @@ import { computeRowInsertions, len, skipBlanks, transform } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
-import type { InterProScanResults } from './launchInterProScan.ts'
 import type {
+  Annotation,
   BasicTrack,
   DomainBand,
   NodeWithIds,
@@ -89,6 +90,7 @@ import type {
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
 import type { Theme } from '@mui/material'
+import type { InterProScanResults } from 'msa-parsers'
 
 function parseTreeText(text: string) {
   if (text.startsWith('BioTreeContainer')) {
@@ -101,7 +103,7 @@ function parseTreeText(text: string) {
  * #stateModel MsaView
  *
  * The main MSAView state model. Holds the loaded alignment, tree, and optional
- * InterProScan domain annotations, plus all display state (color scheme, zoom,
+ * overlay annotations, plus all display state (color scheme, zoom,
  * scroll, collapsed clades). It composes in members from `DialogQueueSessionMixin`,
  * `Tree`, and `MSAModel` (see Inherited members below). Data is loaded reactively
  * from the `msaFilehandle` / `treeFilehandle` / `gffFilehandle` properties, or set
@@ -224,7 +226,7 @@ function stateModelFactory() {
 
         /**
          * #property
-         * filehandle object for InterProScan GFF file
+         * filehandle object for a GFF file of overlay annotations
          */
         gffFilehandle: types.maybe(FileLocation),
 
@@ -386,10 +388,12 @@ function stateModelFactory() {
 
       /**
        * #volatile
+       * overlay annotations drawn on the alignment, whatever their source.
+       * Every source -- InterProScan, GFF, a user upload -- converts to this
+       * flat list before it reaches the model, so nothing downstream of here
+       * knows which one it came from
        */
-      interProAnnotations: undefined as
-        | undefined
-        | Record<string, InterProScanResults>,
+      annotations: [] as Annotation[],
     }))
     .actions(self => ({
       /**
@@ -481,7 +485,7 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * toggle the InterProScan protein-domain overlay on the alignment
+       * toggle the annotation overlay on the alignment
        */
       setShowDomains(arg: boolean) {
         self.showDomains = arg
@@ -631,7 +635,7 @@ function stateModelFactory() {
        * #getter
        */
       get actuallyShowDomains() {
-        return self.showDomains && !!self.interProAnnotations
+        return self.showDomains && self.annotations.length > 0
       },
       get viewInitialized() {
         return self.volatileWidth !== undefined
@@ -686,7 +690,7 @@ function stateModelFactory() {
         return !!this.tree.noTree
       },
       get noDomains() {
-        return !self.interProAnnotations
+        return self.annotations.length === 0
       },
       menuItems() {
         return []
@@ -1392,18 +1396,27 @@ function stateModelFactory() {
 
       /**
        * #action
-       * Set domain annotations and reveal the overlay in a single step (or clear
-       * both when passed undefined). Shared by every domain source: InterProScan,
-       * GFF, user-provided uploads, and NCBI CDD.
+       * Set the overlay annotations and reveal the overlay in a single step (an
+       * empty list clears both). Every source funnels through here after its
+       * own adapter has flattened it: InterProScan, GFF, user uploads, NCBI CDD.
+       */
+      setAnnotations(annotations: Annotation[]) {
+        self.annotations = annotations
+        self.setShowDomains(annotations.length > 0)
+      },
+
+      /**
+       * #action
+       * set the overlay from raw InterProScan results keyed by row name. Kept
+       * for downstream plugins that hold the EBI wire format; new code should
+       * adapt to Annotation[] and call setAnnotations.
        */
       setDomains(data?: Record<string, InterProScanResults>) {
-        self.interProAnnotations = data
-        self.setShowDomains(!!data)
+        this.setAnnotations(data ? interProScanToAnnotations(data) : [])
       },
 
       applyGFFText(gffText: string) {
-        const gffRecords = parseGFF(gffText)
-        this.setDomains(gffToInterProResults(gffRecords))
+        this.setAnnotations(gffToAnnotations(parseGFF(gffText)))
       },
 
       /**
@@ -1670,41 +1683,29 @@ function stateModelFactory() {
       get totalTrackAreaHeight() {
         return sum(self.turnedOnTracks.map(r => r.model.height))
       },
-      get tidyInterProAnnotationTypes() {
-        return new Map(
-          this.tidyInterProAnnotations.map(annot => [annot.accession, annot]),
-        )
+      /**
+       * one representative annotation per accession, which is what the legend,
+       * the filter dialog and the palettes key off
+       */
+      get annotationTypes() {
+        // first occurrence wins. The representative supplies only the name,
+        // description and -- for ordinal segments -- the start that orders
+        // them, and those agree across an accession's instances
+        const types = new Map<string, Annotation>()
+        for (const annot of self.annotations) {
+          if (!types.has(annot.accession)) {
+            types.set(annot.accession, annot)
+          }
+        }
+        return types
       },
-      get tidyInterProAnnotations() {
-        return self.interProAnnotations
-          ? Object.entries(self.interProAnnotations)
-              .flatMap(([id, val]) =>
-                val.matches.flatMap(({ signature, locations }) => {
-                  const { entry } = signature
-                  return entry
-                    ? locations.map(({ start, end, strand }) => ({
-                        id,
-                        name: entry.name,
-                        accession: entry.accession,
-                        description: entry.description,
-                        featureType: entry.featureType,
-                        start,
-                        end,
-                        strand,
-                      }))
-                    : []
-                }),
-              )
-              .toSorted((a, b) => len(b) - len(a))
-          : []
-      },
-      get tidyFilteredInterProAnnotations() {
-        return this.tidyInterProAnnotations.filter(r =>
+      get filteredAnnotations() {
+        return self.annotations.filter(r =>
           self.featureFilters.get(r.accession),
         )
       },
-      get tidyFilteredGatheredInterProAnnotations() {
-        return groupBy(this.tidyFilteredInterProAnnotations, r => r.id)
+      get annotationsByRow() {
+        return groupBy(this.filteredAnnotations, r => r.id)
       },
     }))
     .views(self => ({
@@ -1738,7 +1739,7 @@ function stateModelFactory() {
        * labeled by number rather than each getting a distinct hue + legend row
        */
       get segmentDomainTypes() {
-        return [...self.tidyInterProAnnotationTypes.values()]
+        return [...self.annotationTypes.values()]
           .filter(d => segmentFeatureTypes.has(d.featureType ?? ''))
           .toSorted((a, b) => a.start - b.start)
       },
@@ -1748,7 +1749,7 @@ function stateModelFactory() {
        * their own color and a legend entry
        */
       get categoricalDomainTypes() {
-        return [...self.tidyInterProAnnotationTypes.values()].filter(
+        return [...self.annotationTypes.values()].filter(
           d => !segmentFeatureTypes.has(d.featureType ?? ''),
         )
       },
@@ -1800,22 +1801,24 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * every filtered-on domain annotation resolved to the visible column span
-       * it is drawn across, keyed by row name and in draw order (largest first,
-       * as tidyInterProAnnotations orders them). Resolving these once here rather
-       * than inside each canvas block removes a per-feature, per-block sequence
-       * position conversion from every redraw, and gives the letter renderer the
-       * band colors it needs to keep residues readable on top of the boxes.
+       * every filtered-on annotation resolved to the visible column span it is
+       * drawn across, keyed by row name. Each row is ordered longest-first so a
+       * short domain nested inside a long one draws on top of it rather than
+       * under it. Resolving these once here rather than inside each canvas
+       * block removes a per-feature, per-block sequence position conversion
+       * from every redraw, and gives the letter renderer the band colors it
+       * needs to keep residues readable on top of the boxes.
        */
       get domainBands() {
         const bands = new Map<string, DomainBand[]>()
         for (const [name, annotations] of Object.entries(
-          self.tidyFilteredGatheredInterProAnnotations,
+          self.annotationsByRow,
         )) {
           const { blanks } = self
           const rowBands = annotations
+            .toSorted((a, b) => len(b) - len(a))
             .map(annotation => {
-              // InterPro positions are 1-based and inclusive. Both ends count
+              // annotation positions are 1-based and inclusive. Both ends count
               // the visible columns in front of a global column, so endCol is
               // the exclusive column after the last residue's own column --
               // the band stops there rather than stretching across a following
@@ -2001,7 +2004,7 @@ function stateModelFactory() {
         self.setTreeFilehandle(undefined)
         self.setMSAFilehandle(undefined)
         self.setGFFFilehandle(undefined)
-        self.setDomains(undefined)
+        self.setAnnotations([])
       },
       /**
        * #action
@@ -2074,7 +2077,7 @@ function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            for (const key of self.tidyInterProAnnotationTypes.keys()) {
+            for (const key of self.annotationTypes.keys()) {
               this.initFilter(key)
             }
           }),
@@ -2214,7 +2217,7 @@ function stateModelFactory() {
           }),
         )
 
-        // gffFilehandle carries InterProScan domains
+        // gffFilehandle carries overlay annotations
         loadOnFilehandleChange({
           getFilehandle: () => self.gffFilehandle,
           onLoad: text => {

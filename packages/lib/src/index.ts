@@ -11,7 +11,9 @@ export { default as MSAViewer } from './components/MSAViewer.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
 export type { HierarchyNode } from './hierarchy.ts'
-export type { InterProScanResults } from './launchInterProScan.ts'
+// InterProScanResults is the EBI wire format that setDomains still accepts;
+// Annotation is the source-agnostic shape everything else is written against
+export type { InterProScanResults } from 'msa-parsers'
 // ColumnCounts, DomainBand and TidyDomainAnnotation surface in the inferred type
 // of the composed state model, so a downstream plugin cannot emit declarations
 // for its own stateModelFactory without being able to name them (TS2883).
@@ -19,6 +21,7 @@ export type { InterProScanResults } from './launchInterProScan.ts'
 export type { ColumnCounts } from './columnCounts.ts'
 export type {
   Accession,
+  Annotation,
   BasicTrack,
   BasicTrackModel,
   DomainBand,
