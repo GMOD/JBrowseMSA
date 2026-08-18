@@ -235,7 +235,8 @@ ${section(exampleSection(header.examples), overviewSection(header.docs, inherite
 
 async function main() {
   const dir = 'apidocs'
-  fs.mkdirSync(dir, { recursive: true })
+  // extract before touching the output directory, so a parse failure leaves the
+  // previously generated docs in place rather than deleting them
   const models = generateStateModelDocs(await getAllFiles())
   const withHeader = Object.values(models).filter((m): m is ModelWithHeader =>
     Boolean(m.header),
@@ -247,6 +248,14 @@ async function main() {
         .map(m => [m.header.selfDeclId!, m] as const),
     ),
     bySlug: new Map(withHeader.map(m => [m.header.id, m] as const)),
+  }
+  fs.mkdirSync(dir, { recursive: true })
+  // drop pages for models that no longer exist. CLAUDE.md is authored, not
+  // generated, and lives here to be found by anyone editing these files
+  for (const file of fs.readdirSync(dir)) {
+    if (file.endsWith('.md') && file !== 'CLAUDE.md') {
+      fs.rmSync(`${dir}/${file}`)
+    }
   }
   for (const model of withHeader) {
     const ancestors = collectAncestors(model, index)
