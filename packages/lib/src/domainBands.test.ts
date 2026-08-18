@@ -18,6 +18,12 @@ const gff = `##gff-version 3
 a	Pfam	protein_match	1	4	.	.	.	Name=PF00001;signature_desc=First
 a	Pfam	protein_match	5	8	.	.	.	Name=PF00002;signature_desc=Second`
 
+// row `b` only: PF00003 ends inside the insertion, PF00004 lies entirely within
+// it, so gap hiding puts one end and then both ends into hidden columns
+const insertionGff = `##gff-version 3
+b	Pfam	protein_match	4	8	.	.	.	Name=PF00003;signature_desc=Overlapping
+b	Pfam	protein_match	5	8	.	.	.	Name=PF00004;signature_desc=Inside`
+
 function makeModel() {
   const model = MSAModelF().create({
     id: 'domain-bands-test',
@@ -53,6 +59,24 @@ test('bands follow the columns when gappy columns are hidden', () => {
   expect(bands.map(b => [b.startCol, b.endCol])).toEqual([
     [0, 4],
     [4, 8],
+  ])
+})
+
+test('a band whose end lands in a hidden column keeps its visible part', () => {
+  const model = makeModel()
+  model.applyGFFText(insertionGff)
+  expect(model.domainBands.get('b')!.map(b => [b.startCol, b.endCol])).toEqual([
+    [3, 8],
+    [4, 8],
+  ])
+
+  model.setHideGaps(true)
+  model.setAllowedGappyness(50)
+  expect(model.blanks).toEqual([4, 5, 6, 7])
+  // PF00003 covers V + the 4 hidden Qs, so only the V column survives; PF00004
+  // is nothing but hidden columns and drops out entirely
+  expect(model.domainBands.get('b')!.map(b => [b.startCol, b.endCol])).toEqual([
+    [3, 4],
   ])
 })
 

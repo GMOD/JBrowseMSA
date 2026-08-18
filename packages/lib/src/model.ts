@@ -71,6 +71,7 @@ import {
   globalColToVisibleCol,
   visibleColToGlobalCol,
   visibleColToSeqPosForRow,
+  visibleColsBefore,
 } from './rowCoordinateCalculations.ts'
 import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
 import { stripDefault } from './stripDefault.ts'
@@ -1797,17 +1798,25 @@ function stateModelFactory() {
         )) {
           const rowBands = annotations
             .map((annotation, stackIndex) => {
-              // InterPro positions are 1-based and inclusive; endCol is the
-              // exclusive column *after* the last residue, taken from that
-              // residue rather than from the next one, so a band stops at its own
-              // last residue instead of stretching across a following gap run
-              const startCol = self.seqPosToVisibleCol(
-                name,
-                annotation.start - 1,
+              // InterPro positions are 1-based and inclusive. Both ends count
+              // the visible columns in front of a global column, so endCol is
+              // the exclusive column after the last residue's own column --
+              // the band stops there rather than stretching across a following
+              // gap run -- and a residue whose column is itself hidden
+              // collapses onto the neighbouring boundary instead of dropping
+              // the band. A band whose every column is hidden spans nothing
+              // and is left out.
+              const { blanks } = self
+              const startCol = visibleColsBefore(
+                blanks,
+                self.seqPosToGlobalCol(name, annotation.start - 1),
               )
-              const lastCol = self.seqPosToVisibleCol(name, annotation.end - 1)
-              return startCol !== undefined && lastCol !== undefined
-                ? { annotation, startCol, endCol: lastCol + 1, stackIndex }
+              const endCol = visibleColsBefore(
+                blanks,
+                self.seqPosToGlobalCol(name, annotation.end - 1) + 1,
+              )
+              return endCol > startCol
+                ? { annotation, startCol, endCol, stackIndex }
                 : undefined
             })
             .filter(notEmpty)

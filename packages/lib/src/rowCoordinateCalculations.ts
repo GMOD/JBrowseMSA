@@ -66,13 +66,30 @@ export function globalColToVisibleCol(
   blanks: number[],
   globalCol: number,
 ): number | undefined {
-  const blanksBefore = partitionPoint(
-    blanks.length,
-    i => blanks[i]! >= globalCol,
-  )
+  const blanksBefore = countBlanksBefore(blanks, globalCol)
   return blanks[blanksBefore] === globalCol
     ? undefined // Column is hidden
     : globalCol - blanksBefore
+}
+
+function countBlanksBefore(blanks: number[], globalCol: number) {
+  return partitionPoint(blanks.length, i => blanks[i]! >= globalCol)
+}
+
+/**
+ * How many visible columns come before a global column. For a visible column
+ * that is its own visible index; for a hidden one it is the index of the next
+ * visible column, i.e. where the hidden column collapses to.
+ *
+ * That total answer is what spans want: resolving both ends of a span through
+ * globalColToVisibleCol instead loses the whole span whenever either end lands
+ * in a hidden column.
+ *
+ * @param blanks - Sorted array of global column indices that are hidden
+ * @param globalCol - The global column index in the full MSA
+ */
+export function visibleColsBefore(blanks: number[], globalCol: number) {
+  return globalCol - countBlanksBefore(blanks, globalCol)
 }
 
 /**
