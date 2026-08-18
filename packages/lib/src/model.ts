@@ -2042,8 +2042,12 @@ function stateModelFactory() {
        */
       fitHorizontally() {
         if (self.numColumns > 0) {
+          // the alignment canvas is the msa area minus the vertical scrollbar,
+          // so fitting to msaAreaWidth left the last ~20px of columns off the
+          // right edge -- and short of the width that shows a minimap, so there
+          // was nothing on screen saying they were there
           self.colWidth = clamp(
-            self.msaAreaWidth / self.numColumns,
+            (self.msaAreaWidth - self.verticalScrollbarWidth) / self.numColumns,
             minColWidth,
             maxCellSize,
           )

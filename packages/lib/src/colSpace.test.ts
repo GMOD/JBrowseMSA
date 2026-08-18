@@ -38,3 +38,32 @@ test('the last column agrees with the column statistics', () => {
   expect(model.mouseOverColumnStats?.col).toBe(9)
   expect(model.visibleColToRowLetter('b', 9)).toBe('C')
 })
+
+// enough rows to force the vertical scrollbar, which eats into the width the
+// alignment canvas actually gets
+function makeTallModel() {
+  const names = Array.from({ length: 60 }, (_, i) => `seq${i}`)
+  const model = MSAModelF().create({
+    id: 'col-fit-test',
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    height: 300,
+    data: { msa: names.map(n => `>${n}\n${'ACGT'.repeat(50)}`).join('\n') },
+  })
+  model.setWidth(800)
+  return model
+}
+
+test('fit horizontally leaves every column on screen', () => {
+  const model = makeTallModel()
+  expect(model.showVerticalScrollbar).toBe(true)
+
+  model.fitHorizontally()
+  // the canvas is the msa area minus the scrollbar; fitting to the msa area
+  // alone pushed the last columns past the right edge, with no minimap to
+  // show that anything was cut off
+  expect(model.totalWidth).toBeLessThanOrEqual(
+    model.msaAreaWidth - model.verticalScrollbarWidth,
+  )
+  expect(model.showHorizontalScrollbar).toBe(false)
+})
