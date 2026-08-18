@@ -12,67 +12,12 @@ import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
 import MSAModelF from './model.ts'
+import { installRenderTestEnv } from './renderTestEnv.ts'
 import { renderToSvg } from './renderToSvg.tsx'
-
-class Mat {
-  constructor(
-    public a = 1,
-    public b = 0,
-    public c = 0,
-    public d = 1,
-    public e = 0,
-    public f = 0,
-  ) {}
-  multiply(o: Mat) {
-    return new Mat(
-      this.a * o.a + this.c * o.b,
-      this.b * o.a + this.d * o.b,
-      this.a * o.c + this.c * o.d,
-      this.b * o.c + this.d * o.d,
-      this.a * o.e + this.c * o.f + this.e,
-      this.b * o.e + this.d * o.f + this.f,
-    )
-  }
-  translate(x: number, y = 0) {
-    return this.multiply(new Mat(1, 0, 0, 1, x, y))
-  }
-  scale(x: number, y = x) {
-    return this.multiply(new Mat(x, 0, 0, y, 0, 0))
-  }
-}
-class Pt {
-  constructor(
-    public x = 0,
-    public y = 0,
-  ) {}
-  matrixTransform(m: Mat) {
-    return new Pt(
-      m.a * this.x + m.c * this.y + m.e,
-      m.b * this.x + m.d * this.y + m.f,
-    )
-  }
-}
 
 beforeAll(() => {
   enableStaticRendering(true)
-  const g = globalThis as Record<string, unknown>
-  g.DOMMatrix = Mat
-  g.DOMPoint = Pt
-  HTMLCanvasElement.prototype.getContext = function () {
-    let font = '10px sans-serif'
-    return {
-      get font() {
-        return font
-      },
-      set font(v: string) {
-        font = v
-      },
-      measureText(t: string) {
-        const size = Number.parseFloat(font) || 10
-        return { width: t.length * size * 0.6 } as TextMetrics
-      },
-    } as unknown as CanvasRenderingContext2D
-  } as unknown as typeof HTMLCanvasElement.prototype.getContext
+  installRenderTestEnv()
 })
 
 // representative `impg query -o fasta-aln` block: PanSN names with region

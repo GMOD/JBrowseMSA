@@ -20,6 +20,8 @@ export type RenderCtx = Pick<
   | 'measureText'
   | 'moveTo'
   | 'resetTransform'
+  | 'restore'
+  | 'save'
   | 'scale'
   | 'setLineDash'
   | 'stroke'

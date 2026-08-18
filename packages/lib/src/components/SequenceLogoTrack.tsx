@@ -1,39 +1,40 @@
 import React from 'react'
 
+import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useCanvasAutorun } from '../useCanvasAutorun.ts'
-import { ConservationTrackResizeHandle } from './ResizeHandles.tsx'
-import { barTrackValues, drawConservationBars } from './tracks/drawTracks.ts'
+import { drawSequenceLogo } from './tracks/drawTracks.ts'
 
 import type { MsaViewModel } from '../model.ts'
 import type { BasicTrack } from '../types.ts'
 
-const ConservationBlock = observer(function ({
+const SequenceLogoBlock = observer(function ({
   model,
-  track,
   offsetX,
   trackHeight,
 }: {
   model: MsaViewModel
-  track: BasicTrack
   offsetX: number
   trackHeight: number
 }) {
   const { blockSize, scrollX, highResScaleFactor } = model
+  const theme = useTheme()
 
   const ref = useCanvasAutorun({
     draw: ctx => {
-      const { colWidth } = model
+      const { colWidth, colStats, colorScheme, logoMaxBits } = model
       ctx.resetTransform()
       ctx.scale(highResScaleFactor, highResScaleFactor)
       ctx.clearRect(0, 0, blockSize, trackHeight)
       ctx.translate(-offsetX, 0)
 
-      drawConservationBars({
+      drawSequenceLogo({
         ctx,
-        values: barTrackValues(model, track.model.id),
-        color: track.model.barColor ?? 'gray',
+        colStats,
+        colorScheme,
+        maxBits: logoMaxBits,
+        textColor: theme.palette.text.primary,
         colWidth,
         trackHeight,
         offsetX,
@@ -42,7 +43,7 @@ const ConservationBlock = observer(function ({
     },
     width: blockSize * highResScaleFactor,
     height: trackHeight * highResScaleFactor,
-    deps: [model, track, offsetX, trackHeight],
+    deps: [model, offsetX, trackHeight, theme],
   })
 
   return (
@@ -60,7 +61,7 @@ const ConservationBlock = observer(function ({
   )
 })
 
-const ConservationTrack = observer(function ({
+const SequenceLogoTrack = observer(function ({
   model,
   track,
 }: {
@@ -80,17 +81,15 @@ const ConservationTrack = observer(function ({
       }}
     >
       {blocksX.map(bx => (
-        <ConservationBlock
+        <SequenceLogoBlock
           key={bx}
           model={model}
-          track={track}
           offsetX={bx}
           trackHeight={trackHeight}
         />
       ))}
-      <ConservationTrackResizeHandle model={model} />
     </div>
   )
 })
 
-export default ConservationTrack
+export default SequenceLogoTrack

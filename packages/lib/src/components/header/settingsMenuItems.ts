@@ -12,9 +12,27 @@ function toggle(label: string, checked: boolean, set: (arg: boolean) => void) {
   }
 }
 
+// Every track the alignment can show, with its current state. Without this the
+// "Close" item on a track's own dropdown is a one-way door -- there is nowhere
+// else in the UI to turn a track back on.
+function tracksSubMenu(model: MsaViewModel): MenuItem[] {
+  const shown = new Set(model.turnedOnTracks.map(t => t.model.id))
+  return model.tracks.map(({ model: { id, name } }) =>
+    toggle(name, shown.has(id), () => {
+      model.toggleTrack(id)
+    }),
+  )
+}
+
 export function msaSettingsMenuItems(model: MsaViewModel): MenuItem[] {
   const { drawMsaLetters, hideGaps, bgColor, showColumnStats } = model
   return [
+    {
+      label: 'Tracks',
+      type: 'subMenu' as const,
+      subMenu: tracksSubMenu(model),
+    },
+    { type: 'divider' as const },
     toggle('Show column statistics on hover', showColumnStats, arg => {
       model.setShowColumnStats(arg)
     }),

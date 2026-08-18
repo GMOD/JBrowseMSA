@@ -7,7 +7,7 @@ import { when } from 'mobx'
 import MinimapSVG from './components/minimap/MinimapSVG.tsx'
 import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
-import { renderAllTracks } from './components/tracks/renderTracksSvg.ts'
+import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { colorContrast } from './util.ts'
 

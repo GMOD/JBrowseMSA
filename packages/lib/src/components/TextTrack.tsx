@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import { setFontSize } from '../setFontSize.ts'
 import { useCanvasAutorun } from '../useCanvasAutorun.ts'
 import { useColorContrast } from '../useColorContrast.ts'
-import { drawTextTrackContent } from './tracks/renderTracksSvg.ts'
+import { drawTextTrackContent } from './tracks/drawTracks.ts'
 
 import type { MsaViewModel } from '../model.ts'
 import type { BasicTrack } from '../types.ts'

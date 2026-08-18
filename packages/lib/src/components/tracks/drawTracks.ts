@@ -1,6 +1,8 @@
+import { columnLogoStack } from '../../sequenceLogo.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
 
+import type { ColumnCounts } from '../../columnCounts.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { BasicTrack } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
@@ -94,6 +96,138 @@ export function drawTextTrackContent({
       ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
     }
   }
+}
+
+// Cap height as a fraction of the font size. Every logo letter is scaled from
+// one reference font size to the height its frequency earns, and that scale is
+// only right if we know how tall the glyph actually draws. Measuring per letter
+// would be exact but `measureText` reports no vertical box in the SVG export
+// backend, so the ratio is a constant: the cap height of the sans-serif faces
+// both backends use, within a percent or two. It only has to be consistent --
+// the same ratio for every letter is what makes the slices sum to the stack
+// height instead of drifting apart.
+const CAP_HEIGHT_RATIO = 0.72
+// letters below this many pixels are noise, and a stack that thin reads better
+// as the bar chart it approximates
+const MIN_LETTER_PX = 3
+
+export function drawSequenceLogo({
+  ctx,
+  colStats,
+  colorScheme,
+  maxBits,
+  textColor,
+  colWidth,
+  trackHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: RenderCtx
+  colStats: ColumnCounts
+  colorScheme: Record<string, string>
+  maxBits: number
+  textColor: string
+  colWidth: number
+  trackHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: blockSize,
+    colWidth,
+  })
+  const end = Math.min(xEnd, colStats.numColumns)
+
+  // one reference size for every glyph; each letter's own transform takes it
+  // from here to the height it earned, so the font is set once for the block
+  const referenceFontSize = trackHeight
+  setFontSize(ctx, referenceFontSize)
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+  const capHeight = referenceFontSize * CAP_HEIGHT_RATIO
+
+  for (let col = xStart; col < end; col++) {
+    const stack = columnLogoStack(colStats, col, maxBits)
+    if (stack.length === 0) {
+      continue
+    }
+    const x = col * colWidth
+    // stack up from the baseline: the array is ascending, so the tallest letter
+    // lands on top, which is the convention that makes a logo readable at a
+    // glance
+    let bottom = trackHeight
+    for (const { letter, bits } of stack) {
+      const h = (bits / maxBits) * trackHeight
+      if (h < MIN_LETTER_PX) {
+        bottom -= h
+        continue
+      }
+      const width = ctx.measureText(letter).width
+      if (width === 0) {
+        bottom -= h
+        continue
+      }
+      ctx.fillStyle = colorScheme[letter] ?? textColor
+      ctx.save()
+      // land the glyph's baseline on the bottom of its slice, then stretch it to
+      // fill the slice vertically and the column horizontally
+      ctx.translate(x, bottom)
+      ctx.scale(colWidth / width, h / capHeight)
+      ctx.fillText(letter, 0, 0)
+      ctx.restore()
+      bottom -= h
+    }
+  }
+}
+
+export function renderSequenceLogoTrack({
+  model,
+  ctx,
+  offsetX,
+  offsetY,
+  trackHeight,
+  theme,
+  blockSizeXOverride,
+  highResScaleFactorOverride,
+}: {
+  model: MsaViewModel
+  ctx: RenderCtx
+  offsetX: number
+  offsetY: number
+  trackHeight: number
+  theme: Theme
+  blockSizeXOverride?: number
+  highResScaleFactorOverride?: number
+}) {
+  const {
+    blockSize,
+    colWidth,
+    colStats,
+    colorScheme,
+    logoMaxBits,
+    highResScaleFactor,
+  } = model
+  const bx = blockSizeXOverride ?? blockSize
+  const k = highResScaleFactorOverride ?? highResScaleFactor
+
+  ctx.resetTransform()
+  ctx.scale(k, k)
+  ctx.translate(-offsetX, offsetY)
+
+  drawSequenceLogo({
+    ctx,
+    colStats,
+    colorScheme,
+    maxBits: logoMaxBits,
+    textColor: theme.palette.text.primary,
+    colWidth,
+    trackHeight,
+    offsetX,
+    blockSize: bx,
+  })
+
+  ctx.resetTransform()
 }
 
 export function renderConservationTrack({
@@ -217,29 +351,47 @@ export function renderAllTracks({
   for (const track of turnedOnTracks) {
     const trackHeight = track.model.height
 
-    if (track.model.barColor !== undefined) {
-      renderConservationTrack({
-        model,
-        ctx,
-        track,
-        offsetX,
-        offsetY: currentY,
-        trackHeight,
-        blockSizeXOverride,
-        highResScaleFactorOverride,
-      })
-    } else {
-      renderTextTrack({
-        model,
-        ctx,
-        track,
-        offsetX,
-        offsetY: currentY,
-        contrastScheme,
-        theme,
-        blockSizeXOverride,
-        highResScaleFactorOverride,
-      })
+    switch (track.model.kind) {
+      case 'bar': {
+        renderConservationTrack({
+          model,
+          ctx,
+          track,
+          offsetX,
+          offsetY: currentY,
+          trackHeight,
+          blockSizeXOverride,
+          highResScaleFactorOverride,
+        })
+        break
+      }
+      case 'logo': {
+        renderSequenceLogoTrack({
+          model,
+          ctx,
+          offsetX,
+          offsetY: currentY,
+          trackHeight,
+          theme,
+          blockSizeXOverride,
+          highResScaleFactorOverride,
+        })
+        break
+      }
+      case 'text': {
+        renderTextTrack({
+          model,
+          ctx,
+          track,
+          offsetX,
+          offsetY: currentY,
+          contrastScheme,
+          theme,
+          blockSizeXOverride,
+          highResScaleFactorOverride,
+        })
+        break
+      }
     }
 
     currentY += trackHeight

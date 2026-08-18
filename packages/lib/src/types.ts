@@ -5,11 +5,17 @@ export interface Accession {
   name: string
   description: string
 }
+// which renderer draws a track's content. Every track kind draws into the same
+// per-column coordinate space, so the kind picks the draw function rather than
+// the geometry -- see drawTracks.ts, which dispatches on it.
+export type TrackKind = 'text' | 'bar' | 'logo'
+
 export interface BasicTrackModel {
   id: string
   name: string
   associatedRowName?: string
   height: number
+  kind: TrackKind
 }
 
 export interface TextTrackModel extends BasicTrackModel {
@@ -18,7 +24,7 @@ export interface TextTrackModel extends BasicTrackModel {
 }
 
 // a track that draws a per-column bar chart (conservation, property
-// conservation). `barColor` doubles as the marker that a track is a bar track.
+// conservation)
 export interface BarTrackModel extends BasicTrackModel {
   barColor?: string
 }

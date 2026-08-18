@@ -321,7 +321,10 @@ treeMetadataFilehandle: types.maybe(FileLocation)
 
 #### property: turnedOffTracks
 
-turned off tracks
+the user's explicit show/hide choice per track id, keyed by id with the value
+meaning "off". A track the user has never touched is absent and falls back to
+its own default (see `defaultOffTracks`), so a hidden-by-default track adds
+nothing to the shared URL.
 
 ```js
 // type signature
@@ -427,7 +430,8 @@ the currently hovered tree node ID and its descendant leaf names
 { nodeId: string; descendantNames: string[]; }
 // code
 hoveredTreeNode: undefined as
-        { nodeId: string; descendantNames: string[] } | undefined
+        | { nodeId: string; descendantNames: string[] }
+        | undefined
 ```
 
 #### volatile: loadingMSA
@@ -521,6 +525,19 @@ number
 resizeHandleWidth: 5
 ```
 
+#### volatile: sequenceLogoTrackHeight
+
+taller than the conservation track by default: the logo spends its height on
+stacked glyphs, and a 40px stack of four residues leaves each one too short to
+identify
+
+```js
+// type signature
+number
+// code
+sequenceLogoTrackHeight: 80
+```
+
 #### volatile: status
 
 ```js
@@ -528,7 +545,8 @@ resizeHandleWidth: 5
 { msg: string; url?: string; onCancel?: () => void; }
 // code
 status: undefined as
-        { msg: string; url?: string; onCancel?: () => void } | undefined
+        | { msg: string; url?: string; onCancel?: () => void }
+        | undefined
 ```
 
 #### volatile: volatileWidth
@@ -803,6 +821,16 @@ Map<any, number>
 ```js
 // type
 any[]
+```
+
+#### getter: logoMaxBits
+
+The y-axis ceiling of the sequence logo track, in bits: the information content
+of a fully conserved column, which depends on the alphabet.
+
+```js
+// type
+number
 ```
 
 #### getter: maxBranchLength
@@ -1561,6 +1589,13 @@ setScrollY: (n: number) => void
 ```js
 // type signature
 setScrollZoom: (arg: boolean) => void
+```
+
+#### action: setSequenceLogoTrackHeight
+
+```js
+// type signature
+setSequenceLogoTrackHeight: (arg: number) => void
 ```
 
 #### action: setShowDomainLegend

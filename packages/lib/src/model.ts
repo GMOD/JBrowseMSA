@@ -19,6 +19,7 @@ import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
 import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
 import ConservationTrack from './components/ConservationTrack.tsx'
+import SequenceLogoTrack from './components/SequenceLogoTrack.tsx'
 import TextTrack from './components/TextTrack.tsx'
 import {
   defaultAllowedGappyness,
@@ -75,6 +76,7 @@ import {
   visibleColsBefore,
 } from './rowCoordinateCalculations.ts'
 import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
+import { maxBitsFor } from './sequenceLogo.ts'
 import { stripDefault } from './stripDefault.ts'
 import { computeRowInsertions, len, skipBlanks, transform } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
@@ -97,6 +99,22 @@ function parseTreeText(text: string) {
     return flatToTree(parseAsn1(text))
   }
   return parseNewick(text.startsWith('SEQ') ? parseEmfTree(text).tree : text)
+}
+
+// Tracks that start hidden. The sequence logo answers a narrower question than
+// conservation does and costs three times the vertical space, so it waits to be
+// asked for.
+const defaultOffTracks = new Set(['sequence-logo'])
+
+// `turnedOffTracks` records the user's explicit choices only: an id is absent
+// until they touch that track, and then its value is whether the track is OFF.
+// Reading the default through this is what lets a track ship hidden without
+// writing an entry into every snapshot and shared URL.
+function trackIsOff(
+  turnedOffTracks: { get: (id: string) => boolean | undefined },
+  id: string,
+) {
+  return turnedOffTracks.get(id) ?? defaultOffTracks.has(id)
 }
 
 /**
@@ -249,7 +267,10 @@ function stateModelFactory() {
         showOnly: types.maybe(types.string),
         /**
          * #property
-         * turned off tracks
+         * the user's explicit show/hide choice per track id, keyed by id with
+         * the value meaning "off". A track the user has never touched is absent
+         * and falls back to its own default (see `defaultOffTracks`), so a
+         * hidden-by-default track adds nothing to the shared URL.
          */
         turnedOffTracks: stripDefault(types.map(types.boolean), {}),
 
@@ -374,6 +395,14 @@ function stateModelFactory() {
        * #volatile
        */
       conservationTrackHeight: 40,
+
+      /**
+       * #volatile
+       * taller than the conservation track by default: the logo spends its
+       * height on stacked glyphs, and a 40px stack of four residues leaves each
+       * one too short to identify
+       */
+      sequenceLogoTrackHeight: 80,
 
       /**
        * #volatile
@@ -1059,6 +1088,14 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * The y-axis ceiling of the sequence logo track, in bits: the information
+       * content of a fully conserved column, which depends on the alphabet.
+       */
+      get logoMaxBits() {
+        return maxBitsFor(this.sequenceType)
+      },
+      /**
+       * #getter
        * Per-column conservation of physicochemical property class (amino acids
        * only). Surfaces conservative-substitution sites that identity-based
        * conservation misses. Empty for nucleotide alignments.
@@ -1437,11 +1474,9 @@ function stateModelFactory() {
        * #action
        */
       toggleTrack(id: string) {
-        if (self.turnedOffTracks.has(id)) {
-          self.turnedOffTracks.delete(id)
-        } else {
-          self.turnedOffTracks.set(id, true)
-        }
+        // the stored value is "is off", so the current shown state is exactly
+        // what the flipped entry should hold
+        self.turnedOffTracks.set(id, !trackIsOff(self.turnedOffTracks, id))
       },
       /**
        * #action
@@ -1513,6 +1548,7 @@ function stateModelFactory() {
           .map(t => ({
             model: {
               ...t,
+              kind: 'text' as const,
               data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
               height: rowHeight,
             },
@@ -1528,6 +1564,7 @@ function stateModelFactory() {
           model: {
             id: 'conservation',
             name: 'Conservation',
+            kind: 'bar',
             height: self.conservationTrackHeight,
             barColor: 'gray',
           },
@@ -1537,15 +1574,26 @@ function stateModelFactory() {
           model: {
             id: 'property-conservation',
             name: 'Property conservation',
+            kind: 'bar',
             height: self.conservationTrackHeight,
             barColor: '#6a51a3',
           },
           ReactComponent: ConservationTrack,
         }
+        const sequenceLogoTrack: BasicTrack = {
+          model: {
+            id: 'sequence-logo',
+            name: 'Sequence logo',
+            kind: 'logo',
+            height: self.sequenceLogoTrackHeight,
+          },
+          ReactComponent: SequenceLogoTrack,
+        }
         return [
           ...this.adapterTrackModels,
           conservationTrack,
           ...(self.sequenceType === 'amino' ? [propertyConservationTrack] : []),
+          sequenceLogoTrack,
         ]
       },
 
@@ -1553,7 +1601,9 @@ function stateModelFactory() {
        * #getter
        */
       get turnedOnTracks() {
-        return this.tracks.filter(f => !self.turnedOffTracks.has(f.model.id))
+        return this.tracks.filter(
+          f => !trackIsOff(self.turnedOffTracks, f.model.id),
+        )
       },
 
       /**
@@ -1987,6 +2037,12 @@ function stateModelFactory() {
        */
       setConservationTrackHeight(arg: number) {
         self.conservationTrackHeight = arg
+      },
+      /**
+       * #action
+       */
+      setSequenceLogoTrackHeight(arg: number) {
+        self.sequenceLogoTrackHeight = arg
       },
       /**
        * #action
