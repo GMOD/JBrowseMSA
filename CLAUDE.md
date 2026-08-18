@@ -25,8 +25,19 @@ canvas with a tiled rendering system for scalability.
 - Canvas rendering uses a tiled block system (`calculateBlocks.ts`) to avoid
   rendering entire large alignments at once.
 - InterProScan domain visualization is a core feature — do not remove it.
-- The `hierarchy.ts` file is a custom d3-hierarchy replacement (no d3
-  dependency).
+- `hierarchy.ts` no longer implements the tree traversals. They live in
+  `@gmod/newick` now, shared with the tree sidebar in jbrowse-components, and
+  the file is a typing shim that re-exports them plus this viewer's own layout
+  helpers. There is no d3 dependency.
+- Tracks (conservation, sequence logo, the Stockholm text tracks) carry a `kind`
+  discriminator and share one draw module, `components/tracks/drawTracks.ts`,
+  which both the live canvas components and the SVG export call. Adding a track
+  kind means a new `kind`, a draw function there, and a case in
+  `renderAllTracks` — not a second rendering path.
+- `turnedOffTracks` records only the user's explicit show/hide choices. An id is
+  absent until they touch that track, and the value then means "off", so a
+  hidden-by-default track (see `defaultOffTracks` in `model.ts`) adds nothing to
+  the shared URL.
 - `@jbrowse/core` is an **external** in the downstream jbrowse-plugin-msaview
   UMD build — it is not bundled, it resolves at runtime against whatever core
   the host jbrowse-web ships, which is often much older than the one in this

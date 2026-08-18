@@ -68,17 +68,90 @@ drag-mousemove handler. They're mutually exclusive in practice (you don't wheel
 mid-drag), so no live bug, but the coupling is fragile — separate flags or a
 documented assumption would be safer.
 
-### Duplicated FASTA defline parsing
+(The "duplicated FASTA defline parsing" and "parseNewick return type uses `any`"
+entries that used to sit here are both done — `splitFastaRecords` in
+`msa-parsers/src/msa/fastaRecords.ts` and a typed `parse(s): NewickNode`.)
 
-The `>`-splitting + id/defline extraction loop is copy-pasted across
-`FastaMSA.ts` (constructor) and `A3mMSA.ts` (constructor + `sniff`), and has
-already diverged slightly (`FastaMSA` builds `colonNormalized`, A3m doesn't).
-Extract a shared `parseFastaEntries(text)` helper in `msa-parsers` util to stop
-the drift.
+---
 
-### parseNewick return type uses `any`
+## From a repo-shape pass (2026-08-18)
 
-`parseNewick.ts` builds `let tree = {} as Record<string, any>` and has no
-declared return type, so `StockholmMSA.getTree` feeds an untyped object into
-`generateNodeIds`. The accumulator is naturally a partial `Node` (`children?`,
-`name?`, `length?`) — type it and annotate the return.
+The sequence logo track came out of this pass. What's left, in the order I'd
+argue for it.
+
+### A selection model — the one that unblocks the grant
+
+The model tracks `mouseCol` and `mouseClickPos` but has no notion of a selected
+column range or row set. That absence is the reason the MSA editor in
+`dna-msa-comparative-genomics.md` cannot start: you cannot drag an exon boundary
+before you can select one. It is a prerequisite, not a feature request.
+
+Sketch: `selectedColumns: {start, end} | undefined` and `selectedRows` on the
+model, a drag-to-select gesture on the alignment canvas (the hit-testing already
+exists in `useMsaBlockMouse.ts`), and a band drawn by the same overlay machinery
+`highlightColumns` uses. Persist both in the snapshot so a selection is
+shareable, exactly as `highlightColumns` already is.
+
+What lands on top of it, cheapest first:
+
+- copy the selected block as FASTA (`SequenceTextArea.tsx` already renders
+  sequence text; `getUngappedSequence` already exists)
+- zoom-to-selection, and trim-to-selection as a view filter
+- export only the selected columns (the SVG export already takes an
+  `exportType`, so this is a third mode)
+- then the editor: drag a boundary, recompute through the columns, write back —
+  which is the read-only projection in `packages/cli/src/genestructure.ts` run
+  in reverse
+
+### Find / search — the most-missed everyday feature
+
+There is no search of any kind: no row-name search, no "jump to column N", no
+motif or regex or IUPAC pattern search. `featureFilters` filters annotation
+_types_, not rows, so nothing covers this. It is the first thing a user reaches
+for on a 230k-row tree.
+
+The overlay to show hits already exists and already persists — a motif hit
+becomes a shareable link via `highlightColumns` for free. Row-name search wants
+to reuse `showOnly`/`collapsed` rather than invent a third row-visibility
+mechanism.
+
+### Conservation mapped onto 3D structure
+
+`seqPosToVisibleCol` / `visibleColToSeqPos` are already a documented cross-repo
+contract with jbrowse-plugin-protein3d, and `website/src/lib/proteinStl.ts`
+already fetches AlphaFold PDBs in the browser. Pushing per-column conservation
+_into_ the structure coloring is a figure nobody else ships and the coordinate
+math is done. Related: the logo track's per-column information content is the
+same number, so "color the structure by information content" is the same wiring.
+
+### Demos
+
+- **Load by accession.** A Pfam/Rfam/InterPro accession box that pulls the
+  family alignment from EBI — "try it on your own family" with no file handling.
+  Rfam pays double: its Stockholm carries tree and secondary structure inline,
+  exercising a path that is supported but barely demoed.
+- **Codon-aware DNA view.** The F12 figure proves the projection math, but
+  nothing in the UI reads a DNA alignment _as codons_ — translate a row, color
+  by synonymous vs non-synonymous, step the ruler by 3. This is the demo that
+  sells rung 1 of the comparative-annotation frame.
+
+### Consolidate the four protein-link generators
+
+`scripts/{src,braf,tp53,tp53-protein3d}-protein-link/generate.mjs` are ~740 LOC
+doing one thing four times: tabix the same public RefSeq GFF, build
+`connectedFeature`, assemble a JBrowse session spec, print the URL. Their own
+headers say so ("Like the SRC/BRAF scripts…"). One generator plus four config
+objects (transcript, region, query row, highlight) is ~200 LOC.
+
+`scripts/screenshots/` has the same shape — five entry points (`generate`,
+`generate-screenshots`, `jbrowse-figures`, `f12-combined-figure`,
+`f12-genome-figure`) over a shared `lib.mjs`.
+
+### Generated intermediates are committed
+
+`scripts/*/work/` and `scripts/examples-gen/build/` hold generated `.aln`,
+`.dnd`, `.afa` and `.vcf` files in git. `examples-gen/datasets/` (the real
+inputs) plus the generator is the reproducible pair; `build/` is output. Worth a
+`.gitignore` and a note in the generator READMEs — but check first whether any
+of them is load-bearing for a figure that CI regenerates, since `pnpm figures`
+and `pnpm screenshots` are diff-gated.

@@ -11,6 +11,7 @@ An interactive multiple sequence alignment viewer.
 - Protein domain overlays from InterProScan GFF (generate them with the
   [CLI](packages/cli/))
 - Protein and nucleotide color schemes, including per-column dynamic schemes
+- Conservation, property-conservation and sequence-logo tracks over the columns
 - React component, UMD-in-HTML, and R htmlwidget entry points
 - Shareable view state and SVG export
 

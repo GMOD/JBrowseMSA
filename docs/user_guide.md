@@ -172,6 +172,33 @@ options to copy them and to show/hide gaps.
 The Export SVG dialog — choose the whole alignment or just the current viewport,
 and whether to include the minimap and tracks.
 
+## Tracks
+
+Strips drawn above the alignment, sharing its columns and its horizontal scroll.
+The **Tracks** submenu at the top of the MSA settings menu lists every one and
+turns it on or off; a track's own dropdown arrow, on its label at the left, also
+closes it and shows its details.
+
+- **Conservation** — a per-column histogram of how conserved the column is, from
+  Shannon entropy, scaled down by how gappy the column is. On by default.
+- **Property conservation** — the same idea over physicochemical property class
+  rather than exact identity, so it surfaces sites held constant by conservative
+  substitution that identity-based conservation reads as variable. Protein
+  alignments only, on by default.
+- **Sequence logo** — the residues of each column stacked by the information
+  they carry, tallest on top, each letter's height its share of the column's
+  total. Off by default. Column height is information content in bits, so it
+  tops out at log2(20) for protein and log2(4) for nucleotide, and a column
+  whose residues are evenly split draws nothing at all. Frequencies come from
+  the non-gap residues, then the whole stack is scaled by the column's occupancy
+  — a column that is mostly gaps stays short even when the few residues left in
+  it agree.
+- **Secondary structure** and other annotation rows carried inline by a
+  Stockholm file appear as text tracks, colored by the active scheme.
+
+Tracks are included in an SVG export when you check "include tracks" in the
+export dialog.
+
 ## Settings reference
 
 Layout options live in two dropdowns in the header: **MSA settings** and **tree
@@ -179,10 +206,10 @@ settings**, beside the color-scheme palette.
 
 [![](media/settings-menu.png)][live-settings-menu]
 
-The MSA settings menu — draw letters, color letters instead of tile backgrounds,
-show per-column statistics on hover, and enable hiding gappy columns. The tree
-settings menu beside it carries the branch-length, label and clickable-bubble
-toggles.
+The MSA settings menu — the Tracks submenu, draw letters, color letters instead
+of tile backgrounds, show per-column statistics on hover, and enable hiding
+gappy columns. The tree settings menu beside it carries the branch-length, label
+and clickable-bubble toggles.
 
 ## Scaling to large data
 
