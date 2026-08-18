@@ -13,6 +13,12 @@ test_that("convert_msa handles named character vector", {
   expect_match(result, "^>s1\nACGT\n>s2\nACGA$")
 })
 
+test_that("convert_msa handles a one-sequence named vector", {
+  # names are what mark a vector as sequences; a length-1 named vector used to
+  # fall through to the scalar branch and be passed on as raw alignment text
+  expect_equal(msaviewr:::convert_msa(c(only = "ACGT")), ">only\nACGT")
+})
+
 test_that("convert_msa reads file", {
   tmp <- tempfile(fileext = ".fa")
   writeLines(c(">s1", "ACGT", ">s2", "ACGA"), tmp)
@@ -80,4 +86,53 @@ test_that("msaview with named vector + ape tree", {
   expect_s3_class(w, "htmlwidget")
   expect_match(w$x$config$data$msa, tree$tip.label[1], fixed = TRUE)
   expect_match(w$x$config$data$tree, ";$")
+})
+
+test_that("convert_gff handles NULL", {
+  expect_null(msaviewr:::convert_gff(NULL))
+})
+
+test_that("convert_gff passes GFF3 text through", {
+  gff <- "##gff-version 3\ns1\t.\tprotein_match\t1\t20\t.\t.\t.\tName=X"
+  expect_equal(msaviewr:::convert_gff(gff), gff)
+})
+
+test_that("convert_gff reads file", {
+  tmp <- tempfile(fileext = ".gff")
+  writeLines(c("##gff-version 3", "s1\t.\tprotein_match\t1\t20\t.\t.\t.\tName=X"), tmp)
+  expect_match(msaviewr:::convert_gff(tmp), "Name=X")
+  unlink(tmp)
+})
+
+test_that("df_to_gff3 emits one row per domain with its own attributes", {
+  df <- data.frame(
+    seqname = c("s1", "s1", "s2"),
+    start = c(1, 50, 10),
+    end = c(20, 80, 30),
+    name = c("Kinase", "Zinc finger", "SH3"),
+    stringsAsFactors = FALSE
+  )
+  lines <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]]
+
+  expect_equal(lines[1], "##gff-version 3")
+  expect_length(lines, 4)
+  # each row keeps its own name, and a space is percent-encoded rather than
+  # ending the attribute
+  expect_match(lines[2], "Name=Kinase$")
+  expect_match(lines[3], "Name=Zinc%20finger$")
+  expect_match(lines[4], "Name=SH3$")
+  # positions land in the GFF start/end columns
+  expect_equal(strsplit(lines[3], "\t")[[1]][4:5], c("50", "80"))
+})
+
+test_that("df_to_gff3 requires the columns it reads", {
+  expect_error(msaviewr:::df_to_gff3(data.frame(start = 1, end = 2)), "seqname")
+  expect_error(msaviewr:::df_to_gff3(data.frame(seqname = "s1")), "start")
+})
+
+test_that("msaview passes gff through to the config", {
+  df <- data.frame(seqname = "s1", start = 1, end = 4, name = "Dom",
+                   stringsAsFactors = FALSE)
+  w <- msaview(msa = ">s1\nACGT", gff = df)
+  expect_match(w$x$config$data$gff, "Name=Dom")
 })

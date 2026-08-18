@@ -191,16 +191,18 @@ renderMsaview <- function(expr, env = parent.frame(), quoted = FALSE) {
 convert_msa <- function(msa) {
   if (is.null(msa)) return(NULL)
 
+  # named character vector -> FASTA. Checked before the scalar branch below:
+  # names are what mark a vector as sequences rather than alignment text, and a
+  # one-sequence alignment is still a named vector, not a FASTA document.
+  if (is.character(msa) && !is.null(names(msa))) {
+    return(named_vec_to_fasta(msa))
+  }
+
   if (is.character(msa) && length(msa) == 1) {
     if (file.exists(msa)) {
       return(paste(readLines(msa, warn = FALSE), collapse = "\n"))
     }
     return(msa)
-  }
-
-  # named character vector -> FASTA
-  if (is.character(msa) && !is.null(names(msa))) {
-    return(named_vec_to_fasta(msa))
   }
 
   # Biostrings XStringSet (DNAStringSet, AAStringSet, RNAStringSet)
