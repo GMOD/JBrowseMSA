@@ -62,8 +62,6 @@ test('fit horizontally leaves every column on screen', () => {
   // the canvas is the msa area minus the scrollbar; fitting to the msa area
   // alone pushed the last columns past the right edge, with no minimap to
   // show that anything was cut off
-  expect(model.totalWidth).toBeLessThanOrEqual(
-    model.msaAreaWidth - model.verticalScrollbarWidth,
-  )
+  expect(model.totalWidth).toBeLessThanOrEqual(model.msaCanvasWidth)
   expect(model.showHorizontalScrollbar).toBe(false)
 })

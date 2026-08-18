@@ -1724,6 +1724,15 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * width of the alignment canvas itself: the msa area less the vertical
+       * scrollbar sitting in it. Not usable from showHorizontalScrollbar, which
+       * feeds msaAreaHeight -> showVerticalScrollbar and would close a cycle
+       */
+      get msaCanvasWidth() {
+        return self.msaAreaWidth - this.verticalScrollbarWidth
+      },
+      /**
+       * #getter
        * ordinal segment types (exons etc.), ordered by sequence position so
        * exon-1..exon-14 read left-to-right; colored by alternating shade and
        * labeled by number rather than each getting a distinct hue + legend row
@@ -2042,12 +2051,11 @@ function stateModelFactory() {
        */
       fitHorizontally() {
         if (self.numColumns > 0) {
-          // the alignment canvas is the msa area minus the vertical scrollbar,
-          // so fitting to msaAreaWidth left the last ~20px of columns off the
-          // right edge -- and short of the width that shows a minimap, so there
-          // was nothing on screen saying they were there
+          // fitting to msaAreaWidth instead left the last ~20px of columns off
+          // the right edge -- and short of the width that shows a minimap, so
+          // nothing on screen said they were there
           self.colWidth = clamp(
-            (self.msaAreaWidth - self.verticalScrollbarWidth) / self.numColumns,
+            self.msaCanvasWidth / self.numColumns,
             minColWidth,
             maxCellSize,
           )

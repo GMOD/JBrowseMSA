@@ -13,9 +13,7 @@ const MSAMouseoverCanvas = observer(function ({
 }: {
   model: MsaViewModel
 }) {
-  const { height, msaAreaWidth, verticalScrollbarWidth, highResScaleFactor } =
-    model
-  const width = msaAreaWidth - verticalScrollbarWidth
+  const { height, msaCanvasWidth: width, highResScaleFactor } = model
   const canvasWidth = width * highResScaleFactor
   const canvasHeight = height * highResScaleFactor
   const ref = useCanvasAutorun({

@@ -40,8 +40,7 @@ const TrackColumnIndicator = observer(function ({
     treeAreaWidth,
     resizeHandleWidth,
     totalTrackAreaHeight,
-    msaAreaWidth,
-    verticalScrollbarWidth,
+    msaCanvasWidth,
   } = model
 
   // hovered column, then the pinned one, matching the alignment's own overlay
@@ -56,7 +55,7 @@ const TrackColumnIndicator = observer(function ({
         position: 'absolute',
         left: treeAreaWidth + resizeHandleWidth,
         top: 0,
-        width: msaAreaWidth - verticalScrollbarWidth,
+        width: msaCanvasWidth,
         height: totalTrackAreaHeight,
         overflow: 'hidden',
         pointerEvents: 'none',

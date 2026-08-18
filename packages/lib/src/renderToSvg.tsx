@@ -161,7 +161,7 @@ function MsaSvg({
       {includeMinimap ? (
         <>
           <g transform={`translate(${treeAreaWidth} 0)`}>
-            <MinimapSVG model={model} />
+            <MinimapSVG model={model} width={width - treeAreaWidth} />
           </g>
           <g transform={`translate(0 ${minimapHeight})`}>{body}</g>
         </>

@@ -8,8 +8,11 @@ import { MINIMAP_BAR_HEIGHT, getMinimapLayout } from './minimapLayout.ts'
 import type { MsaViewModel } from '../../model.ts'
 
 const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
-  const { minimapHeight } = model
-  const { unit, s, w, polygonHeight, polygonPoints } = getMinimapLayout(model)
+  const { minimapHeight, msaCanvasWidth } = model
+  const { unit, s, w, polygonHeight, polygonPoints } = getMinimapLayout(
+    model,
+    msaCanvasWidth,
+  )
 
   const onDrag = useCallback(
     (delta: number, startScroll: number) => {
@@ -19,11 +22,15 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
   )
 
   return (
+    // sized and placed to match the alignment canvas exactly: a minimap that
+    // spans a different width than the columns it maps puts its viewport
+    // rectangle over the wrong ones
     <div
       style={{
         position: 'relative',
         height: minimapHeight,
-        width: '100%',
+        width: msaCanvasWidth,
+        flexShrink: 0,
       }}
     >
       <div
@@ -45,7 +52,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
         }}
       />
 
-      <svg height={polygonHeight} style={{ width: '100%' }}>
+      <svg height={polygonHeight} width={msaCanvasWidth}>
         <polygon fill={scrollbarThumbFill} points={polygonPoints} />
       </svg>
     </div>

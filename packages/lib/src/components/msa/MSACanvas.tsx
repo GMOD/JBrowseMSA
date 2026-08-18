@@ -9,15 +9,8 @@ import MSACanvasBlock from './MSACanvasBlock.tsx'
 import type { MsaViewModel } from '../../model.ts'
 
 const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
-  const {
-    MSA,
-    verticalScrollbarWidth,
-    msaFilehandle,
-    height,
-    msaAreaWidth,
-    blocks2d,
-    scrollZoom,
-  } = model
+  const { MSA, msaFilehandle, height, msaCanvasWidth, blocks2d, scrollZoom } =
+    model
   const ref = useRef<HTMLDivElement>(null)
   const onScrollX = useCallback(
     (d: number) => {
@@ -61,7 +54,7 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
       style={{
         position: 'relative',
         height,
-        width: msaAreaWidth - verticalScrollbarWidth,
+        width: msaCanvasWidth,
         overflow: 'hidden',
       }}
     >

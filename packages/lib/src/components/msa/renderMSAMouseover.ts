@@ -23,8 +23,7 @@ export function renderMouseover({
   const {
     mouseCol,
     colWidth,
-    msaAreaWidth,
-    verticalScrollbarWidth,
+    msaCanvasWidth: width,
     height,
     rowHeight,
     scrollX,
@@ -37,7 +36,6 @@ export function renderMouseover({
     hoveredRowIndices,
     highlightedColumnRuns,
   } = model
-  const width = msaAreaWidth - verticalScrollbarWidth
   ctx.resetTransform()
   ctx.clearRect(0, 0, width * highResScaleFactor, height * highResScaleFactor)
   ctx.scale(highResScaleFactor, highResScaleFactor)
