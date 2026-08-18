@@ -104,11 +104,13 @@ one.
 
 ## Protein domains
 
-Load an InterProScan GFF3 track (from the import form, the **Open domains…**
-menu item, or by querying InterProScan from within the app) to overlay protein
-domains on the alignment. Each protein's domain coordinates are translated into
-MSA coordinate space, so they line up across the family even where alignment
-gaps shift the underlying sequence positions.
+Load a GFF3 annotation file from the import form, or query InterProScan from
+within the app under the **Annotations** menu, to overlay domains on the
+alignment. Any GFF3 works — InterProScan output is the common case, not a
+requirement — and the same overlay draws exon and gene models. Each row's
+annotation coordinates are translated into MSA coordinate space, so they line up
+across the family even where alignment gaps shift the underlying sequence
+positions.
 
 [![](media/real-domains.png)][live-real-domains]
 

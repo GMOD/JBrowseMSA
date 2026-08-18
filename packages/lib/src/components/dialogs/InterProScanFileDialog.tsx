@@ -21,7 +21,7 @@ import { jsonfetch } from '../../fetchUtils.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { InterProScanResponse } from 'msa-parsers'
 
-const UserProvidedDomainsDialog = observer(function ({
+const InterProScanFileDialog = observer(function ({
   handleClose,
   model,
 }: {
@@ -35,7 +35,7 @@ const UserProvidedDomainsDialog = observer(function ({
   return (
     <Dialog
       maxWidth="xl"
-      title="Open protein domains from file"
+      title="Open InterProScan results"
       onClose={() => {
         handleClose()
       }}
@@ -135,4 +135,4 @@ const UserProvidedDomainsDialog = observer(function ({
   )
 })
 
-export default UserProvidedDomainsDialog
+export default InterProScanFileDialog

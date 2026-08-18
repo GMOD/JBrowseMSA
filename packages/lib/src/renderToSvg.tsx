@@ -178,7 +178,7 @@ function MsaSvg({
 }
 
 // the domain color key drawn as a reserved column to the right of the
-// alignment, mirroring the on-screen DomainLegend overlay
+// alignment, mirroring the on-screen AnnotationLegend overlay
 function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
   const { visibleDomainTypes, fillPalette, strokePalette } = model
   const boxHeight = LEGEND_PAD * 2 + visibleDomainTypes.length * LEGEND_ROW_H

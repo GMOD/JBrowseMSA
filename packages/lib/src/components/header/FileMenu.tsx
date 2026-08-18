@@ -7,7 +7,7 @@ import Menu from '@mui/icons-material/Menu'
 import PhotoCamera from '@mui/icons-material/PhotoCamera'
 import { observer } from 'mobx-react'
 
-import { getDomainMenu } from './getDomainsMenu.ts'
+import { getAnnotationsMenu } from './getAnnotationsMenu.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -41,9 +41,9 @@ const FileMenu = observer(({ model }: { model: MsaViewModel }) => {
           },
         },
         {
-          label: 'Domain settings',
+          label: 'Annotations',
           type: 'subMenu',
-          subMenu: getDomainMenu({
+          subMenu: getAnnotationsMenu({
             model,
           }),
         },

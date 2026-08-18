@@ -50,7 +50,7 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
             <FileSelector location={treeFile} setLocation={setTreeFile} />
           </div>
           <div>
-            <Typography>InterProScan GFF file or URL (optional)</Typography>
+            <Typography>Annotation GFF file or URL (optional)</Typography>
             <FileSelector location={gffFile} setLocation={setGffFile} />
           </div>
         </div>

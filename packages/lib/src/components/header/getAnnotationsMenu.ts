@@ -9,22 +9,23 @@ import Visibility from '@mui/icons-material/Visibility'
 import type { MsaViewModel } from '../../model.ts'
 
 const FeatureFilterDialog = lazy(() => import('../dialogs/FeatureDialog.tsx'))
-const UserProvidedDomainsDialog = lazy(
-  () => import('../dialogs/UserProvidedDomainsDialog.tsx'),
+const InterProScanFileDialog = lazy(
+  () => import('../dialogs/InterProScanFileDialog.tsx'),
 )
 const InterProScanDialog = lazy(
   () => import('../dialogs/InterProScanDialog.tsx'),
 )
 
-export function getDomainMenu({ model }: { model: MsaViewModel }) {
+export function getAnnotationsMenu({ model }: { model: MsaViewModel }) {
   const { showDomains, actuallyShowDomains, subFeatureRows, noDomains } = model
+  const noneLoaded = noDomains ? ' (none loaded)' : ''
   return [
     {
-      label: 'Open domains...',
+      label: 'Open InterProScan results...',
       icon: FolderOpen,
       onClick: () => {
         model.queueDialog(handleClose => [
-          UserProvidedDomainsDialog,
+          InterProScanFileDialog,
           {
             handleClose,
             model,
@@ -33,7 +34,7 @@ export function getDomainMenu({ model }: { model: MsaViewModel }) {
       },
     },
     {
-      label: 'Query InterProScan for domains...',
+      label: 'Query InterProScan...',
       icon: Search,
       onClick: () => {
         model.queueDialog(handleClose => [
@@ -46,7 +47,7 @@ export function getDomainMenu({ model }: { model: MsaViewModel }) {
       },
     },
     {
-      label: `Show domains${noDomains ? ' (no domains loaded)' : ''}`,
+      label: `Show annotations${noneLoaded}`,
       disabled: noDomains,
       icon: Visibility,
       checked: actuallyShowDomains,
@@ -56,7 +57,7 @@ export function getDomainMenu({ model }: { model: MsaViewModel }) {
       },
     },
     {
-      label: `Use sub-row layout${noDomains ? ' (no domains loaded)' : ''}`,
+      label: `Use sub-row layout${noneLoaded}`,
       disabled: noDomains,
       checked: actuallyShowDomains ? subFeatureRows : false,
       icon: Sort,
@@ -66,7 +67,7 @@ export function getDomainMenu({ model }: { model: MsaViewModel }) {
       },
     },
     {
-      label: `Filter domains${noDomains ? ' (no domains loaded)' : ''}`,
+      label: `Filter annotations${noneLoaded}`,
       icon: FilterAlt,
       disabled: noDomains,
       onClick: () => {

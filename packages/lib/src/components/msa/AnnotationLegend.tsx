@@ -7,7 +7,11 @@ import { observer } from 'mobx-react'
 
 import type { MsaViewModel } from '../../model.ts'
 
-const DomainLegend = observer(function ({ model }: { model: MsaViewModel }) {
+const AnnotationLegend = observer(function ({
+  model,
+}: {
+  model: MsaViewModel
+}) {
   const {
     actuallyShowDomains,
     visibleDomainTypes: visible,
@@ -41,7 +45,7 @@ const DomainLegend = observer(function ({ model }: { model: MsaViewModel }) {
       >
         <IconButton
           size="small"
-          title={expanded ? 'Collapse domain key' : 'Expand domain key'}
+          title={expanded ? 'Collapse key' : 'Expand key'}
           onClick={() => {
             model.setShowDomainLegend(!expanded)
           }}
@@ -76,4 +80,4 @@ const DomainLegend = observer(function ({ model }: { model: MsaViewModel }) {
   ) : null
 })
 
-export default DomainLegend
+export default AnnotationLegend
