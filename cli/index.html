@@ -213,9 +213,27 @@ is byte-for-byte compatible with the <code>interproscan</code> command.</p>
 
 
 
-<table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>-o, --output &#x3C;file></code></td><td>Output GFF file path</td><td><code>domains.gff</code></td></tr><tr><td><code>--database &#x3C;name></code></td><td>InterPro member db to read</td><td><code>pfam</code></td></tr></tbody></table>
+
+
+
+
+
+<table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>-o, --output &#x3C;file></code></td><td>Output GFF file path</td><td><code>domains.gff</code></td></tr><tr><td><code>--database &#x3C;name></code></td><td>InterPro member db to read</td><td><code>pfam</code></td></tr><tr><td><code>--no-cache</code></td><td>Re-fetch, ignoring the disk cache</td><td>off</td></tr></tbody></table>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interpro</span><span style="color:#9ECBFF"> accessions.tsv</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span></span>
 <span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interpro</span><span style="color:#9ECBFF"> accessions.tsv</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --database</span><span style="color:#9ECBFF"> cdd</span></span></code></pre>
+<h4 id="caching">Caching<a href="#caching" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
+<p>The InterPro API serves one protein per request — there is no batch endpoint —
+so the request count is fixed at one per distinct accession. To keep that from
+being paid twice, every response is cached on disk under
+<code>$XDG_CACHE_HOME/react-msaview-cli/interpro</code> (override with
+<code>REACT_MSAVIEW_CACHE</code>), keyed by InterPro release so a new release misses
+cleanly rather than serving coordinates computed against the old one. Proteins
+with no matches are cached too, so they are not re-fetched every run.</p>
+<p>A re-run of the same dataset therefore makes one request — the release lookup —
+and answers the rest from disk. That also makes a failed run resumable: retries
+are automatic with backoff, and if the API is still unreachable the accessions
+already fetched stay cached, so re-running picks up where it stopped instead of
+asking EBI for all of them again.</p>
 <h3 id="genestructure">genestructure<a href="#genestructure" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
 <p>Build a <strong>gene-structure GFF</strong> for a coding-sequence alignment from a RefSeq
 transcript, overlaid in react-msaview the same way InterProScan domains are. The
