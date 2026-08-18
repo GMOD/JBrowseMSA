@@ -46,8 +46,9 @@ Once data is loaded the view has four parts:
 - **Alignment panel** (right) — the residues, colored by the active scheme.
 - **Header** (top) — menu buttons for files, color schemes, and tree/MSA
   settings, plus zoom controls.
-- **Minimap & conservation track** — an overview ruler above the alignment for
-  fast navigation and a per-column conservation histogram.
+- **Minimap & tracks** — an overview ruler above the alignment for fast
+  navigation, and a strip of per-column tracks sharing the alignment's columns
+  (see [Tracks](#tracks)).
 
 Hovering a column highlights the corresponding position across rows (and on the
 tree), making it easy to read a single site down the whole family.
@@ -196,6 +197,13 @@ closes it and shows its details.
 - **Secondary structure** and other annotation rows carried inline by a
   Stockholm file appear as text tracks, colored by the active scheme.
 
+[![](media/sequence-logo.png)][live-sequence-logo]
+
+The sequence logo over the IL2RA alignment. The tall single letters are the
+columns the family holds constant, the short stacks are the columns it varies,
+and the gap-only stretch in the middle draws nothing — matching the run of `-`
+in the rows below it.
+
 Tracks are included in an SVG export when you check "include tracks" in the
 export dialog.
 
@@ -253,6 +261,8 @@ sized data.
   https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A185%2C%22treeAreaWidth%22%3A250%2C%22data%22%3A%7B%22msa%22%3A%22CLUSTAL%20O(1.2.3)%20multiple%20sequence%20alignment%5CnUniProt%7CP26898%7CIL2RA_SHEEP%20%20%20%20%20%20MEPSLLMWRFFVFIVVPGCVTEACHDDPPSLRNA----------MFKVLRYE----VGTM%5CnUniProt%7CP01590%7CIL2RA_MOUSE%20%20%20%20%20%20MEPRLLMLGFLSLTIVPSCRAELCLYDPPEVPNA----------TFKALSYK----NGTI%5CnUniProt%7CP41690%7CIL2RA_FELCA%20%20%20%20%20%20MEPSLLLWGILTFVVVHGHVTELCDENPPDIQHA----------TFKALTYK----TGTM%5CnUniProt%7CP01589%7CIL2RA_HUMAN%20%20%20%20%20%20MDSYLLMWGLLTFIMVPGCQAELCDDDPPEIPHA----------TFKAMAYK----EGTM%5CnUniProt%7CQ5MNY4%7CIL2RA_MACMU%20%20%20%20%20%20MDPYLLMWGLLTFITVPGCQAELCDDDPPKITHA----------TFKAVAYK----EGTM%5CnUniProt%7CP26896%7CIL2RB_RAT%20%20%20%20%20%20%20%20MATVDLSWRLPLYILLLLLATT--------------------------------WVSAAV%5Cn%22%2C%22tree%22%3A%22(((UniProt%7CP26898%7CIL2RA_SHEEP%3A0.24%2C(UniProt%7CP41690%7CIL2RA_FELCA%3A0.18%2C(UniProt%7CP01589%7CIL2RA_HUMAN%3A0.04%2CUniProt%7CQ5MNY4%7CIL2RA_MACMU%3A0.04)%3A0.13)%3A0.05)%3A0.02%2CUniProt%7CP01590%7CIL2RA_MOUSE%3A0.23)%3A0.07%2CUniProt%7CP26896%7CIL2RB_RAT%3A0.34)%3B%22%7D%7D%7D
 [live-export-svg-dialog]:
   https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A185%2C%22treeAreaWidth%22%3A250%2C%22data%22%3A%7B%22msa%22%3A%22CLUSTAL%20O(1.2.3)%20multiple%20sequence%20alignment%5CnUniProt%7CP26898%7CIL2RA_SHEEP%20%20%20%20%20%20MEPSLLMWRFFVFIVVPGCVTEACHDDPPSLRNA----------MFKVLRYE----VGTM%5CnUniProt%7CP01590%7CIL2RA_MOUSE%20%20%20%20%20%20MEPRLLMLGFLSLTIVPSCRAELCLYDPPEVPNA----------TFKALSYK----NGTI%5CnUniProt%7CP41690%7CIL2RA_FELCA%20%20%20%20%20%20MEPSLLLWGILTFVVVHGHVTELCDENPPDIQHA----------TFKALTYK----TGTM%5CnUniProt%7CP01589%7CIL2RA_HUMAN%20%20%20%20%20%20MDSYLLMWGLLTFIMVPGCQAELCDDDPPEIPHA----------TFKAMAYK----EGTM%5CnUniProt%7CQ5MNY4%7CIL2RA_MACMU%20%20%20%20%20%20MDPYLLMWGLLTFITVPGCQAELCDDDPPKITHA----------TFKAVAYK----EGTM%5CnUniProt%7CP26896%7CIL2RB_RAT%20%20%20%20%20%20%20%20MATVDLSWRLPLYILLLLLATT--------------------------------WVSAAV%5Cn%22%2C%22tree%22%3A%22(((UniProt%7CP26898%7CIL2RA_SHEEP%3A0.24%2C(UniProt%7CP41690%7CIL2RA_FELCA%3A0.18%2C(UniProt%7CP01589%7CIL2RA_HUMAN%3A0.04%2CUniProt%7CQ5MNY4%7CIL2RA_MACMU%3A0.04)%3A0.13)%3A0.05)%3A0.02%2CUniProt%7CP01590%7CIL2RA_MOUSE%3A0.23)%3A0.07%2CUniProt%7CP26896%7CIL2RB_RAT%3A0.34)%3B%22%7D%7D%7D
+[live-sequence-logo]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A260%2C%22treeAreaWidth%22%3A250%2C%22data%22%3A%7B%22msa%22%3A%22CLUSTAL%20O(1.2.3)%20multiple%20sequence%20alignment%5CnUniProt%7CP26898%7CIL2RA_SHEEP%20%20%20%20%20%20MEPSLLMWRFFVFIVVPGCVTEACHDDPPSLRNA----------MFKVLRYE----VGTM%5CnUniProt%7CP01590%7CIL2RA_MOUSE%20%20%20%20%20%20MEPRLLMLGFLSLTIVPSCRAELCLYDPPEVPNA----------TFKALSYK----NGTI%5CnUniProt%7CP41690%7CIL2RA_FELCA%20%20%20%20%20%20MEPSLLLWGILTFVVVHGHVTELCDENPPDIQHA----------TFKALTYK----TGTM%5CnUniProt%7CP01589%7CIL2RA_HUMAN%20%20%20%20%20%20MDSYLLMWGLLTFIMVPGCQAELCDDDPPEIPHA----------TFKAMAYK----EGTM%5CnUniProt%7CQ5MNY4%7CIL2RA_MACMU%20%20%20%20%20%20MDPYLLMWGLLTFITVPGCQAELCDDDPPKITHA----------TFKAVAYK----EGTM%5CnUniProt%7CP26896%7CIL2RB_RAT%20%20%20%20%20%20%20%20MATVDLSWRLPLYILLLLLATT--------------------------------WVSAAV%5Cn%22%2C%22tree%22%3A%22(((UniProt%7CP26898%7CIL2RA_SHEEP%3A0.24%2C(UniProt%7CP41690%7CIL2RA_FELCA%3A0.18%2C(UniProt%7CP01589%7CIL2RA_HUMAN%3A0.04%2CUniProt%7CQ5MNY4%7CIL2RA_MACMU%3A0.04)%3A0.13)%3A0.05)%3A0.02%2CUniProt%7CP01590%7CIL2RA_MOUSE%3A0.23)%3A0.07%2CUniProt%7CP26896%7CIL2RB_RAT%3A0.34)%3B%22%7D%2C%22colorSchemeName%22%3A%22maeditor%22%2C%22turnedOffTracks%22%3A%7B%22sequence-logo%22%3Afalse%2C%22conservation%22%3Atrue%7D%7D%7D
 [live-settings-menu]:
   https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A185%2C%22treeAreaWidth%22%3A250%2C%22data%22%3A%7B%22msa%22%3A%22CLUSTAL%20O(1.2.3)%20multiple%20sequence%20alignment%5CnUniProt%7CP26898%7CIL2RA_SHEEP%20%20%20%20%20%20MEPSLLMWRFFVFIVVPGCVTEACHDDPPSLRNA----------MFKVLRYE----VGTM%5CnUniProt%7CP01590%7CIL2RA_MOUSE%20%20%20%20%20%20MEPRLLMLGFLSLTIVPSCRAELCLYDPPEVPNA----------TFKALSYK----NGTI%5CnUniProt%7CP41690%7CIL2RA_FELCA%20%20%20%20%20%20MEPSLLLWGILTFVVVHGHVTELCDENPPDIQHA----------TFKALTYK----TGTM%5CnUniProt%7CP01589%7CIL2RA_HUMAN%20%20%20%20%20%20MDSYLLMWGLLTFIMVPGCQAELCDDDPPEIPHA----------TFKAMAYK----EGTM%5CnUniProt%7CQ5MNY4%7CIL2RA_MACMU%20%20%20%20%20%20MDPYLLMWGLLTFITVPGCQAELCDDDPPKITHA----------TFKAVAYK----EGTM%5CnUniProt%7CP26896%7CIL2RB_RAT%20%20%20%20%20%20%20%20MATVDLSWRLPLYILLLLLATT--------------------------------WVSAAV%5Cn%22%2C%22tree%22%3A%22(((UniProt%7CP26898%7CIL2RA_SHEEP%3A0.24%2C(UniProt%7CP41690%7CIL2RA_FELCA%3A0.18%2C(UniProt%7CP01589%7CIL2RA_HUMAN%3A0.04%2CUniProt%7CQ5MNY4%7CIL2RA_MACMU%3A0.04)%3A0.13)%3A0.05)%3A0.02%2CUniProt%7CP01590%7CIL2RA_MOUSE%3A0.23)%3A0.07%2CUniProt%7CP26896%7CIL2RB_RAT%3A0.34)%3B%22%7D%2C%22colorSchemeName%22%3A%22maeditor%22%7D%7D
 [live-large-tree]:

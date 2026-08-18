@@ -23,73 +23,12 @@ import {
   proteinTree,
 } from '../../examples/src/examples/exampleData.ts'
 import MSAModelF from '../src/model.ts'
+import { installRenderTestEnv } from '../src/renderTestEnv.ts'
 import { renderToSvg } from '../src/renderToSvg.tsx'
-
-// minimal 2d-affine DOMMatrix: [a c e / b d f / 0 0 1]
-class Mat {
-  a = 1
-  b = 0
-  c = 0
-  d = 1
-  e = 0
-  f = 0
-  constructor(init?: number[]) {
-    if (init) {
-      ;[this.a, this.b, this.c, this.d, this.e, this.f] = init
-    }
-  }
-  multiply(o: Mat) {
-    return new Mat([
-      this.a * o.a + this.c * o.b,
-      this.b * o.a + this.d * o.b,
-      this.a * o.c + this.c * o.d,
-      this.b * o.c + this.d * o.d,
-      this.a * o.e + this.c * o.f + this.e,
-      this.b * o.e + this.d * o.f + this.f,
-    ])
-  }
-  translate(x: number, y = 0) {
-    return this.multiply(new Mat([1, 0, 0, 1, x, y]))
-  }
-  scale(x: number, y = x) {
-    return this.multiply(new Mat([x, 0, 0, y, 0, 0]))
-  }
-}
-
-class Pt {
-  constructor(
-    public x = 0,
-    public y = 0,
-  ) {}
-  matrixTransform(m: Mat) {
-    return new Pt(
-      m.a * this.x + m.c * this.y + m.e,
-      m.b * this.x + m.d * this.y + m.f,
-    )
-  }
-}
 
 function setup() {
   enableStaticRendering(true)
-  const g = globalThis as Record<string, unknown>
-  g.DOMMatrix = Mat
-  g.DOMPoint = Pt
-  // svgcanvas only reads font + measureText off the 2d context
-  HTMLCanvasElement.prototype.getContext = function () {
-    let font = '10px sans-serif'
-    return {
-      get font() {
-        return font
-      },
-      set font(v: string) {
-        font = v
-      },
-      measureText(t: string) {
-        const size = Number.parseFloat(font) || 10
-        return { width: t.length * size * 0.6 } as TextMetrics
-      },
-    } as unknown as CanvasRenderingContext2D
-  } as typeof HTMLCanvasElement.prototype.getContext
+  installRenderTestEnv()
 }
 
 // Inline data mirroring the R package README examples, so the R figures are
@@ -144,6 +83,12 @@ const figures = [
     treeAreaWidth: 220,
     data: { msa: domainsMSA, tree: '', gff: domainsGFF },
   },
+  {
+    name: 'example-sequence-logo',
+    colorScheme: 'maeditor',
+    data: { msa: proteinMSA, tree: proteinTree },
+    tracks: ['sequence-logo'],
+  },
 ]
 
 test('generate README figures', async () => {
@@ -167,12 +112,23 @@ test('generate README figures', async () => {
     if (fig.treeAreaWidth !== undefined) {
       model.setTreeAreaWidth(fig.treeAreaWidth)
     }
+    // a figure opts into the track strip by naming the tracks it wants, so the
+    // other figures stay exactly as tall as they were
+    const tracks = fig.tracks ?? []
+    for (const id of tracks) {
+      model.toggleTrack(id)
+    }
+    for (const { model: t } of model.turnedOnTracks) {
+      if (!tracks.includes(t.id)) {
+        model.toggleTrack(t.id)
+      }
+    }
     model.setWidth(900)
     const svg = await renderToSvg(model, {
       theme,
       exportType: 'entire',
       includeMinimap: false,
-      includeTracks: false,
+      includeTracks: tracks.length > 0,
     })
     fs.writeFileSync(path.join(outDir, `${fig.name}.svg`), svg)
     console.log(`wrote ${fig.name}.svg`)

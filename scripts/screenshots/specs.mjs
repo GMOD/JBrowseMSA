@@ -69,6 +69,18 @@ export const specs = [
     clip: 'viewer',
   },
   {
+    name: 'sequence-logo',
+    // the logo track ships hidden, and `turnedOffTracks` holds the user's
+    // explicit choice with the value meaning "off" -- so `false` is how a
+    // deep-link turns it on, which is also what this exercises
+    url: data({
+      colorSchemeName: 'maeditor',
+      height: 260,
+      turnedOffTracks: { 'sequence-logo': false, conservation: true },
+    }),
+    clip: 'viewer',
+  },
+  {
     // Was 'settings-dialog', driving file menu -> "More settings" -> a modal
     // with "Tree options"/"MSA options" sections. That dialog is gone: Header
     // now renders TreeSettingsMenu and MSASettingsMenu as their own dropdowns
