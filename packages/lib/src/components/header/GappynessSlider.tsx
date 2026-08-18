@@ -16,8 +16,11 @@ const GappynessSlider = observer(function GappynessSlider({
   }
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      {/* the threshold is inclusive: blanks are columns whose gap count is at
+          least ceil(allowedGappyness% of the rows), so at 100 it hides the
+          columns that are entirely gaps rather than nothing */}
       <Typography style={{ whiteSpace: 'nowrap' }}>
-        Hide columns w/ &gt;{allowedGappyness}% gaps
+        Hide columns w/ &ge;{allowedGappyness}% gaps
       </Typography>
       <Slider
         // Named, because the class alone is not enough to find it from outside.

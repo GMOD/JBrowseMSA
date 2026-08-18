@@ -1,6 +1,7 @@
 import { setFontSize } from '../../setFontSize.ts'
 import { adjustColorForContrast } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
+import { domainBandCursor } from './domainBandCursor.ts'
 import { visibleColRange } from './visibleColRange.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
@@ -167,8 +168,9 @@ function drawTilesAndText({
       if (str) {
         const tileY = y - rowHeight
         const textY = y - quarterRowHeight
-        const bands = overDomains ? domainBandsByStart.get(name) : undefined
-        let band = 0
+        const bandAt = domainBandCursor(
+          overDomains ? domainBandsByStart.get(name) : undefined,
+        )
 
         for (let j = 0, l2 = str.length; j < l2; j++) {
           const col = xStart + j
@@ -186,27 +188,21 @@ function drawTilesAndText({
           }
 
           if (showMsaLetters) {
-            // bands are sorted by start column and the sweep is left to right,
-            // so one forward-only cursor finds the band covering each column
-            while (bands && band < bands.length && bands[band]!.endCol <= col) {
-              band++
-            }
-            const covering = bands?.[band]
-            ctx.fillStyle =
-              covering && covering.startCol <= col
-                ? // on top of a domain box: contrast against the box fill
-                  domainColors!.get(covering.annotation.accession)!
-                : tiles
-                  ? // on top of a colored tile
-                    (contrastScheme[letter] ?? 'black')
-                  : !drawTiles || !color
-                    ? // plain background, uncolored letters
-                      theme.palette.text.primary
-                    : // letter-color mode: darken/lighten to stay readable
-                      adjustColorForContrast(
-                        color,
-                        theme.palette.background.default,
-                      )
+            const covering = bandAt(col)
+            ctx.fillStyle = covering
+              ? // on top of a domain box: contrast against the box fill
+                domainColors!.get(covering.annotation.accession)!
+              : tiles
+                ? // on top of a colored tile
+                  (contrastScheme[letter] ?? 'black')
+                : !drawTiles || !color
+                  ? // plain background, uncolored letters
+                    theme.palette.text.primary
+                  : // letter-color mode: darken/lighten to stay readable
+                    adjustColorForContrast(
+                      color,
+                      theme.palette.background.default,
+                    )
             ctx.fillText(
               isMatchingReference ? '.' : letter,
               x + halfColWidth,
