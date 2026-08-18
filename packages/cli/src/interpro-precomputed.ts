@@ -2,6 +2,13 @@ import * as fs from 'node:fs'
 
 import { interProToGFF } from 'msa-parsers'
 
+import {
+  cacheLocation,
+  fetchWithRetry,
+  readCached,
+  writeCached,
+} from './interpro-cache.ts'
+
 // Build a domain GFF from InterPro's PRECOMPUTED matches for UniProtKB
 // accessions, instead of submitting sequences to a live InterProScan job. Every
 // UniProtKB sequence already has InterPro matches computed and served by the
@@ -21,6 +28,7 @@ export interface InterProPrecomputedOptions {
   inputFile: string
   outputFile: string
   database: string
+  noCache?: boolean
 }
 
 interface Accession {
@@ -73,8 +81,11 @@ function parseAccessions(text: string): Accession[] {
   return out
 }
 
+// The one request a run makes regardless of cache state, and the thing that
+// makes caching safe: entries are keyed by release, so a new InterPro release
+// misses rather than serving coordinates computed against the old one.
 async function fetchRelease(): Promise<string> {
-  const res = await fetch(`${API}/`)
+  const res = await fetchWithRetry(`${API}/`)
   if (!res.ok) {
     throw new Error(`InterPro release lookup failed: ${res.status}`)
   }
@@ -86,7 +97,7 @@ async function fetchEntries(
   accession: string,
   database: string,
 ): Promise<ApiResult[]> {
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `${API}/entry/${database}/protein/uniprot/${accession}/`,
   )
   // 204 = the protein exists but has no matches in this member database.
@@ -104,15 +115,52 @@ async function fetchEntries(
 export async function runInterProPrecomputed(
   options: InterProPrecomputedOptions,
 ): Promise<void> {
-  const { inputFile, outputFile, database } = options
+  const { inputFile, outputFile, database, noCache } = options
   console.log(`Reading accessions from ${inputFile}...`)
   const accessions = parseAccessions(fs.readFileSync(inputFile, 'utf8'))
-  console.log(`Found ${accessions.length} accessions`)
+  // two rows can carry the same accession under different labels; that is one
+  // protein to look up, then copied to each label
+  const distinct = [...new Set(accessions.map(a => a.accession))]
+  const extra =
+    distinct.length === accessions.length
+      ? ''
+      : ` (${distinct.length} distinct)`
+  console.log(`Found ${accessions.length} accessions${extra}`)
 
   const release = await fetchRelease()
   console.log(
-    `InterPro release ${release}; fetching precomputed ${database} matches...`,
+    `InterPro release ${release}; reading precomputed ${database} matches...`,
   )
+
+  const entriesByAccession = new Map<string, ApiResult[]>()
+  let fetched = 0
+  let cached = 0
+  for (const [i, accession] of distinct.entries()) {
+    const hit = noCache
+      ? undefined
+      : readCached<ApiResult[]>(release, database, accession)
+    let entries: ApiResult[]
+    if (hit) {
+      entries = hit
+      cached++
+    } else {
+      try {
+        entries = await fetchEntries(accession, database)
+      } catch (e) {
+        // every accession resolved so far is on disk, so the re-run this
+        // prompts resumes from here instead of asking EBI for them again
+        throw new Error(
+          `${e}\n${i} of ${distinct.length} accessions are cached; re-run to resume from ${accession}.`,
+        )
+      }
+      writeCached(release, database, accession, entries)
+      fetched++
+    }
+    entriesByAccession.set(accession, entries)
+    console.log(
+      `  [${i + 1}/${distinct.length}] ${accession}: ${entries.length} ${database} entries${hit ? ' (cached)' : ''}`,
+    )
+  }
 
   const results: Record<
     string,
@@ -127,11 +175,8 @@ export async function runInterProPrecomputed(
     }
   > = {}
 
-  let done = 0
   for (const { accession, label } of accessions) {
-    done++
-    const entries = await fetchEntries(accession, database)
-    const matches = entries
+    const matches = (entriesByAccession.get(accession) ?? [])
       .map(({ metadata, proteins }) => ({
         signature: {
           entry: {
@@ -146,10 +191,9 @@ export async function runInterProPrecomputed(
       }))
       .filter(m => m.locations.length > 0)
     results[label] = { matches, xref: [{ id: label }] }
-    console.log(
-      `  [${done}/${accessions.length}] ${label} (${accession}): ${matches.length} ${database} domains`,
-    )
   }
+
+  console.log(`${fetched} fetched, ${cached} from ${cacheLocation()}`)
 
   const gff = interProToGFF(results).replace(
     '##gff-version 3',
