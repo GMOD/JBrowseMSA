@@ -3,8 +3,8 @@ import { expect, test } from 'vitest'
 
 import MSAModelF from './model.ts'
 
-// jsdom has no 2d context, and measureTextCanvas throws without one. Only the
-// width matters here, so a stub keeps the test about tree size.
+// jsdom has no 2d context, so measureTextCanvas falls back to an estimate. Only
+// the width matters here, so a stub keeps the test about tree size.
 HTMLCanvasElement.prototype.getContext = (() => ({
   font: '12px sans-serif',
   measureText: (t: string) => ({ width: t.length * 7 }),
@@ -29,4 +29,25 @@ test('a tree far past the argument limit still lays out', () => {
   // 's199999' is the longest name, at 7 chars * 7px
   expect(model.labelsWidth).toBe(49)
   expect(model.treeWidth).toBeGreaterThan(0)
+})
+
+test('re-hovering the same tree node does not re-walk the tree', () => {
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    data: { tree: flatNewick(200_000) },
+  })
+  model.setWidth(1000)
+
+  const leafId = model.leaves[1000]!.data.id
+  model.setHoveredTreeNode(leafId)
+  const first = model.hoveredTreeNode
+
+  // the tree's mousemove handler fires this on every event, so an unchanged id
+  // has to leave the state object alone: rebuilding it walks all 200k nodes and
+  // invalidates every overlay that reads hoveredRowIndices
+  model.setHoveredTreeNode(leafId)
+  expect(model.hoveredTreeNode).toBe(first)
+
+  model.setHoveredTreeNode(undefined)
+  expect(model.hoveredTreeNode).toBeUndefined()
 })

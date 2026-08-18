@@ -40,7 +40,7 @@ export interface TidyDomainAnnotation {
 }
 
 // a tidy annotation resolved to the visible column span it is drawn across.
-// stackIndex is its position within its row's annotation list, which the
+// stackIndex is its position among the bands its row actually draws, which the
 // sub-row layout uses to stack boxes.
 export interface DomainBand {
   annotation: TidyDomainAnnotation

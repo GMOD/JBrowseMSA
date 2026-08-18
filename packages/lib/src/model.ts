@@ -1243,17 +1243,24 @@ function stateModelFactory() {
        * set hovered tree node and its descendants
        */
       setHoveredTreeNode(nodeId?: string) {
-        if (nodeId) {
-          const node = find(self.hierarchy, n => n.data.id === nodeId)
-          self.hoveredTreeNode = node
-            ? {
-                nodeId,
-                descendantNames: leaves(node).map(leaf => leaf.data.name),
-              }
-            : undefined
-        } else {
-          self.hoveredTreeNode = undefined
+        // the tree's mousemove handler calls this on every event, and both the
+        // lookup and the write are expensive: `find` walks the whole hierarchy,
+        // and a fresh object here invalidates hoveredRowIndices and redraws the
+        // tree and MSA overlays. Re-hovering the same node is the common case
+        if (nodeId === self.hoveredTreeNode?.nodeId) {
+          return
         }
+        if (!nodeId) {
+          self.hoveredTreeNode = undefined
+          return
+        }
+        const node = find(self.hierarchy, n => n.data.id === nodeId)
+        self.hoveredTreeNode = node
+          ? {
+              nodeId,
+              descendantNames: leaves(node).map(leaf => leaf.data.name),
+            }
+          : undefined
       },
 
       /**
@@ -1796,8 +1803,9 @@ function stateModelFactory() {
         for (const [name, annotations] of Object.entries(
           self.tidyFilteredGatheredInterProAnnotations,
         )) {
+          const { blanks } = self
           const rowBands = annotations
-            .map((annotation, stackIndex) => {
+            .map(annotation => {
               // InterPro positions are 1-based and inclusive. Both ends count
               // the visible columns in front of a global column, so endCol is
               // the exclusive column after the last residue's own column --
@@ -1806,7 +1814,6 @@ function stateModelFactory() {
               // collapses onto the neighbouring boundary instead of dropping
               // the band. A band whose every column is hidden spans nothing
               // and is left out.
-              const { blanks } = self
               const startCol = visibleColsBefore(
                 blanks,
                 self.seqPosToGlobalCol(name, annotation.start - 1),
@@ -1816,10 +1823,13 @@ function stateModelFactory() {
                 self.seqPosToGlobalCol(name, annotation.end - 1) + 1,
               )
               return endCol > startCol
-                ? { annotation, startCol, endCol, stackIndex }
+                ? { annotation, startCol, endCol }
                 : undefined
             })
             .filter(notEmpty)
+            // numbered after the drop, so a band that resolved to nothing does
+            // not leave an empty sub-row behind it
+            .map((band, stackIndex) => ({ ...band, stackIndex }))
           if (rowBands.length > 0) {
             bands.set(name, rowBands)
           }
