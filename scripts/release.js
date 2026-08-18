@@ -76,6 +76,12 @@ console.log('Updated packages/lib/src/version.ts')
 console.log('\nBuilding all packages...')
 run('pnpm build')
 
+// The R package vendors the UMD bundle (R installs run no node), so refresh it
+// from the build we just made -- otherwise msaviewr ships whatever JavaScript
+// was current the last time someone remembered to copy it across
+console.log('\nSyncing the R package bundle...')
+run('node scripts/sync-r-bundle.mjs')
+
 // Commit the version bump, tag, and push. The pushed tag triggers publish.yml
 // (npm), and the push to main triggers deploy-docs.yml (GitHub Pages).
 const tag = `v${newVersion}`
@@ -83,6 +89,8 @@ console.log(`\nCreating git tag ${tag}...`)
 const changed = [
   ...packages.map(pkg => `packages/${pkg}/package.json`),
   'packages/lib/src/version.ts',
+  'packages/r-msaview/inst/htmlwidgets/lib/react-msaview.umd.js',
+  'packages/r-msaview/inst/htmlwidgets/msaview.yaml',
 ].join(' ')
 run(`git add ${changed}`)
 run(`git commit -m "${tag}"`)

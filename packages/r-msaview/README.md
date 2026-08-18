@@ -290,6 +290,19 @@ Nucleotide: `nucleotide`, `jbrowse_dna`, `rainbow_dna`, `clustalx_dna`
 Dynamic (computed per-column): `clustalx_protein_dynamic`,
 `percent_identity_dynamic`
 
+## Development
+
+The widget's JavaScript lives at `inst/htmlwidgets/lib/react-msaview.umd.js`. It
+is generated, not edited: installing an R package runs no node, so the bundle is
+vendored rather than built on demand. `scripts/release.js` refreshes it from the
+build it just made, so every release ships matching JavaScript, and CI fails if
+the committed bundle's version stamp has drifted from `packages/lib`. To refresh
+it by hand from the repo root:
+
+```sh
+pnpm build && pnpm sync:r-bundle
+```
+
 ## License
 
 MIT

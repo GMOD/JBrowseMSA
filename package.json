@@ -12,6 +12,7 @@
     "dev": "pnpm --filter app dev",
     "watch": "pnpm -r --parallel --filter svgcanvas --filter msa-parsers --filter react-msaview --filter app run '/^(watch|dev)$/'",
     "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build",
+    "sync:r-bundle": "node scripts/sync-r-bundle.mjs",
     "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",
     "build:site": "pnpm --filter website build",
     "build:pages": "pnpm build:lib && pnpm build:site && pnpm --filter app build && node scripts/assemble-pages.mjs",
