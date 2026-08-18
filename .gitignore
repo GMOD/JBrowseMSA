@@ -130,3 +130,4 @@ pages-dist
 # stays installable until a MUI-v9 @jbrowse/core is published to npm.
 !vendor-jbrowse/jbrowse-core.tgz
 !vendor-jbrowse/jbrowse-render-core.tgz
+.claude
