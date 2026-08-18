@@ -83,7 +83,8 @@ const Reset = observer(function ({
 })
 
 const Loading = observer(function ({ model }: { model: MsaViewModel }) {
-  const { isLoading, dataInitialized, msaFilehandle, treeFilehandle } = model
+  const { isLoading, dataInitialized, error, msaFilehandle, treeFilehandle } =
+    model
   const hasPendingFilehandle = !!(msaFilehandle || treeFilehandle)
 
   return (
@@ -97,6 +98,14 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
           ) : (
             <MSAView model={model} />
           )
+        ) : error ? (
+          // Ahead of the spinner, because a failed load KEEPS its filehandle --
+          // only an abort clears it. So hasPendingFilehandle stays true, this
+          // fell to the spinner below, and the ImportForm that renders
+          // `model.error` was never reached: the reader got "Downloading file"
+          // and a Cancel button for as long as they were willing to watch it.
+          // Found on AlphaFold's files/msa/ prefix answering 403 to every key.
+          <Reset model={model} error={error} />
         ) : hasPendingFilehandle || isLoading ? (
           <LoadingSpinner model={model} />
         ) : (
