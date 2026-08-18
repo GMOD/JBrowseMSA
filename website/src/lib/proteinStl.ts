@@ -52,23 +52,20 @@ function rotateAbout(v: Vec3, axis: Vec3, angle: number): Vec3 {
 // 30–38/38–46/46–54, altLoc at 16 (0-based, end-exclusive slices).
 export function parseCaTrace(pdb: string): Vec3[] {
   const points: Vec3[] = []
-  let done = false
   for (const line of pdb.split('\n')) {
-    if (!done) {
-      if (line.startsWith('ENDMDL')) {
-        done = true
-      } else {
-        const isCa =
-          line.startsWith('ATOM') && line.slice(12, 16).trim() === 'CA'
-        const altLoc = line[16]
-        if (isCa && (altLoc === ' ' || altLoc === 'A')) {
-          points.push([
-            Number(line.slice(30, 38)),
-            Number(line.slice(38, 46)),
-            Number(line.slice(46, 54)),
-          ])
-        }
-      }
+    // first model only, and a structure file runs to many MB, so stop reading
+    // rather than scanning the rest of it with a flag held down
+    if (line.startsWith('ENDMDL')) {
+      break
+    }
+    const isCa = line.startsWith('ATOM') && line.slice(12, 16).trim() === 'CA'
+    const altLoc = line[16]
+    if (isCa && (altLoc === ' ' || altLoc === 'A')) {
+      points.push([
+        Number(line.slice(30, 38)),
+        Number(line.slice(38, 46)),
+        Number(line.slice(46, 54)),
+      ])
     }
   }
   return points
