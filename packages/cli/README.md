@@ -94,15 +94,32 @@ is byte-for-byte compatible with the `interproscan` command.
 
 #### Options
 
-| Option                | Description                | Default       |
-| --------------------- | -------------------------- | ------------- |
-| `-o, --output <file>` | Output GFF file path       | `domains.gff` |
-| `--database <name>`   | InterPro member db to read | `pfam`        |
+| Option                | Description                       | Default       |
+| --------------------- | --------------------------------- | ------------- |
+| `-o, --output <file>` | Output GFF file path              | `domains.gff` |
+| `--database <name>`   | InterPro member db to read        | `pfam`        |
+| `--no-cache`          | Re-fetch, ignoring the disk cache | off           |
 
 ```bash
 react-msaview-cli interpro accessions.tsv -o domains.gff
 react-msaview-cli interpro accessions.tsv -o domains.gff --database cdd
 ```
+
+#### Caching
+
+The InterPro API serves one protein per request — there is no batch endpoint —
+so the request count is fixed at one per distinct accession. To keep that from
+being paid twice, every response is cached on disk under
+`$XDG_CACHE_HOME/react-msaview-cli/interpro` (override with
+`REACT_MSAVIEW_CACHE`), keyed by InterPro release so a new release misses
+cleanly rather than serving coordinates computed against the old one. Proteins
+with no matches are cached too, so they are not re-fetched every run.
+
+A re-run of the same dataset therefore makes one request — the release lookup —
+and answers the rest from disk. That also makes a failed run resumable: retries
+are automatic with backoff, and if the API is still unreachable the accessions
+already fetched stay cached, so re-running picks up where it stopped instead of
+asking EBI for all of them again.
 
 ### genestructure
 

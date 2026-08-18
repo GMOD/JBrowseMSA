@@ -67,6 +67,10 @@ const { values, positionals } = parseArgs({
       type: 'string',
       default: 'pfam',
     },
+    'no-cache': {
+      type: 'boolean',
+      default: false,
+    },
     ref: {
       type: 'string',
     },
@@ -125,6 +129,9 @@ OPTIONS (interpro — precomputed):
                                 line; # comments ok — the examples-gen .tsv works)
   -o, --output <file>           Output GFF file (default: domains.gff)
   --database <name>             InterPro member db to read (default: pfam)
+  --no-cache                    Re-fetch every accession, ignoring the on-disk
+                                cache (kept per InterPro release under
+                                $XDG_CACHE_HOME/react-msaview-cli/interpro)
 
 OPTIONS (genestructure):
   <input>                       MSA file (coding-sequence alignment) [required]
@@ -224,6 +231,7 @@ async function main() {
       inputFile,
       outputFile: values.output,
       database: values.database,
+      noCache: values['no-cache'],
     })
   } else if (command === 'genestructure') {
     const inputFile = positionals[1]
