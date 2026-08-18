@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 
 import { makeStyles } from '@jbrowse/core/util/tss-react'
-import { Button, TextField } from '@mui/material'
+import { TextField } from '@mui/material'
 import { getUngappedSequence } from 'msa-parsers'
 
-import copy from '../vendor/copyToClipboard.ts'
 import Checkbox2 from './Checkbox2.tsx'
+import CopyButton from './CopyButton.tsx'
 
 const useStyles = makeStyles()({
   textAreaFont: {
@@ -21,7 +21,6 @@ const useStyles = makeStyles()({
 
 export default function SequenceTextArea({ str }: { str: [string, string][] }) {
   const { classes } = useStyles()
-  const [copied, setCopied] = useState(false)
   const [showGaps, setShowGaps] = useState(false)
   const [showEmpty, setShowEmpty] = useState(false)
 
@@ -32,19 +31,7 @@ export default function SequenceTextArea({ str }: { str: [string, string][] }) {
     .join('\n')
   return (
     <>
-      <Button
-        color="primary"
-        variant="contained"
-        onClick={() => {
-          copy(disp)
-          setCopied(true)
-          setTimeout(() => {
-            setCopied(false)
-          }, 500)
-        }}
-      >
-        {copied ? 'Copied!' : 'Copy to clipboard'}
-      </Button>
+      <CopyButton text={disp} />
       <Checkbox2
         label="Show gaps"
         checked={showGaps}

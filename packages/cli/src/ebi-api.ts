@@ -43,17 +43,22 @@ async function getResults(jobId: string): Promise<InterProScanResponse> {
   return response.json() as Promise<InterProScanResponse>
 }
 
+const TERMINAL_FAILURES = new Set(['FAILURE', 'ERROR', 'NOT_FOUND'])
+
 async function waitForJob(jobId: string): Promise<void> {
   let attempts = 0
   const maxAttempts = 300
 
   while (attempts < maxAttempts) {
-    const status = await checkStatus(jobId)
+    // the status endpoint returns a bare status token; match it exactly rather
+    // than by substring so an error page that happens to mention FINISHED
+    // cannot be read as success (nor one mentioning ERROR as a failure)
+    const status = (await checkStatus(jobId)).trim()
 
-    if (status.includes('FINISHED')) {
+    if (status === 'FINISHED') {
       return
     }
-    if (status.includes('FAILURE') || status.includes('ERROR')) {
+    if (TERMINAL_FAILURES.has(status)) {
       throw new Error(`Job ${jobId} failed: ${status}`)
     }
 

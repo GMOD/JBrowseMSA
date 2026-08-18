@@ -10,10 +10,12 @@ import { runInterProScan } from './interproscan-msa.ts'
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
+    // no default: each command has its own, and comparing against a shared
+    // default here to detect "not passed" silently overrode an explicit
+    // `-o domains.gff` on the commands whose default is something else
     output: {
       type: 'string',
       short: 'o',
-      default: 'domains.gff',
     },
     msa: {
       type: 'string',
@@ -186,8 +188,7 @@ async function main() {
       console.error('Error: --msa <file> is required')
       process.exit(1)
     }
-    const outputFile =
-      values.output === 'domains.gff' ? 'alignment.svg' : values.output
+    const outputFile = values.output ?? 'alignment.svg'
     await exportSvg({
       msaFile,
       treeFile: values.tree,
@@ -211,7 +212,7 @@ async function main() {
 
     await runInterProScan({
       inputFile,
-      outputFile: values.output,
+      outputFile: values.output ?? 'domains.gff',
       useLocal: values.local,
       useDocker: values.docker,
       useSingularity: values.singularity,
@@ -229,7 +230,7 @@ async function main() {
 
     await runInterProPrecomputed({
       inputFile,
-      outputFile: values.output,
+      outputFile: values.output ?? 'domains.gff',
       database: values.database,
       noCache: values['no-cache'],
     })
@@ -239,8 +240,7 @@ async function main() {
       console.error('Error: Input MSA file is required')
       process.exit(1)
     }
-    const outputFile =
-      values.output === 'domains.gff' ? 'genestructure.gff' : values.output
+    const outputFile = values.output ?? 'genestructure.gff'
     await runGeneStructure({
       inputFile,
       outputFile,
