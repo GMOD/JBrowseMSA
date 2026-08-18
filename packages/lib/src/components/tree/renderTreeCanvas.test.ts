@@ -117,8 +117,9 @@ describe('getNodeX cladogram positioning', () => {
   })
 })
 
-// the x values the tree pass actually strokes, for a model built from newick
-function drawnTreeXs(newick: string) {
+// the x values the tree pass actually strokes, for a model built from newick,
+// alongside the tree width they are expected to span
+function drawnTree(newick: string) {
   const model = stateModelFactory().create({
     type: 'MsaView',
     data: { msa: '>a\nA\n>b\nA\n>c\nA\n>d\nA', tree: newick },
@@ -150,19 +151,26 @@ function drawnTreeXs(newick: string) {
     offsetY: 0,
     theme: { palette: { text: { primary: '#000' } } } as Theme,
   })
-  return xs
+  return { xs, model }
 }
 
 describe('renderTreeCanvas horizontal extent', () => {
   it('spreads a cladogram across the tree area when branch lengths are absent', () => {
     // a lengthless newick forces cladogram mode; scaling it by the (zero) max
     // branch length would stack every node on x=0 as one vertical line
-    const xs = drawnTreeXs('((a,b),(c,d));')
-    expect(Math.max(...xs)).toBe(300)
+    const { xs, model } = drawnTree('((a,b),(c,d));')
+    expect(Math.max(...xs)).toBe(model.treeWidth)
   })
 
   it('scales a phylogram by branch length', () => {
-    const xs = drawnTreeXs('((a:0.1,b:0.2):0.3,(c:0.4,d:0.5):0.6);')
-    expect(Math.max(...xs)).toBeCloseTo(300)
+    const { xs, model } = drawnTree('((a:0.1,b:0.2):0.3,(c:0.4,d:0.5):0.6);')
+    expect(Math.max(...xs)).toBeCloseTo(model.treeWidth)
+  })
+
+  // labels off means no label gutter to reserve, so the tips reach the far edge
+  // of the tree area rather than stopping at the default treeWidth
+  it('hands the label gutter to the tree when labels are off', () => {
+    const { model } = drawnTree('((a,b),(c,d));')
+    expect(model.treeWidth).toBe(model.treeAreaWidth - 10 - model.marginLeft)
   })
 })

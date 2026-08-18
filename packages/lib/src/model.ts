@@ -1434,10 +1434,12 @@ function stateModelFactory() {
        * #getter
        */
       get labelWidthMap() {
-        const { rowHeight, leaves, treeMetadata, fontSize } = self
-        return rowHeight <= 5
-          ? new Map<string, number>()
-          : new Map(
+        const { showTreeText, leaves, treeMetadata, fontSize } = self
+        // gated on the same condition the renderer draws labels under, so the
+        // gutter labelsWidth reserves and the labels actually drawn cannot
+        // disagree -- and so turning labels off hands their space to the tree
+        return showTreeText
+          ? new Map(
               leaves.map(node => {
                 const { name } = node.data
                 // `||`, matching renderTreeLabels: an empty genome falls back
@@ -1447,6 +1449,7 @@ function stateModelFactory() {
                 return [name, measureTextCanvas(displayName, fontSize)] as const
               }),
             )
+          : new Map<string, number>()
       },
 
       get labelsWidth() {
