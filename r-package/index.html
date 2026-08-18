@@ -307,6 +307,14 @@ ggtree-specific annotations (colors, labels, metadata) stay in ggtree.</p>
 <p>Nucleotide: <code>nucleotide</code>, <code>jbrowse_dna</code>, <code>rainbow_dna</code>, <code>clustalx_dna</code></p>
 <p>Dynamic (computed per-column): <code>clustalx_protein_dynamic</code>,
 <code>percent_identity_dynamic</code></p>
+<h2 id="development">Development<a href="#development" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>The widget’s JavaScript lives at <code>inst/htmlwidgets/lib/react-msaview.umd.js</code>. It
+is generated, not edited: installing an R package runs no node, so the bundle is
+vendored rather than built on demand. <code>scripts/release.js</code> refreshes it from the
+build it just made, so every release ships matching JavaScript, and CI fails if
+the committed bundle’s version stamp has drifted from <code>packages/lib</code>. To refresh
+it by hand from the repo root:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="sh"><code><span class="line"><span style="color:#B392F0">pnpm</span><span style="color:#9ECBFF"> build</span><span style="color:#E1E4E8"> &#x26;&#x26; </span><span style="color:#B392F0">pnpm</span><span style="color:#9ECBFF"> sync:r-bundle</span></span></code></pre>
 <h2 id="license">License<a href="#license" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <p>MIT</p>
   </article>

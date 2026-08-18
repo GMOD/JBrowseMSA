@@ -424,9 +424,12 @@ name, and description:</p>
 <p>After generating the GFF file, you can load it in react-msaview:</p>
 <ul>
 <li>Open your MSA file in react-msaview</li>
-<li>Go to <strong>Menu > Open domains…</strong> and select the generated GFF file</li>
+<li>Select the generated GFF file in the import form’s <strong>Annotation GFF file or
+URL</strong> field</li>
 <li>Domains appear as colored boxes on the alignment</li>
 </ul>
+<p>The <strong>Annotations > Open InterProScan results…</strong> menu item takes InterProScan
+JSON rather than GFF, so use the import form for the file generated above.</p>
 <p>In the React component, pass it inline as the <code>gff</code> prop (see the “Protein
 domains” example in <code>packages/examples</code>):</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="jsx"><code><span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#79B8FF">MSAViewer</span><span style="color:#B392F0"> msa</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{msaText} </span><span style="color:#B392F0">gff</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{domainsGff} /></span></span></code></pre>
