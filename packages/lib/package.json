@@ -33,7 +33,7 @@
     "build:umd": "node esbuild.mjs",
     "build": "pnpm clean && pnpm build:esm && pnpm build:umd",
     "statedocs": "node --experimental-strip-types docgen/generateStateModelDocs.ts",
-    "poststatedocs": "pnpm format",
+    "poststatedocs": "oxfmt apidocs",
     "test": "vitest"
   },
   "peerDependencies": {
