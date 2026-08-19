@@ -1,1 +1,0 @@
-import{r as e}from"./rolldown-runtime.hePW80VL.js";import{t}from"./jsx-runtime.CWLBoBiw.js";import{f as n,m as r,p as i}from"./exampleData.C4yoj9uk.js";var a=e(t(),1);function o(){return(0,a.jsx)(`div`,{style:{border:`1px solid var(--border)`,borderRadius:6},children:(0,a.jsx)(r,{msa:n,tree:i,colorScheme:`clustalx_protein_dynamic`,height:400})})}export{o as default};
