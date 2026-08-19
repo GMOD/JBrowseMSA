@@ -588,6 +588,17 @@ any
 boolean
 ```
 
+#### getter: alphabetMaxBits
+
+The information content of a fully conserved column, in bits, which depends on
+the alphabet. Both the entropy ceiling `conservation` normalizes against and the
+y-axis ceiling of the sequence logo track.
+
+```js
+// type
+number
+```
+
 #### getter: blanks
 
 ```js
@@ -821,16 +832,6 @@ Map<any, number>
 ```js
 // type
 any[]
-```
-
-#### getter: logoMaxBits
-
-The y-axis ceiling of the sequence logo track, in bits: the information content
-of a fully conserved column, which depends on the alphabet.
-
-```js
-// type
-number
 ```
 
 #### getter: maxBranchLength

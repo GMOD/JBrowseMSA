@@ -38,20 +38,13 @@ export function columnLogoStack(
   maxBits: number,
 ): LogoLetter[] {
   const total = colStats.total(col)
-  const gapCount = colStats.gapCount(col)
-  const nonGapTotal = total - gapCount
+  const nonGapTotal = total - colStats.gapCount(col)
   if (nonGapTotal === 0) {
     return []
   }
 
-  let entropy = 0
-  colStats.forEachResidue(col, (_slot, count) => {
-    const freq = count / nonGapTotal
-    entropy -= freq * Math.log2(freq)
-  })
-
   const informationContent =
-    Math.max(0, maxBits - entropy) * (total === 0 ? 0 : nonGapTotal / total)
+    Math.max(0, maxBits - colStats.entropy(col)) * (nonGapTotal / total)
   if (informationContent === 0) {
     return []
   }

@@ -216,7 +216,7 @@ export function drawTrackBlock({
     colorScheme: modelColorScheme,
     fontSize,
     rowHeight,
-    logoMaxBits,
+    alphabetMaxBits,
     highResScaleFactor,
   } = model
   const {
@@ -253,7 +253,7 @@ export function drawTrackBlock({
         ctx,
         colStats,
         colorScheme: modelColorScheme,
-        maxBits: logoMaxBits,
+        maxBits: alphabetMaxBits,
         textColor,
         colWidth,
         trackHeight,

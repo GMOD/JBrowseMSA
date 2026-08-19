@@ -109,6 +109,25 @@ export class ColumnCounts {
     }
   }
 
+  /**
+   * Shannon entropy of a column in bits, taken over its non-gap residues only:
+   * a column of two residues and eight gaps is a two-way choice, not a ten-way
+   * one, and gap occupancy is accounted for separately by every caller. 0 for
+   * an all-gap column.
+   */
+  entropy(col: number) {
+    const nonGapTotal = this.total(col) - this.gapCount(col)
+    if (nonGapTotal === 0) {
+      return 0
+    }
+    let entropy = 0
+    this.forEachResidue(col, (_slot, count) => {
+      const freq = count / nonGapTotal
+      entropy -= freq * Math.log2(freq)
+    })
+    return entropy
+  }
+
   /** non-gap [letter, count] pairs for one column, for display */
   residueEntries(col: number) {
     const entries: [string, number][] = []

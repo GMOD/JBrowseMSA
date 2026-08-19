@@ -1063,33 +1063,23 @@ function stateModelFactory() {
        * Returns values 0-1 where 1 = fully conserved, 0 = no conservation.
        */
       get conservation() {
-        const { colStats, sequenceType } = this
-        const alphabetSize = sequenceType === 'amino' ? 20 : 4
-        const maxEntropy = Math.log2(alphabetSize)
-
+        const { colStats, alphabetMaxBits } = this
         return Array.from({ length: colStats.numColumns }, (_, col) => {
           const total = colStats.total(col)
           const gapCount = colStats.gapCount(col)
-          const nonGapTotal = total - gapCount
-          let score = 0
-          if (nonGapTotal > 0) {
-            let entropy = 0
-            colStats.forEachResidue(col, (_slot, count) => {
-              const freq = count / nonGapTotal
-              entropy -= freq * Math.log2(freq)
-            })
-            score =
-              Math.max(0, 1 - entropy / maxEntropy) * (1 - gapCount / total)
-          }
-          return score
+          return total > gapCount
+            ? Math.max(0, 1 - colStats.entropy(col) / alphabetMaxBits) *
+                (1 - gapCount / total)
+            : 0
         })
       },
       /**
        * #getter
-       * The y-axis ceiling of the sequence logo track, in bits: the information
-       * content of a fully conserved column, which depends on the alphabet.
+       * The information content of a fully conserved column, in bits, which
+       * depends on the alphabet. Both the entropy ceiling `conservation`
+       * normalizes against and the y-axis ceiling of the sequence logo track.
        */
-      get logoMaxBits() {
+      get alphabetMaxBits() {
         return maxBitsFor(this.sequenceType)
       },
       /**

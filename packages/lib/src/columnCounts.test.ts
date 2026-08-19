@@ -47,6 +47,21 @@ describe('columnCounts', () => {
     expect(counts.total(3)).toBe(1)
   })
 
+  test('entropy is taken over the non-gap residues only', () => {
+    const counts = columnCountsFromColumns(['AAAA', 'AACC', 'ACGT', 'AC--'])
+    // fully conserved: no choice left to make
+    expect(counts.entropy(0)).toBeCloseTo(0, 10)
+    // even two-way and four-way splits
+    expect(counts.entropy(1)).toBeCloseTo(1, 10)
+    expect(counts.entropy(2)).toBeCloseTo(2, 10)
+    // the two gaps do not turn a 1-bit choice into a 2-bit one
+    expect(counts.entropy(3)).toBeCloseTo(1, 10)
+  })
+
+  test('an all-gap column has no entropy rather than NaN', () => {
+    expect(columnCountsFromColumns(['----']).entropy(0)).toBe(0)
+  })
+
   test('residue slots round-trip to their letters', () => {
     const counts = columnCountsFromColumns(['WY'])
     const slots: number[] = []
