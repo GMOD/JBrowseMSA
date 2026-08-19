@@ -31,25 +31,43 @@ const BLOSUM62_DATA = [
   [-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4, 1],
 ]
 
-const BLOSUM62 = new Map<string, Map<string, number>>()
-for (let i = 0; i < BLOSUM62_KEYS.length; i++) {
-  const row = new Map<string, number>()
-  for (let j = 0; j < BLOSUM62_KEYS.length; j++) {
-    row.set(BLOSUM62_KEYS[j]!, BLOSUM62_DATA[i]![j]!)
-  }
-  BLOSUM62.set(BLOSUM62_KEYS[i]!, row)
+const NUM_SYMBOLS = BLOSUM62_KEYS.length
+const BLOSUM62 = Int8Array.from(BLOSUM62_DATA.flat())
+
+// charCode -> row/column in BLOSUM62, -1 for anything the matrix does not name.
+// A flat table rather than a Map of Maps keyed by an upper-cased character, for
+// the reason columnCounts.ts gives: the distance matrix is O(rows^2 * columns)
+// lookups, and on a 120x800 alignment the Map form spent nearly all of its time
+// allocating one-character strings in toUpperCase: 2.6s to build a tree, versus
+// 0.34s here for a byte-identical newick.
+const symbolOfCode = new Int8Array(128).fill(-1)
+for (let i = 0; i < NUM_SYMBOLS; i++) {
+  const key = BLOSUM62_KEYS[i]!
+  symbolOfCode[key.charCodeAt(0)] = i
+  symbolOfCode[key.toLowerCase().charCodeAt(0)] = i
 }
 
-function getBlosum62Score(a: string, b: string) {
-  return BLOSUM62.get(a.toUpperCase())?.get(b.toUpperCase()) ?? -4
-}
+// gap, or past the end of a row shorter than the alignment
+const GAP = -2
 
 // stockholm and a3m write gaps as '.', not just '-'. Scoring a '.' as a residue
 // charges the pair the unknown-symbol penalty on every padded column, so two
 // sequences that differ only in where an unrelated row forced padding come out
 // as divergent.
-function isGap(c: string) {
-  return c === '-' || c === '.'
+function symbolAt(seq: string, i: number) {
+  if (i >= seq.length) {
+    return GAP
+  }
+  const code = seq.charCodeAt(i)
+  // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
+  if ((code - 45) >>> 0 <= 1) {
+    return GAP
+  }
+  return code < 128 ? symbolOfCode[code]! : -1
+}
+
+function blosumScore(a: number, b: number) {
+  return a < 0 || b < 0 ? -4 : BLOSUM62[a * NUM_SYMBOLS + b]!
 }
 
 function computePairwiseDistance(seq1: string, seq2: string) {
@@ -63,11 +81,11 @@ function computePairwiseDistance(seq1: string, seq2: string) {
   let maxPossibleScore = 0
 
   for (let i = 0; i < len; i++) {
-    const a = seq1[i] ?? '-'
-    const b = seq2[i] ?? '-'
+    const a = symbolAt(seq1, i)
+    const b = symbolAt(seq2, i)
 
-    const aGap = isGap(a)
-    const bGap = isGap(b)
+    const aGap = a === GAP
+    const bGap = b === GAP
     if (aGap && bGap) {
       continue
     }
@@ -77,8 +95,8 @@ function computePairwiseDistance(seq1: string, seq2: string) {
       continue
     }
 
-    totalScore += getBlosum62Score(a, b)
-    maxPossibleScore += Math.max(getBlosum62Score(a, a), getBlosum62Score(b, b))
+    totalScore += blosumScore(a, b)
+    maxPossibleScore += Math.max(blosumScore(a, a), blosumScore(b, b))
   }
 
   if (compared === 0) {
