@@ -1,6 +1,12 @@
 # Ideas / backlog
 
-Captured for later, not yet required.
+Captured for later, not yet required. An idea that needs more than a few
+paragraphs — a measurement, a comparison, a design argument — gets its own file
+in `ideas/` instead:
+
+- [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md) —
+  the join loop is cubic; why `@gmod/hclust`'s fix for the same shape does not
+  port, and what does.
 
 ## Color rows by group / annotation (publication-style figures)
 
