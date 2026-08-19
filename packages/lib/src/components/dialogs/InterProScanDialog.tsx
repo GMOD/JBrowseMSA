@@ -10,6 +10,57 @@ import { launchInterProScan } from '../../launchInterProScan.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
+const FAMILIES = 'Families, domains, sites & repeats'
+const FEATURES = 'Other sequence features'
+const STRUCTURAL = 'Structural domains'
+const OTHER = 'Other category'
+
+// The analyses the EBI iprscan5 endpoint accepts, all on by default. Static, so
+// it lives out here rather than being rebuilt on every render of the dialog.
+const interProScanPrograms = [
+  {
+    name: 'NCBIfam',
+    category: FAMILIES,
+    description: 'NCBI RefSeq FAMs including TIGRFAMs',
+  },
+  {
+    name: 'SFLD',
+    category: FAMILIES,
+    description: 'Structure function linkage database',
+  },
+  {
+    name: 'Phobius',
+    category: FEATURES,
+    description:
+      'A combined transmembrane topology and signal peptide predictor',
+  },
+  { name: 'SignalP', category: FEATURES },
+  { name: 'SignalP_EUK', category: OTHER },
+  { name: 'SignalP_GRAM_POSITIVE', category: OTHER },
+  { name: 'SignalP_GRAM_NEGATIVE', category: OTHER },
+  { name: 'SuperFamily', category: STRUCTURAL },
+  { name: 'Panther', category: FAMILIES },
+  { name: 'Gene3d', category: STRUCTURAL },
+  { name: 'HAMAP', category: FAMILIES },
+  { name: 'PrositeProfiles', category: FAMILIES },
+  { name: 'PrositePatterns', category: FAMILIES },
+  { name: 'Coils', category: FEATURES },
+  { name: 'SMART', category: FAMILIES },
+  {
+    name: 'CDD',
+    category: FAMILIES,
+    description: 'Conserved Domains Database',
+  },
+  { name: 'PRINTS', category: FAMILIES },
+  { name: 'PfamA', category: FAMILIES },
+  { name: 'MobiDBLite', category: FEATURES },
+  { name: 'PIRSF', category: OTHER },
+  { name: 'TMHMM', category: FEATURES },
+  { name: 'AntiFam', category: OTHER },
+  { name: 'FunFam', category: OTHER },
+  { name: 'PIRSR', category: FAMILIES },
+].map(program => ({ ...program, checked: true }))
+
 const InterProScanDialog = observer(function ({
   handleClose,
   model,
@@ -17,134 +68,7 @@ const InterProScanDialog = observer(function ({
   handleClose: () => void
   model: MsaViewModel
 }) {
-  const [vals, setVals] = useState([
-    {
-      name: 'NCBIfam',
-      description: 'NCBI RefSeq FAMs including TIGRFAMs',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'SFLD',
-      description: 'Structure function linkage database',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'Phobius',
-      checked: true,
-      description:
-        'A combined transmembrane topology and signal peptide predictor',
-      category: 'Other sequence features',
-    },
-    {
-      name: 'SignalP',
-      checked: true,
-      category: 'Other sequence features',
-    },
-    {
-      name: 'SignalP_EUK',
-      category: 'Other category',
-      checked: true,
-    },
-    {
-      name: 'SignalP_GRAM_POSITIVE',
-      category: 'Other category',
-      checked: true,
-    },
-    {
-      name: 'SignalP_GRAM_NEGATIVE',
-      checked: true,
-      category: 'Other category',
-    },
-    {
-      name: 'SuperFamily',
-      category: 'Structural domains',
-      checked: true,
-    },
-    {
-      name: 'Panther',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'Gene3d',
-      category: 'Structural domains',
-      checked: true,
-    },
-    {
-      name: 'HAMAP',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'PrositeProfiles',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'PrositePatterns',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'Coils',
-      category: 'Other sequence features',
-      checked: true,
-    },
-    {
-      name: 'SMART',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'CDD',
-      description: 'Conserved Domains Database',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'PRINTS',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'PfamA',
-      category: 'Families, domains, sites & repeats',
-      checked: true,
-    },
-    {
-      name: 'MobiDBLite',
-      checked: true,
-      category: 'Other sequence features',
-    },
-    {
-      name: 'PIRSF',
-      checked: true,
-      category: 'Other category',
-    },
-    {
-      name: 'TMHMM',
-      checked: true,
-      category: 'Other sequence features',
-    },
-
-    {
-      name: 'AntiFam',
-      checked: true,
-      category: 'Other category',
-    },
-    {
-      name: 'FunFam',
-      checked: true,
-      category: 'Other category',
-    },
-    {
-      name: 'PIRSR',
-      checked: true,
-      category: 'Families, domains, sites & repeats',
-    },
-  ])
+  const [vals, setVals] = useState(interProScanPrograms)
 
   const programs = vals.filter(e => e.checked).map(e => e.name)
   const [show, setShow] = useState(false)
@@ -197,12 +121,11 @@ const InterProScanDialog = observer(function ({
               <tbody>
                 {vals
                   .toSorted((a, b) => a.category.localeCompare(b.category))
-                  .map(({ name, checked, category }) => (
+                  .map(({ name, checked, category, description }) => (
                     <tr key={name}>
                       <td>
                         <input
                           type="checkbox"
-                          key={name}
                           checked={checked}
                           onChange={() => {
                             setVals(
@@ -215,7 +138,7 @@ const InterProScanDialog = observer(function ({
                           }}
                         />
                       </td>
-                      <td>{name}</td>
+                      <td title={description}>{name}</td>
                       <td>{category}</td>
                     </tr>
                   ))}
