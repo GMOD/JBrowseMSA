@@ -43,7 +43,7 @@ table was.
 ## Options, cheapest first
 
 1. **Cap and say so.** Refuse above some n with a message pointing at FastTree /
-   IQ-TREE, the way `dna-msa-comparative-genomics.md` already suggests for
+   IQ-TREE, the way `scripts/examples-gen/README.md` already suggests for
    publication-grade trees. Honest, one commit, and arguably correct: NJ on
    thousands of sequences is the wrong tool regardless of how fast it runs.
 2. **Move it off the main thread**, with the progress + cancellation shape
