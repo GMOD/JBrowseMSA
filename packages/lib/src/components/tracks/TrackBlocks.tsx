@@ -66,7 +66,12 @@ const TrackBlocks = observer(function ({
   model: MsaViewModel
   track: BasicTrack
 }) {
-  const { blocksX, msaAreaWidth } = model
+  // msaCanvasWidth, not msaAreaWidth: a track row is a legend for the columns
+  // directly below it, so it has to stop where the alignment canvas does rather
+  // than running on another 20px under the vertical scrollbar -- otherwise the
+  // last columns appear in the tracks but not in the alignment, and the hovered
+  // -column indicator (sized to the canvas) stops short of the track it crosses
+  const { blocksX, msaCanvasWidth } = model
   const { kind, height, data } = track.model
 
   // a text track with no data draws nothing, and an empty row of its own would
@@ -80,7 +85,7 @@ const TrackBlocks = observer(function ({
       style={{
         position: 'relative',
         height,
-        width: msaAreaWidth,
+        width: msaCanvasWidth,
         overflow: 'hidden',
       }}
     >

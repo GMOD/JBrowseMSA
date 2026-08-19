@@ -1843,11 +1843,11 @@ function stateModelFactory() {
        * needs to keep residues readable on top of the boxes.
        */
       get domainBands() {
+        const { blanks } = self
         const bands = new Map<string, DomainBand[]>()
         for (const [name, annotations] of Object.entries(
           self.annotationsByRow,
         )) {
-          const { blanks } = self
           const rowBands = annotations
             .toSorted((a, b) => len(b) - len(a))
             .map(annotation => {
@@ -1975,8 +1975,11 @@ function stateModelFactory() {
           return undefined
         }
         const { colStats } = self
+        if (mouseCol >= colStats.numColumns) {
+          return undefined
+        }
         const total = colStats.total(mouseCol)
-        if (mouseCol >= colStats.numColumns || !total) {
+        if (!total) {
           return undefined
         }
         const gaps = colStats.gapCount(mouseCol)

@@ -53,15 +53,15 @@ export function DataModelF() {
         self.gff = gff
       },
     }))
-    .postProcessSnapshot(snap => {
-      const { tree, msa, treeMetadata, gff } = snap
-      const max = 50_000
-      return {
-        tree: tree && tree.length > max ? undefined : tree,
-        msa: msa && msa.length > max ? undefined : msa,
-        treeMetadata:
-          treeMetadata && treeMetadata.length > max ? undefined : treeMetadata,
-        gff: gff && gff.length > max ? undefined : gff,
-      }
-    })
+    .postProcessSnapshot(snap =>
+      // a large document is dropped from the snapshot rather than inlined
+      // into a session or a shared URL, and every field here holds one, so
+      // the rule is the same for all of them
+      Object.fromEntries(
+        Object.entries(snap).map(([key, text]) => [
+          key,
+          text && text.length > 50_000 ? undefined : text,
+        ]),
+      ),
+    )
 }
