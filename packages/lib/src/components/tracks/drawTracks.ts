@@ -181,153 +181,113 @@ export function drawSequenceLogo({
   }
 }
 
-export function renderSequenceLogoTrack({
+/**
+ * Draw one track's content into a block of the alignment's column space, at
+ * `offsetY` within the ctx. Owns the transform, so both callers -- the live
+ * canvas blocks and the SVG export -- draw into the same coordinate space, and
+ * adding a track kind means a `kind`, a draw function above, and a case here.
+ */
+export function drawTrackBlock({
   model,
   ctx,
+  track,
   offsetX,
-  offsetY,
-  trackHeight,
+  offsetY = 0,
   theme,
+  contrastScheme,
   blockSizeXOverride,
   highResScaleFactorOverride,
 }: {
   model: MsaViewModel
   ctx: RenderCtx
+  track: BasicTrack
   offsetX: number
-  offsetY: number
-  trackHeight: number
+  offsetY?: number
   theme: Theme
+  contrastScheme: Record<string, string>
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
 }) {
   const {
     blockSize,
+    bgColor,
     colWidth,
     colStats,
-    colorScheme,
+    colorScheme: modelColorScheme,
+    fontSize,
+    rowHeight,
     logoMaxBits,
     highResScaleFactor,
   } = model
-  const bx = blockSizeXOverride ?? blockSize
-  const k = highResScaleFactorOverride ?? highResScaleFactor
-
-  ctx.resetTransform()
-  ctx.scale(k, k)
-  ctx.translate(-offsetX, offsetY)
-
-  drawSequenceLogo({
-    ctx,
-    colStats,
-    colorScheme,
-    maxBits: logoMaxBits,
-    textColor: theme.palette.text.primary,
-    colWidth,
-    trackHeight,
-    offsetX,
-    blockSize: bx,
-  })
-
-  ctx.resetTransform()
-}
-
-export function renderConservationTrack({
-  model,
-  ctx,
-  track,
-  offsetX,
-  offsetY,
-  trackHeight,
-  blockSizeXOverride,
-  highResScaleFactorOverride,
-}: {
-  model: MsaViewModel
-  ctx: RenderCtx
-  track: BasicTrack
-  offsetX: number
-  offsetY: number
-  trackHeight: number
-  blockSizeXOverride?: number
-  highResScaleFactorOverride?: number
-}) {
-  const { blockSize, colWidth, highResScaleFactor } = model
-  const bx = blockSizeXOverride ?? blockSize
-  const k = highResScaleFactorOverride ?? highResScaleFactor
-
-  ctx.resetTransform()
-  ctx.scale(k, k)
-  ctx.translate(-offsetX, offsetY)
-
-  drawConservationBars({
-    ctx,
-    values: barTrackValues(model, track.model.id),
-    color: track.model.barColor ?? 'gray',
-    colWidth,
-    trackHeight,
-    offsetX,
-    blockSize: bx,
-  })
-
-  ctx.resetTransform()
-}
-
-export function renderTextTrack({
-  model,
-  ctx,
-  track,
-  offsetX,
-  offsetY,
-  contrastScheme,
-  theme,
-  blockSizeXOverride,
-  highResScaleFactorOverride,
-}: {
-  model: MsaViewModel
-  ctx: RenderCtx
-  track: BasicTrack
-  offsetX: number
-  offsetY: number
-  contrastScheme: Record<string, string>
-  theme: Theme
-  blockSizeXOverride?: number
-  highResScaleFactorOverride?: number
-}) {
   const {
-    blockSize,
-    bgColor,
-    colorScheme: modelColorScheme,
-    colWidth,
-    fontSize,
-    rowHeight,
-    highResScaleFactor,
-  } = model
-
-  const { customColorScheme, data } = track.model
-  const colorScheme = customColorScheme ?? modelColorScheme
-  const bx = blockSizeXOverride ?? blockSize
+    id,
+    kind,
+    height: trackHeight,
+    barColor,
+    customColorScheme,
+    data,
+  } = track.model
+  const blockSizeX = blockSizeXOverride ?? blockSize
   const k = highResScaleFactorOverride ?? highResScaleFactor
+  const textColor = theme.palette.text.primary
 
   ctx.resetTransform()
   ctx.scale(k, k)
   ctx.translate(-offsetX, offsetY)
-  ctx.textAlign = 'center'
-  setFontSize(ctx, fontSize)
 
-  drawTextTrackContent({
-    ctx,
-    data,
-    colorScheme,
-    contrastScheme,
-    bgColor,
-    textColor: theme.palette.text.primary,
-    colWidth,
-    rowHeight,
-    offsetX,
-    blockSize: bx,
-  })
+  switch (kind) {
+    case 'bar': {
+      drawConservationBars({
+        ctx,
+        values: barTrackValues(model, id),
+        color: barColor ?? 'gray',
+        colWidth,
+        trackHeight,
+        offsetX,
+        blockSize: blockSizeX,
+      })
+      break
+    }
+    case 'logo': {
+      drawSequenceLogo({
+        ctx,
+        colStats,
+        colorScheme: modelColorScheme,
+        maxBits: logoMaxBits,
+        textColor,
+        colWidth,
+        trackHeight,
+        offsetX,
+        blockSize: blockSizeX,
+      })
+      break
+    }
+    case 'text': {
+      ctx.textAlign = 'center'
+      setFontSize(ctx, fontSize)
+      drawTextTrackContent({
+        ctx,
+        data,
+        colorScheme: customColorScheme ?? modelColorScheme,
+        contrastScheme,
+        bgColor,
+        textColor,
+        colWidth,
+        rowHeight,
+        offsetX,
+        blockSize: blockSizeX,
+      })
+      break
+    }
+  }
 
   ctx.resetTransform()
 }
 
+/**
+ * Every turned-on track stacked top to bottom, for the SVG export. The live
+ * view draws the same content one canvas block at a time -- see TrackBlocks.
+ */
 export function renderAllTracks({
   model,
   ctx,
@@ -345,55 +305,19 @@ export function renderAllTracks({
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
 }) {
-  const { turnedOnTracks } = model
   let currentY = 0
-
-  for (const track of turnedOnTracks) {
-    const trackHeight = track.model.height
-
-    switch (track.model.kind) {
-      case 'bar': {
-        renderConservationTrack({
-          model,
-          ctx,
-          track,
-          offsetX,
-          offsetY: currentY,
-          trackHeight,
-          blockSizeXOverride,
-          highResScaleFactorOverride,
-        })
-        break
-      }
-      case 'logo': {
-        renderSequenceLogoTrack({
-          model,
-          ctx,
-          offsetX,
-          offsetY: currentY,
-          trackHeight,
-          theme,
-          blockSizeXOverride,
-          highResScaleFactorOverride,
-        })
-        break
-      }
-      case 'text': {
-        renderTextTrack({
-          model,
-          ctx,
-          track,
-          offsetX,
-          offsetY: currentY,
-          contrastScheme,
-          theme,
-          blockSizeXOverride,
-          highResScaleFactorOverride,
-        })
-        break
-      }
-    }
-
-    currentY += trackHeight
+  for (const track of model.turnedOnTracks) {
+    drawTrackBlock({
+      model,
+      ctx,
+      track,
+      offsetX,
+      offsetY: currentY,
+      theme,
+      contrastScheme,
+      blockSizeXOverride,
+      highResScaleFactorOverride,
+    })
+    currentY += track.model.height
   }
 }

@@ -18,9 +18,7 @@ import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
 import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
-import ConservationTrack from './components/ConservationTrack.tsx'
-import SequenceLogoTrack from './components/SequenceLogoTrack.tsx'
-import TextTrack from './components/TextTrack.tsx'
+import TrackBlocks from './components/tracks/TrackBlocks.tsx'
 import {
   defaultAllowedGappyness,
   defaultColWidth,
@@ -1552,7 +1550,7 @@ function stateModelFactory() {
               data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
               height: rowHeight,
             },
-            ReactComponent: TextTrack,
+            ReactComponent: TrackBlocks,
           }))
       },
 
@@ -1560,40 +1558,35 @@ function stateModelFactory() {
        * #getter
        */
       get tracks(): BasicTrack[] {
-        const conservationTrack: BasicTrack = {
-          model: {
-            id: 'conservation',
-            name: 'Conservation',
-            kind: 'bar',
-            height: self.conservationTrackHeight,
-            barColor: 'gray',
-          },
-          ReactComponent: ConservationTrack,
+        const conservationTrack = {
+          id: 'conservation',
+          name: 'Conservation',
+          kind: 'bar' as const,
+          height: self.conservationTrackHeight,
+          barColor: 'gray',
         }
-        const propertyConservationTrack: BasicTrack = {
-          model: {
-            id: 'property-conservation',
-            name: 'Property conservation',
-            kind: 'bar',
-            height: self.conservationTrackHeight,
-            barColor: '#6a51a3',
-          },
-          ReactComponent: ConservationTrack,
+        const propertyConservationTrack = {
+          id: 'property-conservation',
+          name: 'Property conservation',
+          kind: 'bar' as const,
+          height: self.conservationTrackHeight,
+          barColor: '#6a51a3',
         }
-        const sequenceLogoTrack: BasicTrack = {
-          model: {
-            id: 'sequence-logo',
-            name: 'Sequence logo',
-            kind: 'logo',
-            height: self.sequenceLogoTrackHeight,
-          },
-          ReactComponent: SequenceLogoTrack,
+        const sequenceLogoTrack = {
+          id: 'sequence-logo',
+          name: 'Sequence logo',
+          kind: 'logo' as const,
+          height: self.sequenceLogoTrackHeight,
         }
         return [
           ...this.adapterTrackModels,
-          conservationTrack,
-          ...(self.sequenceType === 'amino' ? [propertyConservationTrack] : []),
-          sequenceLogoTrack,
+          ...[
+            conservationTrack,
+            ...(self.sequenceType === 'amino'
+              ? [propertyConservationTrack]
+              : []),
+            sequenceLogoTrack,
+          ].map(model => ({ model, ReactComponent: TrackBlocks })),
         ]
       },
 

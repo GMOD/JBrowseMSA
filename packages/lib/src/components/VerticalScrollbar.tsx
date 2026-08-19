@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 
 import { observer } from 'mobx-react'
 
-import ScrollbarThumb from './ScrollbarThumb.tsx'
+import DragHandle from './DragHandle.tsx'
 
 import type { MsaViewModel } from '../model.ts'
 
@@ -32,8 +32,9 @@ const VerticalScrollbar = observer(({ model }: { model: MsaViewModel }) => {
         boxSizing: 'border-box',
       }}
     >
-      <ScrollbarThumb
+      <DragHandle
         axis="y"
+        variant="thumb"
         getStart={() => model.scrollY}
         onDrag={onDrag}
         style={{

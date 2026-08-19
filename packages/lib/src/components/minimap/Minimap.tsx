@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 
 import { observer } from 'mobx-react'
 
-import ScrollbarThumb, { scrollbarThumbFill } from '../ScrollbarThumb.tsx'
+import DragHandle, { scrollbarThumbFill } from '../DragHandle.tsx'
 import { MINIMAP_BAR_HEIGHT, getMinimapLayout } from './minimapLayout.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -40,8 +40,9 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
           border: '1px solid #555',
         }}
       />
-      <ScrollbarThumb
+      <DragHandle
         axis="x"
+        variant="thumb"
         getStart={() => model.scrollX}
         onDrag={onDrag}
         style={{

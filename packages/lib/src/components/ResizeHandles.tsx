@@ -1,53 +1,11 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 
 import { observer } from 'mobx-react'
 
-import { useDragScroll } from '../useDragScroll.ts'
+import DragHandle from './DragHandle.tsx'
 
 import type { MsaViewModel } from '../model.ts'
-
-const handleBg = 'rgba(200,200,200)'
-const handleBgHover = 'rgba(150,150,150)'
-
-/**
- * A draggable divider. `getStart` is read at mousedown and handed back to
- * `onDrag` alongside the pixel delta since, so each handle below only has to say
- * which model dimension it resizes and where it sits.
- */
-function ResizeHandle({
-  axis,
-  getStart,
-  onDrag,
-  style,
-}: {
-  axis: 'x' | 'y'
-  getStart: () => number
-  onDrag: (delta: number, startValue: number) => void
-  style: React.CSSProperties
-}) {
-  const [hovered, setHovered] = useState(false)
-  const { startDrag } = useDragScroll(axis, onDrag)
-
-  return (
-    <div
-      onMouseDown={event => {
-        startDrag(event, getStart())
-      }}
-      onMouseEnter={() => {
-        setHovered(true)
-      }}
-      onMouseLeave={() => {
-        setHovered(false)
-      }}
-      style={{
-        position: 'relative',
-        cursor: axis === 'x' ? 'ew-resize' : 'ns-resize',
-        background: hovered ? handleBgHover : handleBg,
-        ...style,
-      }}
-    />
-  )
-}
+import type { TrackKind } from '../types.ts'
 
 export const VerticalResizeHandle = observer(function ({
   model,
@@ -61,8 +19,9 @@ export const VerticalResizeHandle = observer(function ({
     [model],
   )
   return (
-    <ResizeHandle
+    <DragHandle
       axis="x"
+      variant="resizer"
       getStart={() => model.treeAreaWidth}
       onDrag={onDrag}
       style={{ width: model.resizeHandleWidth }}
@@ -82,8 +41,9 @@ export const HorizontalResizeHandle = observer(function ({
     [model],
   )
   return (
-    <ResizeHandle
+    <DragHandle
       axis="y"
+      variant="resizer"
       getStart={() => model.height}
       onDrag={onDrag}
       style={{ width: '100%', height: model.resizeHandleWidth }}
@@ -91,21 +51,53 @@ export const HorizontalResizeHandle = observer(function ({
   )
 })
 
-export const ConservationTrackResizeHandle = observer(function ({
+// The height behind each resizable track kind. Both bar tracks read one height
+// so conservation and property conservation stay directly comparable; the logo
+// keeps its own, being taller by default. Text tracks are absent: they are one
+// alignment row tall and follow rowHeight, so the zoom controls already size
+// them.
+const trackHeights: Partial<
+  Record<
+    TrackKind,
+    {
+      get: (model: MsaViewModel) => number
+      set: (model: MsaViewModel, height: number) => void
+    }
+  >
+> = {
+  bar: {
+    get: model => model.conservationTrackHeight,
+    set: (model, height) => {
+      model.setConservationTrackHeight(height)
+    },
+  },
+  logo: {
+    get: model => model.sequenceLogoTrackHeight,
+    set: (model, height) => {
+      model.setSequenceLogoTrackHeight(height)
+    },
+  },
+}
+
+export const TrackResizeHandle = observer(function ({
   model,
+  kind,
 }: {
   model: MsaViewModel
+  kind: TrackKind
 }) {
+  const height = trackHeights[kind]
   const onDrag = useCallback(
     (delta: number, startHeight: number) => {
-      model.setConservationTrackHeight(Math.max(10, startHeight + delta))
+      height?.set(model, Math.max(10, startHeight + delta))
     },
-    [model],
+    [model, height],
   )
-  return (
-    <ResizeHandle
+  return height ? (
+    <DragHandle
       axis="y"
-      getStart={() => model.conservationTrackHeight}
+      variant="resizer"
+      getStart={() => height.get(model)}
       onDrag={onDrag}
       style={{
         position: 'absolute',
@@ -116,5 +108,5 @@ export const ConservationTrackResizeHandle = observer(function ({
         zIndex: 1,
       }}
     />
-  )
+  ) : null
 })
