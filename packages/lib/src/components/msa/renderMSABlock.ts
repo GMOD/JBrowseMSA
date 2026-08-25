@@ -2,6 +2,7 @@ import { setFontSize } from '../../setFontSize.ts'
 import { adjustColorForContrast } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import { domainBandCursor } from './domainBandCursor.ts'
+import { tileColorFn } from './tileColor.ts'
 import { visibleColRange } from './visibleColRange.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
@@ -20,6 +21,7 @@ export function renderMSABlock({
   highResScaleFactorOverride,
   blockSizeXOverride,
   blockSizeYOverride,
+  rasterTiles,
 }: {
   offsetX: number
   offsetY: number
@@ -30,6 +32,7 @@ export function renderMSABlock({
   highResScaleFactorOverride?: number
   blockSizeXOverride?: number
   blockSizeYOverride?: number
+  rasterTiles?: boolean
 }) {
   const {
     colWidth,
@@ -73,6 +76,9 @@ export function renderMSABlock({
     // when domains are shown the background tiles come from
     // renderBoxFeatureCanvasBlock, so only the letters are drawn here
     drawTiles: !actuallyShowDomains,
+    // ...and when the caller has already laid the raster down, the tiles are
+    // there but nothing here has to paint them
+    rasterTiles,
   })
   drawInsertionIndicators({
     model,
@@ -82,23 +88,6 @@ export function renderMSABlock({
     visibleLeaves,
   })
   ctx.resetTransform()
-}
-
-// Per-cell tile color for the active scheme. The scheme is fixed for the whole
-// block, so resolve which rule applies once rather than re-testing the scheme
-// name inside the innermost loop.
-function tileColorFn(model: MsaViewModel) {
-  const { colorSchemeName, colorScheme, colClustalX, colConsensus } = model
-  if (colorSchemeName === 'clustalx_protein_dynamic') {
-    return (col: number, letter: string) => colClustalX[col]![letter]
-  }
-  if (colorSchemeName === 'percent_identity_dynamic') {
-    return (col: number, letter: string) => {
-      const consensus = colConsensus[col]!
-      return letter === consensus.letter ? consensus.color : undefined
-    }
-  }
-  return (_col: number, letter: string) => colorScheme[letter]
 }
 
 // Letter color to use over a domain box, keyed by accession. Domain fills come
@@ -123,6 +112,7 @@ function drawTilesAndText({
   xEnd,
   referenceSeq,
   drawTiles,
+  rasterTiles,
 }: {
   model: MsaViewModel
   theme: Theme
@@ -133,6 +123,7 @@ function drawTilesAndText({
   xEnd: number
   referenceSeq: string | null | undefined
   drawTiles: boolean
+  rasterTiles?: boolean
 }) {
   const {
     bgColor,
@@ -146,7 +137,11 @@ function drawTilesAndText({
   } = model
 
   const tiles = drawTiles && bgColor
-  if (tiles || showMsaLetters) {
+  const paintTiles = tiles && !rasterTiles
+  if (paintTiles || showMsaLetters) {
+    // over raster tiles the letters take their color from contrastScheme, so
+    // the scheme lookup per cell is pure waste
+    const needsColor = paintTiles || !tiles
     const tileColor = tileColorFn(model)
     const offsetXAligned = xStart * colWidth
     const halfColWidth = colWidth / 2
@@ -178,9 +173,9 @@ function drawTilesAndText({
           const x = j * colWidth + offsetXAligned
           const isMatchingReference =
             referenceSeq && name !== relativeTo && letter === referenceSeq[j]
-          const color = tileColor(col, letter)
+          const color = needsColor ? tileColor(col, letter) : undefined
 
-          if (tiles) {
+          if (paintTiles) {
             ctx.fillStyle = isMatchingReference
               ? theme.palette.action.hover
               : color || theme.palette.background.default

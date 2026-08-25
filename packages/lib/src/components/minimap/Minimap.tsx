@@ -1,18 +1,55 @@
 import React, { useCallback } from 'react'
 
+import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import DragHandle, { scrollbarThumbFill } from '../DragHandle.tsx'
+import { msaThumbnail } from '../msa/msaRaster.ts'
 import { MINIMAP_BAR_HEIGHT, getMinimapLayout } from './minimapLayout.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
 const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
-  const { minimapHeight, msaCanvasWidth } = model
+  const { minimapHeight, msaCanvasWidth, highResScaleFactor } = model
+  const theme = useTheme()
   const { unit, s, w, polygonHeight, polygonPoints } = getMinimapLayout(
     model,
     msaCanvasWidth,
   )
+
+  // the whole alignment, sampled down to the bar: it says where the conserved
+  // blocks and the gappy stretches are, which is what a scroll aims at
+  const barWidth = Math.round(msaCanvasWidth * highResScaleFactor)
+  const barHeight = Math.round(MINIMAP_BAR_HEIGHT * highResScaleFactor)
+  const ref = useCanvasAutorun({
+    draw: ctx => {
+      ctx.resetTransform()
+      ctx.clearRect(0, 0, barWidth, barHeight)
+      const thumbnail = msaThumbnail({
+        model,
+        theme,
+        height: MINIMAP_BAR_HEIGHT,
+      })
+      if (thumbnail) {
+        ctx.imageSmoothingEnabled = true
+        ctx.drawImage(
+          thumbnail,
+          0,
+          0,
+          thumbnail.width,
+          thumbnail.height,
+          0,
+          0,
+          barWidth,
+          barHeight,
+        )
+      }
+    },
+    width: barWidth,
+    height: barHeight,
+    deps: [model, theme],
+  })
 
   const onDrag = useCallback(
     (delta: number, startScroll: number) => {
@@ -33,8 +70,13 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
         flexShrink: 0,
       }}
     >
-      <div
+      <canvas
+        ref={ref}
+        width={barWidth}
+        height={barHeight}
         style={{
+          display: 'block',
+          width: msaCanvasWidth,
           height: MINIMAP_BAR_HEIGHT,
           boxSizing: 'border-box',
           border: '1px solid #555',

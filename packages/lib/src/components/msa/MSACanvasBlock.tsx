@@ -6,6 +6,7 @@ import { observer } from 'mobx-react'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { useColorContrast } from '../../useColorContrast.ts'
 import ColumnStats from './ColumnStats.tsx'
+import { drawMsaRaster, rasterSupported } from './msaRaster.ts'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
 import { useMsaBlockMouse } from './useMsaBlockMouse.ts'
@@ -42,6 +43,14 @@ const MSACanvasBlock = observer(function ({
         offsetY,
         model,
       })
+      // the alignment background comes from zoom-independent raster tiles; the
+      // domain overlay paints its own boxes instead, and letter-color mode has
+      // no background to paint
+      const rasterTiles =
+        !model.actuallyShowDomains && model.bgColor && rasterSupported()
+      if (rasterTiles) {
+        drawMsaRaster({ ctx, model, theme, offsetX, offsetY })
+      }
       renderMSABlock({
         ctx,
         theme,
@@ -49,6 +58,7 @@ const MSACanvasBlock = observer(function ({
         offsetY,
         contrastScheme,
         model,
+        rasterTiles,
       })
     },
     width: canvasSize,
