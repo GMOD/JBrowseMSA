@@ -33,9 +33,9 @@ canvas with a tiled rendering system for scalability.
   discriminator and share one draw module, `components/tracks/drawTracks.ts`.
   `drawTrackBlock` there owns the transform and dispatches on `kind`; the live
   view calls it from `components/tracks/TrackBlocks.tsx`, the one canvas host
-  every kind uses, and the SVG export calls it through `renderAllTracks`.
-  Adding a track kind means a new `kind`, a draw function in that module, and a
-  case in `drawTrackBlock` — not a second rendering path or a second component.
+  every kind uses, and the SVG export calls it through `renderAllTracks`. Adding
+  a track kind means a new `kind`, a draw function in that module, and a case in
+  `drawTrackBlock` — not a second rendering path or a second component.
   `TrackResizeHandle` maps a kind to the model volatile holding its height.
 - `turnedOffTracks` records only the user's explicit show/hide choices. An id is
   absent until they touch that track, and the value then means "off", so a
