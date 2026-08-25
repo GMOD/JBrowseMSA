@@ -128,6 +128,39 @@ async function main() {
         failures.push('structure view is not in its own cell beside the genome')
       }
 
+      // a loc carrying [rev] on every region must come back as reversed
+      // displayed regions, in the order the loc listed them
+      const wantReversed = decodeSessionUrl(jbrowseUrl)
+        .views[0].init.loc.split(' ')
+        .every(l => l.endsWith('[rev]'))
+      const regions = await page.evaluate(() => {
+        const lgv = window.JBrowseRootModel?.session?.views?.find(
+          v => v.type === 'LinearGenomeView',
+        )
+        return (lgv?.displayedRegions ?? []).map(r => ({
+          start: r.start,
+          end: r.end,
+          reversed: !!r.reversed,
+        }))
+      })
+      console.log(
+        `  displayedRegions: ${regions.length} (loc flipped=${wantReversed})`,
+        JSON.stringify(regions.slice(0, 2)),
+      )
+      if (regions.length === 0) {
+        failures.push('LGV has no displayed regions')
+      }
+      if (wantReversed && !regions.every(r => r.reversed)) {
+        failures.push('loc marked [rev] but displayed regions are not reversed')
+      }
+      if (
+        wantReversed &&
+        regions.length > 1 &&
+        regions[0].start < regions[regions.length - 1].start
+      ) {
+        failures.push('flipped regions are not in descending genomic order')
+      }
+
       let ready = {}
       if (connected) {
         ready = await waitForStructure(page)
