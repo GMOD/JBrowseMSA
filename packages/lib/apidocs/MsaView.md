@@ -827,6 +827,15 @@ boolean
 Map<any, number>
 ```
 
+#### getter: labelWidthScale
+
+factor turning a labelWidthMap entry into its width at the current font size
+
+```js
+// type
+number
+```
+
 #### getter: leaves
 
 ```js
@@ -862,8 +871,7 @@ number
 #### getter: maxScrollY
 
 most-negative allowed scrollY, keeping the last row in view rather than letting
-the whole alignment scroll off the top. visible MSA height is computed inline
-here because msaAreaHeight is defined later in the chain.
+the whole alignment scroll off the top.
 
 ```js
 // type
@@ -1199,6 +1207,16 @@ categorical types ordered by sequence position
 ```js
 // type
 any
+```
+
+#### getter: visibleMsaHeight
+
+height of the alignment viewport, px. The same subtraction as msaAreaHeight,
+which is defined later in the views chain
+
+```js
+// type
+number
 ```
 
 #### getter: width

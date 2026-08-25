@@ -264,6 +264,7 @@ function renderTreeLabels({
     marginLeft,
     noTree,
     labelWidthMap,
+    labelWidthScale,
   } = model
   const by = blockSizeYOverride ?? blockSize
   // labels only exist for leaves, which are laid out top to bottom, so take the
@@ -295,8 +296,11 @@ function renderTreeLabels({
         xp = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf) ?? 0
       }
 
+      const measured = labelWidthMap.get(name)
       const width =
-        labelWidthMap.get(name) ?? ctx.measureText(displayName).width
+        measured === undefined
+          ? ctx.measureText(displayName).width
+          : measured * labelWidthScale
 
       ctx.fillStyle = theme.palette.text.primary
       if (labelsAlignRight) {

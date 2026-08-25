@@ -31,6 +31,16 @@ export const segmentShades = ['#9fb6d4', '#d4dcea']
 export const defaultDrawMsaLetters = true
 export const defaultScrollZoom = false
 
+// Cell size floors for drawing residue letters and tree labels. Below these a
+// 500px block holds thousands of glyphs, and fillText -- which no sprite atlas
+// beats, measured -- dominates every zoom frame.
+export const minLetterRowHeight = 8
+export const minLetterColWidth = 5
+
+// Tree labels are measured once at this size and scaled to the current font
+// size, so a vertical zoom never re-measures the tree.
+export const labelReferenceFontSize = 16
+
 // Zoom limits, px per cell. maxCellSize caps both smooth zoom and the stepwise
 // zoom-in buttons (which otherwise grow unbounded). minColWidth/minRowHeight are
 // the smooth-zoom floors.

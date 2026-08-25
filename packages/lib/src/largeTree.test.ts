@@ -26,8 +26,9 @@ test('a tree far past the argument limit still lays out', () => {
   model.setWidth(1000)
 
   expect(model.numRows).toBe(200_000)
-  // 's199999' is the longest name, at 7 chars * 7px
-  expect(model.labelsWidth).toBe(49)
+  // 's199999' is the longest name, at 7 chars * 7px, scaled from the reference
+  // font size the labels are measured at down to the current one (13/16)
+  expect(model.labelsWidth).toBeCloseTo((49 * 13) / 16)
   expect(model.treeWidth).toBeGreaterThan(0)
 })
 
@@ -50,4 +51,17 @@ test('re-hovering the same tree node does not re-walk the tree', () => {
 
   model.setHoveredTreeNode(undefined)
   expect(model.hoveredTreeNode).toBeUndefined()
+})
+
+test('a vertical zoom does not re-measure every label', () => {
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    data: { tree: flatNewick(200_000) },
+  })
+  model.setWidth(1000)
+
+  const before = model.labelWidthMap
+  model.setRowHeight(24)
+  expect(model.labelWidthMap).toBe(before)
+  expect(model.labelsWidth).toBeCloseTo((49 * 18) / 16)
 })

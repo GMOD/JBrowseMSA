@@ -34,8 +34,11 @@ import {
   defaultShowDomainLegend,
   defaultShowDomains,
   defaultSubFeatureRows,
+  labelReferenceFontSize,
   maxCellSize,
   minColWidth,
+  minLetterColWidth,
+  minLetterRowHeight,
   minRowHeight,
   segmentFeatureTypes,
   segmentShades,
@@ -1193,11 +1196,23 @@ function stateModelFactory() {
        */
       get blocksY() {
         return calculateBlocks({
-          viewportSize: self.height,
+          viewportSize: this.visibleMsaHeight,
           viewportPos: -self.scrollY,
           blockSize: self.blockSize,
           mapSize: self.totalHeight,
         })
+      },
+      /**
+       * #getter
+       * height of the alignment viewport, px. The same subtraction as
+       * msaAreaHeight, which is defined later in the views chain
+       */
+      get visibleMsaHeight() {
+        return (
+          self.height -
+          self.headerHeight -
+          (self.msaAreaWidth < self.totalWidth ? self.minimapHeight : 0)
+        )
       },
     }))
     .views(self => ({
@@ -1225,15 +1240,10 @@ function stateModelFactory() {
       /**
        * #getter
        * most-negative allowed scrollY, keeping the last row in view rather than
-       * letting the whole alignment scroll off the top. visible MSA height is
-       * computed inline here because msaAreaHeight is defined later in the chain.
+       * letting the whole alignment scroll off the top.
        */
       get maxScrollY() {
-        const visibleHeight =
-          self.height -
-          self.headerHeight -
-          (self.msaAreaWidth < self.totalWidth ? self.minimapHeight : 0)
-        return Math.min(-self.totalHeight + visibleHeight, 0)
+        return Math.min(-self.totalHeight + self.visibleMsaHeight, 0)
       },
       /**
        * #getter
@@ -1241,7 +1251,8 @@ function stateModelFactory() {
       get showMsaLetters() {
         return (
           self.drawMsaLetters &&
-          self.rowHeight >= 5 &&
+          self.rowHeight >= minLetterRowHeight &&
+          self.colWidth >= minLetterColWidth &&
           self.colWidth > self.rowHeight / 2
         )
       },
@@ -1249,7 +1260,7 @@ function stateModelFactory() {
        * #getter
        */
       get showTreeText() {
-        return self.drawLabels && self.rowHeight >= 5
+        return self.drawLabels && self.rowHeight >= minLetterRowHeight
       },
     }))
     .actions(self => ({
@@ -1478,10 +1489,13 @@ function stateModelFactory() {
        * #getter
        */
       get labelWidthMap() {
-        const { showTreeText, leaves, treeMetadata, fontSize } = self
+        const { showTreeText, leaves, treeMetadata } = self
         // gated on the same condition the renderer draws labels under, so the
         // gutter labelsWidth reserves and the labels actually drawn cannot
-        // disagree -- and so turning labels off hands their space to the tree
+        // disagree -- and so turning labels off hands their space to the tree.
+        // Measured at a fixed reference size and scaled by labelWidthScale:
+        // re-measuring every leaf on every vertical-zoom frame cost ~200ms on a
+        // 50k-leaf tree
         return showTreeText
           ? new Map(
               leaves.map(node => {
@@ -1490,10 +1504,22 @@ function stateModelFactory() {
                 // to the row name, and measuring '' would size the gutter (and
                 // the label's click target) to nothing
                 const displayName = treeMetadata[name]?.genome || name
-                return [name, measureTextCanvas(displayName, fontSize)] as const
+                return [
+                  name,
+                  measureTextCanvas(displayName, labelReferenceFontSize),
+                ] as const
               }),
             )
           : new Map<string, number>()
+      },
+
+      /**
+       * #getter
+       * factor turning a labelWidthMap entry into its width at the current
+       * font size
+       */
+      get labelWidthScale() {
+        return self.fontSize / labelReferenceFontSize
       },
 
       get labelsWidth() {
@@ -1508,7 +1534,7 @@ function stateModelFactory() {
             max = width
           }
         }
-        return max
+        return max * this.labelWidthScale
       },
 
       /**
