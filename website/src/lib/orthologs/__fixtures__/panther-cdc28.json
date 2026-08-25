@@ -1,0 +1,76 @@
+{
+  "search": {
+    "product": {
+      "version": 19,
+      "content": "PANTHERDB"
+    },
+    "mapping": {
+      "mapped": [
+        {
+          "target_gene_symbol": "CDK4",
+          "persistent_id": "PTN000624038",
+          "target_persistent_id": "PTN002514106",
+          "ortholog": "O",
+          "gene": "YEAST|SGD=S000000364|UniProtKB=P00546",
+          "target_gene": "HUMAN|HGNC=1773|UniProtKB=P11802",
+          "id": "CDC28"
+        },
+        {
+          "target_gene_symbol": "cdk-4",
+          "persistent_id": "PTN000624038",
+          "target_persistent_id": "PTN000623338",
+          "ortholog": "O",
+          "gene": "YEAST|SGD=S000000364|UniProtKB=P00546",
+          "target_gene": "CAEEL|WormBase=WBGene00000406|UniProtKB=Q9XTR1",
+          "id": "CDC28"
+        },
+        {
+          "target_gene_symbol": "Cdk4",
+          "persistent_id": "PTN000624038",
+          "target_persistent_id": "PTN000624028",
+          "ortholog": "O",
+          "gene": "YEAST|SGD=S000000364|UniProtKB=P00546",
+          "target_gene": "DROME|FlyBase=FBgn0016131|UniProtKB=Q7K306",
+          "id": "CDC28"
+        },
+        {
+          "target_gene_symbol": "CDK2",
+          "persistent_id": "PTN000624038",
+          "target_persistent_id": "PTN002514144",
+          "ortholog": "LDO",
+          "gene": "YEAST|SGD=S000000364|UniProtKB=P00546",
+          "target_gene": "HUMAN|HGNC=1771|UniProtKB=P24941",
+          "id": "CDC28"
+        },
+        {
+          "target_gene_symbol": "Cdk2",
+          "persistent_id": "PTN000624038",
+          "target_persistent_id": "PTN000624008",
+          "ortholog": "LDO",
+          "gene": "YEAST|SGD=S000000364|UniProtKB=P00546",
+          "target_gene": "MOUSE|MGI=MGI=104772|UniProtKB=P97377",
+          "id": "CDC28"
+        },
+        {
+          "target_gene_symbol": "cdk-2",
+          "persistent_id": "PTN000624038",
+          "target_persistent_id": "PTN000624024",
+          "ortholog": "LDO",
+          "gene": "YEAST|SGD=S000000364|UniProtKB=P00546",
+          "target_gene": "CAEEL|WormBase=WBGene00019362|UniProtKB=O61847",
+          "id": "CDC28"
+        },
+        {
+          "target_gene_symbol": "CDKB2-2",
+          "persistent_id": "PTN000624038",
+          "target_persistent_id": "PTN000624074",
+          "ortholog": "O",
+          "gene": "YEAST|SGD=S000000364|UniProtKB=P00546",
+          "target_gene": "ARATH|TAIR=locus=2037410|UniProtKB=Q8LG64",
+          "id": "CDC28"
+        }
+      ]
+    },
+    "search_type": "matching ortholog info"
+  }
+}

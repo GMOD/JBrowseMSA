@@ -1,0 +1,14 @@
+{
+  "search": {
+    "product": {
+      "version": 19,
+      "content": "PANTHERDB"
+    },
+    "mapping": {
+      "mapped": {
+        "id": "Antp"
+      }
+    },
+    "search_type": "matching ortholog info"
+  }
+}

@@ -19,6 +19,11 @@ stay written down so nobody re-derives them from scratch.
   metadata, the half of publication figure style `relativeTo` does not cover.
 - [Conservation on 3D structure](ideas/conservation-on-structure.md) — the
   coordinate contract with protein3d is already done; this is wiring.
+- [Ortholog sources beyond NCBI](ideas/ortholog-sources-beyond-ncbi.md) — NCBI
+  has no orthologs for yeast, worm or plant genes, so the gene explorer's
+  cross-species alignment fails for four of its seven species. PANTHER measured
+  as the fix, OMA the fallback, Ensembl and OrthoDB rejected with numbers;
+  prototype in `website/src/lib/orthologs/panther.ts`.
 - [Demo: load by accession](ideas/load-by-accession-demo.md) — a Pfam/Rfam box
   that pulls a family alignment from EBI, no file handling.
 - [Demo: codon-aware DNA view](ideas/codon-aware-dna-view.md) — translate a row,

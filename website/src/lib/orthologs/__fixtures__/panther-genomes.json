@@ -1,0 +1,64 @@
+{
+  "search": {
+    "output": {
+      "genomes": {
+        "genome": [
+          {
+            "name": "human",
+            "taxon_id": 9606,
+            "short_name": "HUMAN",
+            "version": "Reference Proteome 2023_03",
+            "long_name": "Homo sapiens"
+          },
+          {
+            "name": "mouse",
+            "taxon_id": 10090,
+            "short_name": "MOUSE",
+            "version": "Reference Proteome 2023_03",
+            "long_name": "Mus musculus"
+          },
+          {
+            "name": "zebrafish",
+            "taxon_id": 7955,
+            "short_name": "DANRE",
+            "version": "Reference Proteome 2023_03",
+            "long_name": "Danio rerio"
+          },
+          {
+            "name": "fruit_fly",
+            "taxon_id": 7227,
+            "short_name": "DROME",
+            "version": "Reference Proteome 2023_03",
+            "long_name": "Drosophila melanogaster"
+          },
+          {
+            "name": "nematode_worm",
+            "taxon_id": 6239,
+            "short_name": "CAEEL",
+            "version": "Reference Proteome 2023_03",
+            "long_name": "Caenorhabditis elegans"
+          },
+          {
+            "name": "budding_yeast",
+            "taxon_id": 559292,
+            "short_name": "YEAST",
+            "version": "Reference Proteome 2023_03",
+            "long_name": "Saccharomyces cerevisiae"
+          },
+          {
+            "name": "arabidopsis",
+            "taxon_id": 3702,
+            "short_name": "ARATH",
+            "version": "Reference Proteome 2023_03",
+            "long_name": "Arabidopsis thaliana"
+          }
+        ]
+      }
+    },
+    "product": {
+      "source": "PANTHERDB",
+      "version": 19
+    },
+    "search_type": "supported genomes information"
+  }
+}
