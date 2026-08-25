@@ -1,5 +1,5 @@
 const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/core.DxpvqkrT.js","_astro/rolldown-runtime.hePW80VL.js","_astro/engine-oniguruma.D2u1fNOb.js"])))=>i.map(i=>d[i]);
-import{r as e}from"./rolldown-runtime.hePW80VL.js";import{A as t,D as n,F as r,M as i,N as a,P as o,Q as s,dt as c,ft as l,ut as u,x as d}from"./Tooltip.BgFwEKP3.js";import{t as f}from"./react.C2itep5K.js";import{t as p}from"./ButtonBase.BXIivUkB.js";import{t as m}from"./jsx-runtime.CWLBoBiw.js";import{o as h}from"./parseGFF.BqQEJEuw.js";import{a as g}from"./Close.D2sTm8w5.js";import{_,a as v,c as y,d as b,f as x,g as S,h as C,i as w,l as ee,m as T,n as E,o as D,p as O,r as te,s as k,t as A,u as j}from"./exampleData.BjzHQx1d.js";import{n as M,t as N}from"./theme.xWn-0dJb.js";import{E as P,_ as F,g as ne,t as re}from"./Select._sixZXyk.js";import{t as I}from"./FormControlLabel.DCifVrV5.js";import{r as ie,t as ae}from"./MenuItem.CK6iVMzL.js";import{t as L}from"./Button.B7hqlHNa.js";import{n as oe}from"./ListItemIcon.Dl6hkVlY.js";import{t as R}from"./Paper.B6cT4LPs.js";import{t as z}from"./mobxreact.DwNzksmd.js";import{c as B}from"./mobx-state-tree.I50eBhvf.js";import{t as V}from"./preload-helper.BCA0xuDy.js";import{t as H}from"./Switch.DFRqA2ny.js";function U(e){return c(`MuiListItemButton`,e)}var W=u(`MuiListItemButton`,[`root`,`focusVisible`,`dense`,`alignItemsFlexStart`,`disabled`,`divider`,`gutters`,`selected`]),G=e(f(),1),K=e(m(),1),q=(e,t)=>{let{ownerState:n}=e;return[t.root,n.dense&&t.dense,n.alignItems===`flex-start`&&t.alignItemsFlexStart,n.divider&&t.divider,!n.disableGutters&&t.gutters]},se=e=>{let{alignItems:t,classes:n,dense:r,disabled:i,disableGutters:a,divider:o,selected:c}=e,l=s({root:[`root`,r&&`dense`,!a&&`gutters`,o&&`divider`,i&&`disabled`,t===`flex-start`&&`alignItemsFlexStart`,c&&`selected`]},U,n);return{...n,...l}},ce=o(p,{shouldForwardProp:e=>r(e)||e===`classes`,name:`MuiListItemButton`,slot:`Root`,overridesResolver:q})(a(({theme:e})=>({display:`flex`,flexGrow:1,justifyContent:`flex-start`,alignItems:`center`,position:`relative`,textDecoration:`none`,minWidth:0,boxSizing:`border-box`,textAlign:`left`,paddingTop:8,paddingBottom:8,...n(e,`background-color`,{duration:e.transitions.duration.shortest}),"&:hover":{textDecoration:`none`,backgroundColor:(e.vars||e).palette.action.hover,"@media (hover: none)":{backgroundColor:`transparent`}},[`&.${W.selected}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity),[`&.${W.focusVisible}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.focusOpacity}`)}},[`&.${W.selected}:hover`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.hoverOpacity}`),"@media (hover: none)":{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity)}},[`&.${W.focusVisible}`]:{backgroundColor:(e.vars||e).palette.action.focus},[`&.${W.disabled}`]:{opacity:(e.vars||e).palette.action.disabledOpacity},variants:[{props:({ownerState:e})=>e.divider,style:{borderBottom:`1px solid ${(e.vars||e).palette.divider}`,backgroundClip:`padding-box`}},{props:{alignItems:`flex-start`},style:{alignItems:`flex-start`}},{props:({ownerState:e})=>!e.disableGutters,style:{paddingLeft:16,paddingRight:16}},{props:({ownerState:e})=>e.dense,style:{paddingTop:4,paddingBottom:4}}]}))),le=G.forwardRef(function(e,n){let r=i({props:e,name:`MuiListItemButton`}),{alignItems:a=`center`,autoFocus:o=!1,component:s=`div`,children:c,dense:u=!1,disableGutters:d=!1,divider:f=!1,focusVisibleClassName:p,selected:m=!1,className:h,...g}=r,_=G.useContext(F),v=G.useMemo(()=>({dense:u||_.dense||!1,alignItems:a,disableGutters:d}),[a,_.dense,u,d]),y=G.useRef(null);P(()=>{o&&y.current&&y.current.focus()},[o]);let b={...r,alignItems:a,dense:v.dense,disableGutters:d,divider:f,selected:m},x=se(b),{root:S,...C}=x,w=t(y,n);return(0,K.jsx)(F.Provider,{value:v,children:(0,K.jsx)(ce,{ref:w,href:g.href||g.to,component:(g.href||g.to)&&s===`div`?`button`:s,internalNativeButton:!1,focusVisibleClassName:l(x.focusVisible,p),ownerState:b,className:l(x.root,h),...g,classes:C,children:c})})}),ue=`>Human
+import{r as e}from"./rolldown-runtime.hePW80VL.js";import{A as t,D as n,F as r,M as i,N as a,P as o,Q as s,dt as c,ft as l,ut as u,x as d}from"./Tooltip.BgFwEKP3.js";import{t as f}from"./react.C2itep5K.js";import{t as p}from"./ButtonBase.BXIivUkB.js";import{t as m}from"./jsx-runtime.CWLBoBiw.js";import{o as h}from"./parseGFF.BqQEJEuw.js";import{a as g}from"./Close.D2sTm8w5.js";import{i as _,n as v,r as y,t as b}from"./src.BwiZevdJ.js";import{n as x,t as ee}from"./theme.xWn-0dJb.js";import{E as S,_ as C,g as w,t as T}from"./Select._sixZXyk.js";import{t as E}from"./FormControlLabel.DCifVrV5.js";import{r as D,t as O}from"./MenuItem.CK6iVMzL.js";import{t as k}from"./Button.B7hqlHNa.js";import{n as te}from"./ListItemIcon.Dl6hkVlY.js";import{t as A}from"./Paper.B6cT4LPs.js";import{t as j}from"./mobxreact.DwNzksmd.js";import{c as M}from"./mobx-state-tree.I50eBhvf.js";import{t as N}from"./preload-helper.BCA0xuDy.js";import{t as P}from"./Switch.DFRqA2ny.js";import{a as ne,c as re,d as ie,f as F,i as ae,l as oe,n as I,o as L,p as R,r as z,s as B,t as V,u as H}from"./exampleData.D25Iuq44.js";function U(e){return c(`MuiListItemButton`,e)}var W=u(`MuiListItemButton`,[`root`,`focusVisible`,`dense`,`alignItemsFlexStart`,`disabled`,`divider`,`gutters`,`selected`]),G=e(f(),1),K=e(m(),1),q=(e,t)=>{let{ownerState:n}=e;return[t.root,n.dense&&t.dense,n.alignItems===`flex-start`&&t.alignItemsFlexStart,n.divider&&t.divider,!n.disableGutters&&t.gutters]},se=e=>{let{alignItems:t,classes:n,dense:r,disabled:i,disableGutters:a,divider:o,selected:c}=e,l=s({root:[`root`,r&&`dense`,!a&&`gutters`,o&&`divider`,i&&`disabled`,t===`flex-start`&&`alignItemsFlexStart`,c&&`selected`]},U,n);return{...n,...l}},ce=o(p,{shouldForwardProp:e=>r(e)||e===`classes`,name:`MuiListItemButton`,slot:`Root`,overridesResolver:q})(a(({theme:e})=>({display:`flex`,flexGrow:1,justifyContent:`flex-start`,alignItems:`center`,position:`relative`,textDecoration:`none`,minWidth:0,boxSizing:`border-box`,textAlign:`left`,paddingTop:8,paddingBottom:8,...n(e,`background-color`,{duration:e.transitions.duration.shortest}),"&:hover":{textDecoration:`none`,backgroundColor:(e.vars||e).palette.action.hover,"@media (hover: none)":{backgroundColor:`transparent`}},[`&.${W.selected}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity),[`&.${W.focusVisible}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.focusOpacity}`)}},[`&.${W.selected}:hover`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.hoverOpacity}`),"@media (hover: none)":{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity)}},[`&.${W.focusVisible}`]:{backgroundColor:(e.vars||e).palette.action.focus},[`&.${W.disabled}`]:{opacity:(e.vars||e).palette.action.disabledOpacity},variants:[{props:({ownerState:e})=>e.divider,style:{borderBottom:`1px solid ${(e.vars||e).palette.divider}`,backgroundClip:`padding-box`}},{props:{alignItems:`flex-start`},style:{alignItems:`flex-start`}},{props:({ownerState:e})=>!e.disableGutters,style:{paddingLeft:16,paddingRight:16}},{props:({ownerState:e})=>e.dense,style:{paddingTop:4,paddingBottom:4}}]}))),le=G.forwardRef(function(e,n){let r=i({props:e,name:`MuiListItemButton`}),{alignItems:a=`center`,autoFocus:o=!1,component:s=`div`,children:c,dense:u=!1,disableGutters:d=!1,divider:f=!1,focusVisibleClassName:p,selected:m=!1,className:h,...g}=r,_=G.useContext(C),v=G.useMemo(()=>({dense:u||_.dense||!1,alignItems:a,disableGutters:d}),[a,_.dense,u,d]),y=G.useRef(null);S(()=>{o&&y.current&&y.current.focus()},[o]);let b={...r,alignItems:a,dense:v.dense,disableGutters:d,divider:f,selected:m},x=se(b),{root:ee,...w}=x,T=t(y,n);return(0,K.jsx)(C.Provider,{value:v,children:(0,K.jsx)(ce,{ref:T,href:g.href||g.to,component:(g.href||g.to)&&s===`div`?`button`:s,internalNativeButton:!1,focusVisibleClassName:l(x.focusVisible,p),ownerState:b,className:l(x.root,h),...g,classes:w,children:c})})}),ue=`>Human
 MAAGGPGAGSAAPVSSTSSLPLAALNMRVRRRLSLFLNVRTQVAADWTALAEEMDFEYLEIRQLETQADPTGRLLDAWQGRPGASVGRLLELLTKLGRDDVLLELGPSIEEDCQKYILKQQQEEAEKPLQVAAVDSSVPRTAELAGITTLDDPLGHMPERFDAFICYCPSDIQFVQEMIRQLEQTNYRLKLCVSDRDVLPGTCVWSIASELIEKRCRRMVVVVSDDYLQSKECDFQTKFALSLSPGAHQKRLIPIKYKAMKKEFPSILRFITVCDYTNPCTKSWFWTRLAKALSLP
 >Gorilla
 MAAGGPGAGSAAPVSSTSSLPLAALNMRVRRRLSLFLNVRTQVAADWTALAEEMDFEYLEIRQLETHADPTGRLLDAWQGRPGASVGRLLELLTKLGRDDVLLELGPSIEEDCQKYILKQQQEEAEKPLQVAAVDSSVPRTAELAGITTLDDPLGHMPERFDAFICYCPSDIQFVQEMIRQLEQTNYRLKLCVSDRDVLPGTCVWSIASELIEKRCRRMVVVVSDDYLQSKECDFQTKFALSLSPGAHQKRLIPIKYKAMKKEFPSILRFITVCDYTNPCTKSWFWTRLAKALSLP
@@ -704,7 +704,7 @@ AJ550907.1/56-3     CAUAAGUC-UGGGCUU------AGCCUACUGAUGAGUCGCUGC-----------------
 AJ536615.1/1-44     ---------GGGUGGUG-UGUACCAUCCCUGAUGAGUCCAA----------------------------AAGGACGAAAUGG---
 #=GC SS_cons        (((((((,.<<<<<__......_>>>>><____>,<<<<____........................____>>>>,,,)))))))
 //
-`;function qe(){return(0,K.jsx)(T,{msa:he,tree:ge,gff:_e,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var Je=`import { MSAViewer } from 'react-msaview'
+`;function qe(){return(0,K.jsx)(b,{msa:he,tree:ge,gff:_e,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var Je=`import { MSAViewer } from 'react-msaview'
 
 import { ace2DomainsGFF, ace2MSA, ace2Tree } from './generatedData'
 
@@ -728,7 +728,7 @@ export default function Ace2() {
     />
   )
 }
-`;function Ye(){return(0,K.jsx)(T,{msa:Ie,tree:Le,gff:Re,colorScheme:`clustalx_protein_dynamic`,height:380})}var Xe=`import { MSAViewer } from 'react-msaview'
+`;function Ye(){return(0,K.jsx)(b,{msa:Ie,tree:Le,gff:Re,colorScheme:`clustalx_protein_dynamic`,height:380})}var Xe=`import { MSAViewer } from 'react-msaview'
 
 import {
   aquaporinDomainsGFF,
@@ -755,7 +755,7 @@ export default function Aquaporin() {
     />
   )
 }
-`;function J(e){let[t,{width:n}]=_();return(0,G.useEffect)(()=>{n&&B(e)&&requestAnimationFrame(()=>{e.setWidth(n)})},[e,n]),t}var Ze=[`maeditor`,`clustal`,`clustalx_protein`,`clustalx_protein_dynamic`,`percent_identity_dynamic`,`lesk`,`cinema`,`flower`,`jalview_taylor`,`jalview_zappo`,`jalview_hydrophobicity`,`jalview_buried`,`none`],Qe=z(function(){let[e]=(0,G.useState)(()=>C().create({type:`MsaView`,height:500,colorSchemeName:`maeditor`,data:{msa:x,tree:O}})),t=J(e);return(0,K.jsxs)(`div`,{children:[(0,K.jsx)(re,{value:e.colorSchemeName,size:`small`,onChange:t=>{e.setColorSchemeName(t.target.value)},sx:{mb:1},children:Ze.map(e=>(0,K.jsx)(ae,{value:e,children:e},e))}),(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(S,{model:e})})]})}),$e=`import { useState } from 'react'
+`;function J(e){let[t,{width:n}]=_();return(0,G.useEffect)(()=>{n&&M(e)&&requestAnimationFrame(()=>{e.setWidth(n)})},[e,n]),t}var Ze=[`maeditor`,`clustal`,`clustalx_protein`,`clustalx_protein_dynamic`,`percent_identity_dynamic`,`lesk`,`cinema`,`flower`,`jalview_taylor`,`jalview_zappo`,`jalview_hydrophobicity`,`jalview_buried`,`none`],Qe=j(function(){let[e]=(0,G.useState)(()=>v().create({type:`MsaView`,height:500,colorSchemeName:`maeditor`,data:{msa:F,tree:R}})),t=J(e);return(0,K.jsxs)(`div`,{children:[(0,K.jsx)(T,{value:e.colorSchemeName,size:`small`,onChange:t=>{e.setColorSchemeName(t.target.value)},sx:{mb:1},children:Ze.map(e=>(0,K.jsx)(O,{value:e,children:e},e))}),(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(y,{model:e})})]})}),$e=`import { useState } from 'react'
 
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
@@ -817,7 +817,7 @@ const ColorSchemes = observer(function () {
 })
 
 export default ColorSchemes
-`;function et(){return(0,K.jsx)(T,{msa:Ce,tree:we,colorScheme:`clustalx_protein_dynamic`,height:320})}var tt=`import { MSAViewer } from 'react-msaview'
+`;function et(){return(0,K.jsx)(b,{msa:Ce,tree:we,colorScheme:`clustalx_protein_dynamic`,height:320})}var tt=`import { MSAViewer } from 'react-msaview'
 
 import { cytochromeCMSA, cytochromeCTree } from './generatedData'
 
@@ -838,7 +838,7 @@ export default function CytochromeC() {
     />
   )
 }
-`;function nt(){return(0,K.jsx)(T,{msa:E,gff:A,colorScheme:`clustalx_protein_dynamic`,height:400})}var rt=`import { MSAViewer } from 'react-msaview'
+`;function nt(){return(0,K.jsx)(b,{msa:I,gff:V,colorScheme:`clustalx_protein_dynamic`,height:400})}var rt=`import { MSAViewer } from 'react-msaview'
 
 import { domainsGFF, domainsMSA } from './exampleData'
 
@@ -856,7 +856,7 @@ export default function Domains() {
     />
   )
 }
-`;function it(){return(0,K.jsx)(T,{msa:je,tree:Me,gff:Ne,colorScheme:`clustalx_protein_dynamic`,height:420})}var at=`import { MSAViewer } from 'react-msaview'
+`;function it(){return(0,K.jsx)(b,{msa:je,tree:Me,gff:Ne,colorScheme:`clustalx_protein_dynamic`,height:420})}var at=`import { MSAViewer } from 'react-msaview'
 
 import { ef1aDomainsGFF, ef1aMSA, ef1aTree } from './generatedData'
 
@@ -881,7 +881,7 @@ export default function Ef1a() {
     />
   )
 }
-`;function ot(){return(0,K.jsx)(T,{msa:te,gff:w,colorScheme:`nucleotide`,colWidth:3,highlightColumns:[205],height:440})}var st=`import { MSAViewer } from 'react-msaview'
+`;function ot(){return(0,K.jsx)(b,{msa:z,gff:ae,colorScheme:`nucleotide`,colWidth:3,highlightColumns:[205],height:440})}var st=`import { MSAViewer } from 'react-msaview'
 
 import { f12CdsMSA, f12ExonsGFF } from './exampleData'
 
@@ -913,7 +913,7 @@ export default function F12() {
     />
   )
 }
-`;function ct(){return(0,K.jsx)(T,{msa:D,gff:v,colorScheme:`nucleotide`,colWidth:1,rowHeight:44,height:360})}var lt=`import { MSAViewer } from 'react-msaview'
+`;function ct(){return(0,K.jsx)(b,{msa:L,gff:ne,colorScheme:`nucleotide`,colWidth:1,rowHeight:44,height:360})}var lt=`import { MSAViewer } from 'react-msaview'
 
 import { geneClusterGFF, geneClusterMSA } from './exampleData'
 
@@ -936,7 +936,7 @@ export default function GeneCluster() {
     />
   )
 }
-`;function ut(){return(0,K.jsx)(T,{msa:pe,tree:me,colorScheme:`clustalx_protein_dynamic`,height:420})}var dt=`import { MSAViewer } from 'react-msaview'
+`;function ut(){return(0,K.jsx)(b,{msa:pe,tree:me,colorScheme:`clustalx_protein_dynamic`,height:420})}var dt=`import { MSAViewer } from 'react-msaview'
 
 import { globinMSA, globinTree } from './generatedData'
 
@@ -957,7 +957,7 @@ export default function Globin() {
     />
   )
 }
-`;function ft(){return(0,K.jsx)(T,{msa:Ke,colorScheme:`nucleotide`,height:400})}var pt=`import { MSAViewer } from 'react-msaview'
+`;function ft(){return(0,K.jsx)(b,{msa:Ke,colorScheme:`nucleotide`,height:400})}var pt=`import { MSAViewer } from 'react-msaview'
 
 import { hammerheadMSA } from './generatedData'
 
@@ -971,7 +971,7 @@ import { hammerheadMSA } from './generatedData'
 export default function Hammerhead() {
   return <MSAViewer msa={hammerheadMSA} colorScheme="nucleotide" height={400} />
 }
-`;function mt(){return(0,K.jsx)(T,{msa:xe,tree:Se,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:320})}var ht=`import { MSAViewer } from 'react-msaview'
+`;function mt(){return(0,K.jsx)(b,{msa:xe,tree:Se,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:320})}var ht=`import { MSAViewer } from 'react-msaview'
 
 import { histoneH4MSA, histoneH4Tree } from './generatedData'
 
@@ -991,7 +991,7 @@ export default function HistoneH4() {
     />
   )
 }
-`;function gt(){return(0,K.jsx)(T,{msa:ze,tree:Be,gff:Ve,colorScheme:`clustalx_protein_dynamic`,height:420})}var _t=`import { MSAViewer } from 'react-msaview'
+`;function gt(){return(0,K.jsx)(b,{msa:ze,tree:Be,gff:Ve,colorScheme:`clustalx_protein_dynamic`,height:420})}var _t=`import { MSAViewer } from 'react-msaview'
 
 import { hoxDomainsGFF, hoxMSA, hoxTree } from './generatedData'
 
@@ -1016,7 +1016,7 @@ export default function Hox() {
     />
   )
 }
-`;function vt(){return(0,K.jsx)(T,{msa:Pe,tree:Fe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:320})}var yt=`import { MSAViewer } from 'react-msaview'
+`;function vt(){return(0,K.jsx)(b,{msa:Pe,tree:Fe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:320})}var yt=`import { MSAViewer } from 'react-msaview'
 
 import { insulinMSA, insulinTree } from './generatedData'
 
@@ -1037,7 +1037,7 @@ export default function Insulin() {
     />
   )
 }
-`;function bt(){return(0,K.jsx)(T,{msa:j,colorScheme:`nucleotide`,height:500})}var xt=`import { MSAViewer } from 'react-msaview'
+`;function bt(){return(0,K.jsx)(b,{msa:H,colorScheme:`nucleotide`,height:500})}var xt=`import { MSAViewer } from 'react-msaview'
 
 import { lysineMSA } from './exampleData'
 
@@ -1047,7 +1047,7 @@ import { lysineMSA } from './exampleData'
 export default function LargeTree() {
   return <MSAViewer msa={lysineMSA} colorScheme="nucleotide" height={500} />
 }
-`,Y=`https://jbrowse.org/genomes/multiple_sequence_alignments`;function St(){return(0,K.jsx)(T,{msaFilehandle:{uri:`${Y}/pfam-cov2.stock`,locationType:`UriLocation`},gffFilehandle:{uri:`${Y}/pfam-cov2-domains.gff`,locationType:`UriLocation`},colorScheme:`maeditor`,height:550})}var Ct=`import { MSAViewer } from 'react-msaview'
+`,Y=`https://jbrowse.org/genomes/multiple_sequence_alignments`;function St(){return(0,K.jsx)(b,{msaFilehandle:{uri:`${Y}/pfam-cov2.stock`,locationType:`UriLocation`},gffFilehandle:{uri:`${Y}/pfam-cov2-domains.gff`,locationType:`UriLocation`},colorScheme:`maeditor`,height:550})}var Ct=`import { MSAViewer } from 'react-msaview'
 
 const BASE = 'https://jbrowse.org/genomes/multiple_sequence_alignments'
 
@@ -1070,7 +1070,7 @@ export default function LoadFromUrl() {
     />
   )
 }
-`,wt=z(function(){let[e]=(0,G.useState)(()=>C().create({type:`MsaView`,height:550,colWidth:16,rowHeight:20,data:{msa:x,tree:O}})),t=J(e);return(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(S,{model:e})})}),Tt=`import { useState } from 'react'
+`,wt=j(function(){let[e]=(0,G.useState)(()=>v().create({type:`MsaView`,height:550,colWidth:16,rowHeight:20,data:{msa:F,tree:R}})),t=J(e);return(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(y,{model:e})})}),Tt=`import { useState } from 'react'
 
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
@@ -1103,7 +1103,7 @@ const ModelApi = observer(function () {
 })
 
 export default ModelApi
-`;function Et(){return(0,K.jsx)(T,{msa:ue,tree:de,gff:fe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:500})}var Dt=`import { MSAViewer } from 'react-msaview'
+`;function Et(){return(0,K.jsx)(b,{msa:ue,tree:de,gff:fe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:500})}var Dt=`import { MSAViewer } from 'react-msaview'
 
 import { myd88DomainsGFF, myd88MSA, myd88Tree } from './generatedData'
 
@@ -1129,7 +1129,7 @@ export default function Myd88() {
     />
   )
 }
-`,Ot=[{slug:`covid`,label:`SARS-CoV-2`},{slug:`zika`,label:`Zika`},{slug:`ebola`,label:`Ebola`},{slug:`measles`,label:`Measles`},{slug:`rsv-a`,label:`RSV-A`}];function kt(){let[e,t]=(0,G.useState)(`zika`),n=`https://jbrowse.org/demos/nextstrain/${e}`;return(0,K.jsxs)(`div`,{children:[(0,K.jsxs)(`label`,{children:[`Pathogen`,` `,(0,K.jsx)(`select`,{value:e,onChange:e=>{t(e.target.value)},children:Ot.map(e=>(0,K.jsx)(`option`,{value:e.slug,children:e.label},e.slug))})]}),(0,K.jsx)(T,{treeFilehandle:{uri:`${n}/${e}.nwk`,locationType:`UriLocation`},msaFilehandle:{uri:`${n}/${e}_msa.fasta`,locationType:`UriLocation`},colorScheme:`nucleotide`,treeAreaWidth:300,height:600},e)]})}var At=`import { useState } from 'react'
+`,Ot=[{slug:`covid`,label:`SARS-CoV-2`},{slug:`zika`,label:`Zika`},{slug:`ebola`,label:`Ebola`},{slug:`measles`,label:`Measles`},{slug:`rsv-a`,label:`RSV-A`}];function kt(){let[e,t]=(0,G.useState)(`zika`),n=`https://jbrowse.org/demos/nextstrain/${e}`;return(0,K.jsxs)(`div`,{children:[(0,K.jsxs)(`label`,{children:[`Pathogen`,` `,(0,K.jsx)(`select`,{value:e,onChange:e=>{t(e.target.value)},children:Ot.map(e=>(0,K.jsx)(`option`,{value:e.slug,children:e.label},e.slug))})]}),(0,K.jsx)(b,{treeFilehandle:{uri:`${n}/${e}.nwk`,locationType:`UriLocation`},msaFilehandle:{uri:`${n}/${e}_msa.fasta`,locationType:`UriLocation`},colorScheme:`nucleotide`,treeAreaWidth:300,height:600},e)]})}var At=`import { useState } from 'react'
 
 import { MSAViewer } from 'react-msaview'
 
@@ -1185,7 +1185,7 @@ export default function Nextstrain() {
     </div>
   )
 }
-`;function jt(){return(0,K.jsx)(T,{msa:He,tree:Ue,gff:We,colorScheme:`clustalx_protein_dynamic`,height:500})}var Mt=`import { MSAViewer } from 'react-msaview'
+`;function jt(){return(0,K.jsx)(b,{msa:He,tree:Ue,gff:We,colorScheme:`clustalx_protein_dynamic`,height:500})}var Mt=`import { MSAViewer } from 'react-msaview'
 
 import { nlrp1DomainsGFF, nlrp1MSA, nlrp1Tree } from './generatedData'
 
@@ -1220,7 +1220,7 @@ export default function Nlrp1() {
     />
   )
 }
-`;function Nt(){return(0,K.jsx)(T,{msa:b,colorScheme:`jbrowse_dna`,height:300})}var Pt=`import { MSAViewer } from 'react-msaview'
+`;function Nt(){return(0,K.jsx)(b,{msa:ie,colorScheme:`jbrowse_dna`,height:300})}var Pt=`import { MSAViewer } from 'react-msaview'
 
 import { nucleotideMSA } from './exampleData'
 
@@ -1231,7 +1231,7 @@ export default function NucleotideAlignment() {
     <MSAViewer msa={nucleotideMSA} colorScheme="jbrowse_dna" height={300} />
   )
 }
-`;function Ft(){return(0,K.jsx)(T,{msa:ve,tree:ye,gff:be,colorScheme:`clustalx_protein_dynamic`,height:420})}var It=`import { MSAViewer } from 'react-msaview'
+`;function Ft(){return(0,K.jsx)(b,{msa:ve,tree:ye,gff:be,colorScheme:`clustalx_protein_dynamic`,height:420})}var It=`import { MSAViewer } from 'react-msaview'
 
 import { opsinDomainsGFF, opsinMSA, opsinTree } from './generatedData'
 
@@ -1254,7 +1254,7 @@ export default function Opsins() {
     />
   )
 }
-`;function Lt(){return(0,K.jsx)(T,{msa:Oe,tree:ke,gff:Ae,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var Rt=`import { MSAViewer } from 'react-msaview'
+`;function Lt(){return(0,K.jsx)(b,{msa:Oe,tree:ke,gff:Ae,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var Rt=`import { MSAViewer } from 'react-msaview'
 
 import { p53DomainsGFF, p53MSA, p53Tree } from './generatedData'
 
@@ -1279,7 +1279,7 @@ export default function P53() {
     />
   )
 }
-`;function zt(){return(0,K.jsx)(T,{msa:Te,tree:Ee,gff:De,colorScheme:`clustalx_protein_dynamic`,height:440})}var Bt=`import { MSAViewer } from 'react-msaview'
+`;function zt(){return(0,K.jsx)(b,{msa:Te,tree:Ee,gff:De,colorScheme:`clustalx_protein_dynamic`,height:440})}var Bt=`import { MSAViewer } from 'react-msaview'
 
 import { prestinDomainsGFF, prestinMSA, prestinTree } from './generatedData'
 
@@ -1305,7 +1305,7 @@ export default function Prestin() {
     />
   )
 }
-`,Vt=z(function(){let[e]=(0,G.useState)(()=>C().create({type:`MsaView`,height:500,data:{msa:x,tree:O}})),t=J(e);return(0,K.jsxs)(`div`,{children:[(0,K.jsxs)(M,{direction:`row`,spacing:1,sx:{mb:1,flexWrap:`wrap`},children:[(0,K.jsx)(L,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(e.colWidth+2)},children:`Wider columns`}),(0,K.jsx)(L,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(Math.max(1,e.colWidth-2))},children:`Narrower columns`}),(0,K.jsx)(L,{variant:`outlined`,size:`small`,onClick:()=>{e.setRowHeight(e.rowHeight+2)},children:`Taller rows`}),(0,K.jsx)(L,{variant:`outlined`,size:`small`,onClick:()=>{e.fit()},children:`Fit to view`})]}),(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(S,{model:e})})]})}),Ht=`import { useState } from 'react'
+`,Vt=j(function(){let[e]=(0,G.useState)(()=>v().create({type:`MsaView`,height:500,data:{msa:F,tree:R}})),t=J(e);return(0,K.jsxs)(`div`,{children:[(0,K.jsxs)(x,{direction:`row`,spacing:1,sx:{mb:1,flexWrap:`wrap`},children:[(0,K.jsx)(k,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(e.colWidth+2)},children:`Wider columns`}),(0,K.jsx)(k,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(Math.max(1,e.colWidth-2))},children:`Narrower columns`}),(0,K.jsx)(k,{variant:`outlined`,size:`small`,onClick:()=>{e.setRowHeight(e.rowHeight+2)},children:`Taller rows`}),(0,K.jsx)(k,{variant:`outlined`,size:`small`,onClick:()=>{e.fit()},children:`Fit to view`})]}),(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(y,{model:e})})]})}),Ht=`import { useState } from 'react'
 
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
@@ -1374,7 +1374,7 @@ const ProgrammaticControl = observer(function () {
 })
 
 export default ProgrammaticControl
-`;function Ut(){return(0,K.jsx)(T,{msa:y,tree:ee,gff:k,colorScheme:`clustalx_protein_dynamic`,height:500})}var X=`import { MSAViewer } from 'react-msaview'
+`;function Ut(){return(0,K.jsx)(b,{msa:re,tree:oe,gff:B,colorScheme:`clustalx_protein_dynamic`,height:500})}var X=`import { MSAViewer } from 'react-msaview'
 
 import { kinaseDomainsGFF, kinaseMSA, kinaseTree } from './exampleData'
 
@@ -1394,7 +1394,7 @@ export default function RealDomains() {
     />
   )
 }
-`,Wt=z(function(){let[e]=(0,G.useState)(()=>C().create({type:`MsaView`,height:500,data:{msa:x,tree:O}})),t=J(e);return(0,K.jsxs)(`div`,{children:[(0,K.jsxs)(M,{direction:`row`,spacing:2,sx:{mb:1,flexWrap:`wrap`},children:[(0,K.jsx)(I,{control:(0,K.jsx)(H,{checked:e.showBranchLen,onChange:t=>{e.setShowBranchLen(t.target.checked)}}),label:`Branch lengths`}),(0,K.jsx)(I,{control:(0,K.jsx)(H,{checked:e.labelsAlignRight,onChange:t=>{e.setLabelsAlignRight(t.target.checked)}}),label:`Align labels right`}),(0,K.jsx)(I,{control:(0,K.jsx)(H,{checked:e.drawNodeBubbles,onChange:t=>{e.setDrawNodeBubbles(t.target.checked)}}),label:`Node bubbles`}),(0,K.jsx)(I,{control:(0,K.jsx)(H,{checked:e.drawTree,onChange:t=>{e.setDrawTree(t.target.checked)}}),label:`Show tree`})]}),(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(S,{model:e})})]})}),Gt=`import { useState } from 'react'
+`,Wt=j(function(){let[e]=(0,G.useState)(()=>v().create({type:`MsaView`,height:500,data:{msa:F,tree:R}})),t=J(e);return(0,K.jsxs)(`div`,{children:[(0,K.jsxs)(x,{direction:`row`,spacing:2,sx:{mb:1,flexWrap:`wrap`},children:[(0,K.jsx)(E,{control:(0,K.jsx)(P,{checked:e.showBranchLen,onChange:t=>{e.setShowBranchLen(t.target.checked)}}),label:`Branch lengths`}),(0,K.jsx)(E,{control:(0,K.jsx)(P,{checked:e.labelsAlignRight,onChange:t=>{e.setLabelsAlignRight(t.target.checked)}}),label:`Align labels right`}),(0,K.jsx)(E,{control:(0,K.jsx)(P,{checked:e.drawNodeBubbles,onChange:t=>{e.setDrawNodeBubbles(t.target.checked)}}),label:`Node bubbles`}),(0,K.jsx)(E,{control:(0,K.jsx)(P,{checked:e.drawTree,onChange:t=>{e.setDrawTree(t.target.checked)}}),label:`Show tree`})]}),(0,K.jsx)(`div`,{ref:t,children:(0,K.jsx)(y,{model:e})})]})}),Gt=`import { useState } from 'react'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Stack from '@mui/material/Stack'
@@ -1472,7 +1472,7 @@ const TreeOptions = observer(function () {
 })
 
 export default TreeOptions
-`;function Kt(){return(0,K.jsx)(T,{msa:Ge,colorScheme:`nucleotide`,height:450})}var qt=`import { MSAViewer } from 'react-msaview'
+`;function Kt(){return(0,K.jsx)(b,{msa:Ge,colorScheme:`nucleotide`,height:450})}var qt=`import { MSAViewer } from 'react-msaview'
 
 import { trnaMSA } from './generatedData'
 
@@ -1486,7 +1486,7 @@ import { trnaMSA } from './generatedData'
 export default function Trna() {
   return <MSAViewer msa={trnaMSA} colorScheme="nucleotide" height={450} />
 }
-`;function Jt(){return(0,K.jsx)(T,{msa:x,tree:O,colorScheme:`maeditor`,height:550})}var Yt=`import { MSAViewer } from 'react-msaview'
+`;function Jt(){return(0,K.jsx)(b,{msa:F,tree:R,colorScheme:`maeditor`,height:550})}var Yt=`import { MSAViewer } from 'react-msaview'
 
 import { proteinMSA, proteinTree } from './exampleData'
 
@@ -1503,4 +1503,4 @@ export default function ZeroConfig() {
     />
   )
 }
-`,Xt=[`Getting started`,`API & control`,`Protein domains`,`Conservation & diffing`,`Phylogeny`,`RNA structure`,`Genes & DNA`],Z=e=>e.toLowerCase().replace(/[^\w\s-]/g,``).trim().replace(/\s+/g,`-`),Q=[{name:`Zero-config viewer`,category:`Getting started`,description:`The simplest usage: pass alignment + tree text as strings to MSAViewer.`,Component:Jt,source:Yt},{name:`Nucleotide alignment`,category:`Getting started`,description:`A DNA alignment with no tree, using a nucleotide color scheme.`,Component:Nt,source:Pt},{name:`Load from URL`,category:`Getting started`,description:`Fetch a remote Stockholm alignment plus an InterProScan domain GFF.`,Component:St,source:Ct},{name:`Model API`,category:`API & control`,description:`Create the model yourself with MSAModelF and render it with MSAView.`,Component:wt,source:Tt},{name:`Programmatic control`,category:`API & control`,description:`Drive the viewer by calling model actions from buttons.`,Component:Vt,source:Ht},{name:`Color schemes`,category:`API & control`,description:`Switch color schemes at runtime via model.setColorSchemeName.`,Component:Qe,source:$e},{name:`Tree options`,category:`API & control`,description:`Toggle branch lengths, label alignment, node bubbles, and the tree panel.`,Component:Wt,source:Gt},{name:`Protein domains`,category:`Protein domains`,description:`Overlay InterProScan domain annotations from an inline GFF3 string.`,Component:nt,source:rt},{name:`Real domains (Src-family kinases)`,category:`Protein domains`,description:`A real Src-family kinase family (SRC, FYN, LCK, ...) with its tree and real InterProScan annotations — the signature SH3 + SH2 + kinase domains generated by react-msaview-cli interproscan.`,Component:Ut,source:X},{name:`Domain architecture (p53)`,category:`Protein domains`,description:`p53 with its InterProScan domains overlaid — the central DNA-binding domain (where most cancer mutations fall) forms the bulk of the protein, flanked by the short N-terminal transactivation motifs, with the reference diff showing as dots in the unannotated linkers.`,Component:Lt,source:Rt},{name:`Domain loss across orthologs (NLRP1)`,category:`Protein domains`,description:`Twelve NLRP1 orthologs that share a six-domain core but differ at the N terminus: the PYD is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish. The core domains sit up to 391 residues apart between rows yet land within 2 alignment columns — which is why the overlay is column-locked and not drawn per-protein.`,Component:jt,source:Mt},{name:`One conserved domain (Hox homeodomain)`,category:`Protein domains`,description:`Hox transcription factors are wildly divergent except for the ~60-residue homeodomain they all share — the InterProScan overlay marks the one block that stays conserved across the family.`,Component:gt,source:_t},{name:`Color vision (opsin duplications)`,category:`Protein domains`,description:`Vertebrate opsins sorted by class (rhodopsins vs cone opsins) with a real InterProScan 7TM-GPCR domain overlay — a color-vision duplication history.`,Component:Ft,source:It},{name:`Channel family (aquaporins)`,category:`Protein domains`,description:`The aquaporin (MIP) family: all share one six-transmembrane domain (InterProScan overlay) but the tree splits water-only channels from the "_glycerol" aquaglyceroporins — grouping by function.`,Component:Ye,source:Xe},{name:`Reference dots (MyD88 across bats)`,category:`Conservation & diffing`,description:`MyD88 across mammals incl. bats, diffed against human (relativeTo) so identical residues show as dots and lineage-specific changes stand out, beside the inferred tree.`,Component:Et,source:Dt},{name:`Host range (ACE2 / SARS-CoV-2 receptor)`,category:`Conservation & diffing`,description:`ACE2 across mammals (bats, civet, pangolin, resistant rodents) diffed against human, so the few spike-contact positions that drive viral susceptibility stand out.`,Component:qe,source:Je},{name:`Extreme conservation (histone H4)`,category:`Conservation & diffing`,description:`Histone H4 across eukaryotes diffed against human — one of the most conserved proteins known renders almost entirely as dots, the opposite extreme from a fast-evolving protein.`,Component:mt,source:ht},{name:`Processing vs conservation (insulin)`,category:`Conservation & diffing`,description:`Preproinsulin across vertebrates diffed against human — the B and A chains of mature insulin stay conserved (dots) while the cleaved-out C-peptide drifts (letters).`,Component:vt,source:yt},{name:`Gene duplication (globin family)`,category:`Phylogeny`,description:`Hemoglobin alpha/beta, myoglobin, neuroglobin and cytoglobin — the inferred tree groups by globin type, not species: the signature of gene duplication.`,Component:ut,source:dt},{name:`Deep phylogeny (cytochrome c)`,category:`Phylogeny`,description:`Cytochrome c from mammals to plants and fungi in one short alignment — the inferred tree spans over a billion years of evolution.`,Component:et,source:tt},{name:`Convergent evolution (prestin / echolocation)`,category:`Phylogeny`,description:`Prestin (SLC26A5): echolocating bats and toothed whales convergently evolved shared changes, so the "_echo" species cluster together against the species tree.`,Component:zt,source:Bt},{name:`Tree of life (EF-1α / EF-Tu)`,category:`Phylogeny`,description:`Elongation factor across all three domains of life (bacteria, archaea, eukaryotes) in one alignment — a universal protein used to probe the deepest splits in the tree of life.`,Component:it,source:at},{name:`Large tree (Lysine riboswitch)`,category:`Phylogeny`,description:`A real ~60 sequence ncRNA family (Rfam Lysine riboswitch) with its full inferred tree — shows the canvas tiling holds up past toy data.`,Component:bt,source:xt},{name:`Nextstrain pathogens`,category:`Phylogeny`,description:`Real Nextstrain phylogenies (SARS-CoV-2, Zika, Ebola, measles, RSV-A) reconstructed into a gap-free reference-coordinate MSA — no aligner needed since Nextstrain tips are stored as mutations against the reference.`,Component:kt,source:At},{name:`RNA secondary structure (tRNA)`,category:`RNA structure`,description:`Transfer RNA (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a secondary-structure track, coloring the acceptor stem and D/anticodon/T arms by base-pairing above the alignment.`,Component:Kt,source:qt},{name:`Ribozyme structure (hammerhead)`,category:`RNA structure`,description:`Hammerhead ribozyme (Rfam RF00008), a small self-cleaving catalytic RNA: the SS_cons track shows its three-way helix junction colored by base-pairing — a catalytic-RNA counterpoint to the tRNA cloverleaf.`,Component:ft,source:pt},{name:`Gene loss + exon structure (F12 in cetaceans)`,category:`Genes & DNA`,description:`A DNA coding alignment of coagulation factor XII with its 14-exon gene structure overlaid (each exon the same color across species). F12 is intact in land mammals and the manatee but disabled in cetaceans by a shared frameshift in exon 3 + premature stops — pseudogenization read straight off the nucleotides, which a protein alignment cannot show.`,Component:ot,source:st},{name:`Gene arrow map (gggenes-style)`,category:`Genes & DNA`,description:`A colinear gene cluster across 6 genomes with each gene drawn as a strand-directed arrow (gggenes-style), overlaid on a real alignment. Genes keep one color down the columns; two are inverted (the arrow flips) and one is deleted (its columns gap out) — yet every gene stays column-aligned, because the arrows are anchored to alignment columns rather than each genome’s own coordinate. Synthetic demo data.`,Component:ct,source:lt}],$;function Zt(){return $||=Promise.all([V(()=>import(`./core.DxpvqkrT.js`),__vite__mapDeps([0,1])),V(()=>import(`./engine-oniguruma.D2u1fNOb.js`),__vite__mapDeps([2,1])),V(()=>import(`./wasm.BnjxR4X6.js`),[]),V(()=>import(`./tsx.udAQXfEw.js`),[]),V(()=>import(`./github-light.EUqPIrTm.js`),[])]).then(([e,t,n,r,i])=>e.createHighlighterCore({themes:[i.default],langs:[r.default],engine:t.createOnigurumaEngine(n)})),$}function Qt({source:e}){let[t,n]=(0,G.useState)(``);return(0,G.useEffect)(()=>{let t=!1;return Zt().then(r=>{t||n(r.codeToHtml(e,{lang:`tsx`,theme:`github-light`}))},()=>{}),()=>{t=!0}},[e]),t?(0,K.jsx)(h,{sx:{overflowX:`auto`,border:1,borderColor:`divider`,borderRadius:1,"& pre":{m:0,p:2,fontSize:13,fontFamily:`monospace`}},dangerouslySetInnerHTML:{__html:t}}):(0,K.jsx)(R,{variant:`outlined`,sx:{p:2,overflowX:`auto`,backgroundColor:`action.hover`},children:(0,K.jsx)(h,{component:`pre`,sx:{m:0,fontSize:13,fontFamily:`monospace`,whiteSpace:`pre`},children:e})})}function $t(){let e=()=>{let e=typeof window>`u`?``:decodeURIComponent(window.location.hash.replace(/^#/,``));return Q.some(t=>Z(t.name)===e)?e:``},[t,n]=(0,G.useState)(()=>e()||Z(Q[0].name));return(0,G.useEffect)(()=>{let t=()=>{let t=e();t&&n(t)};return window.addEventListener(`hashchange`,t),()=>{window.removeEventListener(`hashchange`,t)}},[]),[t,e=>{let t=Z(e);n(t),window.history.replaceState(null,``,`#${t}`)}]}function en({text:e}){let[t,n]=(0,G.useState)(!1);return(0,K.jsx)(L,{size:`small`,variant:`outlined`,onClick:()=>{navigator.clipboard.writeText(e).then(()=>{n(!0),setTimeout(()=>{n(!1)},1500)},()=>{})},children:t?`Copied`:`Copy`})}function tn({sidebarHeader:e,sidebarFooter:t,height:n}){let[r,i]=$t(),a=Q.find(e=>Z(e.name)===r)??Q[0],{Component:o}=a;return(0,K.jsxs)(h,{sx:{display:`flex`,height:n},children:[(0,K.jsxs)(h,{component:`nav`,sx:{width:260,flexShrink:0,borderRight:1,borderColor:`divider`,overflowY:`auto`},children:[e,Xt.map(e=>(0,K.jsx)(ne,{dense:!0,subheader:(0,K.jsx)(ie,{disableSticky:!0,children:e}),children:Q.filter(t=>t.category===e).map(e=>(0,K.jsx)(le,{selected:Z(e.name)===r,onClick:()=>{i(e.name)},children:(0,K.jsx)(oe,{primary:e.name})},e.name))},e)),t]}),(0,K.jsxs)(h,{sx:{flex:1,overflowY:`auto`,p:3},children:[(0,K.jsx)(d,{variant:`h5`,gutterBottom:!0,children:a.name}),(0,K.jsx)(d,{variant:`body2`,color:`text.secondary`,gutterBottom:!0,children:a.description}),(0,K.jsx)(R,{variant:`outlined`,sx:{p:2,my:2},children:(0,K.jsx)(o,{})}),(0,K.jsxs)(h,{sx:{display:`flex`,alignItems:`center`,justifyContent:`space-between`,mb:1},children:[(0,K.jsx)(d,{variant:`subtitle2`,children:`Source`}),(0,K.jsx)(en,{text:a.source})]}),(0,K.jsx)(Qt,{source:a.source})]})]})}function nn(){return(0,K.jsx)(g,{theme:N,children:(0,K.jsx)(tn,{height:`100%`,sidebarHeader:(0,K.jsx)(h,{sx:{p:2},children:(0,K.jsx)(d,{variant:`subtitle2`,color:`text.secondary`,children:`Live examples`})})})})}export{nn as default};
+`,Xt=[`Getting started`,`API & control`,`Protein domains`,`Conservation & diffing`,`Phylogeny`,`RNA structure`,`Genes & DNA`],Z=e=>e.toLowerCase().replace(/[^\w\s-]/g,``).trim().replace(/\s+/g,`-`),Q=[{name:`Zero-config viewer`,category:`Getting started`,description:`The simplest usage: pass alignment + tree text as strings to MSAViewer.`,Component:Jt,source:Yt},{name:`Nucleotide alignment`,category:`Getting started`,description:`A DNA alignment with no tree, using a nucleotide color scheme.`,Component:Nt,source:Pt},{name:`Load from URL`,category:`Getting started`,description:`Fetch a remote Stockholm alignment plus an InterProScan domain GFF.`,Component:St,source:Ct},{name:`Model API`,category:`API & control`,description:`Create the model yourself with MSAModelF and render it with MSAView.`,Component:wt,source:Tt},{name:`Programmatic control`,category:`API & control`,description:`Drive the viewer by calling model actions from buttons.`,Component:Vt,source:Ht},{name:`Color schemes`,category:`API & control`,description:`Switch color schemes at runtime via model.setColorSchemeName.`,Component:Qe,source:$e},{name:`Tree options`,category:`API & control`,description:`Toggle branch lengths, label alignment, node bubbles, and the tree panel.`,Component:Wt,source:Gt},{name:`Protein domains`,category:`Protein domains`,description:`Overlay InterProScan domain annotations from an inline GFF3 string.`,Component:nt,source:rt},{name:`Real domains (Src-family kinases)`,category:`Protein domains`,description:`A real Src-family kinase family (SRC, FYN, LCK, ...) with its tree and real InterProScan annotations — the signature SH3 + SH2 + kinase domains generated by react-msaview-cli interproscan.`,Component:Ut,source:X},{name:`Domain architecture (p53)`,category:`Protein domains`,description:`p53 with its InterProScan domains overlaid — the central DNA-binding domain (where most cancer mutations fall) forms the bulk of the protein, flanked by the short N-terminal transactivation motifs, with the reference diff showing as dots in the unannotated linkers.`,Component:Lt,source:Rt},{name:`Domain loss across orthologs (NLRP1)`,category:`Protein domains`,description:`Twelve NLRP1 orthologs that share a six-domain core but differ at the N terminus: the PYD is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish. The core domains sit up to 391 residues apart between rows yet land within 2 alignment columns — which is why the overlay is column-locked and not drawn per-protein.`,Component:jt,source:Mt},{name:`One conserved domain (Hox homeodomain)`,category:`Protein domains`,description:`Hox transcription factors are wildly divergent except for the ~60-residue homeodomain they all share — the InterProScan overlay marks the one block that stays conserved across the family.`,Component:gt,source:_t},{name:`Color vision (opsin duplications)`,category:`Protein domains`,description:`Vertebrate opsins sorted by class (rhodopsins vs cone opsins) with a real InterProScan 7TM-GPCR domain overlay — a color-vision duplication history.`,Component:Ft,source:It},{name:`Channel family (aquaporins)`,category:`Protein domains`,description:`The aquaporin (MIP) family: all share one six-transmembrane domain (InterProScan overlay) but the tree splits water-only channels from the "_glycerol" aquaglyceroporins — grouping by function.`,Component:Ye,source:Xe},{name:`Reference dots (MyD88 across bats)`,category:`Conservation & diffing`,description:`MyD88 across mammals incl. bats, diffed against human (relativeTo) so identical residues show as dots and lineage-specific changes stand out, beside the inferred tree.`,Component:Et,source:Dt},{name:`Host range (ACE2 / SARS-CoV-2 receptor)`,category:`Conservation & diffing`,description:`ACE2 across mammals (bats, civet, pangolin, resistant rodents) diffed against human, so the few spike-contact positions that drive viral susceptibility stand out.`,Component:qe,source:Je},{name:`Extreme conservation (histone H4)`,category:`Conservation & diffing`,description:`Histone H4 across eukaryotes diffed against human — one of the most conserved proteins known renders almost entirely as dots, the opposite extreme from a fast-evolving protein.`,Component:mt,source:ht},{name:`Processing vs conservation (insulin)`,category:`Conservation & diffing`,description:`Preproinsulin across vertebrates diffed against human — the B and A chains of mature insulin stay conserved (dots) while the cleaved-out C-peptide drifts (letters).`,Component:vt,source:yt},{name:`Gene duplication (globin family)`,category:`Phylogeny`,description:`Hemoglobin alpha/beta, myoglobin, neuroglobin and cytoglobin — the inferred tree groups by globin type, not species: the signature of gene duplication.`,Component:ut,source:dt},{name:`Deep phylogeny (cytochrome c)`,category:`Phylogeny`,description:`Cytochrome c from mammals to plants and fungi in one short alignment — the inferred tree spans over a billion years of evolution.`,Component:et,source:tt},{name:`Convergent evolution (prestin / echolocation)`,category:`Phylogeny`,description:`Prestin (SLC26A5): echolocating bats and toothed whales convergently evolved shared changes, so the "_echo" species cluster together against the species tree.`,Component:zt,source:Bt},{name:`Tree of life (EF-1α / EF-Tu)`,category:`Phylogeny`,description:`Elongation factor across all three domains of life (bacteria, archaea, eukaryotes) in one alignment — a universal protein used to probe the deepest splits in the tree of life.`,Component:it,source:at},{name:`Large tree (Lysine riboswitch)`,category:`Phylogeny`,description:`A real ~60 sequence ncRNA family (Rfam Lysine riboswitch) with its full inferred tree — shows the canvas tiling holds up past toy data.`,Component:bt,source:xt},{name:`Nextstrain pathogens`,category:`Phylogeny`,description:`Real Nextstrain phylogenies (SARS-CoV-2, Zika, Ebola, measles, RSV-A) reconstructed into a gap-free reference-coordinate MSA — no aligner needed since Nextstrain tips are stored as mutations against the reference.`,Component:kt,source:At},{name:`RNA secondary structure (tRNA)`,category:`RNA structure`,description:`Transfer RNA (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a secondary-structure track, coloring the acceptor stem and D/anticodon/T arms by base-pairing above the alignment.`,Component:Kt,source:qt},{name:`Ribozyme structure (hammerhead)`,category:`RNA structure`,description:`Hammerhead ribozyme (Rfam RF00008), a small self-cleaving catalytic RNA: the SS_cons track shows its three-way helix junction colored by base-pairing — a catalytic-RNA counterpoint to the tRNA cloverleaf.`,Component:ft,source:pt},{name:`Gene loss + exon structure (F12 in cetaceans)`,category:`Genes & DNA`,description:`A DNA coding alignment of coagulation factor XII with its 14-exon gene structure overlaid (each exon the same color across species). F12 is intact in land mammals and the manatee but disabled in cetaceans by a shared frameshift in exon 3 + premature stops — pseudogenization read straight off the nucleotides, which a protein alignment cannot show.`,Component:ot,source:st},{name:`Gene arrow map (gggenes-style)`,category:`Genes & DNA`,description:`A colinear gene cluster across 6 genomes with each gene drawn as a strand-directed arrow (gggenes-style), overlaid on a real alignment. Genes keep one color down the columns; two are inverted (the arrow flips) and one is deleted (its columns gap out) — yet every gene stays column-aligned, because the arrows are anchored to alignment columns rather than each genome’s own coordinate. Synthetic demo data.`,Component:ct,source:lt}],$;function Zt(){return $||=Promise.all([N(()=>import(`./core.DxpvqkrT.js`),__vite__mapDeps([0,1])),N(()=>import(`./engine-oniguruma.D2u1fNOb.js`),__vite__mapDeps([2,1])),N(()=>import(`./wasm.BnjxR4X6.js`),[]),N(()=>import(`./tsx.udAQXfEw.js`),[]),N(()=>import(`./github-light.EUqPIrTm.js`),[])]).then(([e,t,n,r,i])=>e.createHighlighterCore({themes:[i.default],langs:[r.default],engine:t.createOnigurumaEngine(n)})),$}function Qt({source:e}){let[t,n]=(0,G.useState)(``);return(0,G.useEffect)(()=>{let t=!1;return Zt().then(r=>{t||n(r.codeToHtml(e,{lang:`tsx`,theme:`github-light`}))},()=>{}),()=>{t=!0}},[e]),t?(0,K.jsx)(h,{sx:{overflowX:`auto`,border:1,borderColor:`divider`,borderRadius:1,"& pre":{m:0,p:2,fontSize:13,fontFamily:`monospace`}},dangerouslySetInnerHTML:{__html:t}}):(0,K.jsx)(A,{variant:`outlined`,sx:{p:2,overflowX:`auto`,backgroundColor:`action.hover`},children:(0,K.jsx)(h,{component:`pre`,sx:{m:0,fontSize:13,fontFamily:`monospace`,whiteSpace:`pre`},children:e})})}function $t(){let e=()=>{let e=typeof window>`u`?``:decodeURIComponent(window.location.hash.replace(/^#/,``));return Q.some(t=>Z(t.name)===e)?e:``},[t,n]=(0,G.useState)(()=>e()||Z(Q[0].name));return(0,G.useEffect)(()=>{let t=()=>{let t=e();t&&n(t)};return window.addEventListener(`hashchange`,t),()=>{window.removeEventListener(`hashchange`,t)}},[]),[t,e=>{let t=Z(e);n(t),window.history.replaceState(null,``,`#${t}`)}]}function en({text:e}){let[t,n]=(0,G.useState)(!1);return(0,K.jsx)(k,{size:`small`,variant:`outlined`,onClick:()=>{navigator.clipboard.writeText(e).then(()=>{n(!0),setTimeout(()=>{n(!1)},1500)},()=>{})},children:t?`Copied`:`Copy`})}function tn({sidebarHeader:e,sidebarFooter:t,height:n}){let[r,i]=$t(),a=Q.find(e=>Z(e.name)===r)??Q[0],{Component:o}=a;return(0,K.jsxs)(h,{sx:{display:`flex`,height:n},children:[(0,K.jsxs)(h,{component:`nav`,sx:{width:260,flexShrink:0,borderRight:1,borderColor:`divider`,overflowY:`auto`},children:[e,Xt.map(e=>(0,K.jsx)(w,{dense:!0,subheader:(0,K.jsx)(D,{disableSticky:!0,children:e}),children:Q.filter(t=>t.category===e).map(e=>(0,K.jsx)(le,{selected:Z(e.name)===r,onClick:()=>{i(e.name)},children:(0,K.jsx)(te,{primary:e.name})},e.name))},e)),t]}),(0,K.jsxs)(h,{sx:{flex:1,overflowY:`auto`,p:3},children:[(0,K.jsx)(d,{variant:`h5`,gutterBottom:!0,children:a.name}),(0,K.jsx)(d,{variant:`body2`,color:`text.secondary`,gutterBottom:!0,children:a.description}),(0,K.jsx)(A,{variant:`outlined`,sx:{p:2,my:2},children:(0,K.jsx)(o,{})}),(0,K.jsxs)(h,{sx:{display:`flex`,alignItems:`center`,justifyContent:`space-between`,mb:1},children:[(0,K.jsx)(d,{variant:`subtitle2`,children:`Source`}),(0,K.jsx)(en,{text:a.source})]}),(0,K.jsx)(Qt,{source:a.source})]})]})}function nn(){return(0,K.jsx)(g,{theme:ee,children:(0,K.jsx)(tn,{height:`100%`,sidebarHeader:(0,K.jsx)(h,{sx:{p:2},children:(0,K.jsx)(d,{variant:`subtitle2`,color:`text.secondary`,children:`Live examples`})})})})}export{nn as default};
