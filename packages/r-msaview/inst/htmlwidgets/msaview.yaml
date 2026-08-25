@@ -1,5 +1,5 @@
 dependencies:
   - name: react-msaview
-    version: 6.0.0
+    version: 6.1.0
     src: lib
     script: react-msaview.umd.js
