@@ -14,7 +14,7 @@ import {
   sessionUrl,
 } from './geneExplorer'
 
-import type { Transcript } from './geneExplorer'
+import type { SessionOptions, Transcript } from './geneExplorer'
 
 // A minimal two-exon transcript on chr17. The exons are far enough apart
 // (gap 800 bp > 2 * DEFAULT_WINDOW_SIZE) that collapsing keeps them separate.
@@ -149,6 +149,13 @@ const configTrackIds: string[] = (
   ) as { tracks: { trackId: string }[] }
 ).tracks.map(t => t.trackId)
 
+// The genome view's init blob for a session over twoExon. The views array is a
+// union over view kinds, and the first entry is always the LinearGenomeView.
+function genomeInit(opts: Partial<SessionOptions> = {}) {
+  const [lgv] = buildSession({ transcript: twoExon, ...opts }).views
+  return (lgv as { init: { loc: string; tracks: string[] } }).init
+}
+
 describe('hg38 tracks', () => {
   it('names a ClinVar track for exactly the genes the config carries', () => {
     const inConfig = configTrackIds
@@ -169,31 +176,29 @@ describe('hg38 tracks', () => {
   })
 
   it('adds ClinVar automatically and conservation on request', () => {
-    const lgv = (opts = {}) =>
-      buildSession({ transcript: twoExon, ...opts }).views[0].init
-    expect(lgv().tracks).toEqual([
+    expect(genomeInit().tracks).toEqual([
       'hg38-ncbiRefSeqSelect',
       'hg38-tp53-clinvar-pathogenic',
     ])
-    expect(lgv({ conservation: true }).tracks).toContain(CONSERVATION_TRACK)
-    const kras = buildSession({
-      transcript: { ...twoExon, geneName: 'KRAS' },
-    }).views[0].init
-    expect(kras.tracks).toEqual(['hg38-ncbiRefSeqSelect'])
+    expect(genomeInit({ conservation: true }).tracks).toContain(
+      CONSERVATION_TRACK,
+    )
+    expect(
+      genomeInit({ transcript: { ...twoExon, geneName: 'KRAS' } }).tracks,
+    ).toEqual(['hg38-ncbiRefSeqSelect'])
   })
 
   it('leaves non-human sessions without hg38 tracks', () => {
-    const { views } = buildSession({
-      transcript: twoExon,
-      assemblyAccession: 'GCF_000001635.27',
-      conservation: true,
-    })
-    expect(views[0].init.tracks).toEqual([])
+    expect(
+      genomeInit({ assemblyAccession: 'GCF_000001635.27', conservation: true })
+        .tracks,
+    ).toEqual([])
   })
 
   it('threads flip into the genome view loc', () => {
-    const { views } = buildSession({ transcript: twoExon, flip: true })
-    expect(views[0].init.loc).toBe('17:961-1120[rev] 17:81-240[rev]')
+    expect(genomeInit({ flip: true }).loc).toBe(
+      '17:961-1120[rev] 17:81-240[rev]',
+    )
   })
 })
 
