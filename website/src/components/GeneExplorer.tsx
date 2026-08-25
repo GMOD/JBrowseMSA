@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 
 import CloseIcon from '@mui/icons-material/Close'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
@@ -30,21 +37,31 @@ import { ThemeProvider } from '@mui/material/styles'
 
 import {
   DEFAULT_WINDOW_SIZE,
+  TREE_URI,
   buildSession,
+  clinvarTrack,
   collapsedLoc,
   geneStats,
   loadGene,
   searchGenes,
   sessionUrl,
 } from '../lib/geneExplorer'
+import { fetchOrthologSymbol } from '../lib/orthologLookup'
 import { buildOrthologMsa } from '../lib/orthologMsa'
 import { fetchProteinStl } from '../lib/proteinStl'
 import { DEFAULT_SPECIES, SPECIES, speciesByTaxId } from '../lib/speciesGenes'
 import { theme } from '../lib/theme'
 
-import type { GeneResult, InlineMsa, Session } from '../lib/geneExplorer'
+import type {
+  GeneResult,
+  InlineMsa,
+  Session,
+  Transcript,
+} from '../lib/geneExplorer'
 import type { Species } from '../lib/speciesGenes'
 import type { ReactNode } from 'react'
+
+const AlignmentPreview = lazy(() => import('./AlignmentPreview'))
 
 // Copy text to the clipboard, exposing a transient message for a Snackbar. A
 // success shows the caller's message; a rejected write (insecure context or
@@ -384,11 +401,23 @@ export default function GeneExplorer() {
           urlGene={urlGene}
           species={species}
           onSpeciesChange={taxId => {
-            // switching species drops the current gene (symbols don't carry
-            // across organisms) and resets the type-ahead
+            // symbols don't carry across organisms, so the switch drops the
+            // gene and resets the type-ahead, then follows NCBI's ortholog to
+            // the new species when it has one. The URL is re-read before that
+            // navigation lands so a slow answer can't override a later pick.
             setSearchTerm('')
             setInputValue('')
             navigate(null, taxId)
+            if (urlGene && result?.geneId) {
+              fetchOrthologSymbol(result.geneId, taxId)
+                .then(symbol => {
+                  const now = parseUrl(window.location.search)
+                  if (symbol && !now.gene && now.species.taxId === taxId) {
+                    navigate(symbol, taxId)
+                  }
+                })
+                .catch(() => {})
+            }
           }}
           onInputChange={(value, isKeystroke) => {
             setInputValue(value)
@@ -680,8 +709,11 @@ function ResultPanel({ result }: { result: GeneResult }) {
   const { codingBp, span, ratio } = geneStats(transcript)
   const [detailsOpen, setDetailsOpen] = useState(false)
   // launch the genome view with introns squeezed out (default) vs. the whole
-  // gene; recomputes the loc/url/session spec below
+  // gene, reading 5'→3' (default for minus-strand genes), with conservation
+  // under it; each recomputes the loc/url/session spec below
   const [collapse, setCollapse] = useState(true)
+  const [flip, setFlip] = useState(transcript.strand === -1)
+  const [conservation, setConservation] = useState(false)
   // a cross-species alignment built on demand (non-human); once present it's
   // folded into the launched session as a connected MsaView
   const [inlineMsa, setInlineMsa] = useState<InlineMsa>()
@@ -694,6 +726,8 @@ function ResultPanel({ result }: { result: GeneResult }) {
         msaAvailable: !!msa,
         inlineMsa,
         collapseIntrons: collapse,
+        flip,
+        conservation,
         assemblyAccession,
       }),
     [
@@ -703,13 +737,15 @@ function ResultPanel({ result }: { result: GeneResult }) {
       proteinSequence,
       inlineMsa,
       collapse,
+      flip,
+      conservation,
       assemblyAccession,
     ],
   )
   const url = useSessionUrl(session)
   const loc = useMemo(
-    () => collapsedLoc(transcript, { collapse }),
-    [transcript, collapse],
+    () => collapsedLoc(transcript, { collapse, flip }),
+    [transcript, collapse, flip],
   )
   const sessionJson = useMemo(() => JSON.stringify(session, null, 2), [session])
 
@@ -792,19 +828,17 @@ function ResultPanel({ result }: { result: GeneResult }) {
           </IconButton>
         </Tooltip>
       </Stack>
-      <FormControlLabel
-        sx={{ mt: 0.5, ml: -0.5, display: 'flex' }}
-        control={
-          <Checkbox
-            size="small"
-            checked={collapse}
-            onChange={event => {
-              setCollapse(event.target.checked)
-            }}
-          />
-        }
-        label={`Collapse introns (±${DEFAULT_WINDOW_SIZE} bp around exons)`}
+      <ViewOptions
+        transcript={transcript}
+        human={!!species.humanFastPath}
+        collapse={collapse}
+        onCollapse={setCollapse}
+        flip={flip}
+        onFlip={setFlip}
+        conservation={conservation}
+        onConservation={setConservation}
       />
+      {msa ? <PreviewAlignment msa={msa.fasta} /> : null}
 
       {species.humanFastPath && !msa ? (
         <Alert severity="info" sx={{ mt: 2 }}>
@@ -873,6 +907,137 @@ function ResultPanel({ result }: { result: GeneResult }) {
         geneName={transcript.geneName}
       />
     </Paper>
+  )
+}
+
+// The checkboxes that shape the launched genome view. The flip only makes
+// sense for a minus-strand gene, and the track options only where the hosted
+// hg38 config has the tracks.
+function ViewOptions({
+  transcript,
+  human,
+  collapse,
+  onCollapse,
+  flip,
+  onFlip,
+  conservation,
+  onConservation,
+}: {
+  transcript: Transcript
+  human: boolean
+  collapse: boolean
+  onCollapse: (v: boolean) => void
+  flip: boolean
+  onFlip: (v: boolean) => void
+  conservation: boolean
+  onConservation: (v: boolean) => void
+}) {
+  const clinvar = human ? clinvarTrack(transcript.geneName) : undefined
+  return (
+    <Box sx={{ mt: 0.5, ml: -0.5 }}>
+      <OptionCheckbox
+        checked={collapse}
+        onChange={onCollapse}
+        label={`Collapse introns (±${DEFAULT_WINDOW_SIZE} bp around exons)`}
+      />
+      {transcript.strand === -1 ? (
+        <OptionCheckbox
+          checked={flip}
+          onChange={onFlip}
+          label="Read 5′→3′ (flip the minus-strand gene)"
+        />
+      ) : null}
+      {human ? (
+        <OptionCheckbox
+          checked={conservation}
+          onChange={onConservation}
+          label="Show 470-way conservation track"
+        />
+      ) : null}
+      {clinvar ? (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', ml: 0.5 }}
+        >
+          Includes the ClinVar pathogenic variants track for{' '}
+          {transcript.geneName}.
+        </Typography>
+      ) : null}
+    </Box>
+  )
+}
+
+function OptionCheckbox({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean
+  onChange: (v: boolean) => void
+  label: string
+}) {
+  return (
+    <FormControlLabel
+      sx={{ display: 'flex' }}
+      control={
+        <Checkbox
+          size="small"
+          checked={checked}
+          onChange={event => {
+            onChange(event.target.checked)
+          }}
+        />
+      }
+      label={label}
+    />
+  )
+}
+
+// matchMedia is missing under jsdom, where every viewport counts as desktop
+const desktopMedia = () =>
+  typeof window.matchMedia === 'function'
+    ? window.matchMedia('(min-width: 641px)')
+    : undefined
+function subscribeDesktop(cb: () => void) {
+  const query = desktopMedia()
+  query?.addEventListener('change', cb)
+  return () => {
+    query?.removeEventListener('change', cb)
+  }
+}
+
+// The alignment the session will open, previewed in place. Behind a disclosure
+// and desktop-only, so the viewer bundle is only fetched when someone asks.
+function PreviewAlignment({ msa }: { msa: string }) {
+  const desktop = useSyncExternalStore(
+    subscribeDesktop,
+    () => desktopMedia()?.matches ?? true,
+    () => false,
+  )
+  const [open, setOpen] = useState(false)
+  if (!desktop) {
+    return null
+  }
+  return (
+    <Box sx={{ mt: 1.5 }}>
+      <Button
+        size="small"
+        variant="text"
+        onClick={() => {
+          setOpen(!open)
+        }}
+      >
+        {open ? 'Hide alignment preview' : 'Preview alignment'}
+      </Button>
+      {open ? (
+        <Box sx={{ mt: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+          <Suspense fallback={<Box sx={{ height: 300 }} />}>
+            <AlignmentPreview msa={msa} treeUri={TREE_URI} />
+          </Suspense>
+        </Box>
+      ) : null}
+    </Box>
   )
 }
 

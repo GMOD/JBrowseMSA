@@ -1,9 +1,13 @@
+import { readFileSync } from 'node:fs'
+
 import { fromUrlSafeB64 } from '@jbrowse/core/util'
 import { describe, expect, it } from 'vitest'
 
 import {
+  CONSERVATION_TRACK,
   DEFAULT_WINDOW_SIZE,
   buildSession,
+  clinvarTrack,
   collapsedLoc,
   connectedFeature,
   geneStats,
@@ -32,7 +36,7 @@ interface DecodedView {
   id: string
   type: string
   connectedViewId?: string
-  init?: { msaName?: string }
+  init?: { msaName?: string; loc?: string; tracks?: string[] }
   structures?: { url: string; connectedViewId: string }[]
 }
 interface DecodedSession {
@@ -85,6 +89,15 @@ describe('collapsedLoc', () => {
     expect(collapsedLoc(twoExon, { collapse: false })).toBe('17:121-1080')
   })
 
+  it('flips a minus-strand gene: regions last-to-first, each marked [rev]', () => {
+    expect(collapsedLoc(twoExon, { flip: true })).toBe(
+      '17:961-1120[rev] 17:81-240[rev]',
+    )
+    expect(collapsedLoc(twoExon, { flip: true, collapse: false })).toBe(
+      '17:121-1080[rev]',
+    )
+  })
+
   it('exposes the padding used as DEFAULT_WINDOW_SIZE', () => {
     const wider = collapsedLoc(twoExon, { padding: DEFAULT_WINDOW_SIZE + 10 })
     // start 120 - 50 = 70 -> 1-based 71
@@ -119,6 +132,68 @@ describe('geneStats', () => {
       span: 960,
       ratio: '6.0',
     })
+  })
+})
+
+// The combined config the sessions open against; the ClinVar table in
+// geneExplorer.ts must name exactly the genes it carries a track for.
+const configTrackIds: string[] = (
+  JSON.parse(
+    readFileSync(
+      new URL(
+        '../../../packages/app/public/data/jbrowse-msa-combined-config.json',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  ) as { tracks: { trackId: string }[] }
+).tracks.map(t => t.trackId)
+
+describe('hg38 tracks', () => {
+  it('names a ClinVar track for exactly the genes the config carries', () => {
+    const inConfig = configTrackIds
+      .map(id => /^hg38-(\w+)-clinvar-pathogenic$/.exec(id)?.[1])
+      .filter((g): g is string => !!g)
+      .map(g => g.toUpperCase())
+      .sort()
+    const named = ['TP53', 'BRAF', 'KRAS', 'EGFR']
+      .filter(g => clinvarTrack(g))
+      .sort()
+    expect(named).toEqual(inConfig)
+    expect(clinvarTrack('TP53')).toBe('hg38-tp53-clinvar-pathogenic')
+    expect(configTrackIds).toContain(clinvarTrack('TP53'))
+  })
+
+  it('has the conservation track in the config', () => {
+    expect(configTrackIds).toContain(CONSERVATION_TRACK)
+  })
+
+  it('adds ClinVar automatically and conservation on request', () => {
+    const lgv = (opts = {}) =>
+      buildSession({ transcript: twoExon, ...opts }).views[0].init
+    expect(lgv().tracks).toEqual([
+      'hg38-ncbiRefSeqSelect',
+      'hg38-tp53-clinvar-pathogenic',
+    ])
+    expect(lgv({ conservation: true }).tracks).toContain(CONSERVATION_TRACK)
+    const kras = buildSession({
+      transcript: { ...twoExon, geneName: 'KRAS' },
+    }).views[0].init
+    expect(kras.tracks).toEqual(['hg38-ncbiRefSeqSelect'])
+  })
+
+  it('leaves non-human sessions without hg38 tracks', () => {
+    const { views } = buildSession({
+      transcript: twoExon,
+      assemblyAccession: 'GCF_000001635.27',
+      conservation: true,
+    })
+    expect(views[0].init.tracks).toEqual([])
+  })
+
+  it('threads flip into the genome view loc', () => {
+    const { views } = buildSession({ transcript: twoExon, flip: true })
+    expect(views[0].init.loc).toBe('17:961-1120[rev] 17:81-240[rev]')
   })
 })
 

@@ -167,6 +167,28 @@ describe('GeneExplorer', () => {
     expect(spinner()).toBeFalsy() // not stuck loading with no gene
   })
 
+  it('offers the 5′→3′ flip only for minus-strand genes, on by default', async () => {
+    vi.mocked(loadGene).mockResolvedValue(geneResult('TP53'))
+    render()
+    setGene('TP53')
+    await flush()
+    const flip = [...container.querySelectorAll('label')].find(l =>
+      l.textContent?.includes('Read 5′→3′'),
+    )
+    expect(flip).toBeTruthy()
+    expect(flip?.querySelector('input')?.checked).toBe(true)
+    expect(container.textContent).toContain('ClinVar')
+    expect(container.textContent).toContain('Preview alignment')
+
+    const plus = geneResult('KRAS')
+    plus.transcript.strand = 1
+    vi.mocked(loadGene).mockResolvedValue(plus)
+    setGene('KRAS')
+    await flush()
+    expect(container.textContent).not.toContain('Read 5′→3′')
+    expect(container.textContent).not.toContain('ClinVar')
+  })
+
   it('surfaces the load error for the current gene', async () => {
     const d = deferred<GeneResult>()
     vi.mocked(loadGene).mockReturnValue(d.promise)

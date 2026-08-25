@@ -49,13 +49,24 @@ const DATA_BASE = 'https://gmod.org/JBrowseMSA/demo/data'
 // coordinates / overlap matching is needed.
 const MSA_BASE = 'https://jbrowse.org/demos/msaview/100way'
 const MSA_GZ = `${MSA_BASE}/hg38.knownCanonical.multiz100way.aa.fa.gz`
-const TREE_URI = `${MSA_BASE}/hg38.multiz100way.nh`
+export const TREE_URI = `${MSA_BASE}/hg38.multiz100way.nh`
 
 // The JBrowse build + config that bundle jbrowse-plugin-msaview and
 // jbrowse-plugin-protein3d (see scripts/gene-explorer/config additions).
 const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 const JBROWSE_CONFIG = `${DATA_BASE}/jbrowse-msa-combined-config.json`
 const GENE_TRACK = 'hg38-ncbiRefSeqSelect'
+export const CONSERVATION_TRACK = 'hg38-multiz470way'
+// Genes with a `hg38-<symbol>-clinvar-pathogenic` VariantTrack in the combined
+// config; geneExplorer.test.ts checks this list against the config file.
+const CLINVAR_GENES = new Set(['TP53', 'BRAF'])
+
+// The per-gene ClinVar track when the config carries one.
+export function clinvarTrack(symbol: string) {
+  return CLINVAR_GENES.has(symbol)
+    ? `hg38-${symbol.toLowerCase()}-clinvar-pathogenic`
+    : undefined
+}
 
 const alphafoldCif = (uniprotId: string) =>
   `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v6.cif`
@@ -72,6 +83,7 @@ export interface GeneLocus {
   start: number // 1-based
   end: number
   uniprotId?: string
+  geneId?: string // NCBI GeneID
 }
 
 // A coding-only transcript model: the collapsed view shows the CDS exons, which
@@ -86,6 +98,7 @@ export interface Transcript {
 
 interface MyGeneHit {
   symbol?: string
+  entrezgene?: string | number
   genomic_pos?: GenomicPos | GenomicPos[]
   uniprot?: { 'Swiss-Prot'?: string | string[] }
 }
@@ -123,7 +136,7 @@ function isHits(v: unknown): v is { hits: { symbol?: unknown }[] } {
 // hosted indexes use.
 async function resolveGene(symbol: string): Promise<GeneLocus> {
   const q = encodeURIComponent(`symbol:${symbol}`)
-  const url = `${MYGENE}/query?q=${q}&species=human&fields=symbol,genomic_pos,uniprot`
+  const url = `${MYGENE}/query?q=${q}&species=human&fields=symbol,genomic_pos,uniprot,entrezgene`
   const res = await fetch(url)
   if (!res.ok) {
     throw new Error(`mygene.info lookup failed (${res.status})`)
@@ -141,6 +154,7 @@ async function resolveGene(symbol: string): Promise<GeneLocus> {
     start: pos.start,
     end: pos.end,
     uniprotId: Array.isArray(swiss) ? swiss[0] : swiss,
+    geneId: hit.entrezgene === undefined ? undefined : String(hit.entrezgene),
   }
 }
 
@@ -331,6 +345,8 @@ export interface CollapseOptions {
   collapse?: boolean
   // bp of padding added around each exon before merging (collapsed view only)
   padding?: number
+  // reverse the regions so a minus-strand gene reads 5'→3' left to right
+  flip?: boolean
 }
 
 // Expand each CDS by `padding` on both sides, then merge any intervals that now
@@ -363,19 +379,24 @@ function toCanonicalRefName(refName: string) {
 // navToLocations), so the introns between them squeeze out — there is no
 // `collapseIntrons` view option, this IS how you build a collapsed view
 // declaratively. When not collapsing, a single region spans the whole CDS.
+// Flipping lists the regions last-to-first with core's `[rev]` suffix on each,
+// which is how the CollapseIntronsDialog makes a minus-strand gene read 5'→3'.
 // Locstrings are 1-based.
 export function collapsedLoc(
   transcript: Transcript,
-  { collapse = true, padding = DEFAULT_WINDOW_SIZE }: CollapseOptions = {},
+  {
+    collapse = true,
+    padding = DEFAULT_WINDOW_SIZE,
+    flip = false,
+  }: CollapseOptions = {},
 ) {
   const refName = toCanonicalRefName(transcript.refName)
-  if (collapse) {
-    return paddedMergedCds(transcript, padding)
-      .map(e => `${refName}:${e.start + 1}-${e.end}`)
-      .join(' ')
-  }
-  const { start, end } = cdsBounds(transcript)
-  return `${refName}:${start + 1}-${end}`
+  const regions = collapse
+    ? paddedMergedCds(transcript, padding)
+    : [cdsBounds(transcript)]
+  const suffix = flip ? '[rev]' : ''
+  const locs = regions.map(r => `${refName}:${r.start + 1}-${r.end}${suffix}`)
+  return (flip ? locs.reverse() : locs).join(' ')
 }
 
 // Genomic extent of the coding model (min start, max end).
@@ -482,7 +503,7 @@ export interface GeneResult {
   species: Species
   transcript: Transcript
   uniprotId?: string
-  // NCBI GeneID (non-human) — the key the ortholog endpoint needs
+  // NCBI GeneID — the key the ortholog endpoints take
   geneId?: string
   msa?: GeneMsa
   // the protein AlphaFold aligns to: the aligned hg38 row when in the 100-way
@@ -524,6 +545,7 @@ async function loadHumanGene(symbol: string): Promise<GeneResult> {
     species: DEFAULT_SPECIES,
     transcript,
     uniprotId: locus.uniprotId,
+    geneId: locus.geneId,
     msa,
     proteinSequence,
   }
@@ -570,6 +592,10 @@ export interface SessionOptions {
   inlineMsa?: InlineMsa
   // false launches a whole-gene view (introns intact) instead of collapsed exons
   collapseIntrons?: boolean
+  // reverse the genome view so a minus-strand gene reads 5'→3'
+  flip?: boolean
+  // add the 470-way conservation track under the gene (human only)
+  conservation?: boolean
   // GenArk accession to embed as the session's assembly (non-human); undefined
   // uses the hosted hg38 config assembly
   assemblyAccession?: string
@@ -589,7 +615,7 @@ type Feature = ReturnType<typeof connectedFeature>
 // regions alone (the connectedFeature carries the codon mapping either way).
 function linearGenomeView(
   transcript: Transcript,
-  collapseIntrons: boolean,
+  collapse: CollapseOptions,
   assemblyName: string,
   tracks: string[],
 ) {
@@ -599,10 +625,20 @@ function linearGenomeView(
     colorByCDS: true,
     init: {
       assembly: assemblyName,
-      loc: collapsedLoc(transcript, { collapse: collapseIntrons }),
+      loc: collapsedLoc(transcript, collapse),
       tracks,
     },
   }
+}
+
+// The hosted hg38 tracks for a gene: the canonical gene model, its ClinVar
+// pathogenic variants when the config has them, and conservation on request.
+function hg38Tracks(symbol: string, conservation: boolean) {
+  return [
+    GENE_TRACK,
+    clinvarTrack(symbol),
+    conservation ? CONSERVATION_TRACK : undefined,
+  ].filter((t): t is string => !!t)
 }
 
 // Fields every MsaView shares regardless of where its alignment comes from.
@@ -726,17 +762,21 @@ export function buildSession({
   msaAvailable,
   inlineMsa,
   collapseIntrons = true,
+  flip = false,
+  conservation = false,
   assemblyAccession,
 }: SessionOptions) {
   const feature = connectedFeature(transcript)
-  // human references the hosted hg38 config assembly + gene track; non-human
+  // human references the hosted hg38 config assembly + tracks; non-human
   // embeds its GenArk assembly in the session and shows the collapsed regions
   // without a hosted track
   const assemblyName = assemblyAccession ?? 'hg38'
-  const tracks = assemblyAccession ? [] : [GENE_TRACK]
+  const tracks = assemblyAccession
+    ? []
+    : hg38Tracks(transcript.geneName, conservation)
   const lgv = linearGenomeView(
     transcript,
-    collapseIntrons,
+    { collapse: collapseIntrons, flip },
     assemblyName,
     tracks,
   )
