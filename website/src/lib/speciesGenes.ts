@@ -184,11 +184,18 @@ export async function resolveGeneNcbi(
     throw new Error(`No placed locus found for "${symbol}" in taxon ${taxId}`)
   }
   const range = hit.loc.genomic_range
+  const assemblyAccession = hit.a.assembly_accession
+  const refName = hit.loc.genomic_accession_version
+  if (!assemblyAccession || !refName) {
+    throw new Error(
+      `NCBI places "${symbol}" on no named assembly/sequence, so there is no genome to show it on`,
+    )
+  }
   return {
     symbol: gene.symbol ?? symbol,
     geneId: gene.gene_id,
-    assemblyAccession: hit.a.assembly_accession ?? '',
-    refName: hit.loc.genomic_accession_version ?? '',
+    assemblyAccession,
+    refName,
     start: Number(range.begin),
     end: Number(range.end),
     strand: range.orientation === 'minus' ? -1 : 1,
@@ -360,9 +367,6 @@ export async function fetchTranscriptNcbi(
     strand: locus.strand,
     name: transcript.mrna,
     geneName: locus.symbol,
-    // coding-only model: the collapsed view shows CDS exons, the same exons the
-    // protein/3D views align to
-    exons: transcript.cds.map(c => ({ start: c.start, end: c.end })),
     cds: transcript.cds,
   }
 }
@@ -398,44 +402,4 @@ export function genArkAssembly(accession: string) {
       },
     },
   }
-}
-
-// --- type-ahead --------------------------------------------------------------
-
-interface ESearchResult {
-  esearchresult?: { idlist?: string[] }
-}
-interface ESummaryResult {
-  result?: Record<string, { name?: string } | string[]>
-}
-
-// Symbol prefix -> matching gene symbols in the species, via E-utils esearch +
-// esummary. Two throttled calls, so it's slower than mygene's human type-ahead,
-// but only fires after the debounce.
-export async function searchGenesNcbi(
-  query: string,
-  taxId: number,
-): Promise<string[]> {
-  const term = encodeURIComponent(`${query}*[sym] AND txid${taxId}[orgn]`)
-  const search = await ncbiJson<ESearchResult>(
-    `${EUTILS}/esearch.fcgi?db=gene&term=${term}&retmax=10&retmode=json`,
-  )
-  const ids = search.esearchresult?.idlist ?? []
-  if (ids.length === 0) {
-    return []
-  }
-  const summary = await ncbiJson<ESummaryResult>(
-    `${EUTILS}/esummary.fcgi?db=gene&id=${ids.join(',')}&retmode=json`,
-  )
-  const result: Record<string, { name?: string } | string[] | undefined> =
-    summary.result ?? {}
-  const symbols = ids
-    .map(id => result[id])
-    .map(entry =>
-      entry && !Array.isArray(entry) && typeof entry.name === 'string'
-        ? entry.name
-        : undefined,
-    )
-    .filter((s): s is string => !!s)
-  return [...new Set(symbols)]
 }

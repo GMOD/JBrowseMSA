@@ -13,7 +13,7 @@ import type * as GeneExplorerLib from '../lib/geneExplorer'
 import type { GeneResult, Transcript } from '../lib/geneExplorer'
 import type { Root } from 'react-dom/client'
 
-// Only the two network entry points are mocked; buildSessionUrl/geneStats/
+// Only the two network entry points are mocked; buildSession/geneStats/
 // collapsedLoc keep their real implementations so the result panel renders
 // exactly as it does in the app (and exercises them against the fixture).
 vi.mock('../lib/geneExplorer', async importOriginal => {
@@ -32,10 +32,6 @@ const transcript: Transcript = {
   strand: -1,
   name: 'NM_000546.6',
   geneName: 'TP53',
-  exons: [
-    { start: 100, end: 200 },
-    { start: 1000, end: 1100 },
-  ],
   cds: [
     { start: 120, end: 200, phase: 0 },
     { start: 1000, end: 1080, phase: 1 },

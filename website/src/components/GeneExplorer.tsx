@@ -30,18 +30,19 @@ import { ThemeProvider } from '@mui/material/styles'
 
 import {
   DEFAULT_WINDOW_SIZE,
-  buildSessionUrl,
+  buildSession,
   collapsedLoc,
   geneStats,
   loadGene,
   searchGenes,
+  sessionUrl,
 } from '../lib/geneExplorer'
 import { buildOrthologMsa } from '../lib/orthologMsa'
 import { fetchProteinStl } from '../lib/proteinStl'
 import { DEFAULT_SPECIES, SPECIES, speciesByTaxId } from '../lib/speciesGenes'
 import { theme } from '../lib/theme'
 
-import type { GeneResult, InlineMsa } from '../lib/geneExplorer'
+import type { GeneResult, InlineMsa, Session } from '../lib/geneExplorer'
 import type { Species } from '../lib/speciesGenes'
 import type { ReactNode } from 'react'
 
@@ -65,14 +66,42 @@ function useCopy() {
   return { copy, message, dismiss }
 }
 
-// Save generated STL bytes to the user's disk via a throwaway object URL.
+// Save generated STL bytes to the user's disk via a throwaway object URL. The
+// revoke waits a tick: Firefox starts the download asynchronously and drops it
+// if the URL is gone by then.
 function triggerDownload(bytes: Uint8Array<ArrayBuffer>, filename: string) {
   const url = URL.createObjectURL(new Blob([bytes], { type: 'model/stl' }))
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = filename
   anchor.click()
-  URL.revokeObjectURL(url)
+  setTimeout(() => {
+    URL.revokeObjectURL(url)
+  }, 1000)
+}
+
+// The launch URL for a session snapshot. Encoding is async (deflate), so the
+// link is empty for the tick it takes; the ignore flag keeps a slow encode of a
+// superseded session from landing on the newer one.
+function useSessionUrl(session: Session) {
+  const [state, setState] = useState<{ session: Session; url: string }>()
+  useEffect(() => {
+    let ignore = false
+    sessionUrl(session).then(
+      url => {
+        if (!ignore) {
+          setState({ session, url })
+        }
+      },
+      (e: unknown) => {
+        console.error(e)
+      },
+    )
+    return () => {
+      ignore = true
+    }
+  }, [session])
+  return state?.session === session ? state.url : undefined
 }
 
 interface Example {
@@ -628,7 +657,10 @@ function GeneResultArea({
             pointerEvents: busy ? 'none' : 'auto',
           }}
         >
-          <ResultPanel key={urlGene} result={result} />
+          <ResultPanel
+            key={`${result.species.taxId}:${urlGene}`}
+            result={result}
+          />
         </Box>
       ) : null}
     </Box>
@@ -653,9 +685,9 @@ function ResultPanel({ result }: { result: GeneResult }) {
   // a cross-species alignment built on demand (non-human); once present it's
   // folded into the launched session as a connected MsaView
   const [inlineMsa, setInlineMsa] = useState<InlineMsa>()
-  const { url, session } = useMemo(
+  const session = useMemo(
     () =>
-      buildSessionUrl({
+      buildSession({
         transcript,
         uniprotId,
         proteinSequence,
@@ -674,6 +706,7 @@ function ResultPanel({ result }: { result: GeneResult }) {
       assemblyAccession,
     ],
   )
+  const url = useSessionUrl(session)
   const loc = useMemo(
     () => collapsedLoc(transcript, { collapse }),
     [transcript, collapse],
@@ -682,9 +715,7 @@ function ResultPanel({ result }: { result: GeneResult }) {
 
   // human uses the hosted hg38 assembly; non-human embeds its GenArk accession
   const assemblyLabel = assemblyAccession ?? 'hg38'
-  const alignRows = inlineMsa
-    ? (inlineMsa.fasta.match(/^>/gm) ?? []).length
-    : msa?.rowCount
+  const alignRows = inlineMsa?.rowCount ?? msa?.rowCount
   const stats = [
     `${transcript.cds.length} coding exons`,
     `${codingBp.toLocaleString()} bp CDS`,
@@ -703,13 +734,7 @@ function ResultPanel({ result }: { result: GeneResult }) {
       setAligning(true)
       setAlignError(undefined)
       buildOrthologMsa(geneId, species.taxId, proteinSequence, setAlignStatus)
-        .then(result => {
-          setInlineMsa({
-            fasta: result.fasta,
-            newick: result.newick,
-            querySeqName: result.querySeqName,
-          })
-        })
+        .then(setInlineMsa)
         .catch((e: unknown) => {
           setAlignError(e instanceof Error ? e.message : String(e))
         })
@@ -746,7 +771,9 @@ function ResultPanel({ result }: { result: GeneResult }) {
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 2 }}>
         <Button
           variant="contained"
+          component="a"
           href={url}
+          disabled={!url}
           target="_blank"
           rel="noopener"
           aria-label="Open in JBrowse (opens in a new tab)"
@@ -1135,8 +1162,10 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
         <Box component="ul" sx={{ pl: 3, m: 0, mb: 2, '& li': { mb: 1 } }}>
           <Typography component="li" variant="body2" color="text.secondary">
             <strong>Human</strong> resolves through <strong>mygene.info</strong>{' '}
-            (hg38 locus + UniProt), with the canonical transcript pulled from
-            the UCSC <Code>ncbiRefSeqSelect</Code> GFF over{' '}
+            (hg38 locus + UniProt). The transcript model comes from the
+            alignment's own knownCanonical CDS sidecar, so genome, alignment and
+            structure share one coordinate space; genes outside the 100-way set
+            fall back to the UCSC <Code>ncbiRefSeqSelect</Code> GFF over{' '}
             <strong>tabix</strong>.
           </Typography>
           <Typography component="li" variant="body2" color="text.secondary">

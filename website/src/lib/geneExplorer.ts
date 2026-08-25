@@ -1,8 +1,8 @@
 import { BgzfFilehandle } from '@gmod/bgzf-filehandle'
 import { TabixIndexedFile } from '@gmod/tabix'
+import { mergeIntervals, toUrlSafeB64 } from '@jbrowse/core/util'
 import { RemoteFile } from 'generic-filehandle2'
 import { parseGFF } from 'msa-parsers'
-import { deflate } from 'pako-esm2'
 
 import {
   DEFAULT_SPECIES,
@@ -10,18 +10,23 @@ import {
   fetchUniProtAccession,
   genArkAssembly,
   resolveGeneNcbi,
-  searchGenesNcbi,
 } from './speciesGenes'
 
 import type { Species } from './speciesGenes'
 import type { GFFRecord } from 'msa-parsers'
 
 // Everything here is fetched live from CORS-enabled public services, so the
-// demo works for any human gene with no per-gene data to host:
+// demo works for any gene with no per-gene data to host:
 //
-//  - mygene.info  : gene symbol -> hg38 locus + UniProt accession (+ type-ahead)
-//  - RefSeq Select: the canonical transcript's exon/CDS model, pulled by locus
-//    with tabix and parsed in the browser (this is the "parse GFF" step)
+//  - mygene.info  : gene symbol -> locus + UniProt accession (+ type-ahead for
+//                   every species)
+//  - the `.cds` sidecar of the hosted 100-way alignment: the knownCanonical
+//    transcript's coding-exon model (human), the same transcript the alignment
+//    is built from, so genome<->MSA<->structure share one coordinate space
+//  - RefSeq Select: the fallback transcript model for human genes outside the
+//    100-way set, pulled by locus with tabix and parsed in the browser
+//  - NCBI Datasets + E-utils + GenArk: locus, transcript and genome for the
+//    other species (see speciesGenes)
 //  - AlphaFold    : the 3D structure, by UniProt accession
 //
 // Only the 100-way alignment needs a hosted file (it is a slice of a
@@ -55,25 +60,9 @@ const GENE_TRACK = 'hg38-ncbiRefSeqSelect'
 const alphafoldCif = (uniprotId: string) =>
   `https://alphafold.ebi.ac.uk/files/AF-${uniprotId}-F1-model_v6.cif`
 
-// Mirrors @jbrowse/core's sessionSharing.toUrlSafeB64 (deflate + url-safe,
-// unpadded base64) so jbrowse-web's `encoded-` SessionLoader path inflates it
-// back via fromUrlSafeB64. Kept byte-compatible deliberately — this is the one
-// contract between the link we emit and the viewer that opens it.
-function toUrlSafeB64(str: string) {
-  const deflated: Uint8Array = deflate(new TextEncoder().encode(str), undefined)
-  const b64 = btoa(Array.from(deflated, b => String.fromCharCode(b)).join(''))
-  return b64
-    .replace(/=+$/, '') // drop padding
-    .replaceAll('+', '-')
-    .replaceAll('/', '_')
-}
-
-export interface Exon {
+export interface CDS {
   start: number // 0-based interbase
   end: number
-}
-
-export interface CDS extends Exon {
   phase: number
 }
 
@@ -85,13 +74,14 @@ export interface GeneLocus {
   uniprotId?: string
 }
 
+// A coding-only transcript model: the collapsed view shows the CDS exons, which
+// are the exons the protein/MSA views align to.
 export interface Transcript {
   refName: string
   strand: 1 | -1
   name: string // RefSeq mRNA accession, e.g. NM_000546.6
   geneName: string
-  exons: Exon[] // genomic ascending, full mRNA (incl. UTR)
-  cds: CDS[] // genomic ascending, coding only
+  cds: CDS[] // genomic ascending
 }
 
 interface MyGeneHit {
@@ -105,17 +95,14 @@ interface GenomicPos {
   end: number
 }
 
-// Type-ahead: gene symbols starting with the typed prefix. Human uses mygene
-// (fast); other species use NCBI E-utils (see speciesGenes).
+// Type-ahead: gene symbols starting with the typed prefix, in the species.
+// mygene.info takes any NCBI taxon id as `species`.
 export async function searchGenes(
   query: string,
   species: Species = DEFAULT_SPECIES,
 ): Promise<string[]> {
-  if (!species.humanFastPath) {
-    return searchGenesNcbi(query, species.taxId)
-  }
   const q = encodeURIComponent(`symbol:${query}*`)
-  const url = `${MYGENE}/query?q=${q}&species=human&fields=symbol&size=10`
+  const url = `${MYGENE}/query?q=${q}&species=${species.taxId}&fields=symbol&size=10`
   const res = await fetch(url)
   const json: unknown = res.ok ? await res.json() : {}
   const hits = isHits(json) ? json.hits : []
@@ -131,7 +118,9 @@ function isHits(v: unknown): v is { hits: { symbol?: unknown }[] } {
   )
 }
 
-// Gene symbol -> hg38 locus + UniProt accession.
+// Gene symbol -> hg38 locus + UniProt accession. mygene matches the symbol
+// case-insensitively and returns the canonical spelling, which is the key the
+// hosted indexes use.
 async function resolveGene(symbol: string): Promise<GeneLocus> {
   const q = encodeURIComponent(`symbol:${symbol}`)
   const url = `${MYGENE}/query?q=${q}&species=human&fields=symbol,genomic_pos,uniprot`
@@ -186,8 +175,7 @@ function getMsaBgzf() {
 
 // Fetch a text sidecar once and parse it into a lookup map, memoizing the
 // promise. The memo is cleared if the fetch fails, so a transient error doesn't
-// wedge every later lookup on a cached rejected promise (the placeholder-forever
-// bug); a later call retries.
+// wedge every later lookup on a cached rejected promise; a later call retries.
 function memoizedTextIndex<T>(url: string, parse: (text: string) => T) {
   let cached: Promise<T> | undefined
   return () => {
@@ -221,7 +209,7 @@ const getMsaIndex = memoizedTextIndex(
 // The knownCanonical CDS model index (`<fa.gz>.cds`): gene symbol -> the hg38
 // row's coding exons. Built by scripts/gene-explorer/build-data.mjs from the
 // SAME transcript as the alignment, so a feature built from it shares the
-// alignment's coordinate space (see fetchGeneCds). ~5 MB, fetched once.
+// alignment's coordinate space (see fetchGeneCds). ~2 MB, fetched once.
 const getCdsIndex = memoizedTextIndex(
   `${MSA_GZ}.cds`,
   text =>
@@ -246,9 +234,6 @@ const getCdsIndex = memoizedTextIndex(
               strand: strand === '-' ? -1 : 1,
               name,
               geneName: symbol,
-              // coding-only model: the collapsed view shows CDS exons, which
-              // is what the protein/MSA views align to
-              exons: cds.map(c => ({ start: c.start, end: c.end })),
               cds,
             },
           ]
@@ -289,8 +274,8 @@ function attr(r: GFFRecord, key: string) {
   return typeof v === 'string' ? v : undefined
 }
 
-// Pull the canonical transcript's exon/CDS structure live from the RefSeq
-// Select GFF and parse it in the browser.
+// Pull the canonical transcript's CDS structure live from the RefSeq Select GFF
+// and parse it in the browser.
 async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
   const lines = await tabixLines(
     getGffTabix(),
@@ -314,13 +299,11 @@ async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
     throw new Error(`No RefSeq Select transcript near ${locus.symbol}`)
   }
   const txId = attr(mrna, 'transcript_id')
-  const mine = records.filter(r => attr(r, 'transcript_id') === txId)
-  const exons = toBlocks(mine.filter(r => r.type === 'exon'))
-  const cds = mine
-    .filter(r => r.type === 'CDS')
+  const cds = records
+    .filter(r => attr(r, 'transcript_id') === txId && r.type === 'CDS')
     .map(r => ({ start: r.start - 1, end: r.end, phase: Number(r.phase) || 0 }))
     .sort((a, b) => a.start - b.start)
-  if (!txId || exons.length === 0 || cds.length === 0) {
+  if (!txId || cds.length === 0) {
     throw new Error(`Incomplete transcript model for ${locus.symbol}`)
   }
   return {
@@ -328,7 +311,6 @@ async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
     strand: mrna.strand === '-' ? -1 : 1,
     name: txId,
     geneName: locus.symbol,
-    exons,
     cds,
   }
 }
@@ -336,17 +318,8 @@ async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
 // Best transcript model for a gene: the alignment-backing knownCanonical CDS
 // when available (so connectedFeature shares the alignment's coordinate space),
 // else the live RefSeq Select transcript for genes outside the 100-way set.
-async function fetchGeneTranscript(
-  symbol: string,
-  locus: GeneLocus,
-): Promise<Transcript> {
-  return (await fetchGeneCds(symbol)) ?? fetchTranscript(locus)
-}
-
-function toBlocks(records: GFFRecord[]): Exon[] {
-  return records
-    .map(r => ({ start: r.start - 1, end: r.end }))
-    .sort((a, b) => a.start - b.start)
+async function fetchGeneTranscript(locus: GeneLocus): Promise<Transcript> {
+  return (await fetchGeneCds(locus.symbol)) ?? fetchTranscript(locus)
 }
 
 // bp of context shown on either side of every exon in the collapsed view, so
@@ -360,23 +333,18 @@ export interface CollapseOptions {
   padding?: number
 }
 
-// Expand each exon by `padding` on both sides, then merge any intervals that now
-// overlap. The padding is already baked into start/end, so a plain overlap merge
-// (no extra gap allowance) leaves an intron collapsed only when its gap exceeds
-// 2*padding. Mirrors jbrowse-components' buildCollapsedRegions.
-function paddedMergedExons(transcript: Transcript, padding: number): Exon[] {
-  const merged: Exon[] = []
-  for (const e of [...transcript.exons].sort((a, b) => a.start - b.start)) {
-    const start = Math.max(0, e.start - padding)
-    const end = e.end + padding
-    const last = merged.at(-1)
-    if (last && start <= last.end) {
-      last.end = Math.max(last.end, end)
-    } else {
-      merged.push({ start, end })
-    }
-  }
-  return merged
+// Expand each CDS by `padding` on both sides, then merge any intervals that now
+// overlap. The padding is already baked into start/end, so the merge takes no
+// extra gap allowance and an intron stays collapsed only when its gap exceeds
+// 2*padding — the same call jbrowse-components' buildCollapsedRegions makes.
+function paddedMergedCds(transcript: Transcript, padding: number) {
+  return mergeIntervals(
+    transcript.cds.map(c => ({
+      start: Math.max(0, c.start - padding),
+      end: c.end + padding,
+    })),
+    0,
+  )
 }
 
 // hg38's sequence (and so its canonical refNames) is "1,2,…,X,Y" — "chr17" is
@@ -390,11 +358,11 @@ function toCanonicalRefName(refName: string) {
   return refName.replace(/^chr/, '')
 }
 
-// A space-separated list of locstrings. When collapsing, each padded/merged exon
+// A space-separated list of locstrings. When collapsing, each padded/merged CDS
 // becomes one displayedRegion in the LinearGenomeView (via JBrowse's
 // navToLocations), so the introns between them squeeze out — there is no
 // `collapseIntrons` view option, this IS how you build a collapsed view
-// declaratively. When not collapsing, a single region spans the whole gene.
+// declaratively. When not collapsing, a single region spans the whole CDS.
 // Locstrings are 1-based.
 export function collapsedLoc(
   transcript: Transcript,
@@ -402,19 +370,19 @@ export function collapsedLoc(
 ) {
   const refName = toCanonicalRefName(transcript.refName)
   if (collapse) {
-    return paddedMergedExons(transcript, padding)
+    return paddedMergedCds(transcript, padding)
       .map(e => `${refName}:${e.start + 1}-${e.end}`)
       .join(' ')
   }
-  const { start, end } = blockBounds(transcript.exons)
+  const { start, end } = cdsBounds(transcript)
   return `${refName}:${start + 1}-${end}`
 }
 
-// Genomic extent of a set of blocks (min start, max end).
-function blockBounds(blocks: Exon[]) {
+// Genomic extent of the coding model (min start, max end).
+function cdsBounds(transcript: Transcript) {
   return {
-    start: Math.min(...blocks.map(b => b.start)),
-    end: Math.max(...blocks.map(b => b.end)),
+    start: Math.min(...transcript.cds.map(c => c.start)),
+    end: Math.max(...transcript.cds.map(c => c.end)),
   }
 }
 
@@ -424,13 +392,10 @@ export interface GeneStats {
   ratio: string // span / codingBp, i.e. how much the collapsed view squeezes out
 }
 
-// The CODING-model summary shown in the result panel. Derived from transcript.cds
-// so it means the same thing whether the transcript came from the .cds sidecar or
-// the RefSeq Select fallback (transcript.exons differs between the two; cds does
-// not).
+// The coding-model summary shown in the result panel.
 export function geneStats(transcript: Transcript): GeneStats {
   const codingBp = transcript.cds.reduce((sum, c) => sum + (c.end - c.start), 0)
-  const { start, end } = blockBounds(transcript.cds)
+  const { start, end } = cdsBounds(transcript)
   const span = end - start
   return { codingBp, span, ratio: (span / codingBp).toFixed(1) }
 }
@@ -438,7 +403,7 @@ export function geneStats(transcript: Transcript): GeneStats {
 // The transcript model the MsaView and ProteinView use to map a residue to its
 // codon (and back). 0-based interbase coordinates, CDS subfeatures only.
 export function connectedFeature(transcript: Transcript) {
-  const { start, end } = blockBounds(transcript.cds)
+  const { start, end } = cdsBounds(transcript)
   return {
     uniqueId: transcript.name,
     type: 'mRNA',
@@ -546,8 +511,8 @@ async function loadHumanGene(symbol: string): Promise<GeneResult> {
   // independent once the locus is known, and each pulls a separate multi-MB
   // index, so fetch them concurrently rather than one after the other
   const [transcript, msa] = await Promise.all([
-    fetchGeneTranscript(symbol, locus),
-    fetchGeneMsa(symbol),
+    fetchGeneTranscript(locus),
+    fetchGeneMsa(locus.symbol),
   ])
   // Prefer the aligned hg38 MSA row: it's the knownCanonical CDS translation, so
   // it shares connectedFeature's codon ordinals. For genes outside the 100-way
@@ -565,7 +530,7 @@ async function loadHumanGene(symbol: string): Promise<GeneResult> {
 }
 
 // Non-human: NCBI locus -> UniProt accession/sequence (steers the isoform pick
-// and drives the 3D view) -> the canonical transcript's genomic exon/CDS model.
+// and drives the 3D view) -> the canonical transcript's genomic CDS model.
 // No precomputed alignment; the cross-species MSA is built on demand.
 async function loadSpeciesGene(
   symbol: string,
@@ -592,6 +557,7 @@ export interface InlineMsa {
   fasta: string
   newick: string
   querySeqName: string // the reference row the MSA maps back to the genome through
+  rowCount: number
 }
 
 export interface SessionOptions {
@@ -717,34 +683,43 @@ function proteinView(
   }
 }
 
-// genome+alignment stacked on the left, the 3D structure on the right (the
-// simple viewIds/direction/size form app-core's createInitialPanels consumes).
+// The workspace tree jbrowse-web restores from a session snapshot
+// (app-core's WorkspaceLayoutMixin: a `row` branch of panels, each holding tabs
+// of view ids; sizes are weights). Genome + alignment stacked in the left cell,
+// the 3D structure in the right. `useWorkspaces` turns the tiled layout on for
+// this session without touching the visitor's own preference. Ids only need to
+// be unique within the tree; the ones jbrowse mints later are random, so fixed
+// names can't collide with them.
 function sideBySideLayout(leftIds: string[], rightId: string) {
   return {
-    direction: 'horizontal' as const,
-    children: [
-      { viewIds: leftIds, size: 58 },
-      { viewIds: [rightId], size: 42 },
-    ],
+    useWorkspaces: true,
+    activePanelId: 'panel-left',
+    layout: {
+      id: 'branch-root',
+      direction: 'row' as const,
+      size: 1,
+      children: [
+        {
+          id: 'panel-left',
+          size: 58,
+          tabs: [{ id: 'tab-left', viewIds: leftIds }],
+          activeTabId: 'tab-left',
+        },
+        {
+          id: 'panel-right',
+          size: 42,
+          tabs: [{ id: 'tab-right', viewIds: [rightId] }],
+          activeTabId: 'tab-right',
+        },
+      ],
+    },
   }
 }
 
-// deflate+base64 a full session snapshot into a `#…session=encoded-…` URL. Two
-// things keep the link working for any gene, including titin-scale ones whose
-// plain session JSON is >100 KB:
-//   - the hash fragment is never sent to the server, so it can't trip the server
-//     request-line limit (HTTP 414) the query string did
-//   - deflate shrinks the (highly repetitive) JSON ~6x so the URL stays sane
-// jbrowse-web reads params from the hash and inflates `encoded-` via
-// fromUrlSafeB64. https://jbrowse.org/jb2/docs/urlparams/
-function encodedSessionUrl(session: unknown) {
-  return `${JBROWSE}#config=${encodeURIComponent(JBROWSE_CONFIG)}&session=encoded-${toUrlSafeB64(JSON.stringify(session))}`
-}
-
-// Build the JBrowse session URL for a gene: a collapsed-intron genome view, plus
+// The JBrowse session snapshot for a gene: a collapsed-intron genome view, plus
 // — when the alignment slice and structure exist — a connected alignment and 3D
 // structure, laid out side by side.
-export function buildSessionUrl({
+export function buildSession({
   transcript,
   uniprotId,
   proteinSequence,
@@ -780,22 +755,30 @@ export function buildSessionUrl({
       ? proteinView(transcript, feature, uniprotId, proteinSequence)
       : undefined
 
-  const session = {
+  return {
     name: `Gene explorer: ${transcript.geneName}`,
     // a GenArk assembly the hosted config never defined, supplied inline
     ...(assemblyAccession
       ? { sessionAssemblies: [genArkAssembly(assemblyAccession)] }
       : {}),
     views: [lgv, ...(msa ? [msa] : []), ...(protein ? [protein] : [])],
-    // genome (+ alignment when present) on the left, structure on the right
     ...(protein
-      ? {
-          init: sideBySideLayout(
-            [lgv.id, ...(msa ? [msa.id] : [])],
-            protein.id,
-          ),
-        }
+      ? sideBySideLayout([lgv.id, ...(msa ? [msa.id] : [])], protein.id)
       : {}),
   }
-  return { session, url: encodedSessionUrl(session) }
+}
+
+export type Session = ReturnType<typeof buildSession>
+
+// deflate+base64 a full session snapshot into a `#…session=encoded-…` URL,
+// with the same encoder jbrowse-web's `encoded-` loader inverts. Two things
+// keep the link working for any gene, including titin-scale ones whose plain
+// session JSON is >100 KB:
+//   - the hash fragment is never sent to the server, so it can't trip the server
+//     request-line limit (HTTP 414) the query string did
+//   - deflate shrinks the (highly repetitive) JSON ~6x so the URL stays sane
+// https://jbrowse.org/jb2/docs/urlparams/
+export async function sessionUrl(session: Session) {
+  const encoded = await toUrlSafeB64(JSON.stringify(session))
+  return `${JBROWSE}#config=${encodeURIComponent(JBROWSE_CONFIG)}&session=encoded-${encoded}`
 }

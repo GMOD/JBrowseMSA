@@ -1,12 +1,13 @@
-import { inflate } from 'pako-esm2'
+import { fromUrlSafeB64 } from '@jbrowse/core/util'
 import { describe, expect, it } from 'vitest'
 
 import {
   DEFAULT_WINDOW_SIZE,
-  buildSessionUrl,
+  buildSession,
   collapsedLoc,
   connectedFeature,
   geneStats,
+  sessionUrl,
 } from './geneExplorer'
 
 import type { Transcript } from './geneExplorer'
@@ -18,10 +19,6 @@ const twoExon: Transcript = {
   strand: -1,
   name: 'NM_000546.6',
   geneName: 'TP53',
-  exons: [
-    { start: 100, end: 200 },
-    { start: 1000, end: 1100 },
-  ],
   cds: [
     { start: 120, end: 200, phase: 0 },
     { start: 1000, end: 1080, phase: 1 },
@@ -29,7 +26,7 @@ const twoExon: Transcript = {
 }
 
 // The session shape that actually travels through the URL, seen at the untyped
-// JSON boundary. buildSessionUrl's return is a union over view kinds; decoding
+// JSON boundary. buildSession's return is a union over view kinds; decoding
 // gives one place to describe the fields the assertions read.
 interface DecodedView {
   id: string
@@ -40,18 +37,18 @@ interface DecodedView {
 }
 interface DecodedSession {
   views: DecodedView[]
-  init?: { children: { viewIds: string[] }[] }
+  useWorkspaces?: boolean
+  activePanelId?: string
+  layout?: {
+    direction: string
+    children: { size: number; tabs: { viewIds: string[] }[] }[]
+  }
 }
 
-// Reverse of toUrlSafeB64 in geneExplorer.ts: url-safe base64 -> inflate -> JSON.
-// Proves the emitted link inflates back to exactly the session we built — the one
-// contract between the link and jbrowse-web's `encoded-` loader.
-function decodeSession(url: string): DecodedSession {
-  const encoded = url.split('&session=encoded-')[1]
-  const b64 = encoded.replaceAll('-', '+').replaceAll('_', '/')
-  const padded = b64.padEnd(Math.ceil(b64.length / 4) * 4, '=')
-  const bytes = Uint8Array.from(atob(padded), c => c.charCodeAt(0))
-  return JSON.parse(new TextDecoder().decode(inflate(bytes, undefined)))
+// jbrowse-web's `encoded-` loader: url-safe base64 -> inflate -> JSON. Proves
+// the emitted link inflates back to exactly the session we built.
+async function decodeSession(url: string): Promise<DecodedSession> {
+  return JSON.parse(await fromUrlSafeB64(url.split('&session=encoded-')[1]))
 }
 
 describe('collapsedLoc', () => {
@@ -60,16 +57,16 @@ describe('collapsedLoc', () => {
   })
 
   it('emits one 1-based padded region per exon when they stay separate', () => {
-    // start 100 (interbase) - 40 padding = 60 -> 1-based 61; end 200 + 40 = 240
-    expect(collapsedLoc(twoExon)).toBe('17:61-240 17:961-1140')
+    // start 120 (interbase) - 40 padding = 80 -> 1-based 81; end 200 + 40 = 240
+    expect(collapsedLoc(twoExon)).toBe('17:81-240 17:961-1120')
   })
 
   it('merges exons whose padded ranges overlap into one region', () => {
     const close: Transcript = {
       ...twoExon,
-      exons: [
-        { start: 100, end: 200 },
-        { start: 250, end: 300 },
+      cds: [
+        { start: 100, end: 200, phase: 0 },
+        { start: 250, end: 300, phase: 2 },
       ],
     }
     // padded [60,240] and [210,340] overlap (210 <= 240) -> single [60,340]
@@ -79,19 +76,19 @@ describe('collapsedLoc', () => {
   it('clamps padding at the start of the contig, never going below base 1', () => {
     const nearStart: Transcript = {
       ...twoExon,
-      exons: [{ start: 10, end: 50 }],
+      cds: [{ start: 10, end: 50, phase: 0 }],
     }
     expect(collapsedLoc(nearStart)).toBe('17:1-90')
   })
 
-  it('spans the whole gene as one region when not collapsing', () => {
-    expect(collapsedLoc(twoExon, { collapse: false })).toBe('17:101-1100')
+  it('spans the whole coding model as one region when not collapsing', () => {
+    expect(collapsedLoc(twoExon, { collapse: false })).toBe('17:121-1080')
   })
 
   it('exposes the padding used as DEFAULT_WINDOW_SIZE', () => {
     const wider = collapsedLoc(twoExon, { padding: DEFAULT_WINDOW_SIZE + 10 })
-    // start 100 - 50 = 50 -> 1-based 51
-    expect(wider).toContain('17:51-')
+    // start 120 - 50 = 70 -> 1-based 71
+    expect(wider).toContain('17:71-')
   })
 })
 
@@ -125,22 +122,21 @@ describe('geneStats', () => {
   })
 })
 
-describe('buildSessionUrl', () => {
+describe('buildSession', () => {
   it('emits a genome-only session when no alignment or structure is available', () => {
-    const { url } = buildSessionUrl({ transcript: twoExon })
-    const decoded = decodeSession(url)
-    expect(decoded.views.map(v => v.type)).toEqual(['LinearGenomeView'])
-    expect(decoded.init).toBeUndefined()
+    const session = buildSession({ transcript: twoExon })
+    expect(session.views.map(v => v.type)).toEqual(['LinearGenomeView'])
+    expect('layout' in session).toBe(false)
   })
 
-  it('adds connected MSA and Protein views with a side-by-side layout', () => {
-    const { url } = buildSessionUrl({
+  it('adds connected MSA and Protein views, tiled side by side', async () => {
+    const session = buildSession({
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
       msaAvailable: true,
     })
-    const decoded = decodeSession(url)
+    const decoded = await decodeSession(await sessionUrl(session))
     const [lgv, msa, protein] = decoded.views
     expect([lgv.type, msa.type, protein.type]).toEqual([
       'LinearGenomeView',
@@ -153,54 +149,58 @@ describe('buildSessionUrl', () => {
     // MsaView reads its block by gene symbol; ProteinView loads the AlphaFold cif
     expect(msa.init?.msaName).toBe('TP53')
     expect(protein.structures?.[0].url).toContain('AF-P04637-')
-    // genome+alignment left, structure right
-    expect(decoded.init?.children[0].viewIds).toEqual([lgv.id, msa.id])
-    expect(decoded.init?.children[1].viewIds).toEqual([protein.id])
+    // the workspace tree jbrowse-web restores: genome + alignment in the left
+    // cell, the structure in the right, workspaces switched on for the session
+    expect(decoded.useWorkspaces).toBe(true)
+    expect(decoded.layout?.direction).toBe('row')
+    expect(decoded.layout?.children.map(c => c.tabs[0].viewIds)).toEqual([
+      [lgv.id, msa.id],
+      [protein.id],
+    ])
+    expect(decoded.layout?.children.map(c => c.size)).toEqual([58, 42])
+    expect(decoded.activePanelId).toBe('panel-left')
   })
 
-  it('round-trips: the encoded URL inflates back to the exact session', () => {
-    const { session, url } = buildSessionUrl({
+  it('round-trips: the encoded URL inflates back to the exact session', async () => {
+    const session = buildSession({
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
       msaAvailable: true,
     })
-    expect(decodeSession(url)).toEqual(session)
+    expect(await decodeSession(await sessionUrl(session))).toEqual(session)
   })
 
   it('includes the AlphaFold structure even without an alignment', () => {
-    const { url } = buildSessionUrl({
+    const session = buildSession({
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
       msaAvailable: false,
     })
-    expect(decodeSession(url).views.map(v => v.type)).toEqual([
+    expect(session.views.map(v => v.type)).toEqual([
       'LinearGenomeView',
       'ProteinView',
     ])
   })
 
   it('embeds a GenArk assembly and names the LGV by it for non-human genes', () => {
-    const { session } = buildSessionUrl({
+    const session = buildSession({
       transcript: twoExon,
       assemblyAccession: 'GCF_000001635.27',
     })
-    const decoded = session as unknown as {
-      sessionAssemblies?: { name: string }[]
-      views: { init?: { assembly?: string } }[]
-    }
-    expect(decoded.sessionAssemblies?.[0].name).toBe('GCF_000001635.27')
-    expect(decoded.views[0].init?.assembly).toBe('GCF_000001635.27')
+    expect(session.sessionAssemblies?.[0].name).toBe('GCF_000001635.27')
+    const lgv = session.views[0] as { init?: { assembly?: string } }
+    expect(lgv.init?.assembly).toBe('GCF_000001635.27')
   })
 
   it('leaves human on the hosted hg38 config assembly (no sessionAssemblies)', () => {
-    const { session } = buildSessionUrl({ transcript: twoExon })
+    const session = buildSession({ transcript: twoExon })
     expect('sessionAssemblies' in session).toBe(false)
   })
 
   it('carries an inline ortholog alignment as a connected MsaView with data', () => {
-    const { url } = buildSessionUrl({
+    const session = buildSession({
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
@@ -209,18 +209,13 @@ describe('buildSessionUrl', () => {
         fasta: '>Mouse\nMEEP\n>Human\nMEEP',
         newick: '(Mouse,Human);',
         querySeqName: 'Mouse',
+        rowCount: 2,
       },
     })
-    const decoded = decodeSession(url) as unknown as {
-      views: {
-        id: string
-        type: string
-        connectedViewId?: string
-        data?: { msa?: string; tree?: string }
-      }[]
-    }
-    const lgv = decoded.views[0]
-    const msa = decoded.views.find(v => v.type === 'MsaView')
+    const lgv = session.views[0]
+    const msa = session.views.find(v => v.type === 'MsaView') as
+      | { connectedViewId?: string; data?: { msa?: string; tree?: string } }
+      | undefined
     expect(msa?.data?.msa).toContain('>Mouse')
     expect(msa?.data?.tree).toBe('(Mouse,Human);')
     // the alignment links back to the genome view
