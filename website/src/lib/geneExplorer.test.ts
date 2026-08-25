@@ -14,12 +14,13 @@ import {
   sessionUrl,
 } from './geneExplorer'
 
-import type { SessionOptions, Transcript } from './geneExplorer'
+import type { Genome, SessionOptions, Transcript } from './geneExplorer'
 
-// A minimal two-exon transcript on chr17. The exons are far enough apart
-// (gap 800 bp > 2 * DEFAULT_WINDOW_SIZE) that collapsing keeps them separate.
+// A minimal two-exon transcript on hg38's chromosome 17, named canonically. The
+// exons are far enough apart (gap 800 bp > 2 * DEFAULT_WINDOW_SIZE) that
+// collapsing keeps them separate.
 const twoExon: Transcript = {
-  refName: 'chr17',
+  refName: '17',
   strand: -1,
   name: 'NM_000546.6',
   geneName: 'TP53',
@@ -29,6 +30,20 @@ const twoExon: Transcript = {
   ],
 }
 
+const hg38: Genome = {
+  configUrl:
+    'https://gmod.org/JBrowseMSA/demo/data/jbrowse-msa-combined-config.json',
+  assemblyName: 'hg38',
+  geneTrackId: 'hg38-ncbiRefSeqSelect',
+}
+
+const mouse: Genome = {
+  configUrl:
+    'https://jbrowse.org/hubs/genark/GCF/000/001/635/GCF_000001635.27/config.json',
+  assemblyName: 'GCF_000001635.27',
+  geneTrackId: 'GCF_000001635.27-ncbiRefSeqSelect',
+}
+
 // The session shape that actually travels through the URL, seen at the untyped
 // JSON boundary. buildSession's return is a union over view kinds; decoding
 // gives one place to describe the fields the assertions read.
@@ -36,8 +51,19 @@ interface DecodedView {
   id: string
   type: string
   connectedViewId?: string
-  init?: { msaName?: string; loc?: string; tracks?: string[] }
+  init?: {
+    msaName?: string
+    loc?: string
+    assembly?: string
+    tracks?: string[]
+  }
   structures?: { url: string; connectedViewId: string }[]
+  orthologParams?: {
+    taxId: number
+    geneCandidates: string[]
+    msaAlgorithm: string
+    proteinSequence?: string
+  }
 }
 interface DecodedSession {
   views: DecodedView[]
@@ -56,8 +82,8 @@ async function decodeSession(url: string): Promise<DecodedSession> {
 }
 
 describe('collapsedLoc', () => {
-  it('drops the chr prefix to hg38 canonical refNames', () => {
-    expect(collapsedLoc(twoExon)).not.toContain('chr')
+  it('names regions by the transcript refName as given (already canonical)', () => {
+    expect(collapsedLoc(twoExon).split(' ')[0]).toMatch(/^17:/)
   })
 
   it('emits one 1-based padded region per exon when they stay separate', () => {
@@ -106,7 +132,7 @@ describe('collapsedLoc', () => {
 })
 
 describe('connectedFeature', () => {
-  it('spans the CDS bounds and normalizes the refName', () => {
+  it('spans the CDS bounds on the transcript refName', () => {
     const f = connectedFeature(twoExon)
     expect(f.refName).toBe('17')
     expect(f.start).toBe(120)
@@ -152,7 +178,11 @@ const configTrackIds: string[] = (
 // The genome view's init blob for a session over twoExon. The views array is a
 // union over view kinds, and the first entry is always the LinearGenomeView.
 function genomeInit(opts: Partial<SessionOptions> = {}) {
-  const [lgv] = buildSession({ transcript: twoExon, ...opts }).views
+  const [lgv] = buildSession({
+    genome: hg38,
+    transcript: twoExon,
+    ...opts,
+  }).views
   return (lgv as { init: { loc: string; tracks: string[] } }).init
 }
 
@@ -188,11 +218,10 @@ describe('hg38 tracks', () => {
     ).toEqual(['hg38-ncbiRefSeqSelect'])
   })
 
-  it('leaves non-human sessions without hg38 tracks', () => {
-    expect(
-      genomeInit({ assemblyAccession: 'GCF_000001635.27', conservation: true })
-        .tracks,
-    ).toEqual([])
+  it('gives non-human sessions their own gene track and no hg38 tracks', () => {
+    expect(genomeInit({ genome: mouse, conservation: true }).tracks).toEqual([
+      'GCF_000001635.27-ncbiRefSeqSelect',
+    ])
   })
 
   it('threads flip into the genome view loc', () => {
@@ -204,13 +233,14 @@ describe('hg38 tracks', () => {
 
 describe('buildSession', () => {
   it('emits a genome-only session when no alignment or structure is available', () => {
-    const session = buildSession({ transcript: twoExon })
+    const session = buildSession({ genome: hg38, transcript: twoExon })
     expect(session.views.map(v => v.type)).toEqual(['LinearGenomeView'])
     expect('layout' in session).toBe(false)
   })
 
   it('adds connected MSA and Protein views, tiled side by side', async () => {
     const session = buildSession({
+      genome: hg38,
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
@@ -243,6 +273,7 @@ describe('buildSession', () => {
 
   it('round-trips: the encoded URL inflates back to the exact session', async () => {
     const session = buildSession({
+      genome: hg38,
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
@@ -253,6 +284,7 @@ describe('buildSession', () => {
 
   it('includes the AlphaFold structure even without an alignment', () => {
     const session = buildSession({
+      genome: hg38,
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
@@ -264,41 +296,50 @@ describe('buildSession', () => {
     ])
   })
 
-  it('embeds a GenArk assembly and names the LGV by it for non-human genes', () => {
-    const session = buildSession({
-      transcript: twoExon,
-      assemblyAccession: 'GCF_000001635.27',
-    })
-    expect(session.sessionAssemblies?.[0].name).toBe('GCF_000001635.27')
-    const lgv = session.views[0] as { init?: { assembly?: string } }
+  it('opens non-human genes on their jb2hubs genome and gene track', async () => {
+    const session = buildSession({ genome: mouse, transcript: twoExon })
+    const url = await sessionUrl(session, mouse)
+    expect(url).toContain(`config=${encodeURIComponent(mouse.configUrl)}`)
+    const [lgv] = (await decodeSession(url)).views
     expect(lgv.init?.assembly).toBe('GCF_000001635.27')
-  })
-
-  it('leaves human on the hosted hg38 config assembly (no sessionAssemblies)', () => {
-    const session = buildSession({ transcript: twoExon })
+    expect(lgv.init?.tracks).toEqual(['GCF_000001635.27-ncbiRefSeqSelect'])
     expect('sessionAssemblies' in session).toBe(false)
   })
 
-  it('carries an inline ortholog alignment as a connected MsaView with data', () => {
+  it('opens human genes on the hosted hg38 config by default', async () => {
+    const session = buildSession({ genome: hg38, transcript: twoExon })
+    expect(await sessionUrl(session)).toContain(
+      `config=${encodeURIComponent(hg38.configUrl)}`,
+    )
+  })
+
+  it('carries an ortholog request the msaview plugin resolves at launch', () => {
     const session = buildSession({
+      genome: mouse,
       transcript: twoExon,
       uniprotId: 'P04637',
       proteinSequence: 'MEEPQSDPSV',
-      assemblyAccession: 'GCF_000001635.27',
-      inlineMsa: {
-        fasta: '>Mouse\nMEEP\n>Human\nMEEP',
-        newick: '(Mouse,Human);',
-        querySeqName: 'Mouse',
-        rowCount: 2,
+      orthologs: {
+        taxId: 10090,
+        geneId: '22059',
+        proteinSequence: 'MEEPQSDPSV',
       },
     })
-    const lgv = session.views[0]
-    const msa = session.views.find(v => v.type === 'MsaView') as
-      | { connectedViewId?: string; data?: { msa?: string; tree?: string } }
-      | undefined
-    expect(msa?.data?.msa).toContain('>Mouse')
-    expect(msa?.data?.tree).toBe('(Mouse,Human);')
-    // the alignment links back to the genome view
-    expect(msa?.connectedViewId).toBe(lgv.id)
+    const [lgv, msa, protein] = session.views as DecodedView[]
+    expect(msa.type).toBe('MsaView')
+    expect(msa.orthologParams).toEqual({
+      taxId: 10090,
+      geneCandidates: ['22059', 'TP53'],
+      msaAlgorithm: 'clustalo',
+      proteinSequence: 'MEEPQSDPSV',
+    })
+    expect('data' in msa).toBe(false)
+    // the alignment links back to the genome view and sits beside it
+    expect(msa.connectedViewId).toBe(lgv.id)
+    expect(session.layout?.children[0].tabs[0].viewIds).toEqual([
+      lgv.id,
+      msa.id,
+    ])
+    expect(session.layout?.children[1].tabs[0].viewIds).toEqual([protein.id])
   })
 })

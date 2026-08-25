@@ -6,10 +6,10 @@ import { parseGFF } from 'msa-parsers'
 
 import {
   DEFAULT_SPECIES,
-  fetchTranscriptNcbi,
+  fetchGeneTable,
   fetchUniProtAccession,
-  genArkAssembly,
   resolveGeneNcbi,
+  transcriptFromGeneTable,
 } from './speciesGenes'
 
 import type { Species } from './speciesGenes'
@@ -25,8 +25,9 @@ import type { GFFRecord } from 'msa-parsers'
 //    is built from, so genome<->MSA<->structure share one coordinate space
 //  - RefSeq Select: the fallback transcript model for human genes outside the
 //    100-way set, pulled by locus with tabix and parsed in the browser
-//  - NCBI Datasets + E-utils + GenArk: locus, transcript and genome for the
-//    other species (see speciesGenes)
+//  - NCBI Datasets + E-utils + jb2hubs: locus, transcript and genome config for
+//    the other species (see speciesGenes); their alignment is built from NCBI
+//    orthologs by jbrowse-plugin-msaview when the session opens
 //  - AlphaFold    : the 3D structure, by UniProt accession
 //
 // Only the 100-way alignment needs a hosted file (it is a slice of a
@@ -79,7 +80,7 @@ export interface CDS {
 
 export interface GeneLocus {
   symbol: string
-  refName: string // with chr prefix, e.g. chr17
+  refName: string // as the RefSeq Select GFF names it, e.g. chr17
   start: number // 1-based
   end: number
   uniprotId?: string
@@ -87,7 +88,8 @@ export interface GeneLocus {
 }
 
 // A coding-only transcript model: the collapsed view shows the CDS exons, which
-// are the exons the protein/MSA views align to.
+// are the exons the protein/MSA views align to. refName is the assembly's
+// canonical name — the one the session must use — so hg38's "17", not "chr17".
 export interface Transcript {
   refName: string
   strand: 1 | -1
@@ -244,7 +246,7 @@ const getCdsIndex = memoizedTextIndex(
           return [
             symbol,
             {
-              refName,
+              refName: hg38RefName(refName),
               strand: strand === '-' ? -1 : 1,
               name,
               geneName: symbol,
@@ -321,7 +323,7 @@ async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
     throw new Error(`Incomplete transcript model for ${locus.symbol}`)
   }
   return {
-    refName: locus.refName,
+    refName: hg38RefName(locus.refName),
     strand: mrna.strand === '-' ? -1 : 1,
     name: txId,
     geneName: locus.symbol,
@@ -368,9 +370,9 @@ function paddedMergedCds(transcript: Transcript, padding: number) {
 // displayedRegions, and the connectedFeature) must use the canonical name:
 // refName matching against displayed regions (bpToPx, hover/click highlights,
 // centerAt) is exact and does NOT alias-resolve, so an aliased displayed region
-// silently breaks those. We keep the friendly "chr17" for the UI and normalize
-// only at the session boundary. (mygene/UCSC give us the "chr"-prefixed form.)
-function toCanonicalRefName(refName: string) {
+// silently breaks those. mygene and the sidecar name the "chr17" form, so the
+// human loaders rename at the source.
+function hg38RefName(refName: string) {
   return refName.replace(/^chr/, '')
 }
 
@@ -390,7 +392,7 @@ export function collapsedLoc(
     flip = false,
   }: CollapseOptions = {},
 ) {
-  const refName = toCanonicalRefName(transcript.refName)
+  const { refName } = transcript
   const regions = collapse
     ? paddedMergedCds(transcript, padding)
     : [cdsBounds(transcript)]
@@ -428,7 +430,7 @@ export function connectedFeature(transcript: Transcript) {
   return {
     uniqueId: transcript.name,
     type: 'mRNA',
-    refName: toCanonicalRefName(transcript.refName),
+    refName: transcript.refName,
     start,
     end,
     strand: transcript.strand,
@@ -499,8 +501,24 @@ async function fetchUniProtSeq(uniprotId: string) {
   return fastaBody(await res.text())
 }
 
+// The genome a session opens on: a hosted JBrowse config, the assembly it
+// defines, and the gene track to show under the collapsed exons. Human is the
+// app's own hg38 config; every other species is its jb2hubs GenArk config.
+export interface Genome {
+  configUrl: string
+  assemblyName: string
+  geneTrackId: string
+}
+
+const HG38: Genome = {
+  configUrl: JBROWSE_CONFIG,
+  assemblyName: 'hg38',
+  geneTrackId: GENE_TRACK,
+}
+
 export interface GeneResult {
   species: Species
+  genome: Genome
   transcript: Transcript
   uniprotId?: string
   // NCBI GeneID — the key the ortholog endpoints take
@@ -509,22 +527,21 @@ export interface GeneResult {
   // the protein AlphaFold aligns to: the aligned hg38 row when in the 100-way
   // set, else the UniProt canonical sequence — so 3D linkage works for any gene
   proteinSequence?: string
-  // GenArk accession to embed as the session assembly; undefined for human,
-  // which uses the hosted hg38 config assembly
-  assemblyAccession?: string
 }
 
 // Resolve a gene to everything the result panel renders. Human uses the bespoke
 // hg38 + 100-way fast path; every other species is synthesized live from NCBI +
-// GenArk + UniProt (see speciesGenes). One entry point so the UI guards
-// staleness once rather than around each await.
+// jb2hubs + UniProt (see speciesGenes) and reports each stage through
+// onProgress. One entry point so the UI guards staleness once rather than
+// around each await.
 export async function loadGene(
   symbol: string,
   species: Species = DEFAULT_SPECIES,
+  onProgress: (message: string) => void = () => {},
 ): Promise<GeneResult> {
   return species.humanFastPath
     ? loadHumanGene(symbol)
-    : loadSpeciesGene(symbol, species)
+    : loadSpeciesGene(symbol, species, onProgress)
 }
 
 async function loadHumanGene(symbol: string): Promise<GeneResult> {
@@ -543,6 +560,7 @@ async function loadHumanGene(symbol: string): Promise<GeneResult> {
     (locus.uniprotId ? await fetchUniProtSeq(locus.uniprotId) : undefined)
   return {
     species: DEFAULT_SPECIES,
+    genome: HG38,
     transcript,
     uniprotId: locus.uniprotId,
     geneId: locus.geneId,
@@ -551,54 +569,66 @@ async function loadHumanGene(symbol: string): Promise<GeneResult> {
   }
 }
 
-// Non-human: NCBI locus -> UniProt accession/sequence (steers the isoform pick
-// and drives the 3D view) -> the canonical transcript's genomic CDS model.
-// No precomputed alignment; the cross-species MSA is built on demand.
+// Non-human: NCBI locus (and the jb2hubs genome that hosts it), then the
+// UniProt sequence and the gene_table concurrently — the sequence drives the
+// 3D view and steers which isoform the gene_table pick takes.
 async function loadSpeciesGene(
   symbol: string,
   species: Species,
+  onProgress: (message: string) => void,
 ): Promise<GeneResult> {
+  onProgress(`Resolving ${symbol} at NCBI…`)
   const locus = await resolveGeneNcbi(symbol, species.taxId)
+  onProgress('Fetching the protein and transcript model…')
+  const geneTable = fetchGeneTable(locus.geneId)
   const uniprotId =
     locus.uniprotId ?? (await fetchUniProtAccession(symbol, species.taxId))
   const proteinSequence = uniprotId
     ? await fetchUniProtSeq(uniprotId)
     : undefined
-  const transcript = await fetchTranscriptNcbi(locus, proteinSequence?.length)
+  const transcript = transcriptFromGeneTable(
+    await geneTable,
+    locus,
+    proteinSequence?.length,
+  )
   return {
     species,
+    genome: {
+      configUrl: locus.configUrl,
+      assemblyName: locus.assemblyAccession,
+      geneTrackId: locus.geneTrackId,
+    },
     transcript,
     uniprotId,
     geneId: locus.geneId,
     proteinSequence,
-    assemblyAccession: locus.assemblyAccession,
   }
 }
 
-export interface InlineMsa {
-  fasta: string
-  newick: string
-  querySeqName: string // the reference row the MSA maps back to the genome through
-  rowCount: number
+// What jbrowse-plugin-msaview needs to build the alignment itself when the
+// session opens: NCBI's orthologs of this gene, aligned at EBI, with the query
+// row being the protein the 3D view aligns to.
+export interface OrthologSource {
+  taxId: number
+  geneId: string
+  proteinSequence: string
 }
 
 export interface SessionOptions {
+  genome: Genome
   transcript: Transcript
   uniprotId?: string
   proteinSequence?: string
   // include the connected hosted 100-way MsaView (human only)
   msaAvailable?: boolean
-  // an alignment computed on the fly (non-human), carried inline in the session
-  inlineMsa?: InlineMsa
+  // include a connected MsaView the plugin fills from NCBI orthologs at launch
+  orthologs?: OrthologSource
   // false launches a whole-gene view (introns intact) instead of collapsed exons
   collapseIntrons?: boolean
   // reverse the genome view so a minus-strand gene reads 5'→3'
   flip?: boolean
   // add the 470-way conservation track under the gene (human only)
   conservation?: boolean
-  // GenArk accession to embed as the session's assembly (non-human); undefined
-  // uses the hosted hg38 config assembly
-  assemblyAccession?: string
 }
 
 type Feature = ReturnType<typeof connectedFeature>
@@ -611,12 +641,11 @@ type Feature = ReturnType<typeof connectedFeature>
 
 // loc/tracks/assembly under `init`: navToLocations expands the space-separated
 // collapsed-exon loc into one displayedRegion per exon, squeezing introns out.
-// Human references the hosted hg38 gene track; other species show the collapsed
-// regions alone (the connectedFeature carries the codon mapping either way).
+// The gene track shows the transcript model under those regions.
 function linearGenomeView(
   transcript: Transcript,
   collapse: CollapseOptions,
-  assemblyName: string,
+  genome: Genome,
   tracks: string[],
 ) {
   return {
@@ -624,20 +653,22 @@ function linearGenomeView(
     type: 'LinearGenomeView',
     colorByCDS: true,
     init: {
-      assembly: assemblyName,
+      assembly: genome.assemblyName,
       loc: collapsedLoc(transcript, collapse),
       tracks,
     },
   }
 }
 
-// The hosted hg38 tracks for a gene: the canonical gene model, its ClinVar
-// pathogenic variants when the config has them, and conservation on request.
-function hg38Tracks(symbol: string, conservation: boolean) {
+// The genome's tracks for a gene: its gene model always; on hg38 also the
+// ClinVar pathogenic variants when the config has them, and conservation on
+// request. The jb2hubs configs carry neither.
+function genomeTracks(genome: Genome, symbol: string, conservation: boolean) {
+  const hg38 = genome.assemblyName === HG38.assemblyName
   return [
-    GENE_TRACK,
-    clinvarTrack(symbol),
-    conservation ? CONSERVATION_TRACK : undefined,
+    genome.geneTrackId,
+    hg38 ? clinvarTrack(symbol) : undefined,
+    hg38 && conservation ? CONSERVATION_TRACK : undefined,
   ].filter((t): t is string => !!t)
 }
 
@@ -679,19 +710,29 @@ function msaViewHosted(
   }
 }
 
-// Non-human: an ortholog alignment built on the fly, carried inline in the
-// session as MSA + guide tree (no hosted file). querySeqName names the reference
-// row the connectedFeature maps genome coordinates through.
-function msaViewInline(
+// Non-human: the plugin builds the alignment when the view attaches —
+// `orthologParams` is its own model property with an autorun (see
+// jbrowse-plugin-msaview DEVELOPERS.md), so the session carries the request,
+// not the result. The GeneID goes first so no symbol lookup is needed; the
+// protein sequence becomes the query row, named `<species>_query` by the
+// plugin, which is the row connectedFeature maps genome coordinates through.
+// allowedGappyness hides the columns a lone long ortholog would otherwise open
+// the view on.
+function msaViewOrthologs(
   transcript: Transcript,
   feature: Feature,
-  inlineMsa: InlineMsa,
+  orthologs: OrthologSource,
   uniprotId?: string,
 ) {
   return {
     ...msaViewBase(transcript, feature, uniprotId),
-    querySeqName: inlineMsa.querySeqName,
-    data: { msa: inlineMsa.fasta, tree: inlineMsa.newick },
+    allowedGappyness: 80,
+    orthologParams: {
+      taxId: orthologs.taxId,
+      geneCandidates: [orthologs.geneId, transcript.geneName],
+      msaAlgorithm: 'clustalo',
+      proteinSequence: orthologs.proteinSequence,
+    },
   }
 }
 
@@ -753,40 +794,33 @@ function sideBySideLayout(leftIds: string[], rightId: string) {
 }
 
 // The JBrowse session snapshot for a gene: a collapsed-intron genome view, plus
-// — when the alignment slice and structure exist — a connected alignment and 3D
-// structure, laid out side by side.
+// — when an alignment source and structure exist — a connected alignment and
+// 3D structure, laid out side by side.
 export function buildSession({
+  genome,
   transcript,
   uniprotId,
   proteinSequence,
   msaAvailable,
-  inlineMsa,
+  orthologs,
   collapseIntrons = true,
   flip = false,
   conservation = false,
-  assemblyAccession,
 }: SessionOptions) {
   const feature = connectedFeature(transcript)
-  // human references the hosted hg38 config assembly + tracks; non-human
-  // embeds its GenArk assembly in the session and shows the collapsed regions
-  // without a hosted track
-  const assemblyName = assemblyAccession ?? 'hg38'
-  const tracks = assemblyAccession
-    ? []
-    : hg38Tracks(transcript.geneName, conservation)
   const lgv = linearGenomeView(
     transcript,
     { collapse: collapseIntrons, flip },
-    assemblyName,
-    tracks,
+    genome,
+    genomeTracks(genome, transcript.geneName, conservation),
   )
 
-  // one MSA source at most: the hosted 100-way (human) or an inline ortholog
-  // alignment (non-human, built on demand)
+  // one MSA source at most: the hosted 100-way (human) or an ortholog alignment
+  // the plugin builds at launch (non-human)
   const msa = msaAvailable
     ? msaViewHosted(transcript, feature, uniprotId)
-    : inlineMsa
-      ? msaViewInline(transcript, feature, inlineMsa, uniprotId)
+    : orthologs
+      ? msaViewOrthologs(transcript, feature, orthologs, uniprotId)
       : undefined
   // the 3D view needs only the structure accession + its protein sequence, not
   // the alignment, so it links up for any gene with a UniProt entry
@@ -797,10 +831,6 @@ export function buildSession({
 
   return {
     name: `Gene explorer: ${transcript.geneName}`,
-    // a GenArk assembly the hosted config never defined, supplied inline
-    ...(assemblyAccession
-      ? { sessionAssemblies: [genArkAssembly(assemblyAccession)] }
-      : {}),
     views: [lgv, ...(msa ? [msa] : []), ...(protein ? [protein] : [])],
     ...(protein
       ? sideBySideLayout([lgv.id, ...(msa ? [msa.id] : [])], protein.id)
@@ -818,7 +848,7 @@ export type Session = ReturnType<typeof buildSession>
 //     request-line limit (HTTP 414) the query string did
 //   - deflate shrinks the (highly repetitive) JSON ~6x so the URL stays sane
 // https://jbrowse.org/jb2/docs/urlparams/
-export async function sessionUrl(session: Session) {
+export async function sessionUrl(session: Session, genome: Genome = HG38) {
   const encoded = await toUrlSafeB64(JSON.stringify(session))
-  return `${JBROWSE}#config=${encodeURIComponent(JBROWSE_CONFIG)}&session=encoded-${encoded}`
+  return `${JBROWSE}#config=${encodeURIComponent(genome.configUrl)}&session=encoded-${encoded}`
 }

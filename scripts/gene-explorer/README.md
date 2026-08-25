@@ -218,8 +218,9 @@ Wiring a hosted assembly into the website is described in
 
 - **Data**: the five files per alignment (done by the `aws s3 cp` commands).
 - **Plugin**: `jbrowse-plugin-msaview` ≥ 2.6.1 adds the indexed-MSA launch path
-  (`msaIndexedLocation` + `msaName` → `BgzfFilehandle.read` by name) so
-  `…/latest/dist/…` serves it.
+  (`msaIndexedLocation` + `msaName` → `BgzfFilehandle.read` by name); ≥ 2.8.2
+  resolves `orthologParams` from a session snapshot, which is how non-human
+  sessions get their alignment. `…/latest/dist/…` serves both.
 - **Config**: `packages/app/public/data/jbrowse-msa-combined-config.json`
   (already carries the `hg38-ncbiRefSeqSelect` track and the `Protein3d` +
   `MsaView` plugins) deploys with the `/demo` app.

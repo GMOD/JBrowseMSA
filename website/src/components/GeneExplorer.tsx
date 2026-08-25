@@ -47,14 +47,13 @@ import {
   sessionUrl,
 } from '../lib/geneExplorer'
 import { fetchOrthologSymbol } from '../lib/orthologLookup'
-import { buildOrthologMsa } from '../lib/orthologMsa'
 import { fetchProteinStl } from '../lib/proteinStl'
 import { DEFAULT_SPECIES, SPECIES, speciesByTaxId } from '../lib/speciesGenes'
 import { theme } from '../lib/theme'
 
 import type {
   GeneResult,
-  InlineMsa,
+  Genome,
   Session,
   Transcript,
 } from '../lib/geneExplorer'
@@ -100,11 +99,11 @@ function triggerDownload(bytes: Uint8Array<ArrayBuffer>, filename: string) {
 // The launch URL for a session snapshot. Encoding is async (deflate), so the
 // link is empty for the tick it takes; the ignore flag keeps a slow encode of a
 // superseded session from landing on the newer one.
-function useSessionUrl(session: Session) {
+function useSessionUrl(session: Session, genome: Genome) {
   const [state, setState] = useState<{ session: Session; url: string }>()
   useEffect(() => {
     let ignore = false
-    sessionUrl(session).then(
+    sessionUrl(session, genome).then(
       url => {
         if (!ignore) {
           setState({ session, url })
@@ -117,7 +116,7 @@ function useSessionUrl(session: Session) {
     return () => {
       ignore = true
     }
-  }, [session])
+  }, [session, genome])
   return state?.session === session ? state.url : undefined
 }
 
@@ -278,22 +277,29 @@ interface GeneOutcome {
 }
 
 // Load everything the result panel renders for the gene named in the URL. The
-// only stored state is the last completed outcome; `busy` is DERIVED — we're
-// loading whenever the URL's gene isn't the one the outcome describes — so no
-// flag has to be kept in sync with a setState inside the effect. The effect just
-// fetches; the ignore flag makes switching genes race-safe.
+// only stored state is the last completed outcome (plus the load's latest
+// progress line); `busy` is DERIVED — we're loading whenever the URL's gene
+// isn't the one the outcome describes — so no flag has to be kept in sync with
+// a setState inside the effect. The effect just fetches; the ignore flag makes
+// switching genes race-safe.
 // https://react.dev/learn/you-might-not-need-an-effect
 function useGene(symbol: string | null, species: Species) {
   const [outcome, setOutcome] = useState<GeneOutcome>({
     symbol: null,
     taxId: null,
   })
+  const [progress, setProgress] = useState<string>()
   useEffect(() => {
     if (!symbol) {
       return
     }
     let ignore = false
-    loadGene(symbol, species).then(
+    setProgress(undefined)
+    loadGene(symbol, species, message => {
+      if (!ignore) {
+        setProgress(message)
+      }
+    }).then(
       result => {
         if (!ignore) {
           setOutcome({ symbol, taxId: species.taxId, result })
@@ -315,8 +321,10 @@ function useGene(symbol: string | null, species: Species) {
   }, [symbol, species])
 
   const isCurrent = outcome.symbol === symbol && outcome.taxId === species.taxId
+  const busy = symbol !== null && !isCurrent
   return {
-    busy: symbol !== null && !isCurrent,
+    busy,
+    progress: busy ? progress : undefined,
     // keep the previous result as a stable placeholder while the next loads (the
     // caller dims it); never surface an error for a gene the URL has left
     result: outcome.result,
@@ -354,7 +362,7 @@ export default function GeneExplorer() {
   }
 
   const hits = useGeneSuggestions(searchTerm, species)
-  const { busy, result, error } = useGene(urlGene, species)
+  const { busy, progress, result, error } = useGene(urlGene, species)
 
   const exampleSymbols = examplesFor(species).map(e => e.symbol)
   // show the curated examples until there's a real query to suggest against
@@ -440,6 +448,7 @@ export default function GeneExplorer() {
           error={error}
           result={result}
           busy={busy}
+          progress={progress}
         />
       </Box>
 
@@ -645,14 +654,25 @@ function GeneResultArea({
   error,
   result,
   busy,
+  progress,
 }: {
   urlGene: string | null
   error: string | undefined
   result: GeneResult | undefined
   busy: boolean
+  progress: string | undefined
 }) {
   return (
     <Box sx={{ flex: 1, minWidth: 0 }}>
+      {progress ? (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', mb: 1 }}
+        >
+          {progress}
+        </Typography>
+      ) : null}
       {urlGene ? null : (
         <Paper
           variant="outlined"
@@ -699,12 +719,12 @@ function GeneResultArea({
 function ResultPanel({ result }: { result: GeneResult }) {
   const {
     species,
+    genome,
     transcript,
     uniprotId,
     geneId,
     msa,
     proteinSequence,
-    assemblyAccession,
   } = result
   const { codingBp, span, ratio } = geneStats(transcript)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -714,73 +734,57 @@ function ResultPanel({ result }: { result: GeneResult }) {
   const [collapse, setCollapse] = useState(true)
   const [flip, setFlip] = useState(transcript.strand === -1)
   const [conservation, setConservation] = useState(false)
-  // a cross-species alignment built on demand (non-human); once present it's
-  // folded into the launched session as a connected MsaView
-  const [inlineMsa, setInlineMsa] = useState<InlineMsa>()
+  // non-human genes with a query protein can carry a connected MsaView that the
+  // plugin fills from NCBI orthologs when the session opens
+  const canAlignOrthologs =
+    !species.humanFastPath && !msa && !!geneId && !!proteinSequence
+  const [includeOrthologs, setIncludeOrthologs] = useState(true)
+  const orthologs = canAlignOrthologs && includeOrthologs
   const session = useMemo(
     () =>
       buildSession({
+        genome,
         transcript,
         uniprotId,
         proteinSequence,
         msaAvailable: !!msa,
-        inlineMsa,
+        orthologs:
+          orthologs && geneId && proteinSequence
+            ? { taxId: species.taxId, geneId, proteinSequence }
+            : undefined,
         collapseIntrons: collapse,
         flip,
         conservation,
-        assemblyAccession,
       }),
     [
+      genome,
       transcript,
       uniprotId,
       msa,
       proteinSequence,
-      inlineMsa,
+      orthologs,
+      geneId,
+      species.taxId,
       collapse,
       flip,
       conservation,
-      assemblyAccession,
     ],
   )
-  const url = useSessionUrl(session)
+  const url = useSessionUrl(session, genome)
   const loc = useMemo(
     () => collapsedLoc(transcript, { collapse, flip }),
     [transcript, collapse, flip],
   )
   const sessionJson = useMemo(() => JSON.stringify(session, null, 2), [session])
 
-  // human uses the hosted hg38 assembly; non-human embeds its GenArk accession
-  const assemblyLabel = assemblyAccession ?? 'hg38'
-  const alignRows = inlineMsa?.rowCount ?? msa?.rowCount
   const stats = [
     `${transcript.cds.length} coding exons`,
     `${codingBp.toLocaleString()} bp CDS`,
     `${ratio}× collapsed`,
-    alignRows ? `${alignRows}-species alignment` : undefined,
+    msa ? `${msa.rowCount}-species alignment` : undefined,
+    orthologs ? 'ortholog alignment' : undefined,
     uniprotId ? 'AlphaFold structure' : undefined,
   ].filter((s): s is string => !!s)
-
-  // build the cross-species alignment on demand (non-human): resolve orthologs,
-  // fetch proteins, align at EBI, then fold the result into the session
-  const [aligning, setAligning] = useState(false)
-  const [alignStatus, setAlignStatus] = useState<string>()
-  const [alignError, setAlignError] = useState<string>()
-  function buildAlignment() {
-    if (geneId && proteinSequence) {
-      setAligning(true)
-      setAlignError(undefined)
-      buildOrthologMsa(geneId, species.taxId, proteinSequence, setAlignStatus)
-        .then(setInlineMsa)
-        .catch((e: unknown) => {
-          setAlignError(e instanceof Error ? e.message : String(e))
-        })
-        .finally(() => {
-          setAligning(false)
-        })
-    }
-  }
-  // non-human genes can offer an on-demand alignment once a query protein exists
-  const canBuildAlignment = !msa && !!geneId && !!proteinSequence
 
   return (
     <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 } }}>
@@ -794,7 +798,7 @@ function ResultPanel({ result }: { result: GeneResult }) {
         <Box component="span" sx={{ fontStyle: 'italic' }}>
           {species.scientificName}
         </Box>{' '}
-        · {assemblyLabel} · {transcript.refName}{' '}
+        · {genome.assemblyName} · {transcript.refName}{' '}
         {transcript.strand === 1 ? '+' : '−'}
       </Typography>
 
@@ -848,49 +852,31 @@ function ResultPanel({ result }: { result: GeneResult }) {
           still work.
         </Alert>
       ) : null}
-      {canBuildAlignment ? (
-        <Box sx={{ mt: 2 }}>
-          {inlineMsa ? (
-            <Alert severity="success">
-              Cross-species alignment ready — {alignRows} species. It&apos;s now
-              part of the session; open it in JBrowse.
-            </Alert>
-          ) : (
-            <>
-              <Button
-                variant="outlined"
+      {canAlignOrthologs ? (
+        <>
+          <FormControlLabel
+            sx={{ ml: -0.5, display: 'flex' }}
+            control={
+              <Checkbox
                 size="small"
-                disabled={aligning}
-                startIcon={
-                  aligning ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : null
-                }
-                onClick={() => {
-                  buildAlignment()
+                checked={includeOrthologs}
+                onChange={event => {
+                  setIncludeOrthologs(event.target.checked)
                 }}
-              >
-                {aligning
-                  ? 'Building alignment…'
-                  : 'Build cross-species alignment'}
-              </Button>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: 'block', mt: 0.5 }}
-              >
-                {aligning && alignStatus
-                  ? alignStatus
-                  : `Aligns ${species.label} orthologs across species live via NCBI + EBI (can take a minute), then adds a connected alignment view to the session.`}
-              </Typography>
-            </>
-          )}
-          {alignError ? (
-            <Alert severity="warning" sx={{ mt: 1 }}>
-              Couldn&apos;t build the alignment: {alignError}
-            </Alert>
-          ) : null}
-        </Box>
+              />
+            }
+            label="Include cross-species alignment"
+          />
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: 'block', mt: -0.5 }}
+          >
+            JBrowse builds it when the session opens: NCBI&apos;s orthologs of{' '}
+            {transcript.geneName}, aligned at EBI Clustal Omega, connected to
+            the genome and structure.
+          </Typography>
+        </>
       ) : null}
 
       <DetailsDialog
@@ -1337,16 +1323,17 @@ function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
             <strong>Other species</strong> resolve through{' '}
             <strong>NCBI Datasets</strong> (GeneID, assembly, Swiss-Prot); the
             genomic exon/CDS model is parsed from the E-utils{' '}
-            <Code>gene_table</Code>. The genome itself comes from the{' '}
-            <strong>UCSC GenArk</strong> 2bit on genomes.jbrowse.org, embedded
-            straight into the session — no config change needed.
+            <Code>gene_table</Code>. The session opens on the JBrowse config{' '}
+            <strong>genomes.jbrowse.org</strong> publishes for that{' '}
+            <strong>UCSC GenArk</strong> assembly, which already carries the
+            genome, the NCBI gene tracks and both plugins.
           </Typography>
           <Typography component="li" variant="body2" color="text.secondary">
             The <strong>AlphaFold</strong> structure is fetched by UniProt
-            accession. The alignment is the hosted 100-way for human, or —
-            outside human — built on demand from NCBI orthologs aligned at{' '}
-            <strong>EBI Clustal Omega</strong> and carried inline in the
-            session.
+            accession. The alignment is the hosted 100-way for human; outside
+            human the session carries an <Code>orthologParams</Code> request and
+            the msaview plugin builds it on open — NCBI orthologs aligned at{' '}
+            <strong>EBI Clustal Omega</strong>.
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>

@@ -7,14 +7,16 @@
 //                    Swiss-Prot accession
 //  - NCBI E-utils  : the `gene_table` flat file -> genomic exon/CDS structure of
 //                    the canonical transcript (parsed here)
-//  - genomes.jbrowse.org / UCSC GenArk : the assembly's 2bit, embedded straight
-//                    into the JBrowse session so no config change is needed
+//  - jb2hubs       : the JBrowse config genomes.jbrowse.org publishes for every
+//                    UCSC GenArk assembly — genome, NCBI gene tracks, and the
+//                    msaview + protein3d plugins — so a session is config + views
 //  - UniProt       : gene -> Swiss-Prot accession when NCBI omits it (common for
 //                    invertebrates), so the AlphaFold 3D view still resolves
 //
-// The refNames NCBI reports (e.g. NC_000077.7) are exactly the sequence names
-// the GenArk 2bit uses, so — unlike hg38's chr aliasing — no canonicalization is
-// needed for the LGV loc or connectedFeature to line up.
+// NCBI names sequences by accession (NC_000077.7); the jb2hubs assembly makes
+// the UCSC name (chr11) canonical through its chromAlias adapter. The session
+// has to use the canonical name — displayed-region matching does not resolve
+// aliases — so the locus is renamed through the same chromAlias file.
 
 import type { CDS, Transcript } from './geneExplorer'
 
@@ -22,6 +24,7 @@ export const DATASETS = 'https://api.ncbi.nlm.nih.gov/datasets/v2'
 export const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 const UNIPROT = 'https://rest.uniprot.org/uniprotkb'
 const GENARK = 'https://hgdownload.soe.ucsc.edu/hubs'
+const JB2HUBS = 'https://jbrowse.org/hubs/genark'
 
 export interface Species {
   taxId: number
@@ -34,7 +37,7 @@ export interface Species {
 
 // Human first (its own fast path); the rest span vertebrate model organisms down
 // to an invertebrate, plant, fungus, so the tooling visibly generalizes. Every
-// one of these resolves against a GenArk assembly hosted on genomes.jbrowse.org.
+// one of these resolves against a GenArk assembly with a jb2hubs config.
 export const SPECIES: Species[] = [
   {
     taxId: 9606,
@@ -126,7 +129,9 @@ export interface SpeciesLocus {
   symbol: string
   geneId: string
   assemblyAccession: string // GCF_000001635.27
-  refName: string // NC_000077.7 — matches the GenArk 2bit's sequence names
+  configUrl: string // the jb2hubs config for that assembly
+  geneTrackId: string // its NCBI gene track, RefSeq Select where it has one
+  refName: string // the assembly's canonical name, e.g. chr11
   start: number // 1-based
   end: number
   strand: 1 | -1
@@ -155,22 +160,41 @@ interface DatasetsGeneReport {
   }[]
 }
 
-// First annotation carrying a placed genomic range. NCBI can list several
-// assemblies; we take the one it reports coordinates against, since that is the
-// coordinate space the exon/CDS structure and the GenArk 2bit share.
-function pickAnnotation(
-  gene: NonNullable<DatasetsGeneReport['reports']>[number]['gene'],
-) {
-  return gene?.annotations
-    ?.map(a => ({
-      a,
-      loc: a.genomic_locations?.find(l => l.genomic_range?.begin),
-    }))
-    .find(({ loc }) => loc)
+interface PlacedAnnotation {
+  assemblyAccession: string
+  refName: string
+  start: number
+  end: number
+  strand: 1 | -1
 }
 
-// Gene symbol + taxon -> locus. Swiss-Prot is best-effort here; the caller fills
-// it in from UniProt when NCBI omits it.
+// Every annotation NCBI places the gene on, in its order. NCBI lists several
+// assemblies for some species (two zebrafish builds, say), and not all of them
+// have a hosted genome, so the caller tries them in turn.
+function placedAnnotations(
+  gene: NonNullable<DatasetsGeneReport['reports']>[number]['gene'],
+): PlacedAnnotation[] {
+  return (gene?.annotations ?? []).flatMap(a => {
+    const loc = a.genomic_locations?.find(l => l.genomic_range?.begin)
+    const range = loc?.genomic_range
+    return a.assembly_accession && loc?.genomic_accession_version && range
+      ? [
+          {
+            assemblyAccession: a.assembly_accession,
+            refName: loc.genomic_accession_version,
+            start: Number(range.begin),
+            end: Number(range.end),
+            strand:
+              range.orientation === 'minus' ? (-1 as const) : (1 as const),
+          },
+        ]
+      : []
+  })
+}
+
+// Gene symbol + taxon -> locus on the first NCBI assembly jb2hubs hosts, named
+// the way that assembly's config names its sequences. Swiss-Prot is best-effort
+// here; the caller fills it in from UniProt when NCBI omits it.
 export async function resolveGeneNcbi(
   symbol: string,
   taxId: number,
@@ -179,28 +203,30 @@ export async function resolveGeneNcbi(
     `${DATASETS}/gene/symbol/${encodeURIComponent(symbol)}/taxon/${taxId}`,
   )
   const gene = json.reports?.[0]?.gene
-  const hit = pickAnnotation(gene)
-  if (!gene?.gene_id || !hit?.loc?.genomic_range?.begin) {
+  const placed = placedAnnotations(gene)
+  if (!gene?.gene_id || placed.length === 0) {
     throw new Error(`No placed locus found for "${symbol}" in taxon ${taxId}`)
   }
-  const range = hit.loc.genomic_range
-  const assemblyAccession = hit.a.assembly_accession
-  const refName = hit.loc.genomic_accession_version
-  if (!assemblyAccession || !refName) {
-    throw new Error(
-      `NCBI places "${symbol}" on no named assembly/sequence, so there is no genome to show it on`,
-    )
+  for (const hit of placed) {
+    const hub = await fetchGenArkHub(hit.assemblyAccession)
+    if (hub) {
+      return {
+        symbol: gene.symbol ?? symbol,
+        geneId: gene.gene_id,
+        assemblyAccession: hit.assemblyAccession,
+        configUrl: hub.configUrl,
+        geneTrackId: hub.geneTrackId,
+        refName: hub.canonicalRefName(hit.refName),
+        start: hit.start,
+        end: hit.end,
+        strand: hit.strand,
+        uniprotId: gene.swiss_prot_accessions?.[0],
+      }
+    }
   }
-  return {
-    symbol: gene.symbol ?? symbol,
-    geneId: gene.gene_id,
-    assemblyAccession,
-    refName,
-    start: Number(range.begin),
-    end: Number(range.end),
-    strand: range.orientation === 'minus' ? -1 : 1,
-    uniprotId: gene.swiss_prot_accessions?.[0],
-  }
+  throw new Error(
+    `No hosted genome for "${symbol}": NCBI places it on ${placed.map(p => p.assemblyAccession).join(', ')}, none of which jb2hubs serves`,
+  )
 }
 
 // Reviewed (Swiss-Prot) accession for a gene, used when NCBI's Datasets record
@@ -346,15 +372,21 @@ function pickCanonical(
   return matched ?? [...pool].sort((a, b) => b.aaLength - a.aaLength)[0]
 }
 
-// The canonical transcript's genomic exon/CDS model, parsed from the gene_table.
+// The gene_table flat file for a gene. Fetched separately from the pick so it
+// can run while the UniProt lookups are in flight.
+export function fetchGeneTable(geneId: string): Promise<string> {
+  return ncbiText(
+    `${EUTILS}/efetch.fcgi?db=gene&id=${geneId}&rettype=gene_table&retmode=text`,
+  )
+}
+
+// The canonical transcript's genomic CDS model, parsed from the gene_table.
 // uniprotLength, when known, steers which isoform we pick.
-export async function fetchTranscriptNcbi(
+export function transcriptFromGeneTable(
+  text: string,
   locus: SpeciesLocus,
   uniprotLength: number | undefined,
-): Promise<Transcript> {
-  const text = await ncbiText(
-    `${EUTILS}/efetch.fcgi?db=gene&id=${locus.geneId}&rettype=gene_table&retmode=text`,
-  )
+): Transcript {
   const transcript = pickCanonical(
     parseGeneTableBlocks(text, locus.strand),
     uniprotLength,
@@ -371,35 +403,134 @@ export async function fetchTranscriptNcbi(
   }
 }
 
-// --- GenArk assembly ---------------------------------------------------------
+// --- GenArk / jb2hubs --------------------------------------------------------
 // hgdownload lays GenArk hubs out by triplets of the numeric accession:
-// GCF_000001635.27 -> hubs/GCF/000/001/635/GCF_000001635.27/GCF_000001635.27.*
-export function genArkBase(accession: string): string {
+// GCF_000001635.27 -> GCF/000/001/635/GCF_000001635.27. jb2hubs shards its
+// configs the same way.
+function shardedPath(accession: string): string {
   const prefix = accession.slice(0, 3) // GCA | GCF
   const digits = accession.slice(4).replace(/\..*$/, '') // 000001635
-  const [p1, p2, p3] = [
-    digits.slice(0, 3),
-    digits.slice(3, 6),
-    digits.slice(6, 9),
-  ]
-  return `${GENARK}/${prefix}/${p1}/${p2}/${p3}/${accession}/${accession}`
+  return `${prefix}/${digits.slice(0, 3)}/${digits.slice(3, 6)}/${digits.slice(6, 9)}/${accession}`
 }
 
-// A JBrowse assembly definition embedded straight into the session (via
-// sessionAssemblies), so the LGV can display a GenArk genome the hosted config
-// never defined. The 2bit + chrom.sizes live on hgdownload.
-export function genArkAssembly(accession: string) {
-  const base = genArkBase(accession)
+export function genArkBase(accession: string): string {
+  return `${GENARK}/${shardedPath(accession)}/${accession}`
+}
+
+export function genArkConfigUrl(accession: string): string {
+  return `${JB2HUBS}/${shardedPath(accession)}/config.json`
+}
+
+// The NCBI gene track a jb2hubs config carries, best first: RefSeq Select is
+// one transcript per gene, the rest widen from there. Not every assembly has
+// every one (fly and worm have no Select track).
+const GENE_TRACK_SUFFIXES = [
+  'ncbiRefSeqSelect',
+  'ncbiRefSeqCurated',
+  'ncbiRefSeq',
+  'ncbiGff',
+]
+
+export function pickGeneTrack(
+  accession: string,
+  trackIds: string[],
+): string | undefined {
+  return GENE_TRACK_SUFFIXES.map(s => `${accession}-${s}`).find(id =>
+    trackIds.includes(id),
+  )
+}
+
+// chromAlias.txt: a header naming each column's naming scheme, then one row per
+// sequence. The column the config's RefNameAliasAdapter names is canonical;
+// every other column is an alias of it.
+export function parseChromAlias(
+  text: string,
+  canonicalColumn: string,
+): Map<string, string> {
+  const [header, ...rows] = text.trim().split('\n')
+  const columns = header.replace(/^#\s*/, '').split('\t')
+  const canonicalIdx = columns.indexOf(canonicalColumn)
+  if (canonicalIdx < 0) {
+    throw new Error(`chromAlias has no "${canonicalColumn}" column`)
+  }
+  const map = new Map<string, string>()
+  for (const row of rows) {
+    const cells = row.split('\t')
+    const canonical = cells[canonicalIdx]
+    if (canonical) {
+      for (const cell of cells) {
+        if (cell) {
+          map.set(cell, canonical)
+        }
+      }
+    }
+  }
+  return map
+}
+
+export interface GenArkHub {
+  configUrl: string
+  geneTrackId: string
+  canonicalRefName: (refName: string) => string
+}
+
+interface HubConfig {
+  assemblies?: {
+    refNameAliases?: {
+      adapter?: { refNameColumnHeaderName?: string; uri?: string }
+    }
+  }[]
+  tracks?: { trackId: string }[]
+}
+
+const hubs = new Map<string, Promise<GenArkHub | undefined>>()
+
+// The jb2hubs config for an assembly, reduced to what a session needs, or
+// undefined when jb2hubs has none. Memoized per accession; a failed fetch is
+// dropped from the memo so a later gene retries.
+export function fetchGenArkHub(
+  accession: string,
+): Promise<GenArkHub | undefined> {
+  let hub = hubs.get(accession)
+  if (!hub) {
+    hub = loadGenArkHub(accession).catch((e: unknown) => {
+      hubs.delete(accession)
+      throw e
+    })
+    hubs.set(accession, hub)
+  }
+  return hub
+}
+
+async function loadGenArkHub(
+  accession: string,
+): Promise<GenArkHub | undefined> {
+  const configUrl = genArkConfigUrl(accession)
+  const res = await fetch(configUrl)
+  if (res.status === 404) {
+    return undefined
+  }
+  if (!res.ok) {
+    throw new Error(`jb2hubs config request failed (${res.status})`)
+  }
+  const config = (await res.json()) as HubConfig
+  const geneTrackId = pickGeneTrack(
+    accession,
+    (config.tracks ?? []).map(t => t.trackId),
+  )
+  if (!geneTrackId) {
+    throw new Error(`jb2hubs config for ${accession} has no NCBI gene track`)
+  }
+  const aliases = config.assemblies?.[0]?.refNameAliases?.adapter
+  const column = aliases?.refNameColumnHeaderName
+  const aliasUri = aliases?.uri
+  const aliasMap =
+    column && aliasUri
+      ? parseChromAlias(await (await fetch(aliasUri)).text(), column)
+      : new Map<string, string>()
   return {
-    name: accession,
-    sequence: {
-      type: 'ReferenceSequenceTrack',
-      trackId: `${accession}-refseq`,
-      adapter: {
-        type: 'TwoBitAdapter',
-        uri: `${base}.2bit`,
-        chromSizes: `${base}.chrom.sizes`,
-      },
-    },
+    configUrl,
+    geneTrackId,
+    canonicalRefName: refName => aliasMap.get(refName) ?? refName,
   }
 }

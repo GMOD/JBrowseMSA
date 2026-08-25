@@ -28,7 +28,7 @@ vi.mock('../lib/theme', () => ({ theme: createTheme() }))
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true)
 
 const transcript: Transcript = {
-  refName: 'chr17',
+  refName: '17',
   strand: -1,
   name: 'NM_000546.6',
   geneName: 'TP53',
@@ -41,6 +41,11 @@ const transcript: Transcript = {
 function geneResult(geneName: string): GeneResult {
   return {
     species: DEFAULT_SPECIES,
+    genome: {
+      configUrl: 'https://example.com/config.json',
+      assemblyName: 'hg38',
+      geneTrackId: 'hg38-ncbiRefSeqSelect',
+    },
     transcript: { ...transcript, geneName, name: `NM_${geneName}` },
     uniprotId: 'P04637',
     msa: {
@@ -119,7 +124,11 @@ describe('GeneExplorer', () => {
     render()
 
     setGene('TP53')
-    expect(loadGene).toHaveBeenCalledWith('TP53', DEFAULT_SPECIES)
+    expect(loadGene).toHaveBeenCalledWith(
+      'TP53',
+      DEFAULT_SPECIES,
+      expect.any(Function),
+    )
     expect(spinner()).toBeTruthy() // busy is derived: URL gene != loaded gene
 
     d.resolve(geneResult('TP53'))

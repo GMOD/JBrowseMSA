@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  genArkAssembly,
   genArkBase,
+  genArkConfigUrl,
+  parseChromAlias,
   parseGeneTableBlocks,
+  pickGeneTrack,
 } from './speciesGenes'
 
 // A trimmed gene_table for a + strand gene: one 5' UTR-only exon, then three
@@ -89,12 +91,53 @@ describe('genArkBase', () => {
   })
 })
 
-describe('genArkAssembly', () => {
-  it('builds a TwoBitAdapter session assembly named by the accession', () => {
-    const asm = genArkAssembly('GCF_000001635.27')
-    expect(asm.name).toBe('GCF_000001635.27')
-    expect(asm.sequence.adapter.type).toBe('TwoBitAdapter')
-    expect(asm.sequence.adapter.uri).toMatch(/GCF_000001635\.27\.2bit$/)
-    expect(asm.sequence.adapter.chromSizes).toMatch(/\.chrom\.sizes$/)
+describe('genArkConfigUrl', () => {
+  it('shards the jb2hubs config path the same way', () => {
+    expect(genArkConfigUrl('GCF_000001635.27')).toBe(
+      'https://jbrowse.org/hubs/genark/GCF/000/001/635/GCF_000001635.27/config.json',
+    )
+  })
+})
+
+describe('pickGeneTrack', () => {
+  const acc = 'GCF_000001215.4'
+  it('prefers RefSeq Select, then curated, then the full set', () => {
+    expect(
+      pickGeneTrack(acc, [`${acc}-ncbiGff`, `${acc}-ncbiRefSeqSelect`]),
+    ).toBe(`${acc}-ncbiRefSeqSelect`)
+    // fly and worm configs carry no Select track
+    expect(
+      pickGeneTrack(acc, [
+        `${acc}-ncbiRefSeq`,
+        `${acc}-ncbiRefSeqCurated`,
+        `${acc}-ncbiGff`,
+      ]),
+    ).toBe(`${acc}-ncbiRefSeqCurated`)
+  })
+
+  it('returns undefined when the config has no NCBI gene track', () => {
+    expect(pickGeneTrack(acc, [`${acc}-repeatMasker`])).toBeUndefined()
+  })
+})
+
+describe('parseChromAlias', () => {
+  // the UCSC chromAlias layout: a commented header naming each column's scheme
+  const text = [
+    '# refseq\tassembly\tgenbank\tncbi\tucsc',
+    'NC_000067.7\t1\tCM000994.3\t1\tchr1',
+    'NC_000077.7\t11\tCM001004.3\t11\tchr11',
+    'NT_166280.1\t\tGL456210.1\t\tchr1_GL456210v1_random',
+  ].join('\n')
+
+  it('maps every alias to the canonical column, which maps to itself', () => {
+    const map = parseChromAlias(text, 'ucsc')
+    expect(map.get('NC_000077.7')).toBe('chr11')
+    expect(map.get('CM001004.3')).toBe('chr11')
+    expect(map.get('chr11')).toBe('chr11')
+    expect(map.get('NT_166280.1')).toBe('chr1_GL456210v1_random')
+  })
+
+  it('rejects a canonical column the header does not name', () => {
+    expect(() => parseChromAlias(text, 'ensembl')).toThrow(/ensembl/)
   })
 })
