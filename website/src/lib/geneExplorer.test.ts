@@ -60,6 +60,7 @@ interface DecodedView {
   structures?: { url: string; connectedViewId: string }[]
   orthologParams?: {
     taxId: number
+    source: string
     geneCandidates: string[]
     msaAlgorithm: string
     proteinSequence?: string
@@ -323,12 +324,14 @@ describe('buildSession', () => {
         taxId: 10090,
         geneId: '22059',
         proteinSequence: 'MEEPQSDPSV',
+        source: 'ncbi',
       },
     })
     const [lgv, msa, protein] = session.views as DecodedView[]
     expect(msa.type).toBe('MsaView')
     expect(msa.orthologParams).toEqual({
       taxId: 10090,
+      source: 'ncbi',
       geneCandidates: ['22059', 'TP53'],
       msaAlgorithm: 'clustalo',
       proteinSequence: 'MEEPQSDPSV',
@@ -341,5 +344,21 @@ describe('buildSession', () => {
       msa.id,
     ])
     expect(session.layout?.children[1].tabs[0].viewIds).toEqual([protein.id])
+  })
+
+  it('names the gene by symbol first when PANTHER is the ortholog source', () => {
+    const session = buildSession({
+      genome: mouse,
+      transcript: { ...twoExon, geneName: 'CDC28' },
+      orthologs: {
+        taxId: 559292,
+        geneId: '852457',
+        proteinSequence: 'MSGELANYKR',
+        source: 'panther',
+      },
+    })
+    const msa = session.views.find(v => v.type === 'MsaView') as DecodedView
+    expect(msa.orthologParams?.source).toBe('panther')
+    expect(msa.orthologParams?.geneCandidates).toEqual(['CDC28', '852457'])
   })
 })

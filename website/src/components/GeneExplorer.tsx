@@ -750,7 +750,12 @@ function ResultPanel({ result }: { result: GeneResult }) {
         msaAvailable: !!msa,
         orthologs:
           orthologs && geneId && proteinSequence
-            ? { taxId: species.taxId, geneId, proteinSequence }
+            ? {
+                taxId: species.taxId,
+                geneId,
+                proteinSequence,
+                source: species.orthologSource ?? 'ncbi',
+              }
             : undefined,
         collapseIntrons: collapse,
         flip,
@@ -765,6 +770,7 @@ function ResultPanel({ result }: { result: GeneResult }) {
       orthologs,
       geneId,
       species.taxId,
+      species.orthologSource,
       collapse,
       flip,
       conservation,
@@ -872,9 +878,10 @@ function ResultPanel({ result }: { result: GeneResult }) {
             color="text.secondary"
             sx={{ display: 'block', mt: -0.5 }}
           >
-            JBrowse builds it when the session opens: NCBI&apos;s orthologs of{' '}
-            {transcript.geneName}, aligned at EBI Clustal Omega, connected to
-            the genome and structure.
+            JBrowse builds it when the session opens:{' '}
+            {species.orthologSource === 'panther' ? 'PANTHER' : 'NCBI'}&apos;s
+            orthologs of {transcript.geneName}, aligned at EBI Clustal Omega,
+            connected to the genome and structure.
           </Typography>
         </>
       ) : null}

@@ -12,7 +12,7 @@ import {
   transcriptFromGeneTable,
 } from './speciesGenes'
 
-import type { Species } from './speciesGenes'
+import type { OrthologSetSource, Species } from './speciesGenes'
 import type { GFFRecord } from 'msa-parsers'
 
 // Everything here is fetched live from CORS-enabled public services, so the
@@ -606,12 +606,13 @@ async function loadSpeciesGene(
 }
 
 // What jbrowse-plugin-msaview needs to build the alignment itself when the
-// session opens: NCBI's orthologs of this gene, aligned at EBI, with the query
-// row being the protein the 3D view aligns to.
+// session opens: the gene's orthologs from one precomputed set, aligned at EBI,
+// with the query row being the protein the 3D view aligns to.
 export interface OrthologSource {
   taxId: number
   geneId: string
   proteinSequence: string
+  source: OrthologSetSource
 }
 
 export interface SessionOptions {
@@ -713,23 +714,30 @@ function msaViewHosted(
 // Non-human: the plugin builds the alignment when the view attaches —
 // `orthologParams` is its own model property with an autorun (see
 // jbrowse-plugin-msaview DEVELOPERS.md), so the session carries the request,
-// not the result. The GeneID goes first so no symbol lookup is needed; the
-// protein sequence becomes the query row, named `<species>_query` by the
-// plugin, which is the row connectedFeature maps genome coordinates through.
-// allowedGappyness hides the columns a lone long ortholog would otherwise open
-// the view on.
+// not the result. NCBI resolves a GeneID without a lookup, PANTHER matches by
+// symbol, so each gets its own id first; the protein sequence becomes the
+// query row, named `<species>_query` by the plugin, which is the row
+// connectedFeature maps genome coordinates through. allowedGappyness hides the
+// columns a lone long ortholog would otherwise open the view on. `source` is
+// read by plugin ≥ 3.3.0; the frozen `orthologParams` carries it past older
+// builds, which run their NCBI path as before.
 function msaViewOrthologs(
   transcript: Transcript,
   feature: Feature,
   orthologs: OrthologSource,
   uniprotId?: string,
 ) {
+  const { source, geneId } = orthologs
   return {
     ...msaViewBase(transcript, feature, uniprotId),
     allowedGappyness: 80,
     orthologParams: {
       taxId: orthologs.taxId,
-      geneCandidates: [orthologs.geneId, transcript.geneName],
+      source,
+      geneCandidates:
+        source === 'panther'
+          ? [transcript.geneName, geneId]
+          : [geneId, transcript.geneName],
       msaAlgorithm: 'clustalo',
       proteinSequence: orthologs.proteinSequence,
     },

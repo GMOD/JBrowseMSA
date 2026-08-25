@@ -26,6 +26,12 @@ const UNIPROT = 'https://rest.uniprot.org/uniprotkb'
 const GENARK = 'https://hgdownload.soe.ucsc.edu/hubs'
 const JB2HUBS = 'https://jbrowse.org/hubs/genark'
 
+// Which precomputed ortholog set the msaview plugin aligns from. NCBI's sets
+// cover vertebrates and insects, so a fly gene finds only insects and a yeast,
+// worm or plant gene nothing; PANTHER's span its reference proteomes from human
+// to Arabidopsis. `ncbi` when omitted.
+export type OrthologSetSource = 'ncbi' | 'panther'
+
 export interface Species {
   taxId: number
   label: string
@@ -33,6 +39,7 @@ export interface Species {
   // true for human, which uses geneExplorer.ts's hg38 + 100-way fast path; the
   // rest go through this module.
   humanFastPath?: boolean
+  orthologSource?: OrthologSetSource
 }
 
 // Human first (its own fast path); the rest span vertebrate model organisms down
@@ -51,14 +58,26 @@ export const SPECIES: Species[] = [
     taxId: 7227,
     label: 'Fruit fly',
     scientificName: 'Drosophila melanogaster',
+    orthologSource: 'panther',
   },
   {
     taxId: 6239,
     label: 'C. elegans',
     scientificName: 'Caenorhabditis elegans',
+    orthologSource: 'panther',
   },
-  { taxId: 3702, label: 'Arabidopsis', scientificName: 'Arabidopsis thaliana' },
-  { taxId: 559292, label: 'Yeast', scientificName: 'Saccharomyces cerevisiae' },
+  {
+    taxId: 3702,
+    label: 'Arabidopsis',
+    scientificName: 'Arabidopsis thaliana',
+    orthologSource: 'panther',
+  },
+  {
+    taxId: 559292,
+    label: 'Yeast',
+    scientificName: 'Saccharomyces cerevisiae',
+    orthologSource: 'panther',
+  },
 ]
 
 export const DEFAULT_SPECIES = SPECIES[0]

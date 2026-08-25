@@ -5,9 +5,9 @@ Backs the human path of the
 human gene → a connected JBrowse session with a **collapsed-intron** gene view,
 its **100-way vertebrate protein alignment**, and the **AlphaFold structure**.
 Other species resolve live through NCBI and GenArk (see
-`website/src/lib/speciesGenes.ts`) today; the same build produces mouse, fly
-and worm alignments (see [Assemblies](#assemblies)), waiting only on hosting
-and the wiring in
+`website/src/lib/speciesGenes.ts`) today; the same build produces mouse, fly and
+worm alignments (see [Assemblies](#assemblies)), waiting only on hosting and the
+wiring in
 [multi-assembly alignments](../../agent-docs/ideas/multi-assembly-alignments.md).
 
 Almost everything is computed live in the browser from public CORS services, so
@@ -219,8 +219,11 @@ Wiring a hosted assembly into the website is described in
 - **Data**: the five files per alignment (done by the `aws s3 cp` commands).
 - **Plugin**: `jbrowse-plugin-msaview` ≥ 2.6.1 adds the indexed-MSA launch path
   (`msaIndexedLocation` + `msaName` → `BgzfFilehandle.read` by name); ≥ 2.8.2
-  resolves `orthologParams` from a session snapshot, which is how non-human
-  sessions get their alignment. `…/latest/dist/…` serves both.
+  resolves `orthologParams` from a session snapshot, which is how mouse and
+  zebrafish sessions get their alignment; ≥ 3.3.0 (unreleased) reads
+  `orthologParams.source: "panther"`, which fly, worm, Arabidopsis and yeast
+  need — NCBI's ortholog sets stop at vertebrates and insects. Until that
+  release `…/latest/dist/…` (3.2.0) ignores the key and runs its NCBI path.
 - **Config**: `packages/app/public/data/jbrowse-msa-combined-config.json`
   (already carries the `hg38-ncbiRefSeqSelect` track and the `Protein3d` +
   `MsaView` plugins) deploys with the `/demo` app.
