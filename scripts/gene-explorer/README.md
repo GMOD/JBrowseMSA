@@ -101,8 +101,11 @@ never silently return the wrong gene.
 build picks one per symbol: the transcript with the longest reference row,
 preferring a placement on a primary sequence, first seen on a tie. It chooses
 among the transcripts the alignment actually holds — the xref table is live and
-the exonAA a snapshot, so the table's longest isoform (daf-16's, for one) can be
-missing from the alignment. That choice is why the exonAA is read twice: a first
+the exonAA a snapshot, so ids retire between the two: a tenth of ce11's aligned
+transcripts (every daf-16 isoform among them) carry an `NM_` refGene no longer
+lists. Those take their symbol from the refGene coding span that overlaps them
+most on the same strand, which adds ~1,800 worm genes and ~40 fly genes the id
+match alone would drop. That choice is why the exonAA is read twice: a first
 pass over the headers picks the transcripts and counts each one's runs of
 records, since isoforms sharing exons have their exon groups interleaved in
 refGene sets and a transcript's block can only close after its last run. Only

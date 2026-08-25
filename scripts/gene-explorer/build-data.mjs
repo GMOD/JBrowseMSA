@@ -183,7 +183,7 @@ function rowName(species) {
 
 // --- xref: transcript id -> gene symbol ---------------------------------------
 console.error(`loading ${assembly.xref} (transcript -> symbol)...`)
-const { txToSymbol, keyOf } = await loadXref(assembly.xref)
+const { txToSymbol, keyOf, coding } = await loadXref(assembly.xref)
 console.error(
   `${assembly.xref}: ${txToSymbol.size} transcript->symbol mappings`,
 )
@@ -204,14 +204,17 @@ const unmappedRefNames = new Set()
 // The same scan counts each transcript's runs of consecutive records, which is
 // what tells pass 2 when a transcript's last record has passed.
 console.error('scanning transcripts...')
-const { symbolOf, runsOf } = await scanTranscripts()
-console.error(`${symbolOf.size} symbols map to a transcript in the alignment`)
+const { symbolOf, runsOf, byCoordinate } = await scanTranscripts()
+console.error(
+  `${symbolOf.size} symbols map to a transcript in the alignment (${byCoordinate} placed by coordinate)`,
+)
 
 async function scanTranscripts() {
   const best = new Map() // symbol -> { transcript, residues, primary }
-  const seen = new Map() // transcript -> { residues, primary, runs }
+  const seen = new Map() // transcript -> { residues, primary, runs, span }
   const refSuffix = `_${db}_`
   let last
+  let byCoordinate = 0
   for await (const line of fastaLines(input)) {
     if (!line.startsWith('>')) {
       continue
@@ -228,8 +231,15 @@ async function scanTranscripts() {
       runs: 0,
     }
     entry.residues += Number(tokens[1]) || 0
-    if (parseCoord(tokens[4])?.refName.includes('_')) {
-      entry.primary = false
+    const coord = parseCoord(tokens[4])
+    if (coord) {
+      entry.primary &&= !coord.refName.includes('_')
+      entry.span = {
+        refName: coord.refName,
+        strand: coord.strand,
+        start: Math.min(entry.span?.start ?? Infinity, coord.start - 1),
+        end: Math.max(entry.span?.end ?? 0, coord.end),
+      }
     }
     if (transcript !== last) {
       entry.runs++
@@ -238,7 +248,13 @@ async function scanTranscripts() {
     seen.set(transcript, entry)
   }
   for (const [transcript, entry] of seen) {
-    const symbol = txToSymbol.get(keyOf(transcript))
+    let symbol = txToSymbol.get(keyOf(transcript))
+    if (!symbol && coding && entry.span) {
+      symbol = symbolByOverlap(entry.span)
+      if (symbol) {
+        byCoordinate++
+      }
+    }
     if (!symbol) {
       continue
     }
@@ -259,7 +275,25 @@ async function scanTranscripts() {
     runsOf: new Map(
       [...seen].map(([transcript, { runs }]) => [transcript, runs]),
     ),
+    byCoordinate,
   }
+}
+
+// The gene whose coding span overlaps the transcript's the most, same sequence
+// and strand. The exonAA is a snapshot and the genePred table is live, so ids
+// retire between the two (a tenth of ce11's transcripts, daf-16 among them);
+// the locus does not move.
+function symbolByOverlap(span) {
+  let bestSymbol
+  let bestOverlap = 0
+  for (const g of coding.get(span.refName) ?? []) {
+    const overlap = Math.min(g.end, span.end) - Math.max(g.start, span.start)
+    if (g.strand === span.strand && overlap > bestOverlap) {
+      bestOverlap = overlap
+      bestSymbol = g.symbol
+    }
+  }
+  return bestSymbol
 }
 
 // --- pass 2: reassemble per transcript, write blocks + index --------------------
@@ -514,8 +548,9 @@ console.error(
 // --- xref loaders -------------------------------------------------------------
 // Each returns the transcript->symbol map plus the `keyOf` normalizer both the
 // table's ids and the exonAA header ids go through before the lookup. genePred
-// columns: bin name chrom strand txStart txEnd cdsStart cdsEnd exonCount
-// exonStarts exonEnds score name2 ...
+// tables (columns: bin name chrom strand txStart txEnd cdsStart cdsEnd
+// exonCount exonStarts exonEnds score name2 ...) also yield each symbol's
+// coding span per sequence, for transcripts whose id the table no longer has.
 async function loadXref(table) {
   const rows = readline.createInterface({
     input: await openGz(`${UCSC}/${db}/database/${table}.txt.gz`),
@@ -525,7 +560,7 @@ async function loadXref(table) {
       return xrefFromPairs(rows, versionless, cols => [cols[0], cols[4]])
     case 'refGene':
     case 'ncbiRefSeq':
-      return xrefFromPairs(rows, versionless, cols => [cols[1], cols[12]])
+      return xrefFromGenePred(rows)
     case 'ensemblToGeneName':
       return xrefFromPairs(rows, wormbaseStem, cols => [cols[0], cols[1]])
     default:
@@ -542,6 +577,31 @@ async function xrefFromPairs(rows, keyOf, pick) {
     }
   }
   return { txToSymbol, keyOf }
+}
+
+async function xrefFromGenePred(rows) {
+  const txToSymbol = new Map()
+  const coding = new Map() // refName -> [{ start, end, strand, symbol }]
+  for await (const line of rows) {
+    const cols = line.split('\t')
+    const [, name, refName, strand, , , cdsStart, cdsEnd] = cols
+    const symbol = cols[12]
+    if (!name || !symbol) {
+      continue
+    }
+    txToSymbol.set(versionless(name), symbol)
+    if (Number(cdsStart) < Number(cdsEnd)) {
+      const list = coding.get(refName) ?? []
+      list.push({
+        start: Number(cdsStart),
+        end: Number(cdsEnd),
+        strand,
+        symbol,
+      })
+      coding.set(refName, list)
+    }
+  }
+  return { txToSymbol, keyOf: versionless, coding }
 }
 
 // --- chromAlias ---------------------------------------------------------------
