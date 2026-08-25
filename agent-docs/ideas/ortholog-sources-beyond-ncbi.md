@@ -1,14 +1,13 @@
 # Ortholog sources beyond NCBI
 
-The gene explorer's "Build cross-species alignment"
-(`website/src/lib/orthologMsa.ts`) and the msaview plugin's `orthologParams`
-launch both take their ortholog set from NCBI Datasets, whose sets are
-vertebrate- and insect-scoped. Measured on 2026-08-25: human TP53 → 658
+The gene explorer's non-human sessions and the msaview plugin's `orthologParams`
+launch — one path since the website started emitting the request instead of
+building the alignment — take their ortholog set from NCBI Datasets, whose sets
+are vertebrate- and insect-scoped. Measured on 2026-08-25: human TP53 → 658
 orthologs; fly Antp → 108, all insects; yeast CDC28 → 3, all yeast. Four of the
 seven species the page offers (yeast, worm, fly in practice, Arabidopsis) can
 therefore never build an alignment. This note measures the alternatives and
-picks one. A prototype of the pick lives in
-`website/src/lib/orthologs/panther.ts`.
+picks one. The pick shipped — see [Shipped](#shipped).
 
 ## Measurements
 
@@ -88,23 +87,29 @@ accession through `efetch`, which also serves Swiss-Prot accessions, so the
 overlay probably survives; confirm on one TrEMBL accession before attaching
 them.
 
-## How to wire the prototype into the website
+## Shipped
 
-`website/src/lib/orthologs/panther.ts` exposes
-`fetchOrthologProteins({ symbol, taxId, uniprotId?, taxa? })`, returning
-`{ label, taxId, accession, sequence }[]` with the query species first. In
-`orthologMsa.ts`, `buildOrthologMsa` would call it in place of
-`fetchOrthologGenes` + `fetchRepresentativeProteins` + the `efetch` FASTA, then
-hand the rows to `clustalOmega` as it does now. Two invariants to keep:
+jbrowse-plugin-msaview 3.3.0 carries the pick. `source: 'ncbi' | 'panther'` on
+`OrthologParams` defaults to `ncbi` and dispatches to
+`src/utils/pantherOrthologs.ts`, whose rows come out in `fetchOrthologRows`'
+shape, so the query row, the labels, the aligner and the CDD overlay never learn
+which source ran. A **Source** select on the Orthologs tab offers the same
+choice interactively, remembered in local storage. The website emits
+`source: 'panther'` for fly, worm, Arabidopsis and yeast.
 
-- The query row's sequence must stay `queryProtein`, the UniProt canonical
-  sequence the 3D view aligns to, because `connectedFeature` maps genome
-  coordinates through that row. Replace the first row's `sequence` with
-  `queryProtein` rather than trusting the fetched one; they are the same
-  accession, so the swap is a safety net, not a change.
-- `querySeqName` must equal the first row's `label`, and every label must be a
-  valid FASTA id that survives Clustal Omega unchanged. PANTHER's short common
-  names (`human`, `fruit_fly`, `budding_yeast`) already are.
+The CDD overlay question this note left open is answered: `efetch` serves a
+Swiss-Prot accession as a GenPept record with CDD Regions, exactly as it serves
+a RefSeq one, and answers a TrEMBL accession with HTTP 400. A mixed batch
+returns the Swiss-Prot records and drops the rest, so domains land on the
+reviewed rows and the alignment is unaffected either way.
 
-`DEFAULT_TAXA` in the module is fourteen PANTHER proteomes from human to
-Dictyostelium, in display order; pass `taxa` to narrow it.
+The prototype module this note was written around,
+`website/src/lib/orthologs/panther.ts`, is deleted. The plugin builds the
+alignment, so keeping a second copy of the same fetcher in the website only
+invited edits to the dead one.
+
+NCBI stays the default, and two live sources is the ceiling: further species
+coverage belongs in the hosted-alignment path (`msaIndexedLocation`, fed by
+`scripts/gene-explorer/build-data.mjs`), which costs no per-source code at all.
+The plugin's DEVELOPERS.md records that boundary where a third source would be
+added.
