@@ -7,11 +7,8 @@ import {
   useSyncExternalStore,
 } from 'react'
 
-import CloseIcon from '@mui/icons-material/Close'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import ViewInArIcon from '@mui/icons-material/ViewInAr'
 import Alert from '@mui/material/Alert'
 import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
@@ -19,38 +16,34 @@ import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
-import Link from '@mui/material/Link'
 import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
-import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import { ThemeProvider } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 
+import { examplesFor } from '../lib/geneExamples'
 import {
   DEFAULT_WINDOW_SIZE,
   TREE_URI,
   buildSession,
   clinvarTrack,
-  collapsedLoc,
   geneStats,
   loadGene,
   searchGenes,
   sessionUrl,
 } from '../lib/geneExplorer'
 import { fetchOrthologSymbol } from '../lib/orthologLookup'
-import { fetchProteinStl } from '../lib/proteinStl'
 import { DEFAULT_SPECIES, SPECIES, speciesByTaxId } from '../lib/speciesGenes'
 import { theme } from '../lib/theme'
+import { HelpDialog, SessionDetailsDialog } from './GeneExplorerDialogs'
 
+import type { Example } from '../lib/geneExamples'
 import type {
   GeneResult,
   Genome,
@@ -58,43 +51,8 @@ import type {
   Transcript,
 } from '../lib/geneExplorer'
 import type { Species } from '../lib/speciesGenes'
-import type { ReactNode } from 'react'
 
 const AlignmentPreview = lazy(() => import('./AlignmentPreview'))
-
-// Copy text to the clipboard, exposing a transient message for a Snackbar. A
-// success shows the caller's message; a rejected write (insecure context or
-// denied permission) shows a failure notice rather than a false confirmation.
-function useCopy() {
-  const [message, setMessage] = useState<string>()
-  const copy = (text: string, successMessage: string) =>
-    navigator.clipboard.writeText(text).then(
-      () => {
-        setMessage(successMessage)
-      },
-      () => {
-        setMessage('Copy failed — clipboard access was blocked')
-      },
-    )
-  const dismiss = () => {
-    setMessage(undefined)
-  }
-  return { copy, message, dismiss }
-}
-
-// Save generated STL bytes to the user's disk via a throwaway object URL. The
-// revoke waits a tick: Firefox starts the download asynchronously and drops it
-// if the URL is gone by then.
-function triggerDownload(bytes: Uint8Array<ArrayBuffer>, filename: string) {
-  const url = URL.createObjectURL(new Blob([bytes], { type: 'model/stl' }))
-  const anchor = document.createElement('a')
-  anchor.href = url
-  anchor.download = filename
-  anchor.click()
-  setTimeout(() => {
-    URL.revokeObjectURL(url)
-  }, 1000)
-}
 
 // The launch URL for a session snapshot. Encoding is async (deflate), so the
 // link is empty for the tick it takes; the ignore flag keeps a slow encode of a
@@ -118,95 +76,6 @@ function useSessionUrl(session: Session, genome: Genome) {
     }
   }, [session, genome])
   return state?.session === session ? state.url : undefined
-}
-
-interface Example {
-  symbol: string
-  note: string
-}
-
-// Curated per species. Human picks all sit in the 100-way index and span tumour
-// suppressors, drug targets, disease genes, and size extremes (tiny HBB vs.
-// titin). The others are textbook genes for each organism, chosen to resolve in
-// NCBI and carry an AlphaFold structure.
-const EXAMPLES_BY_TAXON: Record<number, Example[]> = {
-  9606: [
-    {
-      symbol: 'TP53',
-      note: 'Tumour suppressor — mutated in ~half of all cancers',
-    },
-    {
-      symbol: 'KRAS',
-      note: 'Oncogene — small and almost invariant across vertebrates',
-    },
-    { symbol: 'BRAF', note: 'Melanoma V600E kinase' },
-    { symbol: 'EGFR', note: 'Receptor tyrosine kinase and major drug target' },
-    { symbol: 'PTEN', note: 'Tumour-suppressor phosphatase' },
-    {
-      symbol: 'BRCA1',
-      note: 'Hereditary breast/ovarian cancer — large multi-exon gene',
-    },
-    { symbol: 'CFTR', note: 'Cystic fibrosis chloride channel' },
-    { symbol: 'HBB', note: 'β-globin (sickle cell) — tiny 3-exon gene' },
-    {
-      symbol: 'TTN',
-      note: 'Titin — the largest human gene, extreme intron collapse',
-    },
-    { symbol: 'SOD1', note: 'ALS — small and highly conserved' },
-  ],
-  10090: [
-    { symbol: 'Trp53', note: 'p53 tumour suppressor — the mouse orthologue' },
-    { symbol: 'Shh', note: 'Sonic hedgehog — limb and neural patterning' },
-    { symbol: 'Brca1', note: 'Breast-cancer susceptibility gene' },
-    { symbol: 'Mecp2', note: 'Rett syndrome — X-linked chromatin regulator' },
-    { symbol: 'Pax6', note: 'Master eye-development transcription factor' },
-    { symbol: 'Cftr', note: 'Cystic fibrosis chloride channel' },
-  ],
-  7955: [
-    {
-      symbol: 'shha',
-      note: 'Sonic hedgehog a — fin and floor-plate signalling',
-    },
-    { symbol: 'pax6a', note: 'Eye-development transcription factor' },
-    { symbol: 'tp53', note: 'p53 tumour suppressor' },
-    { symbol: 'myca', note: 'MYC proto-oncogene a' },
-    { symbol: 'sox2', note: 'Stem-cell / neural transcription factor' },
-  ],
-  7227: [
-    { symbol: 'Antp', note: 'Antennapedia — Hox homeotic gene' },
-    { symbol: 'Ubx', note: 'Ultrabithorax — Hox gene' },
-    { symbol: 'wg', note: 'wingless — founding Wnt ligand' },
-    { symbol: 'N', note: 'Notch — receptor of the Notch pathway' },
-    { symbol: 'dpp', note: 'decapentaplegic — a BMP morphogen' },
-    { symbol: 'w', note: 'white — the classic eye-colour gene' },
-  ],
-  6239: [
-    { symbol: 'lin-12', note: 'Notch-family receptor — cell-fate decisions' },
-    { symbol: 'unc-54', note: 'Muscle myosin heavy chain' },
-    { symbol: 'daf-16', note: 'FOXO transcription factor — lifespan' },
-    { symbol: 'let-60', note: 'Ras orthologue — vulval induction' },
-  ],
-  3702: [
-    { symbol: 'AG', note: 'AGAMOUS — floral organ identity (MADS-box)' },
-    { symbol: 'LFY', note: 'LEAFY — floral meristem identity' },
-    { symbol: 'AP1', note: 'APETALA1 — floral organ identity' },
-    { symbol: 'CO', note: 'CONSTANS — photoperiodic flowering' },
-    { symbol: 'PHYB', note: 'Phytochrome B — red-light photoreceptor' },
-  ],
-  559292: [
-    {
-      symbol: 'CDC28',
-      note: 'Cyclin-dependent kinase — the cell-cycle engine',
-    },
-    { symbol: 'ACT1', note: 'Actin — highly conserved cytoskeleton' },
-    { symbol: 'GAL4', note: 'Transcriptional activator (two-hybrid fame)' },
-    { symbol: 'RAD51', note: 'Homologous-recombination recombinase' },
-    { symbol: 'TUB1', note: 'Alpha-tubulin' },
-  ],
-}
-
-function examplesFor(species: Species): Example[] {
-  return EXAMPLES_BY_TAXON[species.taxId] ?? []
 }
 
 function subscribeGeneUrl(cb: () => void) {
@@ -364,9 +233,9 @@ export default function GeneExplorer() {
   const hits = useGeneSuggestions(searchTerm, species)
   const { busy, progress, result, error } = useGene(urlGene, species)
 
-  const exampleSymbols = examplesFor(species).map(e => e.symbol)
+  const examples = examplesFor(species)
   // show the curated examples until there's a real query to suggest against
-  const options = searchTerm.length >= 2 ? hits : exampleSymbols
+  const options = searchTerm.length >= 2 ? hits : examples.map(e => e.symbol)
 
   // Reflect the gene + species in the page URL so it's shareable, bookmarkable,
   // and survives reload; clearing the Autocomplete removes the gene but keeps the
@@ -391,6 +260,26 @@ export default function GeneExplorer() {
     }
   }
 
+  // Symbols don't carry across organisms, so the switch drops the gene and
+  // resets the type-ahead, then follows NCBI's ortholog to the new species when
+  // it has one. The URL is re-read before that navigation lands so a slow answer
+  // can't override a later pick.
+  function switchSpecies(taxId: number) {
+    setSearchTerm('')
+    setInputValue('')
+    navigate(null, taxId)
+    if (urlGene && result?.geneId) {
+      fetchOrthologSymbol(result.geneId, taxId)
+        .then(symbol => {
+          const now = parseUrl(window.location.search)
+          if (symbol && !now.gene && now.species.taxId === taxId) {
+            navigate(symbol, taxId)
+          }
+        })
+        .catch(() => {})
+    }
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -399,34 +288,16 @@ export default function GeneExplorer() {
           gap: 2,
           alignItems: 'flex-start',
           flexWrap: { xs: 'wrap', sm: 'nowrap' },
-          maxWidth: 900,
         }}
       >
         <GeneSearchPanel
           inputValue={inputValue}
           options={options}
+          examples={examples}
           busy={busy}
           urlGene={urlGene}
           species={species}
-          onSpeciesChange={taxId => {
-            // symbols don't carry across organisms, so the switch drops the
-            // gene and resets the type-ahead, then follows NCBI's ortholog to
-            // the new species when it has one. The URL is re-read before that
-            // navigation lands so a slow answer can't override a later pick.
-            setSearchTerm('')
-            setInputValue('')
-            navigate(null, taxId)
-            if (urlGene && result?.geneId) {
-              fetchOrthologSymbol(result.geneId, taxId)
-                .then(symbol => {
-                  const now = parseUrl(window.location.search)
-                  if (symbol && !now.gene && now.species.taxId === taxId) {
-                    navigate(symbol, taxId)
-                  }
-                })
-                .catch(() => {})
-            }
-          }}
+          onSpeciesChange={switchSpecies}
           onInputChange={(value, isKeystroke) => {
             setInputValue(value)
             // only a keystroke should drive a new type-ahead query; the 'reset'
@@ -452,6 +323,16 @@ export default function GeneExplorer() {
         />
       </Box>
 
+      {urlGene && result?.msa ? (
+        <AlignmentPreviewPanel
+          // MSAViewer builds its model from the props it first mounts with, so
+          // a new gene needs a new instance, not a new msa prop
+          key={`${result.species.taxId}:${result.transcript.geneName}`}
+          msa={result.msa.fasta}
+          busy={busy}
+        />
+      ) : null}
+
       <HelpDialog
         open={helpOpen}
         onClose={() => {
@@ -468,6 +349,7 @@ export default function GeneExplorer() {
 function GeneSearchPanel({
   inputValue,
   options,
+  examples,
   busy,
   urlGene,
   species,
@@ -478,6 +360,7 @@ function GeneSearchPanel({
 }: {
   inputValue: string
   options: string[]
+  examples: Example[]
   busy: boolean
   urlGene: string | null
   species: Species
@@ -488,7 +371,6 @@ function GeneSearchPanel({
   onSelect: (symbol: string | null) => void
   onOpenHelp: () => void
 }) {
-  const examples = examplesFor(species)
   const noteBySymbol = new Map(examples.map(e => [e.symbol, e.note]))
   const urlGeneNote = urlGene ? noteBySymbol.get(urlGene) : undefined
   return (
@@ -662,18 +544,9 @@ function GeneResultArea({
   busy: boolean
   progress: string | undefined
 }) {
-  return (
-    <Box sx={{ flex: 1, minWidth: 0 }}>
-      {progress ? (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ display: 'block', mb: 1 }}
-        >
-          {progress}
-        </Typography>
-      ) : null}
-      {urlGene ? null : (
+  if (!urlGene) {
+    return (
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Paper
           variant="outlined"
           sx={{
@@ -686,19 +559,32 @@ function GeneResultArea({
             color: 'text.secondary',
           }}
         >
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ maxWidth: 560 }}>
             Pick a species, then search for a gene or choose an example to build
             a connected JBrowse session — a collapsed-intron genome view, its
             protein alignment across species, and the AlphaFold structure.
           </Typography>
         </Paper>
-      )}
-      {urlGene && error ? (
+      </Box>
+    )
+  }
+  return (
+    <Box sx={{ flex: 1, minWidth: 0 }}>
+      {progress ? (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', mb: 1 }}
+        >
+          {progress}
+        </Typography>
+      ) : null}
+      {error ? (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       ) : null}
-      {urlGene && result ? (
+      {result ? (
         <Box
           sx={{
             opacity: busy ? 0.5 : 1,
@@ -726,11 +612,11 @@ function ResultPanel({ result }: { result: GeneResult }) {
     msa,
     proteinSequence,
   } = result
-  const { codingBp, span, ratio } = geneStats(transcript)
+  const { codingBp, ratio } = geneStats(transcript)
   const [detailsOpen, setDetailsOpen] = useState(false)
   // launch the genome view with introns squeezed out (default) vs. the whole
   // gene, reading 5'→3' (default for minus-strand genes), with conservation
-  // under it; each recomputes the loc/url/session spec below
+  // under it; each recomputes the session spec below
   const [collapse, setCollapse] = useState(true)
   const [flip, setFlip] = useState(transcript.strand === -1)
   const [conservation, setConservation] = useState(false)
@@ -740,48 +626,33 @@ function ResultPanel({ result }: { result: GeneResult }) {
     !species.humanFastPath && !msa && !!geneId && !!proteinSequence
   const [includeOrthologs, setIncludeOrthologs] = useState(true)
   const orthologs = canAlignOrthologs && includeOrthologs
+  // every buildSession input except the four view toggles comes off `result`,
+  // so it is the only other dep — the session object has to stay referentially
+  // stable or useSessionUrl re-encodes on every render
   const session = useMemo(
     () =>
       buildSession({
-        genome,
-        transcript,
-        uniprotId,
-        proteinSequence,
-        msaAvailable: !!msa,
+        genome: result.genome,
+        transcript: result.transcript,
+        uniprotId: result.uniprotId,
+        proteinSequence: result.proteinSequence,
+        msaAvailable: !!result.msa,
         orthologs:
-          orthologs && geneId && proteinSequence
+          orthologs && result.geneId && result.proteinSequence
             ? {
-                taxId: species.taxId,
-                geneId,
-                proteinSequence,
-                source: species.orthologSource ?? 'ncbi',
+                taxId: result.species.taxId,
+                geneId: result.geneId,
+                proteinSequence: result.proteinSequence,
+                source: result.species.orthologSource ?? 'ncbi',
               }
             : undefined,
         collapseIntrons: collapse,
         flip,
         conservation,
       }),
-    [
-      genome,
-      transcript,
-      uniprotId,
-      msa,
-      proteinSequence,
-      orthologs,
-      geneId,
-      species.taxId,
-      species.orthologSource,
-      collapse,
-      flip,
-      conservation,
-    ],
+    [result, orthologs, collapse, flip, conservation],
   )
   const url = useSessionUrl(session, genome)
-  const loc = useMemo(
-    () => collapsedLoc(transcript, { collapse, flip }),
-    [transcript, collapse, flip],
-  )
-  const sessionJson = useMemo(() => JSON.stringify(session, null, 2), [session])
 
   const stats = [
     `${transcript.cds.length} coding exons`,
@@ -848,7 +719,6 @@ function ResultPanel({ result }: { result: GeneResult }) {
         conservation={conservation}
         onConservation={setConservation}
       />
-      {msa ? <PreviewAlignment msa={msa.fasta} /> : null}
 
       {species.humanFastPath && !msa ? (
         <Alert severity="info" sx={{ mt: 2 }}>
@@ -886,18 +756,16 @@ function ResultPanel({ result }: { result: GeneResult }) {
         </>
       ) : null}
 
-      <DetailsDialog
+      <SessionDetailsDialog
         open={detailsOpen}
         onClose={() => {
           setDetailsOpen(false)
         }}
-        loc={loc}
-        sessionJson={sessionJson}
-        codingBp={codingBp}
-        span={span}
-        ratio={ratio}
+        transcript={transcript}
+        session={session}
+        collapse={collapse}
+        flip={flip}
         uniprotId={uniprotId}
-        geneName={transcript.geneName}
       />
     </Paper>
   )
@@ -987,33 +855,19 @@ function OptionCheckbox({
   )
 }
 
-// matchMedia is missing under jsdom, where every viewport counts as desktop
-const desktopMedia = () =>
-  typeof window.matchMedia === 'function'
-    ? window.matchMedia('(min-width: 641px)')
-    : undefined
-function subscribeDesktop(cb: () => void) {
-  const query = desktopMedia()
-  query?.addEventListener('change', cb)
-  return () => {
-    query?.removeEventListener('change', cb)
-  }
-}
-
-// The alignment the session will open, previewed in place. Behind a disclosure
-// and desktop-only, so the viewer bundle is only fetched when someone asks.
-function PreviewAlignment({ msa }: { msa: string }) {
-  const desktop = useSyncExternalStore(
-    subscribeDesktop,
-    () => desktopMedia()?.matches ?? true,
-    () => false,
-  )
+// The alignment the session will open, previewed in place. It gets its own row
+// under the two columns because an alignment needs the whole page width to read.
+// Behind a disclosure and desktop-only, so the viewer bundle is only fetched
+// when someone asks. defaultMatches keeps jsdom (no matchMedia) on the desktop
+// branch.
+function AlignmentPreviewPanel({ msa, busy }: { msa: string; busy: boolean }) {
+  const desktop = useMediaQuery('(min-width:641px)', { defaultMatches: true })
   const [open, setOpen] = useState(false)
   if (!desktop) {
     return null
   }
   return (
-    <Box sx={{ mt: 1.5 }}>
+    <Box sx={{ mt: 2, opacity: busy ? 0.5 : 1, transition: 'opacity 0.2s' }}>
       <Button
         size="small"
         variant="text"
@@ -1024,418 +878,12 @@ function PreviewAlignment({ msa }: { msa: string }) {
         {open ? 'Hide alignment preview' : 'Preview alignment'}
       </Button>
       {open ? (
-        <Box sx={{ mt: 1, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-          <Suspense fallback={<Box sx={{ height: 300 }} />}>
-            <AlignmentPreview msa={msa} treeUri={TREE_URI} />
+        <Paper variant="outlined" sx={{ mt: 1, overflow: 'hidden' }}>
+          <Suspense fallback={<Box sx={{ height: 460 }} />}>
+            <AlignmentPreview msa={msa} treeUri={TREE_URI} height={460} />
           </Suspense>
-        </Box>
+        </Paper>
       ) : null}
     </Box>
-  )
-}
-
-function DetailsDialog({
-  open,
-  onClose,
-  loc,
-  sessionJson,
-  codingBp,
-  span,
-  ratio,
-  uniprotId,
-  geneName,
-}: {
-  open: boolean
-  onClose: () => void
-  loc: string
-  sessionJson: string
-  codingBp: number
-  span: number
-  ratio: string
-  uniprotId: string | undefined
-  geneName: string
-}) {
-  const { copy, message: copyMessage, dismiss: dismissCopy } = useCopy()
-  // STL export runs on click (fetch AlphaFold + build mesh), so it's a plain
-  // async handler — busy drives the spinner, stlError surfaces failures.
-  const [stlBusy, setStlBusy] = useState(false)
-  const [stlError, setStlError] = useState<string>()
-
-  function downloadStl(accession: string) {
-    setStlBusy(true)
-    fetchProteinStl(accession)
-      .then(bytes => {
-        triggerDownload(bytes, `${geneName}-${accession}.stl`)
-      })
-      .catch((e: unknown) => {
-        setStlError(e instanceof Error ? e.message : String(e))
-      })
-      .finally(() => {
-        setStlBusy(false)
-      })
-  }
-
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      scroll="paper"
-    >
-      <DialogHeader title="Session details" onClose={onClose} />
-      <DialogContent dividers>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          {codingBp.toLocaleString()} CDS bp / {span.toLocaleString()} bp coding
-          span ({ratio}× collapsed)
-          {uniprotId ? ` · UniProt ${uniprotId}` : ''}
-        </Typography>
-        <Stack
-          direction="row"
-          spacing={1}
-          useFlexGap
-          sx={{ flexWrap: 'wrap', mb: 1.5 }}
-        >
-          <Button
-            size="small"
-            onClick={() => {
-              void copy(window.location.href, 'Page link copied')
-            }}
-          >
-            Copy page link
-          </Button>
-          <Button
-            size="small"
-            onClick={() => {
-              void copy(sessionJson, 'Session JSON copied')
-            }}
-          >
-            Copy session JSON
-          </Button>
-          {uniprotId ? (
-            <Tooltip title="Download a 3D-printable STL of the AlphaFold structure (a solid tube swept along the protein backbone)">
-              <span>
-                <Button
-                  size="small"
-                  disabled={stlBusy}
-                  startIcon={
-                    stlBusy ? (
-                      <CircularProgress size={16} color="inherit" />
-                    ) : (
-                      <ViewInArIcon />
-                    )
-                  }
-                  onClick={() => {
-                    downloadStl(uniprotId)
-                  }}
-                >
-                  {stlBusy ? 'Preparing STL…' : '3D print (STL)'}
-                </Button>
-              </span>
-            </Tooltip>
-          ) : null}
-        </Stack>
-        <Paper
-          variant="outlined"
-          sx={{ p: 1.5, mb: 1.5, overflowX: 'auto', bgcolor: 'action.hover' }}
-        >
-          <Box
-            component="code"
-            sx={{ fontSize: 12, fontFamily: 'monospace', whiteSpace: 'pre' }}
-          >
-            {loc}
-          </Box>
-        </Paper>
-        <CodeBlock fontSize={11} maxHeight={280}>
-          {sessionJson}
-        </CodeBlock>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={() => {
-            onClose()
-          }}
-        >
-          Close
-        </Button>
-      </DialogActions>
-      <Snackbar
-        open={!!copyMessage}
-        autoHideDuration={2000}
-        onClose={() => {
-          dismissCopy()
-        }}
-        message={copyMessage}
-      />
-      <Snackbar
-        open={!!stlError}
-        autoHideDuration={5000}
-        onClose={() => {
-          setStlError(undefined)
-        }}
-        message={stlError ? `Couldn't build STL: ${stlError}` : undefined}
-      />
-    </Dialog>
-  )
-}
-
-// Dialog title row with a close button pinned to the right — shared by both
-// modals so the header layout stays identical.
-function DialogHeader({
-  title,
-  onClose,
-}: {
-  title: ReactNode
-  onClose: () => void
-}) {
-  return (
-    <DialogTitle
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        pr: 1,
-      }}
-    >
-      {title}
-      <IconButton
-        aria-label="Close"
-        onClick={() => {
-          onClose()
-        }}
-      >
-        <CloseIcon />
-      </IconButton>
-    </DialogTitle>
-  )
-}
-
-// A scrollable monospace <pre> block tinted to match the surrounding paper.
-function CodeBlock({
-  children,
-  fontSize = 12,
-  maxHeight,
-}: {
-  children: ReactNode
-  fontSize?: number
-  maxHeight?: number
-}) {
-  return (
-    <Box
-      component="pre"
-      sx={{
-        m: 0,
-        p: 1.5,
-        overflow: 'auto',
-        fontSize,
-        fontFamily: 'monospace',
-        bgcolor: 'action.hover',
-        borderRadius: 1,
-        maxHeight,
-      }}
-    >
-      {children}
-    </Box>
-  )
-}
-
-// Inline code token, styled to read like a code span inside the dialog (the
-// global .prose code rule doesn't reach this portal-rendered content).
-function Code({ children }: { children: ReactNode }) {
-  return (
-    <Box
-      component="code"
-      sx={{
-        fontFamily: 'monospace',
-        fontSize: '0.85em',
-        bgcolor: 'action.hover',
-        px: 0.5,
-        borderRadius: 0.5,
-      }}
-    >
-      {children}
-    </Box>
-  )
-}
-
-// The "spec → URL" skeleton shown in the help modal, mirroring buildSessionUrl()
-// in lib/geneExplorer.ts.
-const BUILD_SNIPPET = `// A JBrowse session is just an array of views, linked to each other by id.
-// You open one by putting the spec in the URL hash (#) — no server, no build
-// step. The hash fragment never reaches the server, so there's no URL-length
-// limit (a long ?query= would 414); the live explorer also gzips the session
-// into a 'session=encoded-…' param to keep big genes compact.
-const spec = {
-  views: [
-    {
-      type: 'LinearGenomeView',
-      id: 'lgv',
-      assembly: 'hg38',
-      // the collapsed-intron trick: a loc made of the exon ranges,
-      // space-separated, so the exons render back-to-back
-      loc: 'chr17:7,673,534-7,673,608 chr17:7,673,700-7,673,837',
-      tracks: ['hg38-ncbiRefSeqSelect'],
-    },
-    {
-      type: 'MsaView',           // jbrowse-plugin-msaview
-      connectedViewId: 'lgv',    // <- this is what links it to the genome view
-      connectedFeature: feature, // the transcript model (CDS start/end/phase)
-      msaIndexedLocation: { uri: MSA_URL },
-      msaName: 'TP53',           // random-read this gene's block by name
-      treeFileLocation: { uri: TREE_URL },
-    },
-    {
-      type: 'ProteinView',       // jbrowse-plugin-protein3d
-      connectedViewId: 'lgv',
-      feature,
-      url: 'https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v6.cif',
-    },
-  ],
-}
-
-const url =
-  JBROWSE + '#config=' + encodeURIComponent(CONFIG) +
-  '&session=spec-' + encodeURIComponent(JSON.stringify(spec))`
-
-function HelpDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const base = import.meta.env.BASE_URL
-  const { copy, message: copyMessage, dismiss: dismissCopy } = useCopy()
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      fullWidth
-      scroll="paper"
-    >
-      <DialogHeader title="How the gene explorer works" onClose={onClose} />
-      <DialogContent dividers>
-        <Typography variant="subtitle2" gutterBottom>
-          Under the hood
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Nothing is precomputed per gene — the whole session is synthesized
-          live in your browser from public data:
-        </Typography>
-        <Box component="ul" sx={{ pl: 3, m: 0, mb: 2, '& li': { mb: 1 } }}>
-          <Typography component="li" variant="body2" color="text.secondary">
-            <strong>Human</strong> resolves through <strong>mygene.info</strong>{' '}
-            (hg38 locus + UniProt). The transcript model comes from the
-            alignment's own knownCanonical CDS sidecar, so genome, alignment and
-            structure share one coordinate space; genes outside the 100-way set
-            fall back to the UCSC <Code>ncbiRefSeqSelect</Code> GFF over{' '}
-            <strong>tabix</strong>.
-          </Typography>
-          <Typography component="li" variant="body2" color="text.secondary">
-            <strong>Other species</strong> resolve through{' '}
-            <strong>NCBI Datasets</strong> (GeneID, assembly, Swiss-Prot); the
-            genomic exon/CDS model is parsed from the E-utils{' '}
-            <Code>gene_table</Code>. The session opens on the JBrowse config{' '}
-            <strong>genomes.jbrowse.org</strong> publishes for that{' '}
-            <strong>UCSC GenArk</strong> assembly, which already carries the
-            genome, the NCBI gene tracks and both plugins.
-          </Typography>
-          <Typography component="li" variant="body2" color="text.secondary">
-            The <strong>AlphaFold</strong> structure is fetched by UniProt
-            accession. The alignment is the hosted 100-way for human; outside
-            human the session carries an <Code>orthologParams</Code> request and
-            the msaview plugin builds it on open — NCBI orthologs aligned at{' '}
-            <strong>EBI Clustal Omega</strong>.
-          </Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          There is no <Code>collapseIntrons</Code> option in JBrowse. The trick
-          is to give the Linear Genome View a <Code>loc</Code> made of the exon
-          ranges, space-separated, so each renders back-to-back and the introns
-          disappear. The alignment and structure stay in sync because all three
-          views share the same transcript model, so a residue maps to its codon
-          and back.
-        </Typography>
-
-        <Typography variant="subtitle2" gutterBottom>
-          Build the same thing yourself
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          A JBrowse session is a declarative <em>spec</em>: an array of views,
-          each pointing at the others by <Code>connectedViewId</Code>. You don't
-          write any wiring code — you describe the views, put the spec in the
-          URL, and the{' '}
-          <Link
-            href="https://github.com/GMOD/jbrowse-plugin-msaview"
-            target="_blank"
-            rel="noopener"
-          >
-            msaview
-          </Link>{' '}
-          and{' '}
-          <Link
-            href="https://github.com/GMOD/jbrowse-plugin-protein3d"
-            target="_blank"
-            rel="noopener"
-          >
-            protein3d
-          </Link>{' '}
-          plugins handle the linking. The shape:
-        </Typography>
-        <Box sx={{ position: 'relative' }}>
-          <Button
-            size="small"
-            startIcon={<ContentCopyIcon fontSize="small" />}
-            onClick={() => {
-              void copy(BUILD_SNIPPET, 'Snippet copied')
-            }}
-            sx={{
-              position: 'absolute',
-              top: 4,
-              right: 4,
-              bgcolor: 'background.paper',
-            }}
-          >
-            Copy
-          </Button>
-          <CodeBlock>{BUILD_SNIPPET}</CodeBlock>
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          That's the entire mechanism — every link in the{' '}
-          <Link href={`${base}/gallery#jbrowse`}>gallery</Link> is one of these
-          URLs. The explorer just fills in the <Code>feature</Code>, exon
-          ranges, and accessions for whatever gene you type. The full source is{' '}
-          <Link
-            href="https://github.com/GMOD/JBrowseMSA/blob/main/website/src/lib/geneExplorer.ts"
-            target="_blank"
-            rel="noopener"
-          >
-            geneExplorer.ts
-          </Link>{' '}
-          (see <Code>buildSessionUrl</Code>), and the URL-param API is
-          documented under{' '}
-          <Link
-            href="https://jbrowse.org/jb2/docs/urlparams/"
-            target="_blank"
-            rel="noopener"
-          >
-            JBrowse URL params
-          </Link>
-          .
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          onClick={() => {
-            onClose()
-          }}
-        >
-          Close
-        </Button>
-      </DialogActions>
-      <Snackbar
-        open={!!copyMessage}
-        autoHideDuration={2000}
-        onClose={() => {
-          dismissCopy()
-        }}
-        message={copyMessage}
-      />
-    </Dialog>
   )
 }

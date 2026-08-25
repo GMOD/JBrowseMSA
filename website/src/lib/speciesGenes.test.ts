@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  genArkBase,
   genArkConfigUrl,
   parseChromAlias,
   parseGeneTableBlocks,
@@ -79,22 +78,16 @@ describe('parseGeneTableBlocks', () => {
   })
 })
 
-describe('genArkBase', () => {
-  it('lays a GenArk accession out by digit triplets on hgdownload', () => {
-    expect(genArkBase('GCF_000001635.27')).toBe(
-      'https://hgdownload.soe.ucsc.edu/hubs/GCF/000/001/635/GCF_000001635.27/GCF_000001635.27',
+describe('genArkConfigUrl', () => {
+  it('shards the jb2hubs config path by digit triplets', () => {
+    expect(genArkConfigUrl('GCF_000001635.27')).toBe(
+      'https://jbrowse.org/hubs/genark/GCF/000/001/635/GCF_000001635.27/config.json',
     )
   })
 
   it('handles GCA accessions too', () => {
-    expect(genArkBase('GCA_000001215.4')).toContain('/hubs/GCA/000/001/215/')
-  })
-})
-
-describe('genArkConfigUrl', () => {
-  it('shards the jb2hubs config path the same way', () => {
-    expect(genArkConfigUrl('GCF_000001635.27')).toBe(
-      'https://jbrowse.org/hubs/genark/GCF/000/001/635/GCF_000001635.27/config.json',
+    expect(genArkConfigUrl('GCA_000001215.4')).toContain(
+      '/genark/GCA/000/001/215/',
     )
   })
 })

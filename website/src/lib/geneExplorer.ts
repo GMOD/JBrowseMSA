@@ -98,6 +98,9 @@ export interface Transcript {
   cds: CDS[] // genomic ascending
 }
 
+interface MyGeneQuery {
+  hits?: MyGeneHit[]
+}
 interface MyGeneHit {
   symbol?: string
   entrezgene?: string | number
@@ -119,18 +122,11 @@ export async function searchGenes(
   const q = encodeURIComponent(`symbol:${query}*`)
   const url = `${MYGENE}/query?q=${q}&species=${species.taxId}&fields=symbol&size=10`
   const res = await fetch(url)
-  const json: unknown = res.ok ? await res.json() : {}
-  const hits = isHits(json) ? json.hits : []
-  const symbols = hits
-    .map(h => (typeof h.symbol === 'string' ? h.symbol : undefined))
+  const json = res.ok ? ((await res.json()) as MyGeneQuery) : {}
+  const symbols = (json.hits ?? [])
+    .map(h => h.symbol)
     .filter((s): s is string => !!s)
   return [...new Set(symbols)]
-}
-
-function isHits(v: unknown): v is { hits: { symbol?: unknown }[] } {
-  return (
-    typeof v === 'object' && v !== null && 'hits' in v && Array.isArray(v.hits)
-  )
 }
 
 // Gene symbol -> hg38 locus + UniProt accession. mygene matches the symbol
@@ -143,8 +139,8 @@ async function resolveGene(symbol: string): Promise<GeneLocus> {
   if (!res.ok) {
     throw new Error(`mygene.info lookup failed (${res.status})`)
   }
-  const json: unknown = await res.json()
-  const hit = firstHit(json)
+  const json = (await res.json()) as MyGeneQuery
+  const hit = json.hits?.[0]
   const pos = hit && pickGenomicPos(hit.genomic_pos)
   if (!hit || !pos) {
     throw new Error(`No hg38 locus found for "${symbol}"`)
@@ -158,10 +154,6 @@ async function resolveGene(symbol: string): Promise<GeneLocus> {
     uniprotId: Array.isArray(swiss) ? swiss[0] : swiss,
     geneId: hit.entrezgene === undefined ? undefined : String(hit.entrezgene),
   }
-}
-
-function firstHit(v: unknown): MyGeneHit | undefined {
-  return isHits(v) ? (v.hits[0] as MyGeneHit | undefined) : undefined
 }
 
 // A gene can map to several scaffolds; keep the primary chr assembly entry.
@@ -257,19 +249,6 @@ const getCdsIndex = memoizedTextIndex(
     ),
 )
 
-// The knownCanonical transcript model that backs the alignment, keyed by gene
-// symbol. Preferred over fetchTranscript (RefSeq Select) so connectedFeature
-// shares the alignment's transcript and the genome<->MSA / genome<->3D mappings
-// stay coordinate-consistent for every gene.
-async function fetchGeneCds(geneName: string): Promise<Transcript | undefined> {
-  // an unreachable .cds index is just another "no CDS for this gene" as far as
-  // the caller is concerned (it falls back to RefSeq Select either way), so
-  // collapse the network failure into the undefined the return type already
-  // allows. getCdsIndex clears its memo on failure, so a later pick retries.
-  const index = await getCdsIndex().catch(() => undefined)
-  return index?.get(geneName)
-}
-
 async function tabixLines(
   file: TabixIndexedFile,
   refName: string,
@@ -333,9 +312,12 @@ async function fetchTranscript(locus: GeneLocus): Promise<Transcript> {
 
 // Best transcript model for a gene: the alignment-backing knownCanonical CDS
 // when available (so connectedFeature shares the alignment's coordinate space),
-// else the live RefSeq Select transcript for genes outside the 100-way set.
+// else the live RefSeq Select transcript for genes outside the 100-way set. An
+// unreachable .cds index reads as "no CDS for this gene" — RefSeq Select covers
+// both cases, and getCdsIndex clears its memo so a later pick retries.
 async function fetchGeneTranscript(locus: GeneLocus): Promise<Transcript> {
-  return (await fetchGeneCds(locus.symbol)) ?? fetchTranscript(locus)
+  const index = await getCdsIndex().catch(() => undefined)
+  return index?.get(locus.symbol) ?? fetchTranscript(locus)
 }
 
 // bp of context shown on either side of every exon in the collapsed view, so

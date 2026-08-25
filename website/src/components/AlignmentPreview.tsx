@@ -6,17 +6,19 @@ import { MSAViewer } from 'react-msaview'
 export default function AlignmentPreview({
   msa,
   treeUri,
+  height = 300,
 }: {
   msa: string
   treeUri: string
+  height?: number
 }) {
   return (
     <MSAViewer
       msa={msa}
       treeFilehandle={{ uri: treeUri, locationType: 'UriLocation' }}
       colorScheme="percent_identity_dynamic"
-      height={300}
-      treeAreaWidth={160}
+      height={height}
+      treeAreaWidth={200}
     />
   )
 }

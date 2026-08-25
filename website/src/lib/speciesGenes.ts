@@ -23,7 +23,6 @@ import type { CDS, Transcript } from './geneExplorer'
 export const DATASETS = 'https://api.ncbi.nlm.nih.gov/datasets/v2'
 export const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils'
 const UNIPROT = 'https://rest.uniprot.org/uniprotkb'
-const GENARK = 'https://hgdownload.soe.ucsc.edu/hubs'
 const JB2HUBS = 'https://jbrowse.org/hubs/genark'
 
 // Which precomputed ortholog set the msaview plugin aligns from. NCBI's sets
@@ -262,22 +261,10 @@ export async function fetchUniProtAccession(
   const res = await fetch(
     `${UNIPROT}/search?query=${query}&fields=accession&format=json&size=1`,
   ).catch(() => undefined)
-  const json: unknown = res?.ok ? await res.json() : undefined
-  return firstAccession(json)
-}
-
-function firstAccession(json: unknown): string | undefined {
-  const results =
-    typeof json === 'object' && json !== null && 'results' in json
-      ? (json as { results: unknown[] }).results
-      : []
-  const first = results[0]
-  return typeof first === 'object' &&
-    first !== null &&
-    'primaryAccession' in first &&
-    typeof first.primaryAccession === 'string'
-    ? first.primaryAccession
+  const json = res?.ok
+    ? ((await res.json()) as { results?: { primaryAccession?: string }[] })
     : undefined
+  return json?.results?.[0]?.primaryAccession
 }
 
 // --- gene_table parsing ------------------------------------------------------
@@ -423,21 +410,13 @@ export function transcriptFromGeneTable(
 }
 
 // --- GenArk / jb2hubs --------------------------------------------------------
-// hgdownload lays GenArk hubs out by triplets of the numeric accession:
-// GCF_000001635.27 -> GCF/000/001/635/GCF_000001635.27. jb2hubs shards its
-// configs the same way.
-function shardedPath(accession: string): string {
+// jb2hubs shards its configs by triplets of the numeric accession, the way
+// hgdownload lays GenArk hubs out: GCF_000001635.27 ->
+// GCF/000/001/635/GCF_000001635.27.
+export function genArkConfigUrl(accession: string): string {
   const prefix = accession.slice(0, 3) // GCA | GCF
   const digits = accession.slice(4).replace(/\..*$/, '') // 000001635
-  return `${prefix}/${digits.slice(0, 3)}/${digits.slice(3, 6)}/${digits.slice(6, 9)}/${accession}`
-}
-
-export function genArkBase(accession: string): string {
-  return `${GENARK}/${shardedPath(accession)}/${accession}`
-}
-
-export function genArkConfigUrl(accession: string): string {
-  return `${JB2HUBS}/${shardedPath(accession)}/config.json`
+  return `${JB2HUBS}/${prefix}/${digits.slice(0, 3)}/${digits.slice(3, 6)}/${digits.slice(6, 9)}/${accession}/config.json`
 }
 
 // The NCBI gene track a jb2hubs config carries, best first: RefSeq Select is
