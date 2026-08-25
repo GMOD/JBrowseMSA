@@ -20,6 +20,7 @@
  */
 import { delay } from '../screenshots/lib.mjs'
 import {
+  decodeSessionUrl,
   fetchJbrowseUrl,
   launchBrowser,
   openSession,
@@ -64,7 +65,9 @@ async function main() {
     if (!jbrowseUrl) {
       failures.push('gene-explorer page never produced an Open-in-JBrowse URL')
     }
-    const hasProteinView = jbrowseUrl?.includes('ProteinView')
+    const hasProteinView =
+      !!jbrowseUrl &&
+      decodeSessionUrl(jbrowseUrl).views.some(v => v.type === 'ProteinView')
     if (jbrowseUrl && !hasProteinView) {
       failures.push('spec has no ProteinView (no structure linkage to test)')
     }

@@ -3,6 +3,8 @@
  * page like a user would, take the JBrowse URL it builds, open it in a headless
  * swiftshader-WebGL Chrome, and wait for the structure to load and connect.
  */
+import { inflateSync } from 'node:zlib'
+
 import puppeteer from 'puppeteer-core'
 
 import { delay, findChrome } from '../screenshots/lib.mjs'
@@ -48,6 +50,13 @@ export async function fetchJbrowseUrl(page, symbol) {
     await delay(1000)
   }
   return undefined
+}
+
+// The session snapshot inside an `encoded-` launch URL: url-safe base64 of the
+// deflated JSON, the inverse of what the page's sessionUrl() emits.
+export function decodeSessionUrl(url) {
+  const encoded = url.split('session=encoded-')[1]
+  return JSON.parse(inflateSync(Buffer.from(encoded, 'base64url')).toString())
 }
 
 // A session carrying plugins the config didn't declare trips jbrowse-web's
