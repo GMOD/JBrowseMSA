@@ -25,6 +25,19 @@ canvas with a tiled rendering system for scalability.
 - Canvas rendering uses a tiled block system (`calculateBlocks.ts`) to avoid
   rendering entire large alignments at once.
 - InterProScan domain visualization is a core feature — do not remove it.
+- The alignment background on screen comes from `components/msa/msaRaster.ts`:
+  one pixel per cell, built lazily in 512-cell tiles and blitted with
+  `drawImage`, so a zoom frame costs a few blits instead of a `fillRect` per
+  visible cell. The cache keys on everything a cell's color depends on and on
+  nothing that zoom changes. `MSACanvasBlock` decides whether the raster applies
+  and tells `renderMSABlock` via `rasterTiles`; the SVG export passes nothing
+  and keeps the per-cell rect path, which is what its snapshots encode. Letters
+  stay `fillText` — a glyph sprite atlas measured 2-3x slower.
+- The minimap bar draws the same raster sampled down to at most 2000 columns.
+- Blocks are positioned at their offsets only; `scrollX`/`scrollY` live on one
+  transformed container per panel (`MSACanvas`, `TreeCanvas`, `TrackBlocks`).
+  Anything `position: fixed` inside those containers has to be portaled, since a
+  transformed ancestor becomes its containing block.
 - `hierarchy.ts` no longer implements the tree traversals. They live in
   `@gmod/newick` now, shared with the tree sidebar in jbrowse-components, and
   the file is a typing shim that re-exports them plus this viewer's own layout
