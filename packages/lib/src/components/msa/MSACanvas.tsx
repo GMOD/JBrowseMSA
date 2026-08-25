@@ -9,8 +9,16 @@ import MSACanvasBlock from './MSACanvasBlock.tsx'
 import type { MsaViewModel } from '../../model.ts'
 
 const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
-  const { MSA, msaFilehandle, height, msaCanvasWidth, blocks2d, scrollZoom } =
-    model
+  const {
+    MSA,
+    msaFilehandle,
+    height,
+    msaCanvasWidth,
+    blocks2d,
+    scrollZoom,
+    scrollX,
+    scrollY,
+  } = model
   const ref = useRef<HTMLDivElement>(null)
   const onScrollX = useCallback(
     (d: number) => {
@@ -59,14 +67,26 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
       }}
     >
       {!MSA && !msaFilehandle ? null : MSA ? (
-        blocks2d.map(([bx, by]) => (
-          <MSACanvasBlock
-            key={`${bx}_${by}`}
-            model={model}
-            offsetX={bx}
-            offsetY={by}
-          />
-        ))
+        // one transform for the whole block set, so a scroll frame is a
+        // compositor move rather than a style write per block
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            transform: `translate(${scrollX}px, ${scrollY}px)`,
+            willChange: 'transform',
+          }}
+        >
+          {blocks2d.map(([bx, by]) => (
+            <MSACanvasBlock
+              key={`${bx}_${by}`}
+              model={model}
+              offsetX={bx}
+              offsetY={by}
+            />
+          ))}
+        </div>
       ) : (
         <Loading />
       )}

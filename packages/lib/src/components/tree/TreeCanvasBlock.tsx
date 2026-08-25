@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
+import { createPortal } from 'react-dom'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import TreeBranchMenu from './TreeBranchMenu.tsx'
@@ -56,7 +57,7 @@ const TreeCanvasBlock = observer(function ({
   const { clickMap, hovered, hitTest, onMouseMove, onMouseLeave } =
     useTreeHover({ model, offsetY })
 
-  const { scrollY, treeAreaWidth, blockSize, highResScaleFactor } = model
+  const { treeAreaWidth, blockSize, highResScaleFactor } = model
   const width = treeAreaWidth + padding
   const height = blockSize
 
@@ -82,7 +83,7 @@ const TreeCanvasBlock = observer(function ({
   const style = {
     width,
     height,
-    top: scrollY + offsetY,
+    top: offsetY,
     left: 0,
     position: 'absolute',
   } as const
@@ -144,21 +145,27 @@ const TreeCanvasBlock = observer(function ({
           className={classes.hover}
           style={{
             left: hovered.minX,
-            top: hovered.minY + scrollY,
+            top: hovered.minY,
             width: hovered.maxX - hovered.minX,
             height: hovered.maxY - hovered.minY,
           }}
         />
       ) : null}
 
-      {hovered ? (
-        <div
-          className={classes.tooltip}
-          style={{ left: hovered.clientX + 12, top: hovered.clientY + 12 }}
-        >
-          {hovered.name}
-        </div>
-      ) : null}
+      {/* portaled: the block set sits under a transform, which would otherwise
+      make this fixed tooltip position against the scrolled tree instead of the
+      window */}
+      {hovered
+        ? createPortal(
+            <div
+              className={classes.tooltip}
+              style={{ left: hovered.clientX + 12, top: hovered.clientY + 12 }}
+            >
+              {hovered.name}
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   )
 })

@@ -13,7 +13,7 @@ import type { MsaViewModel } from '../../model.ts'
 
 const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { treeWidth, height, blocksY, treeAreaWidth } = model
+  const { treeWidth, height, blocksY, treeAreaWidth, scrollY } = model
   const onScrollY = useCallback(
     (d: number) => {
       model.doScrollY(d)
@@ -80,9 +80,21 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
         width: treeWidth + padding,
       }}
     >
-      {blocksY.map(block => (
-        <TreeCanvasBlock key={block} model={model} offsetY={block} />
-      ))}
+      {/* one transform for the whole block set, matching MSACanvas: the tree
+      scrolls in lockstep with the alignment and on the same compositor move */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          transform: `translateY(${scrollY}px)`,
+          willChange: 'transform',
+        }}
+      >
+        {blocksY.map(block => (
+          <TreeCanvasBlock key={block} model={model} offsetY={block} />
+        ))}
+      </div>
       <canvas
         ref={mouseoverRef}
         width={treeAreaWidth}

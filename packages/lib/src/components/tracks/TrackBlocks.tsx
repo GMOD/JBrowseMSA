@@ -19,7 +19,7 @@ const TrackBlock = observer(function ({
   track: BasicTrack
   offsetX: number
 }) {
-  const { blockSize, scrollX, colorScheme, highResScaleFactor } = model
+  const { blockSize, colorScheme, highResScaleFactor } = model
   const { height, customColorScheme } = track.model
   const { theme, contrastScheme } = useColorContrast(
     customColorScheme ?? colorScheme,
@@ -45,7 +45,7 @@ const TrackBlock = observer(function ({
       height={canvasHeight}
       style={{
         position: 'absolute',
-        left: scrollX + offsetX,
+        left: offsetX,
         width: blockSize,
         height,
       }}
@@ -71,7 +71,7 @@ const TrackBlocks = observer(function ({
   // than running on another 20px under the vertical scrollbar -- otherwise the
   // last columns appear in the tracks but not in the alignment, and the hovered
   // -column indicator (sized to the canvas) stops short of the track it crosses
-  const { blocksX, msaCanvasWidth } = model
+  const { blocksX, msaCanvasWidth, scrollX } = model
   const { kind, height, data } = track.model
 
   // a text track with no data draws nothing, and an empty row of its own would
@@ -89,9 +89,20 @@ const TrackBlocks = observer(function ({
         overflow: 'hidden',
       }}
     >
-      {blocksX.map(bx => (
-        <TrackBlock key={bx} model={model} track={track} offsetX={bx} />
-      ))}
+      {/* one transform for the whole block set, matching MSACanvas */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          transform: `translateX(${scrollX}px)`,
+          willChange: 'transform',
+        }}
+      >
+        {blocksX.map(bx => (
+          <TrackBlock key={bx} model={model} track={track} offsetX={bx} />
+        ))}
+      </div>
       <TrackResizeHandle model={model} kind={kind} />
     </div>
   )

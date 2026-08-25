@@ -22,7 +22,7 @@ const MSACanvasBlock = observer(function ({
   offsetX: number
   offsetY: number
 }) {
-  const { scrollY, scrollX, colorScheme, blockSize, highResScaleFactor } = model
+  const { colorScheme, blockSize, highResScaleFactor } = model
   const { theme, contrastScheme } = useColorContrast(colorScheme)
   const { tooltipPoint, onMouseMove, onClick, onMouseLeave } = useMsaBlockMouse(
     {
@@ -89,8 +89,8 @@ const MSACanvasBlock = observer(function ({
         height={canvasSize}
         style={{
           position: 'absolute',
-          top: scrollY + offsetY,
-          left: scrollX + offsetX,
+          top: offsetY,
+          left: offsetX,
           width: blockSize,
           height: blockSize,
         }}
