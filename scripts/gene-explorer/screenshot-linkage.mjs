@@ -15,9 +15,13 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import puppeteer from 'puppeteer-core'
-
-import { delay, findChrome } from '../screenshots/lib.mjs'
+import { delay } from '../screenshots/lib.mjs'
+import {
+  fetchJbrowseUrl,
+  launchBrowser,
+  openSession,
+  waitForStructure,
+} from './lib.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '..', '..')
@@ -31,73 +35,19 @@ const OUT = path.join(
 const SYMBOL = process.argv[2] ?? 'TP53'
 const START = Number(process.argv[3] ?? 197)
 const END = Number(process.argv[4] ?? 202)
-const SITE = `https://gmod.org/JBrowseMSA/gene-explorer/?gene=${SYMBOL}`
 
-const browser = await puppeteer.launch({
-  headless: true,
-  executablePath: findChrome(),
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--use-gl=angle',
-    '--use-angle=swiftshader',
-    '--enable-unsafe-swiftshader',
-    '--ignore-gpu-blocklist',
-    '--hide-scrollbars',
-  ],
-  defaultViewport: { width: 1800, height: 980, deviceScaleFactor: 2 },
-})
+const browser = await launchBrowser(
+  { width: 1800, height: 980, deviceScaleFactor: 2 },
+  ['--hide-scrollbars'],
+)
 try {
   const page = await browser.newPage()
-  await page.goto(SITE, { waitUntil: 'networkidle2', timeout: 60000 })
-  let url
-  for (let i = 0; i < 40; i++) {
-    url = await page.evaluate(
-      () =>
-        [...document.querySelectorAll('a')].find(a =>
-          (a.href || '').includes('session=spec-'),
-        )?.href,
-    )
-    if (url) {
-      break
-    }
-    await delay(1000)
-  }
+  const url = await fetchJbrowseUrl(page, SYMBOL)
   if (!url) {
     throw new Error('gene-explorer page did not produce a JBrowse URL')
   }
-
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 })
-  for (let i = 0; i < 15; i++) {
-    const clicked = await page.evaluate(() => {
-      const b = [...document.querySelectorAll('button')].find(x =>
-        /trust|yes|continue/i.test(x.textContent || ''),
-      )
-      if (b) {
-        b.click()
-        return true
-      }
-      return false
-    })
-    if (clicked) {
-      break
-    }
-    await delay(1000)
-  }
-
-  // wait for the structure to load + align + connect
-  for (let i = 0; i < 90; i++) {
-    const ready = await page.evaluate(() => {
-      const s = window.JBrowseRootModel?.session?.views?.find(
-        v => v.type === 'ProteinView',
-      )?.structures?.[0]
-      return !!s?.pairwiseAlignment && !!s?.connectedView
-    })
-    if (ready) {
-      break
-    }
-    await delay(2000)
-  }
+  await openSession(page, url)
+  await waitForStructure(page)
 
   // select the residue span on the structure: lights the codons in the LGV
   // (clickGenomeHighlights), the MSA columns, and the 3D structure together

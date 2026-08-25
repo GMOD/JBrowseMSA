@@ -1,9 +1,11 @@
 # Gene explorer data
 
-Backs the [Gene explorer](../../website/src/pages/gene-explorer.astro) page:
-type any human gene → a connected JBrowse session with a **collapsed-intron**
-gene view, its **100-way vertebrate protein alignment**, and the **AlphaFold
-structure**.
+Backs the human path of the
+[Gene explorer](../../website/src/pages/gene-explorer.astro) page: type any
+human gene → a connected JBrowse session with a **collapsed-intron** gene view,
+its **100-way vertebrate protein alignment**, and the **AlphaFold structure**.
+Other species resolve live through NCBI and GenArk (see
+`website/src/lib/speciesGenes.ts`) and need nothing from here.
 
 Almost everything is computed live in the browser from public CORS services, so
 there is nothing per-gene to host:

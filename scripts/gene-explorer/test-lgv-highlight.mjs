@@ -10,16 +10,23 @@
  * (structure.setHoveredPosition — exactly what molstar's hover handler does) and
  * asserts the genome regions it produces (structure.hoverGenomeHighlights, which
  * the LGV renders) land in the gene's CDS and that adjacent residues map one
- * codon (3 bp) apart.
+ * codon (3 bp) apart. It also asserts the session opened tiled: genome +
+ * alignment in one cell, the structure beside them.
  *
  *   node scripts/gene-explorer/test-lgv-highlight.mjs [SYMBOL]   # default TP53
+ *
+ * GENE_EXPLORER_SITE=http://localhost:4321/JBrowseMSA/gene-explorer/ points it
+ * at a local `astro dev` instead of the deployed page.
  */
-import puppeteer from 'puppeteer-core'
-
-import { delay, findChrome } from '../screenshots/lib.mjs'
+import { delay } from '../screenshots/lib.mjs'
+import {
+  fetchJbrowseUrl,
+  launchBrowser,
+  openSession,
+  waitForStructure,
+} from './lib.mjs'
 
 const SYMBOL = process.argv[2] ?? 'TP53'
-const SITE = `https://gmod.org/JBrowseMSA/gene-explorer/?gene=${SYMBOL}`
 const MSA_GZ =
   'https://jbrowse.org/demos/msaview/100way/hg38.knownCanonical.multiz100way.aa.fa.gz'
 
@@ -45,66 +52,18 @@ async function main() {
   const cds = await cdsBounds(SYMBOL)
   console.log(`${SYMBOL}  CDS ${cds.refName}:${cds.min}-${cds.max}`)
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: findChrome(),
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--use-gl=angle',
-      '--use-angle=swiftshader',
-      '--enable-unsafe-swiftshader',
-      '--ignore-gpu-blocklist',
-    ],
-    defaultViewport: { width: 1600, height: 900 },
-  })
+  const browser = await launchBrowser({ width: 1600, height: 900 })
   const failures = []
   try {
     const page = await browser.newPage()
     page.on('pageerror', e => console.log('  [pageerror]', e.message))
 
     // ---- 1. the gene-explorer page builds the spec; grab its JBrowse URL ----
-    await page.goto(SITE, { waitUntil: 'networkidle2', timeout: 60000 })
-    let jbrowseUrl
-    let pageState
-    for (let i = 0; i < 40; i++) {
-      pageState = await page.evaluate(() => {
-        const txt = document.body.innerText
-        const anchor = [...document.querySelectorAll('a')].find(a =>
-          (a.href || '').includes('session=spec-'),
-        )
-        return {
-          jbrowseUrl: anchor?.href,
-          previewLoaded: txt.includes('100-way alignment'),
-          notHostedMsg: txt.includes('once the alignment file is hosted'),
-          error:
-            /error|failed|not found/i.test(txt) && txt.length < 400
-              ? txt
-              : undefined,
-        }
-      })
-      if (pageState.jbrowseUrl) {
-        break
-      }
-      await delay(1000)
-    }
-    console.log(
-      '  page:',
-      JSON.stringify({
-        gotUrl: !!pageState.jbrowseUrl,
-        previewLoaded: pageState.previewLoaded,
-        notHostedMsg: pageState.notHostedMsg,
-      }),
-    )
-    if (!pageState.jbrowseUrl) {
+    const jbrowseUrl = await fetchJbrowseUrl(page, SYMBOL)
+    console.log('  page: gotUrl', !!jbrowseUrl)
+    if (!jbrowseUrl) {
       failures.push('gene-explorer page never produced an Open-in-JBrowse URL')
     }
-    if (pageState.notHostedMsg) {
-      failures.push(
-        'page shows stale "alignment not hosted" message (MSA preview did not load)',
-      )
-    }
-    jbrowseUrl = pageState.jbrowseUrl
     const hasProteinView = jbrowseUrl?.includes('ProteinView')
     if (jbrowseUrl && !hasProteinView) {
       failures.push('spec has no ProteinView (no structure linkage to test)')
@@ -112,26 +71,7 @@ async function main() {
 
     // ---- 2. open the built session in live JBrowse, test 3D -> LGV ----------
     if (jbrowseUrl && hasProteinView) {
-      await page.goto(jbrowseUrl, {
-        waitUntil: 'domcontentloaded',
-        timeout: 60000,
-      })
-      for (let i = 0; i < 15; i++) {
-        const clicked = await page.evaluate(() => {
-          const b = [...document.querySelectorAll('button')].find(x =>
-            /trust|yes|continue/i.test(x.textContent || ''),
-          )
-          if (b) {
-            b.click()
-            return true
-          }
-          return false
-        })
-        if (clicked) {
-          break
-        }
-        await delay(1000)
-      }
+      await openSession(page, jbrowseUrl)
 
       // fail fast: the LGV must keep the spec's pinned id so connectedViewId
       // resolves. A stale jbrowse build assigns a random id (no linkage). Don't
@@ -163,39 +103,31 @@ async function main() {
         )
       }
 
+      // the workspace tree the session carried must have been restored: two
+      // cells in a row, the structure in its own, and workspaces on
+      const layout = await page.evaluate(() => {
+        const session = window.JBrowseRootModel?.session
+        const panels = session?.layout?.children ?? []
+        return {
+          useWorkspaces: session?.effectiveUseWorkspaces,
+          direction: session?.layout?.direction,
+          cells: panels.map(p => p.tabs?.flatMap(t => [...t.viewIds]) ?? []),
+        }
+      })
+      console.log('  layout:', JSON.stringify(layout))
+      if (layout.useWorkspaces !== true || layout.direction !== 'row') {
+        failures.push('session did not open as a tiled row workspace')
+      }
+      if (
+        layout.cells.length !== 2 ||
+        !layout.cells[1]?.some(id => id.startsWith('protein-'))
+      ) {
+        failures.push('structure view is not in its own cell beside the genome')
+      }
+
       let ready = {}
       if (connected) {
-        for (let i = 0; i < 90; i++) {
-          ready = await page.evaluate(() => {
-            const root = window.JBrowseRootModel
-            if (!root) {
-              return { stage: 'no-root' }
-            }
-            const views = root.session?.views ?? []
-            const pv = views.find(v => v.type === 'ProteinView')
-            const msa = views.find(v => v.type === 'MsaView')
-            const s = pv?.structures?.[0]
-            return {
-              msaConnected: !!msa?.connectedView,
-              structure: !!s,
-              structureConnected: !!s?.connectedView,
-              aligned: !!s?.pairwiseAlignment,
-              seqCount: s?.structureSequences?.length ?? 0,
-              error: pv?.error
-                ? String(pv.error)
-                : s?.error
-                  ? String(s.error)
-                  : undefined,
-            }
-          })
-          if (ready.error) {
-            console.log('  [model error]', ready.error)
-          }
-          if (ready.structure && ready.aligned && ready.structureConnected) {
-            break
-          }
-          await delay(2000)
-        }
+        ready = await waitForStructure(page)
         console.log('  jbrowse ready:', JSON.stringify(ready))
         if (!ready?.aligned) {
           failures.push('structure pairwiseAlignment never computed')
