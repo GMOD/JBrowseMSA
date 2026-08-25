@@ -6,10 +6,12 @@
 // Input: a UCSC `*.exonAA.fa.gz` (streamed — never fully in memory). FASTA, one
 // record per (transcript, species, exon). Header:
 //   >{transcript}_{db}_{exonNum}_{exonCount} {aaLen} {..} {..} {chr:start-end}{strand}
-// Records for one transcript are consecutive; within it, exon 1 of every
-// species, then exon 2, ... with the reference assembly's row first. {db} can
-// itself contain underscores (`C_sp38_MB_2015` in the ce11 135-way), so the
-// parser anchors on the reference db and the current transcript rather than
+// A transcript's records for one exon are consecutive, the reference assembly
+// first; exon groups of isoforms that share exons can interleave (refGene sets
+// do this), so a transcript stays open until its last run of records has
+// passed, which a first pass over the headers counts. {db}
+// can itself contain underscores (`C_sp38_MB_2015` in the ce11 135-way), so
+// the parser anchors on the reference db and the open transcript rather than
 // counting underscores.
 //
 // The ASSEMBLIES table below says, per UCSC assembly, which exonAA set to read,
@@ -38,19 +40,20 @@
 //
 // Usage:
 //   node scripts/gene-explorer/build-data.mjs [--assembly=hg38] [exonAA.fa.gz] [outDir]
-// Defaults: streams the exonAA straight from hgdownload; writes to ./out.
-// Requires bgzip (htslib) on PATH.
+// Defaults: downloads the exonAA from hgdownload into outDir (it is read twice);
+// writes to ./out. Requires bgzip (htslib) on PATH.
 //
 // To test on a small slice without the full download, pass a local gz holding a
 // handful of transcripts (see scripts/gene-explorer/README.md).
 
 import { spawnSync } from 'node:child_process'
 import { once } from 'node:events'
-import { createReadStream, createWriteStream } from 'node:fs'
+import { createReadStream, createWriteStream, existsSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
-import { dirname, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import readline from 'node:readline'
 import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
 import { fileURLToPath } from 'node:url'
 import { createGunzip } from 'node:zlib'
 
@@ -60,8 +63,8 @@ const GENARK = 'https://hgdownload.soe.ucsc.edu/hubs'
 
 // `set` names the gene set the exonAA was built from; `xref` names the UCSC
 // table that maps its transcript ids to symbols. knownCanonical is one
-// transcript per gene already; refGene/ncbiRefSeq/ensGene carry every isoform,
-// so those pick the longest coding transcript per symbol (see loadXref).
+// transcript per gene already (`canonical`, first one wins); the other sets
+// carry every isoform, so the build keeps the longest coding one per symbol.
 // `genArk` is the assembly the website displays the gene on, whose sequence
 // names differ from UCSC's; absent for hg38, which keeps UCSC names.
 const ASSEMBLIES = {
@@ -69,6 +72,7 @@ const ASSEMBLIES = {
     db: 'hg38',
     way: 100,
     set: 'knownCanonical',
+    canonical: true,
     exonAA: 'multiz100way/alignments/knownCanonical.multiz100way.exonAA.fa.gz',
     xref: 'kgXref',
     tree: 'multiz100way/hg38.100way.nh',
@@ -77,6 +81,7 @@ const ASSEMBLIES = {
     db: 'mm39',
     way: 35,
     set: 'knownCanonical',
+    canonical: true,
     exonAA: 'multiz35way/alignments/knownCanonical.exonAA.fa.gz',
     xref: 'kgXref',
     tree: 'multiz35way/mm39.35way.nh',
@@ -131,7 +136,6 @@ if (!assembly) {
   )
 }
 const positional = args.filter(a => !a.startsWith('--'))
-const input = positional[0] ?? `${UCSC}/${assembly.db}/${assembly.exonAA}`
 const outDir = positional[1] ?? join(here, 'out')
 const { db, way, set } = assembly
 const outName = `${db}.${set}.multiz${way}way.aa`
@@ -152,6 +156,9 @@ const wormbaseStem = id => id.replace(/^(.+\..+)\.\d+$/, '$1')
 
 await mkdir(outDir, { recursive: true })
 requireTool('bgzip')
+const input = await localInput(
+  positional[0] ?? `${UCSC}/${assembly.db}/${assembly.exonAA}`,
+)
 
 // --- species tree ------------------------------------------------------------
 // Loaded first because its leaf names are the row names the viewer joins on.
@@ -187,13 +194,83 @@ const toDisplayRefName = assembly.genArk
   : name => name
 const unmappedRefNames = new Set()
 
-// --- stream the exonAA, reassemble per transcript, write blocks + index ------
+// --- pass 1: which transcript represents each symbol ---------------------------
+// The xref table is live and the exonAA a snapshot, so an isoform the table
+// lists can be absent from the alignment (daf-16's longest RefSeq is); choosing
+// among the transcripts the alignment actually holds is what makes every symbol
+// resolve. Non-canonical sets keep the longest reference row per symbol,
+// preferring a placement on a primary sequence, first seen on a tie.
+//
+// The same scan counts each transcript's runs of consecutive records, which is
+// what tells pass 2 when a transcript's last record has passed.
+console.error('scanning transcripts...')
+const { symbolOf, runsOf } = await scanTranscripts()
+console.error(`${symbolOf.size} symbols map to a transcript in the alignment`)
+
+async function scanTranscripts() {
+  const best = new Map() // symbol -> { transcript, residues, primary }
+  const seen = new Map() // transcript -> { residues, primary, runs }
+  const refSuffix = `_${db}_`
+  let last
+  for await (const line of fastaLines(input)) {
+    if (!line.startsWith('>')) {
+      continue
+    }
+    const i = line.indexOf(refSuffix)
+    if (i < 0) {
+      continue
+    }
+    const transcript = line.slice(1, i)
+    const tokens = line.split(/\s+/)
+    const entry = seen.get(transcript) ?? {
+      residues: 0,
+      primary: true,
+      runs: 0,
+    }
+    entry.residues += Number(tokens[1]) || 0
+    if (parseCoord(tokens[4])?.refName.includes('_')) {
+      entry.primary = false
+    }
+    if (transcript !== last) {
+      entry.runs++
+      last = transcript
+    }
+    seen.set(transcript, entry)
+  }
+  for (const [transcript, entry] of seen) {
+    const symbol = txToSymbol.get(keyOf(transcript))
+    if (!symbol) {
+      continue
+    }
+    const prev = best.get(symbol)
+    if (
+      !prev ||
+      (!assembly.canonical &&
+        (entry.residues > prev.residues ||
+          (entry.residues === prev.residues && entry.primary && !prev.primary)))
+    ) {
+      best.set(symbol, { transcript, ...entry })
+    }
+  }
+  return {
+    symbolOf: new Map(
+      [...best].map(([symbol, { transcript }]) => [transcript, symbol]),
+    ),
+    runsOf: new Map(
+      [...seen].map(([transcript, { runs }]) => [transcript, runs]),
+    ),
+  }
+}
+
+// --- pass 2: reassemble per transcript, write blocks + index --------------------
 const fa = createWriteStream(faPath)
 const idx = createWriteStream(idxPath)
 const cdsOut = createWriteStream(cdsPath)
-const lines = readline.createInterface({ input: await openInput(input) })
 
-let cur // { transcript, exons: Map<exonNum,{len,bySpecies:Map<db,seq>}> }
+// transcripts whose records are still arriving, keyed by id; `cur` is the one
+// the last record belonged to
+const open = new Map()
+let cur
 let header
 let seq = ''
 let offset = 0
@@ -207,12 +284,12 @@ let partialCds = 0
 // complete CDS whose length is not 3x the reference row's residue count: the
 // invariant the website's genome<->MSA mapping rests on
 let cdsMismatch = 0
-// one transcript per symbol: knownCanonical guarantees it and loadXref picks
-// one for the other sets — but guard anyway, keeping the first, so a name can
-// never silently return the wrong gene
+// one block per symbol: chooseTranscripts names one transcript, but the same
+// transcript id can be aligned at two placements; the first block wins so a
+// name can never silently return the wrong gene
 const seenSymbol = new Set()
 
-for await (const line of lines) {
+for await (const line of fastaLines(input)) {
   if (line.startsWith('>')) {
     await commitRecord()
     header = line.slice(1)
@@ -222,7 +299,9 @@ for await (const line of lines) {
   }
 }
 await commitRecord()
-await flush()
+for (const t of open.values()) {
+  await flush(t)
+}
 await endStream(fa)
 await endStream(idx)
 await endStream(cdsOut)
@@ -233,9 +312,17 @@ async function commitRecord() {
     if (!rec) {
       unparsed++
     } else {
-      if (!cur || cur.transcript !== rec.transcript) {
-        await flush()
-        cur = { transcript: rec.transcript, exons: new Map() }
+      if (cur && cur.transcript !== rec.transcript) {
+        await endRun(cur)
+      }
+      cur = open.get(rec.transcript)
+      if (!cur) {
+        cur = {
+          transcript: rec.transcript,
+          runsLeft: runsOf.get(rec.transcript) ?? 1,
+          exons: new Map(),
+        }
+        open.set(rec.transcript, cur)
       }
       let exon = cur.exons.get(rec.exonNum)
       if (!exon) {
@@ -255,14 +342,25 @@ async function commitRecord() {
   header = undefined
 }
 
+// A transcript is complete when its last run of records ends (pass 1 counted
+// them). One with runs still to come has an isoform's exon group interleaved
+// and stays open.
+async function endRun(t) {
+  t.runsLeft--
+  if (t.runsLeft <= 0) {
+    open.delete(t.transcript)
+    await flush(t)
+  }
+}
+
 // Header: {transcript}_{db}_{exonNum}_{exonCount} {aaLen} {f0} {f1} {coord}
 // where {coord} = chr:start-end[+-], the 1-based inclusive genomic CDS span of
 // the exon's coding bases (absent for a species with no alignment there). The
 // two frame ints are derivable from cumulative length, so phase is recomputed
 // in flush() rather than trusted from the header.
 //
-// A transcript's records lead with the reference assembly, so a stem ending in
-// `_{db}` opens a transcript, and every other record of it is `{transcript}_`
+// An exon group leads with the reference assembly, so a stem ending in `_{db}`
+// names the transcript, and every other record of the group is `{transcript}_`
 // followed by the species name, underscores and all.
 function parseHeader(h) {
   const tokens = h.split(/\s+/)
@@ -300,33 +398,31 @@ function parseCoord(token) {
     : undefined
 }
 
-async function flush() {
-  if (cur && cur.exons.size > 0) {
-    const symbol = txToSymbol.get(keyOf(cur.transcript))
-    if (symbol) {
-      if (seenSymbol.has(symbol)) {
-        dupes++
-      } else {
-        seenSymbol.add(symbol)
-        const { block, refResidues } = assemble(cur)
-        const bytes = Buffer.from(block)
-        if (!fa.write(bytes)) {
-          await once(fa, 'drain')
+async function flush(t) {
+  const symbol = symbolOf.get(t.transcript)
+  if (t.exons.size > 0 && symbol) {
+    if (seenSymbol.has(symbol)) {
+      dupes++
+    } else {
+      seenSymbol.add(symbol)
+      const { block, refResidues } = assemble(t)
+      const bytes = Buffer.from(block)
+      if (!fa.write(bytes)) {
+        await once(fa, 'drain')
+      }
+      idx.write(`${symbol}\t${offset}\t${bytes.length}\n`)
+      offset += bytes.length
+      written++
+      const cds = buildCds(t)
+      if (cds) {
+        if (cds.bp % 3 !== 0) {
+          partialCds++
+        } else if (cds.bp !== 3 * refResidues) {
+          cdsMismatch++
         }
-        idx.write(`${symbol}\t${offset}\t${bytes.length}\n`)
-        offset += bytes.length
-        written++
-        const cds = buildCds(cur)
-        if (cds) {
-          if (cds.bp % 3 !== 0) {
-            partialCds++
-          } else if (cds.bp !== 3 * refResidues) {
-            cdsMismatch++
-          }
-          cdsOut.write(
-            `${symbol}\t${cur.transcript}\t${cds.refName}\t${cds.strand}\t${cds.spec}\n`,
-          )
-        }
+        cdsOut.write(
+          `${symbol}\t${t.transcript}\t${cds.refName}\t${cds.strand}\t${cds.spec}\n`,
+        )
       }
     }
   }
@@ -417,111 +513,35 @@ console.error(
 
 // --- xref loaders -------------------------------------------------------------
 // Each returns the transcript->symbol map plus the `keyOf` normalizer both the
-// table's ids and the exonAA header ids go through before the lookup.
+// table's ids and the exonAA header ids go through before the lookup. genePred
+// columns: bin name chrom strand txStart txEnd cdsStart cdsEnd exonCount
+// exonStarts exonEnds score name2 ...
 async function loadXref(table) {
-  const rows = await tableRows(table)
+  const rows = readline.createInterface({
+    input: await openGz(`${UCSC}/${db}/database/${table}.txt.gz`),
+  })
   switch (table) {
     case 'kgXref':
-      return {
-        keyOf: versionless,
-        txToSymbol: await xrefFromPairs(rows, versionless, cols => [
-          cols[0],
-          cols[4],
-        ]),
-      }
+      return xrefFromPairs(rows, versionless, cols => [cols[0], cols[4]])
     case 'refGene':
     case 'ncbiRefSeq':
-      return {
-        keyOf: versionless,
-        txToSymbol: await xrefFromGenePred(rows, versionless, cols => cols[12]),
-      }
-    case 'ensemblToGeneName': {
-      // ensGene's name2 is a WBGene id, so the symbol comes from this table and
-      // the isoform pick from the ensGene genePred
-      const symbolByTx = await xrefFromPairs(rows, wormbaseStem, cols => [
-        cols[0],
-        cols[1],
-      ])
-      return {
-        keyOf: wormbaseStem,
-        txToSymbol: await xrefFromGenePred(
-          await tableRows('ensGene'),
-          wormbaseStem,
-          cols => symbolByTx.get(wormbaseStem(cols[1])),
-        ),
-      }
-    }
+      return xrefFromPairs(rows, versionless, cols => [cols[1], cols[12]])
+    case 'ensemblToGeneName':
+      return xrefFromPairs(rows, wormbaseStem, cols => [cols[0], cols[1]])
     default:
       throw new Error(`no loader for xref table ${table}`)
   }
 }
 
-async function tableRows(table) {
-  return readline.createInterface({
-    input: await openInput(`${UCSC}/${db}/database/${table}.txt.gz`),
-  })
-}
-
-// TAB-separated (id, symbol) pairs; every id maps
 async function xrefFromPairs(rows, keyOf, pick) {
-  const map = new Map()
+  const txToSymbol = new Map()
   for await (const line of rows) {
     const [id, symbol] = pick(line.split('\t'))
     if (id && symbol) {
-      map.set(keyOf(id), symbol)
+      txToSymbol.set(keyOf(id), symbol)
     }
   }
-  return map
-}
-
-// genePred tables list every isoform, so a gene must pick one: the longest
-// coding transcript, preferring a placement on a primary sequence, first seen
-// on a tie. Only the chosen transcript maps, so the other isoforms fall out of
-// the alignment as "no symbol" rather than as duplicates.
-// Columns: bin name chrom strand txStart txEnd cdsStart cdsEnd exonCount
-// exonStarts exonEnds score name2 ...
-async function xrefFromGenePred(rows, keyOf, symbolOf) {
-  const best = new Map() // symbol -> { id, codingBp, primary }
-  for await (const line of rows) {
-    const cols = line.split('\t')
-    const [, name, chrom, , , , cdsStart, cdsEnd, , exonStarts, exonEnds] = cols
-    const symbol = symbolOf(cols)
-    const codingBp = codingLength(
-      Number(cdsStart),
-      Number(cdsEnd),
-      exonStarts,
-      exonEnds,
-    )
-    if (!name || !symbol || codingBp === 0) {
-      continue
-    }
-    const candidate = {
-      id: keyOf(name),
-      codingBp,
-      primary: !chrom.includes('_'),
-    }
-    const prev = best.get(symbol)
-    if (
-      !prev ||
-      candidate.codingBp > prev.codingBp ||
-      (candidate.codingBp === prev.codingBp &&
-        candidate.primary &&
-        !prev.primary)
-    ) {
-      best.set(symbol, candidate)
-    }
-  }
-  return new Map([...best].map(([symbol, { id }]) => [id, symbol]))
-}
-
-function codingLength(cdsStart, cdsEnd, exonStarts, exonEnds) {
-  const starts = exonStarts.split(',').filter(Boolean).map(Number)
-  const ends = exonEnds.split(',').filter(Boolean).map(Number)
-  let bp = 0
-  for (let i = 0; i < starts.length; i++) {
-    bp += Math.max(0, Math.min(ends[i], cdsEnd) - Math.max(starts[i], cdsStart))
-  }
-  return bp
+  return { txToSymbol, keyOf }
 }
 
 // --- chromAlias ---------------------------------------------------------------
@@ -558,15 +578,36 @@ async function loadChromAlias(accession) {
 }
 
 // --- helpers -----------------------------------------------------------------
-async function openInput(src) {
-  if (src.startsWith('http')) {
+// The exonAA is read twice (pass 1 chooses transcripts, pass 2 assembles), so a
+// URL is downloaded once into outDir and kept there for the next run.
+async function localInput(src) {
+  if (!src.startsWith('http')) {
+    return src
+  }
+  const path = join(outDir, basename(src))
+  if (!existsSync(path)) {
+    console.error(`downloading ${src} -> ${path}`)
     const res = await fetch(src)
     if (!res.ok || !res.body) {
       throw new Error(`fetch failed: ${res.status} ${src}`)
     }
-    return Readable.fromWeb(res.body).pipe(createGunzip())
+    await pipeline(Readable.fromWeb(res.body), createWriteStream(path))
   }
-  return createReadStream(src).pipe(createGunzip())
+  return path
+}
+
+function fastaLines(path) {
+  return readline.createInterface({
+    input: createReadStream(path).pipe(createGunzip()),
+  })
+}
+
+async function openGz(url) {
+  const res = await fetch(url)
+  if (!res.ok || !res.body) {
+    throw new Error(`fetch failed: ${res.status} ${url}`)
+  }
+  return Readable.fromWeb(res.body).pipe(createGunzip())
 }
 
 function endStream(stream) {

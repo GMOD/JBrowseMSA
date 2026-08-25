@@ -33,6 +33,9 @@ stay written down so nobody re-derives them from scratch.
   Needs a min-height decision, not a one-liner.
 - [Consolidate the protein-link generators](ideas/consolidate-script-generators.md)
   — 738 LOC doing one thing four times; one generator plus four configs is ~200.
+- [Precomputed alignments for mouse, fly and worm](ideas/multi-assembly-alignments.md)
+  — `build-data.mjs` already builds them; host the files and swap the species'
+  on-demand alignment for a one-read hosted one, `.cds` and all.
 - [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md) —
   the join loop is cubic; why `@gmod/hclust`'s fix for the same shape does not
   port, and what does.
