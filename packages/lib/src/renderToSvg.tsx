@@ -30,11 +30,16 @@ const LEGEND_SWATCH = 12
 const LEGEND_FONT = 12
 const LEGEND_CHAR_W = 7
 
+const LEGEND_MAX_W = 360
+const LEGEND_TEXT_X = LEGEND_PAD + LEGEND_SWATCH + 6
+
 function getLegendWidth(model: MsaViewModel) {
-  const names = model.visibleDomainTypes.map(d => d.name)
-  const maxLen = Math.max(0, ...names.map(n => n.length))
-  const w = LEGEND_PAD * 2 + LEGEND_SWATCH + 6 + maxLen * LEGEND_CHAR_W
-  return Math.min(360, Math.max(120, w))
+  const maxLen = model.visibleDomainTypes.reduce(
+    (a, d) => Math.max(a, d.name.length),
+    0,
+  )
+  const w = LEGEND_TEXT_X + LEGEND_PAD + maxLen * LEGEND_CHAR_W
+  return Math.min(LEGEND_MAX_W, Math.max(120, w))
 }
 
 // resolved sizes/offsets (in svg user units) for the chosen export, shared by
@@ -42,6 +47,7 @@ function getLegendWidth(model: MsaViewModel) {
 // mirrors the live scroll position
 interface Layout {
   width: number
+  msaAreaWidth: number
   height: number
   contentHeight: number
   trackHeight: number
@@ -53,8 +59,6 @@ interface Layout {
 
 function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
   const {
-    width,
-    height,
     scrollX,
     scrollY,
     totalWidth,
@@ -62,21 +66,33 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
     treeAreaWidth,
     totalTrackAreaHeight,
     minimapHeight,
+    msaAreaHeight,
+    msaCanvasWidth,
+    showHorizontalScrollbar,
   } = model
   const trackHeight = opts.includeTracks ? totalTrackAreaHeight : 0
   // the minimap reflects the live viewport scroll position, so it's only
-  // meaningful for a viewport export, never for the entire alignment
-  const includeMinimap = opts.exportType === 'viewport' && !!opts.includeMinimap
+  // meaningful for a viewport export, never for the entire alignment -- and
+  // only when the live view shows one at all, since a minimap over an alignment
+  // that already fits marks a viewport wider than the bar
+  const includeMinimap =
+    opts.exportType === 'viewport' &&
+    !!opts.includeMinimap &&
+    showHorizontalScrollbar
   const legendWidth =
     model.actuallyShowDomains && model.visibleDomainTypes.length > 0
       ? getLegendWidth(model)
       : 0
 
-  // width stays content-only (the renderers derive msaAreaWidth from it); the
-  // legend occupies an extra column added at the svg root in MsaSvg
+  // width stays content-only; the legend occupies an extra column added at the
+  // svg root in MsaSvg. The viewport export takes the alignment canvas's own
+  // size rather than the widget's -- the widget box also covers the header, the
+  // resize handle and the scrollbars, and rendering that box exports rows and
+  // columns the scrollbars hide on screen
   return opts.exportType === 'entire'
     ? {
         width: totalWidth + treeAreaWidth,
+        msaAreaWidth: totalWidth,
         height: totalHeight + trackHeight,
         contentHeight: totalHeight,
         trackHeight,
@@ -86,9 +102,11 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
         legendWidth,
       }
     : {
-        width,
-        height: height + (includeMinimap ? minimapHeight : 0) + trackHeight,
-        contentHeight: height,
+        width: msaCanvasWidth + treeAreaWidth,
+        msaAreaWidth: msaCanvasWidth,
+        height:
+          msaAreaHeight + (includeMinimap ? minimapHeight : 0) + trackHeight,
+        contentHeight: msaAreaHeight,
         trackHeight,
         offsetX: -scrollX,
         offsetY: -scrollY,
@@ -125,26 +143,16 @@ function MsaSvg({
   const { treeAreaWidth, minimapHeight } = model
   const totalWidth = width + legendWidth
   const legendTop = includeMinimap ? minimapHeight : 0
+  const contrastScheme = colorContrast(model.colorScheme, theme)
+  const props = { Context, model, theme, layout, contrastScheme }
 
   const body = (
     <>
-      {trackHeight > 0 ? (
-        <TrackRendering
-          Context={Context}
-          model={model}
-          theme={theme}
-          layout={layout}
-        />
-      ) : null}
+      {trackHeight > 0 ? <TrackRendering {...props} /> : null}
       <g
         transform={trackHeight > 0 ? `translate(0 ${trackHeight})` : undefined}
       >
-        <CoreRendering
-          Context={Context}
-          model={model}
-          theme={theme}
-          layout={layout}
-        />
+        <CoreRendering {...props} />
       </g>
     </>
   )
@@ -157,11 +165,18 @@ function MsaSvg({
       xmlnsXlink="http://www.w3.org/1999/xlink"
       viewBox={`0 0 ${totalWidth} ${height}`}
     >
-      <rect width="100%" height="100%" fill="white" />
+      {/* every layer below draws in the theme's colors, so the page has to be
+          the theme's background too -- a hardcoded white one turns a dark-theme
+          export into white text on white */}
+      <rect
+        width="100%"
+        height="100%"
+        fill={theme.palette.background.default}
+      />
       {includeMinimap ? (
         <>
           <g transform={`translate(${treeAreaWidth} 0)`}>
-            <MinimapSVG model={model} width={width - treeAreaWidth} />
+            <MinimapSVG model={model} />
           </g>
           <g transform={`translate(0 ${minimapHeight})`}>{body}</g>
         </>
@@ -170,7 +185,7 @@ function MsaSvg({
       )}
       {legendWidth > 0 ? (
         <g transform={`translate(${width} ${legendTop})`}>
-          <LegendSVG model={model} width={legendWidth} />
+          <LegendSVG model={model} theme={theme} width={legendWidth} />
         </g>
       ) : null}
     </svg>
@@ -179,9 +194,22 @@ function MsaSvg({
 
 // the domain color key drawn as a reserved column to the right of the
 // alignment, mirroring the on-screen AnnotationLegend overlay
-function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
+function LegendSVG({
+  model,
+  theme,
+  width,
+}: {
+  model: MsaViewModel
+  theme: Theme
+  width: number
+}) {
   const { visibleDomainTypes, fillPalette, strokePalette } = model
   const boxHeight = LEGEND_PAD * 2 + visibleDomainTypes.length * LEGEND_ROW_H
+  // the column is capped at LEGEND_MAX_W, so a name too long for it has to be
+  // clipped here -- text that overruns the reserved width runs off the figure
+  const maxChars = Math.floor(
+    (width - LEGEND_TEXT_X - LEGEND_PAD) / LEGEND_CHAR_W,
+  )
   return (
     <g>
       <rect
@@ -189,7 +217,7 @@ function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
         y={0}
         width={width - 4}
         height={boxHeight}
-        fill="white"
+        fill={theme.palette.background.paper}
         stroke="#ccc"
         rx={2}
       />
@@ -206,11 +234,14 @@ function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
               stroke={strokePalette[d.accession]}
             />
             <text
-              x={LEGEND_PAD + LEGEND_SWATCH + 6}
+              x={LEGEND_TEXT_X}
               y={y + LEGEND_SWATCH - 1}
               fontSize={LEGEND_FONT}
+              fill={theme.palette.text.primary}
             >
-              {d.name}
+              {d.name.length > maxChars
+                ? `${d.name.slice(0, Math.max(1, maxChars - 1))}…`
+                : d.name}
             </text>
           </g>
         )
@@ -219,21 +250,23 @@ function LegendSVG({ model, width }: { model: MsaViewModel; width: number }) {
   )
 }
 
+interface LayerProps {
+  model: MsaViewModel
+  theme: Theme
+  layout: Layout
+  Context: typeof ContextType
+  contrastScheme: Record<string, string>
+}
+
 function CoreRendering({
   model,
   theme,
   layout,
   Context,
-}: {
-  model: MsaViewModel
-  theme: Theme
-  layout: Layout
-  Context: typeof ContextType
-}) {
-  const { contentHeight, offsetX, offsetY, width } = layout
-  const { treeAreaWidth, colorScheme, id } = model
-  const msaAreaWidth = width - treeAreaWidth
-  const contrastScheme = colorContrast(colorScheme, theme)
+  contrastScheme,
+}: LayerProps) {
+  const { contentHeight, offsetX, offsetY, msaAreaWidth } = layout
+  const { treeAreaWidth, id } = model
 
   const treeCtx = new Context(treeAreaWidth, contentHeight)
   renderTreeCanvas({
@@ -293,16 +326,10 @@ function TrackRendering({
   theme,
   layout,
   Context,
-}: {
-  model: MsaViewModel
-  theme: Theme
-  layout: Layout
-  Context: typeof ContextType
-}) {
-  const { trackHeight, offsetX, width } = layout
-  const { treeAreaWidth, colorScheme, id } = model
-  const msaAreaWidth = width - treeAreaWidth
-  const contrastScheme = colorContrast(colorScheme, theme)
+  contrastScheme,
+}: LayerProps) {
+  const { trackHeight, offsetX, msaAreaWidth } = layout
+  const { treeAreaWidth, id } = model
 
   const ctx = new Context(msaAreaWidth, trackHeight)
   renderAllTracks({

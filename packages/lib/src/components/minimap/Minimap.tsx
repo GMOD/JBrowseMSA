@@ -13,10 +13,7 @@ import type { MsaViewModel } from '../../model.ts'
 const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
   const { minimapHeight, msaCanvasWidth, highResScaleFactor } = model
   const theme = useTheme()
-  const { unit, s, w, polygonHeight, polygonPoints } = getMinimapLayout(
-    model,
-    msaCanvasWidth,
-  )
+  const { unit, s, w, polygonHeight, polygonPoints } = getMinimapLayout(model)
 
   // the whole alignment, sampled down to the bar: it says where the conserved
   // blocks and the gappy stretches are, which is what a scroll aims at

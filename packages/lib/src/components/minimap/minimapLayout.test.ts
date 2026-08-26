@@ -23,7 +23,7 @@ test('the viewport rectangle scales by the canvas width, not the msa area', () =
   expect(model.showVerticalScrollbar).toBe(true)
   expect(model.msaCanvasWidth).toBe(model.msaAreaWidth - 20)
 
-  const { unit, s, w } = getMinimapLayout(model, model.msaCanvasWidth)
+  const { unit, s, w } = getMinimapLayout(model)
   expect(unit).toBeCloseTo(model.msaCanvasWidth / model.totalWidth)
   // unscrolled, the rectangle starts at the left edge and covers the fraction
   // of the alignment on screen. Sizing it by msaAreaWidth instead overstated
@@ -34,12 +34,12 @@ test('the viewport rectangle scales by the canvas width, not the msa area', () =
   )
 })
 
-test('the rectangle tracks scrollX and the trapezoid spans the given width', () => {
+test('the rectangle tracks scrollX and the trapezoid spans the bar', () => {
   const model = makeModel()
   model.setScrollX(-300)
 
-  const width = 400
-  const { s, polygonHeight, polygonPoints } = getMinimapLayout(model, width)
+  const { msaCanvasWidth: width } = model
+  const { s, polygonHeight, polygonPoints } = getMinimapLayout(model)
   expect(s).toBeCloseTo((300 / model.totalWidth) * width)
   expect(polygonHeight).toBe(model.minimapHeight - MINIMAP_BAR_HEIGHT)
   // bottom edge spans the full minimap, top edge is the viewport rectangle
@@ -48,11 +48,22 @@ test('the rectangle tracks scrollX and the trapezoid spans the given width', () 
   ).toBe(true)
 })
 
+test('an alignment that already fits never overflows the bar', () => {
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: '>a\nACGT\n>b\nACGT' },
+  })
+  model.setWidth(1000)
+  expect(model.totalWidth).toBeLessThan(model.msaCanvasWidth)
+  expect(getMinimapLayout(model).w).toBe(model.msaCanvasWidth)
+})
+
 test('an empty alignment collapses to a zero-width unit instead of dividing by zero', () => {
   const model = MSAModelF().create({ type: 'MsaView' })
   model.setWidth(1000)
   expect(model.totalWidth).toBe(0)
-  const { unit, s, w } = getMinimapLayout(model, 400)
+  const { unit, s, w } = getMinimapLayout(model)
   expect(unit).toBe(0)
   expect(s).toBeCloseTo(0)
   // still clamped to the minimum grabbable width

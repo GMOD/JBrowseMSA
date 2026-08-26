@@ -1,26 +1,26 @@
 // @vitest-environment jsdom
 //
-// The viewport export draws a minimap by default, and nothing covered it. The
-// export lays the figure out on its own grid rather than the on-screen one, so
-// the minimap has to be told how wide to draw -- reading a width off the model
-// puts its trapezoid short of the alignment column beside it.
+// The viewport export draws a minimap by default, and nothing covered it. It
+// spans the same alignment canvas the live minimap does, so its trapezoid has
+// to reach the right edge of the exported alignment column -- and it is drawn
+// only when the live view shows one at all.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
+import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
 import MSAModelF from './model.ts'
-import { installRenderTestEnv } from './renderTestEnv.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 
 beforeAll(() => {
   enableStaticRendering(true)
-  installRenderTestEnv()
+  installHeadlessRenderEnv()
 })
 
 const width = 1000
 
-function makeModel() {
-  const row = 'ACDEFGHIKL'.repeat(40)
+function makeModel(cols = 400) {
+  const row = 'ACDEFGHIKL'.repeat(cols / 10)
   const model = MSAModelF().create({
     type: 'MsaView',
     msaFormat: 'fasta',
@@ -31,19 +31,24 @@ function makeModel() {
   return model
 }
 
-test('the exported minimap spans the exported alignment column', async () => {
-  const model = makeModel()
-  expect(model.showHorizontalScrollbar).toBe(true)
-
-  const svg = await renderToSvg(model, {
+function exportViewport(model: ReturnType<typeof makeModel>) {
+  return renderToSvg(model, {
     theme: createJBrowseTheme(),
     exportType: 'viewport',
     includeMinimap: true,
     includeTracks: false,
   })
+}
 
-  // the minimap column runs from the tree area to the right edge of the figure
-  const minimapWidth = width - model.treeAreaWidth
+test('the exported minimap spans the exported alignment column', async () => {
+  const model = makeModel()
+  expect(model.showHorizontalScrollbar).toBe(true)
+
+  const svg = await exportViewport(model)
+
+  // the minimap column is the alignment canvas, which is what the export lays
+  // out beside the tree
+  const minimapWidth = model.msaCanvasWidth
   const polygon = /<polygon[^>]*points="([^"]*)"/.exec(svg)?.[1]
   expect(polygon).toBeDefined()
   // bottom edge of the trapezoid reaches the full width it was given
@@ -52,4 +57,13 @@ test('the exported minimap spans the exported alignment column', async () => {
   )
   // and the bar outline is drawn to the same width
   expect(svg).toContain(`width="${minimapWidth}"`)
+})
+
+test('no minimap when the alignment already fits across', async () => {
+  const model = makeModel(10)
+  expect(model.showHorizontalScrollbar).toBe(false)
+
+  // a minimap here would mark a viewport wider than the bar it sits in, and the
+  // live view draws none either
+  expect(await exportViewport(model)).not.toContain('<polygon')
 })

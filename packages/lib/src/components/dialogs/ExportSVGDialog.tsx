@@ -113,8 +113,7 @@ export default function ExportSVGDialog({
             void model
               .exportSVG({
                 theme,
-                includeMinimap:
-                  exportType === 'entire' ? false : includeMinimap,
+                includeMinimap,
                 includeTracks: hasTracks && includeTracks,
                 exportType,
               })
