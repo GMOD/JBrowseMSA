@@ -41,6 +41,9 @@ export async function exportSvg({
   const gff = gffFile ? fs.readFileSync(gffFile, 'utf8') : undefined
 
   const model = MSAModelF().create({
+    // a fixed id keeps the clipPath ids stable, so exporting the same input
+    // twice gives the same bytes -- an mst-generated one differs every run
+    id: 'msaview-export',
     type: 'MsaView',
     height,
     colorSchemeName: colorScheme,
