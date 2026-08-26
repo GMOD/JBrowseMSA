@@ -11,7 +11,7 @@ const maxCachedTiles = 64
 const maxThumbnailColumns = 2000
 const maxColorCacheEntries = 4096
 
-type RasterCanvas = HTMLCanvasElement | OffscreenCanvas
+export type RasterCanvas = HTMLCanvasElement | OffscreenCanvas
 type RasterCtx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
 export interface RasterSpec {
@@ -125,23 +125,32 @@ export function rasterPixels({
   return out
 }
 
+// Getting a context object back is not the same as getting one that can do
+// this: the headless render shim hands back a context carrying only measureText,
+// which a truthiness test accepts and putImageData then does not survive. Name
+// the methods the raster actually calls, so every caller degrades together.
+function usableRasterCtx(ctx: unknown): ctx is RasterCtx {
+  const c = ctx as Record<string, unknown> | null
+  return (
+    !!c &&
+    typeof c.createImageData === 'function' &&
+    typeof c.putImageData === 'function' &&
+    typeof c.getImageData === 'function' &&
+    typeof c.clearRect === 'function' &&
+    typeof c.fillRect === 'function'
+  )
+}
+
 function makeRasterCanvas(width: number, height: number) {
-  if (typeof OffscreenCanvas !== 'undefined') {
-    const canvas = new OffscreenCanvas(width, height)
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    return ctx
-      ? { canvas: canvas as RasterCanvas, ctx: ctx as RasterCtx }
-      : undefined
-  }
-  if (typeof document === 'undefined') {
-    return undefined
-  }
-  const canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  const ctx = canvas.getContext('2d', { willReadFrequently: true })
-  return ctx
-    ? { canvas: canvas as RasterCanvas, ctx: ctx as RasterCtx }
+  const canvas =
+    typeof OffscreenCanvas !== 'undefined'
+      ? new OffscreenCanvas(width, height)
+      : typeof document !== 'undefined'
+        ? Object.assign(document.createElement('canvas'), { width, height })
+        : undefined
+  const ctx = canvas?.getContext('2d', { willReadFrequently: true })
+  return usableRasterCtx(ctx)
+    ? { canvas: canvas as RasterCanvas, ctx }
     : undefined
 }
 
@@ -306,6 +315,104 @@ export function drawMsaRaster({
   }
   ctx.resetTransform()
   ctx.imageSmoothingEnabled = true
+}
+
+/**
+ * A raster canvas as a PNG data URI, for embedding in the SVG export.
+ *
+ * toDataURL is the synchronous read-back and only the DOM canvas has it, so an
+ * OffscreenCanvas -- which is what the tile and thumbnail caches hold wherever
+ * it exists -- gets copied onto one first. Returns undefined wherever the
+ * read-back is unavailable (jsdom) rather than throwing, which is the signal to
+ * fall back to drawing the thing in vector.
+ */
+export function canvasHref(canvas: RasterCanvas | undefined) {
+  if (!canvas || typeof document === 'undefined') {
+    return undefined
+  }
+  try {
+    if (canvas instanceof HTMLCanvasElement) {
+      return canvas.toDataURL('image/png')
+    }
+    const out = document.createElement('canvas')
+    out.width = canvas.width
+    out.height = canvas.height
+    const ctx = out.getContext('2d')
+    if (typeof ctx?.drawImage !== 'function') {
+      return undefined
+    }
+    ctx.drawImage(canvas as CanvasImageSource, 0, 0)
+    return out.toDataURL('image/png')
+  } catch {
+    return undefined
+  }
+}
+
+// A canvas much past this many pixels fails to allocate, and the browser's own
+// per-side limit is lower still, so a raster bigger than either samples down.
+// The result is still drawn across the same rectangle -- it loses cell-exact
+// detail at a size where no figure could show it anyway.
+const maxImagePixels = 64e6
+const maxImageSide = 16384
+
+/**
+ * The alignment rectangle [col0, col0+numCols) x [row0, row0+numRows) as a PNG
+ * data URI, for the SVG export.
+ *
+ * SVG has no blit, so the export cannot reuse the tile cache the live canvas
+ * draws from: one <image> is the whole background instead. That is the
+ * difference between an export that scales and one that does not -- the vector
+ * path emits a <rect> per cell, and a 200x500 alignment exhausts the heap
+ * building them.
+ *
+ * Returns undefined wherever a canvas cannot be read back (jsdom, notably),
+ * which is the signal to keep the per-cell path.
+ */
+export function rasterImageHref({
+  model,
+  theme,
+  col0,
+  row0,
+  numCols,
+  numRows,
+}: {
+  model: MsaViewModel
+  theme: Theme
+  col0: number
+  row0: number
+  numCols: number
+  numRows: number
+}) {
+  if (numCols <= 0 || numRows <= 0 || typeof document === 'undefined') {
+    return undefined
+  }
+  const cache = getCache(model, theme)
+  let step = 1
+  while (
+    Math.ceil(numCols / step) * Math.ceil(numRows / step) > maxImagePixels ||
+    Math.ceil(numCols / step) > maxImageSide ||
+    Math.ceil(numRows / step) > maxImageSide
+  ) {
+    step *= 2
+  }
+  const width = Math.ceil(numCols / step)
+  const height = Math.ceil(numRows / step)
+
+  return canvasHref(
+    paint(
+      rasterPixels({
+        spec: cache.spec,
+        col0,
+        row0,
+        width,
+        height,
+        colStep: step,
+        rowStep: step,
+      }),
+      width,
+      height,
+    ),
+  )
 }
 
 /**

@@ -4,9 +4,12 @@ import React from 'react'
 import { renderToStaticMarkup } from '@jbrowse/core/util'
 import { when } from 'mobx'
 
+import { visibleRowRange } from './components/getVisibleLeaves.ts'
 import MinimapSVG from './components/minimap/MinimapSVG.tsx'
+import { rasterImageHref, rasterSupported } from './components/msa/msaRaster.ts'
 import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
+import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { colorContrast } from './util.ts'
@@ -176,7 +179,7 @@ function MsaSvg({
       {includeMinimap ? (
         <>
           <g transform={`translate(${treeAreaWidth} 0)`}>
-            <MinimapSVG model={model} />
+            <MinimapSVG model={model} theme={theme} />
           </g>
           <g transform={`translate(0 ${minimapHeight})`}>{body}</g>
         </>
@@ -278,6 +281,8 @@ function CoreRendering({
     highResScaleFactorOverride: 1,
   })
 
+  const raster = rasterBackground({ model, theme, layout })
+
   const msaCtx = new Context(msaAreaWidth, contentHeight)
   renderBoxFeatureCanvasBlock({
     model,
@@ -300,6 +305,7 @@ function CoreRendering({
     blockSizeXOverride: msaAreaWidth,
     blockSizeYOverride: contentHeight,
     highResScaleFactorOverride: 1,
+    rasterTiles: !!raster,
   })
 
   return (
@@ -316,9 +322,68 @@ function CoreRendering({
         height={contentHeight}
         transform={`translate(${treeAreaWidth} 0)`}
         ctx={msaCtx}
+        underlay={raster}
       />
     </>
   )
+}
+
+/**
+ * The alignment background as a single <image>, on the same terms the live
+ * canvas uses it: no domain overlay painting its own boxes, background coloring
+ * on, and a canvas we can actually read back.
+ *
+ * One node replaces the <rect>-per-cell the vector path emits, which is what
+ * lets an export of a real alignment finish at all. The image is one pixel per
+ * cell drawn across the cells' own rectangle, so it upscales by whole cells --
+ * image-rendering keeps those edges hard rather than smearing them, making it
+ * pixel-for-pixel what the rects drew.
+ */
+function rasterBackground({
+  model,
+  theme,
+  layout,
+}: {
+  model: MsaViewModel
+  theme: Theme
+  layout: Layout
+}) {
+  const { contentHeight, offsetX, offsetY, msaAreaWidth } = layout
+  const { colWidth, rowHeight, actuallyShowDomains, bgColor } = model
+  if (actuallyShowDomains || !bgColor || !rasterSupported()) {
+    return undefined
+  }
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: msaAreaWidth,
+    colWidth,
+  })
+  const { yStart, yEnd } = visibleRowRange({
+    model,
+    offsetY,
+    blockSizeY: contentHeight,
+  })
+  const numCols = Math.min(xEnd, model.numColumns) - xStart
+  const numRows = Math.min(yEnd, model.leaves.length) - yStart
+  const href = rasterImageHref({
+    model,
+    theme,
+    col0: xStart,
+    row0: yStart,
+    numCols,
+    numRows,
+  })
+  return href ? (
+    <image
+      href={href}
+      x={xStart * colWidth - offsetX}
+      y={yStart * rowHeight - offsetY}
+      width={numCols * colWidth}
+      height={numRows * rowHeight}
+      imageRendering="pixelated"
+      preserveAspectRatio="none"
+    />
+  ) : undefined
 }
 
 function TrackRendering({
@@ -355,19 +420,22 @@ function TrackRendering({
 }
 
 // Clips a svgcanvas Context to its box and injects its markup verbatim (it is
-// already serialized SVG, not React).
+// already serialized SVG, not React). `underlay` draws beneath that markup,
+// inside the same clip, for the parts of a layer React emits directly.
 function ClipGroup({
   clipId,
   width,
   height,
   transform,
   ctx,
+  underlay,
 }: {
   clipId: string
   width: number
   height: number
   transform?: string
   ctx: ContextType
+  underlay?: React.ReactNode
 }) {
   return (
     <>
@@ -376,11 +444,10 @@ function ClipGroup({
           <rect x={0} y={0} width={width} height={height} />
         </clipPath>
       </defs>
-      <g
-        clipPath={`url(#${clipId})`}
-        transform={transform}
-        dangerouslySetInnerHTML={{ __html: ctx.getSvg().innerHTML }}
-      />
+      <g clipPath={`url(#${clipId})`} transform={transform}>
+        {underlay}
+        <g dangerouslySetInnerHTML={{ __html: ctx.getSvg().innerHTML }} />
+      </g>
     </>
   )
 }
