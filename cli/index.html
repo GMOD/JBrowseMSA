@@ -4,18 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>CLI — JBrowseMSA</title>
-    <meta name="description" content="react-msaview-cli: batch InterProScan domain annotation for multiple sequence alignments, via the EBI API, Docker, Singularity, or a local install.">
+    <meta name="description" content="react-msaview-cli: annotate a multiple sequence alignment with InterPro domains or RefSeq exons, and render it to a publication SVG, from the command line with no browser.">
     <link rel="canonical" href="https://gmod.org/JBrowseMSA/cli/">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230d233f'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='11' font-weight='bold' text-anchor='middle' fill='white'%3EM%3C/text%3E%3C/svg%3E">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="JBrowseMSA">
     <meta property="og:title" content="CLI — JBrowseMSA">
-    <meta property="og:description" content="react-msaview-cli: batch InterProScan domain annotation for multiple sequence alignments, via the EBI API, Docker, Singularity, or a local install.">
+    <meta property="og:description" content="react-msaview-cli: annotate a multiple sequence alignment with InterPro domains or RefSeq exons, and render it to a publication SVG, from the command line with no browser.">
     <meta property="og:url" content="https://gmod.org/JBrowseMSA/cli/">
     <meta property="og:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="CLI — JBrowseMSA">
-    <meta name="twitter:description" content="react-msaview-cli: batch InterProScan domain annotation for multiple sequence alignments, via the EBI API, Docker, Singularity, or a local install.">
+    <meta name="twitter:description" content="react-msaview-cli: annotate a multiple sequence alignment with InterPro domains or RefSeq exons, and render it to a publication SVG, from the command line with no browser.">
     <meta name="twitter:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
   <link rel="stylesheet" href="/JBrowseMSA/_astro/Base.DWALGsgO.css"></head>
   <body>
@@ -78,23 +78,46 @@
       
   <article class="prose">
     <h1 id="react-msaview-cli">react-msaview-cli</h1>
-<p>Command-line tools for <a href="../">react-msaview</a> (JBrowseMSA), including batch
-InterProScan processing for multiple sequence alignments.</p>
-<p>Uses
-<a href="https://github.com/GMOD/JBrowseMSA/tree/main/packages/msa-parsers">msa-parsers</a>
-for file format support.</p>
-<h2 id="installation">Installation<a href="#installation" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># From the monorepo root</span></span>
-<span class="line"><span style="color:#B392F0">pnpm</span><span style="color:#9ECBFF"> install</span></span>
-<span class="line"><span style="color:#B392F0">pnpm</span><span style="color:#79B8FF"> --filter</span><span style="color:#9ECBFF"> react-msaview-cli</span><span style="color:#9ECBFF"> build</span></span>
+<p>Annotate a multiple sequence alignment and render it to a publication figure,
+from the command line, with no browser in the loop.</p>
+<p>Two things live here, and they compose:</p>
+<ul>
+<li><strong>Annotate</strong> — build a domain or exon GFF for an alignment, from InterPro’s
+precomputed matches (<code>interpro</code>), a live InterProScan run (<code>interproscan</code>), or
+a RefSeq transcript’s exon model (<code>genestructure</code>).</li>
+<li><strong>Render</strong> — draw the alignment, its tree, and those annotations to a
+standalone SVG (<code>export-svg</code>). This is the same renderer the web viewer uses,
+driven headlessly, so the figure matches what the app shows.</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<ul>
+<li>NodeJS v22+</li>
+</ul>
+<p>Nothing else for <code>export-svg</code> and <code>interpro</code>. <code>interproscan</code> needs a backend to
+scan with — the EBI web API (the default, no install), or Docker, Singularity,
+or a local InterProScan (see <a href="#interproscan">interproscan</a>).</p>
+<h2 id="setup">Setup<a href="#setup" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> install</span><span style="color:#79B8FF"> -g</span><span style="color:#9ECBFF"> react-msaview-cli</span></span></code></pre>
+<p>From a clone of the monorepo instead:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">pnpm</span><span style="color:#9ECBFF"> install</span></span>
+<span class="line"><span style="color:#B392F0">pnpm</span><span style="color:#79B8FF"> --filter</span><span style="color:#9ECBFF"> react-msaview-cli</span><span style="color:#9ECBFF"> build</span></span></code></pre>
+<h2 id="quickstart">Quickstart<a href="#quickstart" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>An Src-family kinase alignment with its tree and Pfam domains, rendered in two
+commands. The first asks InterPro for the domains of each row; the second draws
+the figure.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interpro</span><span style="color:#9ECBFF"> accessions.tsv</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Or install globally (after publishing)</span></span>
-<span class="line"><span style="color:#B392F0">pnpm</span><span style="color:#9ECBFF"> add</span><span style="color:#79B8FF"> -g</span><span style="color:#9ECBFF"> react-msaview-cli</span></span></code></pre>
-<h2 id="commands">Commands<a href="#commands" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<h3 id="interproscan">interproscan<a href="#interproscan" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<p>Run InterProScan on all sequences in an MSA file and output results as GFF3.</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">input-ms</span><span style="color:#E1E4E8">a</span><span style="color:#F97583">></span><span style="color:#E1E4E8"> [options]</span></span></code></pre>
-<h4 id="options">Options<a href="#options" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#9ECBFF"> kinases.aln</span><span style="color:#79B8FF"> --tree</span><span style="color:#9ECBFF"> kinases.nwk</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  --gff</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --col-width</span><span style="color:#79B8FF"> 1.6</span><span style="color:#79B8FF"> --row-height</span><span style="color:#79B8FF"> 14</span><span style="color:#79B8FF"> --tree-area-width</span><span style="color:#79B8FF"> 200</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  -o</span><span style="color:#9ECBFF"> kinases.svg</span></span></code></pre>
+<figure><img src="/JBrowseMSA/media/cli-domains.png" alt="Src-family kinases: tree, SH3/SH2/kinase domain architecture, and the color key"><figcaption>The domain architecture reads straight down the alignment — SH3, then SH2, then
+the catalytic domain — because every row is drawn in the alignment’s own column
+space. The key on the right is generated from the domains actually present.</figcaption></figure>
+<p>Every figure on this page is <code>export-svg</code> output, drawn from the Src-kinase and
+GPCR examples in
+<a href="https://github.com/GMOD/JBrowseMSA/tree/main/packages/examples/src/examples/exampleData.ts">packages/examples</a>.</p>
+<h2 id="rendering-figures">Rendering figures<a href="#rendering-figures" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">fil</span><span style="color:#E1E4E8">e</span><span style="color:#F97583">></span><span style="color:#E1E4E8"> [options]</span></span></code></pre>
 
 
 
@@ -150,37 +173,50 @@ for file format support.</p>
 
 
 
-<table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>-o, --output &#x3C;file></code></td><td>Output GFF file path</td><td><code>domains.gff</code></td></tr><tr><td><code>--local</code></td><td>Use a local InterProScan installation instead of EBI</td><td><code>false</code></td></tr><tr><td><code>--docker</code></td><td>Run InterProScan via the <code>interpro/interproscan</code> image</td><td><code>false</code></td></tr><tr><td><code>--singularity</code></td><td>Run InterProScan via a Singularity/Apptainer container</td><td><code>false</code></td></tr><tr><td><code>--singularity-image &#x3C;img></code></td><td>Singularity image to use</td><td><code>docker://interpro/interproscan:latest</code></td></tr><tr><td><code>--interproscan-path &#x3C;path></code></td><td>Path to local interproscan.sh</td><td><code>interproscan.sh</code></td></tr><tr><td><code>--programs &#x3C;list></code></td><td>Comma-separated list of InterProScan programs</td><td><code>PfamA,CDD</code></td></tr><tr><td><code>--email &#x3C;email></code></td><td>Email for EBI API (used only for EBI API runs)</td><td><code>user@example.com</code></td></tr><tr><td><code>-h, --help</code></td><td>Show help message</td><td></td></tr></tbody></table>
-<p>By default (no backend flag) the CLI submits sequences to the EBI InterProScan
-REST API one at a time. <code>--local</code>, <code>--docker</code>, and <code>--singularity</code> instead run
-InterProScan on the whole alignment locally, which is much faster for large
-datasets.</p>
-<h4 id="supported-msa-formats">Supported MSA formats<a href="#supported-msa-formats" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
-<p>The CLI automatically detects the input format:</p>
-<ul>
-<li><strong>FASTA</strong> (<code>.fasta</code>, <code>.fa</code>, <code>.faa</code>)</li>
-<li><strong>Clustal</strong> (<code>.clustal</code>, <code>.aln</code>)</li>
-<li><strong>Stockholm</strong> (<code>.sto</code>, <code>.stockholm</code>)</li>
-<li><strong>A3M</strong> (<code>.a3m</code>) - AlphaFold/ColabFold format</li>
-<li><strong>EMF</strong> (<code>.emf</code>) - Ensembl Multi Format</li>
-</ul>
-<h4 id="available-interproscan-programs">Available InterProScan programs<a href="#available-interproscan-programs" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
-<p>When using <code>--programs</code>, you can specify any combination of:</p>
-<ul>
-<li><code>PfamA</code> - Protein families (part of the <code>PfamA,CDD</code> default)</li>
-<li><code>SMART</code> - Simple Modular Architecture Research Tool</li>
-<li><code>SUPERFAMILY</code> - Structural and functional annotation</li>
-<li><code>Gene3D</code> - Structural domain assignments</li>
-<li><code>CDD</code> - Conserved Domain Database</li>
-<li><code>PANTHER</code> - Protein Analysis Through Evolutionary Relationships</li>
-<li><code>TIGRFAM</code> - TIGR protein families</li>
-<li><code>Hamap</code> - High-quality Automated Annotation of Microbial Proteomes</li>
-<li><code>ProSiteProfiles</code> - PROSITE profiles</li>
-<li><code>ProSitePatterns</code> - PROSITE patterns</li>
-<li><code>PRINTS</code> - Protein fingerprints</li>
-<li><code>PIRSF</code> - PIR SuperFamily</li>
-<li><code>MobiDBLite</code> - Disorder prediction</li>
-</ul>
+
+
+
+
+
+<table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>--msa &#x3C;file></code></td><td>MSA file (FASTA, Stockholm, Clustal, A3M)</td><td><em>required</em></td></tr><tr><td><code>--tree &#x3C;file></code></td><td>Newick tree file</td><td></td></tr><tr><td><code>--gff &#x3C;file></code></td><td>Domain or exon GFF (from the commands below)</td><td></td></tr><tr><td><code>-o, --output &#x3C;file></code></td><td>Output SVG file path</td><td><code>alignment.svg</code></td></tr><tr><td><code>--color-scheme &#x3C;name></code></td><td>Color scheme</td><td><code>maeditor</code></td></tr><tr><td><code>--col-width &#x3C;px></code></td><td>Width of one alignment column</td><td><code>12</code></td></tr><tr><td><code>--row-height &#x3C;px></code></td><td>Height of one alignment row</td><td><code>16</code></td></tr><tr><td><code>--width &#x3C;px></code></td><td>Viewport width, which sets the tree area</td><td><code>1200</code></td></tr><tr><td><code>--height &#x3C;px></code></td><td>Viewport height</td><td><code>600</code></td></tr><tr><td><code>--tree-area-width &#x3C;px></code></td><td>Tree panel width in pixels</td><td></td></tr></tbody></table>
+<h3 id="sizing-the-figure">Sizing the figure<a href="#sizing-the-figure" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p><code>export-svg</code> always draws the <strong>entire</strong> alignment, so the output is as wide as
+the alignment is long — <code>--width</code> and <code>--height</code> size the viewport the model
+lays out in, not the figure. What scales the figure is <code>--col-width</code> and
+<code>--row-height</code>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D">## a 90-column alignment at the default 12px columns: letters are legible</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#9ECBFF"> gpcrs.fa</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> gpcrs.svg</span></span></code></pre>
+<p><img src="/JBrowseMSA/media/cli-letters.png" alt="Four GPCR rows with residue letters and a Pfam domain box"></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D">## an 856-column alignment at 1.4px columns: an overview, no letters</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#9ECBFF"> kinases.aln</span><span style="color:#79B8FF"> --tree</span><span style="color:#9ECBFF"> kinases.nwk</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  --col-width</span><span style="color:#79B8FF"> 1.4</span><span style="color:#79B8FF"> --row-height</span><span style="color:#79B8FF"> 16</span><span style="color:#79B8FF"> --tree-area-width</span><span style="color:#79B8FF"> 280</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> overview.svg</span></span></code></pre>
+<figure><img src="/JBrowseMSA/media/cli-quickstart.png" alt="The same kinase family drawn as a colored overview beside its tree"><figcaption>Residue letters draw only where there is room for them — columns at least 5px
+wide and wider than half the row height, rows at least 8px tall — which is the
+same rule the app applies as you zoom out. Below that you get the colored
+overview above, and for a whole-alignment figure that is usually what you want:
+the conserved blocks and the gaps are the signal at that scale, and the letters
+would be unreadable ink.</figcaption></figure>
+<h3 id="color-schemes">Color schemes<a href="#color-schemes" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#9ECBFF"> gpcrs.fa</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  --color-scheme</span><span style="color:#9ECBFF"> clustalx_protein_dynamic</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> gpcrs.svg</span></span></code></pre>
+<figure><img src="/JBrowseMSA/media/cli-clustalx.png" alt="The same GPCR rows under the ClustalX scheme"><figcaption><code>maeditor</code> (the default), <code>clustal</code>, <code>clustalx_protein</code>, <code>lesk</code>, <code>flower</code>,
+<code>cinema</code>, and the <code>jalview_*</code> family (<code>jalview_zappo</code>, <code>jalview_taylor</code>,
+<code>jalview_hydrophobicity</code>, <code>jalview_buried</code>, <code>jalview_prophelix</code>,
+<code>jalview_propstrand</code>, <code>jalview_propturn</code>) color each residue by identity. The
+two <code>_dynamic</code> schemes — <code>clustalx_protein_dynamic</code> and
+<code>percent_identity_dynamic</code> — color by what the column actually contains, so
+conservation shows up as color rather than as something you have to read off.
+<code>nucleotide</code>, <code>clustalx_dna</code>, <code>jbrowse_dna</code> and <code>rainbow_dna</code> are for DNA;
+<code>none</code> turns background color off.</figcaption></figure>
+<h3 id="output">Output<a href="#output" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>The SVG is pure vector: every cell is its own rectangle, so it scales without
+limit but grows with the alignment. A 10-row by 856-column figure is about
+700KB. Converting to PNG or PDF for a journal:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">rsvg-convert</span><span style="color:#79B8FF"> -w</span><span style="color:#79B8FF"> 2000</span><span style="color:#9ECBFF"> alignment.svg</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> alignment.png</span></span>
+<span class="line"><span style="color:#B392F0">inkscape</span><span style="color:#9ECBFF"> alignment.svg</span><span style="color:#79B8FF"> --export-filename=alignment.pdf</span></span></code></pre>
+<p>Exports are reproducible — the same input gives the same bytes, so a figure can
+be regenerated in CI and diffed.</p>
+<h2 id="annotating">Annotating<a href="#annotating" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <h3 id="interpro">interpro<a href="#interpro" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
 <p>Build a domain GFF from InterPro’s <strong>precomputed</strong> matches for UniProtKB
 accessions, instead of submitting sequences to a live InterProScan job. Every
@@ -192,7 +228,6 @@ Prefer this over <code>interproscan</code> whenever your rows are UniProt access
 <p>The input is one accession per line, optionally followed by a tab- or
 space-separated row label; lines starting with <code>#</code> are ignored. The output GFF
 is byte-for-byte compatible with the <code>interproscan</code> command.</p>
-<h4 id="options-1">Options<a href="#options-1" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
 
 
 
@@ -234,19 +269,103 @@ and answers the rest from disk. That also makes a failed run resumable: retries
 are automatic with backoff, and if the API is still unreachable the accessions
 already fetched stay cached, so re-running picks up where it stopped instead of
 asking EBI for all of them again.</p>
+<h3 id="interproscan">interproscan<a href="#interproscan" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>Run InterProScan on all sequences in an MSA file and output results as GFF3. Use
+this when the rows are not UniProt accessions — a de novo assembly, predicted
+proteins, anything InterPro has not already scanned.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">input-ms</span><span style="color:#E1E4E8">a</span><span style="color:#F97583">></span><span style="color:#E1E4E8"> [options]</span></span></code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>-o, --output &#x3C;file></code></td><td>Output GFF file path</td><td><code>domains.gff</code></td></tr><tr><td><code>--local</code></td><td>Use a local InterProScan installation instead of EBI</td><td><code>false</code></td></tr><tr><td><code>--docker</code></td><td>Run InterProScan via the <code>interpro/interproscan</code> image</td><td><code>false</code></td></tr><tr><td><code>--singularity</code></td><td>Run InterProScan via a Singularity/Apptainer container</td><td><code>false</code></td></tr><tr><td><code>--singularity-image &#x3C;img></code></td><td>Singularity image to use</td><td><code>docker://interpro/interproscan:latest</code></td></tr><tr><td><code>--interproscan-path &#x3C;path></code></td><td>Path to local interproscan.sh</td><td><code>interproscan.sh</code></td></tr><tr><td><code>--programs &#x3C;list></code></td><td>Comma-separated list of InterProScan programs</td><td><code>PfamA,CDD</code></td></tr><tr><td><code>--email &#x3C;email></code></td><td>Email for EBI API (used only for EBI API runs)</td><td><code>user@example.com</code></td></tr></tbody></table>
+<p>By default (no backend flag) the CLI submits sequences to the EBI InterProScan
+REST API one at a time. <code>--local</code>, <code>--docker</code>, and <code>--singularity</code> instead run
+InterProScan on the whole alignment locally, which is much faster for large
+datasets.</p>
+<h4 id="choosing-a-backend">Choosing a backend<a href="#choosing-a-backend" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D">## EBI web API — no install, but one sequential submission per sequence</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --email</span><span style="color:#9ECBFF"> you@example.com</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Docker — no InterProScan install, whole alignment in one run</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --docker</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## a local install</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  --local</span><span style="color:#79B8FF"> --interproscan-path</span><span style="color:#9ECBFF"> /opt/interproscan/interproscan.sh</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">## Singularity/Apptainer, for HPC clusters without Docker</span></span>
+<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  --singularity</span><span style="color:#79B8FF"> --singularity-image</span><span style="color:#9ECBFF"> /path/to/interproscan.sif</span></span></code></pre>
+<p>Docker mounts a temp directory into the <code>interpro/interproscan</code> container, runs
+the scan on the whole alignment at once, and reads the JSON back out.</p>
+<p>The EBI API has usage limits: sequences go one at a time, sequentially, to avoid
+overwhelming the server. Past about 100 sequences, use a local or container
+backend.</p>
+<h4 id="interproscan-programs">InterProScan programs<a href="#interproscan-programs" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
+<p><code>--programs</code> takes any combination of <code>PfamA</code> (in the default), <code>CDD</code> (in the
+default), <code>SMART</code>, <code>SUPERFAMILY</code>, <code>Gene3D</code>, <code>PANTHER</code>, <code>TIGRFAM</code>, <code>Hamap</code>,
+<code>ProSiteProfiles</code>, <code>ProSitePatterns</code>, <code>PRINTS</code>, <code>PIRSF</code>, and <code>MobiDBLite</code>.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  --programs</span><span style="color:#9ECBFF"> PfamA,SMART,Gene3D</span><span style="color:#79B8FF"> --email</span><span style="color:#9ECBFF"> you@example.com</span></span></code></pre>
 <h3 id="genestructure">genestructure<a href="#genestructure" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
 <p>Build a <strong>gene-structure GFF</strong> for a coding-sequence alignment from a RefSeq
-transcript, overlaid in react-msaview the same way InterProScan domains are. The
-exon model is fetched from the NCBI Datasets v2 API; each species’ Nth exon is
-named <code>exon-N</code>, so a given exon is the same color in every row and the exon
-architecture reads straight down the alignment.</p>
+transcript, overlaid the same way InterProScan domains are. The exon model is
+fetched from the NCBI Datasets v2 API; each species’ Nth exon is named <code>exon-N</code>,
+so a given exon is the same color in every row and the exon architecture reads
+straight down the alignment.</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> genestructure</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">input-ms</span><span style="color:#E1E4E8">a</span><span style="color:#F97583">></span><span style="color:#79B8FF"> --gene</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">symbo</span><span style="color:#E1E4E8">l</span><span style="color:#F97583">></span><span style="color:#79B8FF"> --ref</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">rownam</span><span style="color:#E1E4E8">e</span><span style="color:#F97583">></span><span style="color:#E1E4E8"> [options]</span></span></code></pre>
 <p>The exon boundaries of the chosen transcript are mapped onto the reference row’s
 columns, then projected into every other row’s own ungapped coordinates — so an
 exon that picks up a frameshifting indel in one lineage gets shorter on exactly
 that row while staying column-aligned with the rest. The reference row must be
 the transcript’s coding sequence (the CLI warns if its length doesn’t match).</p>
-<h4 id="options-2">Options<a href="#options-2" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
 
 
 
@@ -288,119 +407,30 @@ the transcript’s coding sequence (the CLI warns if its length doesn’t match)
 
 
 <table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>--gene &#x3C;symbol></code></td><td>Gene symbol to look up in RefSeq (e.g. <code>F12</code>)</td><td></td></tr><tr><td><code>--taxon &#x3C;name|id></code></td><td>Taxon for <code>--gene</code></td><td><code>human</code></td></tr><tr><td><code>--gene-id &#x3C;id></code></td><td>NCBI GeneID, instead of <code>--gene</code></td><td></td></tr><tr><td><code>--transcript &#x3C;acc></code></td><td>Specific transcript accession</td><td>MANE/RefSeq Select</td></tr><tr><td><code>--ref &#x3C;rowname></code></td><td>Reference row = the transcript’s CDS</td><td>first row</td></tr><tr><td><code>-o, --output &#x3C;file></code></td><td>Output GFF file path</td><td><code>genestructure.gff</code></td></tr></tbody></table>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># F12 coding alignment -> 14-exon overlay (MANE Select transcript, human row)</span></span>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D">## F12 coding alignment -> 14-exon overlay (MANE Select transcript, human row)</span></span>
 <span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> genestructure</span><span style="color:#9ECBFF"> f12-cds.stock</span><span style="color:#79B8FF"> --gene</span><span style="color:#9ECBFF"> F12</span><span style="color:#79B8FF"> --ref</span><span style="color:#9ECBFF"> human</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> exons.gff</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#6A737D"># pin a specific transcript</span></span>
+<span class="line"><span style="color:#6A737D">## pin a specific transcript</span></span>
 <span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> genestructure</span><span style="color:#9ECBFF"> aln.fa</span><span style="color:#79B8FF"> --transcript</span><span style="color:#9ECBFF"> NM_000505.4</span><span style="color:#79B8FF"> --ref</span><span style="color:#9ECBFF"> human</span></span></code></pre>
-<h3 id="export-svg">export-svg<a href="#export-svg" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<p>Render an alignment (with an optional tree and domain overlay) straight to a
-standalone SVG — no browser required. This is what the R package shells out to
-for vector export.</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF">fil</span><span style="color:#E1E4E8">e</span><span style="color:#F97583">></span><span style="color:#E1E4E8"> [options]</span></span></code></pre>
-<h4 id="options-3">Options<a href="#options-3" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h4>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<table><thead><tr><th>Option</th><th>Description</th><th>Default</th></tr></thead><tbody><tr><td><code>--msa &#x3C;file></code></td><td>MSA file (FASTA, Stockholm, or Clustal)</td><td><em>required</em></td></tr><tr><td><code>--tree &#x3C;file></code></td><td>Newick tree file</td><td></td></tr><tr><td><code>--gff &#x3C;file></code></td><td>InterProScan domain GFF file</td><td></td></tr><tr><td><code>-o, --output &#x3C;file></code></td><td>Output SVG file path</td><td><code>alignment.svg</code></td></tr><tr><td><code>--color-scheme &#x3C;name></code></td><td>Color scheme</td><td><code>maeditor</code></td></tr><tr><td><code>--width &#x3C;px></code></td><td>Canvas width in pixels</td><td><code>1200</code></td></tr><tr><td><code>--height &#x3C;px></code></td><td>Canvas height in pixels</td><td><code>600</code></td></tr><tr><td><code>--tree-area-width &#x3C;px></code></td><td>Tree panel width in pixels</td><td></td></tr></tbody></table>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> alignment.svg</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> --tree</span><span style="color:#9ECBFF"> tree.nwk</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> alignment.svg</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> export-svg</span><span style="color:#79B8FF"> --msa</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> --gff</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --color-scheme</span><span style="color:#9ECBFF"> clustalx_protein_dynamic</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> alignment.svg</span></span></code></pre>
-<h2 id="examples">Examples<a href="#examples" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<h3 id="using-the-ebi-api-recommended-for-small-datasets">Using the EBI API (recommended for small datasets)<a href="#using-the-ebi-api-recommended-for-small-datasets" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># Basic usage - runs the default PfamA + CDD analysis</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --email</span><span style="color:#9ECBFF"> your@email.com</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Multiple programs</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --programs</span><span style="color:#9ECBFF"> PfamA,SMART,Gene3D</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --email</span><span style="color:#9ECBFF"> your@email.com</span></span></code></pre>
-<h3 id="using-local-interproscan">Using local InterProScan<a href="#using-local-interproscan" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<p>For large datasets or frequent usage, install InterProScan locally:</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># With interproscan.sh in PATH</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --local</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D"># With custom path</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --local</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --interproscan-path</span><span style="color:#9ECBFF"> /opt/interproscan/interproscan.sh</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D"># With specific programs</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --local</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --programs</span><span style="color:#9ECBFF"> PfamA,SMART</span></span></code></pre>
-<h3 id="using-docker">Using Docker<a href="#using-docker" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<p>No local InterProScan install needed — just Docker:</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --docker</span></span></code></pre>
-<p>This mounts a temp directory into the <code>interpro/interproscan</code> container, runs
-the scan on the whole alignment at once, and reads the JSON back out.</p>
-<h3 id="using-singularity-apptainer">Using Singularity / Apptainer<a href="#using-singularity-apptainer" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<p>On HPC clusters where Docker is unavailable:</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># Pull from Docker Hub (requires network)</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> --singularity</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Or use a pre-pulled .sif image</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.fasta</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --singularity</span><span style="color:#79B8FF"> \</span></span>
-<span class="line"><span style="color:#79B8FF">  --singularity-image</span><span style="color:#9ECBFF"> /path/to/interproscan.sif</span></span></code></pre>
-<h3 id="different-input-formats">Different input formats<a href="#different-input-formats" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># Clustal format</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> alignment.clustal</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D"># Stockholm format</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> PF00001.stockholm</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span></span>
-<span class="line"></span>
-<span class="line"><span style="color:#6A737D"># A3M format (from ColabFold/AlphaFold)</span></span>
-<span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interproscan</span><span style="color:#9ECBFF"> colabfold.a3m</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> domains.gff</span></span></code></pre>
-<h2 id="worked-example">Worked example<a href="#worked-example" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<h2 id="input-formats">Input formats<a href="#input-formats" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>The CLI detects the MSA format from the file:</p>
+<ul>
+<li><strong>FASTA</strong> (<code>.fasta</code>, <code>.fa</code>, <code>.faa</code>)</li>
+<li><strong>Clustal</strong> (<code>.clustal</code>, <code>.aln</code>)</li>
+<li><strong>Stockholm</strong> (<code>.sto</code>, <code>.stockholm</code>)</li>
+<li><strong>A3M</strong> (<code>.a3m</code>) — AlphaFold/ColabFold</li>
+<li><strong>EMF</strong> (<code>.emf</code>) — Ensembl Multi Format</li>
+</ul>
+<h2 id="annotation-output-format">Annotation output format<a href="#annotation-output-format" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>The annotation commands write standard GFF3, one <code>protein_match</code> line per hit.
+<code>start</code>/<code>end</code> are 1-based positions in the <strong>ungapped</strong> sequence (gaps are
+stripped before scanning), and the attributes carry the signature accession,
+name, and description:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>##gff-version 3</span></span>
+<span class="line"><span>seq1	InterProScan	protein_match	10	150	.	.	.	Name=PF00001;signature_desc=7tm_1;description=7 transmembrane receptor (rhodopsin family)</span></span>
+<span class="line"><span>seq1	InterProScan	protein_match	200	350	.	.	.	Name=PF00002;signature_desc=7tm_2;description=7 transmembrane receptor (Secretin family)</span></span>
+<span class="line"><span>seq2	InterProScan	protein_match	5	120	.	.	.	Name=PF00001;signature_desc=7tm_1;description=7 transmembrane receptor (rhodopsin family)</span></span></code></pre>
+<p>A worked run:</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="console"><code><span class="line"><span style="color:#E1E4E8">$ react-msaview-cli interproscan gpcrs.fasta -o domains.gff --docker</span></span>
 <span class="line"><span style="color:#79B8FF">Reading MSA from gpcrs.fasta...</span></span>
 <span class="line"><span style="color:#79B8FF">Found 4 sequences</span></span>
@@ -411,58 +441,33 @@ the scan on the whole alignment at once, and reads the JSON back out.</p>
 <span class="line"><span style="color:#79B8FF">Converting results to GFF...</span></span>
 <span class="line"><span style="color:#79B8FF">Writing output to domains.gff...</span></span>
 <span class="line"><span style="color:#79B8FF">Done!</span></span></code></pre>
-<h2 id="output-format">Output format<a href="#output-format" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<p>The output is standard GFF3, with one <code>protein_match</code> line per domain hit.
-<code>start</code>/<code>end</code> are 1-based positions in the <strong>ungapped</strong> sequence (gaps are
-stripped before scanning), and the attributes carry the signature accession,
-name, and description:</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>##gff-version 3</span></span>
-<span class="line"><span>seq1	InterProScan	protein_match	10	150	.	.	.	Name=PF00001;signature_desc=7tm_1;description=7 transmembrane receptor (rhodopsin family)</span></span>
-<span class="line"><span>seq1	InterProScan	protein_match	200	350	.	.	.	Name=PF00002;signature_desc=7tm_2;description=7 transmembrane receptor (Secretin family)</span></span>
-<span class="line"><span>seq2	InterProScan	protein_match	5	120	.	.	.	Name=PF00001;signature_desc=7tm_1;description=7 transmembrane receptor (rhodopsin family)</span></span></code></pre>
-<h2 id="loading-results-in-react-msaview">Loading results in react-msaview<a href="#loading-results-in-react-msaview" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<p>After generating the GFF file, you can load it in react-msaview:</p>
-<ul>
-<li>Open your MSA file in react-msaview</li>
-<li>Select the generated GFF file in the import form’s <strong>Annotation GFF file or
-URL</strong> field</li>
-<li>Domains appear as colored boxes on the alignment</li>
-</ul>
-<p>The <strong>Annotations > Open InterProScan results…</strong> menu item takes InterProScan
-JSON rather than GFF, so use the import form for the file generated above.</p>
-<p>In the React component, pass it inline as the <code>gff</code> prop (see the “Protein
-domains” example in <code>packages/examples</code>):</p>
+<h2 id="using-the-gff-elsewhere">Using the GFF elsewhere<a href="#using-the-gff-elsewhere" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>The same file the CLI writes loads into every other front end.</p>
+<p>In the web viewer, select it in the import form’s <strong>Annotation GFF file or URL</strong>
+field. (The <strong>Annotations > Open InterProScan results…</strong> menu item takes
+InterProScan JSON rather than GFF, so use the import form for the file generated
+above.)</p>
+<p>In the React component, pass it inline as the <code>gff</code> prop:</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="jsx"><code><span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#79B8FF">MSAViewer</span><span style="color:#B392F0"> msa</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{msaText} </span><span style="color:#B392F0">gff</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{domainsGff} /></span></span></code></pre>
-<p>From R, pass the file (or string) as the <code>gff</code> argument:</p>
+<p>From R:</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="r"><code><span class="line"><span style="color:#B392F0">msaview</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">msa</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "alignment.fasta"</span><span style="color:#F97583">,</span><span style="color:#FFAB70"> gff</span><span style="color:#F97583"> =</span><span style="color:#9ECBFF"> "domains.gff"</span><span style="color:#E1E4E8">)</span></span></code></pre>
-<p>The domains render as labeled boxes over the matching rows:</p>
-<p><img src="/JBrowseMSA/media/example-domains.svg" alt="InterProScan domains rendered over an alignment"></p>
 <h2 id="troubleshooting">Troubleshooting<a href="#troubleshooting" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<h3 id="ebi-api-timeout">EBI API timeout<a href="#ebi-api-timeout" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<p>If you get timeout errors with the EBI API:</p>
-<ul>
-<li>Use <code>--local</code>, <code>--docker</code>, or <code>--singularity</code> to run InterProScan yourself</li>
-<li>Check your internet connection</li>
-<li>For large datasets, a local/container backend is much faster than the API</li>
-</ul>
-<h3 id="local-interproscan-not-found">Local InterProScan not found<a href="#local-interproscan-not-found" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p><strong>EBI API timeout.</strong> Use <code>--local</code>, <code>--docker</code>, or <code>--singularity</code> to run
+InterProScan yourself. For large datasets those are much faster than the API
+regardless.</p>
+<p><strong>Local InterProScan not found.</strong></p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Error: Failed to run Local: spawn interproscan.sh ENOENT. Is interproscan.sh installed and on PATH?</span></span></code></pre>
-<p>Make sure InterProScan is installed and specify the full path:</p>
-<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">--interproscan-path</span><span style="color:#9ECBFF"> /full/path/to/interproscan-5.xx/interproscan.sh</span></span></code></pre>
-<h3 id="no-results-in-output">No results in output<a href="#no-results-in-output" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
-<ul>
-<li>Check that your sequences are protein sequences (not nucleotide)</li>
-<li>Try different programs (some may not have hits for your sequences)</li>
-<li>Verify the input file is valid MSA format</li>
-</ul>
-<h2 id="api-rate-limits">API rate limits<a href="#api-rate-limits" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<p>The EBI InterProScan API has usage limits:</p>
-<ul>
-<li>Sequences are submitted one at a time, sequentially, to avoid overwhelming the
-server</li>
-<li>For large datasets (>100 sequences), use <code>--local</code>, <code>--docker</code>, or
-<code>--singularity</code> instead</li>
-</ul>
+<p>Give the full path:
+<code>--interproscan-path /full/path/to/interproscan-5.xx/interproscan.sh</code></p>
+<p><strong>No results in the output.</strong> Check that the sequences are protein, not
+nucleotide; try other <code>--programs</code>; verify the input parses as one of the
+formats above.</p>
+<p><strong>The exported figure is enormous.</strong> <code>export-svg</code> draws the whole alignment at
+<code>--col-width</code> per column. Drop <code>--col-width</code> until it fits — below ~8px the
+residue letters stop drawing, which is most of the file size.</p>
+<h2 id="uses">Uses<a href="#uses" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p><a href="https://github.com/GMOD/JBrowseMSA/tree/main/packages/msa-parsers">msa-parsers</a>
+for file format support, and <a href="../lib">react-msaview</a> for rendering.</p>
 <h2 id="license">License<a href="#license" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <p>MIT</p>
   </article>
