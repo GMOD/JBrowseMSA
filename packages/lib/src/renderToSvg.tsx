@@ -408,14 +408,56 @@ function TrackRendering({
   })
 
   return (
-    <g transform={`translate(${treeAreaWidth} 0)`}>
-      <ClipGroup
-        clipId={`tracks-${id}`}
-        width={msaAreaWidth}
-        height={trackHeight}
-        ctx={ctx}
-      />
-    </g>
+    <>
+      <TrackLabelsSVG model={model} theme={theme} />
+      <g transform={`translate(${treeAreaWidth} 0)`}>
+        <ClipGroup
+          clipId={`tracks-${id}`}
+          width={msaAreaWidth}
+          height={trackHeight}
+          ctx={ctx}
+        />
+      </g>
+    </>
+  )
+}
+
+// Each track's name in the tree-width column beside it, where the live view puts
+// it (see TrackLabel). Without these the figure has an unlabeled bar chart and
+// an unlabeled logo, and nothing says which is which.
+function TrackLabelsSVG({
+  model,
+  theme,
+}: {
+  model: MsaViewModel
+  theme: Theme
+}) {
+  const { turnedOnTracks, treeAreaWidth, fontSize, drawLabels } = model
+  if (!drawLabels) {
+    return null
+  }
+  let y = 0
+  return (
+    <>
+      {turnedOnTracks.map(track => {
+        const { id, name, height } = track.model
+        const size = Math.min(height, fontSize)
+        const baseline = y + height / 2 + size / 3
+        y += height
+        return size < 5 ? null : (
+          <text
+            key={id}
+            x={treeAreaWidth - 4}
+            y={baseline}
+            fontSize={size}
+            textAnchor="end"
+            fill={theme.palette.text.primary}
+          >
+            {name}
+          </text>
+        )
+      })}
+    </>
   )
 }
 

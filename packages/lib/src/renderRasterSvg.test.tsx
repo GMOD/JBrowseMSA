@@ -197,3 +197,20 @@ test('the exported minimap carries the alignment thumbnail', async () => {
   expect(bar).toContain(dataUrl)
   expect(bar).toContain(`width="${model.msaCanvasWidth}"`)
 })
+
+test('each track is named in the tree column beside it', async () => {
+  const model = makeModel(4, 40)
+  model.toggleTrack('sequence-logo')
+  const names = model.turnedOnTracks.map(t => t.model.name)
+  expect(names.length).toBeGreaterThan(1)
+
+  const svg = await renderToSvg(model, {
+    theme: createJBrowseTheme(),
+    exportType: 'entire',
+    includeTracks: true,
+  })
+
+  for (const name of names) {
+    expect(svg).toContain(`>${name}</text>`)
+  }
+})
