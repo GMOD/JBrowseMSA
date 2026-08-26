@@ -23,12 +23,12 @@ import {
   proteinTree,
 } from '../../examples/src/examples/exampleData.ts'
 import MSAModelF from '../src/model.ts'
-import { installRenderTestEnv } from '../src/renderTestEnv.ts'
+import { installHeadlessRenderEnv } from '../src/headlessRenderEnv.ts'
 import { renderToSvg } from '../src/renderToSvg.tsx'
 
 function setup() {
   enableStaticRendering(true)
-  installRenderTestEnv()
+  installHeadlessRenderEnv()
 }
 
 // Inline data mirroring the R package README examples, so the R figures are

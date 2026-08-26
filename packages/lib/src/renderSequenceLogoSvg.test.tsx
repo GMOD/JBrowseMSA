@@ -10,13 +10,16 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
+import {
+  CHAR_WIDTH_RATIO,
+  installHeadlessRenderEnv,
+} from './headlessRenderEnv.ts'
 import MSAModelF from './model.ts'
-import { TEST_CHAR_WIDTH_RATIO, installRenderTestEnv } from './renderTestEnv.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 
 beforeAll(() => {
   enableStaticRendering(true)
-  installRenderTestEnv()
+  installHeadlessRenderEnv()
 })
 
 // column 0 is fully conserved A, column 1 is a 3:1 split of C over G, and
@@ -159,8 +162,7 @@ test('letters are stretched to fill their column', async () => {
   model.toggleTrack('sequence-logo')
   const glyphs = await glyphsOf(model)
 
-  const expected =
-    colWidth / (model.sequenceLogoTrackHeight * TEST_CHAR_WIDTH_RATIO)
+  const expected = colWidth / (model.sequenceLogoTrackHeight * CHAR_WIDTH_RATIO)
   for (const glyph of glyphs) {
     expect(glyph.sx).toBeCloseTo(expected, 5)
   }

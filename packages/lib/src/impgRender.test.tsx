@@ -11,13 +11,13 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
+import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
 import MSAModelF from './model.ts'
-import { installRenderTestEnv } from './renderTestEnv.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 
 beforeAll(() => {
   enableStaticRendering(true)
-  installRenderTestEnv()
+  installHeadlessRenderEnv()
 })
 
 // representative `impg query -o fasta-aln` block: PanSN names with region

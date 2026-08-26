@@ -6,6 +6,12 @@
 // members they rely on (e.g. mouseCol/setMousePos, setHighlightedColumns,
 // seqPosToVisibleCol/visibleColToSeqPos) are flagged inline in model.ts.
 export { renderToSvg } from './renderToSvg.tsx'
+// renderToSvg outside a browser needs DOM bits jsdom omits; react-msaview-cli
+// and the README figure generator both drive it that way
+export {
+  CHAR_WIDTH_RATIO,
+  installHeadlessRenderEnv,
+} from './headlessRenderEnv.ts'
 export { default as MSAView } from './components/Loading.tsx'
 export { default as MSAViewer } from './components/MSAViewer.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'

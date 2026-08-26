@@ -1,6 +1,6 @@
 /**
- * jsdom shims for the SVG-export tests. Test-only -- nothing in the viewer
- * imports this.
+ * DOM shims for driving `renderToSvg` outside a browser -- the SVG-export
+ * tests, the README figure generator, and react-msaview-cli all need them.
  *
  * jsdom implements neither DOMMatrix nor a canvas 2D context, and
  * `@jbrowse/svgcanvas` needs both: it tracks the current transform as a real
@@ -12,7 +12,7 @@
  * leaves the rest undefined -- every emitted transform then carries `NaN` in its
  * x components, which no assertion on a drawn x-position can survive.
  */
-export class TestDOMMatrix {
+export class HeadlessDOMMatrix {
   a: number
   b: number
   c: number
@@ -30,8 +30,8 @@ export class TestDOMMatrix {
     this.f = f
   }
 
-  multiply(o: TestDOMMatrix) {
-    return new TestDOMMatrix([
+  multiply(o: HeadlessDOMMatrix) {
+    return new HeadlessDOMMatrix([
       this.a * o.a + this.c * o.b,
       this.b * o.a + this.d * o.b,
       this.a * o.c + this.c * o.d,
@@ -42,22 +42,22 @@ export class TestDOMMatrix {
   }
 
   translate(x: number, y = 0) {
-    return this.multiply(new TestDOMMatrix([1, 0, 0, 1, x, y]))
+    return this.multiply(new HeadlessDOMMatrix([1, 0, 0, 1, x, y]))
   }
 
   scale(x: number, y = x) {
-    return this.multiply(new TestDOMMatrix([x, 0, 0, y, 0, 0]))
+    return this.multiply(new HeadlessDOMMatrix([x, 0, 0, y, 0, 0]))
   }
 }
 
-export class TestDOMPoint {
+export class HeadlessDOMPoint {
   constructor(
     public x = 0,
     public y = 0,
   ) {}
 
-  matrixTransform(m: TestDOMMatrix) {
-    return new TestDOMPoint(
+  matrixTransform(m: HeadlessDOMMatrix) {
+    return new HeadlessDOMPoint(
       m.a * this.x + m.c * this.y + m.e,
       m.b * this.x + m.d * this.y + m.f,
     )
@@ -65,18 +65,22 @@ export class TestDOMPoint {
 }
 
 /**
- * Install the shims. Call from `beforeAll` in any test that exports SVG.
+ * Install the shims, into `globalThis` by default. A Node caller that builds
+ * its own jsdom passes that window instead, because Node has no global
+ * HTMLCanvasElement to patch.
  *
  * `measureText` reports 0.6em per character, close enough to a real sans-serif
- * average for layout assertions and, more usefully, exactly predictable: a test
- * can compute the width a renderer will see rather than hardcoding a number
+ * average for layout and, more usefully, exactly predictable: a caller can
+ * compute the width a renderer will see rather than hardcoding a number
  * measured from one machine's fonts.
  */
-export function installRenderTestEnv() {
+export function installHeadlessRenderEnv(win: unknown = globalThis) {
   const g = globalThis as Record<string, unknown>
-  g.DOMMatrix = TestDOMMatrix
-  g.DOMPoint = TestDOMPoint
-  HTMLCanvasElement.prototype.getContext = function () {
+  g.DOMMatrix = HeadlessDOMMatrix
+  g.DOMPoint = HeadlessDOMPoint
+  const canvas = (win as { HTMLCanvasElement: typeof HTMLCanvasElement })
+    .HTMLCanvasElement
+  canvas.prototype.getContext = function () {
     let font = '10px sans-serif'
     return {
       get font() {
@@ -86,11 +90,11 @@ export function installRenderTestEnv() {
         font = v
       },
       measureText: (t: string) => ({
-        width: t.length * (Number.parseFloat(font) || 10) * 0.6,
+        width: t.length * (Number.parseFloat(font) || 10) * CHAR_WIDTH_RATIO,
       }),
     } as unknown as CanvasRenderingContext2D
   } as unknown as typeof HTMLCanvasElement.prototype.getContext
 }
 
 /** the per-character width factor `measureText` above reports */
-export const TEST_CHAR_WIDTH_RATIO = 0.6
+export const CHAR_WIDTH_RATIO = 0.6
