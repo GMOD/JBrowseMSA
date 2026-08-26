@@ -458,6 +458,11 @@ function GeneSearchPanel({
             helperText={`Type any ${species.label} gene, or pick below`}
             size="small"
             slotProps={{
+              // spread params.slotProps, not just its `input`: this prop
+              // replaces the one `{...params}` supplied, and dropping the rest
+              // takes `htmlInput` with it — the slot carrying the ref and value
+              // Autocomplete drives the field through
+              ...params.slotProps,
               input: {
                 ...params.slotProps.input,
                 endAdornment: (
