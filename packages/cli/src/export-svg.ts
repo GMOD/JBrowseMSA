@@ -13,6 +13,8 @@ export async function exportSvg({
   height,
   width,
   treeAreaWidth,
+  colWidth,
+  rowHeight,
 }: {
   msaFile: string
   treeFile?: string
@@ -22,6 +24,8 @@ export async function exportSvg({
   height: number
   width: number
   treeAreaWidth?: number
+  colWidth?: number
+  rowHeight?: number
 }) {
   const { MSAModelF, renderToSvg, installHeadlessRenderEnv } =
     await import('react-msaview')
@@ -47,6 +51,11 @@ export async function exportSvg({
     type: 'MsaView',
     height,
     colorSchemeName: colorScheme,
+    // an entire-alignment export is sized by the cells, not by --width/--height:
+    // these are what scale the figure, and shrinking them past the letter
+    // threshold is what turns a long alignment into a readable block diagram
+    ...(colWidth === undefined ? {} : { colWidth }),
+    ...(rowHeight === undefined ? {} : { rowHeight }),
     data: { msa, tree, ...(gff ? { gff } : {}) },
   })
   if (treeAreaWidth !== undefined) {

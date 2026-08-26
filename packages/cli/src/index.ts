@@ -41,6 +41,12 @@ const { values, positionals } = parseArgs({
     'tree-area-width': {
       type: 'string',
     },
+    'col-width': {
+      type: 'string',
+    },
+    'row-height': {
+      type: 'string',
+    },
     local: {
       type: 'boolean',
       default: false,
@@ -154,6 +160,8 @@ OPTIONS (export-svg):
   --width <px>                  Canvas width in pixels (default: 1200)
   --height <px>                 Canvas height in pixels (default: 600)
   --tree-area-width <px>        Tree panel width in pixels (optional)
+  --col-width <px>              Width of one alignment column (default: 12)
+  --row-height <px>             Height of one alignment row (default: 16)
 
   -h, --help                    Show this help message
 
@@ -200,6 +208,14 @@ async function main() {
       treeAreaWidth:
         values['tree-area-width'] !== undefined
           ? parseInt(values['tree-area-width'], 10)
+          : undefined,
+      colWidth:
+        values['col-width'] !== undefined
+          ? parseFloat(values['col-width'])
+          : undefined,
+      rowHeight:
+        values['row-height'] !== undefined
+          ? parseFloat(values['row-height'])
           : undefined,
     })
     console.log(`wrote ${outputFile}`)
