@@ -1,1 +1,0 @@
-import{r as e}from"./rolldown-runtime.hePW80VL.js";import{t}from"./jsx-runtime.CWLBoBiw.js";import{t as n}from"./src.CHxbL28I.js";var r=e(t(),1);function i({msa:e,treeUri:t}){return(0,r.jsx)(n,{msa:e,treeFilehandle:{uri:t,locationType:`UriLocation`},colorScheme:`percent_identity_dynamic`,height:300,treeAreaWidth:160})}export{i as default};
