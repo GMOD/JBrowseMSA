@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { calcDepthToLeaf, findMaxBranchLen } from '../../hierarchy.ts'
 import stateModelFactory from '../../model.ts'
+import { ClickMapIndex } from './clickMap.ts'
 import { getNodeX, renderTreeCanvas } from './renderTreeCanvas.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
@@ -172,5 +173,59 @@ describe('renderTreeCanvas horizontal extent', () => {
   it('hands the label gutter to the tree when labels are off', () => {
     const { model } = drawnTree('((a,b),(c,d));')
     expect(model.treeWidth).toBe(model.treeAreaWidth - 10 - model.marginLeft)
+  })
+})
+
+describe('node bubble click targets', () => {
+  const bounds = { minX: 0, minY: 0, maxX: 10000, maxY: 10000 }
+
+  // "draw clickable bubbles" only controls the painting; the branches have to
+  // stay clickable with it off
+  function renderWithBubbles(drawNodeBubbles: boolean) {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: { msa: '>a\nA\n>b\nA\n>c\nA\n>d\nA', tree: '((a,b),(c,d));' },
+    })
+    model.setWidth(1000)
+    model.setDrawLabels(false)
+    model.setDrawNodeBubbles(drawNodeBubbles)
+
+    let arcs = 0
+    const ctx = {
+      font: '12px sans-serif',
+      beginPath() {},
+      stroke() {},
+      fill() {},
+      resetTransform() {},
+      scale() {},
+      translate() {},
+      moveTo() {},
+      lineTo() {},
+      arc() {
+        arcs++
+      },
+    } as unknown as RenderCtx
+
+    const clickMap = new ClickMapIndex()
+    renderTreeCanvas({
+      model,
+      ctx,
+      clickMap,
+      offsetY: 0,
+      theme: { palette: { text: { primary: '#000' } } } as Theme,
+    })
+    return { arcs, hits: clickMap.search(bounds) }
+  }
+
+  it('indexes the internal nodes when the bubbles are drawn', () => {
+    const { arcs, hits } = renderWithBubbles(true)
+    expect(arcs).toBe(3)
+    expect(hits.filter(h => h.branch).length).toBe(3)
+  })
+
+  it('indexes them just the same when the bubbles are off', () => {
+    const { arcs, hits } = renderWithBubbles(false)
+    expect(arcs).toBe(0)
+    expect(hits.filter(h => h.branch).length).toBe(3)
   })
 })

@@ -65,7 +65,7 @@ export function treeSettingsMenuItems(model: MsaViewModel): MenuItem[] {
     toggle('Show tree', drawTree, arg => {
       model.setDrawTree(arg)
     }),
-    toggle('Draw clickable bubbles on tree branches', drawNodeBubbles, arg => {
+    toggle('Draw bubbles on tree branches', drawNodeBubbles, arg => {
       model.setDrawNodeBubbles(arg)
     }),
     toggle('Tree labels align right', labelsAlignRight, arg => {

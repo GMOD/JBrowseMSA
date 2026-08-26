@@ -171,6 +171,8 @@ function renderCollapsedTriangles({
   })
 }
 
+// the bubbles are click targets whether or not they are painted, so this pass
+// always runs and `draw` only decides whether it also strokes the circles
 function renderNodeBubbles({
   ctx,
   clickMap,
@@ -180,6 +182,7 @@ function renderNodeBubbles({
   maxDepthToLeaf,
   blockSizeYOverride,
   collapsedSet,
+  draw,
 }: {
   ctx: RenderCtx
   clickMap?: ClickMapIndex
@@ -189,6 +192,7 @@ function renderNodeBubbles({
   maxDepthToLeaf: number
   blockSizeYOverride?: number
   collapsedSet: Set<string>
+  draw: boolean
 }) {
   const {
     hierarchy,
@@ -207,12 +211,14 @@ function renderNodeBubbles({
     const { id, name } = data
     if (node.height >= 1 && inYBlock(y, offsetY, by)) {
       const isCollapsed = collapsedSet.has(id)
-      ctx.strokeStyle = 'black'
-      ctx.fillStyle = isCollapsed ? 'black' : 'white'
-      ctx.beginPath()
-      ctx.arc(x, y, radius, 0, 2 * Math.PI)
-      ctx.fill()
-      ctx.stroke()
+      if (draw) {
+        ctx.strokeStyle = 'black'
+        ctx.fillStyle = isCollapsed ? 'black' : 'white'
+        ctx.beginPath()
+        ctx.arc(x, y, radius, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.stroke()
+      }
 
       // collapsed nodes get their click/hover target from the triangle pass,
       // which covers the apex bubble and carries a descriptive label
@@ -417,18 +423,17 @@ export function renderTreeCanvas({
       collapsedSet,
     })
 
-    if (drawNodeBubbles) {
-      renderNodeBubbles({
-        ctx,
-        offsetY,
-        clickMap,
-        model,
-        tipX,
-        maxDepthToLeaf,
-        blockSizeYOverride,
-        collapsedSet,
-      })
-    }
+    renderNodeBubbles({
+      ctx,
+      offsetY,
+      clickMap,
+      model,
+      tipX,
+      maxDepthToLeaf,
+      blockSizeYOverride,
+      collapsedSet,
+      draw: drawNodeBubbles,
+    })
   }
 
   if (showTreeText) {

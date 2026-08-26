@@ -56,7 +56,7 @@ export function TreeModelF() {
 
       /**
        * #property
-       * draw clickable node bubbles on the tree
+       * draw node bubbles on the tree; the branches stay clickable either way
        */
       drawNodeBubbles: stripDefault(types.boolean, defaultDrawNodeBubbles),
 
