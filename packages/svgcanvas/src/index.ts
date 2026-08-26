@@ -369,7 +369,14 @@ export class Context {
       element.setAttribute('stroke', 'none')
     }
     for (const key of Object.keys(properties)) {
-      element.setAttribute(key, properties[key])
+      // an unset property means "no such attribute", not the string
+      // "undefined". __applyText passes text-decoration through unconditionally,
+      // so without this every glyph in an export carries
+      // text-decoration="undefined" -- invalid, and ~28 wasted bytes per letter
+      const value = properties[key]
+      if (value !== undefined && value !== null) {
+        element.setAttribute(key, value)
+      }
     }
     return element
   }
