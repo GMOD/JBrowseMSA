@@ -10,7 +10,7 @@ interface Props {
 const { title, description, wide, fullBleed } = Astro.props
 const base = import.meta.env.BASE_URL
 const home = { href: base, label: 'Home' }
-const demo = { href: `${base}/gene-explorer`, label: 'Gene explorer' }
+const demo = { href: `${base}/demo/`, label: 'Standalone app' }
 const groups = [
   {
     label: 'Docs',
@@ -26,7 +26,6 @@ const groups = [
     items: [
       { href: `${base}/gallery`, label: 'Gallery' },
       { href: `${base}/examples`, label: 'Examples' },
-      { href: `${base}/demo/`, label: 'Standalone app' },
     ],
   },
 ]

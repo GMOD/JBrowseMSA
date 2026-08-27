@@ -101,9 +101,7 @@ const figures = [
       Two kinds of example: the standalone react-msaview viewer, where the
       biology reads straight off the alignment and tree, and react-msaview
       running inside JBrowse, connected to a genome view and 3D structure. Each
-      is built reproducibly from public data by the scripts in the repo. Build
-      your own from any gene on the
-      <a href={`${base}/gene-explorer`}>gene explorer</a>.
+      is built reproducibly from public data by the scripts in the repo.
     </p>
 
     <h2 id="standalone">Standalone react-msaview</h2>
@@ -150,18 +148,6 @@ const figures = [
       alt="JBrowse: the TP53 gene with ClinVar, the p53 ortholog alignment, and the AlphaFold structure, all connected, with the nuclear export signal motif lit across genome, alignment, and 3D structure"
       body="Genome ↔ alignment ↔ 3D structure: the TP53 gene (RefSeq + ClinVar), the p53 ortholog alignment, and the AlphaFold structure as one connected session, opened with the nuclear export signal motif (residues 339–350) lit across all three — the same motif highlighted on the genome, the alignment column, and the folded structure at once."
     />
-
-    <Figure
-      src="gene-explorer-protein3d-linkage.png"
-      alt="The gene explorer's connected session for TP53: a span of residues selected on the AlphaFold structure lights the same codons on the collapsed-intron genome view and the 100-way alignment"
-      href={`${base}/gene-explorer`}
-    >
-      Built on the fly by the
-      <a href={`${base}/gene-explorer`}>gene explorer</a> for any gene (here a human
-      one): selecting a span of residues on the AlphaFold structure lights the exact
-      same codons on the collapsed-intron genome view (the yellow band) and the 100-way
-      alignment — structure ↔ genome ↔ alignment, codon-precise.
-    </Figure>
 
     <p>The same connected pattern without the structure view:</p>
     <ul>
