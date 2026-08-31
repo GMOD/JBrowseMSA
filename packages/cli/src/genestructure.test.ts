@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'vitest'
 
-import { codingExons, pickTranscript } from './genestructure.ts'
+import {
+  codingExons,
+  pickTranscript,
+  projectExonsOntoRows,
+} from './genestructure.ts'
 
 // codingExons works purely in transcript coordinates (exon lengths in transcript
 // order, intersected with the CDS range), so it is strand-agnostic and needs no
@@ -142,5 +146,57 @@ describe('pickTranscript', () => {
     expect(pickTranscript(ts, 'NM_000505').accession_version).toBe(
       'NM_000505.4',
     )
+  })
+})
+
+describe('projectExonsOntoRows', () => {
+  // two exons on the reference: columns [0,4) and [4,8)
+  const cols = [
+    { exon: 1, c1: 0, c2: 4 },
+    { exon: 2, c1: 4, c2: 8 },
+  ]
+
+  test('reads each exon in the row own ungapped coordinates', () => {
+    const rows = { ref: 'AAAACCCC', alt: 'AA--CCCC' }
+    expect(
+      projectExonsOntoRows({
+        names: ['ref', 'alt'],
+        getRow: name => rows[name as keyof typeof rows],
+        cols,
+      }),
+    ).toEqual([
+      { name: 'ref', exon: 1, start: 1, end: 4 },
+      { name: 'ref', exon: 2, start: 5, end: 8 },
+      // the deletion shortens exon 1 on this row alone; exon 2 follows it
+      { name: 'alt', exon: 1, start: 1, end: 2 },
+      { name: 'alt', exon: 2, start: 3, end: 6 },
+    ])
+  })
+
+  test('drops an exon a row has no residue across', () => {
+    const rows = { ref: 'AAAACCCC', gapped: '----CCCC' }
+    expect(
+      projectExonsOntoRows({
+        names: ['gapped'],
+        getRow: name => rows[name as keyof typeof rows],
+        cols,
+      }),
+    ).toEqual([{ name: 'gapped', exon: 2, start: 1, end: 4 }])
+  })
+
+  // a row shorter than the reference has no prefix entry past its own end;
+  // reading off the end produced NaN start/end columns in the emitted GFF
+  test('stops at the end of a row shorter than the reference', () => {
+    const rows = { ref: 'AAAACCCC', short: 'AAAAC' }
+    expect(
+      projectExonsOntoRows({
+        names: ['short'],
+        getRow: name => rows[name as keyof typeof rows],
+        cols,
+      }),
+    ).toEqual([
+      { name: 'short', exon: 1, start: 1, end: 4 },
+      { name: 'short', exon: 2, start: 5, end: 5 },
+    ])
   })
 })

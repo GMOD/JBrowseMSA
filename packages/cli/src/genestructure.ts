@@ -202,6 +202,45 @@ function prefixNonGap(row: string): number[] {
   return prefix
 }
 
+// ragged input is real -- a3m and hand-edited fasta both produce rows shorter
+// than the reference -- and such a row has no prefix entry for a column past
+// its own end. Everything out there is gap, so the count stops at the row's
+// total rather than reading off the end and writing NaN coordinates into the GFF
+function nonGapBefore(prefix: number[], col: number) {
+  return prefix[Math.min(col, prefix.length - 1)]!
+}
+
+export interface ExonColumns {
+  exon: number
+  c1: number
+  c2: number
+}
+
+/**
+ * The reference transcript's coding exons projected onto every row: each exon's
+ * reference boundary columns, re-read in that row's own ungapped (1-based,
+ * inclusive) coordinates. A row that carries no residue across an exon's columns
+ * contributes no feature for it.
+ */
+export function projectExonsOntoRows({
+  names,
+  getRow,
+  cols,
+}: {
+  names: string[]
+  getRow: (name: string) => string
+  cols: ExonColumns[]
+}) {
+  return names.flatMap(name => {
+    const prefix = prefixNonGap(getRow(name))
+    return cols.flatMap(({ exon, c1, c2 }) => {
+      const start = nonGapBefore(prefix, c1)
+      const len = nonGapBefore(prefix, c2) - start
+      return len > 0 ? [{ name, exon, start: start + 1, end: start + len }] : []
+    })
+  })
+}
+
 export async function runGeneStructure(
   options: GeneStructureOptions,
 ): Promise<void> {
@@ -273,18 +312,15 @@ export async function runGeneStructure(
       `(${exons.length} coding exons) projected from reference row "${ref}" ` +
       `— react-msaview-cli genestructure`,
   ]
-  for (const name of names) {
-    const prefix = prefixNonGap(msa.getRow(name))
-    for (const { exon, c1, c2 } of cols) {
-      const start = prefix[c1]! // 0-based ungapped start
-      const len = prefix[c2]! - start
-      if (len > 0) {
-        lines.push(
-          `${name}\t${source}\texon\t${start + 1}\t${start + len}\t.\t.\t.\t` +
-            `ID=${name}.exon${exon};Name=exon-${exon}`,
-        )
-      }
-    }
+  for (const { name, exon, start, end } of projectExonsOntoRows({
+    names,
+    getRow: name => msa.getRow(name),
+    cols,
+  })) {
+    lines.push(
+      `${name}\t${source}\texon\t${start}\t${end}\t.\t.\t.\t` +
+        `ID=${name}.exon${exon};Name=exon-${exon}`,
+    )
   }
 
   fs.writeFileSync(outputFile, `${lines.join('\n')}\n`, 'utf8')

@@ -16,7 +16,9 @@ const dna = {
   U: red[500],
 }
 
-const colorSchemes = {
+// annotated rather than asserted: the wide type is what lets a free-string
+// scheme name index this, and an annotation still checks the literal against it
+const colorSchemes: Record<string, Record<string, string>> = {
   none: {},
   nucleotide: dna,
   clustal: {
@@ -350,7 +352,7 @@ const colorSchemes = {
     '-': 'gray',
     '.': 'gray',
   },
-} as Record<string, Record<string, string>>
+}
 
 // turn all supplied colors to hex colors which getContrastText from mui
 // requires
