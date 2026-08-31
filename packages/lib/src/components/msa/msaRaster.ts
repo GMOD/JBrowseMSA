@@ -180,7 +180,7 @@ interface RasterCache {
   numColumns: number
   numRows: number
   tiles: Map<string, RasterCanvas>
-  thumbnail?: RasterCanvas
+  thumbnail?: { height: number; canvas: RasterCanvas | undefined }
 }
 
 const caches = new WeakMap<object, RasterCache>()
@@ -341,7 +341,7 @@ export function canvasHref(canvas: RasterCanvas | undefined) {
     if (typeof ctx?.drawImage !== 'function') {
       return undefined
     }
-    ctx.drawImage(canvas as CanvasImageSource, 0, 0)
+    ctx.drawImage(canvas, 0, 0)
     return out.toDataURL('image/png')
   } catch {
     return undefined
@@ -434,24 +434,29 @@ export function msaThumbnail({
   if (numColumns <= 0 || numRows <= 0) {
     return undefined
   }
-  if (!cache.thumbnail) {
+  // keyed on the requested height as well as the cache: rowStep is derived from
+  // it, so a thumbnail built for a different bar height is the wrong sampling
+  if (cache.thumbnail?.height !== height) {
     const colStep = Math.max(1, Math.ceil(numColumns / maxThumbnailColumns))
     const rowStep = Math.max(1, Math.ceil(numRows / height))
     const w = Math.ceil(numColumns / colStep)
     const h = Math.ceil(numRows / rowStep)
-    cache.thumbnail = paint(
-      rasterPixels({
-        spec: cache.spec,
-        col0: 0,
-        row0: 0,
-        width: w,
-        height: h,
-        colStep,
-        rowStep,
-      }),
-      w,
-      h,
-    )
+    cache.thumbnail = {
+      height,
+      canvas: paint(
+        rasterPixels({
+          spec: cache.spec,
+          col0: 0,
+          row0: 0,
+          width: w,
+          height: h,
+          colStep,
+          rowStep,
+        }),
+        w,
+        h,
+      ),
+    }
   }
-  return cache.thumbnail
+  return cache.thumbnail.canvas
 }

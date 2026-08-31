@@ -99,22 +99,22 @@ export async function fetchWithRetry(
 ) {
   let lastError: unknown
   for (let attempt = 0; attempt < attempts; attempt++) {
-    if (attempt > 0) {
-      await delay(baseDelayMs * 2 ** (attempt - 1))
-    }
+    // the server's own Retry-After when it names one, else our exponential
+    // guess -- one wait per failed attempt, not the server's and then ours
+    let wait = baseDelayMs * 2 ** attempt
     try {
       const response = await fetch(url)
       if (!RETRYABLE.has(response.status)) {
         return response
       }
       lastError = new Error(`${response.status} ${response.statusText}`)
-      const named = retryAfterMs(response)
-      if (named) {
-        await delay(named)
-      }
+      wait = retryAfterMs(response) ?? wait
     } catch (e) {
       // network-level failure (DNS, reset, offline); retry the same way
       lastError = e
+    }
+    if (attempt < attempts - 1) {
+      await delay(wait)
     }
   }
   throw new Error(`${url} failed after ${attempts} attempts: ${lastError}`)

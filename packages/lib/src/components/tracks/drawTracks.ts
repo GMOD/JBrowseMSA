@@ -82,17 +82,16 @@ export function drawTextTrackContent({
   for (let i = 0; str && i < str.length; i++) {
     const letter = str[i]!
     const upper = letter.toUpperCase()
-    const color = colorScheme[upper]
+    const fill = bgColor ? colorScheme[upper] : undefined
     const x = (xStart + i) * colWidth
-    const filled = bgColor && !!color
-    if (filled) {
-      ctx.fillStyle = color!
+    if (fill) {
+      ctx.fillStyle = fill
       ctx.fillRect(x, 0, colWidth, rowHeight)
     }
     if (drawLetters) {
       // a letter on a colored tile needs the tile's contrast color; otherwise it
       // sits on the plain background and takes the theme's text color
-      ctx.fillStyle = filled ? (contrastScheme[upper] ?? 'black') : textColor
+      ctx.fillStyle = fill ? (contrastScheme[upper] ?? 'black') : textColor
       ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
     }
   }

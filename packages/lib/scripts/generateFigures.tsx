@@ -22,8 +22,8 @@ import {
   proteinMSA,
   proteinTree,
 } from '../../examples/src/examples/exampleData.ts'
-import MSAModelF from '../src/model.ts'
 import { installHeadlessRenderEnv } from '../src/headlessRenderEnv.ts'
+import MSAModelF from '../src/model.ts'
 import { renderToSvg } from '../src/renderToSvg.tsx'
 
 function setup() {

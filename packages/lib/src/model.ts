@@ -1178,7 +1178,12 @@ function stateModelFactory() {
        * #getter
        */
       get dataInitialized() {
-        return (self.data.msa !== '' || self.data.tree !== '') && !self.error
+        // truthiness, not `!== ''`: these are types.maybe, and DataModel's
+        // postProcessSnapshot drops a document over 50kb, so a restored session
+        // that inlined a large alignment comes back `undefined` here -- which
+        // `!== ''` reads as initialized and renders an empty view instead of
+        // the import form
+        return !!(self.data.msa || self.data.tree) && !self.error
       },
       /**
        * #getter

@@ -265,7 +265,6 @@ function renderTreeLabels({
     blockSize,
     labelsAlignRight,
     drawTree,
-    treeAreaWidth,
     treeAreaWidthMinusMargin,
     marginLeft,
     noTree,
@@ -321,9 +320,13 @@ function renderTreeLabels({
           ctx.stroke()
         }
         ctx.fillText(displayName, offset, yp)
+        // everything here is drawn under translate(marginLeft), so the click box
+        // has to be the text's own right edge in that same space -- taking
+        // treeAreaWidth instead put the target smallPadding off the label
+        const labelRight = offset + marginLeft
         clickMap?.insert({
-          minX: treeAreaWidth - width,
-          maxX: treeAreaWidth,
+          minX: labelRight - width,
+          maxX: labelRight,
           minY: yp - emHeight,
           maxY: yp,
           name,

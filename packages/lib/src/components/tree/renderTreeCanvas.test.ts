@@ -229,3 +229,68 @@ describe('node bubble click targets', () => {
     expect(hits.filter(h => h.branch).length).toBe(3)
   })
 })
+
+describe('leaf label click targets', () => {
+  const bounds = { minX: 0, minY: 0, maxX: 10000, maxY: 10000 }
+  // the recorded fillText x is in content coordinates -- the fake ctx applies
+  // the same translate the real one does -- so it is directly comparable to the
+  // clickMap box, which is what the hit test searches
+  function renderLabels(labelsAlignRight: boolean) {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: { msa: '>a\nA\n>b\nA', tree: '(a,b);' },
+    })
+    model.setWidth(1000)
+    model.setDrawTree(false)
+    model.setLabelsAlignRight(labelsAlignRight)
+
+    let tx = 0
+    const drawn: number[] = []
+    const ctx = {
+      font: '12px sans-serif',
+      measureText: (text: string) => ({ width: text.length * 6 }),
+      beginPath() {},
+      stroke() {},
+      setLineDash() {},
+      resetTransform() {
+        tx = 0
+      },
+      scale() {},
+      translate(x: number) {
+        tx += x
+      },
+      moveTo() {},
+      lineTo() {},
+      fillText(_text: string, x: number) {
+        drawn.push(x + tx)
+      },
+    } as unknown as RenderCtx
+
+    const clickMap = new ClickMapIndex()
+    renderTreeCanvas({
+      model,
+      ctx,
+      clickMap,
+      offsetY: 0,
+      theme: { palette: { text: { primary: '#000' } } } as Theme,
+    })
+    return { drawn, hits: clickMap.search(bounds).filter(h => !h.branch) }
+  }
+
+  it('boxes a right-aligned label at the edge it is drawn against', () => {
+    const { drawn, hits } = renderLabels(true)
+    expect(hits.length).toBe(drawn.length)
+    // textAlign is 'right' here, so the drawn x is the label's right edge
+    for (const hit of hits) {
+      expect(drawn).toContain(hit.maxX)
+    }
+  })
+
+  it('boxes a left-aligned label at the edge it is drawn from', () => {
+    const { drawn, hits } = renderLabels(false)
+    expect(hits.length).toBe(drawn.length)
+    for (const hit of hits) {
+      expect(drawn).toContain(hit.minX)
+    }
+  })
+})
