@@ -618,6 +618,13 @@ function stateModelFactory() {
       /**
        * #action
        */
+      setTreeMetadataFilehandle(treeMetadataFilehandle?: FileLocationType) {
+        self.treeMetadataFilehandle = treeMetadataFilehandle
+      },
+
+      /**
+       * #action
+       */
       setGFFFilehandle(gffFilehandle?: FileLocationType) {
         self.gffFilehandle = gffFilehandle
       },
@@ -2076,8 +2083,23 @@ function stateModelFactory() {
         self.setCurrentAlignment(0)
         self.setTreeFilehandle(undefined)
         self.setMSAFilehandle(undefined)
+        self.setTreeMetadataFilehandle(undefined)
         self.setGFFFilehandle(undefined)
         self.setAnnotations([])
+        // everything below names something in the data that just went away: a
+        // tree node id, a row name, a column index. Tree node ids come from
+        // generateNodeIds and are purely structural ('node-0-0-1' is the root's
+        // first child), so carrying `collapsed`/`showOnly` into the next file
+        // opens it collapsed -- or focused on a subtree -- for no reason the
+        // reader can see
+        self.collapsed.clear()
+        self.featureFilters.clear()
+        self.setShowOnly(undefined)
+        self.drawRelativeTo(undefined)
+        self.setHighlightedColumns(undefined)
+        self.setHoveredTreeNode(undefined)
+        self.setMousePos()
+        self.setMouseClickPos()
       },
       /**
        * #action
