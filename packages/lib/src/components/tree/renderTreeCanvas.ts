@@ -5,6 +5,10 @@ import {
 } from '../../hierarchy.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
+import {
+  drawHighlightLabel,
+  highlightRowFill,
+} from '../msa/renderHighlights.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -349,6 +353,55 @@ function renderTreeLabels({
   ctx.setLineDash([])
 }
 
+// the row sets of `highlights`, tinted across the tree area under the labels
+// with the label in the gutter at the first row of each set
+function renderRowHighlights({
+  ctx,
+  model,
+  theme,
+  offsetY,
+  blockSizeYOverride,
+}: {
+  ctx: RenderCtx
+  model: MsaViewModel
+  theme: Theme
+  offsetY: number
+  blockSizeYOverride?: number
+}) {
+  const {
+    resolvedHighlights,
+    rowHeight,
+    treeAreaWidth,
+    marginLeft,
+    blockSize,
+  } = model
+  const by = blockSizeYOverride ?? blockSize
+  for (const { rowIndices, label, color } of resolvedHighlights) {
+    ctx.fillStyle = color ?? highlightRowFill
+    for (const index of rowIndices) {
+      const y = index * rowHeight
+      if (inYBlock(y + rowHeight / 2, offsetY, by)) {
+        ctx.fillRect(-marginLeft, y, treeAreaWidth, rowHeight)
+      }
+    }
+    const first = Math.min(...rowIndices)
+    if (
+      label &&
+      rowIndices.length &&
+      inYBlock(first * rowHeight, offsetY, by)
+    ) {
+      drawHighlightLabel({
+        ctx,
+        theme,
+        label,
+        x: -marginLeft + 2,
+        y: first * rowHeight,
+        spanWidth: treeAreaWidth,
+      })
+    }
+  }
+}
+
 export function renderTreeCanvas({
   model,
   clickMap,
@@ -402,6 +455,9 @@ export function renderTreeCanvas({
   // built once for all three passes: each of them asks about a different node on
   // every block of every redraw, and `collapsed` is a list
   const collapsedSet = new Set(model.collapsed)
+
+  renderRowHighlights({ ctx, model, theme, offsetY, blockSizeYOverride })
+  setFontSize(ctx, fontSize)
 
   if (!noTree && drawTree) {
     renderTree({

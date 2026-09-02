@@ -4,8 +4,10 @@ import {
   multiRowHoverColor,
   referenceColor,
 } from '../overlayColors.ts'
+import { renderHighlights } from './renderHighlights.ts'
 
 import type { MsaViewModel } from '../../model.ts'
+import type { Theme } from '@mui/material'
 
 // the persistent highlightColumns overlay: a stronger fill plus a solid border
 // so a domain/motif band reads clearly over the colored alignment cells (the
@@ -16,9 +18,11 @@ const highlightColumnsBorder = 'rgba(210,90,0,0.95)'
 export function renderMouseover({
   ctx,
   model,
+  theme,
 }: {
   ctx: CanvasRenderingContext2D
   model: MsaViewModel
+  theme: Theme
 }) {
   const {
     mouseCol,
@@ -71,6 +75,16 @@ export function renderMouseover({
     ctx.strokeStyle = highlightColumnsBorder
     ctx.strokeRect(x, 0, w, height)
   }
+
+  renderHighlights({
+    ctx,
+    model,
+    theme,
+    offsetX: -scrollX,
+    offsetY: -scrollY,
+    width,
+    height,
+  })
 
   ctx.fillStyle = hoverColor
   if (mouseCol !== undefined) {

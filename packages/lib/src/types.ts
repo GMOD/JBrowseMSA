@@ -50,6 +50,29 @@ export interface DomainBand {
   stackIndex: number
 }
 
+/**
+ * A persistent, labeled highlight. Coordinates are 1-based and inclusive, as
+ * GFF's are. `row` makes `start`/`end` residues of that row; without it they
+ * are alignment columns. `rows` marks whole rows instead.
+ */
+export interface Highlight {
+  row?: string
+  rows?: string[]
+  start?: number
+  end?: number
+  label?: string
+  color?: string
+}
+
+/** a Highlight resolved to visible column indices and row indices */
+export interface ResolvedHighlight {
+  startCol?: number
+  endCol?: number
+  rowIndices: number[]
+  label?: string
+  color?: string
+}
+
 export interface Node {
   children?: Node[]
   name?: string

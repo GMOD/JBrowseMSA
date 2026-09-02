@@ -94,8 +94,10 @@ import type {
   Annotation,
   BasicTrack,
   DomainBand,
+  Highlight,
   NodeWithIds,
   NodeWithIdsAndLength,
+  ResolvedHighlight,
 } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -349,6 +351,14 @@ function stateModelFactory() {
          * in afterCreate.
          */
         highlightColumns: types.frozen<number[] | undefined>(),
+        /**
+         * #property
+         * labeled highlights in 1-based inclusive coordinates: a column span
+         * `{start, end}`, a residue span `{row, start, end}` of a named row,
+         * or a row set `{rows}`, each with an optional `label` and `color`.
+         * Persists in the snapshot, so a computed answer travels in the URL.
+         */
+        highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
       }),
     )
     .volatile(() => ({
@@ -360,7 +370,8 @@ function stateModelFactory() {
        * #volatile
        */
       status: undefined as
-        { msg: string; url?: string; onCancel?: () => void } | undefined,
+        | { msg: string; url?: string; onCancel?: () => void }
+        | undefined,
       /**
        * #volatile
        * high resolution scale factor, helps make canvas look better on hi-dpi
@@ -423,7 +434,8 @@ function stateModelFactory() {
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        { nodeId: string; descendantNames: string[] } | undefined,
+        | { nodeId: string; descendantNames: string[] }
+        | undefined,
 
       /**
        * #volatile
@@ -556,6 +568,12 @@ function stateModelFactory() {
        */
       setHighlightedColumns(columns?: number[]) {
         self.highlightedColumns = columns
+      },
+      /**
+       * #action
+       */
+      setHighlights(highlights: Highlight[]) {
+        self.highlights.replace(highlights)
       },
       /**
        * #action
@@ -2043,6 +2061,51 @@ function stateModelFactory() {
           }
         }
         return runs
+      },
+
+      /**
+       * #getter
+       * `highlights` projected onto what is on screen: residue spans go
+       * through the named row's gap structure, column spans through the
+       * hidden-column list, and a span that lands entirely on hidden columns
+       * is dropped. Row names that match no row are ignored.
+       */
+      get resolvedHighlights(): ResolvedHighlight[] {
+        const { blanks, rowNamesSet, rowMap } = self
+        const toVisible = (globalCol: number) => {
+          const visible = self.globalColToVisibleCol(globalCol)
+          return visible ?? visibleColsBefore(blanks, globalCol)
+        }
+        return self.highlights.flatMap(
+          ({ row, rows, start, end, label, color }) => {
+            const base = { label, color }
+            if (rows) {
+              const rowIndices = rows
+                .map(name => rowNamesSet.get(name))
+                .filter(notEmpty)
+              return rowIndices.length ? [{ ...base, rowIndices }] : []
+            }
+            if (start === undefined || end === undefined) {
+              return []
+            }
+            let startGlobal = start - 1
+            let endGlobal = end - 1
+            if (row !== undefined) {
+              if (!rowMap.has(row)) {
+                return []
+              }
+              startGlobal = self.seqPosToGlobalCol(row, start - 1)
+              endGlobal = self.seqPosToGlobalCol(row, end - 1)
+            }
+            const startCol = toVisible(startGlobal)
+            const endVisible = self.globalColToVisibleCol(endGlobal)
+            const endCol =
+              endVisible ?? visibleColsBefore(blanks, endGlobal) - 1
+            return startCol <= endCol
+              ? [{ ...base, startCol, endCol, rowIndices: [] }]
+              : []
+          },
+        )
       },
 
       /**

@@ -8,6 +8,7 @@ import { visibleRowRange } from './components/getVisibleLeaves.ts'
 import MinimapSVG from './components/minimap/MinimapSVG.tsx'
 import { rasterImageHref, rasterSupported } from './components/msa/msaRaster.ts'
 import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock.ts'
+import { renderHighlights } from './components/msa/renderHighlights.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
@@ -321,6 +322,16 @@ function CoreRendering({
     blockSizeYOverride: contentHeight,
     highResScaleFactorOverride: 1,
     rasterTiles: !!raster,
+  })
+  msaCtx.resetTransform()
+  renderHighlights({
+    ctx: msaCtx,
+    model,
+    theme,
+    offsetX,
+    offsetY,
+    width: msaAreaWidth,
+    height: contentHeight,
   })
 
   return (

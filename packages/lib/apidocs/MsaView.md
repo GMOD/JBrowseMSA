@@ -178,6 +178,20 @@ IType<number[], number[], number[]>
 highlightColumns: types.frozen<number[] | undefined>()
 ```
 
+#### property: highlights
+
+labeled highlights in 1-based inclusive coordinates: a column span
+`{start, end}`, a residue span `{row, start, end}` of a named row, or a row set
+`{rows}`, each with an optional `label` and `color`. Persists in the snapshot,
+so a computed answer travels in the URL.
+
+```js
+// type signature
+IOptionalIType<IArrayType<IType<Highlight, Highlight, Highlight>>, [undefined]>
+// code
+highlights: stripDefault(types.array(types.frozen<Highlight>()), [])
+```
+
 #### property: id
 
 id of view, randomly generated if not provided
@@ -430,8 +444,7 @@ the currently hovered tree node ID and its descendant leaf names
 { nodeId: string; descendantNames: string[]; }
 // code
 hoveredTreeNode: undefined as
-        | { nodeId: string; descendantNames: string[] }
-        | undefined
+        { nodeId: string; descendantNames: string[] } | undefined
 ```
 
 #### volatile: loadingMSA
@@ -545,8 +558,7 @@ sequenceLogoTrackHeight: 80
 { msg: string; url?: string; onCancel?: () => void; }
 // code
 status: undefined as
-        | { msg: string; url?: string; onCancel?: () => void }
-        | undefined
+        { msg: string; url?: string; onCancel?: () => void } | undefined
 ```
 
 #### volatile: volatileWidth
@@ -995,6 +1007,18 @@ row index of the reference row (`relativeTo`), undefined when unset
 unknown
 ```
 
+#### getter: resolvedHighlights
+
+`highlights` projected onto what is on screen: residue spans go through the
+named row's gap structure, column spans through the hidden-column list, and a
+span that lands entirely on hidden columns is dropped. Row names that match no
+row are ignored.
+
+```js
+// type
+ResolvedHighlight[]
+```
+
 #### getter: root
 
 ```js
@@ -1346,7 +1370,7 @@ drawRelativeTo: (id: string) => void
 
 ```js
 // type signature
-exportSVG: (opts: { theme: Theme; includeMinimap?: boolean; includeTracks?: boolean; exportType: "entire" | "viewport"; }) => Promise<void>
+exportSVG: (opts: ExportSvgOptions) => Promise<void>
 ```
 
 #### action: fit
@@ -1371,6 +1395,10 @@ fitVertically: () => void
 ```
 
 #### action: reset
+
+Return to the import form: every property off `preservedOnReset` (data,
+filehandles, collapsed/showOnly, zoom, scroll, ...) goes back to its default,
+then the file-derived volatiles applySnapshot cannot reach are cleared by hand.
 
 ```js
 // type signature
@@ -1507,6 +1535,13 @@ dead code — it is public API.
 ```js
 // type signature
 setHighlightedColumns: (columns?: number[]) => void
+```
+
+#### action: setHighlights
+
+```js
+// type signature
+setHighlights: (highlights: Highlight[]) => void
 ```
 
 #### action: setHighResScaleFactor
@@ -1678,6 +1713,13 @@ setTreeFilehandle: (treeFilehandle?: FileLocationType) => void
 ```js
 // type signature
 setTreeMetadata: (result: string) => void
+```
+
+#### action: setTreeMetadataFilehandle
+
+```js
+// type signature
+setTreeMetadataFilehandle: (treeMetadataFilehandle?: FileLocationType) => void
 ```
 
 #### action: setWidth

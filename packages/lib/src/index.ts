@@ -31,9 +31,11 @@ export type {
   BasicTrack,
   BasicTrackModel,
   DomainBand,
+  Highlight,
   Node,
   NodeWithIds,
   NodeWithIdsAndLength,
+  ResolvedHighlight,
   TextTrackModel,
   TidyDomainAnnotation,
 } from './types.ts'
