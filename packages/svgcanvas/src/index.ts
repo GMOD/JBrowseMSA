@@ -1017,12 +1017,66 @@ export class Context {
     return Math.atan2(this.__transformMatrix.b, this.__transformMatrix.a)
   }
 
+  /**
+   * An <image> of the source, cropped and scaled the way the canvas call asks:
+   * a nested <svg> whose viewBox is the source rectangle maps it onto the
+   * destination rectangle exactly. Throws rather than dropping the image, so a
+   * renderer that draws one into an export finds out.
+   */
+  drawImage(image: unknown, ...args: number[]) {
+    const source = image as {
+      width: number
+      height: number
+      toDataURL?: (type?: string) => string
+    }
+    if (typeof source.toDataURL !== 'function') {
+      throw new TypeError(
+        'svgcanvas drawImage needs a source with toDataURL (a canvas); an OffscreenCanvas has to be copied onto one first',
+      )
+    }
+    const [sx, sy, sw, sh, dx, dy, dw, dh] =
+      args.length >= 8
+        ? args
+        : [
+            0,
+            0,
+            source.width,
+            source.height,
+            args[0],
+            args[1],
+            args[2] ?? source.width,
+            args[3] ?? source.height,
+          ]
+    const group = this.__createElement('g')
+    const viewport = this.__createElement('svg', {
+      x: dx,
+      y: dy,
+      width: dw,
+      height: dh,
+      viewBox: `${sx} ${sy} ${sw} ${sh}`,
+      preserveAspectRatio: 'none',
+    })
+    const img = this.__createElement('image', {
+      href: source.toDataURL('image/png'),
+      width: source.width,
+      height: source.height,
+      preserveAspectRatio: 'none',
+      'image-rendering': this.imageSmoothingEnabled ? undefined : 'pixelated',
+    })
+    viewport.appendChild(img)
+    group.appendChild(viewport)
+    this.__closestGroupOrSvg().appendChild(group)
+    this.__currentElement = group
+    this.__applyTransformation(group)
+  }
+
+  imageSmoothingEnabled = true
+
   // Stubs for unimplemented methods
   drawFocusRing() {}
   createImageData() {}
   putImageData() {}
   globalCompositeOperation() {}
-  drawImage() {}
   createPattern() {
     return null
   }
