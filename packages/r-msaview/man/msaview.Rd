@@ -10,6 +10,7 @@ msaview(
   gff = NULL,
   color_scheme = NULL,
   show_branch_len = NULL,
+  highlights = NULL,
   height = NULL,
   width = NULL,
   element_id = NULL
@@ -53,6 +54,13 @@ msaview(
 
 \item{show_branch_len}{Logical. If \code{TRUE}, draw branch lengths
 (phylogram). If \code{FALSE}, draw a cladogram.}
+
+\item{highlights}{A list of labeled highlights, each a list with 1-based
+inclusive coordinates: \code{list(start, end)} for alignment columns,
+\code{list(row, start, end)} for residues of the named row, or
+\code{list(rows = c(...))} for whole rows, plus an optional
+\code{label} and \code{color}. Drawn as a bordered band (or row tint)
+with the label beside it, and carried in the widget config.}
 
 \item{height}{Widget height (CSS units or pixels).}
 
@@ -126,6 +134,15 @@ library(Biostrings)
 seqs <- readAAStringSet("unaligned_proteins.fasta")
 aligned <- msa(seqs, method = "ClustalOmega")
 msaview(msa = as(aligned, "AAStringSet"))
+
+# --- Labeled highlights ---
+msaview(
+  msa = "alignment.fa",
+  highlights = list(
+    list(row = "human", start = 248, end = 248, label = "R248Q"),
+    list(rows = c("beluga", "dolphin"), label = "frameshift carriers")
+  )
+)
 
 # --- Color schemes ---
 msaview(msa = "alignment.fa", color_scheme = "clustalx_protein_dynamic")
