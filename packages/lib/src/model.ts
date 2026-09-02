@@ -85,7 +85,13 @@ import {
 import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import { stripDefault } from './stripDefault.ts'
-import { computeRowInsertions, len, skipBlanks, transform } from './util.ts'
+import {
+  computeRowInsertions,
+  dropBlanks,
+  len,
+  skipBlanks,
+  transform,
+} from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
@@ -93,6 +99,7 @@ import type { ExportSvgOptions } from './renderToSvg.tsx'
 import type {
   Annotation,
   BasicTrack,
+  ColumnTrackSpec,
   DomainBand,
   Highlight,
   NodeWithIds,
@@ -114,6 +121,17 @@ function parseTreeText(text: string) {
 // conservation does and costs three times the vertical space, so it waits to be
 // asked for.
 const defaultOffTracks = new Set(['sequence-logo'])
+
+// a data track over this size stays in the live model but leaves the snapshot,
+// the same rule DataModel applies to an inline document
+const maxColumnTrackSnapshotBytes = 50_000
+
+function smallColumnTracks(tracks?: ColumnTrackSpec[]) {
+  const kept = tracks?.filter(
+    t => JSON.stringify(t).length <= maxColumnTrackSnapshotBytes,
+  )
+  return kept?.length ? { columnTracks: kept } : {}
+}
 
 /**
  * The snapshot properties reset() carries across a return to the import form:
@@ -322,6 +340,16 @@ function stateModelFactory() {
          * hidden-by-default track adds nothing to the shared URL.
          */
         turnedOffTracks: stripDefault(types.map(types.boolean), {}),
+        /**
+         * #property
+         * tracks supplied as data rather than computed from the alignment:
+         * per-column values drawn as bars, or a per-column string drawn as a
+         * text track. See docs/layers.md
+         */
+        columnTracks: stripDefault(
+          types.array(types.frozen<ColumnTrackSpec>()),
+          [],
+        ),
 
         /**
          * #property
@@ -1546,6 +1574,12 @@ function stateModelFactory() {
       /**
        * #action
        */
+      setColumnTracks(tracks: ColumnTrackSpec[]) {
+        self.columnTracks.replace(tracks)
+      },
+      /**
+       * #action
+       */
       toggleTrack(id: string) {
         // the stored value is "is off", so the current shown state is exactly
         // what the flipped entry should hold
@@ -1646,6 +1680,65 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * a data track's values or string, projected from its row's residues
+       * onto alignment columns when it names a row
+       */
+      get columnTrackContent() {
+        const { MSA, blanks, hideGapsEffective } = self
+        const width = MSA?.getWidth() ?? 0
+        const project = <T>(track: ColumnTrackSpec, items: T[], fill: T) => {
+          if (!track.row) {
+            return items
+          }
+          const out = Array.from({ length: width }, () => fill)
+          const index = self.seqPosGlobalColIndex.get(track.row)
+          items.forEach((item, seqPos) => {
+            const col = index?.[seqPos]
+            if (col !== undefined) {
+              out[col] = item
+            }
+          })
+          return out
+        }
+        const skip = <T>(items: T[]) =>
+          hideGapsEffective ? dropBlanks(blanks, items) : items
+        return new Map<string, { values?: number[]; data?: string }>(
+          self.columnTracks.map(track => {
+            if (track.kind === 'bar') {
+              const max = track.max ?? 1
+              const values = skip(project(track, track.values ?? [], 0)).map(
+                v => Math.min(1, Math.max(0, v / max)),
+              )
+              return [track.id, { values }] as const
+            }
+            const data = skip(project(track, [...(track.data ?? '')], ' '))
+            return [track.id, { data: data.join('') }] as const
+          }),
+        )
+      },
+      /**
+       * #getter
+       */
+      get columnTrackModels(): BasicTrack[] {
+        return self.columnTracks.map(track => ({
+          model: {
+            id: track.id,
+            name: track.name,
+            kind: track.kind,
+            height:
+              track.height ??
+              (track.kind === 'bar'
+                ? self.conservationTrackHeight
+                : self.rowHeight),
+            barColor: track.color,
+            customColorScheme: track.colors,
+            data: this.columnTrackContent.get(track.id)?.data,
+          },
+          ReactComponent: TrackBlocks,
+        }))
+      },
+      /**
+       * #getter
        */
       get tracks(): BasicTrack[] {
         const conservationTrack = {
@@ -1670,6 +1763,7 @@ function stateModelFactory() {
         }
         return [
           ...this.adapterTrackModels,
+          ...this.columnTrackModels,
           ...[
             conservationTrack,
             ...(self.sequenceType === 'amino'
@@ -2499,11 +2593,12 @@ function stateModelFactory() {
         )
       },
     }))
-    .postProcessSnapshot(({ data, ...rest }) => ({
+    .postProcessSnapshot(({ data, columnTracks, ...rest }) => ({
       // per-property defaults are stripped by the stripDefault helper; the only thing
       // it can't express is this cross-field rule: drop inline tree/msa/metadata
       // when a sibling filehandle can refetch them, keeping sessions/URLs small
       ...rest,
+      ...smallColumnTracks(columnTracks),
       data: {
         ...(rest.treeFilehandle ? {} : { tree: data.tree }),
         ...(rest.msaFilehandle ? {} : { msa: data.msa }),

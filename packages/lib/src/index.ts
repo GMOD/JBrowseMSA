@@ -31,6 +31,7 @@ export type {
   Annotation,
   BasicTrack,
   BasicTrackModel,
+  ColumnTrackSpec,
   DomainBand,
   Highlight,
   Node,

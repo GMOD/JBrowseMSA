@@ -43,6 +43,10 @@ export function drawConservationBars({
 // the bar-track values live on model getters (kept off the plain track object so
 // the live canvas autorun stays reactive); select the right one by track id
 export function barTrackValues(model: MsaViewModel, trackId: string) {
+  const supplied = model.columnTrackContent.get(trackId)?.values
+  if (supplied) {
+    return supplied
+  }
   return trackId === 'property-conservation'
     ? model.propertyConservation
     : model.conservation

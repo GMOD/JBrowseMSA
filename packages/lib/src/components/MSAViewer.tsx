@@ -7,7 +7,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import MSAModelF from '../model.ts'
 import Loading from './Loading.tsx'
 
-import type { Highlight } from '../types.ts'
+import type { ColumnTrackSpec, Highlight } from '../types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 
 const theme = createJBrowseTheme()
@@ -35,6 +35,8 @@ interface MSAViewerProps {
   highlights?: Highlight[]
   /** row name to diff every other row against (matches render as ".") */
   relativeTo?: string
+  /** tracks supplied as data: per-column bar values or a text row (see docs/layers.md) */
+  columnTracks?: ColumnTrackSpec[]
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
   drawTree?: boolean
   /** fixed width (px) of the tree/label area */
@@ -57,6 +59,7 @@ export default function MSAViewer({
   highlightColumns,
   highlights,
   relativeTo,
+  columnTracks,
   drawTree,
   treeAreaWidth,
   autoTreeAreaWidth,
@@ -79,6 +82,7 @@ export default function MSAViewer({
       ...(highlightColumns ? { highlightColumns } : {}),
       ...(highlights ? { highlights } : {}),
       ...(relativeTo ? { relativeTo } : {}),
+      ...(columnTracks ? { columnTracks } : {}),
       ...(drawTree !== undefined ? { drawTree } : {}),
       ...(treeAreaWidth ? { treeAreaWidth } : {}),
       ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),

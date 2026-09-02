@@ -34,6 +34,22 @@ export interface BasicTrack {
   model: TextTrackModel & BarTrackModel
 }
 
+// a track supplied as data in the snapshot rather than computed from the
+// alignment. `values` (bar) or `data` (text) index alignment columns, or the
+// 1-based residues of `row` when it names one
+export interface ColumnTrackSpec {
+  id: string
+  name: string
+  kind: 'bar' | 'text'
+  values?: number[]
+  data?: string
+  max?: number
+  color?: string
+  colors?: Record<string, string>
+  row?: string
+  height?: number
+}
+
 // the overlay annotation itself lives in msa-parsers, alongside the adapters
 // that build it. TidyDomainAnnotation is its former name, kept because
 // downstream plugins name it in their emitted declarations.

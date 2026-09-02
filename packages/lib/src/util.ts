@@ -46,6 +46,14 @@ export function colorContrast(
   ])
 }
 
+export function dropBlanks<T>(blanks: number[], arr: T[]) {
+  if (blanks.length === 0) {
+    return arr
+  }
+  const set = new Set(blanks)
+  return arr.filter((_, i) => !set.has(i))
+}
+
 export function skipBlanks(blanks: number[], str: string) {
   if (blanks.length === 0) {
     return str
