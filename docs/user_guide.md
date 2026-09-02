@@ -164,6 +164,13 @@ options to copy them and to show/hide gaps.
 - **Share a session** by copying the page URL — the full view state (data,
   colors, zoom, collapsed clades) is encoded in it, so a collaborator who opens
   the link sees exactly what you see.
+- **Point at something** before you share. The snapshot carries labeled
+  highlights: a residue of a named sequence, a column range, or a set of rows,
+  each with a note that draws beside it. They are written into the view state
+  (see the
+  [layers reference](https://github.com/GMOD/JBrowseMSA/blob/main/docs/layers.md)),
+  so a link can open on "R248, conserved in 651 of 658 orthologs" rather than on
+  a bare column.
 - **Export an image** with **Export SVG** (file menu) for a crisp, scalable
   figure of the current viewport or the entire alignment, optionally including
   the minimap and annotation tracks.

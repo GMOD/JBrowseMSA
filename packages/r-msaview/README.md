@@ -158,6 +158,22 @@ msaview(msa = seqs, gff = domains, color_scheme = "clustalx_protein_dynamic")
 
 ![InterProScan domains rendered over an alignment](../../docs/media/example-domains.svg)
 
+### Labeled highlights
+
+Point at a residue, a column range, or a set of rows, with a label that travels
+with the widget. Coordinates are 1-based and inclusive; `row` makes `start` and
+`end` residues of that sequence, projected through the alignment's gaps.
+
+```r
+msaview(
+  msa = seqs,
+  highlights = list(
+    list(row = "GPCR_human", start = 20, end = 26, label = "ligand pocket"),
+    list(rows = c("GPCR_mouse"), label = "knockout", color = "rgba(0,120,255,0.2)")
+  )
+)
+```
+
 ### With ggtree
 
 Pass a ggtree plot object directly as the `tree` argument. The phylogenetic

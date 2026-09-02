@@ -16,6 +16,9 @@ import { f12CdsMSA, f12ExonsGFF } from './exampleData'
 // fully aquatic life (Huelsmann et al. 2019, Sci. Adv.), and the manatee shows
 // the loss tracks the cetacean lineage, not aquatic life in general.
 //
+// The frameshift is pointed at in human coordinates and the carriers by name,
+// so the note reads off the picture and the same list works in a shared URL.
+//
 // Built reproducibly from the UCSC cactus 241-way alignment; see
 // scripts/f12-cetacean. The tree is embedded in the Stockholm (#=GF NH).
 export default function F12() {
@@ -25,7 +28,13 @@ export default function F12() {
       gff={f12ExonsGFF}
       colorScheme="nucleotide"
       colWidth={3}
-      highlightColumns={[205]}
+      highlights={[
+        { row: 'human', start: 206, end: 206, label: 'shared 1-bp deletion' },
+        {
+          rows: ['minke_whale', 'dolphin', 'beluga', 'porpoise'],
+          label: 'cetaceans: F12 lost',
+        },
+      ]}
       height={440}
     />
   )

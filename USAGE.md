@@ -37,6 +37,30 @@ Props:
 | `gffFilehandle`  | `FileLocation` | Remote file location for domain GFF           |
 | `colorScheme`    | `string`       | Color scheme name (see below)                 |
 | `height`         | `number`       | Widget height in pixels                       |
+| `highlights`     | `Highlight[]`  | Labeled highlights (see below)                |
+
+### Highlights
+
+Point at a residue, a column range, or a set of rows, with a label. Coordinates
+are 1-based and inclusive, as in GFF. With `row`, `start` and `end` are residues
+of that sequence and the viewer projects them through the alignment's gaps;
+without it they are alignment columns. `rows` tints whole rows instead.
+
+```tsx
+<MSAViewer
+  msa={msa}
+  tree={tree}
+  highlights={[
+    { row: 'human', start: 248, end: 248, label: 'R248Q · 651/658 R' },
+    { start: 40, end: 60, label: 'NES', color: 'rgba(0,120,255,0.25)' },
+    { rows: ['beluga', 'dolphin'], label: 'frameshift carriers' },
+  ]}
+/>
+```
+
+The list lives in the model snapshot (`model.setHighlights(...)` changes it), so
+a shared URL carries it, and the SVG export draws it. The full set of data
+layers is in [docs/layers.md](docs/layers.md).
 
 ## Advanced: model-based API
 

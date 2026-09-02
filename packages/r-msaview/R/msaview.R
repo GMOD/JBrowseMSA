@@ -37,6 +37,12 @@
 #'   \code{"clustalx_protein_dynamic"}, \code{"percent_identity_dynamic"}.
 #' @param show_branch_len Logical. If \code{TRUE}, draw branch lengths
 #'   (phylogram). If \code{FALSE}, draw a cladogram.
+#' @param highlights A list of labeled highlights, each a list with 1-based
+#'   inclusive coordinates: \code{list(start, end)} for alignment columns,
+#'   \code{list(row, start, end)} for residues of the named row, or
+#'   \code{list(rows = c(...))} for whole rows, plus an optional
+#'   \code{label} and \code{color}. Drawn as a bordered band (or row tint)
+#'   with the label beside it, and carried in the widget config.
 #' @param height Widget height (CSS units or pixels).
 #' @param width Widget width (CSS units or pixels).
 #' @param element_id HTML element ID.
@@ -101,6 +107,15 @@
 #' aligned <- msa(seqs, method = "ClustalOmega")
 #' msaview(msa = as(aligned, "AAStringSet"))
 #'
+#' # --- Labeled highlights ---
+#' msaview(
+#'   msa = "alignment.fa",
+#'   highlights = list(
+#'     list(row = "human", start = 248, end = 248, label = "R248Q"),
+#'     list(rows = c("beluga", "dolphin"), label = "frameshift carriers")
+#'   )
+#' )
+#'
 #' # --- Color schemes ---
 #' msaview(msa = "alignment.fa", color_scheme = "clustalx_protein_dynamic")
 #' msaview(msa = "alignment.fa", color_scheme = "percent_identity_dynamic")
@@ -118,7 +133,7 @@
 #'
 #' @export
 msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
-                    show_branch_len = NULL,
+                    show_branch_len = NULL, highlights = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
   msa_text <- convert_msa(msa)
   tree_text <- convert_tree(tree)
@@ -133,6 +148,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   }
   config$colorSchemeName <- color_scheme
   config$showBranchLen <- show_branch_len
+  config$highlights <- convert_highlights(highlights)
 
   htmlwidgets::createWidget(
     name = "msaview",
@@ -224,6 +240,17 @@ convert_msa <- function(msa) {
   stop("Unsupported MSA input type: ", class(msa)[1],
        ". Expected a file path, character string, named character vector, ",
        "XStringSet, or MultipleAlignment.")
+}
+
+# Each highlight serializes as one JSON object. `rows` has to stay an array
+# even when it holds one name, and a scalar has to stay a scalar, which
+# htmlwidgets' auto_unbox would otherwise decide per element.
+convert_highlights <- function(highlights) {
+  if (is.null(highlights)) return(NULL)
+  lapply(highlights, function(h) {
+    if (!is.null(h$rows)) h$rows <- I(as.character(h$rows))
+    h
+  })
 }
 
 convert_tree <- function(tree) {
