@@ -10,7 +10,7 @@
 // URL, no clicks:
 //   - a LinearGenomeView with a pinned `id` (lgv-tp53-3d), RefSeq + ClinVar.
 //   - an MsaView `connectedViewId`-linked to it (the p53 ortholog alignment +
-//     tree), with `highlightColumns` lighting the DNA-binding-domain columns.
+//     tree), with a labeled `highlights` residue range lighting the motif.
 //   - a ProteinView `connectedViewId`-linked to the SAME genome view, carrying
 //     the AlphaFold structure URL, the transcript `feature` (codon mapping),
 //     the translated protein sequence, and `initialSelection` — the new
@@ -21,9 +21,9 @@
 // public sources rather than pasted in as an opaque blob:
 //   - the transcript model (connectedFeature / ProteinView feature) from the
 //     same public RefSeq GFF the gene track uses (via tabix),
-//   - the DNA-binding-domain residue range from the EBI UniProt features API
-//     (the same source protein3d's own feature track reads),
-//   - the alignment columns from the served FASTA alignment itself.
+//   - the motif residue range from the EBI UniProt features API (the same
+//     source protein3d's own feature track reads),
+//   - the protein sequence from the served FASTA alignment itself.
 //
 // Usage:  node scripts/tp53-protein3d-link/generate.mjs
 // Requires: tabix (htslib) on PATH and network access to EBI.
@@ -49,7 +49,7 @@ const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
 const CLINVAR_TRACK = 'hg38-tp53-clinvar-pathogenic'
 const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 
-// --- the alignment row (protein sequence + residue->column map) --------------
+// --- the alignment row (protein sequence) ------------------------------------
 const seqs = {}
 let name
 for (const line of readFileSync(
@@ -70,20 +70,6 @@ if (!queryRow) {
 // the degapped query row is the protein sequence protein3d aligns to the
 // AlphaFold structure (= NP_000537.3, the NM_000546.6 translation)
 const proteinSeq = queryRow.replaceAll('-', '')
-
-// 0-based aligned column of a given 1-based query residue
-function residueToColumn(residue) {
-  let residues = 0
-  for (let col = 0; col < queryRow.length; col++) {
-    if (queryRow[col] !== '-') {
-      residues++
-      if (residues === residue) {
-        return col
-      }
-    }
-  }
-  throw new Error(`residue ${residue} not found in ${QUERY_SEQ}`)
-}
 
 // --- the highlighted feature (residue range from EBI UniProt features) -------
 // A small, precise UniProt Motif rather than the whole DNA-binding domain: it
@@ -119,18 +105,6 @@ console.error(
 // ProteinView selection is a 0-based half-open *structure*-residue range; the
 // AlphaFold model is the full-length protein, so structure index = residue - 1.
 const initialSelection = { start: FEATURE_START - 1, end: FEATURE_END }
-
-// MSA highlight: the contiguous alignment-column span covering the motif, so it
-// reads as one solid band (gaps within are included for a clean band).
-const colStart = residueToColumn(FEATURE_START)
-const colEnd = residueToColumn(FEATURE_END)
-const highlightColumns = []
-for (let c = colStart; c <= colEnd; c++) {
-  highlightColumns.push(c)
-}
-console.error(
-  `motif alignment columns: ${colStart}-${colEnd} (${highlightColumns.length} cols)`,
-)
 
 // --- the transcript model (connectedFeature) from public RefSeq GFF ----------
 const lines = execFileSync('tabix', [GFF, REGION], { encoding: 'utf8' })
@@ -222,7 +196,14 @@ const spec = {
       connectedViewId: 'lgv-tp53-3d',
       connectedFeature,
       querySeqName: QUERY_SEQ,
-      highlightColumns,
+      highlights: [
+        {
+          row: QUERY_SEQ,
+          start: FEATURE_START,
+          end: FEATURE_END,
+          label: FEATURE_DESC,
+        },
+      ],
       msaFileLocation: { uri: `${DATA}/tp53-p53-orthologs.fa` },
       treeFileLocation: { uri: `${DATA}/tp53-p53.nh` },
       colorSchemeName: 'clustalx_protein_dynamic',

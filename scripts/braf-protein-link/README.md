@@ -3,9 +3,9 @@
 Builds the **BRAF** example on the _Genome browser_ docs page: the RAF-family
 kinase alignment opened _inside_ JBrowse, **connected** to the human **BRAF**
 gene on hg38 and zoomed onto the **V600** codon. Same connected pattern as
-`scripts/src-protein-link/` (SRC), but opened on a single residue, with the V600
-alignment column pre-highlighted and a matching highlight band on the V600E
-codon in the genome.
+`scripts/src-protein-link/` (SRC), but opened on a single residue, with V600
+labeled in the alignment and a matching highlight band on the V600E codon in the
+genome.
 
 V600E (`c.1799T>A`, hg38 `chr7:140,753,336`) swaps valine for glutamate in the
 kinase activation segment and is the most common oncogenic mutation in melanoma.
@@ -21,9 +21,10 @@ views:
   codon and a `highlight` band over it, and
 - an `MsaView` whose `connectedViewId` points at that id, plus a
   `connectedFeature` (the BRAF transcript model for the codon mapping),
-  `querySeqName: BRAF_HUMAN`, and `highlightColumns: [647]` — the 0-based
-  aligned column of BRAF_HUMAN residue 600, which `generate.mjs` reads out of
-  `braf.aln` itself rather than hard-coding.
+  `querySeqName: BRAF_HUMAN`, and
+  `highlights: [{ row: "BRAF_HUMAN", start: 600, end: 600, label: "V600" }]` —
+  residue 600 in the query row's own numbering; the viewer projects it through
+  the alignment's gaps, so nothing here depends on a column index.
 
 The `LinearGenomeView` also sets `colorByCDS: true` (codon-frame colouring on
 the reference sequence) and overrides the gene-track display with
@@ -34,14 +35,14 @@ pileup sits over the same codon (built by `build-clinvar.mjs`, see below).
 
 The query row `BRAF_HUMAN` (UniProt P15056, 766 aa) is byte-for-byte the protein
 of RefSeq `NM_004333.6` → `NP_004324.2`, so the query row's residue _i_ lines up
-exactly with the transcript's codon _i_, and column 647 maps to V600 = `c.1799`.
+exactly with the transcript's codon _i_, and residue 600 is V600 = `c.1799`.
 
 ## Dependencies in the rest of the stack
 
 Same as `scripts/src-protein-link/`: needs jbrowse-components `main` (forwards a
 spec `id` to `LaunchView-LinearGenomeView` so `connectedViewId` resolves) and
-`jbrowse-plugin-msaview` ≥ 2.5.1 (forwards `connectedViewId` +
-`connectedFeature` + `highlightColumns`).
+`jbrowse-plugin-msaview` built on react-msaview ≥ 6.3.0 (forwards
+`connectedViewId` + `connectedFeature`, and draws `highlights`).
 
 ## connectedFeature + codon coordinate provenance
 
@@ -77,4 +78,4 @@ node scripts/braf-protein-link/generate.mjs       # prints the declarative URL
 
 Requires `tabix`/`bgzip` (htslib) on PATH for the remote RefSeq + ClinVar
 fetches. The printed URL is the value pasted into
-`website/src/pages/gallery.astro`.
+`website/src/lib/jbrowseLinks.ts`.

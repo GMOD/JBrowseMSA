@@ -3,7 +3,8 @@
 // where a wall of ClinVar pathogenic variants piles onto a 100%-conserved
 // alignment column. The MsaView and the LinearGenomeView share coordinates
 // (click a residue -> genome navigates to its codon), the LGV carries a ClinVar
-// pathogenic-variant track, and the link opens with the R248 column highlighted.
+// pathogenic-variant track, and the link opens with R248 labeled in the
+// alignment (a `highlights` entry in the query row's own residue numbering).
 //
 // R248 is the most frequently mutated residue in TP53 across human cancers: it
 // contacts DNA in the minor groove, is invariant across vertebrates, and the
@@ -18,12 +19,6 @@
 // The data files are built by scripts/tp53-protein-link/build-data.mjs.
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const here = dirname(fileURLToPath(import.meta.url))
-const dataLocal = join(here, '..', '..', 'packages', 'app', 'public', 'data')
 
 // Public RefSeq GFF (CSI-indexed) — the same source as the hg38-ncbiRefSeq track
 const GFF = 'https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz'
@@ -36,37 +31,6 @@ const DATA = 'https://gmod.org/JBrowseMSA/demo/data'
 const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
 const CLINVAR_TRACK = 'hg38-tp53-clinvar-pathogenic'
 const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
-
-// 0-based aligned column of the query row's HIGHLIGHT_RESIDUE, read from the same
-// FASTA alignment we serve, so the link can never drift from the data.
-const seqs = {}
-let name
-for (const line of readFileSync(
-  join(dataLocal, 'tp53-p53-orthologs.fa'),
-  'utf8',
-).split('\n')) {
-  if (line.startsWith('>')) {
-    name = line.slice(1).trim()
-    seqs[name] = ''
-  } else if (name) {
-    seqs[name] += line.trim()
-  }
-}
-const queryRow = seqs[QUERY_SEQ]
-let residues = 0
-let HIGHLIGHT_COLUMN
-for (let col = 0; col < queryRow.length; col++) {
-  if (queryRow[col] !== '-') {
-    residues++
-    if (residues === HIGHLIGHT_RESIDUE) {
-      HIGHLIGHT_COLUMN = col
-      break
-    }
-  }
-}
-if (HIGHLIGHT_COLUMN === undefined) {
-  throw new Error(`residue ${HIGHLIGHT_RESIDUE} not found in ${QUERY_SEQ}`)
-}
 
 const lines = execFileSync('tabix', [GFF, REGION], { encoding: 'utf8' })
   .trim()
@@ -92,8 +56,7 @@ if (cds.length === 0) {
 
 const codingBp = cds.reduce((s, c) => s + (c.end - c.start), 0)
 console.error(
-  `${TRANSCRIPT}: ${cds.length} CDS, ${codingBp} bp = ${codingBp / 3} codons; ` +
-    `${QUERY_SEQ} residue ${HIGHLIGHT_RESIDUE} -> column ${HIGHLIGHT_COLUMN}`,
+  `${TRANSCRIPT}: ${cds.length} CDS, ${codingBp} bp = ${codingBp / 3} codons`,
 )
 
 const connectedFeature = {
@@ -161,7 +124,14 @@ const spec = {
       connectedViewId: 'lgv-tp53',
       connectedFeature,
       querySeqName: QUERY_SEQ,
-      highlightColumns: [HIGHLIGHT_COLUMN],
+      highlights: [
+        {
+          row: QUERY_SEQ,
+          start: HIGHLIGHT_RESIDUE,
+          end: HIGHLIGHT_RESIDUE,
+          label: 'R248',
+        },
+      ],
       msaFileLocation: { uri: `${DATA}/tp53-p53-orthologs.fa` },
       treeFileLocation: { uri: `${DATA}/tp53-p53.nh` },
       colorSchemeName: 'clustalx_protein_dynamic',

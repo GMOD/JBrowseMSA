@@ -24,8 +24,8 @@ three views, connected through one pinned genome-view id (`lgv-tp53-3d`):
   framed on the motif's genomic span;
 - an `MsaView` whose `connectedViewId` points at that id, plus a
   `connectedFeature` (the TP53 transcript model), `querySeqName: human`, and
-  `highlightColumns` — the contiguous alignment columns covering the motif, lit
-  as a bordered band;
+  `highlights` — the motif's residue range in the `human` row, lit as a labeled
+  band;
 - a `ProteinView` whose `connectedViewId` points at the **same** genome view
   (full-form launch: `url` + `feature` + `userProvidedTranscriptSequence`
   supplied, so it does not create its own LGV), carrying the AlphaFold structure
@@ -50,8 +50,8 @@ Every coordinate is derived from a public source, not pasted as a blob:
   feature a different annotated element, e.g. the `DNA_BIND` domain.)
 - **protein sequence** (`userProvidedTranscriptSequence`): the degapped `human`
   row of the served alignment (= `NP_000537.3`).
-- **alignment columns**: read from the served FASTA so the link can't drift from
-  the data.
+- **alignment highlight**: the same residue range, in the `human` row's own
+  numbering; the viewer projects it through the alignment's gaps.
 
 ## Coordinate conventions
 
@@ -59,8 +59,8 @@ Every coordinate is derived from a public source, not pasted as a blob:
   AlphaFold model is the full-length protein, so structure index = residue − 1;
   motif residues 339–350 → `{ start: 338, end: 350 }` (matches what clicking the
   feature, `feature.start − 1 … feature.end`, produces).
-- `highlightColumns` are **0-based alignment columns**, the contiguous span from
-  the motif's first to last residue column.
+- `highlights` ranges are **1-based inclusive residues** of the named row, the
+  same numbering the EBI features API uses.
 
 ## Dependencies in the rest of the stack
 
@@ -69,10 +69,9 @@ Every coordinate is derived from a public source, not pasted as a blob:
 - **jbrowse-plugin-protein3d** with the `initialSelection` prop (added for this
   example). Until published, the screenshot serves a local build
   (`scripts/screenshots/jbrowse-figures.mjs --protein3d-dist=…`).
-- **jbrowse-plugin-msaview** ≥ 2.5.1 (`connectedViewId` + `connectedFeature` +
-  `highlightColumns`). The bordered, clearly-visible `highlightColumns` band is
-  a `react-msaview` rendering change; until a release is published _and_ the
-  msaview plugin rebuilt against it, the screenshot serves a local plugin build
+- **jbrowse-plugin-msaview** built on react-msaview ≥ 6.3.0 (`connectedViewId` +
+  `connectedFeature`, and the labeled `highlights` band). Until the msaview
+  plugin is rebuilt against it, the screenshot serves a local plugin build
   (`--plugin-dist=…`, built against the local `react-msaview`).
 
 ## Usage
@@ -82,4 +81,4 @@ node scripts/tp53-protein3d-link/generate.mjs   # prints the declarative URL
 ```
 
 Requires `tabix` (htslib) on PATH and network access to EBI. The printed URL is
-the value pasted into `website/src/pages/gallery.astro`.
+the value pasted into `website/src/lib/jbrowseLinks.ts`.

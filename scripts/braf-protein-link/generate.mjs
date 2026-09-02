@@ -2,8 +2,9 @@
 // RAF-family kinase alignment connected to the human BRAF gene on hg38, opened
 // on the V600 site. The MsaView and the LinearGenomeView share coordinates —
 // clicking a residue navigates the genome via the codon map, and hovering the
-// genome highlights the MSA column — and the link opens with the V600 column
-// pre-highlighted (highlightColumns) over the V600E codon in the genome.
+// genome highlights the MSA column — and the link opens with V600 labeled in
+// the alignment (a `highlights` entry in the query row's own residue numbering)
+// over the V600E codon in the genome.
 //
 // BRAF V600E (c.1799T>A) is the most common oncogenic mutation in melanoma and a
 // frequent driver across other cancers; V600 sits in the kinase activation
@@ -18,11 +19,6 @@
 // Requires: tabix (htslib) on PATH for the remote RefSeq fetch.
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-const here = dirname(fileURLToPath(import.meta.url))
 
 // Public RefSeq GFF (CSI-indexed) — the same source as the hg38-ncbiRefSeq track
 const GFF = 'https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz'
@@ -32,32 +28,6 @@ const REGION = 'chr7:140700000-140930000'
 const QUERY_SEQ = 'BRAF_HUMAN' // the matching row in braf.aln (UniProt P15056, 766 aa)
 const HIGHLIGHT_RESIDUE = 600 // V600 (the V600E activation-segment site)
 const DATA = 'https://gmod.org/JBrowseMSA/demo/data'
-
-// 0-based aligned column of the query row's HIGHLIGHT_RESIDUE, read from the same
-// CLUSTAL alignment we serve so the link can never drift from the data.
-const aln = readFileSync(
-  join(here, '..', '..', 'packages', 'app', 'public', 'data', 'braf.aln'),
-  'utf8',
-)
-const queryRow = aln
-  .split('\n')
-  .filter(l => l.startsWith(QUERY_SEQ + ' '))
-  .map(l => l.trim().split(/\s+/)[1])
-  .join('')
-let residues = 0
-let HIGHLIGHT_COLUMN
-for (let col = 0; col < queryRow.length; col++) {
-  if (queryRow[col] !== '-') {
-    residues++
-    if (residues === HIGHLIGHT_RESIDUE) {
-      HIGHLIGHT_COLUMN = col
-      break
-    }
-  }
-}
-if (HIGHLIGHT_COLUMN === undefined) {
-  throw new Error(`residue ${HIGHLIGHT_RESIDUE} not found in ${QUERY_SEQ}`)
-}
 const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
 const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
 
@@ -160,7 +130,14 @@ const spec = {
       connectedViewId: 'lgv-braf',
       connectedFeature,
       querySeqName: QUERY_SEQ,
-      highlightColumns: [HIGHLIGHT_COLUMN],
+      highlights: [
+        {
+          row: QUERY_SEQ,
+          start: HIGHLIGHT_RESIDUE,
+          end: HIGHLIGHT_RESIDUE,
+          label: 'V600',
+        },
+      ],
       msaFileLocation: { uri: `${DATA}/braf.aln` },
       treeFileLocation: { uri: `${DATA}/braf.nh` },
       colorSchemeName: 'clustalx_protein_dynamic',

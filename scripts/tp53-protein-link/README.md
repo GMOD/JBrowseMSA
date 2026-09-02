@@ -24,10 +24,9 @@ collects a dense stack of distinct pathogenic substitutions.
     / Likely_pathogenic. Requires `tabix` + `bgzip`. **ClinVar is a live,
     weekly-updated source**, so the variant count drifts slightly between runs
     (it is not byte-reproducible the way the alignment is).
-- **`generate.mjs`** — prints the declarative JBrowse link. Reads the served
-  alignment to locate R248's column (no hand-maintained index) and derives the
-  `connectedFeature` (BRAF/SRC-style) from the public RefSeq GFF. Requires
-  `tabix`.
+- **`generate.mjs`** — prints the declarative JBrowse link. Names R248 in the
+  query row's own residue numbering and derives the `connectedFeature`
+  (BRAF/SRC-style) from the public RefSeq GFF. Requires `tabix`.
 
 ## How the link works
 
@@ -38,7 +37,8 @@ A single session spec (`?config=…&session=spec-…`) with two views:
   `tracks: [hg38-ncbiRefSeq, hg38-tp53-clinvar-pathogenic]`, and
 - an `MsaView` whose `connectedViewId` points at it, plus `connectedFeature`
   (the TP53 transcript model), `querySeqName: human`, and
-  `highlightColumns: [258]` (R248's aligned column).
+  `highlights: [{ row: "human", start: 248, end: 248, label: "R248" }]`; the
+  viewer projects the residue through the alignment's gaps.
 
 The ClinVar track is defined in `jbrowse-msa-combined-config.json` (the shared
 config), pointing at the hosted VCF; the VCF keeps refName `17`, resolved to
@@ -47,8 +47,9 @@ config), pointing at the hosted VCF; the VCF keeps refName `17`, resolved to
 ## Dependencies in the rest of the stack
 
 Same as the SRC/BRAF examples: the jbrowse-components `main` (forwards a spec
-`id` to `LaunchView-LinearGenomeView`) and `jbrowse-plugin-msaview` ≥ 2.5.1
-(which forwards `connectedViewId`, `connectedFeature` and `highlightColumns`).
+`id` to `LaunchView-LinearGenomeView`) and `jbrowse-plugin-msaview` built on
+react-msaview ≥ 6.3.0 (which forwards `connectedViewId` and `connectedFeature`,
+and draws `highlights`).
 
 ## Usage
 
