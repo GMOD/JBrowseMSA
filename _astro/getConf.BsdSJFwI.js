@@ -1,0 +1,1 @@
+import{n as e}from"./useFetch.DvDioLli.js";function t(t,n,r={}){return e(t.configuration,n,r)}export{t};

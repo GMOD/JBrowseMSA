@@ -1,1 +1,0 @@
-import{ct as e,st as t}from"./Tooltip.BgFwEKP3.js";var n=e();function r(e){let{theme:n,name:r,props:i}=e;return!n||!n.components||!n.components[r]||!n.components[r].defaultProps?i:t(n.components[r].defaultProps,i)}export{n,r as t};

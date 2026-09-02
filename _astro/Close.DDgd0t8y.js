@@ -1,0 +1,1 @@
+import{r as e}from"./rolldown-runtime.hePW80VL.js";import{n as t}from"./ButtonBase.Dx0S7-Zx.js";import{t as n}from"./jsx-runtime.CWLBoBiw.js";var r=e(n(),1),i=t((0,r.jsx)(`path`,{d:`M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z`}),`Close`);export{i as t};

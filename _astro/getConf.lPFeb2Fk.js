@@ -1,1 +1,0 @@
-import{n as e}from"./useFetch.DUCog5rK.js";function t(t,n,r={}){return e(t.configuration,n,r)}export{t};
