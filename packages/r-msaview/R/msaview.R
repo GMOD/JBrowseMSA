@@ -35,6 +35,15 @@
 #'   \code{"jalview_propturn"}, \code{"nucleotide"}, \code{"jbrowse_dna"},
 #'   \code{"rainbow_dna"}, \code{"clustalx_dna"},
 #'   \code{"clustalx_protein_dynamic"}, \code{"percent_identity_dynamic"}.
+#' @param column_tracks Tracks supplied as data, drawn above the alignment
+#'   beside the computed conservation tracks. A list of tracks, each a list
+#'   with \code{id}, \code{name}, \code{kind} (\code{"bar"} or
+#'   \code{"text"}), and either \code{values} (a numeric vector, one per
+#'   column, drawn as bars scaled by \code{max}, default 1) or \code{data} (a
+#'   string, one character per column, colored by \code{colors}). Give
+#'   \code{row} to index the residues of that row instead of alignment
+#'   columns. \code{color} sets a bar track's color and \code{height} its
+#'   pixel height.
 #' @param show_branch_len Logical. If \code{TRUE}, draw branch lengths
 #'   (phylogram). If \code{FALSE}, draw a cladogram.
 #' @param highlights A list of labeled highlights, each a list with 1-based
@@ -107,6 +116,15 @@
 #' aligned <- msa(seqs, method = "ClustalOmega")
 #' msaview(msa = as(aligned, "AAStringSet"))
 #'
+#' # --- A track from your own numbers ---
+#' msaview(
+#'   msa = seqs,
+#'   column_tracks = list(
+#'     list(id = "dnds", name = "dN/dS", kind = "bar",
+#'          values = dnds, max = 2, row = names(seqs)[1])
+#'   )
+#' )
+#'
 #' # --- Labeled highlights ---
 #' msaview(
 #'   msa = "alignment.fa",
@@ -133,7 +151,8 @@
 #'
 #' @export
 msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
-                    show_branch_len = NULL, highlights = NULL,
+                    column_tracks = NULL, show_branch_len = NULL,
+                    highlights = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
   msa_text <- convert_msa(msa)
   tree_text <- convert_tree(tree)
@@ -147,6 +166,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
     config$data$gff <- gff_text
   }
   config$colorSchemeName <- color_scheme
+  config$columnTracks <- convert_column_tracks(column_tracks)
   config$showBranchLen <- show_branch_len
   config$highlights <- convert_highlights(highlights)
 
@@ -289,6 +309,25 @@ to_fasta <- function(seqs) {
 phylo_to_newick <- function(phy) {
   need_pkg("ape", "convert tree objects")
   ape::write.tree(phy)
+}
+
+convert_column_tracks <- function(tracks) {
+  if (is.null(tracks)) return(NULL)
+  if (!is.list(tracks)) {
+    stop("column_tracks must be a list of tracks, each a list with id, name and kind")
+  }
+  lapply(tracks, function(track) {
+    for (field in c("id", "name", "kind")) {
+      if (is.null(track[[field]])) stop("column track is missing '", field, "'")
+    }
+    if (!track$kind %in% c("bar", "text")) {
+      stop("column track kind must be 'bar' or 'text', got '", track$kind, "'")
+    }
+    # a one-column vector would unbox to a scalar; I() keeps it an array
+    if (!is.null(track$values)) track$values <- I(as.numeric(track$values))
+    if (!is.null(track$colors)) track$colors <- as.list(track$colors)
+    track
+  })
 }
 
 convert_gff <- function(gff) {

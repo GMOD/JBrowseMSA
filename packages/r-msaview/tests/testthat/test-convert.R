@@ -163,3 +163,31 @@ test_that("df_to_gff3 writes large coordinates in full", {
   line <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]][2]
   expect_equal(strsplit(line, "\t")[[1]][4:5], c("100000", "1234567"))
 })
+
+test_that("convert_column_tracks handles NULL", {
+  expect_null(msaviewr:::convert_column_tracks(NULL))
+})
+
+test_that("convert_column_tracks keeps a one-column values vector an array", {
+  tracks <- msaviewr:::convert_column_tracks(list(
+    list(id = "t", name = "T", kind = "bar", values = 0.5)
+  ))
+  json <- jsonlite::toJSON(tracks, auto_unbox = TRUE)
+  expect_match(as.character(json), '"values":[0.5]', fixed = TRUE)
+})
+
+test_that("convert_column_tracks serializes colors as an object", {
+  tracks <- msaviewr:::convert_column_tracks(list(
+    list(id = "f", name = "F", kind = "text", data = "12",
+         colors = c("1" = "#aaa", "2" = "#bbb"))
+  ))
+  json <- jsonlite::toJSON(tracks, auto_unbox = TRUE)
+  expect_match(as.character(json), '"colors":{"1":"#aaa","2":"#bbb"}', fixed = TRUE)
+})
+
+test_that("convert_column_tracks rejects a track without a kind", {
+  expect_error(
+    msaviewr:::convert_column_tracks(list(list(id = "t", name = "T"))),
+    "missing 'kind'"
+  )
+})

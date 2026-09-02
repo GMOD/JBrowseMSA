@@ -3,13 +3,15 @@ import { expect, test } from 'vitest'
 
 import stateModelFactory from './model.ts'
 
+import type { ColumnTrackSpec } from './types.ts'
+
 const MsaView = stateModelFactory()
 
 // s1 has a gap at column 1 and s2 a gap at column 3, and every row is gapped at
 // column 5, so hiding gappy columns drops that one
 const msa = '>s1\nA-CDE-F\n>s2\nAB-DE-F\n>s3\nABCDE-F\n'
 
-function makeModel(columnTracks: unknown[]) {
+function makeModel(columnTracks: ColumnTrackSpec[]) {
   return MsaView.create({
     type: 'MsaView',
     msaFormat: 'fasta',

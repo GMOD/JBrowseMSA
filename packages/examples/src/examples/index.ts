@@ -4,6 +4,8 @@ import Aquaporin from './Aquaporin'
 import AquaporinSrc from './Aquaporin.tsx?raw'
 import ColorSchemes from './ColorSchemes'
 import ColorSchemesSrc from './ColorSchemes.tsx?raw'
+import ColumnTracks from './ColumnTracks'
+import ColumnTracksSrc from './ColumnTracks.tsx?raw'
 import CytochromeC from './CytochromeC'
 import CytochromeCSrc from './CytochromeC.tsx?raw'
 import Domains from './Domains'
@@ -126,6 +128,14 @@ export const examples: Example[] = [
     description: 'Drive the viewer by calling model actions from buttons.',
     Component: ProgrammaticControl,
     source: ProgrammaticControlSrc,
+  },
+  {
+    name: 'Tracks from data',
+    category: 'API & control',
+    description:
+      'Draw a number you computed per residue as a track, through the columnTracks prop.',
+    Component: ColumnTracks,
+    source: ColumnTracksSrc,
   },
   {
     name: 'Color schemes',

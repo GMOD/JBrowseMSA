@@ -174,6 +174,34 @@ msaview(
 )
 ```
 
+### A track from your own numbers
+
+Anything you compute per column, or per residue of one sequence, draws as a
+track above the alignment through `column_tracks`. The viewer scales bars by
+`max` (default 1) and, when `row` names a sequence, places each value on that
+sequence's residues so gaps in the alignment fall out correctly.
+
+```r
+hydropathy <- c(I = 4.5, V = 4.2, L = 3.8, F = 2.8, C = 2.5, M = 1.9, A = 1.8,
+                G = -0.4, T = -0.7, S = -0.8, W = -0.9, Y = -1.3, P = -1.6,
+                H = -3.2, E = -3.5, Q = -3.5, D = -3.5, N = -3.5, K = -3.9,
+                R = -4.5)
+residues <- strsplit(gsub("-", "", seqs[["GPCR_human"]]), "")[[1]]
+
+msaview(
+  msa = seqs,
+  column_tracks = list(
+    list(id = "kd", name = "Hydropathy (human)", kind = "bar",
+         values = hydropathy[residues] + 4.5, max = 9, row = "GPCR_human",
+         color = "#6a51a3")
+  )
+)
+```
+
+A `kind = "text"` track takes `data`, one character per column, and an optional
+`colors` map from character to color. Every field is listed in the
+[layers reference](https://gmod.org/JBrowseMSA/layers).
+
 ### With ggtree
 
 Pass a ggtree plot object directly as the `tree` argument. The phylogenetic

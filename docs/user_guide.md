@@ -214,6 +214,13 @@ in the rows below it.
 Tracks are included in an SVG export when you check "include tracks" in the
 export dialog.
 
+A track can also arrive as data instead of being computed here. A `columnTracks`
+entry in the shared URL or session carries per-column values drawn as bars, or a
+per-column string drawn like a Stockholm annotation line, so a number computed
+outside the viewer, per column or per residue of one row, lands above the
+alignment with a name, a color, and its own menu entry. The
+[layers reference](https://gmod.org/JBrowseMSA/layers) lists the fields.
+
 ## Settings reference
 
 Layout options live in two dropdowns in the header: **MSA settings** and **tree

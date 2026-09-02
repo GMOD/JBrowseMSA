@@ -7,6 +7,8 @@ import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
 import MSAModelF from './model.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 
+import type { ColumnTrackSpec } from './types.ts'
+
 beforeAll(() => {
   enableStaticRendering(true)
   installHeadlessRenderEnv()
@@ -16,7 +18,7 @@ const msa = '>s1\nACGT\n>s2\nACGT\n'
 const colWidth = 20
 const barColor = '#123456'
 
-function makeModel(columnTracks: unknown[]) {
+function makeModel(columnTracks: ColumnTrackSpec[]) {
   const model = MSAModelF().create({
     type: 'MsaView',
     msaFormat: 'fasta',

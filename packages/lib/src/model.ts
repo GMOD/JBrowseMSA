@@ -1711,7 +1711,7 @@ function stateModelFactory() {
               )
               return [track.id, { values }] as const
             }
-            const data = skip(project(track, [...(track.data ?? '')], ' '))
+            const data = skip(project(track, (track.data ?? '').split(''), ' '))
             return [track.id, { data: data.join('') }] as const
           }),
         )

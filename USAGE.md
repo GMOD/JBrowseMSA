@@ -27,17 +27,18 @@ export default function App() {
 
 Props:
 
-| Prop             | Type           | Description                                   |
-| ---------------- | -------------- | --------------------------------------------- |
-| `msa`            | `string`       | Alignment text (FASTA, Stockholm, or Clustal) |
-| `tree`           | `string`       | Newick tree text                              |
-| `gff`            | `string`       | InterProScan domain annotations (GFF3 text)   |
-| `msaFilehandle`  | `FileLocation` | Remote file location for alignment            |
-| `treeFilehandle` | `FileLocation` | Remote file location for tree                 |
-| `gffFilehandle`  | `FileLocation` | Remote file location for domain GFF           |
-| `colorScheme`    | `string`       | Color scheme name (see below)                 |
-| `height`         | `number`       | Widget height in pixels                       |
-| `highlights`     | `Highlight[]`  | Labeled highlights (see below)                |
+| Prop             | Type                | Description                                   |
+| ---------------- | ------------------- | --------------------------------------------- |
+| `msa`            | `string`            | Alignment text (FASTA, Stockholm, or Clustal) |
+| `tree`           | `string`            | Newick tree text                              |
+| `gff`            | `string`            | InterProScan domain annotations (GFF3 text)   |
+| `msaFilehandle`  | `FileLocation`      | Remote file location for alignment            |
+| `treeFilehandle` | `FileLocation`      | Remote file location for tree                 |
+| `gffFilehandle`  | `FileLocation`      | Remote file location for domain GFF           |
+| `colorScheme`    | `string`            | Color scheme name (see below)                 |
+| `height`         | `number`            | Widget height in pixels                       |
+| `columnTracks`   | `ColumnTrackSpec[]` | Tracks supplied as data (see below)           |
+| `highlights`     | `Highlight[]`       | Labeled highlights (see below)                |
 
 ### Highlights
 
@@ -97,6 +98,31 @@ model.setColWidth(16)
 model.toggleCollapsed('node-id')
 model.fit() // fit both axes
 ```
+
+## Tracks from your own data
+
+Anything computed per column, or per residue of one row, draws as a track above
+the alignment. The viewer scales, places, and exports it and computes nothing.
+
+```tsx
+<MSAViewer
+  msa={msa}
+  columnTracks={[
+    {
+      id: 'dnds',
+      name: 'dN/dS',
+      kind: 'bar',
+      values: dnds,
+      max: 2,
+      row: 'human',
+    },
+  ]}
+/>
+```
+
+`kind: 'text'` takes `data`, one character per column, with an optional `colors`
+map. `model.setColumnTracks(tracks)` replaces the set at runtime. The
+[layers reference](docs/layers.md) lists every field.
 
 ## Using react-msaview in a plain HTML file with UMD bundle
 
