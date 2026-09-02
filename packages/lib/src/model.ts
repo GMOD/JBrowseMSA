@@ -632,6 +632,13 @@ function stateModelFactory() {
       /**
        * #action
        */
+      setTreeMetadataFilehandle(treeMetadataFilehandle?: FileLocationType) {
+        self.treeMetadataFilehandle = treeMetadataFilehandle
+      },
+
+      /**
+       * #action
+       */
       setMSA(result: string) {
         self.data.setMSA(result)
       },
@@ -2070,6 +2077,11 @@ function stateModelFactory() {
       },
       /**
        * #action
+       * Tree-shape state has to go too: node ids are path-derived
+       * (node-0-0-1), so ids recorded against one tree match arbitrary nodes
+       * in the next file the user imports — stale `collapsed` entries fold
+       * random clades and a stale `showOnly` restricts the whole new tree to
+       * one of them.
        */
       reset() {
         self.setData({
@@ -2085,6 +2097,7 @@ function stateModelFactory() {
         self.setMSAFilehandle(undefined)
         self.setTreeMetadataFilehandle(undefined)
         self.setGFFFilehandle(undefined)
+        self.setTreeMetadataFilehandle(undefined)
         self.setAnnotations([])
         // everything below names something in the data that just went away: a
         // tree node id, a row name, a column index. Tree node ids come from
