@@ -9,6 +9,10 @@ stay written down so nobody re-derives them from scratch.
 
 ## Open, roughly in the order I would argue for them
 
+- [Layers that take data](ideas/data-layers.md) — the viewer as an agent's
+  render target: column tracks from values, labeled highlights in residue
+  coordinates, colored GFF features, row strips from metadata. Reframes the
+  items below: an agent computes, the snapshot carries it, the viewer draws.
 - [A selection model](ideas/selection-model.md) — no selected column range or
   row set exists, which is the single thing blocking the MSA editor. Copy,
   zoom-to-selection and selective export all land on top of it.
