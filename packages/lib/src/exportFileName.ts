@@ -9,7 +9,8 @@ export function exportFileName(
   extension: string,
 ) {
   const loc = location as
-    { uri?: string; localPath?: string; name?: string } | undefined
+    | { uri?: string; localPath?: string; name?: string }
+    | undefined
   const path = loc?.uri ?? loc?.localPath ?? loc?.name
   const base = path
     ?.split(/[?#]/)[0]

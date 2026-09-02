@@ -61,7 +61,7 @@ without it they are alignment columns. `rows` tints whole rows instead.
 
 The list lives in the model snapshot (`model.setHighlights(...)` changes it), so
 a shared URL carries it, and the SVG export draws it. The full set of data
-layers is in [docs/layers.md](docs/layers.md).
+layers is in [layers reference](https://gmod.org/JBrowseMSA/layers).
 
 ## Advanced: model-based API
 
@@ -122,7 +122,7 @@ the alignment. The viewer scales, places, and exports it and computes nothing.
 
 `kind: 'text'` takes `data`, one character per column, with an optional `colors`
 map. `model.setColumnTracks(tracks)` replaces the set at runtime. The
-[layers reference](docs/layers.md) lists every field.
+[layers reference](https://gmod.org/JBrowseMSA/layers) lists every field.
 
 ## Using react-msaview in a plain HTML file with UMD bundle
 
