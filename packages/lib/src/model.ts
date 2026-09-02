@@ -678,13 +678,6 @@ function stateModelFactory() {
       /**
        * #action
        */
-      setTreeMetadataFilehandle(treeMetadataFilehandle?: FileLocationType) {
-        self.treeMetadataFilehandle = treeMetadataFilehandle
-      },
-
-      /**
-       * #action
-       */
       setMSA(result: string) {
         self.data.setMSA(result)
       },
