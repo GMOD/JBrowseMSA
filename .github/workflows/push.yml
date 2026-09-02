@@ -91,10 +91,16 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           working-directory: packages/r-msaview
-          extra-packages: any::testthat, any::ape
+          extra-packages: any::rcmdcheck, any::testthat, any::ape
       - name: Run tests
         run: Rscript -e "testthat::test_package('msaviewr')"
         working-directory: packages/r-msaview
+      # R CMD check catches what the tests cannot: exports without help pages,
+      # undeclared imports, a stale NAMESPACE
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          working-directory: packages/r-msaview
+          error-on: '"warning"'
 
   attw:
     name: Check types (attw)

@@ -11,9 +11,11 @@ RStudio, R Markdown, Quarto, and Shiny.
 The only hard dependency is `htmlwidgets`:
 
 ```r
-install.packages("htmlwidgets")
-devtools::install("packages/r-msaview")
+remotes::install_github("GMOD/react-msaview", subdir = "packages/r-msaview")
 ```
+
+From a clone of the repository, `devtools::install("packages/r-msaview")`
+installs the checked-out version instead.
 
 For Bioconductor interop:
 

@@ -232,7 +232,17 @@ read_text <- function(x) {
   if (length(x) == 1 && file.exists(x)) {
     return(paste(readLines(x, warn = FALSE), collapse = "\n"))
   }
+  if (length(x) == 1 && looks_like_path(x)) {
+    warning("'", x, "' looks like a file path but no such file exists; ",
+            "passing it to the viewer as text", call. = FALSE)
+  }
   paste(x, collapse = "\n")
+}
+
+# One line ending in an extension, with none of the characters a FASTA,
+# Stockholm, Newick or GFF document is made of
+looks_like_path <- function(x) {
+  !grepl("[\n\t>#(;]", x) && grepl("\\.[A-Za-z0-9]{1,8}$", x)
 }
 
 convert_msa <- function(msa) {

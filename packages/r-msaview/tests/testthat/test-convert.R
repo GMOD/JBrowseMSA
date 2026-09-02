@@ -158,6 +158,30 @@ test_that("to_fasta keeps duplicate names apart and fills blank ones", {
   expect_equal(msaviewr:::to_fasta(c("X", "Y")), ">seq1\nX\n>seq2\nY")
 })
 
+test_that("a path to a file that does not exist warns, then passes as text", {
+  expect_warning(msaviewr:::convert_msa("no_such_alignment.fa"), "no such file")
+  expect_warning(msaviewr:::convert_tree("missing/tree.nwk"), "no such file")
+  # documents are never mistaken for paths
+  expect_no_warning(msaviewr:::convert_msa(">s1\nACGT"))
+  expect_no_warning(msaviewr:::convert_tree("((A,B),C);"))
+  expect_no_warning(msaviewr:::convert_msa("ACGT"))
+})
+
+test_that("convert_msa handles Biostrings string sets", {
+  skip_if_not_installed("Biostrings")
+  aa <- Biostrings::AAStringSet(c(human = "MVLS", mouse = "MVLT"))
+  expect_equal(msaviewr:::convert_msa(aa), ">human\nMVLS\n>mouse\nMVLT")
+
+  unnamed <- Biostrings::DNAStringSet(c("ACGT", "ACGA"))
+  expect_equal(msaviewr:::convert_msa(unnamed), ">seq1\nACGT\n>seq2\nACGA")
+})
+
+test_that("convert_msa handles Biostrings multiple alignments", {
+  skip_if_not_installed("Biostrings")
+  aln <- Biostrings::DNAMultipleAlignment(c(a = "AC-T", b = "ACGT"))
+  expect_equal(msaviewr:::convert_msa(aln), ">a\nAC-T\n>b\nACGT")
+})
+
 test_that("df_to_gff3 writes large coordinates in full", {
   df <- data.frame(seqname = "s1", start = 100000, end = 1234567)
   line <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]][2]
