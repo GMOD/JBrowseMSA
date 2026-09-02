@@ -8,6 +8,7 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
+import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
 import MSAModelF from './model.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 
@@ -17,81 +18,20 @@ const dataUrl = 'data:image/png;base64,STUB'
 // really backed by bytes, and a canvas that reads back
 beforeAll(() => {
   enableStaticRendering(true)
-  globalThis.DOMMatrix = class {
-    a = 1
-    b = 0
-    c = 0
-    d = 1
-    e = 0
-    f = 0
-    constructor(init?: number[]) {
-      const [a = 1, b = 0, c = 0, d = 1, e = 0, f = 0] = init ?? []
-      Object.assign(this, { a, b, c, d, e, f })
-    }
-    multiply(o: any) {
-      return new (globalThis.DOMMatrix as any)([
-        this.a * o.a + this.c * o.b,
-        this.b * o.a + this.d * o.b,
-        this.a * o.c + this.c * o.d,
-        this.b * o.c + this.d * o.d,
-        this.a * o.e + this.c * o.f + this.e,
-        this.b * o.e + this.d * o.f + this.f,
-      ])
-    }
-    translate(x: number, y = 0) {
-      return this.multiply(
-        new (globalThis.DOMMatrix as any)([1, 0, 0, 1, x, y]),
-      )
-    }
-    scale(x: number, y = x) {
-      return this.multiply(
-        new (globalThis.DOMMatrix as any)([x, 0, 0, y, 0, 0]),
-      )
-    }
-  } as any
-  globalThis.DOMPoint = class {
-    constructor(
-      public x = 0,
-      public y = 0,
-    ) {}
-    matrixTransform(m: any) {
-      return new (globalThis.DOMPoint as any)(
-        m.a * this.x + m.c * this.y + m.e,
-        m.b * this.x + m.d * this.y + m.f,
-      )
-    }
-  } as any
-
-  HTMLCanvasElement.prototype.getContext = function () {
-    let font = '10px sans-serif'
-    let fillStyle = '#000000'
-    return {
-      get font() {
-        return font
-      },
-      set font(v: string) {
-        font = v
-      },
-      get fillStyle() {
-        return fillStyle
-      },
-      set fillStyle(v: string) {
-        fillStyle = v
-      },
-      measureText: (t: string) => ({
-        width: t.length * (Number.parseFloat(font) || 10) * 0.6,
-      }),
-      clearRect: () => {},
-      fillRect: () => {},
-      createImageData: (width: number, height: number) => ({
-        data: new Uint8ClampedArray(width * height * 4),
-        width,
-        height,
-      }),
-      putImageData: () => {},
-      getImageData: () => ({ data: Uint8ClampedArray.from([1, 2, 3, 255]) }),
-    } as unknown as CanvasRenderingContext2D
-  } as unknown as typeof HTMLCanvasElement.prototype.getContext
+  installHeadlessRenderEnv(globalThis, {
+    fillStyle: '#000000',
+    clearRect: () => {},
+    fillRect: () => {},
+    createImageData: ((width: number, height: number) => ({
+      data: new Uint8ClampedArray(width * height * 4),
+      width,
+      height,
+    })) as unknown as CanvasRenderingContext2D['createImageData'],
+    putImageData: () => {},
+    getImageData: (() => ({
+      data: Uint8ClampedArray.from([1, 2, 3, 255]),
+    })) as unknown as CanvasRenderingContext2D['getImageData'],
+  })
   HTMLCanvasElement.prototype.toDataURL = () => dataUrl
 })
 

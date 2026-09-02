@@ -45,6 +45,10 @@ function getLegendWidth(model: MsaViewModel) {
   return Math.min(LEGEND_MAX_W, Math.max(120, w))
 }
 
+function legendHeight(domainTypes: unknown[]) {
+  return LEGEND_PAD * 2 + domainTypes.length * LEGEND_ROW_H
+}
+
 // resolved sizes/offsets (in svg user units) for the chosen export, shared by
 // every layer; 'entire' renders the whole alignment unscrolled, 'viewport'
 // mirrors the live scroll position
@@ -119,7 +123,12 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
 }
 
 export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
-  await when(() => model.dataInitialized)
+  // dataInitialized stays false while the model holds a load error, so waiting
+  // on it alone would never settle
+  await when(() => model.dataInitialized || !!model.error)
+  if (model.error) {
+    throw model.error
+  }
   const { Context } = await import('@jbrowse/svgcanvas')
   return renderToStaticMarkup(
     <MsaSvg
@@ -142,10 +151,16 @@ function MsaSvg({
   Context: typeof ContextType
   layout: Layout
 }) {
-  const { width, height, trackHeight, includeMinimap, legendWidth } = layout
-  const { treeAreaWidth, minimapHeight } = model
+  const { width, trackHeight, includeMinimap, legendWidth } = layout
+  const { treeAreaWidth, minimapHeight, visibleDomainTypes } = model
   const totalWidth = width + legendWidth
   const legendTop = includeMinimap ? minimapHeight : 0
+  // a short alignment with many domain types has a key taller than its rows,
+  // and the page has to hold the whole key
+  const height =
+    legendWidth > 0
+      ? Math.max(layout.height, legendTop + legendHeight(visibleDomainTypes))
+      : layout.height
   const contrastScheme = colorContrast(model.colorScheme, theme)
   const props = { Context, model, theme, layout, contrastScheme }
 
@@ -207,7 +222,7 @@ function LegendSVG({
   width: number
 }) {
   const { visibleDomainTypes, fillPalette, strokePalette } = model
-  const boxHeight = LEGEND_PAD * 2 + visibleDomainTypes.length * LEGEND_ROW_H
+  const boxHeight = legendHeight(visibleDomainTypes)
   // the column is capped at LEGEND_MAX_W, so a name too long for it has to be
   // clipped here -- text that overruns the reserved width runs off the figure
   const maxChars = Math.floor(
@@ -364,7 +379,7 @@ function rasterBackground({
     blockSizeY: contentHeight,
   })
   const numCols = Math.min(xEnd, model.numColumns) - xStart
-  const numRows = Math.min(yEnd, model.leaves.length) - yStart
+  const numRows = Math.min(yEnd, model.numRows) - yStart
   const href = rasterImageHref({
     model,
     theme,

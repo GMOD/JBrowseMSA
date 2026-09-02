@@ -73,8 +73,14 @@ export class HeadlessDOMPoint {
  * average for layout and, more usefully, exactly predictable: a caller can
  * compute the width a renderer will see rather than hardcoding a number
  * measured from one machine's fonts.
+ *
+ * `contextExtras` adds to the context a test hands out -- the raster test
+ * supplies the ImageData methods that make the export take its image path.
  */
-export function installHeadlessRenderEnv(win: unknown = globalThis) {
+export function installHeadlessRenderEnv(
+  win: unknown = globalThis,
+  contextExtras: Partial<CanvasRenderingContext2D> = {},
+) {
   const g = globalThis as Record<string, unknown>
   g.DOMMatrix = HeadlessDOMMatrix
   g.DOMPoint = HeadlessDOMPoint
@@ -82,17 +88,20 @@ export function installHeadlessRenderEnv(win: unknown = globalThis) {
     .HTMLCanvasElement
   canvas.prototype.getContext = function () {
     let font = '10px sans-serif'
-    return {
-      get font() {
-        return font
+    return Object.assign(
+      {
+        get font() {
+          return font
+        },
+        set font(v: string) {
+          font = v
+        },
+        measureText: (t: string) => ({
+          width: t.length * (Number.parseFloat(font) || 10) * CHAR_WIDTH_RATIO,
+        }),
       },
-      set font(v: string) {
-        font = v
-      },
-      measureText: (t: string) => ({
-        width: t.length * (Number.parseFloat(font) || 10) * CHAR_WIDTH_RATIO,
-      }),
-    } as unknown as CanvasRenderingContext2D
+      contextExtras,
+    ) as unknown as CanvasRenderingContext2D
   } as unknown as typeof HTMLCanvasElement.prototype.getContext
 }
 

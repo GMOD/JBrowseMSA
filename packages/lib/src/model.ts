@@ -89,6 +89,7 @@ import { computeRowInsertions, len, skipBlanks, transform } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
+import type { ExportSvgOptions } from './renderToSvg.tsx'
 import type {
   Annotation,
   BasicTrack,
@@ -98,7 +99,6 @@ import type {
 } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
-import type { Theme } from '@mui/material'
 import type { InterProScanResults } from 'msa-parsers'
 
 function parseTreeText(text: string) {
@@ -360,8 +360,7 @@ function stateModelFactory() {
        * #volatile
        */
       status: undefined as
-        | { msg: string; url?: string; onCancel?: () => void }
-        | undefined,
+        { msg: string; url?: string; onCancel?: () => void } | undefined,
       /**
        * #volatile
        * high resolution scale factor, helps make canvas look better on hi-dpi
@@ -424,8 +423,7 @@ function stateModelFactory() {
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        | { nodeId: string; descendantNames: string[] }
-        | undefined,
+        { nodeId: string; descendantNames: string[] } | undefined,
 
       /**
        * #volatile
@@ -2140,12 +2138,7 @@ function stateModelFactory() {
       /**
        * #action
        */
-      async exportSVG(opts: {
-        theme: Theme
-        includeMinimap?: boolean
-        includeTracks?: boolean
-        exportType: 'entire' | 'viewport'
-      }) {
+      async exportSVG(opts: ExportSvgOptions) {
         const { renderToSvg } = await import('./renderToSvg.tsx')
         const html = await renderToSvg(self as MsaViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })

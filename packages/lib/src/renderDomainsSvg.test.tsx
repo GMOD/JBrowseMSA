@@ -80,6 +80,28 @@ test('no legend column when domains are hidden', async () => {
   expect(await exportEntire(model)).not.toContain('Kinase')
 })
 
+test('the page grows to hold a key taller than the alignment', async () => {
+  const model = makeModel()
+  model.setDomains({
+    seq1: {
+      xref: [{ id: 'seq1' }],
+      matches: Array.from({ length: 12 }, (_, i) => ({
+        signature: {
+          entry: { name: `Dom${i}`, accession: `PF${i}`, description: '' },
+        },
+        locations: [{ start: 1, end: 5 }],
+      })),
+    },
+  })
+  expect(model.visibleDomainTypes).toHaveLength(12)
+  const keyHeight = 16 + 12 * 16
+  expect(model.totalHeight).toBeLessThan(keyHeight)
+
+  const svg = await exportEntire(model)
+  expect(svg).toContain(`height="${keyHeight}"`)
+  expect(/<svg[^>]*height="(\d+)"/.exec(svg)?.[1]).toBe(String(keyHeight))
+})
+
 test('a domain box past the on-screen block size still draws', async () => {
   // the export renders the alignment in one pass, so the overlay has to be told
   // how wide that pass is; falling back to the 500px on-screen block size culled
