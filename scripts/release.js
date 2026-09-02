@@ -36,6 +36,19 @@ if (capture('git status --porcelain')) {
   console.error('Working tree is dirty; commit or clean it before releasing')
   process.exit(1)
 }
+run('git fetch origin main')
+const localHead = capture('git rev-parse HEAD')
+const remoteHead = capture('git rev-parse origin/main')
+if (localHead !== remoteHead) {
+  const ahead = Number(capture('git rev-list --count origin/main..HEAD'))
+  const behind = Number(capture('git rev-list --count HEAD..origin/main'))
+  console.error(
+    behind
+      ? `main is ${behind} commit(s) behind origin/main; pull before releasing`
+      : `main is ${ahead} commit(s) ahead of origin/main; push before releasing`,
+  )
+  process.exit(1)
+}
 
 // Packages to publish (in dependency order)
 const packages = ['svgcanvas', 'msa-parsers', 'lib', 'cli']
