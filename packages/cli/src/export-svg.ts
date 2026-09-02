@@ -4,6 +4,25 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { JSDOM } from 'jsdom'
 import { enableStaticRendering } from 'mobx-react'
 
+/**
+ * jsdom has no pixels, so without this the export draws a <rect> per cell and a
+ * large alignment exhausts the heap. @napi-rs/canvas is an optional dependency
+ * with prebuilt binaries; when it installed, its canvas stands in for
+ * OffscreenCanvas and the raster background becomes one <image>.
+ */
+async function installNodeCanvas(g: Record<string, unknown>) {
+  const napi = await import('@napi-rs/canvas').catch(() => undefined)
+  if (!napi) {
+    return
+  }
+  const { createCanvas } = napi
+  g.OffscreenCanvas = class {
+    constructor(width: number, height: number) {
+      return createCanvas(width, height)
+    }
+  }
+}
+
 export async function exportSvg({
   msaFile,
   treeFile,
@@ -38,6 +57,7 @@ export async function exportSvg({
   g.window = dom.window
   g.document = dom.window.document
   installHeadlessRenderEnv(dom.window)
+  await installNodeCanvas(g)
 
   const theme = createJBrowseTheme()
   const msa = fs.readFileSync(msaFile, 'utf8')

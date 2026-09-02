@@ -20,6 +20,12 @@ Nothing else for `export-svg` and `interpro`. `interproscan` needs a backend to
 scan with — the EBI web API (the default, no install), or Docker, Singularity,
 or a local InterProScan (see [interproscan](#interproscan)).
 
+`export-svg` draws the alignment background as one embedded image when
+[@napi-rs/canvas](https://www.npmjs.com/package/@napi-rs/canvas) is present. It
+is an optional dependency with prebuilt binaries, so a normal install brings it
+in; on a platform it does not cover, the export still works and draws a
+rectangle per cell instead, which is much larger and slower for big alignments.
+
 ## Setup
 
 ```bash

@@ -320,19 +320,23 @@ export function drawMsaRaster({
 /**
  * A raster canvas as a PNG data URI, for embedding in the SVG export.
  *
- * toDataURL is the synchronous read-back and only the DOM canvas has it, so an
+ * toDataURL is the synchronous read-back. The DOM canvas has it, and so does a
+ * node canvas standing in for OffscreenCanvas headlessly; a browser
  * OffscreenCanvas -- which is what the tile and thumbnail caches hold wherever
- * it exists -- gets copied onto one first. Returns undefined wherever the
- * read-back is unavailable (jsdom) rather than throwing, which is the signal to
- * fall back to drawing the thing in vector.
+ * it exists -- gets copied onto a DOM canvas first. Returns undefined wherever
+ * the read-back is unavailable (jsdom) rather than throwing, which is the
+ * signal to fall back to drawing the thing in vector.
  */
 export function canvasHref(canvas: RasterCanvas | undefined) {
-  if (!canvas || typeof document === 'undefined') {
+  if (!canvas) {
     return undefined
   }
   try {
-    if (canvas instanceof HTMLCanvasElement) {
+    if ('toDataURL' in canvas && typeof canvas.toDataURL === 'function') {
       return canvas.toDataURL('image/png')
+    }
+    if (typeof document === 'undefined') {
+      return undefined
     }
     const out = document.createElement('canvas')
     out.width = canvas.width
