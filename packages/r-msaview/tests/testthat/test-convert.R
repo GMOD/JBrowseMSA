@@ -136,3 +136,30 @@ test_that("msaview passes gff through to the config", {
   w <- msaview(msa = ">s1\nACGT", gff = df)
   expect_match(w$x$config$data$gff, "Name=Dom")
 })
+
+test_that("an absent gff is absent from the config, not null", {
+  # a NULL list element serializes as JSON null, which the viewer's model
+  # rejects as a value for an optional string
+  w <- msaview(msa = ">s1\nACGT")
+  expect_false("gff" %in% names(w$x$config$data))
+  expect_false("colorSchemeName" %in% names(w$x$config))
+  expect_false("showBranchLen" %in% names(w$x$config))
+})
+
+test_that("convert_msa joins the lines of a document", {
+  lines <- c(">s1", "ACGT", ">s2", "ACGA")
+  expect_equal(msaviewr:::convert_msa(lines), paste(lines, collapse = "\n"))
+  expect_equal(msaviewr:::convert_tree(c("((A,B),", "C);")), "((A,B),\nC);")
+})
+
+test_that("to_fasta keeps duplicate names apart and fills blank ones", {
+  expect_equal(msaviewr:::to_fasta(c(a = "X", a = "Y")), ">a\nX\n>a\nY")
+  expect_equal(msaviewr:::to_fasta(c(a = "X", "Y")), ">a\nX\n>seq2\nY")
+  expect_equal(msaviewr:::to_fasta(c("X", "Y")), ">seq1\nX\n>seq2\nY")
+})
+
+test_that("df_to_gff3 writes large coordinates in full", {
+  df <- data.frame(seqname = "s1", start = 100000, end = 1234567)
+  line <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]][2]
+  expect_equal(strsplit(line, "\t")[[1]][4:5], c("100000", "1234567"))
+})

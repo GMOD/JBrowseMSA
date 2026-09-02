@@ -14,24 +14,23 @@ HTMLWidgets.widget({
           return
         }
 
-        var React = RMV.React
-        var createRoot = RMV.createRoot
-        var MSAView = RMV.MSAView
-        var MSAModelF = RMV.MSAModelF
-
         var config = x.config
         if (height && !config.height) {
           config.height = height
         }
 
-        model = MSAModelF().create(config)
+        // a Shiny re-render replaces the model; destroying the old one runs
+        // the disposers its autoruns registered, which nothing else would
+        if (model && RMV.destroy) {
+          RMV.destroy(model)
+        }
+        model = RMV.MSAModelF().create(config)
         model.setWidth(width)
 
         if (!root) {
-          root = createRoot(el)
+          root = RMV.createRoot(el)
         }
-
-        root.render(React.createElement(MSAView, { model: model }))
+        root.render(RMV.React.createElement(RMV.MSAView, { model: model }))
       },
 
       resize: function (newWidth, newHeight) {

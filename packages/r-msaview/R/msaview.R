@@ -126,18 +126,13 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
 
   config <- list(type = "MsaView")
   if (!is.null(msa_text) || !is.null(tree_text) || !is.null(gff_text)) {
-    config$data <- list(
-      msa = msa_text %||% "",
-      tree = tree_text %||% "",
-      gff = gff_text %||% NULL
-    )
+    # a NULL element survives list() and serializes as JSON null, which the
+    # viewer's model rejects; an absent gff has to be absent
+    config$data <- list(msa = msa_text %||% "", tree = tree_text %||% "")
+    config$data$gff <- gff_text
   }
-  if (!is.null(color_scheme)) {
-    config$colorSchemeName <- color_scheme
-  }
-  if (!is.null(show_branch_len)) {
-    config$showBranchLen <- show_branch_len
-  }
+  config$colorSchemeName <- color_scheme
+  config$showBranchLen <- show_branch_len
 
   htmlwidgets::createWidget(
     name = "msaview",
@@ -164,10 +159,10 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
 #'
 #' @param output_id Output variable name.
 #' @param width CSS width (default \code{"100\%"}).
-#' @param height CSS height (default \code{"600px"}).
+#' @param height CSS height (default \code{"550px"}).
 #' @return A Shiny output element.
 #' @export
-msaviewOutput <- function(output_id, width = "100%", height = "600px") {
+msaviewOutput <- function(output_id, width = "100%", height = "550px") {
   htmlwidgets::shinyWidgetOutput(output_id, "msaview", width, height,
                                   package = "msaviewr")
 }
@@ -188,35 +183,42 @@ renderMsaview <- function(expr, env = parent.frame(), quoted = FALSE) {
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
+need_pkg <- function(pkg, what) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    stop("The '", pkg, "' package is required to ", what)
+  }
+}
+
+# A file path, a single string of document text, or the lines of one (what
+# readLines returns). Anything else is left to the caller's typed branches.
+read_text <- function(x) {
+  if (!is.character(x)) return(NULL)
+  if (length(x) == 1 && file.exists(x)) {
+    return(paste(readLines(x, warn = FALSE), collapse = "\n"))
+  }
+  paste(x, collapse = "\n")
+}
+
 convert_msa <- function(msa) {
   if (is.null(msa)) return(NULL)
 
-  # named character vector -> FASTA. Checked before the scalar branch below:
-  # names are what mark a vector as sequences rather than alignment text, and a
-  # one-sequence alignment is still a named vector, not a FASTA document.
+  # names are what mark a character vector as sequences rather than alignment
+  # text, so a one-sequence named vector is still FASTA input, not a document
   if (is.character(msa) && !is.null(names(msa))) {
-    return(named_vec_to_fasta(msa))
+    return(to_fasta(msa))
   }
-
-  if (is.character(msa) && length(msa) == 1) {
-    if (file.exists(msa)) {
-      return(paste(readLines(msa, warn = FALSE), collapse = "\n"))
-    }
-    return(msa)
-  }
+  text <- read_text(msa)
+  if (!is.null(text)) return(text)
 
   # Biostrings XStringSet (DNAStringSet, AAStringSet, RNAStringSet)
   if (inherits(msa, "XStringSet")) {
-    return(xstringset_to_fasta(msa))
+    return(to_fasta(as.character(msa)))
   }
 
   # Biostrings MultipleAlignment (DNAMultipleAlignment, AAMultipleAlignment, etc.)
   if (inherits(msa, "MultipleAlignment")) {
-    if (!requireNamespace("Biostrings", quietly = TRUE)) {
-      stop("The 'Biostrings' package is required to convert MultipleAlignment objects")
-    }
-    ss <- Biostrings::unmasked(msa)
-    return(xstringset_to_fasta(ss))
+    need_pkg("Biostrings", "convert MultipleAlignment objects")
+    return(to_fasta(as.character(Biostrings::unmasked(msa))))
   }
 
   stop("Unsupported MSA input type: ", class(msa)[1],
@@ -227,27 +229,18 @@ convert_msa <- function(msa) {
 convert_tree <- function(tree) {
   if (is.null(tree)) return(NULL)
 
-  if (is.character(tree) && length(tree) == 1) {
-    if (file.exists(tree)) {
-      return(paste(readLines(tree, warn = FALSE), collapse = "\n"))
-    }
-    return(tree)
-  }
+  text <- read_text(tree)
+  if (!is.null(text)) return(text)
 
-  # ape phylo object
   if (inherits(tree, "phylo")) {
-    if (!requireNamespace("ape", quietly = TRUE)) {
-      stop("The 'ape' package is required to convert phylo objects")
-    }
-    return(ape::write.tree(tree))
+    return(phylo_to_newick(tree))
   }
 
-  # treeio treedata object
   if (inherits(tree, "treedata")) {
-    return(treedata_to_newick(tree))
+    need_pkg("treeio", "convert treedata objects")
+    return(phylo_to_newick(treeio::as.phylo(tree)))
   }
 
-  # ggtree plot object - extract the tree
   if (inherits(tree, "ggtree") || inherits(tree, "gg")) {
     return(extract_tree_from_ggtree(tree))
   }
@@ -256,43 +249,26 @@ convert_tree <- function(tree) {
        ". Expected a file path, Newick string, phylo, treedata, or ggtree object.")
 }
 
-named_vec_to_fasta <- function(seqs) {
-  lines <- vapply(names(seqs), function(nm) {
-    paste0(">", nm, "\n", seqs[[nm]])
-  }, character(1))
-  paste(lines, collapse = "\n")
+# Indexed by position, not by name: looking sequences up by name hands every
+# duplicate the first match. An unnamed entry gets a placeholder header.
+to_fasta <- function(seqs) {
+  nms <- names(seqs)
+  if (is.null(nms)) nms <- rep("", length(seqs))
+  blank <- is.na(nms) | nms == ""
+  nms[blank] <- paste0("seq", seq_along(seqs))[blank]
+  paste0(">", nms, "\n", as.character(seqs), collapse = "\n")
 }
 
-xstringset_to_fasta <- function(ss) {
-  nms <- names(ss)
-  seqs <- as.character(ss)
-  lines <- vapply(seq_along(seqs), function(i) {
-    nm <- if (!is.null(nms)) nms[i] else paste0("seq", i)
-    paste0(">", nm, "\n", seqs[i])
-  }, character(1))
-  paste(lines, collapse = "\n")
-}
-
-treedata_to_newick <- function(td) {
-  if (!requireNamespace("treeio", quietly = TRUE)) {
-    stop("The 'treeio' package is required to convert treedata objects")
-  }
-  if (!requireNamespace("ape", quietly = TRUE)) {
-    stop("The 'ape' package is required to convert treedata objects")
-  }
-  phy <- treeio::as.phylo(td)
+phylo_to_newick <- function(phy) {
+  need_pkg("ape", "convert tree objects")
   ape::write.tree(phy)
 }
 
 convert_gff <- function(gff) {
   if (is.null(gff)) return(NULL)
 
-  if (is.character(gff) && length(gff) == 1) {
-    if (file.exists(gff)) {
-      return(paste(readLines(gff, warn = FALSE), collapse = "\n"))
-    }
-    return(gff)
-  }
+  text <- read_text(gff)
+  if (!is.null(text)) return(text)
 
   if (is.data.frame(gff)) {
     return(df_to_gff3(gff))
@@ -310,73 +286,49 @@ df_to_gff3 <- function(df) {
     stop("GFF data frame must have 'start' and 'end' columns")
   }
 
-  source <- if ("source" %in% names(df)) df$source else rep(".", nrow(df))
-  feature <- if ("feature" %in% names(df)) df$feature else rep("protein_match", nrow(df))
-  score <- if ("score" %in% names(df)) df$score else rep(".", nrow(df))
-  strand <- if ("strand" %in% names(df)) df$strand else rep(".", nrow(df))
-  phase <- if ("phase" %in% names(df)) df$phase else rep(".", nrow(df))
+  column <- function(name, default) {
+    if (name %in% names(df)) as.character(df[[name]]) else rep(default, nrow(df))
+  }
+  # paste() renders 100000 as "1e+05", which no GFF parser reads as a position
+  coord <- function(name) format(df[[name]], scientific = FALSE, trim = TRUE)
 
-  attr_parts <- list()
-  if ("name" %in% names(df)) {
-    attr_parts[["Name"]] <- utils::URLencode(as.character(df$name), reserved = TRUE)
-  }
-  if ("signature_desc" %in% names(df)) {
-    attr_parts[["signature_desc"]] <- utils::URLencode(
-      as.character(df$signature_desc), reserved = TRUE
-    )
-  }
-  if ("description" %in% names(df)) {
-    attr_parts[["description"]] <- utils::URLencode(
-      as.character(df$description), reserved = TRUE
-    )
-  }
-
-  attributes <- if (length(attr_parts) > 0) {
-    do.call(paste, c(
-      lapply(names(attr_parts), function(k) paste0(k, "=", attr_parts[[k]])),
-      list(sep = ";")
-    ))
+  attr_keys <- c(name = "Name", signature_desc = "signature_desc",
+                 description = "description")
+  attr_keys <- attr_keys[names(attr_keys) %in% names(df)]
+  attributes <- if (length(attr_keys) > 0) {
+    encoded <- lapply(names(attr_keys), function(col) {
+      paste0(attr_keys[[col]], "=",
+             utils::URLencode(as.character(df[[col]]), reserved = TRUE))
+    })
+    do.call(paste, c(encoded, list(sep = ";")))
   } else {
     rep(".", nrow(df))
   }
 
   rows <- paste(
-    df$seqname, source, feature, df$start, df$end,
-    score, strand, phase, attributes,
+    df$seqname, column("source", "."), column("feature", "protein_match"),
+    coord("start"), coord("end"),
+    column("score", "."), column("strand", "."), column("phase", "."),
+    attributes,
     sep = "\t"
   )
   paste(c("##gff-version 3", rows), collapse = "\n")
 }
 
+# ggtree keeps the tree it drew: get.tree() reads it back from the plot, and
+# when that fails the plot's $data is a tbl_tree that as.phylo() rebuilds
 extract_tree_from_ggtree <- function(p) {
-  # ggtree stores the original tree data in the plot
-  # try treeio::get.tree first, then fall back to the $data slot
-  if (requireNamespace("treeio", quietly = TRUE)) {
-    td <- tryCatch(treeio::get.tree(p), error = function(e) NULL)
-    if (!is.null(td)) {
-      return(treedata_to_newick(td))
+  need_pkg("treeio", "extract a tree from a ggtree object")
+  candidates <- list(
+    function() treeio::get.tree(p),
+    function() treeio::as.phylo(p$data)
+  )
+  for (get in candidates) {
+    phy <- tryCatch(treeio::as.phylo(get()), error = function(e) NULL)
+    if (inherits(phy, "phylo")) {
+      return(phylo_to_newick(phy))
     }
   }
-
-  # fallback: ggtree objects are ggplot objects with $data containing a
-  # tibble that has parent/node/label columns
-  if (!is.null(p$data) && "parent" %in% names(p$data) && "label" %in% names(p$data)) {
-    if (requireNamespace("ape", quietly = TRUE)) {
-      # try to get the phylo object from the plot's internal data
-      td <- tryCatch({
-        tree_data <- p$data
-        if (inherits(tree_data, "tbl_tree")) {
-          treeio::as.phylo(tree_data)
-        } else {
-          NULL
-        }
-      }, error = function(e) NULL)
-      if (inherits(td, "phylo")) {
-        return(ape::write.tree(td))
-      }
-    }
-  }
-
   stop("Could not extract tree from ggtree object. ",
        "Pass the phylo object directly instead, e.g. msaview(tree = tree)")
 }
