@@ -367,7 +367,9 @@ residue letters stop drawing, which is most of the file size.
 ## Uses
 
 [msa-parsers](https://github.com/GMOD/JBrowseMSA/tree/main/packages/msa-parsers)
-for file format support, and [react-msaview](../lib) for rendering.
+for file format support, and
+[react-msaview](https://github.com/GMOD/JBrowseMSA/tree/main/packages/lib) for
+rendering.
 
 ## License
 
