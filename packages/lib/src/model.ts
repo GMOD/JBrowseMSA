@@ -1,7 +1,13 @@
 import { clamp, groupBy, notEmpty, sum } from '@jbrowse/core/util'
 import { openLocation } from '@jbrowse/core/util/io'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
-import { addDisposer, cast, types } from '@jbrowse/mobx-state-tree'
+import {
+  addDisposer,
+  applySnapshot,
+  cast,
+  getSnapshot,
+  types,
+} from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
 import { autorun, transaction } from 'mobx'
 import {
@@ -106,6 +112,46 @@ function parseTreeText(text: string) {
 // conservation does and costs three times the vertical space, so it waits to be
 // asked for.
 const defaultOffTracks = new Set(['sequence-logo'])
+
+/**
+ * The snapshot properties reset() carries across a return to the import form:
+ * display preferences and layout, nothing derived from the loaded file.
+ *
+ * reset() applies a default snapshot filtered to this list, so the list is the
+ * whole decision: a property left off it resets to its default, a visible and
+ * benign failure. The previous shape — a hand-maintained list of things to
+ * CLEAR — failed in the dangerous direction: a forgotten property silently
+ * carried the previous file's state into the next one, and because node ids
+ * are path-derived (node-0-0-1), a stale `collapsed` or `showOnly` id matched
+ * a real node in the new tree and folded it. Downstream composed properties
+ * (e.g. the jbrowse plugin's) are not on the list, so they reset too.
+ *
+ * Exported for modelReset.test.ts, which checks that everything off this list
+ * matches a freshly created model after reset().
+ */
+export const preservedOnReset = new Set([
+  'id',
+  'type',
+  'height',
+  'drawMsaLetters',
+  'scrollZoom',
+  'bgColor',
+  'colorSchemeName',
+  'showColumnStats',
+  'drawLabels',
+  'labelsAlignRight',
+  'treeAreaWidth',
+  'treeWidth',
+  'showBranchLen',
+  'drawTree',
+  'drawNodeBubbles',
+  'autoTreeAreaWidth',
+  'turnedOffTracks',
+  'hideGaps',
+  'allowedGappyness',
+  'subFeatureRows',
+  'showDomainLegend',
+])
 
 // `turnedOffTracks` records the user's explicit choices only: an id is absent
 // until they touch that track, and then its value is whether the track is OFF.
@@ -2077,42 +2123,26 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * Tree-shape state has to go too: node ids are path-derived
-       * (node-0-0-1), so ids recorded against one tree match arbitrary nodes
-       * in the next file the user imports — stale `collapsed` entries fold
-       * random clades and a stale `showOnly` restricts the whole new tree to
-       * one of them.
+       * Return to the import form: every property off `preservedOnReset`
+       * (data, filehandles, collapsed/showOnly, zoom, scroll, ...) goes back
+       * to its default, then the file-derived volatiles applySnapshot cannot
+       * reach are cleared by hand.
        */
       reset() {
-        self.setData({
-          tree: '',
-          msa: '',
-        })
-        self.resetZoom()
+        applySnapshot(
+          self,
+          Object.fromEntries(
+            Object.entries(getSnapshot(self) as Record<string, unknown>).filter(
+              ([key]) => preservedOnReset.has(key),
+            ),
+          ),
+        )
         self.setError(undefined)
-        self.setScrollY(0)
-        self.setScrollX(0)
-        self.setCurrentAlignment(0)
-        self.setTreeFilehandle(undefined)
-        self.setMSAFilehandle(undefined)
-        self.setTreeMetadataFilehandle(undefined)
-        self.setGFFFilehandle(undefined)
-        self.setTreeMetadataFilehandle(undefined)
         self.setAnnotations([])
-        // everything below names something in the data that just went away: a
-        // tree node id, a row name, a column index. Tree node ids come from
-        // generateNodeIds and are purely structural ('node-0-0-1' is the root's
-        // first child), so carrying `collapsed`/`showOnly` into the next file
-        // opens it collapsed -- or focused on a subtree -- for no reason the
-        // reader can see
-        self.collapsed.clear()
-        self.featureFilters.clear()
-        self.setShowOnly(undefined)
-        self.drawRelativeTo(undefined)
         self.setHighlightedColumns(undefined)
+        self.setMousePos(undefined, undefined)
+        self.setMouseClickPos(undefined, undefined)
         self.setHoveredTreeNode(undefined)
-        self.setMousePos()
-        self.setMouseClickPos()
       },
       /**
        * #action
@@ -2245,10 +2275,16 @@ function stateModelFactory() {
             self,
             autorun(async () => {
               const filehandle = getFilehandle()
+              // a cleared filehandle bumps the generation too, so a reset()
+              // mid-download invalidates the in-flight fetch instead of letting
+              // its onLoad land on the emptied model. That also orphans the
+              // invalidated run's `finally`, so the loading flag is cleared
+              // here on its behalf
+              const current = ++generation
               if (!filehandle) {
+                setLoading?.(false)
                 return
               }
-              const current = ++generation
               const isCurrent = () => current === generation
               try {
                 setLoading?.(true)
