@@ -5,20 +5,21 @@
 // path; this file supplies the canvas the raster needs and checks the export
 // takes it instead.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
-import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
-import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
-import MSAModelF from './model.ts'
 import { renderToSvg } from './renderToSvg.tsx'
+import {
+  createTestModel,
+  installSvgTestEnv,
+  syntheticProteinMsa,
+} from './svgTestUtil.ts'
 
 const dataUrl = 'data:image/png;base64,STUB'
 
 // enough of a 2d context for the raster: a color parser, an ImageData that is
 // really backed by bytes, and a canvas that reads back
 beforeAll(() => {
-  enableStaticRendering(true)
-  installHeadlessRenderEnv(globalThis, {
+  installSvgTestEnv({
     fillStyle: '#000000',
     clearRect: () => {},
     fillRect: () => {},
@@ -36,23 +37,10 @@ beforeAll(() => {
 })
 
 function makeModel(rows: number, cols: number) {
-  const letters = 'ACDEFGHIKLMNPQRSTVWY'
-  const msa = Array.from({ length: rows }, (_, r) => {
-    let s = ''
-    for (let c = 0; c < cols; c++) {
-      s += letters[(r * 7 + c * 3) % letters.length]
-    }
-    return `>seq${r}\n${s}`
-  }).join('\n')
-  const model = MSAModelF().create({
+  return createTestModel({
     id: 'raster',
-    type: 'MsaView',
-    height: 400,
-    msaFormat: 'fasta',
-    data: { msa },
+    data: { msa: syntheticProteinMsa(rows, cols) },
   })
-  model.setWidth(800)
-  return model
 }
 
 function exportEntire(model: ReturnType<typeof makeModel>) {

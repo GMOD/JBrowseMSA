@@ -7,19 +7,14 @@
 // until asked for, the stack is ordered and scaled, and the glyphs land inside
 // the track's own band.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
-import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
-import {
-  CHAR_WIDTH_RATIO,
-  installHeadlessRenderEnv,
-} from './headlessRenderEnv.ts'
-import MSAModelF from './model.ts'
+import { CHAR_WIDTH_RATIO } from './headlessRenderEnv.ts'
 import { renderToSvg } from './renderToSvg.tsx'
+import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
 beforeAll(() => {
-  enableStaticRendering(true)
-  installHeadlessRenderEnv()
+  installSvgTestEnv()
 })
 
 // column 0 is fully conserved A, column 1 is a 3:1 split of C over G, and
@@ -28,15 +23,7 @@ const msa = `>s1\nACA\n>s2\nACC\n>s3\nACG\n>s4\nAGT\n`
 const colWidth = 40
 
 function makeModel() {
-  const model = MSAModelF().create({
-    type: 'MsaView',
-    msaFormat: 'fasta',
-    height: 400,
-    colWidth,
-    data: { msa },
-  })
-  model.setWidth(1000)
-  return model
+  return createTestModel({ colWidth, data: { msa } }, 1000)
 }
 
 async function exportSvg(model: ReturnType<typeof makeModel>) {

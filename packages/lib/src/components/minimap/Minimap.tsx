@@ -76,7 +76,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
           width: msaCanvasWidth,
           height: MINIMAP_BAR_HEIGHT,
           boxSizing: 'border-box',
-          border: '1px solid #555',
+          border: `1px solid ${theme.palette.text.secondary}`,
         }}
       />
       <DragHandle

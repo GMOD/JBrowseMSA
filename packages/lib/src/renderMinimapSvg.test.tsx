@@ -5,30 +5,23 @@
 // to reach the right edge of the exported alignment column -- and it is drawn
 // only when the live view shows one at all.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
-import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
-import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
-import MSAModelF from './model.ts'
 import { renderToSvg } from './renderToSvg.tsx'
+import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
 beforeAll(() => {
-  enableStaticRendering(true)
-  installHeadlessRenderEnv()
+  installSvgTestEnv()
 })
 
 const width = 1000
 
 function makeModel(cols = 400) {
   const row = 'ACDEFGHIKL'.repeat(cols / 10)
-  const model = MSAModelF().create({
-    type: 'MsaView',
-    msaFormat: 'fasta',
-    height: 300,
-    data: { msa: `>seq1\n${row}\n>seq2\n${row}` },
-  })
-  model.setWidth(width)
-  return model
+  return createTestModel(
+    { height: 300, data: { msa: `>seq1\n${row}\n>seq2\n${row}` } },
+    width,
+  )
 }
 
 function exportViewport(model: ReturnType<typeof makeModel>) {

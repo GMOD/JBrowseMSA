@@ -3,35 +3,21 @@
 // Layout and palette of the exported figure itself, as opposed to what any one
 // layer draws inside it.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
-import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
-import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
-import MSAModelF from './model.ts'
 import { renderToSvg } from './renderToSvg.tsx'
+import {
+  createTestModel,
+  installSvgTestEnv,
+  syntheticProteinMsa,
+} from './svgTestUtil.ts'
 
 beforeAll(() => {
-  enableStaticRendering(true)
-  installHeadlessRenderEnv()
+  installSvgTestEnv()
 })
 
 function makeModel({ rows = 60, cols = 400 } = {}) {
-  const letters = 'ACDEFGHIKLMNPQRSTVWY'
-  const msa = Array.from({ length: rows }, (_, r) => {
-    const seq = Array.from(
-      { length: cols },
-      (_, c) => letters[(r * 7 + c * 3) % letters.length],
-    ).join('')
-    return `>seq${r}\n${seq}`
-  }).join('\n')
-  const model = MSAModelF().create({
-    type: 'MsaView',
-    msaFormat: 'fasta',
-    height: 400,
-    data: { msa },
-  })
-  model.setWidth(800)
-  return model
+  return createTestModel({ data: { msa: syntheticProteinMsa(rows, cols) } })
 }
 
 const rootRect = (svg: string) => /<rect[^>]*height="100%"[^>]*>/.exec(svg)?.[0]

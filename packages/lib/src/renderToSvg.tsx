@@ -237,7 +237,7 @@ function LegendSVG({
         width={width - 4}
         height={boxHeight}
         fill={theme.palette.background.paper}
-        stroke="#ccc"
+        stroke={theme.palette.divider}
         rx={2}
       />
       {visibleDomainTypes.map((d, i) => {

@@ -5,16 +5,13 @@
 // right. Polyfills mirror impgRender.test.tsx (svgcanvas needs
 // DOMMatrix/DOMPoint + a measureText).
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
-import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
-import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
-import MSAModelF from './model.ts'
 import { renderToSvg } from './renderToSvg.tsx'
+import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
 beforeAll(() => {
-  enableStaticRendering(true)
-  installHeadlessRenderEnv()
+  installSvgTestEnv()
 })
 
 const msa = `>seq1
@@ -27,14 +24,10 @@ function makeModel({
   start = 1,
   end = 5,
 }: { data?: string; start?: number; end?: number } = {}) {
-  const model = MSAModelF().create({
+  const model = createTestModel({
     id: 'domain-svg-test',
-    type: 'MsaView',
-    height: 400,
-    msaFormat: 'fasta',
     data: { msa: data },
   })
-  model.setWidth(800)
   model.setDomains({
     seq1: {
       xref: [{ id: 'seq1' }],

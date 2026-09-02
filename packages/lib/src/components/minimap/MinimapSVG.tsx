@@ -42,7 +42,7 @@ export default function MinimapSVG({
         y={0}
         width={msaCanvasWidth}
         height={MINIMAP_BAR_HEIGHT}
-        stroke="#555"
+        stroke={theme.palette.text.secondary}
         fill="none"
       />
       <rect
@@ -51,7 +51,7 @@ export default function MinimapSVG({
         width={w}
         height={MINIMAP_BAR_HEIGHT}
         fill={scrollbarThumbFill}
-        stroke="#555"
+        stroke={theme.palette.text.secondary}
       />
       <g transform={`translate(0 ${MINIMAP_BAR_HEIGHT})`}>
         <polygon fill={scrollbarThumbFill} points={polygonPoints} />

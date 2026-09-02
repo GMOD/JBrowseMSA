@@ -50,6 +50,7 @@ import {
   segmentShades,
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
+import { exportFileName } from './exportFileName.ts'
 import { fetchTextWithProgress, isAbortError } from './fetchUtils.ts'
 import { flatToTree } from './flatToTree.ts'
 import {
@@ -2299,7 +2300,7 @@ function stateModelFactory() {
         const { renderToSvg } = await import('./renderToSvg.tsx')
         const html = await renderToSvg(self as MsaViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })
-        saveAs(blob, 'image.svg')
+        saveAs(blob, exportFileName(self.msaFilehandle, 'svg'))
       },
       initFilter(arg: string) {
         if (!self.featureFilters.has(arg)) {
