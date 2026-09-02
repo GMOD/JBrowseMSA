@@ -146,10 +146,9 @@ Revisit if an agent produces one that does not.
 
 ## Order
 
-1. Column tracks from values. Smallest change, largest unlock, and the case the
-   JBrowse recipe already demonstrates on the genome side.
-2. Highlights in residue coordinates with labels. Turns a computed answer into a
-   link that points at it.
+1. Column tracks from values. Shipped 2026-09-01 as `columnTracks`.
+2. Highlights in residue coordinates with labels. Shipped 2026-09-01 as
+   `highlights`; `highlightColumns` stays as the legacy 0-based column case.
 3. GFF `color`, then JSON features.
 4. Row strips and tint.
 5. `export-svg` from a snapshot, so the agent loop closes.

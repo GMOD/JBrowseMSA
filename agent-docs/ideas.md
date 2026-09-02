@@ -13,6 +13,8 @@ stay written down so nobody re-derives them from scratch.
   render target: column tracks from values, labeled highlights in residue
   coordinates, colored GFF features, row strips from metadata. Reframes the
   items below: an agent computes, the snapshot carries it, the viewer draws.
+  `columnTracks` and `highlights` shipped; GFF color, row strips, and
+  `export-svg` from a snapshot remain.
 - [A selection model](ideas/selection-model.md) — no selected column range or
   row set exists, which is the single thing blocking the MSA editor. Copy,
   zoom-to-selection and selective export all land on top of it.
