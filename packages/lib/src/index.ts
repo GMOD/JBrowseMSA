@@ -6,6 +6,7 @@
 // members they rely on (e.g. mouseCol/setMousePos, setHighlightedColumns,
 // seqPosToVisibleCol/visibleColToSeqPos) are flagged inline in model.ts.
 export { renderToSvg } from './renderToSvg.tsx'
+export type { ExportSvgOptions } from './renderToSvg.tsx'
 // renderToSvg outside a browser needs DOM bits jsdom omits; react-msaview-cli
 // and the README figure generator both drive it that way
 export {
