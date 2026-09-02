@@ -39,6 +39,10 @@
                         Embedding
                       </a>
                     </li><li>
+                      <a href="/JBrowseMSA/layers">
+                        Layers
+                      </a>
+                    </li><li>
                       <a href="/JBrowseMSA/r-package">
                         R package
                       </a>
@@ -142,7 +146,34 @@ width measurement, and theming automatically.</p>
 
 
 
-<table><thead><tr><th>Prop</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>msa</code></td><td><code>string</code></td><td>Alignment text (FASTA, Stockholm, or Clustal)</td></tr><tr><td><code>tree</code></td><td><code>string</code></td><td>Newick tree text</td></tr><tr><td><code>gff</code></td><td><code>string</code></td><td>InterProScan domain annotations (GFF3 text)</td></tr><tr><td><code>msaFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for alignment</td></tr><tr><td><code>treeFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for tree</td></tr><tr><td><code>gffFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for domain GFF</td></tr><tr><td><code>colorScheme</code></td><td><code>string</code></td><td>Color scheme name (see below)</td></tr><tr><td><code>height</code></td><td><code>number</code></td><td>Widget height in pixels</td></tr></tbody></table>
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Prop</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>msa</code></td><td><code>string</code></td><td>Alignment text (FASTA, Stockholm, or Clustal)</td></tr><tr><td><code>tree</code></td><td><code>string</code></td><td>Newick tree text</td></tr><tr><td><code>gff</code></td><td><code>string</code></td><td>InterProScan domain annotations (GFF3 text)</td></tr><tr><td><code>msaFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for alignment</td></tr><tr><td><code>treeFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for tree</td></tr><tr><td><code>gffFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for domain GFF</td></tr><tr><td><code>colorScheme</code></td><td><code>string</code></td><td>Color scheme name (see below)</td></tr><tr><td><code>height</code></td><td><code>number</code></td><td>Widget height in pixels</td></tr><tr><td><code>columnTracks</code></td><td><code>ColumnTrackSpec[]</code></td><td>Tracks supplied as data (see below)</td></tr><tr><td><code>highlights</code></td><td><code>Highlight[]</code></td><td>Labeled highlights (see below)</td></tr></tbody></table>
+<h3 id="highlights">Highlights<a href="#highlights" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>Point at a residue, a column range, or a set of rows, with a label. Coordinates
+are 1-based and inclusive, as in GFF. With <code>row</code>, <code>start</code> and <code>end</code> are residues
+of that sequence and the viewer projects them through the alignment’s gaps;
+without it they are alignment columns. <code>rows</code> tints whole rows instead.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#79B8FF">MSAViewer</span></span>
+<span class="line"><span style="color:#B392F0">  msa</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{msa}</span></span>
+<span class="line"><span style="color:#B392F0">  tree</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{tree}</span></span>
+<span class="line"><span style="color:#B392F0">  highlights</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{[</span></span>
+<span class="line"><span style="color:#E1E4E8">    { row: </span><span style="color:#9ECBFF">'human'</span><span style="color:#E1E4E8">, start: </span><span style="color:#79B8FF">248</span><span style="color:#E1E4E8">, end: </span><span style="color:#79B8FF">248</span><span style="color:#E1E4E8">, label: </span><span style="color:#9ECBFF">'R248Q · 651/658 R'</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#E1E4E8">    { start: </span><span style="color:#79B8FF">40</span><span style="color:#E1E4E8">, end: </span><span style="color:#79B8FF">60</span><span style="color:#E1E4E8">, label: </span><span style="color:#9ECBFF">'NES'</span><span style="color:#E1E4E8">, color: </span><span style="color:#9ECBFF">'rgba(0,120,255,0.25)'</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#E1E4E8">    { rows: [</span><span style="color:#9ECBFF">'beluga'</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">'dolphin'</span><span style="color:#E1E4E8">], label: </span><span style="color:#9ECBFF">'frameshift carriers'</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#E1E4E8">  ]}</span></span>
+<span class="line"><span style="color:#E1E4E8">/></span></span></code></pre>
+<p>The list lives in the model snapshot (<code>model.setHighlights(...)</code> changes it), so
+a shared URL carries it, and the SVG export draws it. The full set of data
+layers is in <a href="docs/layers.md">docs/layers.md</a>.</p>
 <h2 id="advanced-model-based-api">Advanced: model-based API<a href="#advanced-model-based-api" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <p>For full control over the viewer state, use <code>MSAModelF</code> directly.</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> { MSAView, MSAModelF } </span><span style="color:#F97583">from</span><span style="color:#9ECBFF"> 'react-msaview'</span></span>
@@ -170,6 +201,25 @@ width measurement, and theming automatically.</p>
 <span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">setColWidth</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">16</span><span style="color:#E1E4E8">)</span></span>
 <span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">toggleCollapsed</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'node-id'</span><span style="color:#E1E4E8">)</span></span>
 <span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">fit</span><span style="color:#E1E4E8">() </span><span style="color:#6A737D">// fit both axes</span></span></code></pre>
+<h2 id="tracks-from-your-own-data">Tracks from your own data<a href="#tracks-from-your-own-data" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>Anything computed per column, or per residue of one row, draws as a track above
+the alignment. The viewer scales, places, and exports it and computes nothing.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#79B8FF">MSAViewer</span></span>
+<span class="line"><span style="color:#B392F0">  msa</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{msa}</span></span>
+<span class="line"><span style="color:#B392F0">  columnTracks</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{[</span></span>
+<span class="line"><span style="color:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#E1E4E8">      id: </span><span style="color:#9ECBFF">'dnds'</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">      name: </span><span style="color:#9ECBFF">'dN/dS'</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">      kind: </span><span style="color:#9ECBFF">'bar'</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">      values: dnds,</span></span>
+<span class="line"><span style="color:#E1E4E8">      max: </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">      row: </span><span style="color:#9ECBFF">'human'</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#E1E4E8">  ]}</span></span>
+<span class="line"><span style="color:#E1E4E8">/></span></span></code></pre>
+<p><code>kind: 'text'</code> takes <code>data</code>, one character per column, with an optional <code>colors</code>
+map. <code>model.setColumnTracks(tracks)</code> replaces the set at runtime. The
+<a href="docs/layers.md">layers reference</a> lists every field.</p>
 <h2 id="using-react-msaview-in-a-plain-html-file-with-umd-bundle">Using react-msaview in a plain HTML file with UMD bundle<a href="#using-react-msaview-in-a-plain-html-file-with-umd-bundle" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="html"><code><span class="line"><span style="color:#E1E4E8">&#x3C;</span><span style="color:#85E89D">html</span><span style="color:#E1E4E8">></span></span>
 <span class="line"><span style="color:#E1E4E8">  &#x3C;</span><span style="color:#85E89D">head</span><span style="color:#E1E4E8">></span></span>

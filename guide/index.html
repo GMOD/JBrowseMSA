@@ -39,6 +39,10 @@
                         Embedding
                       </a>
                     </li><li>
+                      <a href="/JBrowseMSA/layers">
+                        Layers
+                      </a>
+                    </li><li>
                       <a href="/JBrowseMSA/r-package">
                         R package
                       </a>
@@ -204,6 +208,13 @@ options to copy them and to show/hide gaps.</figcaption></figure>
 <li><strong>Share a session</strong> by copying the page URL — the full view state (data,
 colors, zoom, collapsed clades) is encoded in it, so a collaborator who opens
 the link sees exactly what you see.</li>
+<li><strong>Point at something</strong> before you share. The snapshot carries labeled
+highlights: a residue of a named sequence, a column range, or a set of rows,
+each with a note that draws beside it. They are written into the view state
+(see the
+<a href="https://github.com/GMOD/JBrowseMSA/blob/main/docs/layers.md">layers reference</a>),
+so a link can open on “R248, conserved in 651 of 658 orthologs” rather than on
+a bare column.</li>
 <li><strong>Export an image</strong> with <strong>Export SVG</strong> (file menu) for a crisp, scalable
 figure of the current viewport or the entire alignment, optionally including
 the minimap and annotation tracks.</li>
@@ -239,6 +250,12 @@ and the gap-only stretch in the middle draws nothing — matching the run of <co
 in the rows below it.</figcaption></figure>
 <p>Tracks are included in an SVG export when you check “include tracks” in the
 export dialog.</p>
+<p>A track can also arrive as data instead of being computed here. A <code>columnTracks</code>
+entry in the shared URL or session carries per-column values drawn as bars, or a
+per-column string drawn like a Stockholm annotation line, so a number computed
+outside the viewer, per column or per residue of one row, lands above the
+alignment with a name, a color, and its own menu entry. The
+<a href="https://gmod.org/JBrowseMSA/layers">layers reference</a> lists the fields.</p>
 <h2 id="settings-reference">Settings reference<a href="#settings-reference" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <p>Layout options live in two dropdowns in the header: <strong>MSA settings</strong> and <strong>tree
 settings</strong>, beside the color-scheme palette.</p>

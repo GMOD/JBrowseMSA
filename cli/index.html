@@ -39,6 +39,10 @@
                         Embedding
                       </a>
                     </li><li>
+                      <a href="/JBrowseMSA/layers">
+                        Layers
+                      </a>
+                    </li><li>
                       <a href="/JBrowseMSA/r-package">
                         R package
                       </a>
@@ -92,6 +96,11 @@ driven headlessly, so the figure matches what the app shows.</li>
 <p>Nothing else for <code>export-svg</code> and <code>interpro</code>. <code>interproscan</code> needs a backend to
 scan with — the EBI web API (the default, no install), or Docker, Singularity,
 or a local InterProScan (see <a href="#interproscan">interproscan</a>).</p>
+<p><code>export-svg</code> draws the alignment background as one embedded image when
+<a href="https://www.npmjs.com/package/@napi-rs/canvas">@napi-rs/canvas</a> is present. It
+is an optional dependency with prebuilt binaries, so a normal install brings it
+in; on a platform it does not cover, the export still works and draws a
+rectangle per cell instead, which is much larger and slower for big alignments.</p>
 <h2 id="setup">Setup<a href="#setup" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">npm</span><span style="color:#9ECBFF"> install</span><span style="color:#79B8FF"> -g</span><span style="color:#9ECBFF"> react-msaview-cli</span></span></code></pre>
 <p>From a clone of the monorepo instead:</p>

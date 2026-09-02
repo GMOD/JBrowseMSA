@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Layers — JBrowseMSA</title>
+    <meta name="description" content="Snapshot fields that carry data into the viewer: tracks from values, drawn without any computation in the app.">
+    <link rel="canonical" href="https://gmod.org/JBrowseMSA/layers/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230d233f'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='11' font-weight='bold' text-anchor='middle' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="JBrowseMSA">
+    <meta property="og:title" content="Layers — JBrowseMSA">
+    <meta property="og:description" content="Snapshot fields that carry data into the viewer: tracks from values, drawn without any computation in the app.">
+    <meta property="og:url" content="https://gmod.org/JBrowseMSA/layers/">
+    <meta property="og:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Layers — JBrowseMSA">
+    <meta name="twitter:description" content="Snapshot fields that carry data into the viewer: tracks from values, drawn without any computation in the app.">
+    <meta name="twitter:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
+  <link rel="stylesheet" href="/JBrowseMSA/_astro/Base.DWALGsgO.css"></head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/JBrowseMSA">JBrowseMSA</a>
+      <nav aria-label="Primary">
+        <a href="/JBrowseMSA">
+          Home
+        </a>
+        <div class="nav-group active">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-docs">
+                  Docs
+                </button>
+                <ul class="nav-menu" id="nav-menu-docs">
+                  <li>
+                      <a href="/JBrowseMSA/guide">
+                        User guide
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/embedding">
+                        Embedding
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/layers" class="active" aria-current="page">
+                        Layers
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/r-package">
+                        R package
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/cli">
+                        CLI
+                      </a>
+                    </li>
+                </ul>
+              </div><div class="nav-group">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-showcase">
+                  Showcase
+                </button>
+                <ul class="nav-menu" id="nav-menu-showcase">
+                  <li>
+                      <a href="/JBrowseMSA/gallery">
+                        Gallery
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/examples">
+                        Examples
+                      </a>
+                    </li>
+                </ul>
+              </div>
+        <a href="/JBrowseMSA/demo/">
+          Standalone app
+        </a>
+      </nav>
+      <a class="github-icon" href="https://github.com/GMOD/JBrowseMSA" target="_blank" rel="noopener noreferrer" aria-label="GitHub"></a>
+    </header>
+    <main>
+      
+  <article class="prose">
+    <h1 id="data-layers">Data layers</h1>
+<p>The snapshot is the API. Every field below is a property of the <code>MsaView</code> model,
+so it can be written into the standalone app’s <code>?data=</code> URL, passed to
+<code>MSAModelF().create</code>, set through <code>MSAViewer</code> props, or given to the R widget,
+and the viewer draws it without computing anything. It travels in a shared URL
+and the SVG export draws it. Wherever a row is named, positions are that row’s
+residues, 1-based and inclusive, as in GFF; the viewer projects them through the
+alignment’s gaps. Without a row they are alignment columns.</p>
+<h2 id="columntracks">columnTracks<a href="#columntracks" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>A track above the alignment, supplied as data. <code>kind: "bar"</code> draws one bar per
+column from <code>values</code>, scaled by <code>max</code> (default 1) and clamped to that range.
+<code>kind: "text"</code> draws one character per column from <code>data</code>, colored by <code>colors</code>.
+<code>row</code> makes <code>values</code> or <code>data</code> index that row’s residues instead of columns, so
+the first value is residue 1 and gaps in the alignment are filled in. A data
+track appears in the Tracks menu, toggles like any other, and exports to SVG.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"MsaView"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "data"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"msa"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">">human</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">MKAANSE</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">>mouse</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">MKA-NSE"</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#79B8FF">  "columnTracks"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#79B8FF">      "id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"dnds"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "name"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"dN/dS"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "kind"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"bar"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "values"</span><span style="color:#E1E4E8">: [</span><span style="color:#79B8FF">0.1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">0.4</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">1.8</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">0.2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">0.3</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">0.1</span><span style="color:#E1E4E8">],</span></span>
+<span class="line"><span style="color:#79B8FF">      "max"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "color"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#6a51a3"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "row"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"human"</span></span>
+<span class="line"><span style="color:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#79B8FF">      "id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"frame"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "name"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"Codon frame"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "kind"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"text"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "data"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"1231231"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "colors"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"1"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#ddd"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"2"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#bbb"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"3"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#999"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  ]</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Field</th><th>Kind</th><th>Meaning</th></tr></thead><tbody><tr><td><code>id</code></td><td>both</td><td>Unique key. The Tracks menu and <code>turnedOffTracks</code> use it</td></tr><tr><td><code>name</code></td><td>both</td><td>Label beside the track</td></tr><tr><td><code>values</code></td><td>bar</td><td>One number per column, or per residue of <code>row</code></td></tr><tr><td><code>max</code></td><td>bar</td><td>Value drawn at full height (default 1)</td></tr><tr><td><code>color</code></td><td>bar</td><td>Bar fill (default gray)</td></tr><tr><td><code>data</code></td><td>text</td><td>One character per column, or per residue of <code>row</code></td></tr><tr><td><code>colors</code></td><td>text</td><td>Character to background color; the active color scheme otherwise</td></tr><tr><td><code>row</code></td><td>both</td><td>Row name whose residues the values or characters index</td></tr><tr><td><code>height</code></td><td>both</td><td>Pixel height (default: the conservation track’s, or the row height)</td></tr></tbody></table>
+<p>A track over 50 kB serialized stays in the live model but leaves the snapshot,
+the same rule that keeps a large inline alignment out of a shared URL. Point a
+large alignment at a URL and keep the track under that size, or host the values
+and set them at runtime with <code>model.setColumnTracks(...)</code>.</p>
+<h2 id="highlights">highlights<a href="#highlights" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>A labeled band over a column range or a residue range, or a tint over a set of
+rows. <code>label</code> and <code>color</code> are optional; <code>color</code> is any CSS color and paints the
+band, its border, or the row tint.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#9ECBFF">"highlights"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#E1E4E8">  { </span><span style="color:#79B8FF">"row"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"human"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"start"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">248</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"end"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">248</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"label"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"R248Q · 651/658 R"</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#E1E4E8">  { </span><span style="color:#79B8FF">"start"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">40</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"end"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">60</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"label"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"NES"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"color"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"rgba(0,120,255,0.25)"</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#E1E4E8">  { </span><span style="color:#79B8FF">"rows"</span><span style="color:#E1E4E8">: [</span><span style="color:#9ECBFF">"beluga"</span><span style="color:#E1E4E8">, </span><span style="color:#9ECBFF">"dolphin"</span><span style="color:#E1E4E8">], </span><span style="color:#79B8FF">"label"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"frameshift carriers"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">]</span></span></code></pre>
+<p><code>row</code> plus <code>start</code>/<code>end</code> is a residue range of that row. Without <code>row</code> the range
+is alignment columns, also 1-based. <code>rows</code> marks whole rows across the tree
+labels and the alignment, with the label in the tree gutter. A range that lands
+entirely on hidden gappy columns draws nothing; one that straddles them shrinks
+to what is visible. Row names that match no row are ignored.</p>
+<p>React: the <code>highlights</code> prop on <code>MSAViewer</code>, or <code>model.setHighlights(list)</code>. R:
+<code>msaview(highlights = list(list(row = "human", start = 248, end = 248)))</code>.</p>
+  </article>
+
+    </main>
+    <footer class="site-footer">
+      <span>
+        react-msaview (JBrowseMSA) ·
+        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> · part of <a href="https://jbrowse.org">JBrowse</a>
+      </span>
+    </footer>
+    <script type="module">var e=[...document.querySelectorAll(`.site-header .nav-group-btn`)],t=e=>e.getAttribute(`aria-expanded`)===`true`,n=(e,t)=>{e.setAttribute(`aria-expanded`,t?`true`:`false`)},r=t=>{e.forEach(e=>{e!==t&&n(e,!1)})},i=e=>{r(e),n(e,!0)};e.forEach(e=>{let a=e.closest(`.nav-group`),o=e.getAttribute(`aria-controls`),s=o?[...document.querySelectorAll(`#${o} a`)]:[];e.addEventListener(`click`,()=>{t(e)?r():i(e)}),a instanceof HTMLElement&&(a.addEventListener(`keydown`,r=>{let a=document.activeElement===e,o=s.findIndex(e=>e===document.activeElement);r.key===`ArrowDown`?(r.preventDefault(),a?(i(e),s[0]?.focus()):o>=0&&s[Math.min(o+1,s.length-1)].focus()):r.key===`ArrowUp`&&o===0?(r.preventDefault(),e.focus()):r.key===`ArrowUp`&&o>0?(r.preventDefault(),s[o-1].focus()):r.key===`Home`&&o>=0?(r.preventDefault(),s[0].focus()):r.key===`End`&&o>=0?(r.preventDefault(),s[s.length-1].focus()):r.key===`Escape`&&t(e)&&(n(e,!1),e.focus())}),a.addEventListener(`focusout`,t=>{let r=t.relatedTarget;(!(r instanceof Node)||!a.contains(r))&&n(e,!1)}))}),document.addEventListener(`click`,e=>{(!(e.target instanceof Element)||!e.target.closest(`.site-header .nav-group`))&&r()}),document.addEventListener(`keydown`,e=>{e.key===`Escape`&&r()});</script></body>
+</html>
