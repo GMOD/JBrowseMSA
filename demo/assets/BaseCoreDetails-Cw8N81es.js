@@ -1,0 +1,2 @@
+import{a as e,t}from"./jsx-runtime-B-hcVAMW.js";import{t as n}from"./BaseCard-CJI24FWq.js";import{t as r}from"./CoreDetails-hk8iCMDD.js";var i=e(t(),1);function a(e){let{title:t=`Primary data`,defaultExpanded:a}=e;return(0,i.jsx)(n,{title:t,defaultExpanded:a,children:(0,i.jsx)(r,{...e})})}export{a as default};
+//# sourceMappingURL=BaseCoreDetails-Cw8N81es.js.map

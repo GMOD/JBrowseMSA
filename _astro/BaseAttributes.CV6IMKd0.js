@@ -1,1 +1,0 @@
-import{r as e}from"./rolldown-runtime.hePW80VL.js";import{t}from"./jsx-runtime.CWLBoBiw.js";import{t as n}from"./BaseCard.BiGInWQH.js";import{t as r}from"./Attributes.C7Aw-3HY.js";var i=e(t(),1);function a(e){let{title:t=`Attributes`,defaultExpanded:a,feature:o}=e;return(0,i.jsx)(n,{title:t,defaultExpanded:a,children:(0,i.jsx)(r,{...e,attributes:o})})}export{a as default};

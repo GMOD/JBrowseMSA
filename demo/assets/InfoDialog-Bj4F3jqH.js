@@ -1,0 +1,2 @@
+import{a as e,t}from"./jsx-runtime-B-hcVAMW.js";import{n,t as r}from"./Dialog-BYX_n4j4.js";import{t as i}from"./Button-8l94P1Iy.js";import{t as a}from"./DialogActions-8XL2Q_37.js";import{t as o}from"./mobxreact-BmA0BizA.js";var s=e(t(),1),c=o(function(e){let{onClose:t,closeText:o=`Close`,actions:c,children:l,...u}=e;return(0,s.jsxs)(r,{onClose:()=>{t()},...u,children:[(0,s.jsx)(n,{children:l}),(0,s.jsxs)(a,{children:[c,(0,s.jsx)(i,{variant:`contained`,color:`primary`,onClick:()=>{t()},children:o})]})]})});export{c as t};
+//# sourceMappingURL=InfoDialog-Bj4F3jqH.js.map
