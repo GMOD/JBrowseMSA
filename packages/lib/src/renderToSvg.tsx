@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React from 'react'
 
-import { renderToStaticMarkup } from '@jbrowse/core/util'
 import { when } from 'mobx'
 
 import { visibleRowRange } from './components/getVisibleLeaves.ts'
@@ -13,6 +12,7 @@ import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
+import { renderToStaticMarkup } from './renderToStaticMarkup.ts'
 import { colorContrast } from './util.ts'
 
 import type { MsaViewModel } from './model.ts'

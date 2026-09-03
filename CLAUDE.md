@@ -61,7 +61,17 @@ canvas with a tiled rendering system for scalability.
   tests green here but lands as `undefined` on a deployed host
   (`TypeError: X is not a function`). Prefer long-established core exports; when
   a new one is a trivial helper, inline it instead (see `statusMessageText` in
-  `packages/lib/src/fetchUtils.ts`).
+  `packages/lib/src/fetchUtils.ts`). The risk runs the other way too, and
+  "long-established" is not a defence: core can _drop_ an export, and then a
+  bundle that built and booted fine throws the first time a user reaches the
+  code path that reads it. That is what happened to `renderToStaticMarkup`,
+  which core removed from the `@jbrowse/core/util` barrel to keep react-dom out
+  of the RPC worker; only the SVG export called it, so jbrowse-plugin-msaview
+  3.4.0 and -tview 2.2.1 shipped and loaded normally and broke on export. It is
+  now inlined in `packages/lib/src/renderToStaticMarkup.ts`. **A core import
+  whose only caller is off the boot path is the dangerous shape** — nothing here
+  or in the downstream plugin's host-compat probe, which asserts only that the
+  app boots and the plugin global is defined, can see it.
 
 ## Key entry points
 
