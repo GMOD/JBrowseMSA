@@ -1,7 +1,68 @@
 // Self-contained JBrowse session URLs for the gallery's "Inside JBrowse"
-// section. Each is the output of a generator script under scripts/ that
-// serializes a session spec (views + connectedFeature + file locations) into a
-// spec- URL for the published jbrowse-plugin-msaview:
+// section.
+//
+// The short-form links are written by hand: since jbrowse-plugin-msaview 3.5
+// a spec names the transcript (`connectedTranscript`) and what to build
+// (`orthologParams` / `searchParams`), and the plugin looks the exon model up
+// in the genome view's own gene track at launch. Nothing here is generated.
+const HUB_HG38 = 'https://jbrowse.org/ucsc/hg38/config.json'
+
+function specUrl(views: Record<string, unknown>[]) {
+  return `https://jbrowse.org/code/jb2/main/?config=${encodeURIComponent(HUB_HG38)}&session=spec-${encodeURIComponent(JSON.stringify({ views }))}`
+}
+
+const tp53Genome = {
+  type: 'LinearGenomeView',
+  id: 'lgv-tp53',
+  assembly: 'hg38',
+  loc: 'chr17:7,668,000-7,688,000',
+  tracks: ['hg38-ncbiRefSeqCurated'],
+}
+
+// TP53's UniRef50 cluster: every reference-proteome entry in UniProtKB within
+// 50% identity of p53, aligned to the transcript's translation in the browser.
+// No job at any service, so it opens in seconds.
+export const tp53UnirefBrowser = specUrl([
+  tp53Genome,
+  {
+    type: 'MsaView',
+    connectedViewId: 'lgv-tp53',
+    connectedTranscript: 'NM_000546.6',
+    placement: 'splitRight',
+    allowedGappyness: 50,
+    orthologParams: {
+      taxId: 9606,
+      geneCandidates: ['TP53'],
+      source: 'uniref',
+      msaAlgorithm: 'browser',
+      maxSpecies: 100,
+    },
+  },
+])
+
+// The same gene through a phmmer search of UniProt's representative proteomes
+// at 15% similarity (rp15), the widest net EBI offers: p53's remote relatives
+// across the tree of life, including p63/p73 and invertebrate p53 family
+// members a 50% cluster cannot reach. The wait is EBI's queue.
+export const tp53PhmmerRp15 = specUrl([
+  tp53Genome,
+  {
+    type: 'MsaView',
+    connectedViewId: 'lgv-tp53',
+    connectedTranscript: 'NM_000546.6',
+    placement: 'splitRight',
+    allowedGappyness: 50,
+    searchParams: {
+      searchProgram: 'phmmer',
+      blastDatabase: 'rp15',
+      maxHits: 100,
+    },
+  },
+])
+
+// The remaining links are each the output of a generator script under scripts/
+// that serializes a session spec (views + connectedFeature + file locations)
+// into a spec- URL for the published jbrowse-plugin-msaview:
 //   tp53Protein3d — scripts/tp53-protein3d-link/generate.mjs (genome + MSA + AlphaFold)
 //   proteinLinked — scripts/src-protein-link/generate.mjs    (genome + MSA, SRC)
 //   brafV600      — scripts/braf-protein-link/generate.mjs   (genome + MSA, BRAF V600)

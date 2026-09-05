@@ -108,8 +108,20 @@ The prototype module this note was written around,
 alignment, so keeping a second copy of the same fetcher in the website only
 invited edits to the dead one.
 
-NCBI stays the default, and two live sources is the ceiling: further species
-coverage belongs in the hosted-alignment path (`msaIndexedLocation`, fed by
-`scripts/gene-explorer/build-data.mjs`), which costs no per-source code at all.
-The plugin's DEVELOPERS.md records that boundary where a third source would be
-added.
+NCBI stays the default. Further species coverage belongs in the hosted-alignment
+path (`msaIndexedLocation`, fed by `scripts/gene-explorer/build-data.mjs`),
+which costs no per-source code at all.
+
+## UniRef, 2026-09-05
+
+A third source did land, and it answers a different question from the two above:
+not "this gene's ortholog per species" but "everything in UniProtKB within 50%
+identity of this protein", which UniProt has already clustered.
+`source: 'uniref'` in the plugin resolves the gene or a UniProt accession, finds
+its UniRef50 (or 90) cluster, and lists the members one per species, reference
+proteomes by default, from rest.uniprot.org (CORS `*`). Human TP53: 191 members,
+129 in reference proteomes, about two seconds. Paired with
+`msaAlgorithm: 'browser'` the launch never touches EBI, which on the day it was
+built took 12 to 15 minutes per phmmer job. What a cluster cannot do is reach
+remote homologs, so phmmer stays for that; both are session-spec sources
+(`orthologParams`, `searchParams`) and jb2hubs' protein browser offers each.
