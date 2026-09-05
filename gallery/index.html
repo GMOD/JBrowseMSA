@@ -191,6 +191,28 @@
         vertebrates on the R248 hotspot, with ClinVar.
       </li>
     </ul>
+
+    <p>
+      The links above carry their alignments as files. The two below carry a
+      <em>request</em> instead, and the view builds the alignment when it opens:
+      the spec names the transcript (<code>connectedTranscript</code>) and the
+      plugin looks its exon model up in the genome view's gene track, so the whole
+      session is a URL short enough to type.
+    </p>
+    <ul>
+      <li>
+        <a href="https://jbrowse.org/code/jb2/main/?config=https%3A%2F%2Fjbrowse.org%2Fucsc%2Fhg38%2Fconfig.json&amp;session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22id%22%3A%22lgv-tp53%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr17%3A7%2C668%2C000-7%2C688%2C000%22%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeqCurated%22%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22connectedViewId%22%3A%22lgv-tp53%22%2C%22connectedTranscript%22%3A%22NM_000546.6%22%2C%22placement%22%3A%22splitRight%22%2C%22allowedGappyness%22%3A50%2C%22orthologParams%22%3A%7B%22taxId%22%3A9606%2C%22geneCandidates%22%3A%5B%22TP53%22%5D%2C%22source%22%3A%22uniref%22%2C%22msaAlgorithm%22%3A%22browser%22%2C%22maxSpecies%22%3A100%7D%7D%5D%7D" target="_blank" rel="noopener">TP53 UniRef cluster ↗</a> —
+        every reference-proteome protein in UniProtKB within 50% identity of p53,
+        looked up from UniProt and aligned to the transcript in the browser. No job
+        at any service, so it opens in seconds.
+      </li>
+      <li>
+        <a href="https://jbrowse.org/code/jb2/main/?config=https%3A%2F%2Fjbrowse.org%2Fucsc%2Fhg38%2Fconfig.json&amp;session=spec-%7B%22views%22%3A%5B%7B%22type%22%3A%22LinearGenomeView%22%2C%22id%22%3A%22lgv-tp53%22%2C%22assembly%22%3A%22hg38%22%2C%22loc%22%3A%22chr17%3A7%2C668%2C000-7%2C688%2C000%22%2C%22tracks%22%3A%5B%22hg38-ncbiRefSeqCurated%22%5D%7D%2C%7B%22type%22%3A%22MsaView%22%2C%22connectedViewId%22%3A%22lgv-tp53%22%2C%22connectedTranscript%22%3A%22NM_000546.6%22%2C%22placement%22%3A%22splitRight%22%2C%22allowedGappyness%22%3A50%2C%22searchParams%22%3A%7B%22searchProgram%22%3A%22phmmer%22%2C%22blastDatabase%22%3A%22rp15%22%2C%22maxHits%22%3A100%7D%7D%5D%7D" target="_blank" rel="noopener">TP53 phmmer search ↗</a> —
+        the same gene through a phmmer search of UniProt's representative proteomes
+        at 15% similarity, the widest net EBI offers: p53's relatives across the tree
+        of life. The wait is EBI's queue, from seconds to many minutes.
+      </li>
+    </ul>
   </article>
 
     </main>
