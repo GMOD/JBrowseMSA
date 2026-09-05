@@ -37,16 +37,21 @@ if (capture('git status --porcelain')) {
   process.exit(1)
 }
 run('git fetch origin main')
-const localHead = capture('git rev-parse HEAD')
-const remoteHead = capture('git rev-parse origin/main')
-if (localHead !== remoteHead) {
-  const ahead = Number(capture('git rev-list --count origin/main..HEAD'))
-  const behind = Number(capture('git rev-list --count HEAD..origin/main'))
+const behind = Number(capture('git rev-list --count HEAD..origin/main'))
+if (behind) {
   console.error(
-    behind
-      ? `main is ${behind} commit(s) behind origin/main; pull before releasing`
-      : `main is ${ahead} commit(s) ahead of origin/main; push before releasing`,
+    `main is ${behind} commit(s) behind origin/main; pull before releasing`,
   )
+  process.exit(1)
+}
+
+// Pushes HEAD if it is ahead, then blocks until CI is green on that exact
+// commit. The build below is the only other thing standing between a bad tree
+// and a tag, and it says nothing about lint, typecheck or the test suite.
+try {
+  run('node scripts/require-green-ci.mjs')
+} catch {
+  // The gate already said why, in more words than a stack trace would
   process.exit(1)
 }
 
