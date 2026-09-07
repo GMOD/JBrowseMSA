@@ -67,5 +67,10 @@
     "typescript5": "npm:typescript@^5.9.3",
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "overrides": {
+      "js-yaml": "4.3.1"
+    }
   }
 }
