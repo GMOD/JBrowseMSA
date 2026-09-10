@@ -100,9 +100,86 @@ function residuePoints(atoms) {
     if (a.label_atom_id !== (isGly ? 'CA' : 'CB')) {
       continue
     }
-    points.set(seqId, [Number(a.Cartn_x), Number(a.Cartn_y), Number(a.Cartn_z)])
+    points.set(seqId, {
+      comp: a.label_comp_id,
+      xyz: [Number(a.Cartn_x), Number(a.Cartn_y), Number(a.Cartn_z)],
+    })
   }
   return points
+}
+
+// prettier-ignore
+const THREE_TO_ONE = {
+  ALA: 'A', ARG: 'R', ASN: 'N', ASP: 'D', CYS: 'C', GLN: 'Q', GLU: 'E',
+  GLY: 'G', HIS: 'H', ILE: 'I', LEU: 'L', LYS: 'K', MET: 'M', PHE: 'F',
+  PRO: 'P', SER: 'S', THR: 'T', TRP: 'W', TYR: 'Y', VAL: 'V',
+  // modified residues that are still the residue they were made from, which is
+  // how the row spells them. PTR is the one this example turns on
+  PTR: 'Y', SEP: 'S', TPO: 'T', MSE: 'M',
+}
+
+/**
+ * The whole point of a contact map on an alignment is that the arcs land on the
+ * residues they came from, and three coordinate systems have to agree for that:
+ * the structure's, UniProt's, and the alignment row's. SIFTS settles the first
+ * two. The third is an assumption -- that this row's residue n IS UniProt's
+ * residue n -- which holds for a full-length sequence and fails silently for a
+ * fragment row, the `/27-137` case a domain alignment is full of. It fails in
+ * the direction that looks like it worked, so check it against what the
+ * structure actually contains rather than trusting it.
+ */
+function checkRowNumbering(points, toUniprot, row) {
+  const seq = readRow(row)
+  let checked = 0
+  const mismatches = []
+  for (const [seqId, { comp }] of points) {
+    const pos = toUniprot(seqId)
+    const expected = THREE_TO_ONE[comp]
+    if (pos === undefined || !expected) {
+      continue
+    }
+    checked++
+    const actual = seq[pos - 1]
+    if (actual !== expected) {
+      mismatches.push(
+        `${pos}: row has ${actual ?? '(past the end)'}, ${PDB.toUpperCase()} has ${comp}`,
+      )
+    }
+  }
+  if (!checked) {
+    throw new Error(
+      `no residue of ${row} could be checked against the structure`,
+    )
+  }
+  if (mismatches.length) {
+    throw new Error(
+      `${mismatches.length}/${checked} residues disagree between ${row} and ` +
+        `${ACCESSION} numbering, so the contacts would be drawn in the wrong ` +
+        `places. Is that row a fragment rather than the full-length sequence?\n  ` +
+        mismatches.slice(0, 5).join('\n  '),
+    )
+  }
+  console.log(`${checked} residues of ${row} match ${PDB.toUpperCase()}`)
+}
+
+// the alignment row, ungapped, straight out of the committed constant
+function readRow(row) {
+  const msa = /export const kinaseMSA = `(.*?)`/s.exec(
+    fs.readFileSync(exampleData, 'utf8'),
+  )?.[1]
+  if (!msa) {
+    throw new Error('kinaseMSA not found in exampleData.ts')
+  }
+  const seq = msa
+    .split('\n')
+    .filter(line => line.startsWith(`${row} `) || line.startsWith(`${row}\t`))
+    .map(line => line.slice(row.length).trim())
+    .join('')
+    .replaceAll('-', '')
+  if (!seq) {
+    throw new Error(`row ${row} not found in kinaseMSA`)
+  }
+  return seq
 }
 
 // SIFTS gives the mapping as blocks; within one block structure numbering and
@@ -161,6 +238,7 @@ if (!mappings) {
 
 const points = residuePoints(parseAtomSite(cif))
 const toUniprot = sequenceToUniprot(mappings)
+checkRowNumbering(points, toUniprot, ROW)
 const regions = readRegions()
 const lastDomainEnd = Math.max(...regions.map(r => r.end))
 const regionOf = pos => {
@@ -183,8 +261,8 @@ for (let i = 0; i < residues.length; i++) {
     if (!ra || !rb || ra === rb) {
       continue
     }
-    const [ax, ay, az] = points.get(a.seqId)
-    const [bx, by, bz] = points.get(b.seqId)
+    const [ax, ay, az] = points.get(a.seqId).xyz
+    const [bx, by, bz] = points.get(b.seqId).xyz
     const d = Math.hypot(ax - bx, ay - by, az - bz)
     if (d < CUTOFF) {
       contacts.push({ start: a.pos, end: b.pos, pair: `${ra} - ${rb}` })

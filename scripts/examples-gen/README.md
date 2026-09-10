@@ -276,6 +276,17 @@ plausible — arcs land somewhere.
 that offset. The check that it worked, for Src, is that the SH2 arcs land on
 residue 527: the phosphotyrosine the domain actually binds.
 
+There is a third coordinate system behind those two, and it is the one nobody
+looks up: the alignment row's. Putting a contact at UniProt residue _n_ on the
+row assumes the row's residue _n_ is that residue, which is true of a
+full-length sequence and false of a fragment — a domain alignment whose rows are
+named `/27-137` puts every arc in the wrong place, quietly. So the script does
+not assume it. It reads the residue identities out of the structure, maps them
+through SIFTS, and compares each one against the row's residue at that position;
+mismatches abort with the count and the first few. For Src all 450 checked
+residues agree, and an offset of one anywhere in the chain breaks 425 of them —
+a check that fails loudly on the failure that otherwise looks like success.
+
 ## The other real examples
 
 Two real examples predate this pipeline and are documented here for provenance:
