@@ -37,12 +37,15 @@
 #'   \code{"clustalx_protein_dynamic"}, \code{"percent_identity_dynamic"}.
 #' @param column_tracks Tracks supplied as data, drawn above the alignment
 #'   beside the computed conservation tracks. A list of tracks, each a list
-#'   with \code{id}, \code{name}, \code{kind} (\code{"bar"} or
-#'   \code{"text"}), and either \code{values} (a numeric vector, one per
-#'   column, drawn as bars scaled by \code{max}, default 1) or \code{data} (a
-#'   string, one character per column, colored by \code{colors}). Give
-#'   \code{row} to index the residues of that row instead of alignment
-#'   columns. \code{color} sets a bar track's color and \code{height} its
+#'   with \code{id}, \code{name}, \code{kind} (\code{"bar"},
+#'   \code{"text"} or \code{"arc"}), and then \code{values} (a numeric
+#'   vector, one per column, drawn as bars scaled by \code{max}, default 1),
+#'   \code{data} (a string, one character per column, colored by
+#'   \code{colors}), or \code{arcs} (pairs of positions joined by a curve,
+#'   given as a data frame with \code{start} and \code{end} columns and an
+#'   optional \code{color}, or a list of such lists). Give \code{row} to
+#'   index the residues of that row instead of alignment columns.
+#'   \code{color} sets a bar or arc track's color and \code{height} its
 #'   pixel height.
 #' @param show_branch_len Logical. If \code{TRUE}, draw branch lengths
 #'   (phylogram). If \code{FALSE}, draw a cladogram.
@@ -330,14 +333,39 @@ convert_column_tracks <- function(tracks) {
     for (field in c("id", "name", "kind")) {
       if (is.null(track[[field]])) stop("column track is missing '", field, "'")
     }
-    if (!track$kind %in% c("bar", "text")) {
-      stop("column track kind must be 'bar' or 'text', got '", track$kind, "'")
+    if (!track$kind %in% c("bar", "text", "arc")) {
+      stop("column track kind must be 'bar', 'text' or 'arc', got '",
+           track$kind, "'")
     }
     # a one-column vector would unbox to a scalar; I() keeps it an array
     if (!is.null(track$values)) track$values <- I(as.numeric(track$values))
     if (!is.null(track$colors)) track$colors <- as.list(track$colors)
+    if (!is.null(track$arcs)) track$arcs <- convert_arcs(track$arcs)
     track
   })
+}
+
+# An arc track's pairs, as a data frame of start/end (+ optional color) or a
+# list of such lists. Both land as a JSON array of objects, and a single arc
+# stays an array rather than unboxing to one object.
+convert_arcs <- function(arcs) {
+  if (is.data.frame(arcs)) {
+    if (!all(c("start", "end") %in% names(arcs))) {
+      stop("an arc data frame must have 'start' and 'end' columns")
+    }
+    arcs <- lapply(seq_len(nrow(arcs)), function(i) as.list(arcs[i, ]))
+  }
+  if (!is.list(arcs)) {
+    stop("arcs must be a data frame or a list of lists with start and end")
+  }
+  I(lapply(arcs, function(arc) {
+    for (field in c("start", "end")) {
+      if (is.null(arc[[field]])) stop("arc is missing '", field, "'")
+      arc[[field]] <- as.numeric(arc[[field]])
+    }
+    if (!is.null(arc$color)) arc$color <- as.character(arc$color)
+    arc
+  }))
 }
 
 convert_gff <- function(gff) {

@@ -55,12 +55,15 @@ msaview(
 
 \item{column_tracks}{Tracks supplied as data, drawn above the alignment
 beside the computed conservation tracks. A list of tracks, each a list
-with \code{id}, \code{name}, \code{kind} (\code{"bar"} or
-\code{"text"}), and either \code{values} (a numeric vector, one per
-column, drawn as bars scaled by \code{max}, default 1) or \code{data} (a
-string, one character per column, colored by \code{colors}). Give
-\code{row} to index the residues of that row instead of alignment
-columns. \code{color} sets a bar track's color and \code{height} its
+with \code{id}, \code{name}, \code{kind} (\code{"bar"},
+\code{"text"} or \code{"arc"}), and then \code{values} (a numeric
+vector, one per column, drawn as bars scaled by \code{max}, default 1),
+\code{data} (a string, one character per column, colored by
+\code{colors}), or \code{arcs} (pairs of positions joined by a curve,
+given as a data frame with \code{start} and \code{end} columns and an
+optional \code{color}, or a list of such lists). Give \code{row} to
+index the residues of that row instead of alignment columns.
+\code{color} sets a bar or arc track's color and \code{height} its
 pixel height.}
 
 \item{show_branch_len}{Logical. If \code{TRUE}, draw branch lengths

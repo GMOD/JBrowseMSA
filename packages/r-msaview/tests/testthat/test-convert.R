@@ -209,6 +209,44 @@ test_that("convert_column_tracks serializes colors as an object", {
   expect_match(as.character(json), '"colors":{"1":"#aaa","2":"#bbb"}', fixed = TRUE)
 })
 
+test_that("convert_column_tracks takes arcs as a data frame", {
+  tracks <- msaviewr:::convert_column_tracks(list(
+    list(id = "s", name = "S", kind = "arc", row = "Human",
+         arcs = data.frame(start = c(31, 43), end = c(96, 109)))
+  ))
+  json <- as.character(jsonlite::toJSON(tracks, auto_unbox = TRUE))
+  expect_match(json, '"arcs":[{"start":31,"end":96},{"start":43,"end":109}]',
+               fixed = TRUE)
+})
+
+test_that("convert_column_tracks keeps a single arc an array", {
+  tracks <- msaviewr:::convert_column_tracks(list(
+    list(id = "s", name = "S", kind = "arc",
+         arcs = list(list(start = 1, end = 10, color = "#b8860b")))
+  ))
+  json <- as.character(jsonlite::toJSON(tracks, auto_unbox = TRUE))
+  expect_match(json, '"arcs":[{"start":1,"end":10,"color":"#b8860b"}]',
+               fixed = TRUE)
+})
+
+test_that("convert_column_tracks rejects an arc without an end", {
+  expect_error(
+    msaviewr:::convert_column_tracks(list(
+      list(id = "s", name = "S", kind = "arc", arcs = list(list(start = 1)))
+    )),
+    "missing 'end'"
+  )
+})
+
+test_that("convert_column_tracks rejects an unknown kind", {
+  expect_error(
+    msaviewr:::convert_column_tracks(list(
+      list(id = "t", name = "T", kind = "line")
+    )),
+    "must be 'bar', 'text' or 'arc'"
+  )
+})
+
 test_that("convert_column_tracks rejects a track without a kind", {
   expect_error(
     msaviewr:::convert_column_tracks(list(list(id = "t", name = "T"))),
