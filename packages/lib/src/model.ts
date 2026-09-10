@@ -94,11 +94,13 @@ import {
   transform,
 } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
+import { parseWuss } from './wuss.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
 import type {
   Annotation,
+  Arc,
   BasicTrack,
   ColumnTrackSpec,
   DomainBand,
@@ -122,6 +124,11 @@ function parseTreeText(text: string) {
 // conservation does and costs three times the vertical space, so it waits to be
 // asked for.
 const defaultOffTracks = new Set(['sequence-logo'])
+
+// base-pair arcs: one color for the nested helices, one for a pseudoknot, whose
+// whole point is that it crosses them
+const HELIX_ARC = '#4e79a7'
+const PSEUDOKNOT_ARC = '#e15759'
 
 // a data track over this size stays in the live model but leaves the snapshot,
 // the same rule DataModel applies to an inline document
@@ -489,6 +496,11 @@ function stateModelFactory() {
        * one too short to identify
        */
       sequenceLogoTrackHeight: 80,
+
+      /**
+       * #volatile
+       */
+      arcTrackHeight: 50,
 
       /**
        * #volatile
@@ -1662,6 +1674,27 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * the base pairs of the consensus secondary structure, as arcs. The WUSS
+       * string is collapsed through the hidden columns before it is parsed, so
+       * the pairs land in the same visible column space the text track does
+       */
+      get secondaryStructureArcs(): Arc[] | undefined {
+        const { blanks, hideGapsEffective } = self
+        const ss = this.secondaryStructureConsensus
+        if (!ss) {
+          return undefined
+        }
+        return parseWuss(hideGapsEffective ? skipBlanks(blanks, ss) : ss).map(
+          ({ start, end, pseudoknot }) => ({
+            start,
+            end,
+            color: pseudoknot ? PSEUDOKNOT_ARC : HELIX_ARC,
+          }),
+        )
+      },
+
+      /**
+       * #getter
        */
       get adapterTrackModels(): BasicTrack[] {
         const { rowHeight, MSA, hideGapsEffective, blanks } = self
@@ -1703,8 +1736,37 @@ function stateModelFactory() {
         }
         const skip = <T>(items: T[]) =>
           hideGapsEffective ? dropBlanks(blanks, items) : items
-        return new Map<string, { values?: number[]; data?: string }>(
+        // an arc names two positions rather than one per column, so it takes
+        // the same two steps the arrays take -- a row's residues onto columns,
+        // then columns onto the visible ones -- as a lookup. visibleColsBefore,
+        // not globalColToVisibleCol: an endpoint in a hidden column collapses
+        // to where that column went instead of taking the whole arc with it
+        const resolve = (track: ColumnTrackSpec, pos: number) => {
+          const col = track.row
+            ? self.seqPosGlobalColIndex.get(track.row)?.[pos - 1]
+            : pos - 1
+          if (col === undefined || col < 0 || col >= width) {
+            return undefined
+          }
+          return hideGapsEffective ? visibleColsBefore(blanks, col) : col
+        }
+        return new Map<
+          string,
+          { values?: number[]; data?: string; arcs?: Arc[] }
+        >(
           self.columnTracks.map(track => {
+            if (track.kind === 'arc') {
+              const arcs = (track.arcs ?? [])
+                .map(arc => {
+                  const start = resolve(track, Math.min(arc.start, arc.end))
+                  const end = resolve(track, Math.max(arc.start, arc.end))
+                  return start !== undefined && end !== undefined && start < end
+                    ? { start, end, color: arc.color }
+                    : undefined
+                })
+                .filter(notEmpty)
+              return [track.id, { arcs }] as const
+            }
             if (track.kind === 'bar') {
               const max = track.max ?? 1
               const values = skip(project(track, track.values ?? [], 0)).map(
@@ -1721,19 +1783,25 @@ function stateModelFactory() {
        * #getter
        */
       get columnTrackModels(): BasicTrack[] {
+        const defaultHeight = {
+          bar: self.conservationTrackHeight,
+          arc: self.arcTrackHeight,
+          text: self.rowHeight,
+          logo: self.sequenceLogoTrackHeight,
+        }
         return self.columnTracks.map(track => ({
           model: {
             id: track.id,
             name: track.name,
             kind: track.kind,
-            height:
-              track.height ??
-              (track.kind === 'bar'
-                ? self.conservationTrackHeight
-                : self.rowHeight),
+            height: track.height ?? defaultHeight[track.kind],
+            // the spec has one `color`; bar and arc are separate track models
+            // that read it under their own name
             barColor: track.color,
+            arcColor: track.color,
             customColorScheme: track.colors,
             data: this.columnTrackContent.get(track.id)?.data,
+            arcs: this.columnTrackContent.get(track.id)?.arcs,
           },
           ReactComponent: TrackBlocks,
         }))
@@ -1762,8 +1830,24 @@ function stateModelFactory() {
           kind: 'logo' as const,
           height: self.sequenceLogoTrackHeight,
         }
+        const arcs = this.secondaryStructureArcs
+        const basePairTrack = arcs?.length
+          ? [
+              {
+                id: 'base-pairs',
+                name: 'Base pairs',
+                kind: 'arc' as const,
+                height: self.arcTrackHeight,
+                arcs,
+              },
+            ]
+          : []
         return [
           ...this.adapterTrackModels,
+          ...basePairTrack.map(model => ({
+            model,
+            ReactComponent: TrackBlocks,
+          })),
           ...this.columnTrackModels,
           ...[
             conservationTrack,
@@ -2269,6 +2353,12 @@ function stateModelFactory() {
        */
       setSequenceLogoTrackHeight(arg: number) {
         self.sequenceLogoTrackHeight = arg
+      },
+      /**
+       * #action
+       */
+      setArcTrackHeight(arg: number) {
+        self.arcTrackHeight = arg
       },
       /**
        * #action

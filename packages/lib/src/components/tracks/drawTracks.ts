@@ -4,7 +4,7 @@ import { visibleColRange } from '../msa/visibleColRange.ts'
 
 import type { ColumnCounts } from '../../columnCounts.ts'
 import type { MsaViewModel } from '../../model.ts'
-import type { BasicTrack } from '../../types.ts'
+import type { Arc, BasicTrack } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
@@ -50,6 +50,58 @@ export function barTrackValues(model: MsaViewModel, trackId: string) {
   return trackId === 'property-conservation'
     ? model.propertyConservation
     : model.conservation
+}
+
+// An arc's apex scales with how far it reaches, so a short helix stays shallow
+// and a long-range pair sweeps the full track height. The scale is sqrt rather
+// than linear because a contact map's spans are heavily skewed towards short
+// ones, which linear scaling flattens into a smear along the baseline.
+export function drawArcs({
+  ctx,
+  arcs,
+  color,
+  colWidth,
+  trackHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: RenderCtx
+  arcs: Arc[] | undefined
+  color: string
+  colWidth: number
+  trackHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  if (!arcs?.length) {
+    return
+  }
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: blockSize,
+    colWidth,
+  })
+  let maxSpan = 1
+  for (const arc of arcs) {
+    maxSpan = Math.max(maxSpan, arc.end - arc.start)
+  }
+  // a full-height apex would put the stroke half outside the track
+  const apexRoom = trackHeight - 1
+  ctx.lineWidth = 1
+  for (const arc of arcs) {
+    // an arc that spans the block draws even though neither foot is inside it
+    if (arc.end < xStart || arc.start > xEnd) {
+      continue
+    }
+    const x1 = (arc.start + 0.5) * colWidth
+    const x2 = (arc.end + 0.5) * colWidth
+    const apex = apexRoom * Math.sqrt((arc.end - arc.start) / maxSpan)
+    ctx.strokeStyle = arc.color ?? color
+    ctx.beginPath()
+    ctx.moveTo(x1, trackHeight)
+    ctx.quadraticCurveTo((x1 + x2) / 2, trackHeight - 2 * apex, x2, trackHeight)
+    ctx.stroke()
+  }
 }
 
 export function drawTextTrackContent({
@@ -227,6 +279,8 @@ export function drawTrackBlock({
     kind,
     height: trackHeight,
     barColor,
+    arcColor,
+    arcs,
     customColorScheme,
     data,
   } = track.model
@@ -244,6 +298,18 @@ export function drawTrackBlock({
         ctx,
         values: barTrackValues(model, id),
         color: barColor ?? 'gray',
+        colWidth,
+        trackHeight,
+        offsetX,
+        blockSize: blockSizeX,
+      })
+      break
+    }
+    case 'arc': {
+      drawArcs({
+        ctx,
+        arcs,
+        color: arcColor ?? theme.palette.text.primary,
         colWidth,
         trackHeight,
         offsetX,

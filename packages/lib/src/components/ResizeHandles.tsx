@@ -77,6 +77,12 @@ const trackHeights: Partial<
       model.setSequenceLogoTrackHeight(height)
     },
   },
+  arc: {
+    get: model => model.arcTrackHeight,
+    set: (model, height) => {
+      model.setArcTrackHeight(height)
+    },
+  },
 }
 
 export const TrackResizeHandle = observer(function ({

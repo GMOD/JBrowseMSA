@@ -72,11 +72,10 @@ const TrackBlocks = observer(function ({
   // last columns appear in the tracks but not in the alignment, and the hovered
   // -column indicator (sized to the canvas) stops short of the track it crosses
   const { blocksX, msaCanvasWidth, scrollX } = model
-  const { kind, height, data } = track.model
+  const { kind, height, data, arcs } = track.model
 
-  // a text track with no data draws nothing, and an empty row of its own would
-  // still take up vertical space
-  if (kind === 'text' && !data) {
+  // a track with nothing to draw would still take up its vertical space
+  if ((kind === 'text' && !data) || (kind === 'arc' && !arcs?.length)) {
     return null
   }
 

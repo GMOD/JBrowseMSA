@@ -8,7 +8,7 @@ export interface Accession {
 // which renderer draws a track's content. Every track kind draws into the same
 // per-column coordinate space, so the kind picks the draw function rather than
 // the geometry -- see drawTracks.ts, which dispatches on it.
-export type TrackKind = 'text' | 'bar' | 'logo'
+export type TrackKind = 'text' | 'bar' | 'logo' | 'arc'
 
 export interface BasicTrackModel {
   id: string
@@ -29,20 +29,45 @@ export interface BarTrackModel extends BasicTrackModel {
   barColor?: string
 }
 
+// a pair of columns joined by an arc, already resolved to 0-based visible
+// columns -- what the renderer consumes
+export interface Arc {
+  start: number
+  end: number
+  color?: string
+}
+
+// a track that joins pairs of columns with arcs (RNA base pairs, disulfide
+// bonds, residue contacts)
+export interface ArcTrackModel extends BasicTrackModel {
+  arcs?: Arc[]
+  arcColor?: string
+}
+
 export interface BasicTrack {
   ReactComponent: React.FC<any>
-  model: TextTrackModel & BarTrackModel
+  model: TextTrackModel & BarTrackModel & ArcTrackModel
+}
+
+// one arc of an arc track, in the snapshot's own coordinates: 1-based and
+// inclusive, alignment columns unless the track names a `row`
+export interface ArcSpec {
+  start: number
+  end: number
+  color?: string
 }
 
 // a track supplied as data in the snapshot rather than computed from the
 // alignment. `values` (bar) or `data` (text) index alignment columns, or the
-// 1-based residues of `row` when it names one
+// 1-based residues of `row` when it names one; `arcs` (arc) name two such
+// positions each
 export interface ColumnTrackSpec {
   id: string
   name: string
-  kind: 'bar' | 'text'
+  kind: 'bar' | 'text' | 'arc'
   values?: number[]
   data?: string
+  arcs?: ArcSpec[]
   max?: number
   color?: string
   colors?: Record<string, string>

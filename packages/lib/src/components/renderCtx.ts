@@ -19,6 +19,7 @@ export type RenderCtx = Pick<
   | 'lineWidth'
   | 'measureText'
   | 'moveTo'
+  | 'quadraticCurveTo'
   | 'resetTransform'
   | 'restore'
   | 'save'
