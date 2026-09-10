@@ -120,11 +120,35 @@ export interface ResidueMapping {
   structure: MappedStructure
   segments: ResidueSegment[]
   unobserved?: [number, number][]
+  /**
+   * ungapped length of the row this was computed against. Optional, and worth
+   * setting: a mapping outlives the alignment it was made for, and pointing at
+   * residue 58 of a sequence that has since been re-aligned, revised or swapped
+   * is the failure this whole layer exists to avoid. Declared here, the viewer
+   * can notice and refuse instead of answering from stale arithmetic.
+   */
+  rowLength?: number
   generated?: {
     by?: string
     date?: string
     sourceSha256?: string
   }
+}
+
+// why a mapping, or one segment of it, is not being used. Refusing silently
+// leaves a host unable to tell "no structure for this row" from "the mapping
+// no longer matches what is loaded", which are different problems with
+// different fixes.
+export interface ResidueMappingProblem {
+  row: string
+  structureId: string
+  /**
+   * `mapping` means the whole mapping is out: the evidence is about the row it
+   * claims, so nothing it says can be trusted. `segment` takes only that
+   * segment, since the rest of the mapping still describes residues that exist.
+   */
+  scope: 'mapping' | 'segment'
+  reason: string
 }
 
 // what a lookup gives back: the structure residue a row residue is, or the row

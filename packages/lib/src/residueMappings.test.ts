@@ -98,7 +98,7 @@ test('several segments cover a row broken by a disordered loop', () => {
   expect(model.rowResidue('1ABC', 21)?.seqPos).toBe(7)
 })
 
-test('asymId picks between two chains of one entry', () => {
+test('asymId picks between two chains of one entry, and is required to', () => {
   const model = makeModel([
     {
       row: 'alpha',
@@ -113,13 +113,93 @@ test('asymId picks between two chains of one entry', () => {
   ])
   expect(model.rowResidue('1ABC', 4, 'B')?.rowName).toBe('beta')
   expect(model.rowResidue('1ABC', 4, 'A')?.rowName).toBe('alpha')
-  // without a chain the first mapping that covers it wins
-  expect(model.rowResidue('1ABC', 4)?.rowName).toBe('alpha')
-  // and a chain that covers nothing there still refuses
+  // a homodimer's chains both cover residue 4, so without one named the
+  // question has two answers and gets none. Returning whichever mapping came
+  // first would be the same wrong answer the layer exists to stop, quieter.
+  expect(model.rowResidue('1ABC', 4)).toBeUndefined()
+  // past beta's last residue only one mapping covers it, so it answers
+  expect(model.rowResidue('1ABC', 7)?.rowName).toBe('alpha')
   expect(model.rowResidue('1ABC', 7, 'B')).toBeUndefined()
 })
 
-test('a segment whose sides disagree in length is skipped, not trusted', () => {
+test('a row on several structures needs one named', () => {
+  // the ordinary case: an experimental entry and two predicted models for the
+  // same sequence
+  const segments = [{ rowStart: 1, rowEnd: 8, structStart: 1, structEnd: 8 }]
+  const model = makeModel([
+    { row: 'alpha', structure: { id: '1ABC', kind: 'experimental' }, segments },
+    {
+      row: 'alpha',
+      structure: { id: 'AF-P00001-F1', kind: 'predicted' },
+      segments,
+    },
+  ])
+  expect(model.structureResidue('alpha', 4)).toBeUndefined()
+  expect(model.structureResidue('alpha', 4, '1ABC')?.structure.kind).toBe(
+    'experimental',
+  )
+  expect(
+    model.structureResidue('alpha', 4, 'AF-P00001-F1')?.structure.kind,
+  ).toBe('predicted')
+  expect(model.mappedStructures.map(m => m.structure.id)).toEqual([
+    '1ABC',
+    'AF-P00001-F1',
+  ])
+})
+
+test('a mapping computed against a different sequence is refused, and says so', () => {
+  // alpha is 8 residues. A mapping that declares 142 was computed against
+  // something else -- a revision, a re-alignment, another protein entirely --
+  // and its arithmetic would still return a residue for every query
+  const model = makeModel([{ ...mapping, rowLength: 142 }])
+  expect(model.structureResidue('alpha', 1)).toBeUndefined()
+  expect(model.rowResidue('1ABC', 3)).toBeUndefined()
+  expect(model.usableResidueMappings).toEqual([])
+  expect(model.residueMappingProblems).toEqual([
+    {
+      row: 'alpha',
+      structureId: '1ABC',
+      scope: 'mapping',
+      reason: 'computed against a 142-residue row; this one has 8',
+    },
+  ])
+})
+
+test('a declared row length that matches is no obstacle', () => {
+  const model = makeModel([{ ...mapping, rowLength: 8 }])
+  expect(model.residueMappingProblems).toEqual([])
+  expect(model.structureResidue('alpha', 1)?.position).toBe(3)
+})
+
+test('a segment past the end of the row condemns the whole mapping', () => {
+  // no rowLength declared, but a segment claiming residues the row does not
+  // have is the same evidence: this was not computed against this sequence
+  const model = makeModel([
+    {
+      row: 'alpha',
+      structure: { id: '1ABC' },
+      segments: [{ rowStart: 1, rowEnd: 40, structStart: 1, structEnd: 40 }],
+    },
+  ])
+  expect(model.structureResidue('alpha', 2)).toBeUndefined()
+  expect(model.residueMappingProblems[0]?.reason).toBe(
+    'segment 1-40 does not fit a 8-residue row',
+  )
+})
+
+test('a mapping for a row that is not loaded says which', () => {
+  const model = makeModel([{ ...mapping, row: 'gamma' }])
+  expect(model.residueMappingProblems).toEqual([
+    {
+      row: 'gamma',
+      structureId: '1ABC',
+      scope: 'mapping',
+      reason: 'no such row in the alignment',
+    },
+  ])
+})
+
+test('a segment whose sides disagree in length is skipped, and reported', () => {
   const model = makeModel([
     {
       row: 'alpha',
@@ -131,9 +211,13 @@ test('a segment whose sides disagree in length is skipped, not trusted', () => {
     },
   ])
   // the malformed segment would have answered every one of those queries, off
-  // by however much its sides disagree; the well-formed one behind it answers
+  // by however much its sides disagree; the well-formed one behind it answers,
+  // because the rest of a mapping is still a claim about residues that exist
   expect(model.structureResidue('alpha', 1)?.position).toBe(30)
   expect(model.structureResidue('alpha', 5)).toBeUndefined()
+  expect(model.residueMappingProblems[0]?.reason).toBe(
+    'segment 1-8 maps to 1-4, which is a different length',
+  )
 })
 
 test('the mapping travels in the snapshot', () => {

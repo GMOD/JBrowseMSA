@@ -162,11 +162,25 @@ is segment-shaped, because the underlying biology is.
 2. ~~**Owner-keyed highlights here.**~~ Done — see above.
 3. ~~**`residueMappings` plus the two lookup methods.**~~ Done — the layer, the
    types and `structureResidue`/`rowResidue` are in `model.ts`, documented in
-   `docs/layers.md`, tested in `residueMappings.test.ts`. `rowResidue` takes an
-   optional third argument, `asymId`, because two rows onto two chains of one
-   entry is the ordinary case and the id alone cannot separate them. Nothing
-   produces mappings yet: that is a generator's job, and protein3d already has
-   the SIFTS parsing to do it.
+   `docs/layers.md`, tested in `residueMappings.test.ts`.
+
+   Three things this file did not settle, decided against the prototype review
+   in `~/ideas/sequence-structure-interop.md`. **Both lookups take an optional
+   selector and refuse when the answer is not unique** — a row onto four
+   structures is that review's own worked example, and answering with the first
+   mapping is the ambiguity-reported-as-exact fault it criticises.
+   **`unobserved` is in structure positions**, so a residue can be unobserved
+   and outside the mapped region at once, which the example range in this file
+   implies but does not say. **A stale mapping is refused, not applied**: the
+   review's sharpest criticism is that the digest discipline stops at the
+   fixture boundary and never rides on the wire, and a mapping pointed at a
+   re-aligned or revised sequence answers every query wrongly. `rowLength` is
+   the cheap declared check; a segment overrunning the row is the undeclared
+   one; `residueMappingProblems` makes the refusal legible.
+
+   Nothing produces mappings yet: that is a generator's job, and protein3d
+   already has the SIFTS parsing to do it.
+
 4. **A published locus type and hover/select callbacks**, so protein3d stops
    reaching into `mouseCol` and `setMousePos` through autoruns. Both repos
    already document that coupling as a hazard; step 3 makes it worth fixing,

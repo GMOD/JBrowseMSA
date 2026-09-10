@@ -42,6 +42,7 @@ export type {
   NodeWithIds,
   NodeWithIdsAndLength,
   ResidueMapping,
+  ResidueMappingProblem,
   ResidueSegment,
   ResolvedHighlight,
   RowResidue,

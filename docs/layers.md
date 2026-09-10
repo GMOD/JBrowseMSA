@@ -148,6 +148,7 @@ not the right one. So the correspondence arrives computed, by whatever knows how
       { "rowStart": 1, "rowEnd": 141, "structStart": 2, "structEnd": 142 }
     ],
     "unobserved": [[60, 62]],
+    "rowLength": 142,
     "generated": { "by": "sifts", "date": "2026-09-10" }
   }
 ]
@@ -160,6 +161,7 @@ not the right one. So the correspondence arrives computed, by whatever knows how
 | `structure`  | `id`, plus optional `kind`, `asymId` (the chain) and `url`           |
 | `segments`   | Contiguous runs where the two sides line up 1:1                      |
 | `unobserved` | Structure positions declared but not resolved, as `[start, end]`     |
+| `rowLength`  | Ungapped length of the row it was computed against — set this        |
 | `generated`  | Who computed it, when, and from what                                 |
 
 Positions are 1-based and inclusive on both sides, as everything else here is.
@@ -180,16 +182,40 @@ mean different things to a reader.
 Two model methods read it:
 
 ```ts
-model.structureResidue(rowName, seqPos) // -> {structure, position, observed} | undefined
+model.structureResidue(rowName, seqPos, structureId?) // -> {structure, position, observed} | undefined
 model.rowResidue(structureId, position, asymId?) // -> {rowName, seqPos} | undefined
 ```
 
-Both return `undefined` rather than guessing, which is the whole point. `asymId`
-picks between mappings onto the same entry — a homodimer is two rows on two
-chains of one id — and without it the first mapping covering the position wins.
-A segment whose two sides disagree in length is skipped the same way an
-uncovered position is: it is malformed, and the arithmetic would otherwise
-answer anyway, off by however much the sides disagree.
+Both return `undefined` rather than guessing, which is the whole point, and
+**both refuse when the answer is not unique**. A row commonly maps onto several
+structures — an experimental entry and a couple of predicted models — and a
+homodimer is two rows onto two chains of one id, so returning whichever mapping
+came first would be the same class of wrong answer this layer exists to stop,
+only quieter. Name one with the optional argument, or read `mappedStructures` to
+see what there is.
+
+### Staleness
+
+A mapping outlives the alignment it was computed for. Point it at a re-aligned,
+revised or simply different sequence and every lookup still returns a residue —
+the wrong one, silently, which is the failure mode the whole layer exists to
+avoid. So the viewer checks before it answers, and takes a mapping out of use
+when the two no longer agree:
+
+- The row it names is not in the alignment.
+- `rowLength` is declared and does not match the row's ungapped length. Nothing
+  else catches a same-length substitution, so a producer should always set it.
+- A segment claims residues past the end of the row, which is the same evidence
+  arriving without being declared.
+
+A malformed segment — two sides of different lengths, which cannot be a 1:1 run
+— takes only itself out, since the rest of the mapping still describes residues
+that exist.
+
+`model.residueMappingProblems` lists every one of those with a `scope`
+(`mapping` or `segment`) and a reason, because refusing invisibly leaves a host
+unable to tell "there is no structure for this row" from "this data no longer
+matches what is loaded". `model.usableResidueMappings` is what survived.
 
 `seqPos` is 1-based, like the rest of this document, and composes directly with
 `applyHighlight`. The column helpers on the model (`seqPosToVisibleCol`) take

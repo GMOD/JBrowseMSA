@@ -102,6 +102,7 @@ import type {
   Annotation,
   Arc,
   BasicTrack,
+  ResidueMappingProblem,
   ColumnTrackSpec,
   DomainBand,
   Highlight,
@@ -2041,49 +2042,150 @@ function stateModelFactory() {
       },
 
       /**
+       * #getter
+       * every reason a mapping is being ignored, so a host can say which. A
+       * mapping outlives the alignment it was computed for; when the two no
+       * longer agree the lookups have to refuse, and refusing invisibly is how
+       * "there is no structure here" gets confused with "this data is stale".
+       */
+      get residueMappingProblems(): ResidueMappingProblem[] {
+        const problems: ResidueMappingProblem[] = []
+        for (const mapping of self.residueMappings) {
+          const where = { row: mapping.row, structureId: mapping.structure.id }
+          const residues = self.seqPosGlobalColIndex.get(mapping.row)?.length
+          if (residues === undefined) {
+            problems.push({
+              ...where,
+              scope: 'mapping',
+              reason: 'no such row in the alignment',
+            })
+            continue
+          }
+          if (
+            mapping.rowLength !== undefined &&
+            mapping.rowLength !== residues
+          ) {
+            problems.push({
+              ...where,
+              scope: 'mapping',
+              reason: `computed against a ${mapping.rowLength}-residue row; this one has ${residues}`,
+            })
+            continue
+          }
+          const overrun = mapping.segments.find(
+            segment => segment.rowEnd > residues || segment.rowStart < 1,
+          )
+          if (overrun) {
+            problems.push({
+              ...where,
+              scope: 'mapping',
+              reason: `segment ${overrun.rowStart}-${overrun.rowEnd} does not fit a ${residues}-residue row`,
+            })
+            continue
+          }
+          for (const segment of mapping.segments) {
+            if (!sameLength(segment)) {
+              problems.push({
+                ...where,
+                scope: 'segment',
+                reason: `segment ${segment.rowStart}-${segment.rowEnd} maps to ${segment.structStart}-${segment.structEnd}, which is a different length`,
+              })
+            }
+          }
+        }
+        return problems
+      },
+
+      /**
+       * #getter
+       * the mappings that still fit the loaded alignment. A row-level problem
+       * takes the whole mapping out; a single malformed segment takes only
+       * itself, since the rest of the mapping is still a claim about residues
+       * that exist.
+       */
+      get usableResidueMappings(): ResidueMapping[] {
+        const unusable = new Set(
+          this.residueMappingProblems
+            .filter(problem => problem.scope === 'mapping')
+            .map(problem => `${problem.row}\u0000${problem.structureId}`),
+        )
+        return self.residueMappings
+          .filter(m => !unusable.has(`${m.row}\u0000${m.structure.id}`))
+          .map(m => ({
+            ...m,
+            segments: m.segments.filter(sameLength),
+          }))
+      },
+
+      /**
+       * #getter
+       * the structures the loaded alignment has usable mappings onto. A row can
+       * have several -- an experimental entry and a predicted model, say -- so
+       * a host that means a particular one has to name it.
+       */
+      get mappedStructures() {
+        return this.usableResidueMappings.map(m => ({
+          row: m.row,
+          structure: m.structure,
+        }))
+      },
+
+      /**
        * #method
-       * The structure residue a row residue is, or undefined when nothing maps
-       * it. Refusing is the point: the alternative that this replaces answered
-       * every query, with a wrong residue when it did not know.
+       * The structure residue a row residue is, or undefined. Refusing is the
+       * point: the guess this replaces answered every query, with a wrong
+       * residue when it did not know.
+       *
+       * It also refuses when the answer is not unique. A row commonly maps onto
+       * several structures -- an experimental entry and two predicted models --
+       * and returning whichever came first would be the same class of wrong,
+       * quieter. Name one with `structureId`, or use `mappedStructures` to see
+       * what there is.
        *
        * Positions are 1-based, as `residueMappings` and `highlights` are --
        * note that the column helpers above take 0-based ones.
        *
        * @param rowName - The alignment row
        * @param seqPos - Residue of that row, 1-based
+       * @param structureId - Which structure, when the row maps onto several
        */
       structureResidue(
         rowName: string,
         seqPos: number,
+        structureId?: string,
       ): StructureResidue | undefined {
-        for (const mapping of self.residueMappings) {
+        const hits: StructureResidue[] = []
+        for (const mapping of this.usableResidueMappings) {
           if (mapping.row !== rowName) {
             continue
           }
-          for (const segment of mapping.segments) {
-            if (!sameLength(segment) || seqPos < segment.rowStart) {
-              continue
-            }
-            if (seqPos > segment.rowEnd) {
-              continue
-            }
+          if (
+            structureId !== undefined &&
+            mapping.structure.id !== structureId
+          ) {
+            continue
+          }
+          const segment = mapping.segments.find(
+            seg => seqPos >= seg.rowStart && seqPos <= seg.rowEnd,
+          )
+          if (segment) {
             const position = segment.structStart + (seqPos - segment.rowStart)
-            return {
+            hits.push({
               structure: mapping.structure,
               position,
               observed: !inRanges(mapping.unobserved, position),
-            }
+            })
           }
         }
-        return undefined
+        return hits.length === 1 ? hits[0] : undefined
       },
 
       /**
        * #method
-       * The row residue a structure residue is, the same lookup backwards.
-       * `asymId` picks between mappings onto the same entry -- a homodimer is
-       * two rows on two chains of one id -- and without it the first mapping
-       * that covers the position wins.
+       * The row residue a structure residue is, the same lookup backwards, and
+       * refusing on the same terms. `asymId` picks between mappings onto the
+       * same entry, which a homodimer -- two rows, two chains, one id -- always
+       * needs; without it such a lookup is ambiguous and gets nothing.
        *
        * @param structureId - The structure's id, as the mapping names it
        * @param position - Residue of that structure, 1-based label_seq_id
@@ -2094,28 +2196,25 @@ function stateModelFactory() {
         position: number,
         asymId?: string,
       ): RowResidue | undefined {
-        for (const mapping of self.residueMappings) {
+        const hits: RowResidue[] = []
+        for (const mapping of this.usableResidueMappings) {
           if (mapping.structure.id !== structureId) {
             continue
           }
           if (asymId !== undefined && mapping.structure.asymId !== asymId) {
             continue
           }
-          for (const segment of mapping.segments) {
-            if (
-              !sameLength(segment) ||
-              position < segment.structStart ||
-              position > segment.structEnd
-            ) {
-              continue
-            }
-            return {
+          const segment = mapping.segments.find(
+            seg => position >= seg.structStart && position <= seg.structEnd,
+          )
+          if (segment) {
+            hits.push({
               rowName: mapping.row,
               seqPos: segment.rowStart + (position - segment.structStart),
-            }
+            })
           }
         }
-        return undefined
+        return hits.length === 1 ? hits[0] : undefined
       },
     }))
 
