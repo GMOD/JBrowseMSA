@@ -563,7 +563,7 @@ export const specs = [
           kind: 'arc',
           row: 'SRC_HUMAN',
           height: 110,
-          arcs: readJson('kinaseContacts.json').contacts.map(
+          arcs: readJson('kinaseStructure.json').contacts.map(
             ({ start, end, pair }) => ({
               start,
               end,

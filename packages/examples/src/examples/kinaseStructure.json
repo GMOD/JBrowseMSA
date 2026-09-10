@@ -12,6 +12,32 @@
     "SH3 - Ser-Thr/Tyr_kinase_cat_dom": 8,
     "SH2 - Ser-Thr/Tyr_kinase_cat_dom": 8
   },
+  "residueMappings": [
+    {
+      "row": "SRC_HUMAN",
+      "accession": "P12931",
+      "structure": {
+        "id": "2SRC",
+        "kind": "experimental",
+        "asymId": "A",
+        "url": "https://files.rcsb.org/download/2SRC.cif"
+      },
+      "segments": [
+        {
+          "rowStart": 86,
+          "rowEnd": 536,
+          "structStart": 2,
+          "structEnd": 452
+        }
+      ],
+      "unobserved": [[2, 2]],
+      "rowLength": 536,
+      "generated": {
+        "by": "sifts",
+        "date": "2026-09-10"
+      }
+    }
+  ],
   "contacts": [
     {
       "start": 96,

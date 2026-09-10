@@ -246,11 +246,21 @@ domains pack, rather than the thousands saying a residue touches its neighbours.
 node scripts/examples-gen/contacts.mjs
 ```
 
-It writes `packages/examples/src/examples/kinaseContacts.json`, which carries
+It writes `packages/examples/src/examples/kinaseStructure.json`, which carries
 its own provenance (entry, chain, accession, cutoff, per-domain-pair counts).
 JSON rather than a `.ts` module on purpose: the formatter rewrites a generated
 TS file's quoting, and the screenshot specs read the same file the example
 imports.
+
+The same file carries the SIFTS correspondence as a `residueMappings` layer (see
+`docs/layers.md`). The arcs are derived from it and could have been the only
+output, but throwing the correspondence away after using it is what forces the
+next consumer to guess it back — a structure viewer wanting to know which
+residue an alignment column is has exactly the question this already answered.
+`unobserved` comes from comparing the residues the entity declares against the
+ones that actually have coordinates; `rowLength` is the row it was computed
+against, so the viewer can refuse the mapping if it is later loaded beside a
+different alignment.
 
 `clinvar.mjs` is the same idea for a per-column layer rather than a pairing: it
 counts, per residue, how many distinct missense alleles ClinVar classifies as

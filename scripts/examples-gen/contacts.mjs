@@ -18,10 +18,12 @@
  *      thousands of contacts and nearly all of them are a residue touching its
  *      own neighbours; the inter-domain ones are the architecture.
  *
- * Writes packages/examples/src/examples/kinaseContacts.json -- data, not a TS
- * module, so the formatter has nothing to rewrite and the screenshot specs read
- * the same file the example imports. Run it when the structure or the domain
- * boundaries change:
+ * Writes packages/examples/src/examples/kinaseStructure.json: the contacts, and
+ * the residue mapping they were derived through (see docs/layers.md), which is
+ * the same SIFTS correspondence written down instead of consumed and discarded.
+ * Data, not a TS module, so the formatter has nothing to rewrite and the
+ * screenshot specs read the same file the example imports. Run it when the
+ * structure or the domain boundaries change:
  *
  *   node scripts/examples-gen/contacts.mjs
  */
@@ -36,9 +38,11 @@ const exampleData = path.resolve(
 )
 const outFile = path.resolve(
   here,
-  '../../packages/examples/src/examples/kinaseContacts.json',
+  '../../packages/examples/src/examples/kinaseStructure.json',
 )
 
+const STRUCTURE_URL = pdb =>
+  `https://files.rcsb.org/download/${pdb.toUpperCase()}.cif`
 const PDB = '2src'
 const CHAIN = 'A'
 const ACCESSION = 'P12931' // SRC_HUMAN, the alignment's reference row
@@ -80,6 +84,24 @@ function parseAtomSite(cif) {
 // rows count when they carry a label_seq_id -- a modified residue in the chain
 // (2SRC's phospho-tyrosine 527 is exactly that, and it is the residue the whole
 // example is about).
+// Every residue the structure actually resolved, by label_seq_id. A residue can
+// have a backbone and no side chain, so this is a wider set than the CB points
+// below -- and it is the one that answers "was this observed", which a mapping
+// has to state rather than imply.
+function observedResidues(atoms) {
+  const observed = new Set()
+  for (const a of atoms) {
+    if (a.auth_asym_id !== CHAIN) {
+      continue
+    }
+    const seqId = Number(a.label_seq_id)
+    if (Number.isFinite(seqId)) {
+      observed.add(seqId)
+    }
+  }
+  return observed
+}
+
 function residuePoints(atoms) {
   const points = new Map()
   for (const a of atoms) {
@@ -198,6 +220,65 @@ function sequenceToUniprot(mappings) {
   }
 }
 
+/**
+ * The SIFTS correspondence, written down as a `residueMappings` entry. It is
+ * the same data the contacts were derived through; keeping only the derived
+ * arcs would throw away the part another consumer needs, and re-deriving it
+ * from a live SIFTS call at view time is the thing the layer exists to avoid.
+ *
+ * Segments come straight from SIFTS, whose blocks are already this shape. The
+ * row side is UniProt numbering because checkRowNumbering has just proved this
+ * row uses it -- for a fragment row the two would differ and the script would
+ * have aborted rather than reach here.
+ */
+function residueMapping(mappings, observed, rowLength) {
+  const segments = mappings
+    .filter(m => m.chain_id === CHAIN)
+    .map(m => ({
+      rowStart: m.unp_start,
+      rowEnd: m.unp_end,
+      structStart: m.start.residue_number,
+      structEnd: m.end.residue_number,
+    }))
+    .sort((a, b) => a.rowStart - b.rowStart)
+
+  // positions the entity declares and did not resolve, as ranges. Only within
+  // the mapped segments: outside them there is nothing to ask about, since a
+  // lookup that lands there is unmapped before observation is even a question.
+  const unobserved = []
+  for (const segment of segments) {
+    for (let pos = segment.structStart; pos <= segment.structEnd; pos++) {
+      if (observed.has(pos)) {
+        continue
+      }
+      const last = unobserved.at(-1)
+      if (last && last[1] === pos - 1) {
+        last[1] = pos
+      } else {
+        unobserved.push([pos, pos])
+      }
+    }
+  }
+
+  return {
+    row: ROW,
+    accession: ACCESSION,
+    structure: {
+      id: PDB.toUpperCase(),
+      kind: 'experimental',
+      asymId: CHAIN,
+      url: STRUCTURE_URL(PDB),
+    },
+    segments,
+    ...(unobserved.length ? { unobserved } : {}),
+    rowLength,
+    generated: {
+      by: 'sifts',
+      date: new Date().toISOString().slice(0, 10),
+    },
+  }
+}
+
 // The regions come from the committed domain GFF the example already draws, so
 // the arcs and the boxes can never disagree about where a domain ends. The tail
 // is what follows the last of them.
@@ -236,9 +317,15 @@ if (!mappings) {
   throw new Error(`${PDB} carries no SIFTS mapping to ${ACCESSION}`)
 }
 
-const points = residuePoints(parseAtomSite(cif))
+const atoms = parseAtomSite(cif)
+const points = residuePoints(atoms)
 const toUniprot = sequenceToUniprot(mappings)
 checkRowNumbering(points, toUniprot, ROW)
+const mapping = residueMapping(
+  mappings,
+  observedResidues(atoms),
+  readRow(ROW).length,
+)
 const regions = readRegions()
 const lastDomainEnd = Math.max(...regions.map(r => r.end))
 const regionOf = pos => {
@@ -293,11 +380,17 @@ fs.writeFileSync(
       row: ROW,
       cutoffAngstroms: CUTOFF,
       counts: Object.fromEntries(summary),
+      residueMappings: [mapping],
       contacts,
     },
     null,
     2,
   )}\n`,
+)
+console.log(
+  `mapping: row ${mapping.segments[0].rowStart}-${mapping.segments.at(-1).rowEnd} ` +
+    `of a ${mapping.rowLength}-residue row, ${mapping.segments.length} segment(s), ` +
+    `${(mapping.unobserved ?? []).length} unobserved range(s)`,
 )
 console.log(
   `${contacts.length} inter-domain contacts from ${PDB.toUpperCase()}:\n${summary

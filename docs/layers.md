@@ -212,6 +212,11 @@ A malformed segment — two sides of different lengths, which cannot be a 1:1 ru
 — takes only itself out, since the rest of the mapping still describes residues
 that exist.
 
+`packages/examples/src/examples/kinaseStructure.json` is a real one, generated
+by `scripts/examples-gen/contacts.mjs` from SIFTS: the SRC_HUMAN row against
+chain A of 2SRC, one segment putting row residue 86 at structure residue 2, one
+unobserved range, and `rowLength: 536`.
+
 `model.residueMappingProblems` lists every one of those with a `scope`
 (`mapping` or `segment`) and a reason, because refusing invisibly leaves a host
 unable to tell "there is no structure for this row" from "this data no longer
