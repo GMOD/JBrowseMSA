@@ -498,6 +498,25 @@ export const specs = [
     clip: 'viewer',
   },
   {
+    name: 'pseudoknot-arcs',
+    // Coronavirus frameshift element (Rfam RF00507): the Base pairs track draws
+    // SS_cons as arcs, and the pseudoknot -- written A/a in WUSS because it
+    // crosses stem 1 instead of nesting in it -- crosses the helices it cannot
+    // nest inside. The bracket text track above draws the same annotation as
+    // characters, where the crossing is invisible.
+    url: data({
+      height: 462,
+      treeAreaWidth: 215,
+      colWidth: 11,
+      colorSchemeName: 'nucleotide',
+      data: {
+        msa: readConst('coronaFseMSA'),
+      },
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
     name: 'tree-of-life',
     // EF-1a/EF-Tu across bacteria, archaea, eukaryotes; labels prefixed
     // Euk_/Arc_/Bac_ so the three-domain grouping reads off the tree

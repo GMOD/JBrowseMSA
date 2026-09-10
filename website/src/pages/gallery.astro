@@ -22,7 +22,8 @@ const base = import.meta.env.BASE_URL
 // organism — the standalone demo app at /examples carries the full set of
 // biological stories. Each entry here shows something the others don't:
 // feature overlays, domain annotation, reference diffing, tree topology, RNA
-// secondary structure, gene arrows, base-resolution DNA, scale.
+// secondary structure, base-pair arcs, gene arrows, base-resolution DNA,
+// scale.
 const figures = [
   {
     src: 'real-domains.png',
@@ -70,6 +71,11 @@ const figures = [
     body: 'A tRNA alignment (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a dedicated secondary-structure track above the columns, with the acceptor stem and D-/anticodon-/T-arms colored by base-pairing.',
   },
   {
+    src: 'pseudoknot-arcs.png',
+    title: 'Base pairs, including a pseudoknot',
+    body: 'The coronavirus frameshifting stimulation element (Rfam RF00507) across all four genera. The Base pairs track draws the Stockholm SS_cons as arcs between the columns that pair: blue for the nested helices, red for the pseudoknot. A pseudoknot is by definition a pair that crosses a helix instead of nesting inside it, which is why WUSS has to write it as the letter pair A/a and why the bracket track directly above shows two runs of letters with no visible relationship. The arcs cross.',
+  },
+  {
     src: 'f12-exon-architecture.png',
     title: 'Gene structure overlay (DNA)',
     body: 'Coagulation factor XII coding alignment with its 14 exons overlaid — each exon the same color across species, through the same overlay path as InterProScan domains (built by react-msaview-cli genestructure). The whole gene’s exon architecture reads straight down the alignment.',
@@ -110,10 +116,10 @@ const figures = [
     <p>
       Just an alignment, a tree, and optional feature overlays — no genome
       browser. Each figure below shows a distinct viewer capability — domain
-      overlays, reference diffing, tree topology, RNA secondary structure, gene
-      arrows, base-resolution DNA, scale. The full set of biological examples
-      (more conservation, phylogeny, and domain stories) is live and interactive
-      on the
+      overlays, reference diffing, tree topology, RNA secondary structure,
+      base-pair arcs, gene arrows, base-resolution DNA, scale. The full set of
+      biological examples (more conservation, phylogeny, and domain stories) is
+      live and interactive on the
       <a href={`${base}/examples`}>examples</a> page.
     </p>
 

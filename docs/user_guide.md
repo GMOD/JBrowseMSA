@@ -203,6 +203,11 @@ closes it and shows its details.
   it agree.
 - **Secondary structure** and other annotation rows carried inline by a
   Stockholm file appear as text tracks, colored by the active scheme.
+- **Base pairs** — the same `#=GC SS_cons` annotation drawn as arcs joining the
+  columns that pair, on whenever a Stockholm file carries one. A pseudoknot
+  takes its own color: WUSS writes those pairs as `A`/`a` rather than brackets
+  precisely because they cross a helix instead of nesting inside it, and the
+  crossing is visible in the arcs and invisible in the characters.
 
 [![](media/sequence-logo.png)][live-sequence-logo]
 
@@ -215,10 +220,13 @@ Tracks are included in an SVG export when you check "include tracks" in the
 export dialog.
 
 A track can also arrive as data instead of being computed here. A `columnTracks`
-entry in the shared URL or session carries per-column values drawn as bars, or a
-per-column string drawn like a Stockholm annotation line, so a number computed
-outside the viewer, per column or per residue of one row, lands above the
-alignment with a name, a color, and its own menu entry. The
+entry in the shared URL or session carries per-column values drawn as bars, a
+per-column string drawn like a Stockholm annotation line, or pairs of positions
+drawn as arcs, so something computed outside the viewer — per column, per
+residue of one row, or between two of them — lands above the alignment with a
+name, a color, and its own menu entry. Arcs are how a pairing reaches the
+viewer: a disulfide bond, a residue contact from a structure, a base pair the
+file does not already annotate. The
 [layers reference](https://gmod.org/JBrowseMSA/layers) lists the fields.
 
 ## Settings reference
