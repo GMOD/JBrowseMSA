@@ -107,7 +107,11 @@ import type {
   Highlight,
   NodeWithIds,
   NodeWithIdsAndLength,
+  ResidueMapping,
+  ResidueSegment,
   ResolvedHighlight,
+  RowResidue,
+  StructureResidue,
 } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -190,6 +194,21 @@ function trackIsOff(
   id: string,
 ) {
   return turnedOffTracks.get(id) ?? defaultOffTracks.has(id)
+}
+
+// A segment asserts a 1:1 run, so its two sides have to be the same length.
+// One that is not is malformed data, and the arithmetic below would answer
+// anyway -- with a residue that is off by however much the sides disagree. Skip
+// it, the same refusal an uncovered position gets.
+function sameLength(segment: ResidueSegment) {
+  return (
+    segment.rowEnd - segment.rowStart ===
+    segment.structEnd - segment.structStart
+  )
+}
+
+function inRanges(ranges: [number, number][] | undefined, position: number) {
+  return !!ranges?.some(([start, end]) => position >= start && position <= end)
 }
 
 /**
@@ -356,6 +375,19 @@ function stateModelFactory() {
          */
         columnTracks: stripDefault(
           types.array(types.frozen<ColumnTrackSpec>()),
+          [],
+        ),
+
+        /**
+         * #property
+         * which residue of which structure each row's residues are, as data.
+         * The viewer cannot infer this -- matching a row to a structure by
+         * sequence equality fails for a tagged construct, a truncation or a
+         * subsequence row, and fails in the direction that looks like it
+         * worked -- so it arrives computed. See docs/layers.md
+         */
+        residueMappings: stripDefault(
+          types.array(types.frozen<ResidueMapping>()),
           [],
         ),
 
@@ -2006,6 +2038,84 @@ function stateModelFactory() {
       seqPosToVisibleCol(rowName: string, seqPos: number) {
         const globalCol = this.seqPosToGlobalCol(rowName, seqPos)
         return this.globalColToVisibleCol(globalCol)
+      },
+
+      /**
+       * #method
+       * The structure residue a row residue is, or undefined when nothing maps
+       * it. Refusing is the point: the alternative that this replaces answered
+       * every query, with a wrong residue when it did not know.
+       *
+       * Positions are 1-based, as `residueMappings` and `highlights` are --
+       * note that the column helpers above take 0-based ones.
+       *
+       * @param rowName - The alignment row
+       * @param seqPos - Residue of that row, 1-based
+       */
+      structureResidue(
+        rowName: string,
+        seqPos: number,
+      ): StructureResidue | undefined {
+        for (const mapping of self.residueMappings) {
+          if (mapping.row !== rowName) {
+            continue
+          }
+          for (const segment of mapping.segments) {
+            if (!sameLength(segment) || seqPos < segment.rowStart) {
+              continue
+            }
+            if (seqPos > segment.rowEnd) {
+              continue
+            }
+            const position = segment.structStart + (seqPos - segment.rowStart)
+            return {
+              structure: mapping.structure,
+              position,
+              observed: !inRanges(mapping.unobserved, position),
+            }
+          }
+        }
+        return undefined
+      },
+
+      /**
+       * #method
+       * The row residue a structure residue is, the same lookup backwards.
+       * `asymId` picks between mappings onto the same entry -- a homodimer is
+       * two rows on two chains of one id -- and without it the first mapping
+       * that covers the position wins.
+       *
+       * @param structureId - The structure's id, as the mapping names it
+       * @param position - Residue of that structure, 1-based label_seq_id
+       * @param asymId - Which chain, when the id alone is ambiguous
+       */
+      rowResidue(
+        structureId: string,
+        position: number,
+        asymId?: string,
+      ): RowResidue | undefined {
+        for (const mapping of self.residueMappings) {
+          if (mapping.structure.id !== structureId) {
+            continue
+          }
+          if (asymId !== undefined && mapping.structure.asymId !== asymId) {
+            continue
+          }
+          for (const segment of mapping.segments) {
+            if (
+              !sameLength(segment) ||
+              position < segment.structStart ||
+              position > segment.structEnd
+            ) {
+              continue
+            }
+            return {
+              rowName: mapping.row,
+              seqPos: segment.rowStart + (position - segment.structStart),
+            }
+          }
+        }
+        return undefined
       },
     }))
 

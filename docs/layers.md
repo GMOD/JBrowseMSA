@@ -121,3 +121,77 @@ viewer or a genome browser — wants `model.applyHighlight(owner, list)` and
 persisted ones, and stay out of the snapshot, which is right for a hover: it is
 not part of the document. The owner key is what lets two sources highlight at
 once without either clearing the other's.
+
+## residueMappings
+
+Which residue of which structure a row's residues are. Unlike the layers above,
+this one draws nothing — it answers a question, and the reason it is data is
+that the viewer cannot work the answer out. Matching a row to a structure by
+sequence equality fails for a construct with an expression tag, a truncation, an
+engineered residue, or a row that is a subsequence of the entry, and it fails in
+the direction that looks like it worked: the highlight lands on a residue, just
+not the right one. So the correspondence arrives computed, by whatever knows how
+— SIFTS, an AlphaFold model, a curator.
+
+```json
+"residueMappings": [
+  {
+    "row": "HBA_HUMAN/1-142",
+    "accession": "P69905",
+    "structure": {
+      "id": "1A3N",
+      "kind": "experimental",
+      "asymId": "A",
+      "url": "https://files.rcsb.org/download/1A3N.cif"
+    },
+    "segments": [
+      { "rowStart": 1, "rowEnd": 141, "structStart": 2, "structEnd": 142 }
+    ],
+    "unobserved": [[60, 62]],
+    "generated": { "by": "sifts", "date": "2026-09-10" }
+  }
+]
+```
+
+| Field        | Meaning                                                              |
+| ------------ | -------------------------------------------------------------------- |
+| `row`        | The alignment row this maps                                          |
+| `accession`  | The sequence database entry the mapping went through, for provenance |
+| `structure`  | `id`, plus optional `kind`, `asymId` (the chain) and `url`           |
+| `segments`   | Contiguous runs where the two sides line up 1:1                      |
+| `unobserved` | Structure positions declared but not resolved, as `[start, end]`     |
+| `generated`  | Who computed it, when, and from what                                 |
+
+Positions are 1-based and inclusive on both sides, as everything else here is.
+Structure positions are `label_seq_id`, the index into the entity's SEQRES;
+author numbering carries insertion codes, which break integer arithmetic, so it
+stays out.
+
+**Segments, not a per-residue array**, because the underlying correspondence is
+segment-shaped: a dozen numbers cover what a dense array spends kilobytes on.
+That shape also makes the refusal rule structural rather than a vocabulary — **a
+position no segment covers is unmapped** — so there is no status field for the
+data to disagree with itself about. Three states fall out of it: covered is
+mapped and observed, covered but listed in `unobserved` is mapped and not
+observed, anything else is unmapped. The middle one is worth having, because
+"the crystallographer could not see it" and "this protein has no such residue"
+mean different things to a reader.
+
+Two model methods read it:
+
+```ts
+model.structureResidue(rowName, seqPos) // -> {structure, position, observed} | undefined
+model.rowResidue(structureId, position, asymId?) // -> {rowName, seqPos} | undefined
+```
+
+Both return `undefined` rather than guessing, which is the whole point. `asymId`
+picks between mappings onto the same entry — a homodimer is two rows on two
+chains of one id — and without it the first mapping covering the position wins.
+A segment whose two sides disagree in length is skipped the same way an
+uncovered position is: it is malformed, and the arithmetic would otherwise
+answer anyway, off by however much the sides disagree.
+
+`seqPos` is 1-based, like the rest of this document, and composes directly with
+`applyHighlight`. The column helpers on the model (`seqPosToVisibleCol`) take
+0-based positions, so a structure hover reaches a column as
+`model.seqPosToVisibleCol(rowName, seqPos - 1)`.

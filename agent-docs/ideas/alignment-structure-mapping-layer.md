@@ -160,7 +160,13 @@ is segment-shaped, because the underlying biology is.
 1. **Delete the 1:1 fallback in protein3d.** Downstream, small, pure
    correctness. No mapping and no matched row means no highlight.
 2. ~~**Owner-keyed highlights here.**~~ Done — see above.
-3. **`residueMappings` plus the two lookup methods.** The actual generalization.
+3. ~~**`residueMappings` plus the two lookup methods.**~~ Done — the layer, the
+   types and `structureResidue`/`rowResidue` are in `model.ts`, documented in
+   `docs/layers.md`, tested in `residueMappings.test.ts`. `rowResidue` takes an
+   optional third argument, `asymId`, because two rows onto two chains of one
+   entry is the ordinary case and the id alone cannot separate them. Nothing
+   produces mappings yet: that is a generator's job, and protein3d already has
+   the SIFTS parsing to do it.
 4. **A published locus type and hover/select callbacks**, so protein3d stops
    reaching into `mouseCol` and `setMousePos` through autoruns. Both repos
    already document that coupling as a hazard; step 3 makes it worth fixing,

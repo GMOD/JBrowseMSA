@@ -75,6 +75,72 @@ export interface ColumnTrackSpec {
   height?: number
 }
 
+// One contiguous run where a row's residues and a structure's line up 1:1.
+// Segment-shaped because SIFTS is: a dozen numbers cover what a per-residue
+// array would spend kilobytes on, and it makes the refusal rule structural
+// rather than a vocabulary -- a position no segment covers is unmapped, and
+// there is no status field to disagree with.
+export interface ResidueSegment {
+  rowStart: number
+  rowEnd: number
+  structStart: number
+  structEnd: number
+}
+
+// the structure half of a mapping. `id` is whatever the producer calls the
+// entry (a PDB id, an AlphaFold accession); `asymId` names the chain, which is
+// what distinguishes two mappings onto the same entry
+export interface MappedStructure {
+  id: string
+  kind?: 'experimental' | 'predicted'
+  asymId?: string
+  url?: string
+}
+
+/**
+ * Which residue of which structure a row's residue is, as data. Computed by
+ * whatever knows how -- SIFTS, an AlphaFold model, a curator -- and carried in
+ * the snapshot, because the viewer cannot work it out: matching a row to a
+ * structure by sequence equality fails for a construct with an expression tag,
+ * a truncation, an engineered residue, or a row that is a subsequence of the
+ * entry, and it fails in the direction that looks like it worked.
+ *
+ * Positions are 1-based and inclusive on both sides, as GFF and `highlights`
+ * are. Structure positions are `label_seq_id`, the index into the entity's
+ * SEQRES; author numbering carries insertion codes and stays out.
+ *
+ * `unobserved` is in structure positions: present in SEQRES with no
+ * coordinates. Worth distinguishing from unmapped, because "the
+ * crystallographer could not see it" and "this protein does not have that
+ * residue" mean different things to a reader.
+ */
+export interface ResidueMapping {
+  row: string
+  accession?: string
+  structure: MappedStructure
+  segments: ResidueSegment[]
+  unobserved?: [number, number][]
+  generated?: {
+    by?: string
+    date?: string
+    sourceSha256?: string
+  }
+}
+
+// what a lookup gives back: the structure residue a row residue is, or the row
+// residue a structure residue is. `observed` is false for a residue the
+// structure declares but did not resolve.
+export interface StructureResidue {
+  structure: MappedStructure
+  position: number
+  observed: boolean
+}
+
+export interface RowResidue {
+  rowName: string
+  seqPos: number
+}
+
 // the overlay annotation itself lives in msa-parsers, alongside the adapters
 // that build it. TidyDomainAnnotation is its former name, kept because
 // downstream plugins name it in their emitted declarations.
