@@ -23,8 +23,14 @@ stay written down so nobody re-derives them from scratch.
   tree.
 - [Color rows by group](ideas/row-group-coloring.md) — shade rows by clade or
   metadata, the half of publication figure style `relativeTo` does not cover.
+- [The alignment ↔ structure correspondence as a layer](ideas/alignment-structure-mapping-layer.md)
+  — protein3d anchors a structure to its MSA row by exact sequence equality and
+  silently falls back to a wrong 1:1 map when that fails. Make the
+  correspondence a snapshot layer instead, and give highlights an owner so two
+  sync sources stop clobbering each other. Prerequisite for the item below.
 - [Conservation on 3D structure](ideas/conservation-on-structure.md) — the
-  coordinate contract with protein3d is already done; this is wiring.
+  column ↔ residue half of the contract with protein3d is done; the row ↔
+  structure half is the guess above.
 - [Ortholog sources beyond NCBI](ideas/ortholog-sources-beyond-ncbi.md) — NCBI
   has no orthologs for yeast, worm or plant genes, so the gene explorer's
   cross-species alignment fails for four of its seven species. PANTHER measured
