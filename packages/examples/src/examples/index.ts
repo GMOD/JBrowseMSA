@@ -48,6 +48,8 @@ import Opsins from './Opsins'
 import OpsinsSrc from './Opsins.tsx?raw'
 import P53 from './P53'
 import P53Src from './P53.tsx?raw'
+import PanelControls from './PanelControls'
+import PanelControlsSrc from './PanelControls.tsx?raw'
 import Prestin from './Prestin'
 import PrestinSrc from './Prestin.tsx?raw'
 import ProgrammaticControl from './ProgrammaticControl'
@@ -125,6 +127,18 @@ export const examples: Example[] = [
       'Create the model yourself with MSAModelF and render it with MSAView.',
     Component: ModelApi,
     source: ModelApiSrc,
+  },
+  {
+    name: 'Controls from props',
+    category: 'API & control',
+    description:
+      'Drive the mounted viewer from props — a diff toggle, an expand button, ' +
+      'a color-scheme switch — with no model API and no remount, which is what ' +
+      'a purpose-built page embedding one panel usually needs. Pairs ' +
+      'drawTree={false} with autoTreeAreaWidth so the gutter shrinks to the ' +
+      'labels instead of reserving room for a tree that is not drawn.',
+    Component: PanelControls,
+    source: PanelControlsSrc,
   },
   {
     name: 'Programmatic control',

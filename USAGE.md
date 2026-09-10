@@ -27,18 +27,33 @@ export default function App() {
 
 Props:
 
-| Prop             | Type                | Description                                   |
-| ---------------- | ------------------- | --------------------------------------------- |
-| `msa`            | `string`            | Alignment text (FASTA, Stockholm, or Clustal) |
-| `tree`           | `string`            | Newick tree text                              |
-| `gff`            | `string`            | InterProScan domain annotations (GFF3 text)   |
-| `msaFilehandle`  | `FileLocation`      | Remote file location for alignment            |
-| `treeFilehandle` | `FileLocation`      | Remote file location for tree                 |
-| `gffFilehandle`  | `FileLocation`      | Remote file location for domain GFF           |
-| `colorScheme`    | `string`            | Color scheme name (see below)                 |
-| `height`         | `number`            | Widget height in pixels                       |
-| `columnTracks`   | `ColumnTrackSpec[]` | Tracks supplied as data (see below)           |
-| `highlights`     | `Highlight[]`       | Labeled highlights (see below)                |
+| Prop                | Type                | Description                                                          |
+| ------------------- | ------------------- | -------------------------------------------------------------------- |
+| `msa`               | `string`            | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                 |
+| `tree`              | `string`            | Newick tree text                                                     |
+| `gff`               | `string`            | InterProScan domain annotations (GFF3 text)                          |
+| `msaFilehandle`     | `FileLocation`      | Remote file location for alignment                                   |
+| `treeFilehandle`    | `FileLocation`      | Remote file location for tree                                        |
+| `gffFilehandle`     | `FileLocation`      | Remote file location for domain GFF                                  |
+| `colorScheme`       | `string`            | Color scheme name (see below)                                        |
+| `height`            | `number`            | Widget height in pixels                                              |
+| `colWidth`          | `number`            | Per-column width in pixels (horizontal zoom)                         |
+| `rowHeight`         | `number`            | Per-row height in pixels (vertical zoom)                             |
+| `relativeTo`        | `string`            | Row name to diff every other row against; matches draw as `.`        |
+| `drawTree`          | `boolean`           | Draw the phylogeny (default true); false leaves a label gutter       |
+| `treeAreaWidth`     | `number`            | Fixed width of the tree/label gutter                                 |
+| `autoTreeAreaWidth` | `boolean`           | Size that gutter to the labels instead — pair with `drawTree: false` |
+| `columnTracks`      | `ColumnTrackSpec[]` | Tracks supplied as data (see below)                                  |
+| `highlights`        | `Highlight[]`       | Labeled highlights (see below)                                       |
+| `highlightColumns`  | `number[]`          | Columns (0-based) under a persistent overlay                         |
+
+`height`, `colorScheme`, `colWidth`, `rowHeight`, `relativeTo`, `drawTree` and
+`treeAreaWidth` stay live: change one and the viewer follows, so a host can put
+a control on it without remounting and re-fetching the alignment. Each follows
+only its own prop, so a change the reader makes inside the viewer — a scheme
+picked from the menu, a row dragged taller — is not undone by the host's next
+render. The data props are not among them: a new `msa`/`tree`/`gff` is a
+different alignment, which is a new model, which React spells `key`.
 
 ### Highlights
 
@@ -63,9 +78,48 @@ The list lives in the model snapshot (`model.setHighlights(...)` changes it), so
 a shared URL carries it, and the SVG export draws it. The full set of data
 layers is in [layers reference](https://gmod.org/JBrowseMSA/layers).
 
+### One panel in your own page
+
+A purpose-built page usually wants less than the standalone app shows. Turn the
+phylogeny off and the gutter holds just the row labels, sized to them:
+
+```tsx
+const [expanded, setExpanded] = useState(false)
+const [diff, setDiff] = useState(false)
+
+return (
+  <>
+    <button onClick={() => setDiff(d => !d)}>Diff vs reference</button>
+    <button onClick={() => setExpanded(e => !e)}>
+      {expanded ? 'Collapse' : 'Expand'}
+    </button>
+    <MSAViewer
+      msaFilehandle={{ uri: msaUrl, locationType: 'UriLocation' }}
+      gffFilehandle={{ uri: gffUrl, locationType: 'UriLocation' }}
+      colorScheme="clustalx_dna"
+      drawTree={false}
+      autoTreeAreaWidth
+      relativeTo={diff ? referenceRow : undefined}
+      height={expanded ? 760 : 420}
+    />
+  </>
+)
+```
+
+Both toggles drive the mounted viewer, so flipping one does not re-fetch the
+alignment. `drawTree={false}` with `autoTreeAreaWidth` is the pairing to reach
+for whenever there is no tree to draw — a reference-projected reconstruction has
+no meaningful guide tree, and without it the gutter would otherwise reserve its
+full default width for a tree that never appears.
+
+The component pulls in `@jbrowse/core`, MUI and mobx and renders to canvas, so
+in a server-rendered app (Next.js, Astro, Remix) load it client-side only —
+`React.lazy` inside a `Suspense`, or the framework's equivalent.
+
 ## Advanced: model-based API
 
-For full control over the viewer state, use `MSAModelF` directly.
+For state the props do not cover — hiding gappy columns, collapsing clades,
+reading what the user selected — use `MSAModelF` directly.
 
 ```tsx
 import { MSAView, MSAModelF } from 'react-msaview'

@@ -96,6 +96,49 @@ export default function MSAViewer({
     }
   }, [model, width])
 
+  // The props below stay live after mount: change one and it drives the model,
+  // so a host can put a control on the viewer -- an expand button, a diff
+  // toggle, a color-scheme picker -- without remounting it and re-fetching its
+  // alignment. Each effect depends only on its own prop, so a change the user
+  // makes inside the viewer (picking a scheme from the menu, dragging a row
+  // taller) survives the host's next render rather than being snapped back.
+  // Data props are not among them: new msa/tree/gff is a different alignment,
+  // which is a new model, which React spells `key`.
+  useEffect(() => {
+    if (height !== undefined) {
+      model.setHeight(height)
+    }
+  }, [model, height])
+  useEffect(() => {
+    if (colorScheme !== undefined) {
+      model.setColorSchemeName(colorScheme)
+    }
+  }, [model, colorScheme])
+  useEffect(() => {
+    if (colWidth !== undefined) {
+      model.setColWidth(colWidth)
+    }
+  }, [model, colWidth])
+  useEffect(() => {
+    if (rowHeight !== undefined) {
+      model.setRowHeight(rowHeight)
+    }
+  }, [model, rowHeight])
+  useEffect(() => {
+    if (drawTree !== undefined) {
+      model.setDrawTree(drawTree)
+    }
+  }, [model, drawTree])
+  useEffect(() => {
+    if (treeAreaWidth !== undefined) {
+      model.setTreeAreaWidth(treeAreaWidth)
+    }
+  }, [model, treeAreaWidth])
+  // unguarded: dropping the prop is how a host turns the reference diff back off
+  useEffect(() => {
+    model.drawRelativeTo(relativeTo)
+  }, [model, relativeTo])
+
   return (
     <ThemeProvider theme={theme}>
       <div ref={ref}>
