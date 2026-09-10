@@ -64,6 +64,7 @@ const datasets = [
   // inferred from it and embedded as #=GF NH. Emits a single Stockholm string.
   { name: 'trna', varName: 'trna', kind: 'rna-stockholm' },
   { name: 'hammerhead', varName: 'hammerhead', kind: 'rna-stockholm' },
+  { name: 'corona_fse', varName: 'coronaFse', kind: 'rna-stockholm' },
 ]
 
 function readDataset(name) {

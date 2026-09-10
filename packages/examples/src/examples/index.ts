@@ -6,6 +6,8 @@ import ColorSchemes from './ColorSchemes'
 import ColorSchemesSrc from './ColorSchemes.tsx?raw'
 import ColumnTracks from './ColumnTracks'
 import ColumnTracksSrc from './ColumnTracks.tsx?raw'
+import CoronaFse from './CoronaFse'
+import CoronaFseSrc from './CoronaFse.tsx?raw'
 import CytochromeC from './CytochromeC'
 import CytochromeCSrc from './CytochromeC.tsx?raw'
 import Domains from './Domains'
@@ -260,7 +262,9 @@ export const examples: Example[] = [
     description:
       'Preproinsulin across vertebrates diffed against human — the B and A ' +
       'chains of mature insulin stay conserved (dots) while the cleaved-out ' +
-      'C-peptide drifts (letters).',
+      'C-peptide drifts (letters). The arc track carries the three disulfide ' +
+      'bonds from UniProt: two of them vault the C-peptide, which is what ' +
+      'holds the hormone together after that piece is cut out.',
     Component: Insulin,
     source: InsulinSrc,
   },
@@ -332,6 +336,18 @@ export const examples: Example[] = [
       'anticodon/T arms by base-pairing above the alignment.',
     Component: Trna,
     source: TrnaSrc,
+  },
+  {
+    name: 'Pseudoknot (coronavirus frameshift element)',
+    category: 'RNA structure',
+    description:
+      'The frameshifting stimulation element that coronaviruses use to reach ' +
+      'ORF1b (Rfam RF00507), across all four genera. Its pseudoknot crosses ' +
+      'stem 1 instead of nesting inside it, which is why the seed writes it as ' +
+      'the WUSS letter pair A/a and why the arc track shows something the ' +
+      'bracket track cannot: arcs that cross.',
+    Component: CoronaFse,
+    source: CoronaFseSrc,
   },
   {
     name: 'Ribozyme structure (hammerhead)',

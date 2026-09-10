@@ -29,6 +29,9 @@ export type { ColumnCounts } from './columnCounts.ts'
 export type {
   Accession,
   Annotation,
+  Arc,
+  ArcSpec,
+  ArcTrackModel,
   BasicTrack,
   BasicTrackModel,
   ColumnTrackSpec,
