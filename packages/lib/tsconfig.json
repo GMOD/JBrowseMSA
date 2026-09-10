@@ -2,7 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist/",
-    "rootDir": "src",
+    // rootDir is an emit concern, so it lives in the config that emits
+    // (tsconfig.build.json). Here it would only reject a test that reads
+    // another package's committed data, which realResidueMapping.test.ts does
+    // deliberately -- checking the model against data nobody hand-wrote.
+    "rootDir": "../..",
     "jsx": "react",
     "types": ["node"]
   },
