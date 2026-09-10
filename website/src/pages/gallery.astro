@@ -201,5 +201,24 @@ const figures = [
         of life. The wait is EBI's queue, from seconds to many minutes.
       </li>
     </ul>
+
+    <h2 id="embedded">Or one panel, in a page you write</h2>
+    <p>
+      A connected session is the most a reader can be handed and also the most
+      they have to take in: three linked views, each with its own tracks, menus
+      and coordinate system. When a page has one question to answer, the other
+      shape is to embed the viewer alone and put only the controls that question
+      needs around it — the alignment without the genome browser, the tree
+      turned off when there is no meaningful tree, a diff toggle and an expand
+      button beside it.
+    </p>
+    <p>
+      That is a react-msaview component in your own page rather than a JBrowse
+      session, and the props drive it live, so a toggle costs no remount and no
+      refetch. The <a href={`${base}/embedding`}>embedding guide</a> has the recipe,
+      and
+      <a href={`${base}/examples#controls-from-props`}>Controls from props</a> is
+      it running.
+    </p>
   </article>
 </Base>
