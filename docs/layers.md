@@ -114,3 +114,10 @@ to what is visible. Row names that match no row are ignored.
 
 React: the `highlights` prop on `MSAViewer`, or `model.setHighlights(list)`. R:
 `msaview(highlights = list(list(row = "human", start = 248, end = 248)))`.
+
+A host highlighting something transiently — following a hover in a structure
+viewer or a genome browser — wants `model.applyHighlight(owner, list)` and
+`model.clearHighlight(owner)` instead. Those take the same shape, draw over the
+persisted ones, and stay out of the snapshot, which is right for a hover: it is
+not part of the document. The owner key is what lets two sources highlight at
+once without either clearing the other's.

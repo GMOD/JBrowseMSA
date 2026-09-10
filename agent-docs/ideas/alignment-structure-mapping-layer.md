@@ -112,8 +112,14 @@ backed by a `Map<string, Highlight[]>` volatile that `resolvedHighlights` merges
 alongside the persisted `highlights` array. `setHighlightedColumns` stays as the
 legacy single owner, so nothing downstream breaks.
 
-Worth doing on its own schedule, ahead of everything else here: it is small, and
-it removes a bug class rather than adding a feature.
+**Done** (`applyHighlight`/`clearHighlight` in `model.ts`, tests in
+`highlights.test.ts`). `resolvedHighlights` merges the owner map over the
+persisted `highlights` array, so a transient highlight resolves through the same
+row projection as a document one and draws above it, and `reset()` drops the map
+because a hover belongs to the file that was open. `setHighlightedColumns` was
+left alone rather than reimplemented on top: it is a cross-repo contract with
+jbrowse-plugin-msaview and it renders through a different path, so this adds a
+second door rather than moving the first. Its callers should migrate.
 
 ## What it unlocks
 
@@ -153,7 +159,7 @@ is segment-shaped, because the underlying biology is.
 
 1. **Delete the 1:1 fallback in protein3d.** Downstream, small, pure
    correctness. No mapping and no matched row means no highlight.
-2. **Owner-keyed highlights here.** Independent of everything else.
+2. ~~**Owner-keyed highlights here.**~~ Done — see above.
 3. **`residueMappings` plus the two lookup methods.** The actual generalization.
 4. **A published locus type and hover/select callbacks**, so protein3d stops
    reaching into `mouseCol` and `setMousePos` through autoruns. Both repos

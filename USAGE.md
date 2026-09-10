@@ -151,6 +151,13 @@ model.setRowHeight(20)
 model.setColWidth(16)
 model.toggleCollapsed('node-id')
 model.fit() // fit both axes
+
+// transient highlights, keyed by whoever is asking. Two sources -- a structure
+// viewer's hover, a genome view's -- each add and remove only their own, so
+// neither erases the other. Not persisted; the `highlights` prop is the
+// persisted list.
+model.applyHighlight('protein3d', [{ row: 'human', start: 58, end: 58 }])
+model.clearHighlight('protein3d')
 ```
 
 ## Tracks from your own data
