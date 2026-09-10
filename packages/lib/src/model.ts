@@ -481,6 +481,16 @@ function stateModelFactory() {
 
       /**
        * #volatile
+       * transient highlights keyed by who asked for them. One slot cannot hold
+       * two sources -- a structure viewer's hover and a genome view's hover
+       * both want to point at a column, and with one slot whoever clears last
+       * erases the other's. Keyed by owner, each source adds and removes only
+       * its own. Not persisted: a hover is not part of the document.
+       */
+      transientHighlights: {} as Record<string, Highlight[]>,
+
+      /**
+       * #volatile
        */
       minimapHeight: 56,
 
@@ -615,6 +625,29 @@ function stateModelFactory() {
        */
       setHighlights(highlights: Highlight[]) {
         self.highlights.replace(highlights)
+      },
+      /**
+       * #action
+       * show `highlights` on behalf of `owner`, replacing whatever that owner
+       * showed before and leaving every other owner's alone. The object is
+       * replaced rather than mutated so one assignment is the observable
+       * change.
+       */
+      applyHighlight(owner: string, highlights: Highlight[]) {
+        self.transientHighlights = {
+          ...self.transientHighlights,
+          [owner]: highlights,
+        }
+      },
+      /**
+       * #action
+       * drop what `owner` was showing, leaving every other owner's in place
+       */
+      clearHighlight(owner: string) {
+        if (owner in self.transientHighlights) {
+          const { [owner]: _dropped, ...rest } = self.transientHighlights
+          self.transientHighlights = rest
+        }
       },
       /**
        * #action
@@ -2250,41 +2283,44 @@ function stateModelFactory() {
        * is dropped. Row names that match no row are ignored.
        */
       get resolvedHighlights(): ResolvedHighlight[] {
-        const { blanks, rowNamesSet, rowMap } = self
+        const { blanks, rowNamesSet, rowMap, transientHighlights } = self
         const toVisible = (globalCol: number) => {
           const visible = self.globalColToVisibleCol(globalCol)
           return visible ?? visibleColsBefore(blanks, globalCol)
         }
-        return self.highlights.flatMap(
-          ({ row, rows, start, end, label, color }) => {
-            const base = { label, color }
-            if (rows) {
-              const rowIndices = rows
-                .map(name => rowNamesSet.get(name))
-                .filter(notEmpty)
-              return rowIndices.length ? [{ ...base, rowIndices }] : []
-            }
-            if (start === undefined || end === undefined) {
+        // the document's own highlights first, then what each owner is showing
+        // right now, so a hover draws over a persisted band rather than under it
+        const all = [
+          ...self.highlights,
+          ...Object.values(transientHighlights).flat(),
+        ]
+        return all.flatMap(({ row, rows, start, end, label, color }) => {
+          const base = { label, color }
+          if (rows) {
+            const rowIndices = rows
+              .map(name => rowNamesSet.get(name))
+              .filter(notEmpty)
+            return rowIndices.length ? [{ ...base, rowIndices }] : []
+          }
+          if (start === undefined || end === undefined) {
+            return []
+          }
+          let startGlobal = start - 1
+          let endGlobal = end - 1
+          if (row !== undefined) {
+            if (!rowMap.has(row)) {
               return []
             }
-            let startGlobal = start - 1
-            let endGlobal = end - 1
-            if (row !== undefined) {
-              if (!rowMap.has(row)) {
-                return []
-              }
-              startGlobal = self.seqPosToGlobalCol(row, start - 1)
-              endGlobal = self.seqPosToGlobalCol(row, end - 1)
-            }
-            const startCol = toVisible(startGlobal)
-            const endVisible = self.globalColToVisibleCol(endGlobal)
-            const endCol =
-              endVisible ?? visibleColsBefore(blanks, endGlobal) - 1
-            return startCol <= endCol
-              ? [{ ...base, startCol, endCol, rowIndices: [] }]
-              : []
-          },
-        )
+            startGlobal = self.seqPosToGlobalCol(row, start - 1)
+            endGlobal = self.seqPosToGlobalCol(row, end - 1)
+          }
+          const startCol = toVisible(startGlobal)
+          const endVisible = self.globalColToVisibleCol(endGlobal)
+          const endCol = endVisible ?? visibleColsBefore(blanks, endGlobal) - 1
+          return startCol <= endCol
+            ? [{ ...base, startCol, endCol, rowIndices: [] }]
+            : []
+        })
       },
 
       /**
@@ -2379,6 +2415,7 @@ function stateModelFactory() {
         self.setError(undefined)
         self.setAnnotations([])
         self.setHighlightedColumns(undefined)
+        self.transientHighlights = {}
         self.setMousePos(undefined, undefined)
         self.setMouseClickPos(undefined, undefined)
         self.setHoveredTreeNode(undefined)

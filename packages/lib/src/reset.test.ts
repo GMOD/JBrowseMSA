@@ -59,3 +59,13 @@ test('a file opened after a reset is not collapsed by the previous one', () => {
   expect(model.numRows).toBe(4)
   expect(model.rowNames).toEqual(['x', 'y', 'z', 'w'])
 })
+
+test('reset drops what an owner was highlighting', () => {
+  // a hover belongs to the file that was open; carrying it into the next one
+  // points at a column that means something else now
+  const model = loaded()
+  model.applyHighlight('protein3d', [{ start: 1, end: 1 }])
+  expect(model.resolvedHighlights).toHaveLength(1)
+  model.reset()
+  expect(model.transientHighlights).toEqual({})
+})

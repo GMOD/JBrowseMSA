@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { expect, test } from 'vitest'
 
 import MSAModelF from './model.ts'
@@ -67,4 +68,49 @@ test('setHighlights replaces the list and reset clears it', () => {
   expect(model.highlights).toHaveLength(1)
   model.reset()
   expect(model.highlights).toHaveLength(0)
+})
+
+test('two owners hold their own highlights instead of one erasing the other', () => {
+  // the bug this replaces: one slot, so a structure viewer clearing its hover
+  // took the genome view's highlight with it
+  const model = makeModel([])
+  model.applyHighlight('protein3d', [{ start: 1, end: 1, label: 'residue 12' }])
+  model.applyHighlight('genome', [{ start: 5, end: 6, label: 'exon 3' }])
+  expect(model.resolvedHighlights.map(h => h.label)).toEqual([
+    'residue 12',
+    'exon 3',
+  ])
+
+  model.clearHighlight('protein3d')
+  expect(model.resolvedHighlights.map(h => h.label)).toEqual(['exon 3'])
+
+  model.clearHighlight('genome')
+  expect(model.resolvedHighlights).toEqual([])
+})
+
+test('an owner replaces its own highlights rather than accumulating them', () => {
+  const model = makeModel([])
+  model.applyHighlight('hover', [{ start: 1, end: 1, label: 'first' }])
+  model.applyHighlight('hover', [{ start: 2, end: 2, label: 'second' }])
+  expect(model.resolvedHighlights.map(h => h.label)).toEqual(['second'])
+})
+
+test('clearing an owner that never showed anything changes nothing', () => {
+  const model = makeModel([{ start: 1, end: 1, label: 'kept' }])
+  const before = model.transientHighlights
+  model.clearHighlight('never-used')
+  expect(model.transientHighlights).toBe(before)
+  expect(model.resolvedHighlights.map(h => h.label)).toEqual(['kept'])
+})
+
+test('a transient highlight resolves like a persisted one, and stays out of the snapshot', () => {
+  const model = makeModel([])
+  // a residue span of a gapped row, the case that needs the projection
+  model.applyHighlight('protein3d', [
+    { row: 'seq2', start: 3, end: 3, label: 'residue 3' },
+  ])
+  expect(
+    model.resolvedHighlights.map(h => [h.label, h.startCol, h.endCol]),
+  ).toEqual([['residue 3', 4, 4]])
+  expect(getSnapshot(model)).not.toHaveProperty('transientHighlights')
 })
