@@ -498,6 +498,45 @@ export const specs = [
     clip: 'viewer',
   },
   {
+    name: 'clinvar-variants',
+    // p53 with three answers to "which part matters" stacked on one set of
+    // columns: conservation computed from the alignment, InterPro domain boxes,
+    // and ClinVar's pathogenic missense variants per residue -- which the
+    // viewer computes nothing for. 94% of them fall in the DNA-binding domain.
+    url: data({
+      height: 420,
+      treeAreaWidth: 150,
+      colWidth: 2.4,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      relativeTo: 'Human',
+      // the domain overlay says the same thing as the two bands but paints
+      // every row of every domain, which buries the bars this figure is about
+      turnedOffTracks: { 'property-conservation': true },
+      data: {
+        msa: readConst('p53MSA'),
+        tree: readConst('p53Tree'),
+      },
+      highlights: [
+        { row: 'Human', start: 100, end: 288, label: 'DNA-binding domain' },
+        { row: 'Human', start: 319, end: 357, label: 'Tetramerization' },
+      ],
+      columnTracks: [
+        {
+          id: 'clinvar',
+          name: 'ClinVar pathogenic',
+          kind: 'bar',
+          row: 'Human',
+          color: '#c0392b',
+          height: 90,
+          values: readJson('p53ClinVar.json').counts,
+          max: readJson('p53ClinVar.json').max,
+        },
+      ],
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
     name: 'domain-contacts',
     // The Src-family kinases with the domain overlay AND a contact map from
     // 2SRC over it: the boxes name the domains, the arcs show how they pack.

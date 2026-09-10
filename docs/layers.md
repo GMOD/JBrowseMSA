@@ -81,6 +81,12 @@ so the viewer draws a **Base pairs** track from it, coloring a pseudoknot — a
 pair WUSS writes as `A`/`a` because it crosses a helix instead of nesting in it
 — differently from the nested pairs it crosses.
 
+The numbers do not have to come from the alignment, and the interesting ones
+usually don't: the p53 example carries a count per residue of the missense
+variants ClinVar classifies as pathogenic, which is a fact about human disease
+that no alignment contains. Computing it belongs wherever the data lives; the
+viewer's part is to put it on the right columns.
+
 A track over 50 kB serialized stays in the live model but leaves the snapshot,
 the same rule that keeps a large inline alignment out of a shared URL. Point a
 large alignment at a URL and keep the track under that size, or host the values

@@ -48,6 +48,8 @@ import Opsins from './Opsins'
 import OpsinsSrc from './Opsins.tsx?raw'
 import P53 from './P53'
 import P53Src from './P53.tsx?raw'
+import P53ClinVar from './P53ClinVar'
+import P53ClinVarSrc from './P53ClinVar.tsx?raw'
 import PanelControls from './PanelControls'
 import PanelControlsSrc from './PanelControls.tsx?raw'
 import Prestin from './Prestin'
@@ -213,6 +215,19 @@ export const examples: Example[] = [
       'reference diff showing as dots in the unannotated linkers.',
     Component: P53,
     source: P53Src,
+  },
+  {
+    name: 'Where the disease variants are (p53 + ClinVar)',
+    category: 'Protein domains',
+    description:
+      'Three answers to "which part of this protein matters", from three ' +
+      'different places, on the same columns: conservation computed from the ' +
+      'alignment, domain boxes from InterPro, and — as a data layer the ' +
+      'viewer computes nothing for — the pathogenic missense variants ClinVar ' +
+      'has on record per residue. 94% of them land inside the DNA-binding ' +
+      'domain, with a second small cluster on the tetramerization domain.',
+    Component: P53ClinVar,
+    source: P53ClinVarSrc,
   },
   {
     name: 'Domain loss across orthologs (NLRP1)',

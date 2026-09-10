@@ -21,9 +21,9 @@ const base = import.meta.env.BASE_URL
 // One figure per distinct viewer capability rather than per interesting
 // organism — the standalone demo app at /examples carries the full set of
 // biological stories. Each entry here shows something the others don't:
-// feature overlays, domain annotation, reference diffing, tree topology, RNA
-// secondary structure, base-pair arcs, gene arrows, base-resolution DNA,
-// scale.
+// feature overlays, domain annotation, reference diffing, data layers and
+// labeled bands, tree topology, RNA secondary structure, base-pair arcs, gene
+// arrows, base-resolution DNA, scale.
 const figures = [
   {
     src: 'real-domains.png',
@@ -39,6 +39,11 @@ const figures = [
     src: 'within-protein-conservation.png',
     title: 'A dominant functional domain',
     body: 'p53’s InterProScan domains overlaid: the central DNA-binding domain (red) — where most cancer mutations cluster — forms the bulk of the protein, flanked by the short N-terminal transactivation motifs. The overlay maps the functional architecture onto the alignment.',
+  },
+  {
+    src: 'clinvar-variants.png',
+    title: 'A layer the alignment cannot know',
+    body: 'The same p53 orthologs, diffed against human, with two labeled bands and one track that came from somewhere else entirely: the missense variants ClinVar classifies as pathogenic, counted per residue. 94% of them fall inside the DNA-binding domain, and the small second cluster sits on the tetramerization motif. Conservation is computed from the alignment and says where this family has not changed; this says where changing it causes disease, and the viewer computes none of it — the counts arrive as data and are drawn on the human row’s residues.',
   },
   {
     src: 'domain-loss.png',
@@ -121,10 +126,10 @@ const figures = [
     <p>
       Just an alignment, a tree, and optional feature overlays — no genome
       browser. Each figure below shows a distinct viewer capability — domain
-      overlays, reference diffing, tree topology, RNA secondary structure,
-      base-pair arcs, gene arrows, base-resolution DNA, scale. The full set of
-      biological examples (more conservation, phylogeny, and domain stories) is
-      live and interactive on the
+      overlays, reference diffing, data layers, tree topology, RNA secondary
+      structure, base-pair arcs, gene arrows, base-resolution DNA, scale. The
+      full set of biological examples (more conservation, phylogeny, and domain
+      stories) is live and interactive on the
       <a href={`${base}/examples`}>examples</a> page.
     </p>
 

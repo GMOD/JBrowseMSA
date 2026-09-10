@@ -252,6 +252,23 @@ JSON rather than a `.ts` module on purpose: the formatter rewrites a generated
 TS file's quoting, and the screenshot specs read the same file the example
 imports.
 
+`clinvar.mjs` is the same idea for a per-column layer rather than a pairing: it
+counts, per residue, how many distinct missense alleles ClinVar classifies as
+pathogenic, and writes `packages/examples/src/examples/p53ClinVar.json`.
+
+```sh
+node scripts/examples-gen/clinvar.mjs
+```
+
+Two things it does that a shorter version would get wrong. It filters the
+classification off each record rather than trusting the search term —
+E-utilities translates `"pathogenic"[clinical significance]` to a loose
+`[All Fields]` match that also returns "Conflicting classifications of
+pathogenicity". And it drops nonsense changes: a stop is not one residue
+substituted for another, and it disables everything downstream, so it does not
+belong on a per-residue count. The number to sanity-check against is the biology
+— 94% of what survives falls inside the DNA-binding domain.
+
 SIFTS is the step worth naming. A PDB entry numbers its residues its own way,
 and a contact map placed on the alignment with the wrong offset still looks
 plausible — arcs land somewhere.
