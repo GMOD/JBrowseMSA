@@ -236,6 +236,29 @@ Positions from a feature table are already in that sequence's own numbering,
 which is what `row` on the track expects, so nothing has to be recomputed
 against the alignment.
 
+A contact map is the same shape of data with a longer derivation, so it gets a
+script: `contacts.mjs` fetches the mmCIF for a PDB entry and the SIFTS residue
+mapping, computes C-beta pairs under 8 Å, and keeps the ones whose two ends sit
+in different domains of the committed domain GFF — the pairs that say how the
+domains pack, rather than the thousands saying a residue touches its neighbours.
+
+```sh
+node scripts/examples-gen/contacts.mjs
+```
+
+It writes `packages/examples/src/examples/kinaseContacts.json`, which carries
+its own provenance (entry, chain, accession, cutoff, per-domain-pair counts).
+JSON rather than a `.ts` module on purpose: the formatter rewrites a generated
+TS file's quoting, and the screenshot specs read the same file the example
+imports.
+
+SIFTS is the step worth naming. A PDB entry numbers its residues its own way,
+and a contact map placed on the alignment with the wrong offset still looks
+plausible — arcs land somewhere.
+`https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/<pdb>` is the authority for
+that offset. The check that it worked, for Src, is that the SH2 arcs land on
+residue 527: the phosphotyrosine the domain actually binds.
+
 ## The other real examples
 
 Two real examples predate this pipeline and are documented here for provenance:

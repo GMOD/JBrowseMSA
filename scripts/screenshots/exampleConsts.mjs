@@ -14,9 +14,8 @@ const examplesDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../../packages/examples/src/examples',
 )
-const sources = ['exampleData.ts', 'generatedData.ts'].map(name =>
-  fs.readFileSync(path.join(examplesDir, name), 'utf8'),
-)
+const read = name => fs.readFileSync(path.join(examplesDir, name), 'utf8')
+const sources = ['exampleData.ts', 'generatedData.ts'].map(read)
 
 // Match either `export const NAME = \`…\`` (backtick) or `export const NAME =
 // '…'` (single-quote) across both source files.
@@ -40,4 +39,11 @@ export function readConst(name) {
 
 export function hasConst(name) {
   return sources.some(src => new RegExp(`export const ${name} = `).test(src))
+}
+
+// Generated data that is data rather than a string constant: the arc tracks'
+// pair lists, which the examples import as JSON and the specs read from the
+// same file so a regenerated contact map reaches both.
+export function readJson(file) {
+  return JSON.parse(read(file))
 }

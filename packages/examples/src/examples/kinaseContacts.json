@@ -1,0 +1,302 @@
+{
+  "generatedBy": "scripts/examples-gen/contacts.mjs",
+  "description": "Inter-domain residue contacts of autoinhibited human Src: every C-beta pair under 8 A whose two residues sit in different annotated regions of the SRC_HUMAN row. A residue touching its own neighbours says nothing about how the domains pack, and that is nearly every contact in the structure.",
+  "pdb": "2SRC",
+  "chain": "A",
+  "accession": "P12931",
+  "row": "SRC_HUMAN",
+  "cutoffAngstroms": 8,
+  "counts": {
+    "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail": 22,
+    "SH2 - C-terminal tail": 19,
+    "SH3 - Ser-Thr/Tyr_kinase_cat_dom": 8,
+    "SH2 - Ser-Thr/Tyr_kinase_cat_dom": 8
+  },
+  "contacts": [
+    {
+      "start": 96,
+      "end": 292,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 97,
+      "end": 292,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 98,
+      "end": 289,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 98,
+      "end": 290,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 98,
+      "end": 292,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 98,
+      "end": 293,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 99,
+      "end": 290,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 99,
+      "end": 292,
+      "pair": "SH3 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 157,
+      "end": 527,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 158,
+      "end": 527,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 159,
+      "end": 371,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 159,
+      "end": 520,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 159,
+      "end": 527,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 160,
+      "end": 323,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 163,
+      "end": 368,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 163,
+      "end": 400,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 163,
+      "end": 401,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 163,
+      "end": 402,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 164,
+      "end": 400,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 167,
+      "end": 400,
+      "pair": "SH2 - Ser-Thr/Tyr_kinase_cat_dom"
+    },
+    {
+      "start": 181,
+      "end": 527,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 182,
+      "end": 528,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 188,
+      "end": 530,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 203,
+      "end": 531,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 204,
+      "end": 529,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 204,
+      "end": 530,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 204,
+      "end": 531,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 205,
+      "end": 530,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 205,
+      "end": 531,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 205,
+      "end": 533,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 206,
+      "end": 530,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 217,
+      "end": 533,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 218,
+      "end": 533,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 218,
+      "end": 534,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 220,
+      "end": 534,
+      "pair": "SH2 - C-terminal tail"
+    },
+    {
+      "start": 364,
+      "end": 523,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 367,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 367,
+      "end": 522,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 367,
+      "end": 523,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 368,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 370,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 371,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 371,
+      "end": 520,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 371,
+      "end": 522,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 374,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 494,
+      "end": 522,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 515,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 516,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 516,
+      "end": 520,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 517,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 517,
+      "end": 520,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 517,
+      "end": 521,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 517,
+      "end": 526,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 518,
+      "end": 519,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 518,
+      "end": 520,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 518,
+      "end": 521,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    },
+    {
+      "start": 518,
+      "end": 522,
+      "pair": "Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail"
+    }
+  ]
+}

@@ -6,7 +6,7 @@
 // The app reads a `?data=` URL param as a JSON model snapshot, so we can
 // deep-link a fully loaded alignment instead of driving the import form.
 
-import { hasConst, readConst } from './exampleConsts.mjs'
+import { hasConst, readConst, readJson } from './exampleConsts.mjs'
 
 // The phylogeny examples (MyD88/globin/ACE2/opsins/…) are real datasets built
 // reproducibly into the examples package by scripts/examples-gen. The opsin
@@ -493,6 +493,53 @@ export const specs = [
       data: {
         msa: readConst('trnaMSA'),
       },
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
+    name: 'domain-contacts',
+    // The Src-family kinases with the domain overlay AND a contact map from
+    // 2SRC over it: the boxes name the domains, the arcs show how they pack.
+    // Red is the autoinhibitory clamp -- the C-terminal tail's phospho-Tyr527
+    // bound by the protein's own SH2 domain.
+    url: data({
+      height: 320,
+      treeAreaWidth: 200,
+      colWidth: 1.6,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      showDomainLegend: false,
+      // the arcs and the domain boxes are the figure; the conservation
+      // histograms would take a third of it to say nothing about either
+      turnedOffTracks: { conservation: true, 'property-conservation': true },
+      data: {
+        msa: readConst('kinaseMSA'),
+        tree: readConst('kinaseTree'),
+        gff: readConst('kinaseDomainsGFF'),
+      },
+      columnTracks: [
+        {
+          id: 'contacts',
+          name: 'Domain contacts (2SRC)',
+          kind: 'arc',
+          row: 'SRC_HUMAN',
+          height: 110,
+          arcs: readJson('kinaseContacts.json').contacts.map(
+            ({ start, end, pair }) => ({
+              start,
+              end,
+              color:
+                pair.includes('SH2') && pair.includes('tail')
+                  ? '#e15759'
+                  : pair.includes('tail')
+                    ? '#f28e2b'
+                    : pair.includes('SH3')
+                      ? '#59a14f'
+                      : '#4e79a7',
+            }),
+          ),
+        },
+      ],
     }),
     settle: 2500,
     clip: 'viewer',
