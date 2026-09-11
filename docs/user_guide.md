@@ -99,19 +99,30 @@ The rows beneath it are hidden and the gap-only columns they introduced are
 removed.
 
 The tree settings menu toggles branch-length rendering, right-aligned vs
-tree-adjacent labels, and clickable branch bubbles. You can also compute a
-neighbor-joining tree (BLOSUM62) directly from an alignment that arrived without
-one.
+tree-adjacent labels, and clickable branch bubbles. **Advanced → Calculate
+neighbor joining tree (BLOSUM62)** builds a quick tree from an alignment that
+arrived without one, up to 500 rows — past that the calculation is a main-thread
+freeze of several seconds or more, and the menu item says so instead of running.
+Build a tree that size with FastTree or IQ-TREE and open it beside the
+alignment; the
+[protein family tutorial](https://gmod.org/JBrowseMSA/tutorials/protein_family)
+covers the whole path.
 
 ## Protein domains
 
-Load a GFF3 annotation file from the import form, or query InterProScan from
-within the app under the **Annotations** menu, to overlay domains on the
-alignment. Any GFF3 works — InterProScan output is the common case, not a
-requirement — and the same overlay draws exon and gene models. Each row's
-annotation coordinates are translated into MSA coordinate space, so they line up
-across the family even where alignment gaps shift the underlying sequence
-positions.
+Load a GFF3 annotation file from the import form, or from **Annotations → Open
+InterProScan results...**, to overlay domains on the alignment. Any GFF3 works —
+InterProScan output is the common case, not a requirement — and the same overlay
+draws exon and gene models. Each row's annotation coordinates are translated
+into MSA coordinate space, so they line up across the family even where
+alignment gaps shift the underlying sequence positions.
+
+Building that file is a job for the [CLI](https://gmod.org/JBrowseMSA/cli):
+`react-msaview-cli interpro` reads InterPro's precomputed matches for UniProt
+accessions in seconds, and `interproscan` scans sequences InterPro has not seen.
+The
+[protein family tutorial](https://gmod.org/JBrowseMSA/tutorials/protein_family)
+walks through both.
 
 [![](media/real-domains.png)][live-real-domains]
 

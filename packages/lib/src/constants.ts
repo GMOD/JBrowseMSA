@@ -61,3 +61,11 @@ export const defaultTreeWidth = 300
 export const defaultShowBranchLen = true
 export const defaultDrawTree = true
 export const defaultDrawNodeBubbles = true
+
+// Neighbor joining refuses above this many rows. The distance matrix is O(n^2*L)
+// and the join loop O(n^3), both on the main thread with no progress and no
+// cancel: 400 rows measured 1.5s, 800 rows 10s, and 1600 would be about seventy.
+// See agent-docs/ideas/neighbor-joining-scaling.md for why the RapidNJ fix is a
+// real algorithm change rather than a port, and why capping is the honest answer
+// -- NJ on thousands of sequences is the wrong tool however fast it runs.
+export const maxNeighborJoiningRows = 500

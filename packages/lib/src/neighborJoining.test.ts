@@ -1,6 +1,8 @@
 import { parseNewick } from 'msa-parsers'
 import { describe, expect, test } from 'vitest'
 
+import { maxNeighborJoiningRows } from './constants.ts'
+import MSAModelF from './model.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 
 import type { NewickNode } from '@gmod/newick'
@@ -160,5 +162,37 @@ describe('calculateNeighborJoiningTree', () => {
 
     expect(tree).toMatch(/;$/)
     expect(tree).toContain('short')
+  })
+})
+
+// The join loop is cubic and runs on the main thread, so past a few hundred
+// rows the click that starts it freezes the tab for seconds with no progress
+// and no cancel. The model refuses instead, and names a tool that does not.
+describe('the row cap', () => {
+  function modelWithRows(rows: number) {
+    return MSAModelF().create({
+      type: 'MsaView',
+      msaFormat: 'fasta',
+      data: {
+        msa: Array.from(
+          { length: rows },
+          (_, i) => `>seq${i}\nMKAAYLSMFG`,
+        ).join('\n'),
+      },
+    })
+  }
+
+  test('builds a tree under the cap', () => {
+    const model = modelWithRows(10)
+    model.calculateNeighborJoiningTreeFromMSA()
+    expect(model.data.tree).toContain('seq9')
+  })
+
+  test('refuses over the cap, pointing at a tool built for it', () => {
+    const model = modelWithRows(maxNeighborJoiningRows + 1)
+    expect(() => {
+      model.calculateNeighborJoiningTreeFromMSA()
+    }).toThrow(/FastTree|IQ-TREE/)
+    expect(model.data.tree).toBeFalsy()
   })
 })
