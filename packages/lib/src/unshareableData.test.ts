@@ -7,6 +7,8 @@ import { expect, test } from 'vitest'
 import { maxInlineSnapshotBytes } from './constants.ts'
 import stateModelFactory from './model.ts'
 
+import type { MsaViewModel } from './model.ts'
+
 const MsaView = stateModelFactory()
 
 function fasta(rows: number) {
@@ -19,8 +21,8 @@ function fasta(rows: number) {
 const bigMsa = fasta(400)
 const smallMsa = fasta(2)
 
-function snapshotOf(model: { toJSON: () => unknown }) {
-  return JSON.parse(JSON.stringify(getSnapshot(model as never))) as {
+function snapshotOf(model: MsaViewModel) {
+  return JSON.parse(JSON.stringify(getSnapshot(model))) as {
     data?: { msa?: string; tree?: string; gff?: string }
   }
 }
