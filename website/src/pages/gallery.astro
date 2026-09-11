@@ -217,13 +217,18 @@ const figures = [
       turned off when there is no meaningful tree, a diff toggle and an expand
       button beside it.
     </p>
+    {
+      /* No `#controls-from-props` fragment here: ExampleBrowser reads the hash
+      as a route rather than scrolling to an element, so the examples page is
+      client:only and carries no such id. hyperlink --check-anchors is right to
+      call that a broken anchor, and it fails the build. */
+    }
     <p>
       That is a react-msaview component in your own page rather than a JBrowse
       session, and the props drive it live, so a toggle costs no remount and no
       refetch. The <a href={`${base}/embedding`}>embedding guide</a> has the recipe,
-      and
-      <a href={`${base}/examples#controls-from-props`}>Controls from props</a> is
-      it running.
+      and the <strong>Controls from props</strong> entry on the
+      <a href={`${base}/examples`}>examples</a> page is it running.
     </p>
   </article>
 </Base>
