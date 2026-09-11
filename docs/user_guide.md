@@ -26,7 +26,10 @@ both are present, rows are ordered and connected to match the tree.
 ## Loading your own data
 
 The import form accepts a pasted string, a local file, or a remote URL for each
-of the alignment, the tree, and (optionally) a domain-annotation track.
+of the alignment, the tree, and (optionally) a domain-annotation track. If you
+do not have those files yet, the
+[tutorials](https://gmod.org/JBrowseMSA/tutorials) build them from scratch —
+sequences to alignment to tree to annotations, with the commands to run.
 
 | Input         | Formats                                                                                                                             |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |

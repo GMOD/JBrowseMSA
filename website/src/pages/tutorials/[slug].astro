@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro'
+import { tutorialBySlug } from '../../lib/tutorials.ts'
+
+interface MarkdownPage {
+  Content: astroHTML.JSX.ElementType
+}
+
+export function getStaticPaths() {
+  const pages = import.meta.glob<MarkdownPage>(
+    '../../../../docs/tutorials/*.md',
+    {
+      eager: true,
+    },
+  )
+  return Object.entries(pages).map(([file, page]) => ({
+    params: { slug: file.split('/').pop()!.replace(/\.md$/, '') },
+    props: { page },
+  }))
+}
+
+const { page } = Astro.props as { page: MarkdownPage }
+const { slug } = Astro.params
+const meta = tutorialBySlug.get(String(slug))
+const { Content } = page
+---
+
+<Base
+  title={`${meta?.title ?? 'Tutorial'} — JBrowseMSA`}
+  description={meta?.blurb}
+>
+  <article class="prose">
+    <Content />
+  </article>
+</Base>
