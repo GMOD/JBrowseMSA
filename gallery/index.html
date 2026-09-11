@@ -89,10 +89,10 @@
     <p>
       Just an alignment, a tree, and optional feature overlays — no genome
       browser. Each figure below shows a distinct viewer capability — domain
-      overlays, reference diffing, tree topology, RNA secondary structure, gene
-      arrows, base-resolution DNA, scale. The full set of biological examples
-      (more conservation, phylogeny, and domain stories) is live and interactive
-      on the
+      overlays, reference diffing, data layers, tree topology, RNA secondary
+      structure, base-pair arcs, gene arrows, base-resolution DNA, scale. The
+      full set of biological examples (more conservation, phylogeny, and domain
+      stories) is live and interactive on the
       <a href="/JBrowseMSA/examples">examples</a> page.
     </p>
 
@@ -101,9 +101,17 @@
   <figcaption>
           <strong>Domain architecture</strong> — The Src-family kinases with InterProScan annotations: the shared SH3 + SH2 + kinase domain blocks line up down every member, so the family’s domain layout reads straight across the alignment.</figcaption>
 </figure><figure>
+  <img src="/JBrowseMSA/media/domain-contacts.png" alt="The same Src-family kinases, with a contact map from the solved structure over the domain boxes. The boxes say the family is SH3 + SH2 + kinase; the arcs say how those three fold against each other, which is the mechanism — the C-terminal tail doubles back so its phospho-Tyr527 binds the protein’s own SH2 domain (red) and clamps the kinase shut. C-beta pairs under 8 Å in PDB 2SRC, mapped to UniProt numbering through SIFTS, filtered to the pairs joining two different domains, and placed on the human row so the viewer projects them onto the alignment’s columns." width="2320" height="654" loading="lazy">
+  <figcaption>
+          <strong>How the domains pack</strong> — The same Src-family kinases, with a contact map from the solved structure over the domain boxes. The boxes say the family is SH3 + SH2 + kinase; the arcs say how those three fold against each other, which is the mechanism — the C-terminal tail doubles back so its phospho-Tyr527 binds the protein’s own SH2 domain (red) and clamps the kinase shut. C-beta pairs under 8 Å in PDB 2SRC, mapped to UniProt numbering through SIFTS, filtered to the pairs joining two different domains, and placed on the human row so the viewer projects them onto the alignment’s columns.</figcaption>
+</figure><figure>
   <img src="/JBrowseMSA/media/within-protein-conservation.png" alt="p53’s InterProScan domains overlaid: the central DNA-binding domain (red) — where most cancer mutations cluster — forms the bulk of the protein, flanked by the short N-terminal transactivation motifs. The overlay maps the functional architecture onto the alignment." width="2320" height="974" loading="lazy">
   <figcaption>
           <strong>A dominant functional domain</strong> — p53’s InterProScan domains overlaid: the central DNA-binding domain (red) — where most cancer mutations cluster — forms the bulk of the protein, flanked by the short N-terminal transactivation motifs. The overlay maps the functional architecture onto the alignment.</figcaption>
+</figure><figure>
+  <img src="/JBrowseMSA/media/clinvar-variants.png" alt="The same p53 orthologs, diffed against human, with two labeled bands and one track that came from somewhere else entirely: the missense variants ClinVar classifies as pathogenic, counted per residue. 94% of them fall inside the DNA-binding domain, and the small second cluster sits on the tetramerization motif. Conservation is computed from the alignment and says where this family has not changed; this says where changing it causes disease, and the viewer computes none of it — the counts arrive as data and are drawn on the human row’s residues." width="2320" height="854" loading="lazy">
+  <figcaption>
+          <strong>A layer the alignment cannot know</strong> — The same p53 orthologs, diffed against human, with two labeled bands and one track that came from somewhere else entirely: the missense variants ClinVar classifies as pathogenic, counted per residue. 94% of them fall inside the DNA-binding domain, and the small second cluster sits on the tetramerization motif. Conservation is computed from the alignment and says where this family has not changed; this says where changing it causes disease, and the viewer computes none of it — the counts arrive as data and are drawn on the human row’s residues.</figcaption>
 </figure><figure>
   <img src="/JBrowseMSA/media/domain-loss.png" alt="Twelve NLRP1 orthologs. Every row carries the same core — NACHT, winged helix, HD2, then FIIND/UPA and the CARD — and every one of those blocks lines up in the same columns. The N-terminal PYD (cyan) is there in only five rows, so the blank space under it is a module the other seven lack. Those core domains sit up to 391 residues apart between rows in their own coordinates; column-locking is what stacks them." width="3120" height="694" loading="lazy">
   <figcaption>
@@ -132,6 +140,10 @@
   <img src="/JBrowseMSA/media/rna-secondary-structure.png" alt="A tRNA alignment (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a dedicated secondary-structure track above the columns, with the acceptor stem and D-/anticodon-/T-arms colored by base-pairing." width="2320" height="914" loading="lazy">
   <figcaption>
           <strong>RNA secondary structure</strong> — A tRNA alignment (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a dedicated secondary-structure track above the columns, with the acceptor stem and D-/anticodon-/T-arms colored by base-pairing.</figcaption>
+</figure><figure>
+  <img src="/JBrowseMSA/media/pseudoknot-arcs.png" alt="The coronavirus frameshifting stimulation element (Rfam RF00507) across all four genera. The Base pairs track draws the Stockholm SS_cons as arcs between the columns that pair: blue for the nested helices, red for the pseudoknot. A pseudoknot is by definition a pair that crosses a helix instead of nesting inside it, which is why WUSS has to write it as the letter pair A/a and why the bracket track directly above shows two runs of letters with no visible relationship. The arcs cross." width="2320" height="938" loading="lazy">
+  <figcaption>
+          <strong>Base pairs, including a pseudoknot</strong> — The coronavirus frameshifting stimulation element (Rfam RF00507) across all four genera. The Base pairs track draws the Stockholm SS_cons as arcs between the columns that pair: blue for the nested helices, red for the pseudoknot. A pseudoknot is by definition a pair that crosses a helix instead of nesting inside it, which is why WUSS has to write it as the letter pair A/a and why the bracket track directly above shows two runs of letters with no visible relationship. The arcs cross.</figcaption>
 </figure><figure>
   <img src="/JBrowseMSA/media/f12-exon-architecture.png" alt="Coagulation factor XII coding alignment with its 14 exons overlaid — each exon the same color across species, through the same overlay path as InterProScan domains (built by react-msaview-cli genestructure). The whole gene’s exon architecture reads straight down the alignment." width="2920" height="954" loading="lazy">
   <figcaption>
@@ -211,6 +223,25 @@
         of life. The wait is EBI's queue, from seconds to many minutes.
       </li>
     </ul>
+
+    <h2 id="embedded">Or one panel, in a page you write</h2>
+    <p>
+      A connected session is the most a reader can be handed and also the most
+      they have to take in: three linked views, each with its own tracks, menus
+      and coordinate system. When a page has one question to answer, the other
+      shape is to embed the viewer alone and put only the controls that question
+      needs around it — the alignment without the genome browser, the tree
+      turned off when there is no meaningful tree, a diff toggle and an expand
+      button beside it.
+    </p>
+    <p>
+      That is a react-msaview component in your own page rather than a JBrowse
+      session, and the props drive it live, so a toggle costs no remount and no
+      refetch. The <a href="/JBrowseMSA/embedding">embedding guide</a> has the recipe,
+      and
+      <a href="/JBrowseMSA/examples#controls-from-props">Controls from props</a> is
+      it running.
+    </p>
   </article>
 
     </main>

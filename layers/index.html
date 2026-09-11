@@ -89,9 +89,11 @@ alignment’s gaps. Without a row they are alignment columns.</p>
 <p>A track above the alignment, supplied as data. <code>kind: "bar"</code> draws one bar per
 column from <code>values</code>, scaled by <code>max</code> (default 1) and clamped to that range.
 <code>kind: "text"</code> draws one character per column from <code>data</code>, colored by <code>colors</code>.
-<code>row</code> makes <code>values</code> or <code>data</code> index that row’s residues instead of columns, so
-the first value is residue 1 and gaps in the alignment are filled in. A data
-track appears in the Tracks menu, toggles like any other, and exports to SVG.</p>
+<code>kind: "arc"</code> joins pairs of positions from <code>arcs</code>, each <code>{start, end}</code> drawn as
+a curve whose height grows with how far it reaches. <code>row</code> makes <code>values</code>, <code>data</code>
+or the ends of an arc index that row’s residues instead of columns, so the first
+value is residue 1 and gaps in the alignment are filled in. A data track appears
+in the Tracks menu, toggles like any other, and exports to SVG.</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
 <span class="line"><span style="color:#79B8FF">  "type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"MsaView"</span><span style="color:#E1E4E8">,</span></span>
 <span class="line"><span style="color:#79B8FF">  "data"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"msa"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">">human</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">MKAANSE</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">>mouse</span><span style="color:#79B8FF">\n</span><span style="color:#9ECBFF">MKA-NSE"</span><span style="color:#E1E4E8"> },</span></span>
@@ -111,6 +113,17 @@ track appears in the Tracks menu, toggles like any other, and exports to SVG.</p
 <span class="line"><span style="color:#79B8FF">      "kind"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"text"</span><span style="color:#E1E4E8">,</span></span>
 <span class="line"><span style="color:#79B8FF">      "data"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"1231231"</span><span style="color:#E1E4E8">,</span></span>
 <span class="line"><span style="color:#79B8FF">      "colors"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"1"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#ddd"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"2"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#bbb"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"3"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#999"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#79B8FF">      "id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"disulfides"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "name"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"Disulfide bonds"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "kind"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"arc"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "arcs"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#E1E4E8">        { </span><span style="color:#79B8FF">"start"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">31</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"end"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">96</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#E1E4E8">        { </span><span style="color:#79B8FF">"start"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">43</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"end"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">109</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">      ],</span></span>
+<span class="line"><span style="color:#79B8FF">      "color"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"#b8860b"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "row"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"human"</span></span>
 <span class="line"><span style="color:#E1E4E8">    }</span></span>
 <span class="line"><span style="color:#E1E4E8">  ]</span></span>
 <span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
@@ -169,7 +182,28 @@ track appears in the Tracks menu, toggles like any other, and exports to SVG.</p
 
 
 
-<table><thead><tr><th>Field</th><th>Kind</th><th>Meaning</th></tr></thead><tbody><tr><td><code>id</code></td><td>both</td><td>Unique key. The Tracks menu and <code>turnedOffTracks</code> use it</td></tr><tr><td><code>name</code></td><td>both</td><td>Label beside the track</td></tr><tr><td><code>values</code></td><td>bar</td><td>One number per column, or per residue of <code>row</code></td></tr><tr><td><code>max</code></td><td>bar</td><td>Value drawn at full height (default 1)</td></tr><tr><td><code>color</code></td><td>bar</td><td>Bar fill (default gray)</td></tr><tr><td><code>data</code></td><td>text</td><td>One character per column, or per residue of <code>row</code></td></tr><tr><td><code>colors</code></td><td>text</td><td>Character to background color; the active color scheme otherwise</td></tr><tr><td><code>row</code></td><td>both</td><td>Row name whose residues the values or characters index</td></tr><tr><td><code>height</code></td><td>both</td><td>Pixel height (default: the conservation track’s, or the row height)</td></tr></tbody></table>
+
+
+
+
+
+<table><thead><tr><th>Field</th><th>Kind</th><th>Meaning</th></tr></thead><tbody><tr><td><code>id</code></td><td>both</td><td>Unique key. The Tracks menu and <code>turnedOffTracks</code> use it</td></tr><tr><td><code>name</code></td><td>both</td><td>Label beside the track</td></tr><tr><td><code>values</code></td><td>bar</td><td>One number per column, or per residue of <code>row</code></td></tr><tr><td><code>max</code></td><td>bar</td><td>Value drawn at full height (default 1)</td></tr><tr><td><code>color</code></td><td>bar</td><td>Bar fill (default gray)</td></tr><tr><td><code>data</code></td><td>text</td><td>One character per column, or per residue of <code>row</code></td></tr><tr><td><code>colors</code></td><td>text</td><td>Character to background color; the active color scheme otherwise</td></tr><tr><td><code>arcs</code></td><td>arc</td><td><code>{start, end, color?}</code> pairs; each end is a column or a residue</td></tr><tr><td><code>row</code></td><td>both</td><td>Row name whose residues the values or characters index</td></tr><tr><td><code>height</code></td><td>both</td><td>Pixel height (default: the conservation track’s, or the row height)</td></tr></tbody></table>
+<p>An arc is a relationship between two positions, which is what the other kinds
+cannot express: a base pair, a disulfide bond, a residue contact. Its two ends
+follow the same rule as everything else here — alignment columns, or residues of
+<code>row</code> — so a contact map computed in a protein’s own numbering lands on the
+alignment without being recomputed. Arcs are drawn on one baseline in the order
+given, and <code>color</code> on an individual arc overrides the track’s, which is how one
+track distinguishes classes of pair (nested helices from a pseudoknot, say).</p>
+<p>An RNA Stockholm needs none of this: <code>#=GC SS_cons</code> already pairs the columns,
+so the viewer draws a <strong>Base pairs</strong> track from it, coloring a pseudoknot — a
+pair WUSS writes as <code>A</code>/<code>a</code> because it crosses a helix instead of nesting in it
+— differently from the nested pairs it crosses.</p>
+<p>The numbers do not have to come from the alignment, and the interesting ones
+usually don’t: the p53 example carries a count per residue of the missense
+variants ClinVar classifies as pathogenic, which is a fact about human disease
+that no alignment contains. Computing it belongs wherever the data lives; the
+viewer’s part is to put it on the right columns.</p>
 <p>A track over 50 kB serialized stays in the live model but leaves the snapshot,
 the same rule that keeps a large inline alignment out of a shared URL. Point a
 large alignment at a URL and keep the track under that size, or host the values
@@ -190,6 +224,128 @@ entirely on hidden gappy columns draws nothing; one that straddles them shrinks
 to what is visible. Row names that match no row are ignored.</p>
 <p>React: the <code>highlights</code> prop on <code>MSAViewer</code>, or <code>model.setHighlights(list)</code>. R:
 <code>msaview(highlights = list(list(row = "human", start = 248, end = 248)))</code>.</p>
+<p>A host highlighting something transiently — following a hover in a structure
+viewer or a genome browser — wants <code>model.applyHighlight(owner, list)</code> and
+<code>model.clearHighlight(owner)</code> instead. Those take the same shape, draw over the
+persisted ones, and stay out of the snapshot, which is right for a hover: it is
+not part of the document. The owner key is what lets two sources highlight at
+once without either clearing the other’s.</p>
+<h2 id="residuemappings">residueMappings<a href="#residuemappings" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>Which residue of which structure a row’s residues are. Unlike the layers above,
+this one draws nothing — it answers a question, and the reason it is data is
+that the viewer cannot work the answer out. Matching a row to a structure by
+sequence equality fails for a construct with an expression tag, a truncation, an
+engineered residue, or a row that is a subsequence of the entry, and it fails in
+the direction that looks like it worked: the highlight lands on a residue, just
+not the right one. So the correspondence arrives computed, by whatever knows how
+— SIFTS, an AlphaFold model, a curator.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#9ECBFF">"residueMappings"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#E1E4E8">  {</span></span>
+<span class="line"><span style="color:#79B8FF">    "row"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"HBA_HUMAN/1-142"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "accession"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"P69905"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "structure"</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#79B8FF">      "id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"1A3N"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "kind"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"experimental"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "asymId"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"A"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "url"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"https://files.rcsb.org/download/1A3N.cif"</span></span>
+<span class="line"><span style="color:#E1E4E8">    },</span></span>
+<span class="line"><span style="color:#79B8FF">    "segments"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#E1E4E8">      { </span><span style="color:#79B8FF">"rowStart"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"rowEnd"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">141</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"structStart"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"structEnd"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">142</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">    ],</span></span>
+<span class="line"><span style="color:#79B8FF">    "unobserved"</span><span style="color:#E1E4E8">: [[</span><span style="color:#79B8FF">60</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">62</span><span style="color:#E1E4E8">]],</span></span>
+<span class="line"><span style="color:#79B8FF">    "rowLength"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">142</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "generated"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"by"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"sifts"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"date"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"2026-09-10"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">]</span></span></code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>row</code></td><td>The alignment row this maps</td></tr><tr><td><code>accession</code></td><td>The sequence database entry the mapping went through, for provenance</td></tr><tr><td><code>structure</code></td><td><code>id</code>, plus optional <code>kind</code>, <code>asymId</code> (the chain) and <code>url</code></td></tr><tr><td><code>segments</code></td><td>Contiguous runs where the two sides line up 1:1</td></tr><tr><td><code>unobserved</code></td><td>Structure positions declared but not resolved, as <code>[start, end]</code></td></tr><tr><td><code>rowLength</code></td><td>Ungapped length of the row it was computed against — set this</td></tr><tr><td><code>generated</code></td><td>Who computed it, when, and from what</td></tr></tbody></table>
+<p>Positions are 1-based and inclusive on both sides, as everything else here is.
+Structure positions are <code>label_seq_id</code>, the index into the entity’s SEQRES;
+author numbering carries insertion codes, which break integer arithmetic, so it
+stays out.</p>
+<p><strong>Segments, not a per-residue array</strong>, because the underlying correspondence is
+segment-shaped: a dozen numbers cover what a dense array spends kilobytes on.
+That shape also makes the refusal rule structural rather than a vocabulary — <strong>a
+position no segment covers is unmapped</strong> — so there is no status field for the
+data to disagree with itself about. Three states fall out of it: covered is
+mapped and observed, covered but listed in <code>unobserved</code> is mapped and not
+observed, anything else is unmapped. The middle one is worth having, because
+“the crystallographer could not see it” and “this protein has no such residue”
+mean different things to a reader.</p>
+<p>Two model methods read it:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="ts"><code><span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">structureResidue</span><span style="color:#E1E4E8">(rowName, seqPos, structureId</span><span style="color:#F97583">?</span><span style="color:#E1E4E8">) </span><span style="color:#6A737D">// -> {structure, position, observed} | undefined</span></span>
+<span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">rowResidue</span><span style="color:#E1E4E8">(structureId, position, asymId</span><span style="color:#F97583">?</span><span style="color:#E1E4E8">) </span><span style="color:#6A737D">// -> {rowName, seqPos} | undefined</span></span></code></pre>
+<p>Both return <code>undefined</code> rather than guessing, which is the whole point, and
+<strong>both refuse when the answer is not unique</strong>. A row commonly maps onto several
+structures — an experimental entry and a couple of predicted models — and a
+homodimer is two rows onto two chains of one id, so returning whichever mapping
+came first would be the same class of wrong answer this layer exists to stop,
+only quieter. Name one with the optional argument, or read <code>mappedStructures</code> to
+see what there is.</p>
+<h3 id="staleness">Staleness<a href="#staleness" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>A mapping outlives the alignment it was computed for. Point it at a re-aligned,
+revised or simply different sequence and every lookup still returns a residue —
+the wrong one, silently, which is the failure mode the whole layer exists to
+avoid. So the viewer checks before it answers, and takes a mapping out of use
+when the two no longer agree:</p>
+<ul>
+<li>The row it names is not in the alignment.</li>
+<li><code>rowLength</code> is declared and does not match the row’s ungapped length. Nothing
+else catches a same-length substitution, so a producer should always set it.</li>
+<li>A segment claims residues past the end of the row, which is the same evidence
+arriving without being declared.</li>
+</ul>
+<p>A malformed segment — two sides of different lengths, which cannot be a 1:1 run
+— takes only itself out, since the rest of the mapping still describes residues
+that exist.</p>
+<p><code>packages/examples/src/examples/kinaseStructure.json</code> is a real one, generated
+by <code>scripts/examples-gen/contacts.mjs</code> from SIFTS: the SRC_HUMAN row against
+chain A of 2SRC, one segment putting row residue 86 at structure residue 2, one
+unobserved range, and <code>rowLength: 536</code>.</p>
+<p><code>model.residueMappingProblems</code> lists every one of those with a <code>scope</code>
+(<code>mapping</code> or <code>segment</code>) and a reason, because refusing invisibly leaves a host
+unable to tell “there is no structure for this row” from “this data no longer
+matches what is loaded”. <code>model.usableResidueMappings</code> is what survived.</p>
+<p><code>seqPos</code> is 1-based, like the rest of this document, and composes directly with
+<code>applyHighlight</code>. The column helpers on the model (<code>seqPosToVisibleCol</code>) take
+0-based positions, so a structure hover reaches a column as
+<code>model.seqPosToVisibleCol(rowName, seqPos - 1)</code>.</p>
   </article>
 
     </main>

@@ -156,7 +156,49 @@ width measurement, and theming automatically.</p>
 
 
 
-<table><thead><tr><th>Prop</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>msa</code></td><td><code>string</code></td><td>Alignment text (FASTA, Stockholm, or Clustal)</td></tr><tr><td><code>tree</code></td><td><code>string</code></td><td>Newick tree text</td></tr><tr><td><code>gff</code></td><td><code>string</code></td><td>InterProScan domain annotations (GFF3 text)</td></tr><tr><td><code>msaFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for alignment</td></tr><tr><td><code>treeFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for tree</td></tr><tr><td><code>gffFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for domain GFF</td></tr><tr><td><code>colorScheme</code></td><td><code>string</code></td><td>Color scheme name (see below)</td></tr><tr><td><code>height</code></td><td><code>number</code></td><td>Widget height in pixels</td></tr><tr><td><code>columnTracks</code></td><td><code>ColumnTrackSpec[]</code></td><td>Tracks supplied as data (see below)</td></tr><tr><td><code>highlights</code></td><td><code>Highlight[]</code></td><td>Labeled highlights (see below)</td></tr></tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Prop</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>msa</code></td><td><code>string</code></td><td>Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)</td></tr><tr><td><code>tree</code></td><td><code>string</code></td><td>Newick tree text</td></tr><tr><td><code>gff</code></td><td><code>string</code></td><td>InterProScan domain annotations (GFF3 text)</td></tr><tr><td><code>msaFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for alignment</td></tr><tr><td><code>treeFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for tree</td></tr><tr><td><code>gffFilehandle</code></td><td><code>FileLocation</code></td><td>Remote file location for domain GFF</td></tr><tr><td><code>colorScheme</code></td><td><code>string</code></td><td>Color scheme name (see below)</td></tr><tr><td><code>height</code></td><td><code>number</code></td><td>Widget height in pixels</td></tr><tr><td><code>colWidth</code></td><td><code>number</code></td><td>Per-column width in pixels (horizontal zoom)</td></tr><tr><td><code>rowHeight</code></td><td><code>number</code></td><td>Per-row height in pixels (vertical zoom)</td></tr><tr><td><code>relativeTo</code></td><td><code>string</code></td><td>Row name to diff every other row against; matches draw as <code>.</code></td></tr><tr><td><code>drawTree</code></td><td><code>boolean</code></td><td>Draw the phylogeny (default true); false leaves a label gutter</td></tr><tr><td><code>treeAreaWidth</code></td><td><code>number</code></td><td>Fixed width of the tree/label gutter</td></tr><tr><td><code>autoTreeAreaWidth</code></td><td><code>boolean</code></td><td>Size that gutter to the labels instead — pair with <code>drawTree: false</code></td></tr><tr><td><code>columnTracks</code></td><td><code>ColumnTrackSpec[]</code></td><td>Tracks supplied as data (see below)</td></tr><tr><td><code>highlights</code></td><td><code>Highlight[]</code></td><td>Labeled highlights (see below)</td></tr><tr><td><code>highlightColumns</code></td><td><code>number[]</code></td><td>Columns (0-based) under a persistent overlay</td></tr></tbody></table>
+<p><code>height</code>, <code>colorScheme</code>, <code>colWidth</code>, <code>rowHeight</code>, <code>relativeTo</code>, <code>drawTree</code> and
+<code>treeAreaWidth</code> stay live: change one and the viewer follows, so a host can put
+a control on it without remounting and re-fetching the alignment. Each follows
+only its own prop, so a change the reader makes inside the viewer — a scheme
+picked from the menu, a row dragged taller — is not undone by the host’s next
+render. The data props are not among them: a new <code>msa</code>/<code>tree</code>/<code>gff</code> is a
+different alignment, which is a new model, which React spells <code>key</code>.</p>
 <h3 id="highlights">Highlights<a href="#highlights" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
 <p>Point at a residue, a column range, or a set of rows, with a label. Coordinates
 are 1-based and inclusive, as in GFF. With <code>row</code>, <code>start</code> and <code>end</code> are residues
@@ -174,8 +216,40 @@ without it they are alignment columns. <code>rows</code> tints whole rows instea
 <p>The list lives in the model snapshot (<code>model.setHighlights(...)</code> changes it), so
 a shared URL carries it, and the SVG export draws it. The full set of data
 layers is in <a href="https://gmod.org/JBrowseMSA/layers">layers reference</a>.</p>
+<h3 id="one-panel-in-your-own-page">One panel in your own page<a href="#one-panel-in-your-own-page" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>A purpose-built page usually wants less than the standalone app shows. Turn the
+phylogeny off and the gutter holds just the row labels, sized to them:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">expanded</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">setExpanded</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#B392F0"> useState</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#F97583">const</span><span style="color:#E1E4E8"> [</span><span style="color:#79B8FF">diff</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">setDiff</span><span style="color:#E1E4E8">] </span><span style="color:#F97583">=</span><span style="color:#B392F0"> useState</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">return</span><span style="color:#E1E4E8"> (</span></span>
+<span class="line"><span style="color:#E1E4E8">  &#x3C;></span></span>
+<span class="line"><span style="color:#E1E4E8">    &#x3C;</span><span style="color:#85E89D">button</span><span style="color:#B392F0"> onClick</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{() </span><span style="color:#F97583">=></span><span style="color:#B392F0"> setDiff</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">d</span><span style="color:#F97583"> =></span><span style="color:#F97583"> !</span><span style="color:#E1E4E8">d)}>Diff vs reference&#x3C;/</span><span style="color:#85E89D">button</span><span style="color:#E1E4E8">></span></span>
+<span class="line"><span style="color:#E1E4E8">    &#x3C;</span><span style="color:#85E89D">button</span><span style="color:#B392F0"> onClick</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{() </span><span style="color:#F97583">=></span><span style="color:#B392F0"> setExpanded</span><span style="color:#E1E4E8">(</span><span style="color:#FFAB70">e</span><span style="color:#F97583"> =></span><span style="color:#F97583"> !</span><span style="color:#E1E4E8">e)}></span></span>
+<span class="line"><span style="color:#E1E4E8">      {expanded </span><span style="color:#F97583">?</span><span style="color:#9ECBFF"> 'Collapse'</span><span style="color:#F97583"> :</span><span style="color:#9ECBFF"> 'Expand'</span><span style="color:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#E1E4E8">    &#x3C;/</span><span style="color:#85E89D">button</span><span style="color:#E1E4E8">></span></span>
+<span class="line"><span style="color:#E1E4E8">    &#x3C;</span><span style="color:#79B8FF">MSAViewer</span></span>
+<span class="line"><span style="color:#B392F0">      msaFilehandle</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{{ uri: msaUrl, locationType: </span><span style="color:#9ECBFF">'UriLocation'</span><span style="color:#E1E4E8"> }}</span></span>
+<span class="line"><span style="color:#B392F0">      gffFilehandle</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{{ uri: gffUrl, locationType: </span><span style="color:#9ECBFF">'UriLocation'</span><span style="color:#E1E4E8"> }}</span></span>
+<span class="line"><span style="color:#B392F0">      colorScheme</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">"clustalx_dna"</span></span>
+<span class="line"><span style="color:#B392F0">      drawTree</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{</span><span style="color:#79B8FF">false</span><span style="color:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#B392F0">      autoTreeAreaWidth</span></span>
+<span class="line"><span style="color:#B392F0">      relativeTo</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{diff </span><span style="color:#F97583">?</span><span style="color:#E1E4E8"> referenceRow </span><span style="color:#F97583">:</span><span style="color:#79B8FF"> undefined</span><span style="color:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#B392F0">      height</span><span style="color:#F97583">=</span><span style="color:#E1E4E8">{expanded </span><span style="color:#F97583">?</span><span style="color:#79B8FF"> 760</span><span style="color:#F97583"> :</span><span style="color:#79B8FF"> 420</span><span style="color:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#E1E4E8">    /></span></span>
+<span class="line"><span style="color:#E1E4E8">  &#x3C;/></span></span>
+<span class="line"><span style="color:#E1E4E8">)</span></span></code></pre>
+<p>Both toggles drive the mounted viewer, so flipping one does not re-fetch the
+alignment. <code>drawTree={false}</code> with <code>autoTreeAreaWidth</code> is the pairing to reach
+for whenever there is no tree to draw — a reference-projected reconstruction has
+no meaningful guide tree, and without it the gutter would otherwise reserve its
+full default width for a tree that never appears.</p>
+<p>The component pulls in <code>@jbrowse/core</code>, MUI and mobx and renders to canvas, so
+in a server-rendered app (Next.js, Astro, Remix) load it client-side only —
+<code>React.lazy</code> inside a <code>Suspense</code>, or the framework’s equivalent.</p>
 <h2 id="advanced-model-based-api">Advanced: model-based API<a href="#advanced-model-based-api" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
-<p>For full control over the viewer state, use <code>MSAModelF</code> directly.</p>
+<p>For state the props do not cover — hiding gappy columns, collapsing clades,
+reading what the user selected — use <code>MSAModelF</code> directly.</p>
 <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="tsx"><code><span class="line"><span style="color:#F97583">import</span><span style="color:#E1E4E8"> { MSAView, MSAModelF } </span><span style="color:#F97583">from</span><span style="color:#9ECBFF"> 'react-msaview'</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#F97583">export</span><span style="color:#F97583"> default</span><span style="color:#F97583"> function</span><span style="color:#B392F0"> App</span><span style="color:#E1E4E8">() {</span></span>
@@ -200,7 +274,14 @@ layers is in <a href="https://gmod.org/JBrowseMSA/layers">layers reference</a>.<
 <span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">setRowHeight</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">20</span><span style="color:#E1E4E8">)</span></span>
 <span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">setColWidth</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">16</span><span style="color:#E1E4E8">)</span></span>
 <span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">toggleCollapsed</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'node-id'</span><span style="color:#E1E4E8">)</span></span>
-<span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">fit</span><span style="color:#E1E4E8">() </span><span style="color:#6A737D">// fit both axes</span></span></code></pre>
+<span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">fit</span><span style="color:#E1E4E8">() </span><span style="color:#6A737D">// fit both axes</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// transient highlights, keyed by whoever is asking. Two sources -- a structure</span></span>
+<span class="line"><span style="color:#6A737D">// viewer's hover, a genome view's -- each add and remove only their own, so</span></span>
+<span class="line"><span style="color:#6A737D">// neither erases the other. Not persisted; the `highlights` prop is the</span></span>
+<span class="line"><span style="color:#6A737D">// persisted list.</span></span>
+<span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">applyHighlight</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'protein3d'</span><span style="color:#E1E4E8">, [{ row: </span><span style="color:#9ECBFF">'human'</span><span style="color:#E1E4E8">, start: </span><span style="color:#79B8FF">58</span><span style="color:#E1E4E8">, end: </span><span style="color:#79B8FF">58</span><span style="color:#E1E4E8"> }])</span></span>
+<span class="line"><span style="color:#E1E4E8">model.</span><span style="color:#B392F0">clearHighlight</span><span style="color:#E1E4E8">(</span><span style="color:#9ECBFF">'protein3d'</span><span style="color:#E1E4E8">)</span></span></code></pre>
 <h2 id="tracks-from-your-own-data">Tracks from your own data<a href="#tracks-from-your-own-data" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
 <p>Anything computed per column, or per residue of one row, draws as a track above
 the alignment. The viewer scales, places, and exports it and computes nothing.</p>

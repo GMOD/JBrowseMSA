@@ -1,5 +1,5 @@
 const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["_astro/core.DxpvqkrT.js","_astro/rolldown-runtime.hePW80VL.js","_astro/engine-oniguruma.D2u1fNOb.js"])))=>i.map(i=>d[i]);
-import{r as e}from"./rolldown-runtime.hePW80VL.js";import{C as t,Ct as n,Et as r,F as i,I as a,L as o,M as s,P as c,Tt as l,_t as u,bt as d,dt as f,et as p,ft as m,k as h,pt as g,wt as _,yt as v}from"./mui.CHa6vxLx.js";import{t as y}from"./react.C2itep5K.js";import{t as b}from"./ButtonBase.C52q-uU-.js";import{t as x}from"./jsx-runtime.CWLBoBiw.js";import{_ as S,a as C,b as w,c as ee,d as te,f as T,g as E,h as D,i as ne,l as re,m as O,n as k,o as A,p as j,r as ie,s as ae,t as oe,u as se,v as ce,y as M}from"./exampleData.D_085wi0.js";import{o as le}from"./ToggleButton.BE_QoBwG.js";import{r as ue}from"./Dialog.BsAYn5eN.js";import{E as de,_ as N,g as fe,t as pe}from"./Select.BihkONpS.js";import{t as P}from"./FormControlLabel.BNfdZL67.js";import{i as F,r as I,t as L}from"./MenuItem.CZcXBOIq.js";import{t as R}from"./Button.BnkckaYy.js";import{t as z}from"./Paper.CKHVAjGc.js";import{t as B}from"./preload-helper.BCA0xuDy.js";import{t as V}from"./Switch.BuoFsYvL.js";import{t as H}from"./mobxreact.Dk40HLTO.js";import{l as me}from"./mobx-state-tree.BD7czMNv.js";var U=e(y(),1),W=e(x(),1),he=u(),ge=le(`div`,{name:`MuiStack`,slot:`Root`});function _e(e){return w({props:e,name:`MuiStack`,defaultTheme:he})}function ve(e,t){let n=U.Children.toArray(e).filter(Boolean);return n.reduce((e,r,i)=>(e.push(r),i<n.length-1&&e.push(U.cloneElement(t,{key:`separator-${i}`})),e),[])}var ye=e=>({row:`Left`,"row-reverse":`Right`,column:`Top`,"column-reverse":`Bottom`})[e],be=({ownerState:e,theme:t})=>{let i={display:`flex`,flexDirection:`column`,...n({theme:t},l({values:e.direction,breakpoints:t.breakpoints.values}),e=>({flexDirection:e}))};if(e.spacing){let a=v(t),o=Object.keys(t.breakpoints.values).reduce((t,n)=>((typeof e.spacing==`object`&&e.spacing[n]!=null||typeof e.direction==`object`&&e.direction[n]!=null)&&(t[n]=!0),t),{}),s=l({values:e.direction,base:o}),c=l({values:e.spacing,base:o});typeof s==`object`&&Object.keys(s).forEach((e,t,n)=>{if(!s[e]){let r=t>0?s[n[t-1]]:`column`;s[e]=r}}),i=r(i,n({theme:t},c,(t,n)=>e.useFlexGap?{gap:d(a,t)}:{"& > :not(style):not(style)":{margin:0},"& > :not(style) ~ :not(style)":{[`margin${ye(n?s[n]:e.direction)}`]:d(a,t)}}))}return i=_(t.breakpoints,i),i};function xe(e={}){let{createStyledComponent:t=ge,useThemeProps:n=_e,componentName:r=`MuiStack`}=e,i=()=>p({root:[`root`]},e=>m(r,e),{}),a=t(be);return U.forwardRef(function(e,t){let{component:r=`div`,direction:o=`column`,spacing:s=0,divider:c,children:l,className:u,useFlexGap:d=!1,...f}=n(e),p={direction:o,spacing:s,useFlexGap:d},m=i();return(0,W.jsx)(a,{as:r,ownerState:p,ref:t,className:g(m.root,u),...f,children:c?ve(l,c):l})})}function Se(e){return m(`MuiListItemButton`,e)}var G=f(`MuiListItemButton`,[`root`,`focusVisible`,`dense`,`alignItemsFlexStart`,`disabled`,`divider`,`gutters`,`selected`]),Ce=(e,t)=>{let{ownerState:n}=e;return[t.root,n.dense&&t.dense,n.alignItems===`flex-start`&&t.alignItemsFlexStart,n.divider&&t.divider,!n.disableGutters&&t.gutters]},we=e=>{let{alignItems:t,classes:n,dense:r,disabled:i,disableGutters:a,divider:o,selected:s}=e,c=p({root:[`root`,r&&`dense`,!a&&`gutters`,o&&`divider`,i&&`disabled`,t===`flex-start`&&`alignItemsFlexStart`,s&&`selected`]},Se,n);return{...n,...c}},Te=a(b,{shouldForwardProp:e=>o(e)||e===`classes`,name:`MuiListItemButton`,slot:`Root`,overridesResolver:Ce})(i(({theme:e})=>({display:`flex`,flexGrow:1,justifyContent:`flex-start`,alignItems:`center`,position:`relative`,textDecoration:`none`,minWidth:0,boxSizing:`border-box`,textAlign:`left`,paddingTop:8,paddingBottom:8,...h(e,`background-color`,{duration:e.transitions.duration.shortest}),"&:hover":{textDecoration:`none`,backgroundColor:(e.vars||e).palette.action.hover,"@media (hover: none)":{backgroundColor:`transparent`}},[`&.${G.selected}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity),[`&.${G.focusVisible}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.focusOpacity}`)}},[`&.${G.selected}:hover`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.hoverOpacity}`),"@media (hover: none)":{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity)}},[`&.${G.focusVisible}`]:{backgroundColor:(e.vars||e).palette.action.focus},[`&.${G.disabled}`]:{opacity:(e.vars||e).palette.action.disabledOpacity},variants:[{props:({ownerState:e})=>e.divider,style:{borderBottom:`1px solid ${(e.vars||e).palette.divider}`,backgroundClip:`padding-box`}},{props:{alignItems:`flex-start`},style:{alignItems:`flex-start`}},{props:({ownerState:e})=>!e.disableGutters,style:{paddingLeft:16,paddingRight:16}},{props:({ownerState:e})=>e.dense,style:{paddingTop:4,paddingBottom:4}}]}))),Ee=U.forwardRef(function(e,t){let n=c({props:e,name:`MuiListItemButton`}),{alignItems:r=`center`,autoFocus:i=!1,component:a=`div`,children:o,dense:l=!1,disableGutters:u=!1,divider:d=!1,focusVisibleClassName:f,selected:p=!1,className:m,...h}=n,_=U.useContext(N),v=U.useMemo(()=>({dense:l||_.dense||!1,alignItems:r,disableGutters:u}),[r,_.dense,l,u]),y=U.useRef(null);de(()=>{i&&y.current&&y.current.focus()},[i]);let b={...n,alignItems:r,dense:v.dense,disableGutters:u,divider:d,selected:p},x=we(b),{root:S,...C}=x,w=s(y,t);return(0,W.jsx)(N.Provider,{value:v,children:(0,W.jsx)(Te,{ref:w,href:h.href||h.to,component:(h.href||h.to)&&a===`div`?`button`:a,internalNativeButton:!1,focusVisibleClassName:g(x.focusVisible,f),ownerState:b,className:g(x.root,m),...h,classes:C,children:o})})}),K=xe({createStyledComponent:a(`div`,{name:`MuiStack`,slot:`Root`}),useThemeProps:e=>c({props:e,name:`MuiStack`})}),De=`>Human
+import{r as e}from"./rolldown-runtime.hePW80VL.js";import{C as t,Ct as n,Et as r,F as i,I as a,L as o,M as s,P as c,Tt as l,_t as u,bt as d,dt as f,et as p,ft as m,k as h,pt as g,wt as _,yt as v}from"./mui.CHa6vxLx.js";import{t as y}from"./react.C2itep5K.js";import{t as b}from"./ButtonBase.C52q-uU-.js";import{t as x}from"./jsx-runtime.CWLBoBiw.js";import{_ as ee,a as S,b as C,c as w,d as te,f as T,g as E,h as D,i as ne,l as O,m as k,n as re,o as ie,p as A,r as ae,s as j,t as oe,u as se,v as ce,y as M}from"./exampleData.Dv-3cDZH.js";import{o as le}from"./ToggleButton.BE_QoBwG.js";import{r as ue}from"./Dialog.BsAYn5eN.js";import{E as de,_ as N,g as fe,t as pe}from"./Select.BihkONpS.js";import{t as P}from"./FormControlLabel.BNfdZL67.js";import{i as me,r as he,t as ge}from"./MenuItem.CZcXBOIq.js";import{t as F}from"./Button.BnkckaYy.js";import{t as _e}from"./Paper.CKHVAjGc.js";import{t as I}from"./preload-helper.BCA0xuDy.js";import{t as L}from"./Switch.BuoFsYvL.js";import{t as R}from"./mobxreact.Dk40HLTO.js";import{l as ve}from"./mobx-state-tree.BD7czMNv.js";var z=e(y(),1),B=e(x(),1),ye=u(),be=le(`div`,{name:`MuiStack`,slot:`Root`});function xe(e){return C({props:e,name:`MuiStack`,defaultTheme:ye})}function Se(e,t){let n=z.Children.toArray(e).filter(Boolean);return n.reduce((e,r,i)=>(e.push(r),i<n.length-1&&e.push(z.cloneElement(t,{key:`separator-${i}`})),e),[])}var Ce=e=>({row:`Left`,"row-reverse":`Right`,column:`Top`,"column-reverse":`Bottom`})[e],we=({ownerState:e,theme:t})=>{let i={display:`flex`,flexDirection:`column`,...n({theme:t},l({values:e.direction,breakpoints:t.breakpoints.values}),e=>({flexDirection:e}))};if(e.spacing){let a=v(t),o=Object.keys(t.breakpoints.values).reduce((t,n)=>((typeof e.spacing==`object`&&e.spacing[n]!=null||typeof e.direction==`object`&&e.direction[n]!=null)&&(t[n]=!0),t),{}),s=l({values:e.direction,base:o}),c=l({values:e.spacing,base:o});typeof s==`object`&&Object.keys(s).forEach((e,t,n)=>{if(!s[e]){let r=t>0?s[n[t-1]]:`column`;s[e]=r}}),i=r(i,n({theme:t},c,(t,n)=>e.useFlexGap?{gap:d(a,t)}:{"& > :not(style):not(style)":{margin:0},"& > :not(style) ~ :not(style)":{[`margin${Ce(n?s[n]:e.direction)}`]:d(a,t)}}))}return i=_(t.breakpoints,i),i};function Te(e={}){let{createStyledComponent:t=be,useThemeProps:n=xe,componentName:r=`MuiStack`}=e,i=()=>p({root:[`root`]},e=>m(r,e),{}),a=t(we);return z.forwardRef(function(e,t){let{component:r=`div`,direction:o=`column`,spacing:s=0,divider:c,children:l,className:u,useFlexGap:d=!1,...f}=n(e),p={direction:o,spacing:s,useFlexGap:d},m=i();return(0,B.jsx)(a,{as:r,ownerState:p,ref:t,className:g(m.root,u),...f,children:c?Se(l,c):l})})}function Ee(e){return m(`MuiListItemButton`,e)}var V=f(`MuiListItemButton`,[`root`,`focusVisible`,`dense`,`alignItemsFlexStart`,`disabled`,`divider`,`gutters`,`selected`]),De=(e,t)=>{let{ownerState:n}=e;return[t.root,n.dense&&t.dense,n.alignItems===`flex-start`&&t.alignItemsFlexStart,n.divider&&t.divider,!n.disableGutters&&t.gutters]},Oe=e=>{let{alignItems:t,classes:n,dense:r,disabled:i,disableGutters:a,divider:o,selected:s}=e,c=p({root:[`root`,r&&`dense`,!a&&`gutters`,o&&`divider`,i&&`disabled`,t===`flex-start`&&`alignItemsFlexStart`,s&&`selected`]},Ee,n);return{...n,...c}},ke=a(b,{shouldForwardProp:e=>o(e)||e===`classes`,name:`MuiListItemButton`,slot:`Root`,overridesResolver:De})(i(({theme:e})=>({display:`flex`,flexGrow:1,justifyContent:`flex-start`,alignItems:`center`,position:`relative`,textDecoration:`none`,minWidth:0,boxSizing:`border-box`,textAlign:`left`,paddingTop:8,paddingBottom:8,...h(e,`background-color`,{duration:e.transitions.duration.shortest}),"&:hover":{textDecoration:`none`,backgroundColor:(e.vars||e).palette.action.hover,"@media (hover: none)":{backgroundColor:`transparent`}},[`&.${V.selected}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity),[`&.${V.focusVisible}`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.focusOpacity}`)}},[`&.${V.selected}:hover`]:{backgroundColor:e.alpha((e.vars||e).palette.primary.main,`${(e.vars||e).palette.action.selectedOpacity} + ${(e.vars||e).palette.action.hoverOpacity}`),"@media (hover: none)":{backgroundColor:e.alpha((e.vars||e).palette.primary.main,(e.vars||e).palette.action.selectedOpacity)}},[`&.${V.focusVisible}`]:{backgroundColor:(e.vars||e).palette.action.focus},[`&.${V.disabled}`]:{opacity:(e.vars||e).palette.action.disabledOpacity},variants:[{props:({ownerState:e})=>e.divider,style:{borderBottom:`1px solid ${(e.vars||e).palette.divider}`,backgroundClip:`padding-box`}},{props:{alignItems:`flex-start`},style:{alignItems:`flex-start`}},{props:({ownerState:e})=>!e.disableGutters,style:{paddingLeft:16,paddingRight:16}},{props:({ownerState:e})=>e.dense,style:{paddingTop:4,paddingBottom:4}}]}))),Ae=z.forwardRef(function(e,t){let n=c({props:e,name:`MuiListItemButton`}),{alignItems:r=`center`,autoFocus:i=!1,component:a=`div`,children:o,dense:l=!1,disableGutters:u=!1,divider:d=!1,focusVisibleClassName:f,selected:p=!1,className:m,...h}=n,_=z.useContext(N),v=z.useMemo(()=>({dense:l||_.dense||!1,alignItems:r,disableGutters:u}),[r,_.dense,l,u]),y=z.useRef(null);de(()=>{i&&y.current&&y.current.focus()},[i]);let b={...n,alignItems:r,dense:v.dense,disableGutters:u,divider:d,selected:p},x=Oe(b),{root:ee,...S}=x,C=s(y,t);return(0,B.jsx)(N.Provider,{value:v,children:(0,B.jsx)(ke,{ref:C,href:h.href||h.to,component:(h.href||h.to)&&a===`div`?`button`:a,internalNativeButton:!1,focusVisibleClassName:g(x.focusVisible,f),ownerState:b,className:g(x.root,m),...h,classes:S,children:o})})}),H=Te({createStyledComponent:a(`div`,{name:`MuiStack`,slot:`Root`}),useThemeProps:e=>c({props:e,name:`MuiStack`})}),je=`>Human
 MAAGGPGAGSAAPVSSTSSLPLAALNMRVRRRLSLFLNVRTQVAADWTALAEEMDFEYLEIRQLETQADPTGRLLDAWQGRPGASVGRLLELLTKLGRDDVLLELGPSIEEDCQKYILKQQQEEAEKPLQVAAVDSSVPRTAELAGITTLDDPLGHMPERFDAFICYCPSDIQFVQEMIRQLEQTNYRLKLCVSDRDVLPGTCVWSIASELIEKRCRRMVVVVSDDYLQSKECDFQTKFALSLSPGAHQKRLIPIKYKAMKKEFPSILRFITVCDYTNPCTKSWFWTRLAKALSLP
 >Gorilla
 MAAGGPGAGSAAPVSSTSSLPLAALNMRVRRRLSLFLNVRTQVAADWTALAEEMDFEYLEIRQLETHADPTGRLLDAWQGRPGASVGRLLELLTKLGRDDVLLELGPSIEEDCQKYILKQQQEEAEKPLQVAAVDSSVPRTAELAGITTLDDPLGHMPERFDAFICYCPSDIQFVQEMIRQLEQTNYRLKLCVSDRDVLPGTCVWSIASELIEKRCRRMVVVVSDDYLQSKECDFQTKFALSLSPGAHQKRLIPIKYKAMKKEFPSILRFITVCDYTNPCTKSWFWTRLAKALSLP
@@ -33,7 +33,7 @@ MAAGGSRAGSASPIPSASSLPLAALNVRVRRRLSLFLNVRTQVAADWTALAEEMGFEYLEIRQLEAHADPMGKLLDDWQG
 MSAGDPRVGSGSLDSFMFSIPLVALNVGVRRRLSLFLNPRTPVAADWTLLAEEMGFEYLEIRELETRPDPTRSLLDAWQGRSGASVGRLLELLALLDREDILKELKSRIEEDCQKYLGKQQNQESEKPLQVARVESSVPQTKELGGITTLDDPLGQTPELFDAFICYCPNDIEFVQEMIRQLEQTDYRLKLCVSDRDVLPGTCVWSIASELIEKRCRRMVVVVSDDYLQSKECDFQTKFALSLSPGVQQKRLIPIKYKAMKKDFPSILRFITICDYTNPCTKSWFWTRLAKALSLP
 >Rat
 MSAGGPRVGSVSVDSYLFSLPLVALNVGVRRRLSLFLNPRTTAAADWTSLAEEMGFEYLEIREFETRPDPTRSLLDAWQGRSGSSVGRLLELLALLDREDILYELKDRIEEDCQKYIRNQQKQESEKPLQVARVESSVPQTKELGGITTLDDPLGQTPELFDAFICYCPSDIEFVQEMIRQLEQTDYRLKLCVSDRDVLPGTCVWSIASELIEKRCRRMVVVVSDDYLQSKECDFQTKFALSLSPGVQQKRLIPIKYKAMKKDFPSILRFITICDYTNPCTKSWFWTRLAKALSLP
-`,Oe=`((((((Human:0.00273,Gorilla:0.00065):0.00067,Macaque:0.00946):0.00195,Chimp:0.00481):0.02441,Horse:0.02561):0.00330,((((Dolphin:0.01932,Blue_whale:0.00433):0.03960,Cattle:0.08202):0.00424,Pig:0.04849):0.01999,((Bat_Pteropus:0.04112,Bat_Hipposideros:0.02983):0.00510,Bat_Phyllostomus:0.02193):0.01163):0.00351):0.00111,(Dog:0.04110,Cat:0.01634):0.01346,(Elephant:0.08992,(Mouse:0.02894,Rat:0.03187):0.10152):0.01148);`,ke=`##gff-version 3
+`,Me=`((((((Human:0.00273,Gorilla:0.00065):0.00067,Macaque:0.00946):0.00195,Chimp:0.00481):0.02441,Horse:0.02561):0.00330,((((Dolphin:0.01932,Blue_whale:0.00433):0.03960,Cattle:0.08202):0.00424,Pig:0.04849):0.01999,((Bat_Pteropus:0.04112,Bat_Hipposideros:0.02983):0.00510,Bat_Phyllostomus:0.02193):0.01163):0.00351):0.00111,(Dog:0.04110,Cat:0.01634):0.01346,(Elephant:0.08992,(Mouse:0.02894,Rat:0.03187):0.10152):0.01148);`,Ne=`##gff-version 3
 # precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Human	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
 Human	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
@@ -69,7 +69,7 @@ Bat_Hipposideros	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signatur
 Bat_Hipposideros	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
 Bat_Phyllostomus	InterProScan	protein_match	31	104	.	.	.	Name=IPR000488;signature_desc=Death%20domain;description=Death%20domain
 Bat_Phyllostomus	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signature_desc=TIR%20domain;description=TIR%20domain
-`,Ae=`>Human_myoglobin
+`,Pe=`>Human_myoglobin
 ----------------MGLSDGEWQLVLNVWGKVEADIPGHGQEVLIRLFKGHPETLEKFDKFK-HLKSEDEMKASEDLKKHGATVLTALGGILKKKGH---HEAEIKPLAQSHATKHKIPVKYLEFISECIIQVLQSKHPGDFGADAQGAMNKALELFRKDMASNYKELGFQG-----------------
 >Horse_myoglobin
 ----------------MGLSDGEWQQVLNVWGKVEADIAGHGQEVLIRLFTGHPETLEKFDKFK-HLKTEAEMKASEDLKKHGTVVLTALGGILKKKGH---HEAELKPLAQSHATKHKIPIKYLEFISDAIIHVLHSKHPGDFGADAQGAMTKALELFRNDIAAKYKELGFQG-----------------
@@ -97,7 +97,7 @@ Bat_Phyllostomus	InterProScan	protein_match	164	278	.	.	.	Name=IPR000157;signatu
 MEKVPGEMEIERRERSEELSEAERKAVQAMWARLYANCEDVGVAILVRFFVNFPSAKQYFSQFK-HMEDPLEMERSPQLRKHACRVMGALNTVVENLHDPDKVSSVLALVGKAHALKHKVEPVYFKILSGVILEVVAEEFASDFPPETQRAWAKLRGLIYSHVTAAYKEVGWVQQVPNATTPPATLPSSGP
 >Human_neuroglobin
 ------------------MERPEPELIRQSWRAVSRSPLEHGTVLFARLFALEPDLLPLFQYNCRQFSSPEDCLSSPEFLDHIRKVMLVIDAAVTNVEDLSSLEEYLASLGRKHR-AVGVKLSSFSTVGESLLYMLEKCLGPAFTPATRAAWSQLYGAVVQAMSRGWDGE---------------------
-`,je=`((((Human_myoglobin:0.05875,Horse_myoglobin:0.05813):0.02543,Mouse_myoglobin:0.08496):0.28696,Human_cytoglobin:0.34291):0.03210,((((Human_alpha:0.06112,Horse_alpha:0.05860):0.01034,Mouse_alpha:0.07769):0.13107,Human_zeta:0.20344):0.07542,((((Human_beta:0.03038,Human_delta:0.03764):0.05152,Horse_beta:0.08570):0.02567,Mouse_beta:0.11232):0.03387,Human_gamma:0.14732):0.15679):0.04656,Human_neuroglobin:0.42998);`,Me=`>Pig
+`,Fe=`((((Human_myoglobin:0.05875,Horse_myoglobin:0.05813):0.02543,Mouse_myoglobin:0.08496):0.28696,Human_cytoglobin:0.34291):0.03210,((((Human_alpha:0.06112,Horse_alpha:0.05860):0.01034,Mouse_alpha:0.07769):0.13107,Human_zeta:0.20344):0.07542,((((Human_beta:0.03038,Human_delta:0.03764):0.05152,Horse_beta:0.08570):0.02567,Mouse_beta:0.11232):0.03387,Human_gamma:0.14732):0.15679):0.04656,Human_neuroglobin:0.42998);`,Ie=`>Pig
 MSGSFWLLLSLIPVTAAQSTTEELAKTFLEKFNLEAEDLAYQSSLASWNYNTNITDENIQKMNDARAKWSAFYEEQSRIAKTYPLDEIQTLILKRQLQALQQSGTSGLSADKSKRLNTILNTMSTIYSSGKVLDPNNPQECLVLEPGLDEIMENSKDYSRRLWAWESWRAEVGKQLRPLYEEYVVLENEMARANNYEDYGDYWRGDYEVTGTGDYDYSRNQLMEDVERTFAEIKPLYEHLHAYVRAKLMDAYPSRISPTGCLPAHLLGDMWGRFWTNLYPLTVPFGEKPSIDVTEAMVNQSWDAIRIFEEAEKFFVSIGLPNMTQGFWNNSMLTEPGDGRKVVCHPTAWDLGKGDFRIKMCTKVTMDDFLTAHHEMGHIQYDMAYAIQPYLLRNGANEGFHEAVGEIMSLSAATPHYLKALGLLPPDFYEDSETEINFLLKQALTIVGTLPFTYMLEKWRWMVFKGEIPKEQWMQKWWEMKREIVGVVEPLPHDETYCDPACLFHVAEDYSFIRYYTRTIYQFQFHEALCRTAKHEGPLYKCDISNSTEAGQKLLQMLSLGKSEPWTLALENIVGVKTMDVKPLLSYFEPLLTWLKAQNGNSSVGWNTDWTPYADQSIKVRISLKSALGKEAYEWNDNEMYLFRSSIAYAMRNYFSSAKNETIPFGAEDVWVSDLKPRISFNFFVTSPANMSDIIPRSDVEKAISMSRSRINDAFRLDDNTLEFLGIQPTLGPPDEPPVTVWLIIFGVVMGLVVVGIVVLIFTGIRDRRKKKQASSEENPYGSMDLSKGESNSGFQNGDDIQTSF
 >Cattle
 MTGSFWLLLSLVAVTAAQSTTEEQAKTFLEKFNHEAEDLSYQSSLASWNYNTNITDENVQKMNEARAKWSAFYEEQSRMAKTYSLEEIQNLTLKRQLKALQHSGTSALSAEKSKRLNTILNKMSTIYSTGKVLDPN-TQECLALEPGLDDIMENSRDYNRRLWAWEGWRAEVGKQLRPLYEEYVVLENEMARANNYEDYGDYWRGDYEVTGAGDYDYSRDQLMKDVERTFAEIKPLYEQLHAYVRAKLMHTYPSYISPTGCLPAHLLGDMWGRFWTNLYSLTVPFEHKPSIDVTEKMENQSWDAERIFKEAEKFFVSISLPYMTQGFWDNSMLTEPGDGRKVVCHPTAWDLGKGDFRIKMCTKVTMDDFLTAHHEMGHIQYDMAYAAQPYLLRNGANEGFHEAVGEIMSLSAATPHYLKALGLLAPDFHEDNETEINFLLKQALTIVGTLPFTYMLEKWRWMVFKGEIPKQQWMEKWWEMKREIVGVVEPLPHDETYCDPACLFHVAEDYSFIRYYTRTIYQFQFHEALCKTAKHEGALFKCDISNSTEAGQRLLQMLRLGKSEPWTLALENIVGIKTMDVKPLLNYFEPLFTWLKEQNRNSFVGWSTEWTPYSDQSIKVRISLKSALGENAYEWNDNEMYLFQSSVAYAMRKYFSEARNETVLFGEDNVWVSDKKPRISFKFFVTSPNNVSDIIPRTEVENAIRLSRDRINDVFQLDDNSLEFLGIQPTLGPPYEPPVTIWLIIFGVVMGVVVIGIVVLIFTGIRNRRKKNQASSEENPYGSVDLNKGENNSGFQNIDDVQTSL
@@ -129,7 +129,7 @@ MSGSSWLLLSLVAVTAAQSTTEDLAKKFLDDFNSEAENLSHQSSLASWEYNTNISDENVQKMDEAGAKWSDFYKKQSKLA
 MSGSFWLLLSLVAVTAAQSTTEDEAKKFLDKFNSKAEDLSYESSLASWDYNTNISDENVQKMDEAGAKWSAFYEEQSKLAKNYPLEEIQNDTVKRQLQILQQSGSPVLSEDKSKRLNSILNAMSTIYSTGKVCKPNNPQECLLLEPGLDNIMGTSKDYNERLWAWEGWRAEVGKQLRPLYEEYVVLKNEMARGYHYEDYGDYWRRDYETEESSGPGYSRDQLMKDVDRIFTEIKPLYEHLHAYVRAKLMDTYPLHISPTGCLPAHLLGDMWGRFWTNLYPLTVPFGQKPNIDVTDAMLNQGWDANRIFKEAEKFFVSVSLPKMTEGFWNKSMLTEPGDGRKVVCHPTAWDLGKGDFRIKMCTKVTMEDFLTAHHEMGHIQYDMAYASQPYLLRNGANEGFHEAVGEVMSLSVATPKHLKTMGLLSPDFREDDETEINFLLKQALNIVGTLPFTYMLEKWRWMVFKGEIPKEEWMKKWWEMKREIVGVVEPVPHDETYCDPASLFHVANDYSFIRYYTRTIFEFQFHEALCRIAQHNGPLHKCDISNSTDAGKKLHQMLSVGKSQAWTKTLEDIVDSRNMDVGPLLRYFKPLYTWLQEQNRKSYVGWNTDWSPYADQSIKVWISLKSALGEKAYEWNDNEMYLFRSSVAYAMREYFLKTKNQTILFGDENVWVSNLKPRISFNFHVTSPGNVSDIIPRPEVEGAIRMSRSRINDAFRLDDNSLEFLGIQPTLGPPYQPPVTIWLIVFGVVMAVVVVGIVVLIITGIRDRRKTDQARSEENPYPSVDLSKGENNPGFQNGDDVQTSF
 >Bat_Rousettus
 MLGSFWFLLSLVAVTAAQSTPEELAKTFLEKFNTEAEDLFYQSSLASWDFNTNIIDENVQKMSKARATWSAFYDEQSKLAKTYQLDEIQDPELKLQLRILQQSGSSTLSADKTKRLNDILNTMSTIYSTGKICQPNNSQECLLLEPGLDDIMENSKDYSQRLWAWESWRSEVGKQLRPYYEEYVVLKNEMARGENYEDYGDYWRGDYETEGINGSAYTRDQLIEDVDRIFTEIKPLYEQLHAYVRTKLMDAYPSHISPTGCLPAHLLGDMWGRFWINLYPLTVPFEQKPNIDVTDEMVNQNWNAKRIFKEAEKFFVSLGLPNMTETFWEKSVLTEPDNDQKVACHPTAWDLGKGDFRIIMCTKVKMEDFLTAHHEMGHIQYYMAYATQPYLLRDGANEGFHEAVGEVISLSVATPNHLKNMGLLPPDFYEDNETEINFLLKQALNVVGTLPFTYMLEKWRWMVFKGEIPKEQWMEKWWEMKRELVGVVEPLPHDETYCDPASLFHVANDYSFIRYYTRTIFEFQFLEALCQIAQHEGPLYKCDIANSTEAGKKLHQMLSLGKSKPWTLALESIAGTKNMDVRPLLNYFEPLFTWLKEKNRNSFVGWSTDWSPYSGQSIKVRISLKAALGEKAYEWNDNEMYLFKSSIAYSLREYFLKVKNLTIPFGEEDVWVSDLKPRISFNFFVTSPQNVSEFIPRTEVEGAIRMSRSRINDAFRLDDDTLEFLGIEPTLGTPYQPPVTIWLIVFGVVMGLVVVGIVLLIFVGIRDRRKKNQERSEENPYSSVDLSKGENNAGFQNNDDVQTSF
-`,Ne=`(((Pig:0.05786,Cattle:0.06527):0.03309,((Bat_Rhinolophus:0.03740,Bat_Rhinolophus_macrotis:0.03838):0.04786,Bat_Rousettus:0.10245):0.01323):0.00514,((Human:0.02433,Macaque:0.02785):0.05062,((Mouse:0.04610,Rat:0.04955):0.00915,Hamster:0.04551):0.03976):0.00964,(((Civet:0.04051,Cat:0.02657):0.01639,((Dog:0.00421,Raccoon_dog:0.00450):0.04300,Ferret:0.05215):0.00426):0.02057,Pangolin:0.06166):0.00377);`,Pe=`##gff-version 3
+`,Le=`(((Pig:0.05786,Cattle:0.06527):0.03309,((Bat_Rhinolophus:0.03740,Bat_Rhinolophus_macrotis:0.03838):0.04786,Bat_Rousettus:0.10245):0.01323):0.00514,((Human:0.02433,Macaque:0.02785):0.05062,((Mouse:0.04610,Rat:0.04955):0.00915,Hamster:0.04551):0.03976):0.00964,(((Civet:0.04051,Cat:0.02657):0.01639,((Dog:0.00421,Raccoon_dog:0.00450):0.04300,Ferret:0.05215):0.00426):0.02057,Pangolin:0.06166):0.00377);`,Re=`##gff-version 3
 # precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Human	InterProScan	protein_match	21	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
 Human	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
@@ -163,7 +163,7 @@ Bat_Rhinolophus_macrotis	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;
 Bat_Rhinolophus_macrotis	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
 Bat_Rousettus	InterProScan	protein_match	21	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
 Bat_Rousettus	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
-`,Fe=`>Human_blue_SWS1
+`,ze=`>Human_blue_SWS1
 ----------------------MSEEEFYL-FKNIS--SVGPWDGPQYHIAPVWAFYLQAAFMGTVFLIGFPLNAMVLVATLRYKKLRQPLNYILVNVSFGGFLLCIFSVFPVFVASCNGYFVFGRHVCALEGFLGTVAGLVTGWSLAFLAFERYIVICKPFGNFRFSSKHALTVVLATWTIGIGVSIPPFFGWSRFIPEGLQCSCGPDWYTVGTKYRSESYTWFLFIFCFIVPLSLICFSYTQLLRALKAVAAQQQESATTQKAEREVSRMVVVMVGSFCVCYVPYAAFAMYMVNNRNHGLDLRLVTIPSFFSKSACIYNPIIYCFMNKQFQACIMKMVCG--KAMTDES-DTCSS-QKTEVSTVSSTQVGPN
 >Chicken_violet_SWS1
 ---------------------MSSDDDFYL-FTNGS--VPGPWDGPQYHIAPPWAFYLQTAFMGIVFAVGTPLNAVVLWVTVRYKRLRQPLNYILVNISASGFVSCVLSVFVVFVASARGYFVFGKRVCELEAFVGTHGGLVTGWSLAFLAFERYIVICKPFGNFRFSSRHALLVVVATWLIGVGVGLPPFFGWSRYMPEGLQCSCGPDWYTVGTKYRSEYYTWFLFIFCFIVPLSLIIFSYSQLLSALRAVAAQQQESATTQKAEREVSRMVVVMVGSFCLCYVPYAALAMYMVNNRDHGLDLRLVTIPAFFSKSACVYNPIIYCFMNKQFRACIMETVCG--KPLTDDS-DASTSAQRTEVSSVSSSQVGPT
@@ -183,7 +183,7 @@ MAQQWSLQRLAGRHPQDSYEDSTQSSIFTYTNSNST---RGPFEGPNYHIAPRWVYHLTSVWMIFVVIASVFTNGLVLAA
 MAQQWSLQRLAGRHPQDSYEDSTQSSIFTYTNSNST---RGPFEGPNYHIAPRWVYHLTSVWMIFVVTASVFTNGLVLAATMKFKKLRHPLNWILVNLAVADLAETVIASTISIVNQVSGYFVLGHPMCVLEGYTVSLCGITGLWSLAIISWERWMVVCKPFGNVRFDAKLAIVGIAFSWIWAAVWTAPPIFGWSRYWPHGLKTSCGPDVFSGSSYPGVQSYMIVLMVTCCIIPLAIIMLCYLQVWLAIRAVAKQQKESESTQKAEKEVTRMVVVMIFAYCVCWGPYTFFACFAAANPGYAFHPLMAALPAYFAKSATIYNPVIYVFMNRQFRNCILQLFGK---KVDDGS--ELSSASKTEVSSVS--SVSPA
 >Chicken_red_LWS
 -MAAWEAAFAARRRHEE--EDTTRDSVFTYTNSNNT---RGPFEGPNYHIAPRWVYNLTSVWMIFVVAASVFTNGLVLVATWKFKKLRHPLNWILVNLAVADLGETVIASTISVINQISGYFILGHPMCVVEGYTVSACGITALWSLAIISWERWFVVCKPFGNIKFDGKLAVAGILFSWLWSCAWTAPPIFGWSRYWPHGLKTSCGPDVFSGSSDPGVQSYMVVLMVTCCFFPLAIIILCYLQVWLAIRAVAAQQKESESTQKAEKEVSRMVVVMIVAYCFCWGPYTFFACFAAANPGYAFHPLAAALPAYFAKSATIYNPIIYVFMNRQFRNCILQLFGK---KVDDGS--EVS-TSRTEVSSVSNSSVSPA
-`,Ie=`((((Human_blue_SWS1:0.10301,Chicken_violet_SWS1:0.09409):0.17578,((Human_green_MWS:0.01470,Human_red_LWS:0.02101):0.05054,Chicken_red_LWS:0.09133):0.22303):0.11447,Chicken_green_RH2:0.13562):0.05486,((Human_RHO:0.03363,Bovine_RHO:0.03247):0.04594,Chicken_RHO:0.05607):0.02694,Fish_RHO:0.12448);`,Le=`##gff-version 3
+`,Be=`((((Human_blue_SWS1:0.10301,Chicken_violet_SWS1:0.09409):0.17578,((Human_green_MWS:0.01470,Human_red_LWS:0.02101):0.05054,Chicken_red_LWS:0.09133):0.22303):0.11447,Chicken_green_RH2:0.13562):0.05486,((Human_RHO:0.03363,Bovine_RHO:0.03247):0.04594,Chicken_RHO:0.05607):0.02694,Fish_RHO:0.12448);`,Ve=`##gff-version 3
 # precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Human_RHO	InterProScan	protein_match	55	306	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
 Human_RHO	InterProScan	protein_match	2	37	.	.	.	Name=IPR019477;signature_desc=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin;description=Amino%20terminal%20of%20the%20G-protein%20receptor%20rhodopsin
@@ -200,7 +200,7 @@ Chicken_violet_SWS1	InterProScan	protein_match	50	301	.	.	.	Name=IPR000276;signa
 Human_green_MWS	InterProScan	protein_match	71	322	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
 Human_red_LWS	InterProScan	protein_match	71	322	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
 Chicken_red_LWS	InterProScan	protein_match	68	319	.	.	.	Name=IPR000276;signature_desc=7%20transmembrane%20receptor%20(rhodopsin%20family);description=7%20transmembrane%20receptor%20(rhodopsin%20family)
-`,Re=`>Chicken
+`,He=`>Chicken
 MSGRGKGGKGLGKGGAKRH-RKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKVFLENVIRDAVTYTEHAKRKTVTAMDVVYALKRQGRTLYGFGG
 >C_elegans
 MSGRGKGGKGLGKGGAKRH-RKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKVFLENVIRDAVTYCEHAKRKTVTAMDVVYALKRQGRTLYGFGG
@@ -214,7 +214,7 @@ MSGRGKGGKGLGKGGAKRH-RKVLRDNIQGITKPAIRRLARRGGVKRISGLIYEETRGVLKIFLENVIRDAVTYTEHARR
 MSGRGKGGKGLGKGGAKRH-RKILRDNIQGITKPAIRRLARRGGVKRISGLIYEEVRAVLKSFLESVIRDSVTYTEHAKRKTVTSLDVVYALKRQGRTLYGFGG
 >Tetrahymena
 MAG-GKGGKGMGKVGAKRHSRKSNKASIEGITKPAIRRLARRGGVKRISSFIYDDSRQVLKSFLENVVRDAVTYTEHARRKTVTAMDVVYALKRQGRTLYGFGG
-`,ze=`((Chicken:0.00000,C_elegans:0.00971):0.00000,Human:0.00000,(Drosophila:0.00849,(Arabidopsis:0.01029,(Yeast:0.05645,Tetrahymena:0.14943):0.01380):0.00852):0.00122);`,Be=`>Horse
+`,Ue=`((Chicken:0.00000,C_elegans:0.00971):0.00000,Human:0.00000,(Drosophila:0.00849,(Arabidopsis:0.01029,(Yeast:0.05645,Tetrahymena:0.14943):0.01380):0.00852):0.00122);`,We=`>Horse
 -------MGDVEKGKKIFVQKCAQCHTVEKGGKHKTGPNLHGLFGRKTGQAPGFTYTDANKNKGITWKEETLMEYLENPKKYIPGTKMIFAGIKKKTEREDLIAYLKKATNE
 >Cow
 -------MGDVEKGKKIFVQKCAQCHTVEKGGKHKTGPNLHGLFGRKTGQAPGFSYTDANKNKGITWGEETLMEYLENPKKYIPGTKMIFAGIKKKGEREDLIAYLKKATNE
@@ -230,7 +230,7 @@ MAG-GKGGKGMGKVGAKRHSRKSNKASIEGITKPAIRRLARRGGVKRISSFIYDDSRQVLKSFLENVVRDAVTYTEHARR
 ASFBZAPPGBVKAGEKIFKTKCAQCHTVEKGAGHKQGPNLNGLFGRQSGTTAGYSYSAANKNMAVQWGENTLYDYLLNPKKYIPGTKMVFPGLKKPQDRADLIAYLKZATA-
 >Yeast
 --MTEFKAGSAKKGATLFKTRCLQCHTVEKGGPHKVGPNLHGIFGRHSGQAEGYSYTDANIKKNVLWDENNMSEYLTNPKKYIPGTKMAFGGLKKEKDRNDLITYLKKACE-
-`,Ve=`(((Horse:0.02146,Cow:0.00711):0.02053,Alligator:0.04138):0.00889,(Human:0.06322,(Castor_bean:0.19277,Yeast:0.22007):0.08132):0.02037,(Carp:0.06096,Drosophila:0.11212):0.01070);`,He=`>Human
+`,Ge=`(((Horse:0.02146,Cow:0.00711):0.02053,Alligator:0.04138):0.00889,(Human:0.06322,(Castor_bean:0.19277,Yeast:0.22007):0.08132):0.02037,(Carp:0.06096,Drosophila:0.11212):0.01070);`,Ke=`>Human
 MDHAEENEILAATQRYYVERPIFSHPVLQERLHTKDKVPDSIADKLKQAFTCTPKKIRNIIYMFLPITKWLPAYKFKEYVLGDLVSGISTGVLQLPQGLAFAMLAAVPPIFGLYSSFYPVIMYCFLGTSRHISIGPFAVISLMIGGVAVRLVPDDIVIPGGVNATNGTEARDALRVKVAMSVTLLSGIIQFCLGVCRFGFVAIYLTEPLVRGFTTAAAVHVFTSMLKYLFGVKTKRYSGIFSVVYSTVAVLQNVKNLNVCSLGVGLMVFGLLLGGKEFNERFKEKLPAPIPLEFFA---VVMGTGISAGFNLKESYNVDVVGTLPLGLLPPANPDTSLFHLVYVDAIAIAIVGFSVTISMAKTLANKHGYQVDGNQELIALGLCNSIGSLFQTFSISCSLSRSLVQEGTGGKTQLAGCLASLMILLVILATGFLFESLPQAVLSAIVIVNLKGMFMQFSDLPFFWRTSKIELTIWLTTFVSSLFLGLDYGLITAVIIALLTVIYRTQSPSYKVLGKLPETDVYIDIDAYEEVKEIPGIKIFQINAPIYYANSDLYSNALKRKTGVNPAVIMGARRKAMRKYAKEVGNANMANATVVKADAEVDGEDATKPEEEDGEVKYPPIVIKSTFPEEMQRFMPPGDNVHTVILDFTQVNFIDSVGVKTLAGIVKEYGDVGIYVYLAGCSAQVVNDLTRNRFFENPALWELLFHSIHDAVLGSQLREALAEQEASAPPSQEDLEPNATPATPEA
 >Dog
 MDHAEENEILTASQRYYVERPIFSHPVLQERLHKKDKISDSIGDKLKQAFTCTPKKIRNIIYMFLPITKWLPAYKFKEYVLGDLVSGISTGVLQLPQ-------------------------------------GPFAVISLMIGGVAVRLVPDDIVIPGGVNATNGTEARDALRVKVAMSVTLLSGIIQFCLGVCRFGFVAIYLTEPLVRGFTTAAAVHVFTSMLKYLFGVKTKRYSGIFSVVYSTVAVLQNVKNLNVCSLGVGLMVFGLLLGGKEFNERFKEKLPAPIPLEFFA---VVMGTGISAGFNLKESYNVDVVGTLPLGLLPPANPDTSLFHLVYVDAIAIAIVGFSVTISMAKTLANKHGYQVDGNQELIALGLCNSIGSLFQTFSISCSLSRSLVQEGTGGKTQLAGCLASLMILLVILATGFLFESLPQAVLSAIVIVNLKGMFMQFSDLPFFWRTSKIELTIWLTTFVSSLFLGLDYGLITAVIIALLTVIYRTQSPSYKVLGQLPDTDVYIDIDAYEEVKEIPGIKIFQINAPIYYANSDLYSNALKRKTGVNPAVIMGARRKAMKKYAKEVGNANVANATVVKVDAEVDGEDATKPEQEDDEVKYPPIVIKSTFPEELQRFMPPGDTIHTVILDFTQVNFIDSVGVKTLAGIVKEYGDVGIYVYLAGCSAQVVNDLTQNRFFENPALKELLFHSIHDAVLGSQLREALAEQEASALPPQEDSEPNATPTTPEA
@@ -256,7 +256,7 @@ MDHAEENEILAAAQRYYVERPIFSHPVLQEKLHKKDKISDSIGDKLKQAFTCTPKKIRNIIYMFLPITKWLPAYRFKEYV
 MDHAEENEILGATKRYYVERPIFSHPVLQERLHKKDKVSDSIGDKLKQAFTCTPKKIRNIIYMFLPITKWLPAYKFKEYVLGDLVSGISTGVLQLPQGLAFAMLAAVPPVFGLYSSFYPVIMYCFFGTSRHVSIGPFAVISLMIGGVAVRLVPDDIVIPGGVNATNGTEARDALRVKVAMSVTLLSGIIQFCLGVCRFGFVAIYLTEPLVRGFTTAAAVHVFTSMLKYLFGVKTKRYSGIFSVVYSTVAVLQNVKNLNVCSLGVGLMVFGLLLGGKEFNERFKEKLPAPIPLEFFA---VVMGTGISAGFNLHESYNVDVVGTLPLGLLPPANPDTSLFHLVYVDAIAIAIVGFSVTISMAKTLANKHGYQVDGNQELIALGLCNSIGSLFQTFSISCSLSRSLVQEGTGGKTQLAGCLASLMILLVILATGFLFESLPQAVLSAIVIVNLKGMFMQFSDLPFFWRTSKIELTIWLTTFVSSLFLGLDYGLITAVIIALLTVIYRTQSPSYKVLGQLPDTDVYIDIDAYEEVKEIPGIKIFQINAPIYYANSDLYSNALKRKTGVNPAFIMGARRKAMRKYAKEVGNANMANATVVKVDAEVDGEDGTKPEEDENEIKYPPIVIKSTLPEELQRFMPPGDNIHTIILDFTQVNFIDSVGVKTLAGIVKEYGDVGIYVYLAGCSAQVVNDLTRNRFFENPALLELLFHSIHDAVLGSQAREALAEQEGSAVPPQEDSEPNATPEA---
 >Elephant
 MDHAEENEILVATQKYCVERPIFSHPVLQERLHKKDKISDSIGDKLKQAFTCTPKKIRNIIYMFLPITKWLPAYKFKEYVLGDLVSGISTGVLQLPQGLAFATLAAVPPVFGLYSSFYPVIMYCFFGTSRHISIGPFAVISLMIGGVAVRLVPDDIVIPGGVNATNGTEARDALRVKVAMSVTLLSGIIQFCLGVCRFGFVAIYLTELCLRALTRMSN-NAMTDLRVSVQGLFLDITSSVH-VLQSTVAVLQNVKNLNVCSLGVGLMVFGLLLGGKEFNERFKEKLPAPIPLEFFA---VVMGTGISAGFNLKDSYNVDVVGTLPLGLLPPANPDTSLFHLVYVDAIAIAIVGFSVTISMAKTLAIKHGYQVDGNQELIALGLCNSIGSLFQTFSISCSLSRSLVQEGTGGKTQLAGCLASLMILLVILATGFLFESLPQAVLSAIVIVNLKGM-MQFSDLPFFWRTSKIELTIWLTTFVSSLFLGLDYGLITAVIIALLTVIYRTQSPSYKVLGQLPDTDVYIDIDAYEEVKEIPGIKIFQINAPIYYANSDLYSNALKRKTGVNPALIMSVRRKAMRKYAKEVGNANMANATVVKVGAEVDGEDGTKPEEENNEMKYPPIVIKSTFPEELQRFMPPGDNVHTVILDFTQVNFIDSVGVKTLAGIVKEYGDVGIYVYLAGCSAQVVNDLSRNRFFENPALKDLLFHSIHDAVLGSQAREALAEQEASALPPQEDSEPNATP-----
-`,Ue=`(((((Human:0.01828,Dog:0.01284):0.00161,Mouse:0.03104):0.00351,Elephant:0.06030):0.00265,Horse:0.02207):0.00085,(((((Dolphin_echo:0.00425,Vaquita_echo:0.02372):0.00115,(Beluga_echo:0.00000,Narwhal_echo:0.00000):0.00150):0.00988,Sperm_whale_echo:0.00918):0.00743,Rhinolophus_bat_echo:0.04469):0.00451,Blue_whale:0.01248):0.00489,Cow:0.01195);`,We=`##gff-version 3
+`,qe=`(((((Human:0.01828,Dog:0.01284):0.00161,Mouse:0.03104):0.00351,Elephant:0.06030):0.00265,Horse:0.02207):0.00085,(((((Dolphin_echo:0.00425,Vaquita_echo:0.02372):0.00115,(Beluga_echo:0.00000,Narwhal_echo:0.00000):0.00150):0.00988,Sperm_whale_echo:0.00918):0.00743,Rhinolophus_bat_echo:0.04469):0.00451,Blue_whale:0.01248):0.00489,Cow:0.01195);`,Je=`##gff-version 3
 # precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Human	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
 Human	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
@@ -284,7 +284,7 @@ Narwhal_echo	InterProScan	protein_match	81	475	.	.	.	Name=IPR011547;signature_de
 Narwhal_echo	InterProScan	protein_match	528	709	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
 Vaquita_echo	InterProScan	protein_match	81	467	.	.	.	Name=IPR011547;signature_desc=Sulfate%20permease%20family;description=Sulfate%20permease%20family
 Vaquita_echo	InterProScan	protein_match	605	686	.	.	.	Name=IPR002645;signature_desc=STAS%20domain;description=STAS%20domain
-`,Ge=`>Macaque
+`,U=`>Macaque
 ---MEEPQSDPSIEPPLSQETFSDLWKLLPENNVLSP--LPS-QAVDDLMLSPDDLAQWLTEDPGPDEAPRMSE------AAPPMAPTPAAPTPAAPAPAPSWPLSSSVPSQKTYHGSYGFRLGFLHSGTAKSVTCTYSPDLNKMFCQLAKTCPVQLWVDSTPPPGSRVRAMAIYKQSQHMTEVVRRCPHHERCSD-SDGLAPPQHLIRVEGNLRVEYSDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENFRKKGEPCHQLPPGSTKRALPNNTS-SSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPAGSRAHSSHLKSKKGQSTSRHKKFMFKTEGPDSD
 >Green_monkey
 ---MEEPQSDPSIEPPLSQETFSDLWKLLPENNVLSP--LPS-QAVDDLMLSPDDLAQWLTEDPGPDEAPRMSE------AAPHMAPTPAAPTPAAPAPAPSWPLSSSVPSQKTYHGSYGFRLGFLHSGTAKSVTCTYSPDLNKMFCQLAKTCPVQLWVDSTPPPGSRVRAMAIYKQSQHMTEVVRRCPHHERCSD-SDGLAPPQHLIRVEGNLRVEYSDDRNTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRNSFEVRVCACPGRDRRTEEENFRKKGEPCHELPPGSTKRALPNNTS-SSPQPKKKPLDGEYFTLQIRGRERFEMFRELNEALELKDAQAGKEPAGSRAHSSHLKSKKGQSTSRHKKFMFKTEGPDSD
@@ -316,7 +316,7 @@ MTAMEESQSDISLELPLSQETFSGLWKLLPPEDILP-----SPHCMDDLLLP-QDVEEFF-EGP--SEALRVSG------
 ---MEDSQSDMSIELPLSQETFSCLWKLLPPDDILPTTATGSPNSMEDLFLP-QDVAELL-EGP--EEALQVS-------APAAQEPGTEAPAPVAPASATPWPLSSSVPSQKTYQGNYGFHLGFLQSGTAKSVMCTYSISLNKLFCQLAKTCPVQLWVTSTPPPGTRVRAMAIYKKSQHMTEVVRRCPHHERCSD-GDGLAPPQHLIRVEGNPYAEYLDDRQTFRHSVVVPYEPPEVGSDYTTIHYKYMCNSSCMGGMNRRPILTIITLEDSSGNLLGRDSFEVRVCACPGRDRRTEEENFRKKEEHCPELPPGSAKRALPTSTS-SSPQQKKKPLDGEYFTLKIRGRERFEMFRELNEALELKDARAAEESGDSRAHSSYPKTKKGQSTSRHKKPMIKKVGPDSD
 >Hamster
 ---MEEPQSDLSIELPLSQETFSDLWKLLPPNNVLSTLP--SSDSIEELFLS-ENVAGWL-EDP--GEALQGSAAAAAPAAPAAEDPVAETPAPVASAPATPWPLSSSVPSYKTYQGDYGFRLGFLHSGTAKSVTCTYSPSLNKLFCQLAKTCPVQLWVSSTPPPGTRVRAMAIYKKLQYMTEVVRRCPHHERSSE-GDGLAPPQHLIRVEGNMHAEYLDDKQTFRHSVVVPYEPPEVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDPSGNLLGRNSFEVRICACPGRDRRTEEKNFQKKGEPCPELPPKSAKRALPTNTS-SSPQPKRKTLDGEYFTLKIRGQERFKMFQELNEALELKDAQALKASEDSGAHSSYLKSKKGQSASRLKKLMIKREGPDSD
-`,Ke=`(((((Macaque:0.00330,Green_monkey:0.00179):0.02090,Human:0.01981):0.00741,Treeshrew:0.04794):0.04603,(((Cow:0.03758,Sheep:0.02804):0.04487,(Pig:0.04850,Beluga_whale:0.03202):0.00410):0.01506,(Cat:0.06179,Dog:0.06419):0.02371):0.01622):0.00612,(Woodchuck:0.06915,Rabbit:0.05393):0.00236,(Guinea_pig:0.11502,((Mouse:0.06027,Rat:0.04853):0.05261,Hamster:0.09792):0.02412):0.00355);`,qe=`##gff-version 3
+`,W=`(((((Macaque:0.00330,Green_monkey:0.00179):0.02090,Human:0.01981):0.00741,Treeshrew:0.04794):0.04603,(((Cow:0.03758,Sheep:0.02804):0.04487,(Pig:0.04850,Beluga_whale:0.03202):0.00410):0.01506,(Cat:0.06179,Dog:0.06419):0.02371):0.01622):0.00612,(Woodchuck:0.06915,Rabbit:0.05393):0.00236,(Guinea_pig:0.11502,((Mouse:0.06027,Rat:0.04853):0.05261,Hamster:0.09792):0.02412):0.00355);`,G=`##gff-version 3
 # precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Human	InterProScan	protein_match	100	288	.	.	.	Name=IPR011615;signature_desc=P53%20DNA-binding%20domain;description=P53%20DNA-binding%20domain
 Human	InterProScan	protein_match	319	357	.	.	.	Name=IPR010991;signature_desc=P53%20tetramerisation%20motif;description=P53%20tetramerisation%20motif
@@ -371,7 +371,7 @@ Treeshrew	InterProScan	protein_match	35	59	.	.	.	Name=IPR040926;signature_desc=T
 Woodchuck	InterProScan	protein_match	98	286	.	.	.	Name=IPR011615;signature_desc=P53%20DNA-binding%20domain;description=P53%20DNA-binding%20domain
 Woodchuck	InterProScan	protein_match	317	356	.	.	.	Name=IPR010991;signature_desc=P53%20tetramerisation%20motif;description=P53%20tetramerisation%20motif
 Woodchuck	InterProScan	protein_match	6	30	.	.	.	Name=IPR013872;signature_desc=P53%20transactivation%20motif;description=P53%20transactivation%20motif
-`,Je=`>Euk_Human
+`,Ye=`>Euk_Human
 ----------MGKEKTHINIVVIGHVDSGKSTTTGHLIYKCGGIDKRTIEKFEKEAAEMGKGSFKYAWVLDKLKAERERGITIDISLWKFETSKYYVTIIDAPGHRDFIKNMITGTSQADCAVLIVAAGVGEFEAGISKNGQTREHALLAYTLGVKQLIVGVNKMDSTEPPYSQKRYEEIVKEVST-YIKKIGYNPDTVAFVPISGWNGDNMLEPS-----ANMPWFKGWKVTRKDGNASGTTLLEALDCILP-PTRPTDKPLRLPLQDVYKIGGIGTVPVGRVETGVLKPGMVVTFAPVN---VTTEVKSVEMHHEALSEALPGDNVGFNVKNVSVKDVRRGNVAGDSKNDPPMEAAGFTAQVIILNHPGQISAGYAPVLDCHTAHIACKFAELKEKIDRRSGKKLEDGPKFLKSGDAAIVDMVPGKPMCVESFSDYPPLGRFAVRDMRQTVAVGVIKAVDKKAAGAGKVTKSAQKAQKAK-
 >Euk_Drosophila
 ----------MGKEKIHINIVVIGHVDSGKSTTTGHLIYKCGGIDKRTIEKFEKEAQEMGKGSFKYAWVLDKLKAERERGITIDIALWKFETAKYYVTIIDAPGHRDFIKNMITGTSQADCAVLIVAAGTGEFEAGISKNGQTREHALLAFTLGVKQLIVGVNKMDSSEPPYSEARYEEIKKEVSS-YIKKIGYNPAAVAFVPISGWHGDNMLEPS-----TNMPWFKGWKVERKEGNADGKTLIDALDAILP-PARPTDKALRLPLQDVYKIGGIGTVPVGRVETGVLKPGTVVVFAPAN---ITTEVKSVEMHHEALQEAVPGDNVGFNVKNVSVKELRRGYVAGDSKANPPKGAADFTAQVIVLNHPGQIANGYTPVLDCHTAHIACKFAEIKEKVDRRSGKTTEENPKFIKSGDAAIVNLVPSKPLCVEAFQEFPPLGRFAVRDMRQTVAVGVIKAVNFKDASGGKVTKAAEKATKGKK
@@ -395,7 +395,7 @@ MPSIVLPPKPTALQKPHINLAVVGHVDNGKSTLVGRLLYETGYVDEKAFKEIEEMAKKMGKEDFAFAWILDRFKEERERG
 -----MARAKFERTKDHVNIGTIGHVDHGKTTLTAAITMTL--------------AELGG-AKARKYEDIDAAPEEKARGITINTAHVEYETDSRHYAHVDCPGHADYVKNMITGAAQMDGAILVVSAADG-------PMPQTREHILLAKQVGVPKLVVFLNKKDMVD----DEELLELVELEVRELLSDYDFPGDDIPIVAGSALKAIE----------GEKEYKDA-----------ILELMKAVDDYIDTPEREVDKPFLMAVEDVFSITGRGTVATGRIERGKVKVGEEISIVGIK-DTRKATVTGVEMFQKTLEEGMAGDNVGLLLRGIQKEDIERGMVLAKPGSITP--HTEFEGEVYVLKK--EEGGRHTPFFANYRPQFYVRTTDVTGTIKSYTADD-GSAVEMVMPGDRIKMTVELINPIAIEQG------MRFAIREGGRTIGAGVVSKILK--------------------
 >Bac_Thermus
 -----MAKGEFVRTKPHVNVGTIGHVDHGKTTLTAALTYVA--------------AAENPNVEVKDYGDIDKAPEERARGITINTAHVEYETAKRHYSHVDCPGHADYIKNMITGAAQMDGAILVVSAADG-------PMPQTREHILLARQVGVPYIVVFMNKVDMVD----DPELLDLVEMEVRDLLNQYEFPGDEVPVIRGSALLALEQMHRNPKTRRGENEWVDK-----------IWELLDAIDEYIPTPVRDVDKPFLMPVEDVFTITGRGTVATGRIERGKVKVGDEVEIVGLAPETRRTVVTGVEMHRKTLQEGIAGDNVGVLLRGVSREEVERGQVLAKPGSITP--HTKFEASVYVLKK--EEGGRHTGFFSGYRPQFYFRTTDVTGVVQLPPG------VEMVMPGDNVTFTVELIKPVALEEG------LRFAIREGGRTVGAGVVTKILE--------------------
-`,Ye=`((((((Euk_Human:0.07111,Euk_Drosophila:0.07174):0.02614,Euk_Yeast:0.10439):0.00871,Euk_Arabidopsis:0.12776):0.14017,(((Bac_Ecoli:0.11962,Bac_Bacillus:0.11135):0.00923,Bac_Synechocystis:0.13544):0.01077,Bac_Thermus:0.12343):0.29119):0.01720,(Arc_Halobacterium:0.19978,Arc_Methanococcus:0.18502):0.02068):0.01285,Arc_Thermoplasma:0.16715,Arc_Pyrobaculum:0.22858);`,Xe=`##gff-version 3
+`,Xe=`((((((Euk_Human:0.07111,Euk_Drosophila:0.07174):0.02614,Euk_Yeast:0.10439):0.00871,Euk_Arabidopsis:0.12776):0.14017,(((Bac_Ecoli:0.11962,Bac_Bacillus:0.11135):0.00923,Bac_Synechocystis:0.13544):0.01077,Bac_Thermus:0.12343):0.29119):0.01720,(Arc_Halobacterium:0.19978,Arc_Methanococcus:0.18502):0.02068):0.01285,Arc_Thermoplasma:0.16715,Arc_Pyrobaculum:0.22858);`,Ze=`##gff-version 3
 # precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Euk_Human	InterProScan	protein_match	5	237	.	.	.	Name=IPR000795;signature_desc=Elongation%20factor%20Tu%20GTP%20binding%20domain;description=Elongation%20factor%20Tu%20GTP%20binding%20domain
 Euk_Human	InterProScan	protein_match	260	325	.	.	.	Name=IPR004161;signature_desc=Elongation%20factor%20Tu%20domain%202;description=Elongation%20factor%20Tu%20domain%202
@@ -433,7 +433,7 @@ Bac_Thermus	InterProScan	protein_match	236	306	.	.	.	Name=IPR004161;signature_de
 Bac_Synechocystis	InterProScan	protein_match	10	201	.	.	.	Name=IPR000795;signature_desc=Elongation%20factor%20Tu%20GTP%20binding%20domain;description=Elongation%20factor%20Tu%20GTP%20binding%20domain
 Bac_Synechocystis	InterProScan	protein_match	298	397	.	.	.	Name=IPR004160;signature_desc=Elongation%20factor%20Tu%20C-terminal%20domain;description=Elongation%20factor%20Tu%20C-terminal%20domain
 Bac_Synechocystis	InterProScan	protein_match	225	294	.	.	.	Name=IPR004161;signature_desc=Elongation%20factor%20Tu%20domain%202;description=Elongation%20factor%20Tu%20domain%202
-`,Ze=`>Chicken
+`,K=`>Chicken
 MALWIRSLPLLALLVFSGPGTSYAAANQHLCGSHLVEALYLVCGERGFFYSPKARRDVEQPL-VSSPLRGEAGV---LPFQQEEYEKVKRGIVEQCCHNTCSLYQLENYCN
 >Xenopus
 MALWMQCLPLVLVLFFSTPNT-EALVNQHLCGSHLVEALYLVCGDRGFFYYPKVKRDMEQAL-VSGPQDNELDG---MQLQPQEYQKMKRGIVEQCCHSTCSLFQLESYCN
@@ -704,7 +704,59 @@ AJ550907.1/56-3     CAUAAGUC-UGGGCUU------AGCCUACUGAUGAGUCGCUGC-----------------
 AJ536615.1/1-44     ---------GGGUGGUG-UGUACCAUCCCUGAUGAGUCCAA----------------------------AAGGACGAAAUGG---
 #=GC SS_cons        (((((((,.<<<<<__......_>>>>><____>,<<<<____........................____>>>>,,,)))))))
 //
-`;function ut(){return(0,W.jsx)(O,{msa:Me,tree:Ne,gff:Pe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var dt=`import { MSAViewer } from 'react-msaview'
+`,ut=`# STOCKHOLM 1.0
+#=GF NH ((((((((SARS-CoV-2:0.00559,SARS-CoV:0.00723):0.01787,Bat-CoV-BM48-31:0.02700):0.19079,(((MERS-CoV:0.04168,Bat-CoV-HKU5:0.03239):0.02081,Bat-CoV-HKU4:0.04709):0.04316,(HCoV-HKU1:0.03753,(HCoV-OC43:0.00702,Bovine-CoV:0.00532):0.04889):0.08956):0.05084):0.01551,Night-heron-CoV-HKU19:0.17759):0.00485,Bat-CoV-HKU9:0.17250):0.01146,Munia-CoV-HKU13:0.20195):0.08840,FIPV:0.06248):0.02219,((HCoV-229E:0.08226,HCoV-NL63:0.10441):0.02576,Bat-CoV-HKU2:0.06090):0.02735,(PEDV:0.06831,Bat-CoV-HKU8:0.06503):0.00432);
+#=GF ID Corona_FSE
+#=GF AC RF00507
+#=GF DE Coronavirus frameshifting stimulation element - 18-sequence subset of the Rfam RF00507 seed
+#=GF CC Subset for the react-msaview gallery; the full seed has 51 sequences.
+#=GF CC SS_cons carries stem 1, a nested stem-loop, and a pseudoknot written as
+#=GF CC the WUSS letter pair A/a because it crosses stem 1 instead of nesting
+#=GF CC inside it. Rows are relabeled from the seed's accessions, which the
+#=GF CC #=GS AC lines keep. A neighbor-joining tree (#=GF NH) is inferred from
+#=GF CC this alignment by scripts/examples-gen.
+#=GS SARS-CoV-2 AC URS00021ED9B3_2697049/11-88
+#=GS SARS-CoV AC NC_004718.3/13399-13476
+#=GS Bat-CoV-BM48-31 AC NC_014470.1/13298-13375
+#=GS MERS-CoV AC NC_019843.3/13434-13514
+#=GS Bat-CoV-HKU4 AC NC_009019.1/13551-13631
+#=GS Bat-CoV-HKU5 AC NC_009020.1/13686-13766
+#=GS HCoV-HKU1 AC NC_006577.2/13601-13681
+#=GS HCoV-OC43 AC NC_006213.1/13341-13421
+#=GS Bovine-CoV AC NC_003045.1/13342-13422
+#=GS Bat-CoV-HKU9 AC NC_009021.1/12952-13032
+#=GS HCoV-229E AC NC_002645.1/12521-12595
+#=GS HCoV-NL63 AC NC_005831.2/12440-12514
+#=GS PEDV AC NC_003436.1/12621-12695
+#=GS FIPV AC NC_002306.3/12410-12484
+#=GS Bat-CoV-HKU2 AC NC_009988.1/12447-12521
+#=GS Bat-CoV-HKU8 AC NC_010438.1/12936-13010
+#=GS Munia-CoV-HKU13 AC NC_011550.1/11593-11670
+#=GS Night-heron-CoV-HKU19 AC NC_016994.1/11312-11389
+
+SARS-CoV-2                   GGGUUUGCGGUGUAAGU---GCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCUUUUG
+SARS-CoV                     GGGUUUGCGGUGUAAGU---GCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUCUACAGGGCUUUUG
+Bat-CoV-BM48-31              GGGUUUGCGGUGUAAGU---GCGGCCCGUCUUACACCGUGCGGCACAGGCACAAGCACUGAUGUCGUUUACAGGGCUUUUG
+MERS-CoV                     GAGUCCGGGGUUCUAUUGUAAAUGCCCGAAUAGAACCCUGUUCAAGUGGUUUGUCCACUGAUGUCGUCUUUAGGGCAUUUG
+Bat-CoV-HKU4                 GAGUCCGGGGUUCUAGUGUAAAUGCCCGACUAGAACCCUGUUCAAGUGGUCUAACCACUGAUGUCGUUUAUAGGGCAUUCG
+Bat-CoV-HKU5                 GAGUCCGGGGUUCUAUUGUAAAUGCCCGAAUAGAACCCUGUGCCAGUGGUCUUACCACUGAUGUUGUCUUUAGGGCAUUUG
+HCoV-HKU1                    GGGUUCGGGGUACUAGUGUGAAUGCCCGGCUAGUACCCUGUGCUAGUGGUUUAUCUACUGAUGUUCAAUUAAGGGCAUUUG
+HCoV-OC43                    GGGUUCGGGGUACGAGUGUAGAUGCCCGUCUCGUACCCUGCGCCAGUGGUUUAUCUACUGAUGUACAAUUAAGGGCAUUUG
+Bovine-CoV                   GGGUUCGGGGUACGAGUGUAGAUGCCCGUCUCGUACCCUGUGCCAGUGGUUUAUCUACUGAUGUACAAUUAAGGGCAUUUG
+Bat-CoV-HKU9                 GAGUCAGGGGUACUAGUGGAGUAGCCCGUCUAGUACCCCUAGGUUCUGGUGUCCAACCAGAUAUAGUAUUAAGGGCUUUUG
+HCoV-229E                    GAGUCCGGGGCUCUAGU---GCCGCUCGACUAGAGCCCUG---UAAUGGUACAGACAUAGAUUACUGUGUCCGUGCAUUUG
+HCoV-NL63                    GAGCAAGGGGUUCUAGU---GCAGCUCGACUAGAACCCUG---CAAUGGCACGGACAUCGAUAAGUGUGUUCGUGCUUUUG
+PEDV                         GAGUACGGGGCUCUAGU---GCAGCUCGACUAGAGCCCUG---UAAUGGUACUGAUACACAACAUGUGUAUCGUGCUUUUG
+FIPV                         GAGUGCGGGGUUCUAGU---GCAGCUCGACUAGAACCCUG---UAAUGGUACUGAUCCAGACCAUGUUAGUAGAGCUUUUG
+Bat-CoV-HKU2                 GGGCAAGGGGCUCUAGU---GCAGCUCGACUAGAGCCCUG---UAAUGGUACUGAACCAGAACAUUGUGUUCGUGCUUUUG
+Bat-CoV-HKU8                 GAGUGCGGGGCUCUAGU---GCAGCUCGACUAGAGCCCUG---UAAUGGUACUGAACCAGAACACGUAAUCCGUGCCUUUG
+Munia-CoV-HKU13              GAGUAGUGGGUUCCAGU---GAAGCCCGACUGGAACCCCAACAGCCAGGUACAAUCCCUGAUGCUGUUAAACGGGCUUUUC
+Night-heron-CoV-HKU19        GAGUAAAGGGUUCUAGU---GAUGCCCGCCUAGAACCCUGCACUAGCGACAACCGACCCGAUGUCGUCGUUAGGGCGUUUA
+#=GC SS_cons                 :::::::<<<<<<<<<_...__AAAAA__>>>>>>>>>:<<<<<<<<-<<<____>>>>>->>>>>>:::::aaaaa::::
+#=GC RF                      GAGUaaGGGGuuCuAGU...GaaGCcCGaCUaGaaCCCUgcggcacuGGuucuaaaaCagAugccguuuuaAGgGCuUUUG
+#=GC RNA_structural_elements =======[============Stem1============]=[===========Stem=3=========]==============
+//
+`;function dt(){return(0,B.jsx)(k,{msa:Ie,tree:Le,gff:Re,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var ft=`import { MSAViewer } from 'react-msaview'
 
 import { ace2DomainsGFF, ace2MSA, ace2Tree } from './generatedData'
 
@@ -728,7 +780,7 @@ export default function Ace2() {
     />
   )
 }
-`;function ft(){return(0,W.jsx)(O,{msa:$e,tree:et,gff:tt,colorScheme:`clustalx_protein_dynamic`,height:380})}var pt=`import { MSAViewer } from 'react-msaview'
+`;function pt(){return(0,B.jsx)(k,{msa:$e,tree:et,gff:tt,colorScheme:`clustalx_protein_dynamic`,height:380})}var mt=`import { MSAViewer } from 'react-msaview'
 
 import {
   aquaporinDomainsGFF,
@@ -755,7 +807,7 @@ export default function Aquaporin() {
     />
   )
 }
-`;function q(e){let[t,{width:n}]=S();return(0,U.useEffect)(()=>{n&&me(e)&&requestAnimationFrame(()=>{e.setWidth(n)})},[e,n]),t}var mt=[`maeditor`,`clustal`,`clustalx_protein`,`clustalx_protein_dynamic`,`percent_identity_dynamic`,`lesk`,`cinema`,`flower`,`jalview_taylor`,`jalview_zappo`,`jalview_hydrophobicity`,`jalview_buried`,`none`],ht=H(function(){let[e]=(0,U.useState)(()=>D().create({type:`MsaView`,height:500,colorSchemeName:`maeditor`,data:{msa:T,tree:j}})),t=q(e);return(0,W.jsxs)(`div`,{children:[(0,W.jsx)(pe,{value:e.colorSchemeName,size:`small`,onChange:t=>{e.setColorSchemeName(t.target.value)},sx:{mb:1},children:mt.map(e=>(0,W.jsx)(L,{value:e,children:e},e))}),(0,W.jsx)(`div`,{ref:t,children:(0,W.jsx)(E,{model:e})})]})}),gt=`import { useState } from 'react'
+`;function q(e){let[t,{width:n}]=ee();return(0,z.useEffect)(()=>{n&&ve(e)&&requestAnimationFrame(()=>{e.setWidth(n)})},[e,n]),t}var ht=[`maeditor`,`clustal`,`clustalx_protein`,`clustalx_protein_dynamic`,`percent_identity_dynamic`,`lesk`,`cinema`,`flower`,`jalview_taylor`,`jalview_zappo`,`jalview_hydrophobicity`,`jalview_buried`,`none`],gt=R(function(){let[e]=(0,z.useState)(()=>D().create({type:`MsaView`,height:500,colorSchemeName:`maeditor`,data:{msa:T,tree:A}})),t=q(e);return(0,B.jsxs)(`div`,{children:[(0,B.jsx)(pe,{value:e.colorSchemeName,size:`small`,onChange:t=>{e.setColorSchemeName(t.target.value)},sx:{mb:1},children:ht.map(e=>(0,B.jsx)(ge,{value:e,children:e},e))}),(0,B.jsx)(`div`,{ref:t,children:(0,B.jsx)(E,{model:e})})]})}),_t=`import { useState } from 'react'
 
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
@@ -817,8 +869,8 @@ const ColorSchemes = observer(function () {
 })
 
 export default ColorSchemes
-`,_t={I:4.5,V:4.2,L:3.8,F:2.8,C:2.5,M:1.9,A:1.8,G:-.4,T:-.7,S:-.8,W:-.9,Y:-1.3,P:-1.6,H:-3.2,E:-3.5,Q:-3.5,D:-3.5,N:-3.5,K:-3.9,R:-4.5},J=`UniProt/Swiss-Prot|P01589|IL2RA_HUMAN`,vt=T.split(`
-`).filter(e=>e.startsWith(J)).map(e=>e.slice(37).trim().replaceAll(`-`,``)).join(``);function yt(){return(0,W.jsx)(O,{msa:T,tree:j,colorScheme:`clustalx_protein_dynamic`,height:420,columnTracks:[{id:`hydropathy`,name:`Hydropathy (human)`,kind:`bar`,values:vt.split(``).map(e=>(_t[e]??0)+4.5),max:9,color:`#6a51a3`,row:J}]})}var bt=`import { MSAViewer } from 'react-msaview'
+`,vt={I:4.5,V:4.2,L:3.8,F:2.8,C:2.5,M:1.9,A:1.8,G:-.4,T:-.7,S:-.8,W:-.9,Y:-1.3,P:-1.6,H:-3.2,E:-3.5,Q:-3.5,D:-3.5,N:-3.5,K:-3.9,R:-4.5},J=`UniProt/Swiss-Prot|P01589|IL2RA_HUMAN`,yt=T.split(`
+`).filter(e=>e.startsWith(J)).map(e=>e.slice(37).trim().replaceAll(`-`,``)).join(``);function bt(){return(0,B.jsx)(k,{msa:T,tree:A,colorScheme:`clustalx_protein_dynamic`,height:420,columnTracks:[{id:`hydropathy`,name:`Hydropathy (human)`,kind:`bar`,values:yt.split(``).map(e=>(vt[e]??0)+4.5),max:9,color:`#6a51a3`,row:J}]})}var xt=`import { MSAViewer } from 'react-msaview'
 
 import { proteinMSA, proteinTree } from './exampleData'
 
@@ -877,7 +929,23 @@ export default function ColumnTracks() {
     />
   )
 }
-`;function xt(){return(0,W.jsx)(O,{msa:Be,tree:Ve,colorScheme:`clustalx_protein_dynamic`,height:320})}var St=`import { MSAViewer } from 'react-msaview'
+`;function St(){return(0,B.jsx)(k,{msa:ut,colorScheme:`nucleotide`,height:450})}var Ct=`import { MSAViewer } from 'react-msaview'
+
+import { coronaFseMSA } from './generatedData'
+
+// The coronavirus frameshifting stimulation element (Rfam RF00507), an
+// 18-sequence subset of the seed spanning the four genera. The ribosome reads
+// through this element to translate ORF1b, and it only does so because the RNA
+// folds into a pseudoknot: a pair that crosses stem 1 rather than nesting
+// inside it. WUSS cannot write a crossing pair as a bracket, so the seed writes
+// it as the letter pair A/a -- and the "Base pairs" arc track is where that
+// shows, as arcs crossing the stem instead of nesting under it. The bracket
+// track above it draws the same annotation as characters, where a crossing
+// looks like nothing at all. Built by scripts/examples-gen.
+export default function CoronaFse() {
+  return <MSAViewer msa={coronaFseMSA} colorScheme="nucleotide" height={450} />
+}
+`;function wt(){return(0,B.jsx)(k,{msa:We,tree:Ge,colorScheme:`clustalx_protein_dynamic`,height:320})}var Tt=`import { MSAViewer } from 'react-msaview'
 
 import { cytochromeCMSA, cytochromeCTree } from './generatedData'
 
@@ -898,7 +966,7 @@ export default function CytochromeC() {
     />
   )
 }
-`;function Ct(){return(0,W.jsx)(O,{msa:k,gff:oe,colorScheme:`clustalx_protein_dynamic`,height:400})}var wt=`import { MSAViewer } from 'react-msaview'
+`;function Et(){return(0,B.jsx)(k,{msa:re,gff:oe,colorScheme:`clustalx_protein_dynamic`,height:400})}var Dt=`import { MSAViewer } from 'react-msaview'
 
 import { domainsGFF, domainsMSA } from './exampleData'
 
@@ -916,7 +984,7 @@ export default function Domains() {
     />
   )
 }
-`;function Tt(){return(0,W.jsx)(O,{msa:Je,tree:Ye,gff:Xe,colorScheme:`clustalx_protein_dynamic`,height:420})}var Et=`import { MSAViewer } from 'react-msaview'
+`;function Ot(){return(0,B.jsx)(k,{msa:Ye,tree:Xe,gff:Ze,colorScheme:`clustalx_protein_dynamic`,height:420})}var kt=`import { MSAViewer } from 'react-msaview'
 
 import { ef1aDomainsGFF, ef1aMSA, ef1aTree } from './generatedData'
 
@@ -941,7 +1009,7 @@ export default function Ef1a() {
     />
   )
 }
-`;function Dt(){return(0,W.jsx)(O,{msa:ie,gff:ne,colorScheme:`nucleotide`,colWidth:3,highlights:[{row:`human`,start:206,end:206,label:`shared 1-bp deletion`},{rows:[`minke_whale`,`dolphin`,`beluga`,`porpoise`],label:`cetaceans: F12 lost`}],height:440})}var Ot=`import { MSAViewer } from 'react-msaview'
+`;function At(){return(0,B.jsx)(k,{msa:ae,gff:ne,colorScheme:`nucleotide`,colWidth:3,highlights:[{row:`human`,start:206,end:206,label:`shared 1-bp deletion`},{rows:[`minke_whale`,`dolphin`,`beluga`,`porpoise`],label:`cetaceans: F12 lost`}],height:440})}var jt=`import { MSAViewer } from 'react-msaview'
 
 import { f12CdsMSA, f12ExonsGFF } from './exampleData'
 
@@ -982,7 +1050,7 @@ export default function F12() {
     />
   )
 }
-`;function kt(){return(0,W.jsx)(O,{msa:A,gff:C,colorScheme:`nucleotide`,colWidth:1,rowHeight:44,height:360})}var At=`import { MSAViewer } from 'react-msaview'
+`;function Mt(){return(0,B.jsx)(k,{msa:ie,gff:S,colorScheme:`nucleotide`,colWidth:1,rowHeight:44,height:360})}var Nt=`import { MSAViewer } from 'react-msaview'
 
 import { geneClusterGFF, geneClusterMSA } from './exampleData'
 
@@ -1005,7 +1073,7 @@ export default function GeneCluster() {
     />
   )
 }
-`;function jt(){return(0,W.jsx)(O,{msa:Ae,tree:je,colorScheme:`clustalx_protein_dynamic`,height:420})}var Mt=`import { MSAViewer } from 'react-msaview'
+`;function Pt(){return(0,B.jsx)(k,{msa:Pe,tree:Fe,colorScheme:`clustalx_protein_dynamic`,height:420})}var Ft=`import { MSAViewer } from 'react-msaview'
 
 import { globinMSA, globinTree } from './generatedData'
 
@@ -1026,7 +1094,7 @@ export default function Globin() {
     />
   )
 }
-`;function Nt(){return(0,W.jsx)(O,{msa:lt,colorScheme:`nucleotide`,height:400})}var Pt=`import { MSAViewer } from 'react-msaview'
+`;function It(){return(0,B.jsx)(k,{msa:lt,colorScheme:`nucleotide`,height:400})}var Lt=`import { MSAViewer } from 'react-msaview'
 
 import { hammerheadMSA } from './generatedData'
 
@@ -1040,7 +1108,7 @@ import { hammerheadMSA } from './generatedData'
 export default function Hammerhead() {
   return <MSAViewer msa={hammerheadMSA} colorScheme="nucleotide" height={400} />
 }
-`;function Ft(){return(0,W.jsx)(O,{msa:Re,tree:ze,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:320})}var It=`import { MSAViewer } from 'react-msaview'
+`;function Rt(){return(0,B.jsx)(k,{msa:He,tree:Ue,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:320})}var zt=`import { MSAViewer } from 'react-msaview'
 
 import { histoneH4MSA, histoneH4Tree } from './generatedData'
 
@@ -1060,7 +1128,7 @@ export default function HistoneH4() {
     />
   )
 }
-`;function Lt(){return(0,W.jsx)(O,{msa:nt,tree:rt,gff:it,colorScheme:`clustalx_protein_dynamic`,height:420})}var Rt=`import { MSAViewer } from 'react-msaview'
+`;function Bt(){return(0,B.jsx)(k,{msa:nt,tree:rt,gff:it,colorScheme:`clustalx_protein_dynamic`,height:420})}var Vt=`import { MSAViewer } from 'react-msaview'
 
 import { hoxDomainsGFF, hoxMSA, hoxTree } from './generatedData'
 
@@ -1085,7 +1153,7 @@ export default function Hox() {
     />
   )
 }
-`;function zt(){return(0,W.jsx)(O,{msa:Ze,tree:Qe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:320})}var Bt=`import { MSAViewer } from 'react-msaview'
+`,Ht=[{start:31,end:96},{start:43,end:109},{start:95,end:100}];function Ut(){return(0,B.jsx)(k,{msa:K,tree:Qe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:360,columnTracks:[{id:`disulfides`,name:`Disulfide bonds`,kind:`arc`,arcs:Ht,color:`#b8860b`,row:`Human`,height:40}]})}var Wt=`import { MSAViewer } from 'react-msaview'
 
 import { insulinMSA, insulinTree } from './generatedData'
 
@@ -1095,6 +1163,18 @@ import { insulinMSA, insulinTree } from './generatedData'
 // relativeTo="Human" the B and A regions render mostly as dots while the
 // C-peptide region fills with letters — conservation mapping onto which parts
 // survive into the functional hormone. Built by scripts/examples-gen.
+//
+// The arcs are the three disulfide bonds, taken from the UniProt P01308 feature
+// table and placed on the human row's residues. Two of them vault the whole
+// C-peptide: B7-A7 and B19-A20 are what hold the mature hormone together once
+// the peptide between them is cut out, so the arcs answer the question the dots
+// raise — how a protein survives losing its middle.
+const disulfides = [
+  { start: 31, end: 96 }, // B7-A7, interchain
+  { start: 43, end: 109 }, // B19-A20, interchain
+  { start: 95, end: 100 }, // A6-A11, within the A chain
+]
+
 export default function Insulin() {
   return (
     <MSAViewer
@@ -1102,11 +1182,90 @@ export default function Insulin() {
       tree={insulinTree}
       relativeTo="Human"
       colorScheme="clustalx_protein_dynamic"
-      height={320}
+      height={360}
+      columnTracks={[
+        {
+          id: 'disulfides',
+          name: 'Disulfide bonds',
+          kind: 'arc',
+          arcs: disulfides,
+          color: '#b8860b',
+          row: 'Human',
+          height: 40,
+        },
+      ]}
     />
   )
 }
-`;function Vt(){return(0,W.jsx)(O,{msa:se,colorScheme:`nucleotide`,height:500})}var Ht=`import { MSAViewer } from 'react-msaview'
+`,Y={generatedBy:`scripts/examples-gen/contacts.mjs`,description:`Inter-domain residue contacts of autoinhibited human Src: every C-beta pair under 8 A whose two residues sit in different annotated regions of the SRC_HUMAN row. A residue touching its own neighbours says nothing about how the domains pack, and that is nearly every contact in the structure.`,pdb:`2SRC`,chain:`A`,accession:`P12931`,row:`SRC_HUMAN`,cutoffAngstroms:8,counts:{"Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail":22,"SH2 - C-terminal tail":19,"SH3 - Ser-Thr/Tyr_kinase_cat_dom":8,"SH2 - Ser-Thr/Tyr_kinase_cat_dom":8},residueMappings:[{row:`SRC_HUMAN`,accession:`P12931`,structure:{id:`2SRC`,kind:`experimental`,asymId:`A`,url:`https://files.rcsb.org/download/2SRC.cif`},segments:[{rowStart:86,rowEnd:536,structStart:2,structEnd:452}],unobserved:[[2,2]],rowLength:536,generated:{by:`sifts`,date:`2026-09-10`}}],contacts:[{start:96,end:292,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:97,end:292,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:98,end:289,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:98,end:290,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:98,end:292,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:98,end:293,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:99,end:290,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:99,end:292,pair:`SH3 - Ser-Thr/Tyr_kinase_cat_dom`},{start:157,end:527,pair:`SH2 - C-terminal tail`},{start:158,end:527,pair:`SH2 - C-terminal tail`},{start:159,end:371,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:159,end:520,pair:`SH2 - C-terminal tail`},{start:159,end:527,pair:`SH2 - C-terminal tail`},{start:160,end:323,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:163,end:368,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:163,end:400,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:163,end:401,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:163,end:402,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:164,end:400,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:167,end:400,pair:`SH2 - Ser-Thr/Tyr_kinase_cat_dom`},{start:181,end:527,pair:`SH2 - C-terminal tail`},{start:182,end:528,pair:`SH2 - C-terminal tail`},{start:188,end:530,pair:`SH2 - C-terminal tail`},{start:203,end:531,pair:`SH2 - C-terminal tail`},{start:204,end:529,pair:`SH2 - C-terminal tail`},{start:204,end:530,pair:`SH2 - C-terminal tail`},{start:204,end:531,pair:`SH2 - C-terminal tail`},{start:205,end:530,pair:`SH2 - C-terminal tail`},{start:205,end:531,pair:`SH2 - C-terminal tail`},{start:205,end:533,pair:`SH2 - C-terminal tail`},{start:206,end:530,pair:`SH2 - C-terminal tail`},{start:217,end:533,pair:`SH2 - C-terminal tail`},{start:218,end:533,pair:`SH2 - C-terminal tail`},{start:218,end:534,pair:`SH2 - C-terminal tail`},{start:220,end:534,pair:`SH2 - C-terminal tail`},{start:364,end:523,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:367,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:367,end:522,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:367,end:523,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:368,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:370,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:371,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:371,end:520,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:371,end:522,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:374,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:494,end:522,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:515,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:516,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:516,end:520,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:517,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:517,end:520,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:517,end:521,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:517,end:526,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:518,end:519,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:518,end:520,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:518,end:521,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`},{start:518,end:522,pair:`Ser-Thr/Tyr_kinase_cat_dom - C-terminal tail`}]},Gt=Y.residueMappings,Kt=e=>e.includes(`SH2`)&&e.includes(`tail`)?`#e15759`:e.includes(`tail`)?`#f28e2b`:e.includes(`SH3`)?`#59a14f`:`#4e79a7`;function qt(){return(0,B.jsx)(k,{msa:w,tree:O,gff:j,colorScheme:`clustalx_protein_dynamic`,height:520,residueMappings:Gt,columnTracks:[{id:`contacts`,name:`Domain contacts (2SRC)`,kind:`arc`,arcs:Y.contacts.map(({start:e,end:t,pair:n})=>({start:e,end:t,color:Kt(n)})),row:`SRC_HUMAN`,height:60}]})}var Jt=`import { MSAViewer } from 'react-msaview'
+
+import { kinaseDomainsGFF, kinaseMSA, kinaseTree } from './exampleData'
+import structure from './kinaseStructure.json'
+
+import type { ResidueMapping } from 'react-msaview'
+
+// The same Src-family kinases as the domain example, with the domain boxes and
+// a contact map over them. The boxes say the family is SH3 + SH2 + kinase; the
+// arcs say how those three pack, which is the mechanism: autoinhibited Src
+// folds its C-terminal tail back so phospho-Tyr527 binds its own SH2 domain,
+// and the kinase stays shut until that bond is broken. Four arcs land on 527
+// from the SH2 domain — the clamp, drawn as what it is, a pair of positions.
+//
+// Contacts are C-beta pairs under 8 A in PDB 2SRC, mapped to UniProt numbering
+// through SIFTS and filtered to pairs that join two different domains (data and
+// provenance in kinaseStructure.json, built by scripts/examples-gen/contacts.mjs).
+// They are placed on the SRC_HUMAN row, so the viewer projects them onto the
+// alignment's columns and every other row keeps its own gaps.
+//
+// That same file carries the SIFTS correspondence the arcs were derived
+// through, as a \`residueMappings\` layer. Nothing in this page consumes it --
+// there is no structure viewer here -- but a host that has one can ask
+// model.structureResidue('SRC_HUMAN', 527) and get 2SRC residue 443 back
+// instead of guessing, which is the point of writing it down rather than
+// throwing it away after computing the arcs.
+// A JSON import widens every literal to \`string\` and every pair to \`number[]\`,
+// so this is where a generated file becomes typed data. It is generated by a
+// committed script that verifies the numbering it writes, which is what makes
+// the assertion honest rather than a wish.
+const residueMappings = structure.residueMappings as ResidueMapping[]
+
+const color = (pair: string) => {
+  if (pair.includes('SH2') && pair.includes('tail')) {
+    return '#e15759'
+  }
+  if (pair.includes('tail')) {
+    return '#f28e2b'
+  }
+  return pair.includes('SH3') ? '#59a14f' : '#4e79a7'
+}
+
+export default function KinaseContacts() {
+  return (
+    <MSAViewer
+      msa={kinaseMSA}
+      tree={kinaseTree}
+      gff={kinaseDomainsGFF}
+      colorScheme="clustalx_protein_dynamic"
+      height={520}
+      residueMappings={residueMappings}
+      columnTracks={[
+        {
+          id: 'contacts',
+          name: 'Domain contacts (2SRC)',
+          kind: 'arc',
+          arcs: structure.contacts.map(({ start, end, pair }) => ({
+            start,
+            end,
+            color: color(pair),
+          })),
+          row: 'SRC_HUMAN',
+          height: 60,
+        },
+      ]}
+    />
+  )
+}
+`;function Yt(){return(0,B.jsx)(k,{msa:se,colorScheme:`nucleotide`,height:500})}var Xt=`import { MSAViewer } from 'react-msaview'
 
 import { lysineMSA } from './exampleData'
 
@@ -1116,7 +1275,7 @@ import { lysineMSA } from './exampleData'
 export default function LargeTree() {
   return <MSAViewer msa={lysineMSA} colorScheme="nucleotide" height={500} />
 }
-`,Y=`https://jbrowse.org/genomes/multiple_sequence_alignments`;function Ut(){return(0,W.jsx)(O,{msaFilehandle:{uri:`${Y}/pfam-cov2.stock`,locationType:`UriLocation`},gffFilehandle:{uri:`${Y}/pfam-cov2-domains.gff`,locationType:`UriLocation`},colorScheme:`maeditor`,height:550})}var Wt=`import { MSAViewer } from 'react-msaview'
+`,X=`https://jbrowse.org/genomes/multiple_sequence_alignments`;function Zt(){return(0,B.jsx)(k,{msaFilehandle:{uri:`${X}/pfam-cov2.stock`,locationType:`UriLocation`},gffFilehandle:{uri:`${X}/pfam-cov2-domains.gff`,locationType:`UriLocation`},colorScheme:`maeditor`,height:550})}var Qt=`import { MSAViewer } from 'react-msaview'
 
 const BASE = 'https://jbrowse.org/genomes/multiple_sequence_alignments'
 
@@ -1139,7 +1298,7 @@ export default function LoadFromUrl() {
     />
   )
 }
-`,Gt=H(function(){let[e]=(0,U.useState)(()=>D().create({type:`MsaView`,height:550,colWidth:16,rowHeight:20,data:{msa:T,tree:j}})),t=q(e);return(0,W.jsx)(`div`,{ref:t,children:(0,W.jsx)(E,{model:e})})}),Kt=`import { useState } from 'react'
+`,$t=R(function(){let[e]=(0,z.useState)(()=>D().create({type:`MsaView`,height:550,colWidth:16,rowHeight:20,data:{msa:T,tree:A}})),t=q(e);return(0,B.jsx)(`div`,{ref:t,children:(0,B.jsx)(E,{model:e})})}),en=`import { useState } from 'react'
 
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
@@ -1172,7 +1331,7 @@ const ModelApi = observer(function () {
 })
 
 export default ModelApi
-`;function qt(){return(0,W.jsx)(O,{msa:De,tree:Oe,gff:ke,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:500})}var Jt=`import { MSAViewer } from 'react-msaview'
+`;function tn(){return(0,B.jsx)(k,{msa:je,tree:Me,gff:Ne,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:500})}var nn=`import { MSAViewer } from 'react-msaview'
 
 import { myd88DomainsGFF, myd88MSA, myd88Tree } from './generatedData'
 
@@ -1198,7 +1357,7 @@ export default function Myd88() {
     />
   )
 }
-`,Yt=[{slug:`covid`,label:`SARS-CoV-2`},{slug:`zika`,label:`Zika`},{slug:`ebola`,label:`Ebola`},{slug:`measles`,label:`Measles`},{slug:`rsv-a`,label:`RSV-A`}];function Xt(){let[e,t]=(0,U.useState)(`zika`),n=`https://jbrowse.org/demos/nextstrain/${e}`;return(0,W.jsxs)(`div`,{children:[(0,W.jsxs)(`label`,{children:[`Pathogen`,` `,(0,W.jsx)(`select`,{value:e,onChange:e=>{t(e.target.value)},children:Yt.map(e=>(0,W.jsx)(`option`,{value:e.slug,children:e.label},e.slug))})]}),(0,W.jsx)(O,{treeFilehandle:{uri:`${n}/${e}.nwk`,locationType:`UriLocation`},msaFilehandle:{uri:`${n}/${e}_msa.fasta`,locationType:`UriLocation`},colorScheme:`nucleotide`,treeAreaWidth:300,height:600},e)]})}var Zt=`import { useState } from 'react'
+`,rn=[{slug:`covid`,label:`SARS-CoV-2`},{slug:`zika`,label:`Zika`},{slug:`ebola`,label:`Ebola`},{slug:`measles`,label:`Measles`},{slug:`rsv-a`,label:`RSV-A`}];function an(){let[e,t]=(0,z.useState)(`zika`),n=`https://jbrowse.org/demos/nextstrain/${e}`;return(0,B.jsxs)(`div`,{children:[(0,B.jsxs)(`label`,{children:[`Pathogen`,` `,(0,B.jsx)(`select`,{value:e,onChange:e=>{t(e.target.value)},children:rn.map(e=>(0,B.jsx)(`option`,{value:e.slug,children:e.label},e.slug))})]}),(0,B.jsx)(k,{treeFilehandle:{uri:`${n}/${e}.nwk`,locationType:`UriLocation`},msaFilehandle:{uri:`${n}/${e}_msa.fasta`,locationType:`UriLocation`},colorScheme:`nucleotide`,treeAreaWidth:300,height:600},e)]})}var on=`import { useState } from 'react'
 
 import { MSAViewer } from 'react-msaview'
 
@@ -1254,7 +1413,7 @@ export default function Nextstrain() {
     </div>
   )
 }
-`;function Qt(){return(0,W.jsx)(O,{msa:at,tree:ot,gff:st,colorScheme:`clustalx_protein_dynamic`,height:500})}var $t=`import { MSAViewer } from 'react-msaview'
+`;function sn(){return(0,B.jsx)(k,{msa:at,tree:ot,gff:st,colorScheme:`clustalx_protein_dynamic`,height:500})}var cn=`import { MSAViewer } from 'react-msaview'
 
 import { nlrp1DomainsGFF, nlrp1MSA, nlrp1Tree } from './generatedData'
 
@@ -1289,7 +1448,7 @@ export default function Nlrp1() {
     />
   )
 }
-`;function en(){return(0,W.jsx)(O,{msa:te,colorScheme:`jbrowse_dna`,height:300})}var tn=`import { MSAViewer } from 'react-msaview'
+`;function ln(){return(0,B.jsx)(k,{msa:te,colorScheme:`jbrowse_dna`,height:300})}var un=`import { MSAViewer } from 'react-msaview'
 
 import { nucleotideMSA } from './exampleData'
 
@@ -1300,7 +1459,7 @@ export default function NucleotideAlignment() {
     <MSAViewer msa={nucleotideMSA} colorScheme="jbrowse_dna" height={300} />
   )
 }
-`;function nn(){return(0,W.jsx)(O,{msa:Fe,tree:Ie,gff:Le,colorScheme:`clustalx_protein_dynamic`,height:420})}var rn=`import { MSAViewer } from 'react-msaview'
+`;function dn(){return(0,B.jsx)(k,{msa:ze,tree:Be,gff:Ve,colorScheme:`clustalx_protein_dynamic`,height:420})}var fn=`import { MSAViewer } from 'react-msaview'
 
 import { opsinDomainsGFF, opsinMSA, opsinTree } from './generatedData'
 
@@ -1323,7 +1482,7 @@ export default function Opsins() {
     />
   )
 }
-`;function an(){return(0,W.jsx)(O,{msa:Ge,tree:Ke,gff:qe,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var on=`import { MSAViewer } from 'react-msaview'
+`;function pn(){return(0,B.jsx)(k,{msa:U,tree:W,gff:G,relativeTo:`Human`,colorScheme:`clustalx_protein_dynamic`,height:480})}var mn=`import { MSAViewer } from 'react-msaview'
 
 import { p53DomainsGFF, p53MSA, p53Tree } from './generatedData'
 
@@ -1348,7 +1507,115 @@ export default function P53() {
     />
   )
 }
-`;function sn(){return(0,W.jsx)(O,{msa:He,tree:Ue,gff:We,colorScheme:`clustalx_protein_dynamic`,height:440})}var cn=`import { MSAViewer } from 'react-msaview'
+`,Z={generatedBy:`scripts/examples-gen/clinvar.mjs`,description:`Distinct missense alleles at each residue of TP53 that ClinVar classifies as pathogenic or likely pathogenic, on NM_000546. One entry per residue of the Human row, position 1 first. A count is how many different substitutions are on record there, not how many patients carry one -- ClinVar counts alleles, and a residue saturates once every substitution reachable by a single base change has been reported.`,source:`https://www.ncbi.nlm.nih.gov/clinvar/`,query:`TP53[gene] AND "missense variant"[molecular consequence]`,classifications:[`Pathogenic`,`Likely pathogenic`,`Pathogenic/Likely pathogenic`],retrieved:`2026-09-10`,gene:`TP53`,transcript:`NM_000546`,row:`Human`,alleles:253,residuesHit:104,max:8,counts:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,2,4,3,0,6,0,0,0,0,0,0,0,0,0,0,1,2,1,5,0,0,2,2,3,1,1,4,0,0,2,0,0,2,0,3,0,0,0,1,0,0,0,6,2,0,0,1,1,3,6,2,0,1,0,2,1,1,0,0,2,0,0,2,1,3,0,3,3,1,3,5,1,3,0,0,0,0,0,0,0,0,1,0,0,4,3,1,1,1,0,1,0,0,0,0,0,3,0,0,0,0,0,0,0,3,2,1,1,0,1,0,3,0,0,0,0,0,0,0,0,0,0,0,3,0,4,0,2,4,6,2,3,5,2,0,4,5,4,1,6,2,1,2,0,1,3,0,0,0,2,1,0,0,0,0,0,2,3,3,0,1,4,1,3,6,0,2,1,1,3,0,3,8,3,1,0,2,2,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,5,0,0,0,1,1,0,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]};function hn(){return(0,B.jsx)(k,{msa:U,tree:W,gff:G,colorScheme:`clustalx_protein_dynamic`,relativeTo:`Human`,height:480,columnTracks:[{id:`clinvar`,name:`ClinVar pathogenic`,kind:`bar`,values:Z.counts,max:Z.max,color:`#c0392b`,row:Z.row}]})}var gn=`import { MSAViewer } from 'react-msaview'
+
+import { p53DomainsGFF, p53MSA, p53Tree } from './generatedData'
+import clinvar from './p53ClinVar.json'
+
+// Three answers to "which part of this protein matters", from three different
+// places, stacked on the same columns.
+//
+// The conservation track is computed from the alignment below it: where this
+// family has not changed. The domain boxes come from InterPro: what the parts
+// are called. The red bars come from ClinVar and are the one thing the
+// alignment cannot know — where changing the protein is known to cause disease.
+// 94% of them fall inside the DNA-binding domain, and the smaller cluster
+// around residue 337 is the tetramerization domain.
+//
+// The viewer computes none of it. \`row\` puts the counts on the human sequence's
+// residues, so they land on the right columns whatever the gaps do, and \`max\`
+// sets which count draws full height. Data and provenance in p53ClinVar.json,
+// built by scripts/examples-gen/clinvar.mjs.
+export default function P53ClinVar() {
+  return (
+    <MSAViewer
+      msa={p53MSA}
+      tree={p53Tree}
+      gff={p53DomainsGFF}
+      colorScheme="clustalx_protein_dynamic"
+      relativeTo="Human"
+      height={480}
+      columnTracks={[
+        {
+          id: 'clinvar',
+          name: 'ClinVar pathogenic',
+          kind: 'bar',
+          values: clinvar.counts,
+          max: clinvar.max,
+          color: '#c0392b',
+          row: clinvar.row,
+        },
+      ]}
+    />
+  )
+}
+`;function _n(){let[e,t]=(0,z.useState)(!1),[n,r]=(0,z.useState)(!0),[i,a]=(0,z.useState)(`clustalx_protein_dynamic`);return(0,B.jsxs)(`div`,{children:[(0,B.jsxs)(H,{direction:`row`,spacing:1,sx:{mb:1,flexWrap:`wrap`},children:[(0,B.jsx)(F,{variant:n?`contained`:`outlined`,size:`small`,onClick:()=>{r(e=>!e)},children:`Diff vs human`}),(0,B.jsx)(F,{variant:`outlined`,size:`small`,onClick:()=>{t(e=>!e)},children:e?`Collapse`:`Expand`}),(0,B.jsx)(F,{variant:`outlined`,size:`small`,onClick:()=>{a(e=>e===`clustalx_protein_dynamic`?`maeditor`:`clustalx_protein_dynamic`)},children:`Color scheme`})]}),(0,B.jsx)(k,{msa:K,colorScheme:i,relativeTo:n?`Human`:void 0,height:e?560:300,drawTree:!1,autoTreeAreaWidth:!0})]})}var vn=`import { useState } from 'react'
+
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import { MSAViewer } from 'react-msaview'
+
+import { insulinMSA } from './generatedData'
+
+// A purpose-built page usually wants less than the standalone app shows, and
+// wants its own controls on what is left. Every toggle here is a prop: the
+// viewer follows them on the mounted model, so flipping one costs nothing and
+// re-fetches nothing, and none of it needs the model API.
+//
+// \`drawTree={false}\` with \`autoTreeAreaWidth\` is the pairing to reach for when
+// there is no tree to draw — the gutter shrinks to the labels instead of
+// reserving its full default width for a phylogeny that never appears.
+export default function PanelControls() {
+  const [expanded, setExpanded] = useState(false)
+  const [diff, setDiff] = useState(true)
+  const [scheme, setScheme] = useState('clustalx_protein_dynamic')
+  return (
+    <div>
+      <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap' }}>
+        <Button
+          variant={diff ? 'contained' : 'outlined'}
+          size="small"
+          onClick={() => {
+            setDiff(d => !d)
+          }}
+        >
+          Diff vs human
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => {
+            setExpanded(e => !e)
+          }}
+        >
+          {expanded ? 'Collapse' : 'Expand'}
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => {
+            setScheme(s =>
+              s === 'clustalx_protein_dynamic'
+                ? 'maeditor'
+                : 'clustalx_protein_dynamic',
+            )
+          }}
+        >
+          Color scheme
+        </Button>
+      </Stack>
+      <MSAViewer
+        msa={insulinMSA}
+        colorScheme={scheme}
+        relativeTo={diff ? 'Human' : undefined}
+        height={expanded ? 560 : 300}
+        drawTree={false}
+        autoTreeAreaWidth
+      />
+    </div>
+  )
+}
+`;function yn(){return(0,B.jsx)(k,{msa:Ke,tree:qe,gff:Je,colorScheme:`clustalx_protein_dynamic`,height:440})}var bn=`import { MSAViewer } from 'react-msaview'
 
 import { prestinDomainsGFF, prestinMSA, prestinTree } from './generatedData'
 
@@ -1374,7 +1641,7 @@ export default function Prestin() {
     />
   )
 }
-`,ln=H(function(){let[e]=(0,U.useState)(()=>D().create({type:`MsaView`,height:500,data:{msa:T,tree:j}})),t=q(e);return(0,W.jsxs)(`div`,{children:[(0,W.jsxs)(K,{direction:`row`,spacing:1,sx:{mb:1,flexWrap:`wrap`},children:[(0,W.jsx)(R,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(e.colWidth+2)},children:`Wider columns`}),(0,W.jsx)(R,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(Math.max(1,e.colWidth-2))},children:`Narrower columns`}),(0,W.jsx)(R,{variant:`outlined`,size:`small`,onClick:()=>{e.setRowHeight(e.rowHeight+2)},children:`Taller rows`}),(0,W.jsx)(R,{variant:`outlined`,size:`small`,onClick:()=>{e.fit()},children:`Fit to view`})]}),(0,W.jsx)(`div`,{ref:t,children:(0,W.jsx)(E,{model:e})})]})}),un=`import { useState } from 'react'
+`,xn=R(function(){let[e]=(0,z.useState)(()=>D().create({type:`MsaView`,height:500,data:{msa:T,tree:A}})),t=q(e);return(0,B.jsxs)(`div`,{children:[(0,B.jsxs)(H,{direction:`row`,spacing:1,sx:{mb:1,flexWrap:`wrap`},children:[(0,B.jsx)(F,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(e.colWidth+2)},children:`Wider columns`}),(0,B.jsx)(F,{variant:`outlined`,size:`small`,onClick:()=>{e.setColWidth(Math.max(1,e.colWidth-2))},children:`Narrower columns`}),(0,B.jsx)(F,{variant:`outlined`,size:`small`,onClick:()=>{e.setRowHeight(e.rowHeight+2)},children:`Taller rows`}),(0,B.jsx)(F,{variant:`outlined`,size:`small`,onClick:()=>{e.fit()},children:`Fit to view`})]}),(0,B.jsx)(`div`,{ref:t,children:(0,B.jsx)(E,{model:e})})]})}),Sn=`import { useState } from 'react'
 
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
@@ -1443,7 +1710,7 @@ const ProgrammaticControl = observer(function () {
 })
 
 export default ProgrammaticControl
-`;function dn(){return(0,W.jsx)(O,{msa:ee,tree:re,gff:ae,colorScheme:`clustalx_protein_dynamic`,height:500})}var X=`import { MSAViewer } from 'react-msaview'
+`;function Cn(){return(0,B.jsx)(k,{msa:w,tree:O,gff:j,colorScheme:`clustalx_protein_dynamic`,height:500})}var wn=`import { MSAViewer } from 'react-msaview'
 
 import { kinaseDomainsGFF, kinaseMSA, kinaseTree } from './exampleData'
 
@@ -1463,7 +1730,7 @@ export default function RealDomains() {
     />
   )
 }
-`,fn=H(function(){let[e]=(0,U.useState)(()=>D().create({type:`MsaView`,height:500,data:{msa:T,tree:j}})),t=q(e);return(0,W.jsxs)(`div`,{children:[(0,W.jsxs)(K,{direction:`row`,spacing:2,sx:{mb:1,flexWrap:`wrap`},children:[(0,W.jsx)(P,{control:(0,W.jsx)(V,{checked:e.showBranchLen,onChange:t=>{e.setShowBranchLen(t.target.checked)}}),label:`Branch lengths`}),(0,W.jsx)(P,{control:(0,W.jsx)(V,{checked:e.labelsAlignRight,onChange:t=>{e.setLabelsAlignRight(t.target.checked)}}),label:`Align labels right`}),(0,W.jsx)(P,{control:(0,W.jsx)(V,{checked:e.drawNodeBubbles,onChange:t=>{e.setDrawNodeBubbles(t.target.checked)}}),label:`Node bubbles`}),(0,W.jsx)(P,{control:(0,W.jsx)(V,{checked:e.drawTree,onChange:t=>{e.setDrawTree(t.target.checked)}}),label:`Show tree`})]}),(0,W.jsx)(`div`,{ref:t,children:(0,W.jsx)(E,{model:e})})]})}),pn=`import { useState } from 'react'
+`,Tn=R(function(){let[e]=(0,z.useState)(()=>D().create({type:`MsaView`,height:500,data:{msa:T,tree:A}})),t=q(e);return(0,B.jsxs)(`div`,{children:[(0,B.jsxs)(H,{direction:`row`,spacing:2,sx:{mb:1,flexWrap:`wrap`},children:[(0,B.jsx)(P,{control:(0,B.jsx)(L,{checked:e.showBranchLen,onChange:t=>{e.setShowBranchLen(t.target.checked)}}),label:`Branch lengths`}),(0,B.jsx)(P,{control:(0,B.jsx)(L,{checked:e.labelsAlignRight,onChange:t=>{e.setLabelsAlignRight(t.target.checked)}}),label:`Align labels right`}),(0,B.jsx)(P,{control:(0,B.jsx)(L,{checked:e.drawNodeBubbles,onChange:t=>{e.setDrawNodeBubbles(t.target.checked)}}),label:`Node bubbles`}),(0,B.jsx)(P,{control:(0,B.jsx)(L,{checked:e.drawTree,onChange:t=>{e.setDrawTree(t.target.checked)}}),label:`Show tree`})]}),(0,B.jsx)(`div`,{ref:t,children:(0,B.jsx)(E,{model:e})})]})}),En=`import { useState } from 'react'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Stack from '@mui/material/Stack'
@@ -1541,7 +1808,7 @@ const TreeOptions = observer(function () {
 })
 
 export default TreeOptions
-`;function mn(){return(0,W.jsx)(O,{msa:ct,colorScheme:`nucleotide`,height:450})}var hn=`import { MSAViewer } from 'react-msaview'
+`;function Dn(){return(0,B.jsx)(k,{msa:ct,colorScheme:`nucleotide`,height:450})}var On=`import { MSAViewer } from 'react-msaview'
 
 import { trnaMSA } from './generatedData'
 
@@ -1555,7 +1822,7 @@ import { trnaMSA } from './generatedData'
 export default function Trna() {
   return <MSAViewer msa={trnaMSA} colorScheme="nucleotide" height={450} />
 }
-`;function gn(){return(0,W.jsx)(O,{msa:T,tree:j,colorScheme:`maeditor`,height:550})}var _n=`import { MSAViewer } from 'react-msaview'
+`;function kn(){return(0,B.jsx)(k,{msa:T,tree:A,colorScheme:`maeditor`,height:550})}var An=`import { MSAViewer } from 'react-msaview'
 
 import { proteinMSA, proteinTree } from './exampleData'
 
@@ -1572,4 +1839,4 @@ export default function ZeroConfig() {
     />
   )
 }
-`,vn=[`Getting started`,`API & control`,`Protein domains`,`Conservation & diffing`,`Phylogeny`,`RNA structure`,`Genes & DNA`],Z=e=>e.toLowerCase().replace(/[^\w\s-]/g,``).trim().replace(/\s+/g,`-`),Q=[{name:`Zero-config viewer`,category:`Getting started`,description:`The simplest usage: pass alignment + tree text as strings to MSAViewer.`,Component:gn,source:_n},{name:`Nucleotide alignment`,category:`Getting started`,description:`A DNA alignment with no tree, using a nucleotide color scheme.`,Component:en,source:tn},{name:`Load from URL`,category:`Getting started`,description:`Fetch a remote Stockholm alignment plus an InterProScan domain GFF.`,Component:Ut,source:Wt},{name:`Model API`,category:`API & control`,description:`Create the model yourself with MSAModelF and render it with MSAView.`,Component:Gt,source:Kt},{name:`Programmatic control`,category:`API & control`,description:`Drive the viewer by calling model actions from buttons.`,Component:ln,source:un},{name:`Tracks from data`,category:`API & control`,description:`Draw a number you computed per residue as a track, through the columnTracks prop.`,Component:yt,source:bt},{name:`Color schemes`,category:`API & control`,description:`Switch color schemes at runtime via model.setColorSchemeName.`,Component:ht,source:gt},{name:`Tree options`,category:`API & control`,description:`Toggle branch lengths, label alignment, node bubbles, and the tree panel.`,Component:fn,source:pn},{name:`Protein domains`,category:`Protein domains`,description:`Overlay InterProScan domain annotations from an inline GFF3 string.`,Component:Ct,source:wt},{name:`Real domains (Src-family kinases)`,category:`Protein domains`,description:`A real Src-family kinase family (SRC, FYN, LCK, ...) with its tree and real InterProScan annotations — the signature SH3 + SH2 + kinase domains generated by react-msaview-cli interproscan.`,Component:dn,source:X},{name:`Domain architecture (p53)`,category:`Protein domains`,description:`p53 with its InterProScan domains overlaid — the central DNA-binding domain (where most cancer mutations fall) forms the bulk of the protein, flanked by the short N-terminal transactivation motifs, with the reference diff showing as dots in the unannotated linkers.`,Component:an,source:on},{name:`Domain loss across orthologs (NLRP1)`,category:`Protein domains`,description:`Twelve NLRP1 orthologs that share a six-domain core but differ at the N terminus: the PYD is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish. The core domains sit up to 391 residues apart between rows yet land within 2 alignment columns — which is why the overlay is column-locked and not drawn per-protein.`,Component:Qt,source:$t},{name:`One conserved domain (Hox homeodomain)`,category:`Protein domains`,description:`Hox transcription factors are wildly divergent except for the ~60-residue homeodomain they all share — the InterProScan overlay marks the one block that stays conserved across the family.`,Component:Lt,source:Rt},{name:`Color vision (opsin duplications)`,category:`Protein domains`,description:`Vertebrate opsins sorted by class (rhodopsins vs cone opsins) with a real InterProScan 7TM-GPCR domain overlay — a color-vision duplication history.`,Component:nn,source:rn},{name:`Channel family (aquaporins)`,category:`Protein domains`,description:`The aquaporin (MIP) family: all share one six-transmembrane domain (InterProScan overlay) but the tree splits water-only channels from the "_glycerol" aquaglyceroporins — grouping by function.`,Component:ft,source:pt},{name:`Reference dots (MyD88 across bats)`,category:`Conservation & diffing`,description:`MyD88 across mammals incl. bats, diffed against human (relativeTo) so identical residues show as dots and lineage-specific changes stand out, beside the inferred tree.`,Component:qt,source:Jt},{name:`Host range (ACE2 / SARS-CoV-2 receptor)`,category:`Conservation & diffing`,description:`ACE2 across mammals (bats, civet, pangolin, resistant rodents) diffed against human, so the few spike-contact positions that drive viral susceptibility stand out.`,Component:ut,source:dt},{name:`Extreme conservation (histone H4)`,category:`Conservation & diffing`,description:`Histone H4 across eukaryotes diffed against human — one of the most conserved proteins known renders almost entirely as dots, the opposite extreme from a fast-evolving protein.`,Component:Ft,source:It},{name:`Processing vs conservation (insulin)`,category:`Conservation & diffing`,description:`Preproinsulin across vertebrates diffed against human — the B and A chains of mature insulin stay conserved (dots) while the cleaved-out C-peptide drifts (letters).`,Component:zt,source:Bt},{name:`Gene duplication (globin family)`,category:`Phylogeny`,description:`Hemoglobin alpha/beta, myoglobin, neuroglobin and cytoglobin — the inferred tree groups by globin type, not species: the signature of gene duplication.`,Component:jt,source:Mt},{name:`Deep phylogeny (cytochrome c)`,category:`Phylogeny`,description:`Cytochrome c from mammals to plants and fungi in one short alignment — the inferred tree spans over a billion years of evolution.`,Component:xt,source:St},{name:`Convergent evolution (prestin / echolocation)`,category:`Phylogeny`,description:`Prestin (SLC26A5): echolocating bats and toothed whales convergently evolved shared changes, so the "_echo" species cluster together against the species tree.`,Component:sn,source:cn},{name:`Tree of life (EF-1α / EF-Tu)`,category:`Phylogeny`,description:`Elongation factor across all three domains of life (bacteria, archaea, eukaryotes) in one alignment — a universal protein used to probe the deepest splits in the tree of life.`,Component:Tt,source:Et},{name:`Large tree (Lysine riboswitch)`,category:`Phylogeny`,description:`A real ~60 sequence ncRNA family (Rfam Lysine riboswitch) with its full inferred tree — shows the canvas tiling holds up past toy data.`,Component:Vt,source:Ht},{name:`Nextstrain pathogens`,category:`Phylogeny`,description:`Real Nextstrain phylogenies (SARS-CoV-2, Zika, Ebola, measles, RSV-A) reconstructed into a gap-free reference-coordinate MSA — no aligner needed since Nextstrain tips are stored as mutations against the reference.`,Component:Xt,source:Zt},{name:`RNA secondary structure (tRNA)`,category:`RNA structure`,description:`Transfer RNA (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a secondary-structure track, coloring the acceptor stem and D/anticodon/T arms by base-pairing above the alignment.`,Component:mn,source:hn},{name:`Ribozyme structure (hammerhead)`,category:`RNA structure`,description:`Hammerhead ribozyme (Rfam RF00008), a small self-cleaving catalytic RNA: the SS_cons track shows its three-way helix junction colored by base-pairing — a catalytic-RNA counterpoint to the tRNA cloverleaf.`,Component:Nt,source:Pt},{name:`Gene loss + exon structure (F12 in cetaceans)`,category:`Genes & DNA`,description:`A DNA coding alignment of coagulation factor XII with its 14-exon gene structure overlaid (each exon the same color across species). F12 is intact in land mammals and the manatee but disabled in cetaceans by a shared frameshift in exon 3 + premature stops — pseudogenization read straight off the nucleotides, which a protein alignment cannot show.`,Component:Dt,source:Ot},{name:`Gene arrow map (gggenes-style)`,category:`Genes & DNA`,description:`A colinear gene cluster across 6 genomes with each gene drawn as a strand-directed arrow (gggenes-style), overlaid on a real alignment. Genes keep one color down the columns; two are inverted (the arrow flips) and one is deleted (its columns gap out) — yet every gene stays column-aligned, because the arrows are anchored to alignment columns rather than each genome’s own coordinate. Synthetic demo data.`,Component:kt,source:At}],$;function yn(){return $||=Promise.all([B(()=>import(`./core.DxpvqkrT.js`),__vite__mapDeps([0,1])),B(()=>import(`./engine-oniguruma.D2u1fNOb.js`),__vite__mapDeps([2,1])),B(()=>import(`./wasm.BnjxR4X6.js`),[]),B(()=>import(`./tsx.udAQXfEw.js`),[]),B(()=>import(`./github-light.EUqPIrTm.js`),[])]).then(([e,t,n,r,i])=>e.createHighlighterCore({themes:[i.default],langs:[r.default],engine:t.createOnigurumaEngine(n)})),$}function bn({source:e}){let[t,n]=(0,U.useState)(``);return(0,U.useEffect)(()=>{let t=!1;return yn().then(r=>{t||n(r.codeToHtml(e,{lang:`tsx`,theme:`github-light`}))},()=>{}),()=>{t=!0}},[e]),t?(0,W.jsx)(M,{sx:{overflowX:`auto`,border:1,borderColor:`divider`,borderRadius:1,"& pre":{m:0,p:2,fontSize:13,fontFamily:`monospace`}},dangerouslySetInnerHTML:{__html:t}}):(0,W.jsx)(z,{variant:`outlined`,sx:{p:2,overflowX:`auto`,backgroundColor:`action.hover`},children:(0,W.jsx)(M,{component:`pre`,sx:{m:0,fontSize:13,fontFamily:`monospace`,whiteSpace:`pre`},children:e})})}function xn(){let e=()=>{let e=typeof window>`u`?``:decodeURIComponent(window.location.hash.replace(/^#/,``));return Q.some(t=>Z(t.name)===e)?e:``},[t,n]=(0,U.useState)(()=>e()||Z(Q[0].name));return(0,U.useEffect)(()=>{let t=()=>{let t=e();t&&n(t)};return window.addEventListener(`hashchange`,t),()=>{window.removeEventListener(`hashchange`,t)}},[]),[t,e=>{let t=Z(e);n(t),window.history.replaceState(null,``,`#${t}`)}]}function Sn({text:e}){let[t,n]=(0,U.useState)(!1);return(0,W.jsx)(R,{size:`small`,variant:`outlined`,onClick:()=>{navigator.clipboard.writeText(e).then(()=>{n(!0),setTimeout(()=>{n(!1)},1500)},()=>{})},children:t?`Copied`:`Copy`})}function Cn({sidebarHeader:e,sidebarFooter:n,height:r}){let[i,a]=xn(),o=Q.find(e=>Z(e.name)===i)??Q[0],{Component:s}=o;return(0,W.jsxs)(M,{sx:{display:`flex`,height:r},children:[(0,W.jsxs)(M,{component:`nav`,sx:{width:260,flexShrink:0,borderRight:1,borderColor:`divider`,overflowY:`auto`},children:[e,vn.map(e=>(0,W.jsx)(fe,{dense:!0,subheader:(0,W.jsx)(I,{disableSticky:!0,children:e}),children:Q.filter(t=>t.category===e).map(e=>(0,W.jsx)(Ee,{selected:Z(e.name)===i,onClick:()=>{a(e.name)},children:(0,W.jsx)(F,{primary:e.name})},e.name))},e)),n]}),(0,W.jsxs)(M,{sx:{flex:1,overflowY:`auto`,p:3},children:[(0,W.jsx)(t,{variant:`h5`,gutterBottom:!0,children:o.name}),(0,W.jsx)(t,{variant:`body2`,color:`text.secondary`,gutterBottom:!0,children:o.description}),(0,W.jsx)(z,{variant:`outlined`,sx:{p:2,my:2},children:(0,W.jsx)(s,{})}),(0,W.jsxs)(M,{sx:{display:`flex`,alignItems:`center`,justifyContent:`space-between`,mb:1},children:[(0,W.jsx)(t,{variant:`subtitle2`,children:`Source`}),(0,W.jsx)(Sn,{text:o.source})]}),(0,W.jsx)(bn,{source:o.source})]})]})}var wn=ce();function Tn(){return(0,W.jsx)(ue,{theme:wn,children:(0,W.jsx)(Cn,{height:`100%`,sidebarHeader:(0,W.jsx)(M,{sx:{p:2},children:(0,W.jsx)(t,{variant:`subtitle2`,color:`text.secondary`,children:`Live examples`})})})})}export{Tn as default};
+`,jn=[`Getting started`,`API & control`,`Protein domains`,`Conservation & diffing`,`Phylogeny`,`RNA structure`,`Genes & DNA`],Q=e=>e.toLowerCase().replace(/[^\w\s-]/g,``).trim().replace(/\s+/g,`-`),$=[{name:`Zero-config viewer`,category:`Getting started`,description:`The simplest usage: pass alignment + tree text as strings to MSAViewer.`,Component:kn,source:An},{name:`Nucleotide alignment`,category:`Getting started`,description:`A DNA alignment with no tree, using a nucleotide color scheme.`,Component:ln,source:un},{name:`Load from URL`,category:`Getting started`,description:`Fetch a remote Stockholm alignment plus an InterProScan domain GFF.`,Component:Zt,source:Qt},{name:`Model API`,category:`API & control`,description:`Create the model yourself with MSAModelF and render it with MSAView.`,Component:$t,source:en},{name:`Controls from props`,category:`API & control`,description:`Drive the mounted viewer from props — a diff toggle, an expand button, a color-scheme switch — with no model API and no remount, which is what a purpose-built page embedding one panel usually needs. Pairs drawTree={false} with autoTreeAreaWidth so the gutter shrinks to the labels instead of reserving room for a tree that is not drawn.`,Component:_n,source:vn},{name:`Programmatic control`,category:`API & control`,description:`Drive the viewer by calling model actions from buttons.`,Component:xn,source:Sn},{name:`Tracks from data`,category:`API & control`,description:`Draw a number you computed per residue as a track, through the columnTracks prop.`,Component:bt,source:xt},{name:`Color schemes`,category:`API & control`,description:`Switch color schemes at runtime via model.setColorSchemeName.`,Component:gt,source:_t},{name:`Tree options`,category:`API & control`,description:`Toggle branch lengths, label alignment, node bubbles, and the tree panel.`,Component:Tn,source:En},{name:`Protein domains`,category:`Protein domains`,description:`Overlay InterProScan domain annotations from an inline GFF3 string.`,Component:Et,source:Dt},{name:`Real domains (Src-family kinases)`,category:`Protein domains`,description:`A real Src-family kinase family (SRC, FYN, LCK, ...) with its tree and real InterProScan annotations — the signature SH3 + SH2 + kinase domains generated by react-msaview-cli interproscan.`,Component:Cn,source:wn},{name:`Domain packing (Src autoinhibition)`,category:`Protein domains`,description:`The same Src-family kinases, with a contact map from the solved structure over the domain boxes. The boxes say the family is SH3 + SH2 + kinase; the arcs say how the three pack, which is the mechanism — the C-terminal tail folds back so phospho-Tyr527 binds the protein’s own SH2 domain and clamps the kinase shut. C-beta pairs under 8 Å in PDB 2SRC, mapped to UniProt numbering through SIFTS and filtered to the pairs that join two different domains.`,Component:qt,source:Jt},{name:`Domain architecture (p53)`,category:`Protein domains`,description:`p53 with its InterProScan domains overlaid — the central DNA-binding domain (where most cancer mutations fall) forms the bulk of the protein, flanked by the short N-terminal transactivation motifs, with the reference diff showing as dots in the unannotated linkers.`,Component:pn,source:mn},{name:`Where the disease variants are (p53 + ClinVar)`,category:`Protein domains`,description:`Three answers to "which part of this protein matters", from three different places, on the same columns: conservation computed from the alignment, domain boxes from InterPro, and — as a data layer the viewer computes nothing for — the pathogenic missense variants ClinVar has on record per residue. 94% of them land inside the DNA-binding domain, with a second small cluster on the tetramerization domain.`,Component:hn,source:gn},{name:`Domain loss across orthologs (NLRP1)`,category:`Protein domains`,description:`Twelve NLRP1 orthologs that share a six-domain core but differ at the N terminus: the PYD is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish. The core domains sit up to 391 residues apart between rows yet land within 2 alignment columns — which is why the overlay is column-locked and not drawn per-protein.`,Component:sn,source:cn},{name:`One conserved domain (Hox homeodomain)`,category:`Protein domains`,description:`Hox transcription factors are wildly divergent except for the ~60-residue homeodomain they all share — the InterProScan overlay marks the one block that stays conserved across the family.`,Component:Bt,source:Vt},{name:`Color vision (opsin duplications)`,category:`Protein domains`,description:`Vertebrate opsins sorted by class (rhodopsins vs cone opsins) with a real InterProScan 7TM-GPCR domain overlay — a color-vision duplication history.`,Component:dn,source:fn},{name:`Channel family (aquaporins)`,category:`Protein domains`,description:`The aquaporin (MIP) family: all share one six-transmembrane domain (InterProScan overlay) but the tree splits water-only channels from the "_glycerol" aquaglyceroporins — grouping by function.`,Component:pt,source:mt},{name:`Reference dots (MyD88 across bats)`,category:`Conservation & diffing`,description:`MyD88 across mammals incl. bats, diffed against human (relativeTo) so identical residues show as dots and lineage-specific changes stand out, beside the inferred tree.`,Component:tn,source:nn},{name:`Host range (ACE2 / SARS-CoV-2 receptor)`,category:`Conservation & diffing`,description:`ACE2 across mammals (bats, civet, pangolin, resistant rodents) diffed against human, so the few spike-contact positions that drive viral susceptibility stand out.`,Component:dt,source:ft},{name:`Extreme conservation (histone H4)`,category:`Conservation & diffing`,description:`Histone H4 across eukaryotes diffed against human — one of the most conserved proteins known renders almost entirely as dots, the opposite extreme from a fast-evolving protein.`,Component:Rt,source:zt},{name:`Processing vs conservation (insulin)`,category:`Conservation & diffing`,description:`Preproinsulin across vertebrates diffed against human — the B and A chains of mature insulin stay conserved (dots) while the cleaved-out C-peptide drifts (letters). The arc track carries the three disulfide bonds from UniProt: two of them vault the C-peptide, which is what holds the hormone together after that piece is cut out.`,Component:Ut,source:Wt},{name:`Gene duplication (globin family)`,category:`Phylogeny`,description:`Hemoglobin alpha/beta, myoglobin, neuroglobin and cytoglobin — the inferred tree groups by globin type, not species: the signature of gene duplication.`,Component:Pt,source:Ft},{name:`Deep phylogeny (cytochrome c)`,category:`Phylogeny`,description:`Cytochrome c from mammals to plants and fungi in one short alignment — the inferred tree spans over a billion years of evolution.`,Component:wt,source:Tt},{name:`Convergent evolution (prestin / echolocation)`,category:`Phylogeny`,description:`Prestin (SLC26A5): echolocating bats and toothed whales convergently evolved shared changes, so the "_echo" species cluster together against the species tree.`,Component:yn,source:bn},{name:`Tree of life (EF-1α / EF-Tu)`,category:`Phylogeny`,description:`Elongation factor across all three domains of life (bacteria, archaea, eukaryotes) in one alignment — a universal protein used to probe the deepest splits in the tree of life.`,Component:Ot,source:kt},{name:`Large tree (Lysine riboswitch)`,category:`Phylogeny`,description:`A real ~60 sequence ncRNA family (Rfam Lysine riboswitch) with its full inferred tree — shows the canvas tiling holds up past toy data.`,Component:Yt,source:Xt},{name:`Nextstrain pathogens`,category:`Phylogeny`,description:`Real Nextstrain phylogenies (SARS-CoV-2, Zika, Ebola, measles, RSV-A) reconstructed into a gap-free reference-coordinate MSA — no aligner needed since Nextstrain tips are stored as mutations against the reference.`,Component:an,source:on},{name:`RNA secondary structure (tRNA)`,category:`RNA structure`,description:`Transfer RNA (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a secondary-structure track, coloring the acceptor stem and D/anticodon/T arms by base-pairing above the alignment.`,Component:Dn,source:On},{name:`Pseudoknot (coronavirus frameshift element)`,category:`RNA structure`,description:`The frameshifting stimulation element that coronaviruses use to reach ORF1b (Rfam RF00507), across all four genera. Its pseudoknot crosses stem 1 instead of nesting inside it, which is why the seed writes it as the WUSS letter pair A/a and why the arc track shows something the bracket track cannot: arcs that cross.`,Component:St,source:Ct},{name:`Ribozyme structure (hammerhead)`,category:`RNA structure`,description:`Hammerhead ribozyme (Rfam RF00008), a small self-cleaving catalytic RNA: the SS_cons track shows its three-way helix junction colored by base-pairing — a catalytic-RNA counterpoint to the tRNA cloverleaf.`,Component:It,source:Lt},{name:`Gene loss + exon structure (F12 in cetaceans)`,category:`Genes & DNA`,description:`A DNA coding alignment of coagulation factor XII with its 14-exon gene structure overlaid (each exon the same color across species). F12 is intact in land mammals and the manatee but disabled in cetaceans by a shared frameshift in exon 3 + premature stops — pseudogenization read straight off the nucleotides, which a protein alignment cannot show.`,Component:At,source:jt},{name:`Gene arrow map (gggenes-style)`,category:`Genes & DNA`,description:`A colinear gene cluster across 6 genomes with each gene drawn as a strand-directed arrow (gggenes-style), overlaid on a real alignment. Genes keep one color down the columns; two are inverted (the arrow flips) and one is deleted (its columns gap out) — yet every gene stays column-aligned, because the arrows are anchored to alignment columns rather than each genome’s own coordinate. Synthetic demo data.`,Component:Mt,source:Nt}],Mn;function Nn(){return Mn||=Promise.all([I(()=>import(`./core.DxpvqkrT.js`),__vite__mapDeps([0,1])),I(()=>import(`./engine-oniguruma.D2u1fNOb.js`),__vite__mapDeps([2,1])),I(()=>import(`./wasm.BnjxR4X6.js`),[]),I(()=>import(`./tsx.udAQXfEw.js`),[]),I(()=>import(`./github-light.EUqPIrTm.js`),[])]).then(([e,t,n,r,i])=>e.createHighlighterCore({themes:[i.default],langs:[r.default],engine:t.createOnigurumaEngine(n)})),Mn}function Pn({source:e}){let[t,n]=(0,z.useState)(``);return(0,z.useEffect)(()=>{let t=!1;return Nn().then(r=>{t||n(r.codeToHtml(e,{lang:`tsx`,theme:`github-light`}))},()=>{}),()=>{t=!0}},[e]),t?(0,B.jsx)(M,{sx:{overflowX:`auto`,border:1,borderColor:`divider`,borderRadius:1,"& pre":{m:0,p:2,fontSize:13,fontFamily:`monospace`}},dangerouslySetInnerHTML:{__html:t}}):(0,B.jsx)(_e,{variant:`outlined`,sx:{p:2,overflowX:`auto`,backgroundColor:`action.hover`},children:(0,B.jsx)(M,{component:`pre`,sx:{m:0,fontSize:13,fontFamily:`monospace`,whiteSpace:`pre`},children:e})})}function Fn(){let e=()=>{let e=typeof window>`u`?``:decodeURIComponent(window.location.hash.replace(/^#/,``));return $.some(t=>Q(t.name)===e)?e:``},[t,n]=(0,z.useState)(()=>e()||Q($[0].name));return(0,z.useEffect)(()=>{let t=()=>{let t=e();t&&n(t)};return window.addEventListener(`hashchange`,t),()=>{window.removeEventListener(`hashchange`,t)}},[]),[t,e=>{let t=Q(e);n(t),window.history.replaceState(null,``,`#${t}`)}]}function In({text:e}){let[t,n]=(0,z.useState)(!1);return(0,B.jsx)(F,{size:`small`,variant:`outlined`,onClick:()=>{navigator.clipboard.writeText(e).then(()=>{n(!0),setTimeout(()=>{n(!1)},1500)},()=>{})},children:t?`Copied`:`Copy`})}function Ln({sidebarHeader:e,sidebarFooter:n,height:r}){let[i,a]=Fn(),o=$.find(e=>Q(e.name)===i)??$[0],{Component:s}=o;return(0,B.jsxs)(M,{sx:{display:`flex`,height:r},children:[(0,B.jsxs)(M,{component:`nav`,sx:{width:260,flexShrink:0,borderRight:1,borderColor:`divider`,overflowY:`auto`},children:[e,jn.map(e=>(0,B.jsx)(fe,{dense:!0,subheader:(0,B.jsx)(he,{disableSticky:!0,children:e}),children:$.filter(t=>t.category===e).map(e=>(0,B.jsx)(Ae,{selected:Q(e.name)===i,onClick:()=>{a(e.name)},children:(0,B.jsx)(me,{primary:e.name})},e.name))},e)),n]}),(0,B.jsxs)(M,{sx:{flex:1,overflowY:`auto`,p:3},children:[(0,B.jsx)(t,{variant:`h5`,gutterBottom:!0,children:o.name}),(0,B.jsx)(t,{variant:`body2`,color:`text.secondary`,gutterBottom:!0,children:o.description}),(0,B.jsx)(_e,{variant:`outlined`,sx:{p:2,my:2},children:(0,B.jsx)(s,{})}),(0,B.jsxs)(M,{sx:{display:`flex`,alignItems:`center`,justifyContent:`space-between`,mb:1},children:[(0,B.jsx)(t,{variant:`subtitle2`,children:`Source`}),(0,B.jsx)(In,{text:o.source})]}),(0,B.jsx)(Pn,{source:o.source})]})]})}var Rn=ce();function zn(){return(0,B.jsx)(ue,{theme:Rn,children:(0,B.jsx)(Ln,{height:`100%`,sidebarHeader:(0,B.jsx)(M,{sx:{p:2},children:(0,B.jsx)(t,{variant:`subtitle2`,color:`text.secondary`,children:`Live examples`})})})})}export{zn as default};
