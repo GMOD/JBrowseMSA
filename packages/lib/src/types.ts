@@ -165,6 +165,16 @@ export interface RowResidue {
   seqPos: number
 }
 
+/**
+ * One loaded document that the snapshot leaves behind, and how big it is.
+ * `what` names it the way the import form does, since that is where the reader
+ * would go to load it differently.
+ */
+export interface UnshareableData {
+  what: 'alignment' | 'tree' | 'annotations' | 'row metadata'
+  bytes: number
+}
+
 // the overlay annotation itself lives in msa-parsers, alongside the adapters
 // that build it. TidyDomainAnnotation is its former name, kept because
 // downstream plugins name it in their emitted declarations.

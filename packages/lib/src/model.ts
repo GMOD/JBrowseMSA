@@ -42,6 +42,7 @@ import {
   defaultSubFeatureRows,
   labelReferenceFontSize,
   maxCellSize,
+  maxInlineSnapshotBytes,
   maxNeighborJoiningRows,
   minColWidth,
   minLetterColWidth,
@@ -114,6 +115,7 @@ import type {
   ResolvedHighlight,
   RowResidue,
   StructureResidue,
+  UnshareableData,
 } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -138,11 +140,9 @@ const PSEUDOKNOT_ARC = '#e15759'
 
 // a data track over this size stays in the live model but leaves the snapshot,
 // the same rule DataModel applies to an inline document
-const maxColumnTrackSnapshotBytes = 50_000
-
 function smallColumnTracks(tracks?: ColumnTrackSpec[]) {
   const kept = tracks?.filter(
-    t => JSON.stringify(t).length <= maxColumnTrackSnapshotBytes,
+    t => JSON.stringify(t).length <= maxInlineSnapshotBytes,
   )
   return kept?.length ? { columnTracks: kept } : {}
 }
@@ -817,6 +817,18 @@ function stateModelFactory() {
       setTreeMetadata(result: string) {
         self.data.setTreeMetadata(result)
       },
+
+      /**
+       * #action
+       * keep the GFF text the way the alignment and the tree are kept, rather
+       * than only its parsed annotations. The annotations are volatile, so a
+       * file opened from disk used to leave no trace in the snapshot at all --
+       * not the text, and not the filehandle, which is cleared once a blob is
+       * read. An autorun parses this back into annotations.
+       */
+      setGFF(result: string) {
+        self.data.setGFF(result)
+      },
     }))
 
     .views(self => ({
@@ -896,6 +908,37 @@ function stateModelFactory() {
       },
       get noDomains() {
         return self.annotations.length === 0
+      },
+
+      /**
+       * #getter
+       * the loaded documents this view's own snapshot cannot carry, largest
+       * first. A file opened from disk or pasted in becomes inline text, and
+       * DataModel drops an inline document past `maxInlineSnapshotBytes`
+       * rather than put megabytes of sequence into a session or a URL.
+       *
+       * Dropping it is right. Dropping it silently is what makes a copied link
+       * open an empty viewer, so the header says so and the standalone app
+       * stops rewriting the address bar while this is non-empty. A document
+       * fetched from a URL never appears here whatever its size: the snapshot
+       * keeps the filehandle and refetches through it.
+       */
+      get unshareableData(): UnshareableData[] {
+        const { data } = self
+        return (
+          [
+            ['alignment', data.msa, self.msaFilehandle],
+            ['tree', data.tree, self.treeFilehandle],
+            ['annotations', data.gff, self.gffFilehandle],
+            ['row metadata', data.treeMetadata, self.treeMetadataFilehandle],
+          ] as const
+        )
+          .flatMap(([what, text, filehandle]) =>
+            !filehandle && text && text.length > maxInlineSnapshotBytes
+              ? [{ what, bytes: text.length }]
+              : [],
+          )
+          .sort((a, b) => b.bytes - a.bytes)
       },
       menuItems() {
         return []
@@ -2849,11 +2892,13 @@ function stateModelFactory() {
           }),
         )
 
-        // gffFilehandle carries overlay annotations
+        // gffFilehandle carries overlay annotations. It loads into data.gff and
+        // the autorun above parses it, so there is one parse path whether the
+        // text arrived from a file or from a snapshot
         loadOnFilehandleChange({
           getFilehandle: () => self.gffFilehandle,
           onLoad: text => {
-            self.applyGFFText(text)
+            self.setGFF(text)
           },
           clearFilehandle: () => {
             self.setGFFFilehandle(undefined)

@@ -69,3 +69,10 @@ export const defaultDrawNodeBubbles = true
 // real algorithm change rather than a port, and why capping is the honest answer
 // -- NJ on thousands of sequences is the wrong tool however fast it runs.
 export const maxNeighborJoiningRows = 500
+
+// The largest inline document the snapshot carries. Past this a pasted or
+// locally-opened file stays in the live model and leaves the snapshot, since a
+// session or a shared URL holding megabytes of sequence is not a link anyone
+// can send. `unshareableData` reads the same number, so what the viewer warns
+// about and what the snapshot drops cannot drift apart.
+export const maxInlineSnapshotBytes = 50_000

@@ -15,7 +15,16 @@ const App = types
         autorun(
           () => {
             const url = new URL(window.document.URL)
-            url.searchParams.set('data', JSON.stringify(getSnapshot(self)))
+            // A document too large for the snapshot leaves it (see
+            // `unshareableData`), so writing the snapshot here would replace a
+            // working URL with one that opens an empty viewer. Drop the param
+            // instead: the address bar then says what the header says, which is
+            // that this view is not in the link.
+            if (self.msaview.unshareableData.length > 0) {
+              url.searchParams.delete('data')
+            } else {
+              url.searchParams.set('data', JSON.stringify(getSnapshot(self)))
+            }
             window.history.replaceState(null, '', url.toString())
           },
           { delay: 1000 },

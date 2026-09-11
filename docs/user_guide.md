@@ -175,9 +175,14 @@ options to copy them and to show/hide gaps.
 
 ## Sharing and exporting
 
-- **Share a session** by copying the page URL — the full view state (data,
-  colors, zoom, collapsed clades) is encoded in it, so a collaborator who opens
-  the link sees exactly what you see.
+- **Share a session** by copying the page URL — the view state (colors, zoom,
+  collapsed clades, highlights) is encoded in it, so a collaborator who opens
+  the link sees exactly what you see. The data travels too, but only up to about
+  50 kB of it: a file you opened from your own computer is inlined into the
+  link, and anything larger than that is left out rather than turned into a
+  megabyte-long URL. The header says **Not in the link** when that happens.
+  Serve the file over HTTP and open it by URL instead, and the link carries the
+  address rather than the file, at any size.
 - **Point at something** before you share. The snapshot carries labeled
   highlights: a residue of a named sequence, a column range, or a set of rows,
   each with a note that draws beside it. They are written into the view state
