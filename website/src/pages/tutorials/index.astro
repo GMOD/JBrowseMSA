@@ -1,0 +1,39 @@
+---
+import Base from '../../layouts/Base.astro'
+import { tutorials } from '../../lib/tutorials.ts'
+
+const base = import.meta.env.BASE_URL
+---
+
+<Base
+  title="Tutorials — JBrowseMSA"
+  description="End-to-end walkthroughs that prepare the data outside the viewer: sequences to alignment to tree to annotations, ending on a link that opens the result."
+>
+  <article class="prose">
+    <h1>Tutorials</h1>
+    <p>
+      The viewer draws an alignment, a tree and whatever annotations you hand
+      it. Getting those three files is the part that takes the work, and it
+      happens outside the browser, in tools built for it. Each page below is one
+      continuous line of work — every step consumes what the step before
+      produced — and ends on a URL that opens the result in JBrowseMSA.
+    </p>
+    <p>
+      The <a href={`${base}/layers`}>layers reference</a> is the other half: how something
+      you computed — per-column values, labeled highlights, pairs of positions, a
+      structure correspondence — reaches the viewer as data rather than as a feature
+      the viewer had to grow.
+    </p>
+
+    <div class="cards">
+      {
+        tutorials.map(t => (
+          <a class="card" href={`${base}/tutorials/${t.slug}`}>
+            <h3>{t.title}</h3>
+            <p>{t.blurb}</p>
+          </a>
+        ))
+      }
+    </div>
+  </article>
+</Base>

@@ -17,6 +17,22 @@ canvas with a tiled rendering system for scalability.
 - `packages/r-msaview` — R htmlwidget package with ggtree/Biostrings/treeio
   interop
 
+## Tutorials
+
+`docs/tutorials/*.md` are reader-facing walkthroughs of the work that happens
+**outside** the viewer: sequences to alignment to tree to annotations, ending on
+a `?data=` URL that opens the result. A tutorial is one continuous line of work
+— each step consumes what the step before produced — and every command in it has
+been run, with the real numbers in the prose. The whole pipeline also lives in
+`docs/tutorials/scripts/build_<topic>.sh`, which `## Reproduce it end to end`
+curls.
+
+Adding one means a file there plus an entry in `website/src/lib/tutorials.ts`;
+`website/src/pages/tutorials/[slug].astro` globs the directory and `index.astro`
+reads the list. Prefer a tutorial over a viewer feature whenever the work is
+data preparation — see `viewer-not-analysis-tool` in the memory and
+`agent-docs/ideas/data-layers.md`.
+
 ## Architecture decisions
 
 - `packages/lib/src/model.ts` is a large MST model (~2000 lines). Do not attempt
