@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>A protein family from a list of accessions — JBrowseMSA</title>
+    <meta name="description" content="Twelve UniProt accessions to an alignment, a tree and Pfam domains, in four commands outside the viewer. Ends on a link that shows which lineages lost a domain.">
+    <link rel="canonical" href="https://gmod.org/JBrowseMSA/tutorials/protein_family/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230d233f'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='11' font-weight='bold' text-anchor='middle' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="JBrowseMSA">
+    <meta property="og:title" content="A protein family from a list of accessions — JBrowseMSA">
+    <meta property="og:description" content="Twelve UniProt accessions to an alignment, a tree and Pfam domains, in four commands outside the viewer. Ends on a link that shows which lineages lost a domain.">
+    <meta property="og:url" content="https://gmod.org/JBrowseMSA/tutorials/protein_family/">
+    <meta property="og:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="A protein family from a list of accessions — JBrowseMSA">
+    <meta name="twitter:description" content="Twelve UniProt accessions to an alignment, a tree and Pfam domains, in four commands outside the viewer. Ends on a link that shows which lineages lost a domain.">
+    <meta name="twitter:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
+  <link rel="stylesheet" href="/JBrowseMSA/_astro/Base.DWALGsgO.css"></head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/JBrowseMSA">JBrowseMSA</a>
+      <nav aria-label="Primary">
+        <a href="/JBrowseMSA">
+          Home
+        </a>
+        <div class="nav-group">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-docs">
+                  Docs
+                </button>
+                <ul class="nav-menu" id="nav-menu-docs">
+                  <li>
+                      <a href="/JBrowseMSA/guide">
+                        User guide
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/tutorials">
+                        Tutorials
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/embedding">
+                        Embedding
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/layers">
+                        Layers
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/r-package">
+                        R package
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/cli">
+                        CLI
+                      </a>
+                    </li>
+                </ul>
+              </div><div class="nav-group">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-showcase">
+                  Showcase
+                </button>
+                <ul class="nav-menu" id="nav-menu-showcase">
+                  <li>
+                      <a href="/JBrowseMSA/gallery">
+                        Gallery
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/examples">
+                        Examples
+                      </a>
+                    </li>
+                </ul>
+              </div>
+        <a href="/JBrowseMSA/demo/">
+          Standalone app
+        </a>
+      </nav>
+      <a class="github-icon" href="https://github.com/GMOD/JBrowseMSA" target="_blank" rel="noopener noreferrer" aria-label="GitHub"></a>
+    </header>
+    <main>
+      
+  <article class="prose">
+    <h1 id="a-protein-family-from-a-list-of-accessions">A protein family from a list of accessions</h1>
+<p>You have a gene and a question about it that one species cannot answer: which
+lineages kept a domain, and which lost it. This page starts from twelve UniProt
+accessions and ends with a link that opens the alignment, its tree and its Pfam
+domains in JBrowseMSA, with the missing domain visible as a gap in one column.
+Four commands, none of them run inside the viewer.</p>
+<h2 id="prerequisites">Prerequisites<a href="#prerequisites" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<ul>
+<li><code>curl</code></li>
+<li>ClustalW — <code>apt install clustalw</code> on Debian/Ubuntu, <code>brew install clustal-w</code>
+on macOS. It aligns and infers a tree, so it is the only aligner this page
+needs.</li>
+<li><a href="https://gmod.org/JBrowseMSA/cli">react-msaview-cli</a> —
+<code>npm install -g react-msaview-cli</code>, NodeJS v22+</li>
+</ul>
+<h2 id="where-the-data-comes-from">Where the data comes from<a href="#where-the-data-comes-from" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>Twelve NLRP1 orthologs, as UniProtKB holds them, with Pfam matches from InterPro
+release 110.0.</p>
+<ul>
+<li>One protein sequence per accession:
+<code>https://rest.uniprot.org/uniprotkb/Q9C000.fasta</code></li>
+<li>Precomputed Pfam matches for that accession:
+<code>https://www.ebi.ac.uk/interpro/api/entry/pfam/protein/uniprot/Q9C000/</code></li>
+</ul>
+<p>Nothing here is downloaded in bulk. Both endpoints serve one protein per
+request, and the whole family is twelve of each.</p>
+<h2 id="the-family">The family<a href="#the-family" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>NLRP1 is an inflammasome sensor. Every vertebrate ortholog shares the same core
+in the same order — a NACHT nucleotide-binding domain, a winged helix, a helical
+domain, then FIIND and CARD at the C terminus. What varies is the N terminus: a
+pyrin (PYD) death-fold domain that primates carry and rodents do not.</p>
+<p>That variation is the thing a single sequence cannot show you and an alignment
+can, provided the domains are drawn in the alignment’s coordinates rather than
+each protein’s own. The proteins here run from 1143 to 1537 residues, so residue
+328 means a different thing in every row.</p>
+<h2 id="1-name-the-rows">1. Name the rows<a href="#1-name-the-rows" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>One accession per line, and the label you want down the side of the viewer. The
+label travels all the way through: it becomes the FASTA defline, the tree tip,
+and the first column of the domain GFF.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Q9C000	Human</span></span>
+<span class="line"><span>H2QC06	Chimp</span></span>
+<span class="line"><span>A0A1D5QWR0	Rhesus</span></span>
+<span class="line"><span>A0A8I3MJ75	Dog</span></span>
+<span class="line"><span>A0ABM3YGI7	Hedgehog</span></span>
+<span class="line"><span>E1BNN6	Cow</span></span>
+<span class="line"><span>K9IW94	Pig</span></span>
+<span class="line"><span>A0A9L0RFW2	Horse</span></span>
+<span class="line"><span>Q2LKU9	Mouse</span></span>
+<span class="line"><span>D9I2G4	Rat</span></span>
+<span class="line"><span>A0ABM2XMM7	Hamster</span></span>
+<span class="line"><span>A0A386CAB9	Zebrafish</span></span></code></pre>
+<p>Save that as <code>accessions.tsv</code>. The separator is a tab, and a line starting with
+<code>#</code> is a comment, so the file can carry its own notes about why each row is in
+it.</p>
+<h2 id="2-fetch-the-sequences">2. Fetch the sequences<a href="#2-fetch-the-sequences" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># read each accession, write one FASTA record named by the label rather than</span></span>
+<span class="line"><span style="color:#6A737D"># the accession -- the label is what the viewer draws</span></span>
+<span class="line"><span style="color:#F97583">while</span><span style="color:#E1E4E8"> IFS</span><span style="color:#F97583">=</span><span style="color:#9ECBFF">$'</span><span style="color:#79B8FF">\t</span><span style="color:#9ECBFF">'</span><span style="color:#79B8FF"> read</span><span style="color:#79B8FF"> -r</span><span style="color:#9ECBFF"> accession</span><span style="color:#9ECBFF"> label</span><span style="color:#E1E4E8">; </span><span style="color:#F97583">do</span></span>
+<span class="line"><span style="color:#79B8FF">  printf</span><span style="color:#9ECBFF"> '>%s\n'</span><span style="color:#9ECBFF"> "</span><span style="color:#E1E4E8">$label</span><span style="color:#9ECBFF">"</span><span style="color:#F97583"> >></span><span style="color:#9ECBFF"> family.fasta</span></span>
+<span class="line"><span style="color:#B392F0">  curl</span><span style="color:#79B8FF"> -sf</span><span style="color:#9ECBFF"> "https://rest.uniprot.org/uniprotkb/</span><span style="color:#E1E4E8">$accession</span><span style="color:#9ECBFF">.fasta"</span><span style="color:#F97583"> |</span></span>
+<span class="line"><span style="color:#B392F0">    tail</span><span style="color:#79B8FF"> -n</span><span style="color:#9ECBFF"> +2</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> tr</span><span style="color:#79B8FF"> -d</span><span style="color:#9ECBFF"> '\n'</span><span style="color:#F97583"> >></span><span style="color:#9ECBFF"> family.fasta</span></span>
+<span class="line"><span style="color:#79B8FF">  printf</span><span style="color:#9ECBFF"> '\n'</span><span style="color:#F97583"> >></span><span style="color:#9ECBFF"> family.fasta</span></span>
+<span class="line"><span style="color:#F97583">done</span><span style="color:#F97583"> &#x3C;</span><span style="color:#E1E4E8"> accessions.tsv</span></span></code></pre>
+<p><code>tail -n +2</code> drops UniProt’s own defline, which carries the accession, the
+species and the protein name; <code>tr -d '\n'</code> unwraps the sequence onto one line.
+Check what you got before aligning it:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">awk</span><span style="color:#9ECBFF"> '/^>/{name=$0; next}{print name, length($0)}'</span><span style="color:#9ECBFF"> family.fasta</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>>Human 1473</span></span>
+<span class="line"><span>>Chimp 1471</span></span>
+<span class="line"><span>>Rhesus 1537</span></span>
+<span class="line"><span>>Dog 1432</span></span>
+<span class="line"><span>>Hedgehog 1360</span></span>
+<span class="line"><span>>Cow 1410</span></span>
+<span class="line"><span>>Pig 1294</span></span>
+<span class="line"><span>>Horse 1465</span></span>
+<span class="line"><span>>Mouse 1182</span></span>
+<span class="line"><span>>Rat 1218</span></span>
+<span class="line"><span>>Hamster 1143</span></span>
+<span class="line"><span>>Zebrafish 1355</span></span></code></pre>
+<p>Twelve records, all plausible lengths for a full-length NLRP1. A truncated
+fragment or a stray isoform shows up here as a length that does not belong, and
+it is much cheaper to catch now than to explain later as a gap in the figure.</p>
+<h2 id="3-align-them">3. Align them<a href="#3-align-them" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">clustalw</span><span style="color:#79B8FF"> -INFILE=family.fasta</span><span style="color:#79B8FF"> -ALIGN</span><span style="color:#79B8FF"> -TYPE=PROTEIN</span><span style="color:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#79B8FF">  -OUTPUT=FASTA</span><span style="color:#79B8FF"> -OUTFILE=family.afa</span></span></code></pre>
+<p>Under two seconds, and it reports <code>Alignment Score 258590</code> and 1666 columns —
+129 more than the longest input, which is the room the aligner made for
+insertions.</p>
+<p>ClustalW is progressive: fast, deterministic, no configuration, and good enough
+that the domain architecture below lands in the right columns. For a figure
+whose argument is the phylogeny rather than the domains, graduate to MAFFT or
+MUSCLE for the alignment and IQ-TREE or RAxML for the tree.</p>
+<h2 id="4-infer-a-tree">4. Infer a tree<a href="#4-infer-a-tree" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6A737D"># -TREE reads an existing alignment and writes neighbor-joining Newick</span></span>
+<span class="line"><span style="color:#B392F0">clustalw</span><span style="color:#79B8FF"> -INFILE=family.afa</span><span style="color:#79B8FF"> -TREE</span><span style="color:#79B8FF"> -TYPE=PROTEIN</span><span style="color:#79B8FF"> -OUTPUTTREE=phylip</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D"># ClustalW wraps the Newick across many lines; the viewer wants one string</span></span>
+<span class="line"><span style="color:#B392F0">tr</span><span style="color:#79B8FF"> -d</span><span style="color:#9ECBFF"> '[:space:]'</span><span style="color:#F97583"> &#x3C;</span><span style="color:#9ECBFF"> family.ph</span><span style="color:#F97583"> ></span><span style="color:#9ECBFF"> family.nwk</span></span></code></pre>
+<p>Read the result before trusting it:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>(((((Mouse:0.11672,Rat:0.11797):0.05644,Hamster:0.14779):0.05664,</span></span>
+<span class="line"><span>Zebrafish:0.56540):0.02478,Hedgehog:0.22128):0.01141,...</span></span></code></pre>
+<p>Zebrafish sits inside the rodents. It should be the outgroup, and its branch
+length is 0.56540 against 0.11 to 0.22 for everything else — the longest branch
+in the tree by a factor of three. A neighbor-joining tree pulls the longest
+branch towards whichever other branch is longest, which is long-branch
+attraction, and it is why the tree on this page is scaffolding for reading the
+alignment rather than a result.</p>
+<h2 id="5-ask-interpro-what-the-domains-are">5. Ask InterPro what the domains are<a href="#5-ask-interpro-what-the-domains-are" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>Every UniProtKB sequence already has its InterPro matches computed, so for
+accessions there is nothing to scan:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">react-msaview-cli</span><span style="color:#9ECBFF"> interpro</span><span style="color:#9ECBFF"> accessions.tsv</span><span style="color:#79B8FF"> -o</span><span style="color:#9ECBFF"> family-domains.gff</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>InterPro release 110.0; reading precomputed pfam matches...</span></span>
+<span class="line"><span>  [1/12] Q9C000: 9 pfam entries</span></span>
+<span class="line"><span>  ...</span></span>
+<span class="line"><span>12 fetched, 0 from /home/you/.cache/react-msaview-cli/interpro</span></span></code></pre>
+<p>About twenty seconds for twelve proteins, and the release number goes into the
+GFF header, so the coordinates in the figure are pinned to one InterPro version.
+Re-running answers from the disk cache and makes a single request.</p>
+<p>The other command, <code>react-msaview-cli interproscan</code>, submits sequences to the
+EBI job queue and waits about fifteen minutes. That is the right tool when the
+rows are a de novo assembly or predicted proteins that InterPro has never seen,
+and the wrong one whenever your rows are accessions.</p>
+<p>Count what came back before drawing it:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">grep</span><span style="color:#9ECBFF"> IPR004020</span><span style="color:#9ECBFF"> family-domains.gff</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> cut</span><span style="color:#79B8FF"> -f1</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Human</span></span>
+<span class="line"><span>Chimp</span></span>
+<span class="line"><span>Rhesus</span></span>
+<span class="line"><span>Dog</span></span>
+<span class="line"><span>Hedgehog</span></span></code></pre>
+<p>Five rows out of twelve carry the PYD, at residues 9-83 in each. That is the
+answer to the question this page started with, and everything below is about
+seeing it in place.</p>
+<h2 id="6-open-it">6. Open it<a href="#6-open-it" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>Three files now: <code>family.afa</code>, <code>family.nwk</code>, <code>family-domains.gff</code>. Drag them
+into the alignment, tree and annotation slots of the
+<a href="https://gmod.org/JBrowseMSA/demo/">import form</a> and the view comes up.</p>
+<p>That view is not shareable, though. A file opened from your own computer is
+carried inside the page URL, and an alignment this size does not fit, so the
+header will say <strong>Not in the link</strong>. To get a link, put the three files
+somewhere that serves them over HTTPS with CORS — a GitHub repo works, through
+<code>raw.githubusercontent.com</code> — and name the URLs instead:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "msaview"</span><span style="color:#E1E4E8">: {</span></span>
+<span class="line"><span style="color:#79B8FF">    "type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"MsaView"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "colWidth"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">2</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "rowHeight"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">22</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "colorSchemeName"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"clustalx_protein_dynamic"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">    "msaFilehandle"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"uri"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"https://example.org/family.afa"</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#79B8FF">    "treeFilehandle"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"uri"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"https://example.org/family.nwk"</span><span style="color:#E1E4E8"> },</span></span>
+<span class="line"><span style="color:#79B8FF">    "gffFilehandle"</span><span style="color:#E1E4E8">: { </span><span style="color:#79B8FF">"uri"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"https://example.org/family-domains.gff"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"><span style="color:#E1E4E8">  }</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>URL-encode that and hang it off the app as <code>?data=</code>, and the link carries the
+addresses rather than the files, at any size.
+<a href="https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A520%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A2%2C%22rowHeight%22%3A22%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D">Here is that link against a hosted copy of this family</a>.</p>
+<figure><a href="https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A520%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A2%2C%22rowHeight%22%3A22%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D"><img src="/JBrowseMSA/media/domain-loss.png" alt=""></a><figcaption>The twelve orthologs with their tree and their Pfam domains. The PYD boxes at
+the left end appear on five rows and nowhere else.</figcaption></figure>
+<h2 id="what-the-columns-did">What the columns did<a href="#what-the-columns-did" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>The NACHT domain is annotated in all twelve rows, and InterPro reports it at a
+different residue in each:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">grep</span><span style="color:#9ECBFF"> IPR007111</span><span style="color:#9ECBFF"> family-domains.gff</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> cut</span><span style="color:#79B8FF"> -f1,4,5</span></span></code></pre>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Human	328	497</span></span>
+<span class="line"><span>Hamster	93	258</span></span>
+<span class="line"><span>Mouse	134	301</span></span>
+<span class="line"><span>Zebrafish	258	428</span></span></code></pre>
+<p>Human 328 and hamster 93 are 235 residues apart. In the viewer both are drawn in
+alignment column 371, and mouse and zebrafish in column 372 — the same band,
+because the overlay projects each row’s residue coordinates through that row’s
+gaps before drawing. That projection is the reason the PYD gap reads as a gap:
+the five rows that carry the domain draw it in one place, and the seven that do
+not leave that place empty.</p>
+<h2 id="the-row-that-is-empty-for-another-reason">The row that is empty for another reason<a href="#the-row-that-is-empty-for-another-reason" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<p>Cow, hedgehog and zebrafish have no leucine-rich repeats called at all, while
+human has three and rhesus four:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">grep</span><span style="color:#9ECBFF"> IPR001611</span><span style="color:#9ECBFF"> family-domains.gff</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> cut</span><span style="color:#79B8FF"> -f1</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> sort</span><span style="color:#F97583"> |</span><span style="color:#B392F0"> uniq</span><span style="color:#79B8FF"> -c</span></span></code></pre>
+<p>An LRR region that draws blank can mean the protein has none, or that nobody
+annotated the ones it has — several of these rows are unreviewed entries whose
+gene models under-call. Zoomed out to whole-protein scale the two look
+identical. Zoom to base resolution and they separate: a row with residues under
+an unannotated stretch is not a row that is gap there.</p>
+<p>The PYD survives that test. In the rows without it the alignment is mostly gap
+under the human PYD, not residues without a call.</p>
+<h2 id="reproduce-it-end-to-end">Reproduce it end to end<a href="#reproduce-it-end-to-end" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">curl</span><span style="color:#79B8FF"> -O</span><span style="color:#9ECBFF"> https://raw.githubusercontent.com/GMOD/JBrowseMSA/main/docs/tutorials/scripts/build_protein_family.sh</span></span>
+<span class="line"><span style="color:#B392F0">bash</span><span style="color:#9ECBFF"> build_protein_family.sh</span></span></code></pre>
+<p>With no arguments it writes the accession list above and builds all three files
+beside it. Point it at your own list to do the same for another family:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#B392F0">bash</span><span style="color:#9ECBFF"> build_protein_family.sh</span><span style="color:#9ECBFF"> my-accessions.tsv</span><span style="color:#9ECBFF"> out/</span></span></code></pre>
+<h2 id="see-also">See also<a href="#see-also" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<ul>
+<li><a href="https://gmod.org/JBrowseMSA/cli">CLI</a></li>
+<li><a href="https://gmod.org/JBrowseMSA/guide">User guide</a></li>
+<li><a href="https://gmod.org/JBrowseMSA/layers">Data layers</a></li>
+</ul>
+<h2 id="references">References<a href="#references" class="heading-anchor" aria-hidden="true" tabindex="-1">#</a></h2>
+<ul>
+<li>Bateman A, et al. UniProt: the Universal Protein Knowledgebase in 2025.
+<em>Nucleic Acids Research</em> 53:D609-D617.</li>
+<li>Blum M, et al. InterPro: the protein sequence classification resource in 2025.
+<em>Nucleic Acids Research</em> 53:D444-D456.</li>
+<li>Larkin MA, et al. Clustal W and Clustal X version 2.0. <em>Bioinformatics</em>
+23:2947-2948.</li>
+</ul>
+  </article>
+
+    </main>
+    <footer class="site-footer">
+      <span>
+        react-msaview (JBrowseMSA) ·
+        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> · part of <a href="https://jbrowse.org">JBrowse</a>
+      </span>
+    </footer>
+    <script type="module">var e=[...document.querySelectorAll(`.site-header .nav-group-btn`)],t=e=>e.getAttribute(`aria-expanded`)===`true`,n=(e,t)=>{e.setAttribute(`aria-expanded`,t?`true`:`false`)},r=t=>{e.forEach(e=>{e!==t&&n(e,!1)})},i=e=>{r(e),n(e,!0)};e.forEach(e=>{let a=e.closest(`.nav-group`),o=e.getAttribute(`aria-controls`),s=o?[...document.querySelectorAll(`#${o} a`)]:[];e.addEventListener(`click`,()=>{t(e)?r():i(e)}),a instanceof HTMLElement&&(a.addEventListener(`keydown`,r=>{let a=document.activeElement===e,o=s.findIndex(e=>e===document.activeElement);r.key===`ArrowDown`?(r.preventDefault(),a?(i(e),s[0]?.focus()):o>=0&&s[Math.min(o+1,s.length-1)].focus()):r.key===`ArrowUp`&&o===0?(r.preventDefault(),e.focus()):r.key===`ArrowUp`&&o>0?(r.preventDefault(),s[o-1].focus()):r.key===`Home`&&o>=0?(r.preventDefault(),s[0].focus()):r.key===`End`&&o>=0?(r.preventDefault(),s[s.length-1].focus()):r.key===`Escape`&&t(e)&&(n(e,!1),e.focus())}),a.addEventListener(`focusout`,t=>{let r=t.relatedTarget;(!(r instanceof Node)||!a.contains(r))&&n(e,!1)}))}),document.addEventListener(`click`,e=>{(!(e.target instanceof Element)||!e.target.closest(`.site-header .nav-group`))&&r()}),document.addEventListener(`keydown`,e=>{e.key===`Escape`&&r()});</script></body>
+</html>

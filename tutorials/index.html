@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tutorials — JBrowseMSA</title>
+    <meta name="description" content="End-to-end walkthroughs that prepare the data outside the viewer: sequences to alignment to tree to annotations, ending on a link that opens the result.">
+    <link rel="canonical" href="https://gmod.org/JBrowseMSA/tutorials/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230d233f'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='11' font-weight='bold' text-anchor='middle' fill='white'%3EM%3C/text%3E%3C/svg%3E">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="JBrowseMSA">
+    <meta property="og:title" content="Tutorials — JBrowseMSA">
+    <meta property="og:description" content="End-to-end walkthroughs that prepare the data outside the viewer: sequences to alignment to tree to annotations, ending on a link that opens the result.">
+    <meta property="og:url" content="https://gmod.org/JBrowseMSA/tutorials/">
+    <meta property="og:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Tutorials — JBrowseMSA">
+    <meta name="twitter:description" content="End-to-end walkthroughs that prepare the data outside the viewer: sequences to alignment to tree to annotations, ending on a link that opens the result.">
+    <meta name="twitter:image" content="https://gmod.org/JBrowseMSA/media/within-protein-conservation.png">
+  <link rel="stylesheet" href="/JBrowseMSA/_astro/Base.DWALGsgO.css"></head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/JBrowseMSA">JBrowseMSA</a>
+      <nav aria-label="Primary">
+        <a href="/JBrowseMSA">
+          Home
+        </a>
+        <div class="nav-group active">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-docs">
+                  Docs
+                </button>
+                <ul class="nav-menu" id="nav-menu-docs">
+                  <li>
+                      <a href="/JBrowseMSA/guide">
+                        User guide
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/tutorials" class="active" aria-current="page">
+                        Tutorials
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/embedding">
+                        Embedding
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/layers">
+                        Layers
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/r-package">
+                        R package
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/cli">
+                        CLI
+                      </a>
+                    </li>
+                </ul>
+              </div><div class="nav-group">
+                <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls="nav-menu-showcase">
+                  Showcase
+                </button>
+                <ul class="nav-menu" id="nav-menu-showcase">
+                  <li>
+                      <a href="/JBrowseMSA/gallery">
+                        Gallery
+                      </a>
+                    </li><li>
+                      <a href="/JBrowseMSA/examples">
+                        Examples
+                      </a>
+                    </li>
+                </ul>
+              </div>
+        <a href="/JBrowseMSA/demo/">
+          Standalone app
+        </a>
+      </nav>
+      <a class="github-icon" href="https://github.com/GMOD/JBrowseMSA" target="_blank" rel="noopener noreferrer" aria-label="GitHub"></a>
+    </header>
+    <main>
+      
+  <article class="prose">
+    <h1>Tutorials</h1>
+    <p>
+      The viewer draws an alignment, a tree and whatever annotations you hand
+      it. Getting those three files is the part that takes the work, and it
+      happens outside the browser, in tools built for it. Each page below is one
+      continuous line of work — every step consumes what the step before
+      produced — and ends on a URL that opens the result in JBrowseMSA.
+    </p>
+    <p>
+      The <a href="/JBrowseMSA/layers">layers reference</a> is the other half: how something
+      you computed — per-column values, labeled highlights, pairs of positions, a
+      structure correspondence — reaches the viewer as data rather than as a feature
+      the viewer had to grow.
+    </p>
+
+    <div class="cards">
+      <a class="card" href="/JBrowseMSA/tutorials/protein_family">
+            <h3>A protein family from a list of accessions</h3>
+            <p>Twelve UniProt accessions to an alignment, a tree and Pfam domains, in four commands outside the viewer. Ends on a link that shows which lineages lost a domain.</p>
+          </a>
+    </div>
+  </article>
+
+    </main>
+    <footer class="site-footer">
+      <span>
+        react-msaview (JBrowseMSA) ·
+        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> · part of <a href="https://jbrowse.org">JBrowse</a>
+      </span>
+    </footer>
+    <script type="module">var e=[...document.querySelectorAll(`.site-header .nav-group-btn`)],t=e=>e.getAttribute(`aria-expanded`)===`true`,n=(e,t)=>{e.setAttribute(`aria-expanded`,t?`true`:`false`)},r=t=>{e.forEach(e=>{e!==t&&n(e,!1)})},i=e=>{r(e),n(e,!0)};e.forEach(e=>{let a=e.closest(`.nav-group`),o=e.getAttribute(`aria-controls`),s=o?[...document.querySelectorAll(`#${o} a`)]:[];e.addEventListener(`click`,()=>{t(e)?r():i(e)}),a instanceof HTMLElement&&(a.addEventListener(`keydown`,r=>{let a=document.activeElement===e,o=s.findIndex(e=>e===document.activeElement);r.key===`ArrowDown`?(r.preventDefault(),a?(i(e),s[0]?.focus()):o>=0&&s[Math.min(o+1,s.length-1)].focus()):r.key===`ArrowUp`&&o===0?(r.preventDefault(),e.focus()):r.key===`ArrowUp`&&o>0?(r.preventDefault(),s[o-1].focus()):r.key===`Home`&&o>=0?(r.preventDefault(),s[0].focus()):r.key===`End`&&o>=0?(r.preventDefault(),s[s.length-1].focus()):r.key===`Escape`&&t(e)&&(n(e,!1),e.focus())}),a.addEventListener(`focusout`,t=>{let r=t.relatedTarget;(!(r instanceof Node)||!a.contains(r))&&n(e,!1)}))}),document.addEventListener(`click`,e=>{(!(e.target instanceof Element)||!e.target.closest(`.site-header .nav-group`))&&r()}),document.addEventListener(`keydown`,e=>{e.key===`Escape`&&r()});</script></body>
+</html>
