@@ -64,6 +64,9 @@ stay written down so nobody re-derives them from scratch.
   generator is not worth the binaries.
 - [useWheelScroll's shared rAF flag](ideas/closed/usewheelscroll-shared-raf-flag.md)
   — a contended frame loses no drag delta, so there is nothing to fix.
+- [WebGL/GPU rendering for the MSA canvas](ideas/closed/webgl-rendering.md) —
+  measured: a glyph atlas ran 2-3x slower than `fillText`, and the raster tile
+  cache already makes zoom cost-independent of column width.
 
 Done and removed: duplicated FASTA defline parsing (now `splitFastaRecords` in
 `msa-parsers/src/msa/fastaRecords.ts`), `parseNewick` returning `any` (now a
