@@ -20,11 +20,6 @@ const HeaderStatusArea = observer(({ model }: { model: MsaViewModel }) => {
   return status ? (
     <Typography className={classes.margin}>
       <LoadingEllipses message={status.msg} component="span" />{' '}
-      {status.url ? (
-        <a href={status.url} target="_blank" rel="noreferrer">
-          (status)
-        </a>
-      ) : null}{' '}
       {status.onCancel ? (
         <Button size="small" onClick={() => status.onCancel?.()}>
           Cancel

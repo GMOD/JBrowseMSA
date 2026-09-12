@@ -4,6 +4,7 @@ import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
 import AccountTree from '@mui/icons-material/AccountTree'
 import { observer } from 'mobx-react'
 
+import { maxNeighborJoiningRows } from '../../constants.ts'
 import { treeSettingsMenuItems } from './settingsMenuItems.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -14,6 +15,7 @@ const TreeSettingsMenu = observer(function ({
   model: MsaViewModel
 }) {
   const { rows } = model
+  const tooManyRows = rows.length > maxNeighborJoiningRows
   return (
     <CascadingMenuButton
       data-testid="tree_settings_menu"
@@ -30,7 +32,13 @@ const TreeSettingsMenu = observer(function ({
                 type: 'subMenu' as const,
                 subMenu: [
                   {
-                    label: 'Calculate neighbor joining tree (BLOSUM62)',
+                    // the cap shows in the label rather than arriving as an
+                    // error after the click, since the click is what would
+                    // freeze the tab
+                    label: tooManyRows
+                      ? `Calculate neighbor joining tree (over ${maxNeighborJoiningRows} rows, use FastTree)`
+                      : 'Calculate neighbor joining tree (BLOSUM62)',
+                    disabled: tooManyRows,
                     onClick: () => {
                       try {
                         model.calculateNeighborJoiningTreeFromMSA()

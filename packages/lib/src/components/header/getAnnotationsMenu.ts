@@ -2,7 +2,7 @@ import { lazy } from 'react'
 
 import FilterAlt from '@mui/icons-material/FilterAlt'
 import FolderOpen from '@mui/icons-material/FolderOpen'
-import Search from '@mui/icons-material/Search'
+import MenuBook from '@mui/icons-material/MenuBook'
 import Sort from '@mui/icons-material/Sort'
 import Visibility from '@mui/icons-material/Visibility'
 
@@ -12,9 +12,8 @@ const FeatureFilterDialog = lazy(() => import('../dialogs/FeatureDialog.tsx'))
 const InterProScanFileDialog = lazy(
   () => import('../dialogs/InterProScanFileDialog.tsx'),
 )
-const InterProScanDialog = lazy(
-  () => import('../dialogs/InterProScanDialog.tsx'),
-)
+
+const domainsTutorial = 'https://gmod.org/JBrowseMSA/tutorials/protein_family'
 
 export function getAnnotationsMenu({ model }: { model: MsaViewModel }) {
   const { showDomains, actuallyShowDomains, subFeatureRows, noDomains } = model
@@ -33,17 +32,17 @@ export function getAnnotationsMenu({ model }: { model: MsaViewModel }) {
         ])
       },
     },
+    // The viewer used to submit the whole alignment to the EBI iprscan5 queue
+    // and poll it for about fifteen minutes, capped at 140 rows and under a
+    // hardcoded email address. `react-msaview-cli interpro` answers the same
+    // question from InterPro's precomputed matches in seconds, and
+    // `interproscan` covers rows InterPro has not seen. Neither belongs in a
+    // browser tab, so this points at the page that walks through them.
     {
-      label: 'Query InterProScan...',
-      icon: Search,
+      label: 'How to get a domain file...',
+      icon: MenuBook,
       onClick: () => {
-        model.queueDialog(handleClose => [
-          InterProScanDialog,
-          {
-            handleClose,
-            model,
-          },
-        ])
+        window.open(domainsTutorial, '_blank', 'noopener,noreferrer')
       },
     },
     {

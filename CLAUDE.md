@@ -8,7 +8,9 @@ canvas with a tiled rendering system for scalability.
 
 - `packages/lib` — main React component library (the core viewer)
 - `packages/app` — demo app deployed at gmod.org/JBrowseMSA
-- `packages/cli` — CLI for batch InterProScan queries against EBI API
+- `packages/cli` — domain/exon GFFs (InterPro precomputed matches, InterProScan,
+  RefSeq exon models) and headless SVG export. The only path to a domain file
+  now that the viewer no longer scans
 - `packages/msa-parsers` — parsers for Stockholm, FASTA, Clustal, Newick, EMF,
   A3M, GFF
 - `packages/svgcanvas` — vendored ESM fork of svgcanvas for SVG export
@@ -24,7 +26,18 @@ canvas with a tiled rendering system for scalability.
   `observer` from mobx-react to reactively re-render.
 - Canvas rendering uses a tiled block system (`calculateBlocks.ts`) to avoid
   rendering entire large alignments at once.
-- InterProScan domain visualization is a core feature — do not remove it.
+- InterProScan domain **visualization** is a core feature — do not remove it.
+  That means the GFF path: `Annotations → Open InterProScan results...`, the
+  overlay, the legend, the filter dialog, `annotationsByRow`. Producing the file
+  is not the viewer's job and no longer happens here — the tab used to submit
+  the alignment to the EBI iprscan5 queue and poll it for fifteen minutes, and
+  `react-msaview-cli interpro` answers from precomputed matches in seconds.
+- Nothing in the viewer waits on a remote compute queue, and nothing runs an
+  analysis that would freeze the tab. Neighbor joining is the edge: it stays,
+  capped at `maxNeighborJoiningRows`, because on a small alignment it is faster
+  than installing an aligner. The general rule is `viewer-not-analysis-tool` — a
+  new analysis is a tutorial plus a snapshot layer (`docs/layers.md`), not a
+  menu item.
 - The alignment background on screen comes from `components/msa/msaRaster.ts`:
   one pixel per cell, built lazily in 512-cell tiles and blitted with
   `drawImage`, so a zoom frame costs a few blits instead of a `fillRect` per

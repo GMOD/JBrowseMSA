@@ -42,6 +42,7 @@ import {
   defaultSubFeatureRows,
   labelReferenceFontSize,
   maxCellSize,
+  maxNeighborJoiningRows,
   minColWidth,
   minLetterColWidth,
   minLetterRowHeight,
@@ -438,9 +439,7 @@ function stateModelFactory() {
       /**
        * #volatile
        */
-      status: undefined as
-        | { msg: string; url?: string; onCancel?: () => void }
-        | undefined,
+      status: undefined as { msg: string; onCancel?: () => void } | undefined,
       /**
        * #volatile
        * high resolution scale factor, helps make canvas look better on hi-dpi
@@ -1486,11 +1485,20 @@ function stateModelFactory() {
 
       /**
        * #action
-       * Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances
+       * Calculate a neighbor joining tree from the current MSA using BLOSUM62
+       * distances. Refuses above `maxNeighborJoiningRows`: the join loop is
+       * cubic and runs on the main thread, so 800 rows is a ten-second freeze
+       * with no progress and no cancel, and a tree that size wants a tool built
+       * for it anyway.
        */
       calculateNeighborJoiningTreeFromMSA() {
         if (self.rows.length < 2) {
           throw new Error('Need at least 2 sequences to build a tree')
+        }
+        if (self.rows.length > maxNeighborJoiningRows) {
+          throw new Error(
+            `Neighbor joining here is capped at ${maxNeighborJoiningRows} sequences and this alignment has ${self.rows.length}. Build the tree with FastTree or IQ-TREE and open it alongside the alignment: https://gmod.org/JBrowseMSA/tutorials/protein_family`,
+          )
         }
         const newickTree = calculateNeighborJoiningTree(self.rows)
         self.setTree(newickTree)
@@ -1667,7 +1675,7 @@ function stateModelFactory() {
       /**
        * #action
        */
-      setStatus(status?: { msg: string; url?: string; onCancel?: () => void }) {
+      setStatus(status?: { msg: string; onCancel?: () => void }) {
         self.status = status
       },
     }))
