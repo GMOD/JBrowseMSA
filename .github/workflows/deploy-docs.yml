@@ -1,7 +1,7 @@
 name: Deploy docs site
 
 # Builds the docs website (gmod.org/JBrowseMSA) with the demo app at /demo and
-# publishes to the gh-pages branch.
+# publishes it via GitHub's native Pages deployment (no gh-pages branch).
 on:
   push:
     branches: [main]
@@ -9,14 +9,12 @@ on:
 
 # allow one concurrent deploy; let an in-progress run finish
 concurrency:
-  group: deploy-docs
+  group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v5
 
@@ -40,8 +38,21 @@ jobs:
       - name: Build pages bundle (docs + /demo app)
         run: pnpm build:pages
 
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./pages-dist
+          path: ./pages-dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

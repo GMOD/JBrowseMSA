@@ -40,9 +40,10 @@ Deployed to **gmod.org/JBrowseMSA** (hence `base: '/JBrowseMSA'` in
 From the repo root, `pnpm build:pages` builds this site plus the app into
 `pages-dist/` (docs at the root, app under `/demo`, with a `.nojekyll` so
 Astro's `_astro/` assets survive). The
-[Deploy docs site](../../.github/workflows/deploy-docs.yml) workflow publishes
-`pages-dist/` to the `gh-pages` branch on every push to `main`;
-`pnpm deploy:pages` does the same by hand.
+[Deploy docs site](../../.github/workflows/deploy-docs.yml) workflow uploads
+`pages-dist/` as a Pages artifact and deploys it via GitHub's native Pages
+action on every push to `main` — no `gh-pages` branch involved. Trigger it
+by hand with `workflow_dispatch` for an out-of-band deploy.
 
 The interactive **examples gallery** (`packages/examples`,
 jbrowse.org/storybook/msa) deploys separately and must be run locally (needs AWS

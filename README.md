@@ -128,9 +128,9 @@ re-render when observed model properties change.
 - **Docs site → gmod.org/JBrowseMSA**, with the **demo app at
   gmod.org/JBrowseMSA/demo**. `pnpm build:pages` builds both into `pages-dist/`
   (docs at the root, app under `/demo`); the
-  [Deploy docs site](.github/workflows/deploy-docs.yml) workflow publishes it to
-  the `gh-pages` branch on every push to `main`. To deploy by hand:
-  `pnpm deploy:pages`.
+  [Deploy docs site](.github/workflows/deploy-docs.yml) workflow deploys it via
+  GitHub's native Pages action on every push to `main`. Trigger it by hand with
+  `workflow_dispatch` for an out-of-band deploy.
 - **Examples gallery → jbrowse.org/storybook/msa** is deployed separately and
   **must be run locally** (it needs AWS credentials). Build it with
   `pnpm --filter examples build`, then upload `packages/examples/dist/` by hand
