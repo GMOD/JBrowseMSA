@@ -23,3 +23,9 @@ ALS = "ALS"
 # family) and CONSTANS (the Arabidopsis flowering-time gene, symbol CO)
 Wnt = "Wnt"
 CONSTANS = "CONSTANS"
+# amino acid three-letter codes: the PDB/ClinVar tables in scripts/examples-gen
+# and the Pfam domain name Ser-Thr/Tyr_kinase_cat_dom
+SER = "SER"
+THR = "THR"
+Ser = "Ser"
+Thr = "Thr"
