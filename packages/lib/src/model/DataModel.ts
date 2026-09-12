@@ -1,5 +1,7 @@
 import { types } from '@jbrowse/mobx-state-tree'
 
+import { maxInlineSnapshotBytes } from '../constants.ts'
+
 /**
  * #stateModel DataModel
  * the data stored for the model. this is sometimes temporary in the case that
@@ -56,11 +58,13 @@ export function DataModelF() {
     .postProcessSnapshot(snap =>
       // a large document is dropped from the snapshot rather than inlined
       // into a session or a shared URL, and every field here holds one, so
-      // the rule is the same for all of them
+      // the rule is the same for all of them. The parent model's
+      // `unshareableData` reports what this drops, since dropping it silently
+      // is how a copied link comes to open an empty viewer
       Object.fromEntries(
         Object.entries(snap).map(([key, text]) => [
           key,
-          text && text.length > 50_000 ? undefined : text,
+          text && text.length > maxInlineSnapshotBytes ? undefined : text,
         ]),
       ),
     )

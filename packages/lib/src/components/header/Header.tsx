@@ -13,6 +13,7 @@ import HeaderStatusArea from './HeaderStatusArea.tsx'
 import MSASettingsMenu from './MSASettingsMenu.tsx'
 import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
 import TreeSettingsMenu from './TreeSettingsMenu.tsx'
+import UnshareableDataWarning from './UnshareableDataWarning.tsx'
 import ZoomControls from './ZoomControls.tsx'
 import ZoomMenu from './ZoomMenu.tsx'
 
@@ -39,6 +40,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       </div>
       <HeaderInfoArea model={model} />
       <Spacer />
+      <UnshareableDataWarning model={model} />
       <HeaderStatusArea model={model} />
       <Tooltip title="About">
         <IconButton

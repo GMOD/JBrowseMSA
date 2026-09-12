@@ -14,14 +14,15 @@ const inFlight = new Map<
 >()
 
 vi.mock('@jbrowse/core/util/io', () => ({
-  openLocation: (loc: { uri: string }) => loc,
+  openLocation: (loc: { uri?: string; name?: string }) => loc,
 }))
 
+// keyed by uri, or by name for a blob, which has no uri
 vi.mock('./fetchUtils.ts', async importOriginal => ({
   ...(await importOriginal<typeof FetchUtils>()),
-  fetchTextWithProgress: (loc: { uri: string }) =>
+  fetchTextWithProgress: (loc: { uri?: string; name?: string }) =>
     new Promise<string>((resolve, reject) => {
-      inFlight.set(loc.uri, { resolve, reject })
+      inFlight.set(loc.uri ?? loc.name!, { resolve, reject })
     }),
 }))
 
@@ -132,6 +133,31 @@ test('tree, treeMetadata and gff filehandles each load into their own field', as
 
   expect(model.data.tree).toBe('(a,b);')
   expect(model.treeMetadata.a?.genome).toBe('human')
+  expect(model.data.gff).toContain('PF00069')
   expect(model.actuallyShowDomains).toBe(true)
   expect(model.loadingTree).toBe(false)
+})
+
+// Reading a blob clears the filehandle, since a blob id means nothing to the
+// next session. The gff used to parse straight into the volatile annotations,
+// so clearing the filehandle left the snapshot with no record of the file at
+// all -- no text and no way to refetch it.
+test('a gff read from a local file keeps its text after the filehandle clears', async () => {
+  const model = makeModel()
+  model.setGFFFilehandle({
+    locationType: 'BlobLocation',
+    blobId: 'b1',
+    name: 'domains.gff',
+  })
+
+  inFlight
+    .get('domains.gff')!
+    .resolve(
+      '##gff-version 3\na\tPfam\tprotein_match\t1\t2\t.\t.\t.\tName=PF00069',
+    )
+  await flush()
+
+  expect(model.gffFilehandle).toBeUndefined()
+  expect(model.data.gff).toContain('PF00069')
+  expect(model.actuallyShowDomains).toBe(true)
 })
