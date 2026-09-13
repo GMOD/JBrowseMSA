@@ -2,6 +2,8 @@ import * as fs from 'node:fs'
 
 import { parseMSA } from 'msa-parsers'
 
+import type { MSAFormat } from 'msa-parsers'
+
 // Build a gene-structure GFF (one feature per exon, per alignment row) that
 // react-msaview overlays on a coding-sequence alignment the same way it overlays
 // InterProScan domains. The exon model comes from NCBI Datasets v2 (RefSeq), so
@@ -25,6 +27,7 @@ export interface GeneStructureOptions {
   taxon: string
   geneId?: string
   transcript?: string
+  format?: MSAFormat
 }
 
 interface Exon {
@@ -59,8 +62,7 @@ async function resolveGeneId(gene: string, taxon: string): Promise<string> {
     `${API}/gene/symbol/${encodeURIComponent(gene)}/taxon/${encodeURIComponent(taxon)}`,
   )
   const report = getReports(json)[0] as
-    | { gene?: { gene_id?: string } }
-    | undefined
+    { gene?: { gene_id?: string } } | undefined
   const id = report?.gene?.gene_id
   if (!id) {
     throw new Error(`no gene found for symbol "${gene}" in taxon "${taxon}"`)
@@ -247,7 +249,7 @@ export async function runGeneStructure(
   const { inputFile, outputFile, gene, taxon, transcript } = options
 
   console.log(`Reading MSA from ${inputFile}...`)
-  const msa = parseMSA(fs.readFileSync(inputFile, 'utf8'))
+  const msa = parseMSA(fs.readFileSync(inputFile, 'utf8'), 0, options.format)
   const names = msa.getNames()
   const ref = options.ref ?? names[0]
   if (!ref || !names.includes(ref)) {

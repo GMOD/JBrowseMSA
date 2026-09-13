@@ -6,106 +6,116 @@ import { exportSvg } from './export-svg.ts'
 import { runGeneStructure } from './genestructure.ts'
 import { runInterProPrecomputed } from './interpro-precomputed.ts'
 import { runInterProScan } from './interproscan-msa.ts'
+import { DEFAULT_DOCKER_IMAGE } from './runner.ts'
 
-const { values, positionals } = parseArgs({
-  allowPositionals: true,
-  options: {
-    // no default: each command has its own, and comparing against a shared
-    // default here to detect "not passed" silently overrode an explicit
-    // `-o domains.gff` on the commands whose default is something else
-    output: {
-      type: 'string',
-      short: 'o',
-    },
-    msa: {
-      type: 'string',
-    },
-    tree: {
-      type: 'string',
-    },
-    gff: {
-      type: 'string',
-    },
-    'color-scheme': {
-      type: 'string',
-      default: 'maeditor',
-    },
-    width: {
-      type: 'string',
-      default: '1200',
-    },
-    height: {
-      type: 'string',
-      default: '600',
-    },
-    'tree-area-width': {
-      type: 'string',
-    },
-    'col-width': {
-      type: 'string',
-    },
-    'row-height': {
-      type: 'string',
-    },
-    local: {
-      type: 'boolean',
-      default: false,
-    },
-    docker: {
-      type: 'boolean',
-      default: false,
-    },
-    singularity: {
-      type: 'boolean',
-      default: false,
-    },
-    'singularity-image': {
-      type: 'string',
-      default: 'docker://interpro/interproscan:latest',
-    },
-    'interproscan-path': {
-      type: 'string',
-      default: 'interproscan.sh',
-    },
-    programs: {
-      type: 'string',
-      default: 'PfamA,CDD',
-    },
-    database: {
-      type: 'string',
-      default: 'pfam',
-    },
-    'no-cache': {
-      type: 'boolean',
-      default: false,
-    },
-    ref: {
-      type: 'string',
-    },
-    gene: {
-      type: 'string',
-    },
-    taxon: {
-      type: 'string',
-      default: 'human',
-    },
-    'gene-id': {
-      type: 'string',
-    },
-    transcript: {
-      type: 'string',
-    },
-    email: {
-      type: 'string',
-      default: 'user@example.com',
-    },
-    help: {
-      type: 'boolean',
-      short: 'h',
-      default: false,
-    },
+import type { MSAFormat } from 'msa-parsers'
+
+const options = {
+  // no default: each command has its own, and comparing against a shared
+  // default here to detect "not passed" silently overrode an explicit
+  // `-o domains.gff` on the commands whose default is something else
+  output: {
+    type: 'string',
+    short: 'o',
   },
-})
+  msa: {
+    type: 'string',
+  },
+  tree: {
+    type: 'string',
+  },
+  gff: {
+    type: 'string',
+  },
+  'color-scheme': {
+    type: 'string',
+    default: 'maeditor',
+  },
+  width: {
+    type: 'string',
+    default: '1200',
+  },
+  height: {
+    type: 'string',
+    default: '600',
+  },
+  'tree-area-width': {
+    type: 'string',
+  },
+  'col-width': {
+    type: 'string',
+  },
+  'row-height': {
+    type: 'string',
+  },
+  local: {
+    type: 'boolean',
+    default: false,
+  },
+  docker: {
+    type: 'boolean',
+    default: false,
+  },
+  singularity: {
+    type: 'boolean',
+    default: false,
+  },
+  'singularity-image': {
+    type: 'string',
+    default: `docker://${DEFAULT_DOCKER_IMAGE}`,
+  },
+  'docker-image': {
+    type: 'string',
+    default: DEFAULT_DOCKER_IMAGE,
+  },
+  'interproscan-path': {
+    type: 'string',
+    default: 'interproscan.sh',
+  },
+  programs: {
+    type: 'string',
+    default: 'PfamA,CDD',
+  },
+  database: {
+    type: 'string',
+    default: 'pfam',
+  },
+  'no-cache': {
+    type: 'boolean',
+    default: false,
+  },
+  ref: {
+    type: 'string',
+  },
+  gene: {
+    type: 'string',
+  },
+  taxon: {
+    type: 'string',
+    default: 'human',
+  },
+  'gene-id': {
+    type: 'string',
+  },
+  transcript: {
+    type: 'string',
+  },
+  email: {
+    type: 'string',
+    default: 'user@example.com',
+  },
+  format: {
+    type: 'string',
+  },
+  'interproscan-data': {
+    type: 'string',
+  },
+  help: {
+    type: 'boolean',
+    short: 'h',
+    default: false,
+  },
+} as const
 
 function printHelp() {
   console.log(`
@@ -126,10 +136,19 @@ OPTIONS (interproscan):
   -o, --output <file>           Output GFF file (default: domains.gff)
   --local                       Use local InterProScan installation
   --docker                      Use Docker (interpro/interproscan image)
+  --docker-image <image>        Docker image (default: ${DEFAULT_DOCKER_IMAGE})
   --singularity                 Use Singularity/Apptainer container
-  --singularity-image <image>   Singularity image (default: docker://interpro/interproscan:latest)
+  --singularity-image <image>   Singularity image (default: docker://${DEFAULT_DOCKER_IMAGE})
   --interproscan-path <path>    Path to interproscan.sh (default: interproscan.sh)
-  --programs <list>             Comma-separated list of programs (default: PfamA,CDD)
+  --interproscan-data <dir>     Host directory holding the InterProScan member
+                                database data/, mounted into the container
+                                (docker/singularity; the image ships without it)
+  --programs <list>             Comma-separated list of programs, in the EBI
+                                API's naming (default: PfamA,CDD); the container
+                                and local backends get the equivalent
+                                InterProScan 5 names
+  --format <name>               Force the MSA format instead of sniffing it
+                                (stockholm, fasta, a3m, clustal, emf)
   --email <email>               Email for EBI API (default: user@example.com)
 
 OPTIONS (interpro — precomputed):
@@ -137,6 +156,10 @@ OPTIONS (interpro — precomputed):
                                 line; # comments ok — the examples-gen .tsv works)
   -o, --output <file>           Output GFF file (default: domains.gff)
   --database <name>             InterPro member db to read (default: pfam)
+  --msa <file>                  Alignment the GFF is for; each row's ungapped
+                                length is checked against the UniProt sequence
+                                the matches were computed on (optional)
+  --format <name>               Force the --msa format instead of sniffing it
   --no-cache                    Re-fetch every accession, ignoring the on-disk
                                 cache (kept per InterPro release under
                                 $XDG_CACHE_HOME/react-msaview-cli/interpro)
@@ -149,10 +172,12 @@ OPTIONS (genestructure):
   --transcript <accession>      Specific transcript (default: MANE/RefSeq Select)
   --ref <rowname>               Reference row = the transcript's CDS
                                 (default: first alignment row)
+  --format <name>               Force the MSA format instead of sniffing it
   -o, --output <file>           Output GFF file (default: genestructure.gff)
 
 OPTIONS (export-svg):
-  --msa <file>                  MSA file (FASTA, Stockholm, or Clustal) [required]
+  --msa <file>                  MSA file (FASTA, Stockholm, Clustal, A3M, EMF) [required]
+  --format <name>               Force the MSA format instead of sniffing it
   --tree <file>                 Newick tree file (optional)
   --gff <file>                  InterProScan domain GFF file (optional)
   -o, --output <file>           Output SVG file (default: alignment.svg)
@@ -182,13 +207,29 @@ EXAMPLES:
 `)
 }
 
+const MSA_FORMATS = new Set(['stockholm', 'a3m', 'fasta', 'emf', 'clustal'])
+
+function readFormat(format?: string) {
+  if (format !== undefined && !MSA_FORMATS.has(format)) {
+    throw new Error(
+      `unknown --format ${format}; one of ${[...MSA_FORMATS].join(', ')}`,
+    )
+  }
+  return format as MSAFormat | undefined
+}
+
 async function main() {
+  // inside main, so a mistyped flag reaches the handler below as a message
+  // rather than as a stack trace out of module evaluation
+  const { values, positionals } = parseArgs({ allowPositionals: true, options })
+
   if (values.help || positionals.length === 0) {
     printHelp()
     process.exit(0)
   }
 
   const command = positionals[0]
+  const format = readFormat(values.format)
 
   if (command === 'export-svg') {
     const msaFile = values.msa
@@ -217,6 +258,7 @@ async function main() {
         values['row-height'] !== undefined
           ? parseFloat(values['row-height'])
           : undefined,
+      format,
     })
     console.log(`wrote ${outputFile}`)
   } else if (command === 'interproscan') {
@@ -233,9 +275,12 @@ async function main() {
       useDocker: values.docker,
       useSingularity: values.singularity,
       singularityImage: values['singularity-image'],
+      dockerImage: values['docker-image'],
       interproscanPath: values['interproscan-path'],
+      dataDir: values['interproscan-data'],
       programs: values.programs.split(','),
       email: values.email,
+      format,
     })
   } else if (command === 'interpro') {
     const inputFile = positionals[1]
@@ -249,6 +294,8 @@ async function main() {
       outputFile: values.output ?? 'domains.gff',
       database: values.database,
       noCache: values['no-cache'],
+      msaFile: values.msa,
+      format,
     })
   } else if (command === 'genestructure') {
     const inputFile = positionals[1]
@@ -265,6 +312,7 @@ async function main() {
       taxon: values.taxon,
       geneId: values['gene-id'],
       transcript: values.transcript,
+      format,
     })
   } else {
     console.error(`Unknown command: ${command}`)

@@ -4,6 +4,8 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { JSDOM } from 'jsdom'
 import { enableStaticRendering } from 'mobx-react'
 
+import type { MSAFormat } from 'msa-parsers'
+
 /**
  * jsdom has no pixels, so without this the export draws a <rect> per cell and a
  * large alignment exhausts the heap. @napi-rs/canvas is an optional dependency
@@ -34,6 +36,7 @@ export async function exportSvg({
   treeAreaWidth,
   colWidth,
   rowHeight,
+  format,
 }: {
   msaFile: string
   treeFile?: string
@@ -45,6 +48,7 @@ export async function exportSvg({
   treeAreaWidth?: number
   colWidth?: number
   rowHeight?: number
+  format?: MSAFormat
 }) {
   const { MSAModelF, renderToSvg, installHeadlessRenderEnv } =
     await import('react-msaview')
@@ -76,6 +80,7 @@ export async function exportSvg({
     // threshold is what turns a long alignment into a readable block diagram
     ...(colWidth === undefined ? {} : { colWidth }),
     ...(rowHeight === undefined ? {} : { rowHeight }),
+    ...(format ? { msaFormat: format } : {}),
     data: { msa, tree, ...(gff ? { gff } : {}) },
   })
   if (treeAreaWidth !== undefined) {

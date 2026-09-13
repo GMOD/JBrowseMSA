@@ -1,15 +1,21 @@
 import type { Annotation } from '../types.ts'
 
 /**
- * Write annotations as GFF3, one line per annotation, in list order.
+ * Write annotations as GFF3, one line per annotation, in list order, with
+ * optional `#` comment lines after the version directive saying where they came
+ * from.
  *
  * The source column is always `InterProScan`: an Annotation records no source
- * of its own, and the CLI's precomputed-lookup path depends on this output
- * matching what a real InterProScan run emits, byte for byte.
+ * of its own, and the viewer reads a precomputed-lookup GFF by the same rules
+ * it reads a real InterProScan run's.
  */
-export function annotationsToGFF(annotations: Annotation[]): string {
+export function annotationsToGFF(
+  annotations: Annotation[],
+  header: string[] = [],
+): string {
   return [
     '##gff-version 3',
+    ...header.map(line => `# ${line}`),
     ...annotations.map(annotation => {
       const { accession, name, description, featureType } = annotation
       const { id, start, end, strand } = annotation

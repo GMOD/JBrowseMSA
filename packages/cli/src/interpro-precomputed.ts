@@ -1,6 +1,6 @@
 import * as fs from 'node:fs'
 
-import { interProToGFF } from 'msa-parsers'
+import { annotationsToGFF, getUngappedSequence, parseMSA } from 'msa-parsers'
 
 import {
   cacheLocation,
@@ -8,6 +8,8 @@ import {
   readCached,
   writeCached,
 } from './interpro-cache.ts'
+
+import type { MSAFormat } from 'msa-parsers'
 
 // Build a domain GFF from InterPro's PRECOMPUTED matches for UniProtKB
 // accessions, instead of submitting sequences to a live InterProScan job. Every
@@ -19,8 +21,8 @@ import {
 // Input: one accession per line, optional whitespace-separated row label
 // (`<accession>\t<label>`); lines starting with # are ignored. This is exactly
 // the scripts/examples-gen datasets/<name>.tsv format, so it can be run on those
-// directly. Output GFF is keyed by label and matches the interproscan command's
-// format byte-for-byte (it reuses interProToGFF).
+// directly. The output GFF is keyed by label and is written by the same
+// annotationsToGFF the interproscan command's output goes through.
 
 const API = 'https://www.ebi.ac.uk/interpro/api'
 
@@ -29,6 +31,8 @@ export interface InterProPrecomputedOptions {
   outputFile: string
   database: string
   noCache?: boolean
+  msaFile?: string
+  format?: MSAFormat
 }
 
 interface Accession {
@@ -45,6 +49,7 @@ interface ApiLocation {
 }
 interface ApiProtein {
   entry_protein_locations: ApiLocation[]
+  protein_length?: number
 }
 interface ApiMetadata {
   accession: string
@@ -57,6 +62,7 @@ interface ApiResult {
 }
 interface ApiEntryResponse {
   results: ApiResult[]
+  next: string | null
 }
 interface ApiRootResponse {
   databases: { interpro: { version: string } }
@@ -93,21 +99,32 @@ async function fetchRelease(): Promise<string> {
   return json.databases.interpro.version
 }
 
+/**
+ * Every entry the member database has for one protein.
+ *
+ * The API pages at 20 results, so reading only the first page quietly dropped
+ * the tail of a well-annotated protein -- P98161 has 24 InterPro entries and
+ * the GFF carried 20 of them, cached as if complete.
+ */
 async function fetchEntries(
   accession: string,
   database: string,
 ): Promise<ApiResult[]> {
-  const res = await fetchWithRetry(
-    `${API}/entry/${database}/protein/uniprot/${accession}/`,
-  )
-  // 204 = the protein exists but has no matches in this member database.
-  let results: ApiResult[] = []
-  if (res.status !== 204) {
+  const results: ApiResult[] = []
+  let url: string | null =
+    `${API}/entry/${database}/protein/uniprot/${accession}/?page_size=200`
+  while (url) {
+    const res = await fetchWithRetry(url)
+    // 204 = the protein exists but has no matches in this member database.
+    if (res.status === 204 || res.status === 404) {
+      break
+    }
     if (!res.ok) {
       throw new Error(`InterPro lookup ${accession} failed: ${res.status}`)
     }
     const json = (await res.json()) as ApiEntryResponse
-    results = json.results
+    results.push(...json.results)
+    url = json.next
   }
   return results
 }
@@ -160,45 +177,79 @@ export async function runInterProPrecomputed(
     console.log(
       `  [${i + 1}/${distinct.length}] ${accession}: ${entries.length} ${database} entries${hit ? ' (cached)' : ''}`,
     )
+    // a typo, a non-UniProtKB id or a protein the database really has nothing
+    // for all look the same from here -- an empty answer that then caches as
+    // one, so say it once rather than leave the row silently undecorated
+    if (entries.length === 0) {
+      console.warn(
+        `    no ${database} matches for ${accession}; check it is a UniProtKB accession and that --database is the right member database`,
+      )
+    }
   }
 
-  const results: Record<
-    string,
-    {
-      matches: {
-        signature: {
-          entry: { accession: string; name: string; description: string }
-        }
-        locations: ApiFragment[]
-      }[]
-      xref: { id: string }[]
-    }
-  > = {}
-
-  for (const { accession, label } of accessions) {
-    const matches = (entriesByAccession.get(accession) ?? [])
-      .map(({ metadata, proteins }) => ({
-        signature: {
-          entry: {
+  const annotations = accessions.flatMap(({ accession, label }) =>
+    (entriesByAccession.get(accession) ?? []).flatMap(
+      ({ metadata, proteins }) =>
+        (proteins[0]?.entry_protein_locations ?? []).flatMap(loc =>
+          loc.fragments.map(f => ({
+            id: label,
             accession: metadata.integrated ?? metadata.accession,
             name: metadata.name,
             description: metadata.name,
-          },
-        },
-        locations: (proteins[0]?.entry_protein_locations ?? []).flatMap(loc =>
-          loc.fragments.map(f => ({ start: f.start, end: f.end })),
+            start: f.start,
+            end: f.end,
+          })),
         ),
-      }))
-      .filter(m => m.locations.length > 0)
-    results[label] = { matches, xref: [{ id: label }] }
-  }
+    ),
+  )
 
   console.log(`${fetched} fetched, ${cached} from ${cacheLocation()}`)
 
-  const gff = interProToGFF(results).replace(
-    '##gff-version 3',
-    `##gff-version 3\n# precomputed InterPro ${release} ${database} matches by UniProtKB accession (react-msaview-cli interpro --database ${database})`,
-  )
+  if (options.msaFile) {
+    checkLengths(
+      options.msaFile,
+      options.format,
+      accessions,
+      entriesByAccession,
+    )
+  }
+
+  const gff = annotationsToGFF(annotations, [
+    `precomputed InterPro ${release} ${database} matches by UniProtKB accession (react-msaview-cli interpro --database ${database})`,
+  ])
   fs.writeFileSync(outputFile, `${gff}\n`, 'utf8')
   console.log(`Wrote ${outputFile}`)
+}
+
+/**
+ * Warn where a row is not the protein the matches were computed on.
+ *
+ * The coordinates come from UniProt's canonical sequence. A row that is an
+ * isoform or a fragment is a different length, and the domains then land on the
+ * wrong residues -- silently, since nothing else in the file disagrees.
+ */
+function checkLengths(
+  msaFile: string,
+  format: MSAFormat | undefined,
+  accessions: Accession[],
+  entriesByAccession: Map<string, ApiResult[]>,
+) {
+  const msa = parseMSA(fs.readFileSync(msaFile, 'utf8'), 0, format)
+  const names = new Set(msa.getNames())
+  for (const { accession, label } of accessions) {
+    const proteinLength = entriesByAccession
+      .get(accession)
+      ?.map(e => e.proteins[0]?.protein_length)
+      .find(l => l !== undefined)
+    if (!names.has(label)) {
+      console.warn(`  ${label}: no such row in ${msaFile}`)
+    } else if (proteinLength !== undefined) {
+      const rowLength = getUngappedSequence(msa.getRow(label)).length
+      if (rowLength !== proteinLength) {
+        console.warn(
+          `  ${label}: row is ${rowLength} residues, ${accession} is ${proteinLength}; the matches are computed on the canonical sequence, so an isoform or fragment puts them on the wrong residues`,
+        )
+      }
+    }
+  }
 }

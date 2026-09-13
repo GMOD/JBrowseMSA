@@ -141,6 +141,26 @@ describe('interProToGFF', () => {
     expect(lines[1]).toContain('signature_desc=disorder_prediction')
   })
 
+  test('writes header lines as comments under the version directive', () => {
+    const gff = annotationsToGFF(
+      [
+        {
+          id: 'seq1',
+          accession: 'PF00001',
+          name: '7tm_1',
+          description: '7tm_1',
+          start: 1,
+          end: 9,
+        },
+      ],
+      ['precomputed InterPro 110.0 pfam matches'],
+    )
+    expect(gff.split('\n').slice(0, 2)).toEqual([
+      '##gff-version 3',
+      '# precomputed InterPro 110.0 pfam matches',
+    ])
+  })
+
   test('skips a match whose signature has no accession', () => {
     const results: Record<string, InterProScanResults> = {
       seq1: {

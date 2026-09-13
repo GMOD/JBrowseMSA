@@ -45,9 +45,16 @@ async function getResults(jobId: string): Promise<InterProScanResponse> {
 
 const TERMINAL_FAILURES = new Set(['FAILURE', 'ERROR', 'NOT_FOUND'])
 
+// The queue has been measured at fifteen minutes for one sequence, so five
+// minutes of polling gave up on jobs that were still going to finish. Poll
+// every three seconds for an hour instead -- the wait is EBI's, and abandoning
+// a running job neither shortens it nor frees it.
+const POLL_INTERVAL_MS = 3000
+const MAX_WAIT_MS = 60 * 60 * 1000
+
 async function waitForJob(jobId: string): Promise<void> {
   let attempts = 0
-  const maxAttempts = 300
+  const maxAttempts = MAX_WAIT_MS / POLL_INTERVAL_MS
 
   while (attempts < maxAttempts) {
     // the status endpoint returns a bare status token; match it exactly rather
@@ -62,11 +69,13 @@ async function waitForJob(jobId: string): Promise<void> {
       throw new Error(`Job ${jobId} failed: ${status}`)
     }
 
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS))
     attempts++
 
     if (attempts % 10 === 0) {
-      console.log(`  Still waiting... (${attempts}s)`)
+      console.log(
+        `  Still waiting... (${Math.round((attempts * POLL_INTERVAL_MS) / 1000)}s)`,
+      )
     }
   }
 
@@ -79,22 +88,39 @@ export async function runEbiInterProScan(
   email: string,
 ): Promise<InterProScanResults[]> {
   const allResults: InterProScanResults[] = []
+  const failed: string[] = []
 
   for (let i = 0; i < sequences.length; i++) {
     const seq = sequences[i]!
     console.log(`  [${i + 1}/${sequences.length}] Submitting ${seq.id}...`)
 
-    const jobId = await submitJob(seq, programs, email)
-    console.log(`  Job: ${jobId}`)
+    // one sequence failing used to throw away every result before it, after
+    // however many queue-minutes those took; keep them and say which rows the
+    // GFF is missing
+    try {
+      const jobId = await submitJob(seq, programs, email)
+      console.log(`  Job: ${jobId}`)
 
-    await waitForJob(jobId)
+      await waitForJob(jobId)
 
-    const results = await getResults(jobId)
-    for (const r of results.results) {
-      allResults.push(r)
+      const results = await getResults(jobId)
+      for (const r of results.results) {
+        allResults.push(r)
+      }
+      console.log(`  [${i + 1}/${sequences.length}] Done`)
+    } catch (e) {
+      failed.push(seq.id)
+      console.warn(`  [${i + 1}/${sequences.length}] ${seq.id} failed: ${e}`)
     }
+  }
 
-    console.log(`  [${i + 1}/${sequences.length}] Done`)
+  if (failed.length === sequences.length) {
+    throw new Error(`every sequence failed: ${failed.join(', ')}`)
+  }
+  if (failed.length > 0) {
+    console.warn(
+      `  ${failed.length} of ${sequences.length} sequences have no matches in the output: ${failed.join(', ')}`,
+    )
   }
 
   return allResults
