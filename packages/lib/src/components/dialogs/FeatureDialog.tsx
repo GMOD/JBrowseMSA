@@ -16,14 +16,20 @@ import { observer } from 'mobx-react'
 import type { MsaViewModel } from '../../model.ts'
 
 const Toggles = observer(function ({ model }: { model: MsaViewModel }) {
-  const { featureFilters } = model
+  // the accessions the file has, not the ones the filter map happens to hold:
+  // that map now carries only what the reader turned off, and before that it
+  // accumulated every accession of every file opened in this view
+  const { annotationTypes } = model
+  const setAll = (shown: boolean) => {
+    for (const accession of annotationTypes.keys()) {
+      model.setFilter(accession, shown)
+    }
+  }
   return (
     <div>
       <Button
         onClick={() => {
-          for (const key of featureFilters.keys()) {
-            model.setFilter(key, true)
-          }
+          setAll(true)
         }}
       >
         Toggle all on
@@ -31,9 +37,7 @@ const Toggles = observer(function ({ model }: { model: MsaViewModel }) {
 
       <Button
         onClick={() => {
-          for (const key of featureFilters.keys()) {
-            model.setFilter(key, false)
-          }
+          setAll(false)
         }}
       >
         Toggle all off
@@ -68,11 +72,11 @@ const FeatureTable = observer(function ({ model }: { model: MsaViewModel }) {
               <TableRow key={accession}>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={model.featureFilters.get(accession) ?? false}
+                    checked={!model.turnedOffFeatures.get(accession)}
                     onChange={() => {
                       model.setFilter(
                         accession,
-                        !model.featureFilters.get(accession),
+                        !!model.turnedOffFeatures.get(accession),
                       )
                     }}
                   />

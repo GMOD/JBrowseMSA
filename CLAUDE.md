@@ -42,11 +42,14 @@ data preparation — see `viewer-not-analysis-tool` in the memory and
   `observer` from mobx-react to reactively re-render.
 - Canvas rendering uses a tiled block system (`calculateBlocks.ts`) to avoid
   rendering entire large alignments at once.
-- InterProScan domain **visualization** is a core feature — do not remove it.
-  That means the GFF path: `Annotations → Open InterProScan results...`, the
-  overlay, the legend, the filter dialog, `annotationsByRow`. Producing the file
-  is not the viewer's job and no longer happens here — the tab used to submit
-  the alignment to the EBI iprscan5 queue and poll it for fifteen minutes, and
+- Domain **visualization** is a core feature — do not remove it. That means the
+  GFF path: `Annotations → Open annotation file...` (GFF3 as the CLI writes it,
+  or an InterProScan JSON response, converted to GFF on the way in), the
+  overlay, the legend, the filter dialog, `annotationsByRow`. The dialog lands
+  its file in `data.gff`, so the annotations travel in the snapshot and the
+  shared URL like every other layer. Producing the file is not the viewer's job
+  and no longer happens here — the tab used to submit the alignment to the EBI
+  iprscan5 queue and poll it for fifteen minutes, and
   `react-msaview-cli interpro` answers from precomputed matches in seconds.
 - Nothing in the viewer waits on a remote compute queue, and nothing runs an
   analysis that would freeze the tab. Neighbor joining is the edge: it stays,

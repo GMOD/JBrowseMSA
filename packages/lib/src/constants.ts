@@ -5,7 +5,11 @@ export const defaultHeight = 550
 export const defaultScrollX = 0
 export const defaultScrollY = 0
 export const defaultCurrentAlignment = 0
-export const defaultShowDomains = false
+// Annotations are loaded on purpose -- a gff filehandle, a file picked in the
+// dialog -- so they are drawn unless the reader has said otherwise. Since only
+// the "no" is stored, a shared link with the overlay hidden reopens hidden, and
+// one that never mentions it opens showing whatever annotations it carries.
+export const defaultShowDomains = true
 export const defaultShowDomainLegend = true
 export const defaultHideGaps = true
 export const defaultAllowedGappyness = 100

@@ -16,5 +16,8 @@ export function load(
   }
   if (gffFile) {
     model.setGFFFilehandle(gffFile)
+    // asked for by hand, so drawn -- even if the reader hid the overlay
+    // earlier in this view
+    model.setShowDomains(true)
   }
 }

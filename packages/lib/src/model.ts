@@ -423,8 +423,13 @@ function stateModelFactory() {
 
         /**
          * #property
+         * the user's explicit hide choices per annotation accession, keyed by
+         * accession with the value meaning "off", the same shape as
+         * `turnedOffTracks`. An accession the user has never touched is absent
+         * and drawn, so a file of two hundred domain types adds nothing to the
+         * shared URL until someone filters one out
          */
-        featureFilters: stripDefault(types.map(types.boolean), {}),
+        turnedOffFeatures: stripDefault(types.map(types.boolean), {}),
         /**
          * #property
          */
@@ -2096,8 +2101,8 @@ function stateModelFactory() {
         return types
       },
       get filteredAnnotations() {
-        return self.annotations.filter(r =>
-          self.featureFilters.get(r.accession),
+        return self.annotations.filter(
+          r => !self.turnedOffFeatures.get(r.accession),
         )
       },
       get annotationsByRow() {
@@ -2374,13 +2379,16 @@ function stateModelFactory() {
 
       /**
        * #action
-       * Set the overlay annotations and reveal the overlay in a single step (an
-       * empty list clears both). Every source funnels through here after its
-       * own adapter has flattened it: InterProScan, GFF, user uploads, NCBI CDD.
+       * Set the overlay annotations (an empty list clears them). Every source
+       * funnels through here after its own adapter has flattened it:
+       * InterProScan, GFF, user uploads, NCBI CDD.
+       *
+       * It does not touch `showDomains`. Loading used to force the overlay on,
+       * and since a restored snapshot loads its GFF again on the way in, a link
+       * shared with the overlay hidden reopened with it drawn.
        */
       setAnnotations(annotations: Annotation[]) {
         self.annotations = annotations
-        self.setShowDomains(annotations.length > 0)
       },
 
       /**
@@ -2515,7 +2523,7 @@ function stateModelFactory() {
        */
       get visibleDomainTypes() {
         return this.categoricalDomainTypes
-          .filter(d => self.featureFilters.get(d.accession))
+          .filter(d => !self.turnedOffFeatures.get(d.accession))
           .toSorted((a, b) => a.start - b.start)
       },
 
@@ -2805,13 +2813,17 @@ function stateModelFactory() {
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, exportFileName(self.msaFilehandle, 'svg'))
       },
-      initFilter(arg: string) {
-        if (!self.featureFilters.has(arg)) {
-          self.featureFilters.set(arg, true)
+      /**
+       * #action
+       * draw this annotation type, or stop drawing it. Only the "stop" is
+       * recorded -- see `turnedOffFeatures`
+       */
+      setFilter(accession: string, shown: boolean) {
+        if (shown) {
+          self.turnedOffFeatures.delete(accession)
+        } else {
+          self.turnedOffFeatures.set(accession, true)
         }
-      },
-      setFilter(arg: string, flag: boolean) {
-        self.featureFilters.set(arg, flag)
       },
 
       /**
@@ -2868,15 +2880,6 @@ function stateModelFactory() {
         if (self.highlightColumns?.length) {
           self.setHighlightedColumns(self.highlightColumns)
         }
-
-        addDisposer(
-          self,
-          autorun(() => {
-            for (const key of self.annotationTypes.keys()) {
-              this.initFilter(key)
-            }
-          }),
-        )
 
         // track the live device pixel ratio so canvas backing stores re-scale
         // when the window moves between monitors or the browser zooms. The
@@ -3002,7 +3005,12 @@ function stateModelFactory() {
           },
         })
 
-        // autorun parses inline gff text from data.gff
+        // autorun parses inline gff text from data.gff. Text that goes away
+        // takes its annotations with it -- setData with a new alignment and no
+        // gff used to leave the previous file's annotations drawn over it --
+        // while annotations a host set directly are left alone, which is why
+        // this tracks what it applied instead of reading the current list
+        let appliedGFF = false
         addDisposer(
           self,
           autorun(() => {
@@ -3010,10 +3018,14 @@ function stateModelFactory() {
             if (gffText) {
               try {
                 self.applyGFFText(gffText)
+                appliedGFF = true
               } catch (e) {
                 console.error(e)
                 self.setError(e)
               }
+            } else if (appliedGFF) {
+              appliedGFF = false
+              self.setAnnotations([])
             }
           }),
         )

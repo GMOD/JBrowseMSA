@@ -114,11 +114,13 @@ covers the whole path.
 ## Protein domains
 
 Load a GFF3 annotation file from the import form, or from **Annotations → Open
-InterProScan results...**, to overlay domains on the alignment. Any GFF3 works —
+annotation file...**, to overlay domains on the alignment. Any GFF3 works —
 InterProScan output is the common case, not a requirement — and the same overlay
-draws exon and gene models. Each row's annotation coordinates are translated
-into MSA coordinate space, so they line up across the family even where
-alignment gaps shift the underlying sequence positions.
+draws exon and gene models. That dialog also takes the JSON an InterProScan run
+returns, converting it to GFF3 as it loads, and either way the annotations
+travel in the shared link with the rest of the view. Each row's annotation
+coordinates are translated into MSA coordinate space, so they line up across the
+family even where alignment gaps shift the underlying sequence positions.
 
 Building that file is a job for the [CLI](https://gmod.org/JBrowseMSA/cli):
 `react-msaview-cli interpro` reads InterPro's precomputed matches for UniProt

@@ -9,8 +9,8 @@ import Visibility from '@mui/icons-material/Visibility'
 import type { MsaViewModel } from '../../model.ts'
 
 const FeatureFilterDialog = lazy(() => import('../dialogs/FeatureDialog.tsx'))
-const InterProScanFileDialog = lazy(
-  () => import('../dialogs/InterProScanFileDialog.tsx'),
+const AnnotationFileDialog = lazy(
+  () => import('../dialogs/AnnotationFileDialog.tsx'),
 )
 
 const domainsTutorial = 'https://gmod.org/JBrowseMSA/tutorials/protein_family'
@@ -20,11 +20,11 @@ export function getAnnotationsMenu({ model }: { model: MsaViewModel }) {
   const noneLoaded = noDomains ? ' (none loaded)' : ''
   return [
     {
-      label: 'Open InterProScan results...',
+      label: 'Open annotation file...',
       icon: FolderOpen,
       onClick: () => {
         model.queueDialog(handleClose => [
-          InterProScanFileDialog,
+          AnnotationFileDialog,
           {
             handleClose,
             model,
