@@ -21,6 +21,7 @@ msaview(
 \item{msa}{Alignment data. Can be:
 \itemize{
   \item A file path to a FASTA, Stockholm, or Clustal file
+  \item An http(s) URL, which the viewer fetches itself
   \item A character string containing alignment text
   \item A \code{DNAStringSet} or \code{AAStringSet} (Biostrings)
   \item A \code{DNAMultipleAlignment} or \code{AAMultipleAlignment} (Biostrings)
@@ -30,6 +31,7 @@ msaview(
 \item{tree}{Tree data. Can be:
 \itemize{
   \item A file path to a Newick file
+  \item An http(s) URL, which the viewer fetches itself
   \item A character string containing a Newick tree
   \item An \code{ape::phylo} object
   \item A \code{treeio::treedata} object
@@ -39,6 +41,7 @@ msaview(
 \item{gff}{Domain annotation data. Can be:
 \itemize{
   \item A file path to a GFF3 file
+  \item An http(s) URL, which the viewer fetches itself
   \item A character string containing GFF3 text
   \item A data frame with columns \code{seqname}, \code{start}, \code{end},
     and optionally \code{name}, \code{description}, \code{signature_desc}
@@ -90,6 +93,15 @@ Renders an interactive multiple sequence alignment viewer powered by
 react-msaview. Accepts a wide range of R and Bioconductor objects for
 both alignments and phylogenetic trees.
 }
+\details{
+Row names are normalized on the way in: whitespace and the Newick grammar
+characters become underscores, in the alignment, the tree, a GFF data
+frame's \code{seqname}, and the row a highlight or column track names. The
+two formats mangle a name like \code{Homo sapiens} differently otherwise --
+ape writes \code{Homo_sapiens} while the FASTA header keeps the space, which
+the viewer reads as a row called \code{Homo} -- and the tree then matches no
+row.
+}
 \examples{
 \dontrun{
 # --- Basic usage with character strings ---
@@ -101,6 +113,9 @@ msaview(
 # --- From files ---
 msaview(msa = "alignment.stock")
 msaview(msa = "alignment.fa", tree = "tree.nwk")
+
+# --- From a URL, fetched by the viewer ---
+msaview(msa = "https://gmod.org/JBrowseMSA/data/pfam.stock")
 
 # --- With ape ---
 library(ape)

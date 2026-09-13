@@ -11,7 +11,7 @@ RStudio, R Markdown, Quarto, and Shiny.
 The only hard dependency is `htmlwidgets`:
 
 ```r
-remotes::install_github("GMOD/react-msaview", subdir = "packages/r-msaview")
+remotes::install_github("GMOD/JBrowseMSA", subdir = "packages/r-msaview")
 ```
 
 From a clone of the repository, `devtools::install("packages/r-msaview")`
@@ -108,11 +108,13 @@ aa <- AAStringSet(c(
 msaview(msa = aa, color_scheme = "clustal")
 
 # DNAMultipleAlignment
+# every row has to be the same length: a MultipleAlignment is an alignment,
+# and Biostrings rejects a ragged one
 aln <- DNAMultipleAlignment(c(
-  "ATGCGATCGATCGATCG--ATCG",
-  "ATGCGATCGATCGATCGATCGATCG",
-  "ATGCG--CGATCGATCGATCGATCG"
-), rowmask = as(IRanges(), "NormalIRanges"))
+  seq1 = "ATGCGATCGATCGATCG--ATCG",
+  seq2 = "ATGCGATCGATCGATCGATCGAC",
+  seq3 = "ATGCG--CGATCGATCGATCGAC"
+))
 msaview(msa = aln)
 ```
 
@@ -134,7 +136,7 @@ argument accepts a file path, a GFF3 string, or a data frame. This pairs with
 the [CLI](../cli/), which writes domains as GFF3:
 
 ```sh
-react-msaview-cli interproscan proteins.fasta -o domains.gff
+react-msaview-cli interpro accessions.tsv -o domains.gff
 ```
 
 ```r

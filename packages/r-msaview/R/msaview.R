@@ -4,9 +4,18 @@
 #' react-msaview. Accepts a wide range of R and Bioconductor objects for
 #' both alignments and phylogenetic trees.
 #'
+#' Row names are normalized on the way in: whitespace and the Newick grammar
+#' characters become underscores, in the alignment, the tree, a GFF data
+#' frame's \code{seqname}, and the row a highlight or column track names. The
+#' two formats mangle a name like \code{Homo sapiens} differently otherwise --
+#' ape writes \code{Homo_sapiens} while the FASTA header keeps the space, which
+#' the viewer reads as a row called \code{Homo} -- and the tree then matches no
+#' row.
+#'
 #' @param msa Alignment data. Can be:
 #'   \itemize{
 #'     \item A file path to a FASTA, Stockholm, or Clustal file
+#'     \item An http(s) URL, which the viewer fetches itself
 #'     \item A character string containing alignment text
 #'     \item A \code{DNAStringSet} or \code{AAStringSet} (Biostrings)
 #'     \item A \code{DNAMultipleAlignment} or \code{AAMultipleAlignment} (Biostrings)
@@ -15,6 +24,7 @@
 #' @param tree Tree data. Can be:
 #'   \itemize{
 #'     \item A file path to a Newick file
+#'     \item An http(s) URL, which the viewer fetches itself
 #'     \item A character string containing a Newick tree
 #'     \item An \code{ape::phylo} object
 #'     \item A \code{treeio::treedata} object
@@ -23,6 +33,7 @@
 #' @param gff Domain annotation data. Can be:
 #'   \itemize{
 #'     \item A file path to a GFF3 file
+#'     \item An http(s) URL, which the viewer fetches itself
 #'     \item A character string containing GFF3 text
 #'     \item A data frame with columns \code{seqname}, \code{start}, \code{end},
 #'       and optionally \code{name}, \code{description}, \code{signature_desc}
@@ -71,6 +82,9 @@
 #' # --- From files ---
 #' msaview(msa = "alignment.stock")
 #' msaview(msa = "alignment.fa", tree = "tree.nwk")
+#'
+#' # --- From a URL, fetched by the viewer ---
+#' msaview(msa = "https://gmod.org/JBrowseMSA/data/pfam.stock")
 #'
 #' # --- With ape ---
 #' library(ape)
@@ -157,9 +171,12 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     column_tracks = NULL, show_branch_len = NULL,
                     highlights = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
-  msa_text <- convert_msa(msa)
-  tree_text <- convert_tree(tree)
-  gff_text <- convert_gff(gff)
+  # a URL is for the viewer to fetch, not for R to read: reading it here would
+  # need an HTTP client, and passing it on as document text drew a one-row
+  # alignment whose name was the URL
+  msa_text <- if (is_url(msa)) NULL else convert_msa(msa)
+  tree_text <- if (is_url(tree)) NULL else convert_tree(tree)
+  gff_text <- if (is_url(gff)) NULL else convert_gff(gff)
 
   config <- list(type = "MsaView")
   if (!is.null(msa_text) || !is.null(tree_text) || !is.null(gff_text)) {
@@ -168,6 +185,9 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
     config$data <- list(msa = msa_text %||% "", tree = tree_text %||% "")
     config$data$gff <- gff_text
   }
+  config$msaFilehandle <- uri_location(msa)
+  config$treeFilehandle <- uri_location(tree)
+  config$gffFilehandle <- uri_location(gff)
   config$colorSchemeName <- color_scheme
   config$columnTracks <- convert_column_tracks(column_tracks)
   config$showBranchLen <- show_branch_len
@@ -281,7 +301,8 @@ convert_msa <- function(msa) {
 convert_highlights <- function(highlights) {
   if (is.null(highlights)) return(NULL)
   lapply(highlights, function(h) {
-    if (!is.null(h$rows)) h$rows <- I(as.character(h$rows))
+    if (!is.null(h$rows)) h$rows <- I(sanitize_names(h$rows))
+    if (!is.null(h$row)) h$row <- sanitize_names(h$row)
     h
   })
 }
@@ -309,6 +330,33 @@ convert_tree <- function(tree) {
        ". Expected a file path, Newick string, phylo, treedata, or ggtree object.")
 }
 
+is_url <- function(x) {
+  is.character(x) && length(x) == 1 && grepl("^(https?|ftp)://", x)
+}
+
+uri_location <- function(x) {
+  if (is_url(x)) list(uri = x, locationType = "UriLocation") else NULL
+}
+
+#' The one name rule
+#'
+#' An alignment row is named by its FASTA defline up to the first whitespace,
+#' and a Newick label cannot hold the grammar characters unquoted, so the two
+#' formats mangle a name like \code{Homo sapiens} or \code{chr1:1-100}
+#' differently -- ape writes \code{Homo_sapiens} and \code{chr1-1-100}, the
+#' FASTA header keeps the space and the viewer reads the row as \code{Homo}.
+#' Names that do not match are names that match no row. Applying one
+#' substitution to both sides, and to the row named by a GFF feature, a
+#' highlight or a track, is what keeps them the same string.
+#'
+#' @param x Character vector of names.
+#' @return The names with whitespace and Newick grammar characters replaced by
+#'   underscores.
+#' @noRd
+sanitize_names <- function(x) {
+  gsub("[[:space:],:;()\\[\\]'\"]+", "_", as.character(x), perl = TRUE)
+}
+
 # Indexed by position, not by name: looking sequences up by name hands every
 # duplicate the first match. An unnamed entry gets a placeholder header.
 to_fasta <- function(seqs) {
@@ -316,11 +364,12 @@ to_fasta <- function(seqs) {
   if (is.null(nms)) nms <- rep("", length(seqs))
   blank <- is.na(nms) | nms == ""
   nms[blank] <- paste0("seq", seq_along(seqs))[blank]
-  paste0(">", nms, "\n", as.character(seqs), collapse = "\n")
+  paste0(">", sanitize_names(nms), "\n", as.character(seqs), collapse = "\n")
 }
 
 phylo_to_newick <- function(phy) {
   need_pkg("ape", "convert tree objects")
+  phy$tip.label <- sanitize_names(phy$tip.label)
   ape::write.tree(phy)
 }
 
@@ -338,6 +387,7 @@ convert_column_tracks <- function(tracks) {
            track$kind, "'")
     }
     # a one-column vector would unbox to a scalar; I() keeps it an array
+    if (!is.null(track$row)) track$row <- sanitize_names(track$row)
     if (!is.null(track$values)) track$values <- I(as.numeric(track$values))
     if (!is.null(track$colors)) track$colors <- as.list(track$colors)
     if (!is.null(track$arcs)) track$arcs <- convert_arcs(track$arcs)
@@ -410,7 +460,8 @@ df_to_gff3 <- function(df) {
   }
 
   rows <- paste(
-    df$seqname, column("source", "."), column("feature", "protein_match"),
+    sanitize_names(df$seqname), column("source", "."),
+    column("feature", "protein_match"),
     coord("start"), coord("end"),
     column("score", "."), column("strand", "."), column("phase", "."),
     attributes,

@@ -26,11 +26,13 @@ msaview(msa = aa, color_scheme = "clustal")
 # msaview(msa = dna)
 
 # ── 4. DNAMultipleAlignment ──────────────────────────────────────────
+# every row has to be the same length: a MultipleAlignment is an alignment,
+# and Biostrings rejects a ragged one
 aln <- DNAMultipleAlignment(c(
-  "ATGCGATCGATCGATCG--ATCG",
-  "ATGCGATCGATCGATCGATCGATCG",
-  "ATGCG--CGATCGATCGATCGATCG"
-), rowmask = as(IRanges(), "NormalIRanges"))
+  seq1 = "ATGCGATCGATCGATCG--ATCG",
+  seq2 = "ATGCGATCGATCGATCGATCGAC",
+  seq3 = "ATGCG--CGATCGATCGATCGAC"
+))
 msaview(msa = aln)
 
 # ── 5. After running msa package alignment ───────────────────────────
