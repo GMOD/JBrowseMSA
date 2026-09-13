@@ -47,10 +47,20 @@ test('a viewport export is the alignment canvas, not the whole widget', async ()
 
   // the widget box also covers the resize handle and the scrollbars; exporting
   // it drew the rows and columns those hide
-  const { treeAreaWidth, msaCanvasWidth, msaAreaHeight, minimapHeight } = model
+  const {
+    treeAreaWidth,
+    msaCanvasWidth,
+    msaAreaHeight,
+    minimapHeight,
+    totalTrackAreaHeight,
+  } = model
   expect(svg).toContain(`width="${treeAreaWidth + msaCanvasWidth}"`)
   expect(svg).toContain(`height="${msaAreaHeight + minimapHeight}"`)
-  expect(msaAreaHeight + minimapHeight).toBe(model.height)
+  // the tracks are left out of this export, and so is the band they occupy on
+  // screen: the three together are the widget
+  expect(msaAreaHeight + minimapHeight + totalTrackAreaHeight).toBe(
+    model.height,
+  )
 })
 
 test('no attribute is serialized as the string "undefined"', async () => {

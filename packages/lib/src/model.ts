@@ -213,6 +213,15 @@ function sameLength(segment: ResidueSegment) {
   )
 }
 
+// Does the content need a scrollbar? fit() divides the viewport by the row or
+// column count and multiplies it back, so an exact fit lands a fraction of a
+// pixel over -- enough for a `>` to answer yes and hand the reader a minimap or
+// a scrollbar for half a pixel of nothing, which then shrinks the viewport and
+// leaves a gap.
+function overflows(content: number, viewport: number) {
+  return content - viewport > 0.5
+}
+
 function inRanges(ranges: [number, number][] | undefined, position: number) {
   return !!ranges?.some(([start, end]) => position >= start && position <= end)
 }
@@ -1399,82 +1408,6 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      get dataInitialized() {
-        // truthiness, not `!== ''`: these are types.maybe, and DataModel's
-        // postProcessSnapshot drops a document over 50kb, so a restored session
-        // that inlined a large alignment comes back `undefined` here -- which
-        // `!== ''` reads as initialized and renders an empty view instead of
-        // the import form
-        return !!(self.data.msa || self.data.tree) && !self.error
-      },
-      /**
-       * #getter
-       */
-      get blocksX() {
-        return calculateBlocks({
-          viewportSize: self.msaAreaWidth,
-          viewportPos: -self.scrollX,
-          blockSize: self.blockSize,
-          mapSize: self.totalWidth,
-        })
-      },
-      /**
-       * #getter
-       */
-      get blocksY() {
-        return calculateBlocks({
-          viewportSize: this.visibleMsaHeight,
-          viewportPos: -self.scrollY,
-          blockSize: self.blockSize,
-          mapSize: self.totalHeight,
-        })
-      },
-      /**
-       * #getter
-       * height of the alignment viewport, px. The same subtraction as
-       * msaAreaHeight, which is defined later in the views chain
-       */
-      get visibleMsaHeight() {
-        return (
-          self.height -
-          self.headerHeight -
-          (self.msaAreaWidth < self.totalWidth ? self.minimapHeight : 0)
-        )
-      },
-    }))
-    .views(self => ({
-      /**
-       * #getter
-       */
-      get blocks2d() {
-        return self.blocksY.flatMap(by =>
-          self.blocksX.map(bx => [bx, by] as const),
-        )
-      },
-
-      /**
-       * #getter
-       */
-      get isLoading() {
-        return self.loadingMSA || self.loadingTree
-      },
-      /**
-       * #getter
-       */
-      get maxScrollX() {
-        return Math.min(-self.totalWidth + (self.msaAreaWidth - 100), 0)
-      },
-      /**
-       * #getter
-       * most-negative allowed scrollY, keeping the last row in view rather than
-       * letting the whole alignment scroll off the top.
-       */
-      get maxScrollY() {
-        return Math.min(-self.totalHeight + self.visibleMsaHeight, 0)
-      },
-      /**
-       * #getter
-       */
       get showMsaLetters() {
         return (
           self.drawMsaLetters &&
@@ -1488,246 +1421,6 @@ function stateModelFactory() {
        */
       get showTreeText() {
         return self.drawLabels && self.rowHeight >= minLetterRowHeight
-      },
-    }))
-    .actions(self => ({
-      /**
-       * #action
-       */
-      setDrawMsaLetters(arg: boolean) {
-        self.drawMsaLetters = arg
-      },
-
-      /**
-       * #action
-       */
-      setScrollZoom(arg: boolean) {
-        self.scrollZoom = arg
-      },
-
-      /**
-       * #action
-       * set hovered tree node and its descendants
-       */
-      setHoveredTreeNode(nodeId?: string) {
-        // the tree's mousemove handler calls this on every event, and both the
-        // lookup and the write are expensive: `find` walks the whole hierarchy,
-        // and a fresh object here invalidates hoveredRowIndices and redraws the
-        // tree and MSA overlays. Re-hovering the same node is the common case
-        if (nodeId === self.hoveredTreeNode?.nodeId) {
-          return
-        }
-        if (!nodeId) {
-          self.hoveredTreeNode = undefined
-          return
-        }
-        const node = find(self.hierarchy, n => n.data.id === nodeId)
-        self.hoveredTreeNode = node
-          ? {
-              nodeId,
-              descendantNames: leaves(node).map(leaf => leaf.data.name),
-            }
-          : undefined
-      },
-
-      /**
-       * #action
-       * Calculate a neighbor joining tree from the current MSA using BLOSUM62
-       * distances. Refuses above `maxNeighborJoiningRows`: the join loop is
-       * cubic and runs on the main thread, so 800 rows is a ten-second freeze
-       * with no progress and no cancel, and a tree that size wants a tool built
-       * for it anyway.
-       */
-      calculateNeighborJoiningTreeFromMSA() {
-        if (self.rows.length < 2) {
-          throw new Error('Need at least 2 sequences to build a tree')
-        }
-        if (self.rows.length > maxNeighborJoiningRows) {
-          throw new Error(
-            `Neighbor joining here is capped at ${maxNeighborJoiningRows} sequences and this alignment has ${self.rows.length}. Build the tree with FastTree or IQ-TREE and open it alongside the alignment: https://gmod.org/JBrowseMSA/tutorials/protein_family`,
-          )
-        }
-        const newickTree = calculateNeighborJoiningTree(self.rows)
-        self.setTree(newickTree)
-      },
-
-      /**
-       * #action
-       * restore the default column width and row height
-       */
-      resetZoom() {
-        self.setColWidth(defaultColWidth)
-        self.setRowHeight(defaultRowHeight)
-      },
-      /**
-       * #action
-       */
-      zoomOutHorizontal() {
-        self.colWidth = Math.max(minColWidth, Math.floor(self.colWidth * 0.75))
-        self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
-      },
-      /**
-       * #action
-       */
-      zoomInHorizontal() {
-        self.colWidth = Math.min(maxCellSize, Math.ceil(self.colWidth * 1.5))
-        self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
-      },
-      /**
-       * #action
-       */
-      zoomInVertical() {
-        self.rowHeight = Math.min(maxCellSize, Math.ceil(self.rowHeight * 1.5))
-      },
-      /**
-       * #action
-       */
-      zoomOutVertical() {
-        self.rowHeight = Math.max(
-          minRowHeight,
-          Math.floor(self.rowHeight * 0.75),
-        )
-      },
-      /**
-       * #action
-       */
-      zoomIn() {
-        transaction(() => {
-          this.zoomInHorizontal()
-          this.zoomInVertical()
-        })
-      },
-      /**
-       * #action
-       */
-      zoomOut() {
-        transaction(() => {
-          this.zoomOutHorizontal()
-          this.zoomOutVertical()
-        })
-      },
-      /**
-       * #action
-       * Smoothly zoom by a continuous scaleFactor. The column under the cursor
-       * (offsetX/offsetY, px relative to the MSA area) stays anchored
-       * horizontally. Vertically the anchor is biased toward the top: when the
-       * alignment nearly fits the viewport, snap to y=0 rather than pinning a
-       * random row under the cursor, with the bias fading out as the alignment
-       * grows taller than the viewport (where cursor-anchoring is useful).
-       * Drives wheel/trackpad-pinch zoom.
-       */
-      zoomToPos(scaleFactor: number, offsetX: number, offsetY: number) {
-        transaction(() => {
-          const colInView = (-self.scrollX + offsetX) / self.colWidth
-          const rowInView = (-self.scrollY + offsetY) / self.rowHeight
-          self.colWidth = clamp(
-            self.colWidth * scaleFactor,
-            minColWidth,
-            maxCellSize,
-          )
-          self.rowHeight = clamp(
-            self.rowHeight * scaleFactor,
-            minRowHeight,
-            maxCellSize,
-          )
-          self.scrollX = clamp(
-            offsetX - colInView * self.colWidth,
-            self.maxScrollX,
-            0,
-          )
-
-          const anchoredScrollY = offsetY - rowInView * self.rowHeight
-          // maxScrollY is -(totalHeight - visibleMsaHeight) when the alignment
-          // overflows, so -maxScrollY is exactly that overflow past the
-          // scrollable MSA viewport (0 when it fits)
-          const overflow = Math.max(0, -self.maxScrollY)
-          const visibleHeight = self.totalHeight - overflow
-          const topBias =
-            visibleHeight > 0 ? clamp(1 - overflow / visibleHeight, 0, 1) : 1
-          self.scrollY = clamp(
-            anchoredScrollY * (1 - topBias),
-            self.maxScrollY,
-            0,
-          )
-        })
-      },
-      /**
-       * #action
-       */
-      doScrollY(deltaY: number) {
-        this.setScrollY(self.scrollY + deltaY)
-      },
-
-      /**
-       * #action
-       * set scroll Y-offset (px), clamped to keep the alignment in view
-       */
-      setScrollY(n: number) {
-        self.scrollY = clamp(n, self.maxScrollY, 0)
-      },
-
-      /**
-       * #action
-       * Set the overlay annotations and reveal the overlay in a single step (an
-       * empty list clears both). Every source funnels through here after its
-       * own adapter has flattened it: InterProScan, GFF, user uploads, NCBI CDD.
-       */
-      setAnnotations(annotations: Annotation[]) {
-        self.annotations = annotations
-        self.setShowDomains(annotations.length > 0)
-      },
-
-      /**
-       * #action
-       * set the overlay from raw InterProScan results keyed by row name. Kept
-       * for downstream plugins that hold the EBI wire format; new code should
-       * adapt to Annotation[] and call setAnnotations.
-       */
-      setDomains(data?: Record<string, InterProScanResults>) {
-        this.setAnnotations(data ? interProScanToAnnotations(data) : [])
-      },
-
-      applyGFFText(gffText: string) {
-        this.setAnnotations(gffToAnnotations(parseGFF(gffText)))
-      },
-
-      /**
-       * #action
-       */
-      doScrollX(deltaX: number) {
-        this.setScrollX(self.scrollX + deltaX)
-      },
-
-      /**
-       * #action
-       */
-      setScrollX(n: number) {
-        self.scrollX = clamp(n, self.maxScrollX, 0)
-      },
-
-      /**
-       * #action
-       */
-      setColumnTracks(tracks: ColumnTrackSpec[]) {
-        self.columnTracks.replace(tracks)
-      },
-      /**
-       * #action
-       */
-      toggleTrack(id: string) {
-        // the stored value is "is off", so the current shown state is exactly
-        // what the flipped entry should hold
-        const defaultOff = self.MSA?.tracks.find(t => t.id === id)?.defaultOff
-        self.turnedOffTracks.set(
-          id,
-          !trackIsOff(self.turnedOffTracks, id, defaultOff),
-        )
-      },
-      /**
-       * #action
-       */
-      setStatus(status?: { msg: string; onCancel?: () => void }) {
-        self.status = status
       },
     }))
     .views(self => ({
@@ -1998,7 +1691,7 @@ function stateModelFactory() {
        * #getter
        */
       get showHorizontalScrollbar() {
-        return self.msaAreaWidth < self.totalWidth
+        return overflows(self.totalWidth, self.msaAreaWidth)
       },
 
       /**
@@ -2281,13 +1974,19 @@ function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
-       * widget width minus the tree area gives the space for the MSA
+       * the vertical space the alignment rows actually get: the widget height
+       * less everything stacked above and below them -- the header, the tracks,
+       * and the minimap when the columns overflow. Every consumer wants this
+       * same subtraction, so there is one of it: blocksY, maxScrollY, the
+       * vertical scrollbar and fitVertically all read it, and a second getter
+       * that forgot the tracks is what put the last rows out of reach.
        */
       get msaAreaHeight() {
         return (
           self.height -
           (self.showHorizontalScrollbar ? self.minimapHeight : 0) -
-          self.headerHeight
+          self.headerHeight -
+          this.totalTrackAreaHeight
         )
       },
       /**
@@ -2327,7 +2026,313 @@ function stateModelFactory() {
        * #getter
        */
       get showVerticalScrollbar() {
-        return self.msaAreaHeight < self.totalHeight
+        return overflows(self.totalHeight, self.msaAreaHeight)
+      },
+    }))
+    .views(self => ({
+      /**
+       * #getter
+       */
+      get dataInitialized() {
+        // truthiness, not `!== ''`: these are types.maybe, and DataModel's
+        // postProcessSnapshot drops a document over 50kb, so a restored session
+        // that inlined a large alignment comes back `undefined` here -- which
+        // `!== ''` reads as initialized and renders an empty view instead of
+        // the import form
+        return !!(self.data.msa || self.data.tree) && !self.error
+      },
+      /**
+       * #getter
+       */
+      get blocksX() {
+        return calculateBlocks({
+          viewportSize: self.msaAreaWidth,
+          viewportPos: -self.scrollX,
+          blockSize: self.blockSize,
+          mapSize: self.totalWidth,
+        })
+      },
+      /**
+       * #getter
+       */
+      get blocksY() {
+        return calculateBlocks({
+          viewportSize: self.msaAreaHeight,
+          viewportPos: -self.scrollY,
+          blockSize: self.blockSize,
+          mapSize: self.totalHeight,
+        })
+      },
+    }))
+    .views(self => ({
+      /**
+       * #getter
+       */
+      get blocks2d() {
+        return self.blocksY.flatMap(by =>
+          self.blocksX.map(bx => [bx, by] as const),
+        )
+      },
+
+      /**
+       * #getter
+       */
+      get isLoading() {
+        return self.loadingMSA || self.loadingTree
+      },
+      /**
+       * #getter
+       */
+      get maxScrollX() {
+        return Math.min(-self.totalWidth + (self.msaAreaWidth - 100), 0)
+      },
+      /**
+       * #getter
+       * most-negative allowed scrollY, keeping the last row in view rather than
+       * letting the whole alignment scroll off the top.
+       */
+      get maxScrollY() {
+        return Math.min(-self.totalHeight + self.msaAreaHeight, 0)
+      },
+    }))
+    .actions(self => ({
+      /**
+       * #action
+       */
+      setDrawMsaLetters(arg: boolean) {
+        self.drawMsaLetters = arg
+      },
+
+      /**
+       * #action
+       */
+      setScrollZoom(arg: boolean) {
+        self.scrollZoom = arg
+      },
+
+      /**
+       * #action
+       * set hovered tree node and its descendants
+       */
+      setHoveredTreeNode(nodeId?: string) {
+        // the tree's mousemove handler calls this on every event, and both the
+        // lookup and the write are expensive: `find` walks the whole hierarchy,
+        // and a fresh object here invalidates hoveredRowIndices and redraws the
+        // tree and MSA overlays. Re-hovering the same node is the common case
+        if (nodeId === self.hoveredTreeNode?.nodeId) {
+          return
+        }
+        if (!nodeId) {
+          self.hoveredTreeNode = undefined
+          return
+        }
+        const node = find(self.hierarchy, n => n.data.id === nodeId)
+        self.hoveredTreeNode = node
+          ? {
+              nodeId,
+              descendantNames: leaves(node).map(leaf => leaf.data.name),
+            }
+          : undefined
+      },
+
+      /**
+       * #action
+       * Calculate a neighbor joining tree from the current MSA using BLOSUM62
+       * distances. Refuses above `maxNeighborJoiningRows`: the join loop is
+       * cubic and runs on the main thread, so 800 rows is a ten-second freeze
+       * with no progress and no cancel, and a tree that size wants a tool built
+       * for it anyway.
+       */
+      calculateNeighborJoiningTreeFromMSA() {
+        if (self.rows.length < 2) {
+          throw new Error('Need at least 2 sequences to build a tree')
+        }
+        if (self.rows.length > maxNeighborJoiningRows) {
+          throw new Error(
+            `Neighbor joining here is capped at ${maxNeighborJoiningRows} sequences and this alignment has ${self.rows.length}. Build the tree with FastTree or IQ-TREE and open it alongside the alignment: https://gmod.org/JBrowseMSA/tutorials/protein_family`,
+          )
+        }
+        const newickTree = calculateNeighborJoiningTree(self.rows)
+        self.setTree(newickTree)
+      },
+
+      /**
+       * #action
+       * restore the default column width and row height
+       */
+      resetZoom() {
+        self.setColWidth(defaultColWidth)
+        self.setRowHeight(defaultRowHeight)
+      },
+      /**
+       * #action
+       */
+      zoomOutHorizontal() {
+        self.colWidth = Math.max(minColWidth, Math.floor(self.colWidth * 0.75))
+        self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
+      },
+      /**
+       * #action
+       */
+      zoomInHorizontal() {
+        self.colWidth = Math.min(maxCellSize, Math.ceil(self.colWidth * 1.5))
+        self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
+      },
+      /**
+       * #action
+       */
+      zoomInVertical() {
+        self.rowHeight = Math.min(maxCellSize, Math.ceil(self.rowHeight * 1.5))
+      },
+      /**
+       * #action
+       */
+      zoomOutVertical() {
+        self.rowHeight = Math.max(
+          minRowHeight,
+          Math.floor(self.rowHeight * 0.75),
+        )
+      },
+      /**
+       * #action
+       */
+      zoomIn() {
+        transaction(() => {
+          this.zoomInHorizontal()
+          this.zoomInVertical()
+        })
+      },
+      /**
+       * #action
+       */
+      zoomOut() {
+        transaction(() => {
+          this.zoomOutHorizontal()
+          this.zoomOutVertical()
+        })
+      },
+      /**
+       * #action
+       * Smoothly zoom by a continuous scaleFactor. The column under the cursor
+       * (offsetX/offsetY, px relative to the MSA area) stays anchored
+       * horizontally. Vertically the anchor is biased toward the top: when the
+       * alignment nearly fits the viewport, snap to y=0 rather than pinning a
+       * random row under the cursor, with the bias fading out as the alignment
+       * grows taller than the viewport (where cursor-anchoring is useful).
+       * Drives wheel/trackpad-pinch zoom.
+       */
+      zoomToPos(scaleFactor: number, offsetX: number, offsetY: number) {
+        transaction(() => {
+          const colInView = (-self.scrollX + offsetX) / self.colWidth
+          const rowInView = (-self.scrollY + offsetY) / self.rowHeight
+          self.colWidth = clamp(
+            self.colWidth * scaleFactor,
+            minColWidth,
+            maxCellSize,
+          )
+          self.rowHeight = clamp(
+            self.rowHeight * scaleFactor,
+            minRowHeight,
+            maxCellSize,
+          )
+          self.scrollX = clamp(
+            offsetX - colInView * self.colWidth,
+            self.maxScrollX,
+            0,
+          )
+
+          const anchoredScrollY = offsetY - rowInView * self.rowHeight
+          // maxScrollY is -(totalHeight - visibleMsaHeight) when the alignment
+          // overflows, so -maxScrollY is exactly that overflow past the
+          // scrollable MSA viewport (0 when it fits)
+          const overflow = Math.max(0, -self.maxScrollY)
+          const visibleHeight = self.totalHeight - overflow
+          const topBias =
+            visibleHeight > 0 ? clamp(1 - overflow / visibleHeight, 0, 1) : 1
+          self.scrollY = clamp(
+            anchoredScrollY * (1 - topBias),
+            self.maxScrollY,
+            0,
+          )
+        })
+      },
+      /**
+       * #action
+       */
+      doScrollY(deltaY: number) {
+        this.setScrollY(self.scrollY + deltaY)
+      },
+
+      /**
+       * #action
+       * set scroll Y-offset (px), clamped to keep the alignment in view
+       */
+      setScrollY(n: number) {
+        self.scrollY = clamp(n, self.maxScrollY, 0)
+      },
+
+      /**
+       * #action
+       * Set the overlay annotations and reveal the overlay in a single step (an
+       * empty list clears both). Every source funnels through here after its
+       * own adapter has flattened it: InterProScan, GFF, user uploads, NCBI CDD.
+       */
+      setAnnotations(annotations: Annotation[]) {
+        self.annotations = annotations
+        self.setShowDomains(annotations.length > 0)
+      },
+
+      /**
+       * #action
+       * set the overlay from raw InterProScan results keyed by row name. Kept
+       * for downstream plugins that hold the EBI wire format; new code should
+       * adapt to Annotation[] and call setAnnotations.
+       */
+      setDomains(data?: Record<string, InterProScanResults>) {
+        this.setAnnotations(data ? interProScanToAnnotations(data) : [])
+      },
+
+      applyGFFText(gffText: string) {
+        this.setAnnotations(gffToAnnotations(parseGFF(gffText)))
+      },
+
+      /**
+       * #action
+       */
+      doScrollX(deltaX: number) {
+        this.setScrollX(self.scrollX + deltaX)
+      },
+
+      /**
+       * #action
+       */
+      setScrollX(n: number) {
+        self.scrollX = clamp(n, self.maxScrollX, 0)
+      },
+
+      /**
+       * #action
+       */
+      setColumnTracks(tracks: ColumnTrackSpec[]) {
+        self.columnTracks.replace(tracks)
+      },
+      /**
+       * #action
+       */
+      toggleTrack(id: string) {
+        // the stored value is "is off", so the current shown state is exactly
+        // what the flipped entry should hold
+        const defaultOff = self.MSA?.tracks.find(t => t.id === id)?.defaultOff
+        self.turnedOffTracks.set(
+          id,
+          !trackIsOff(self.turnedOffTracks, id, defaultOff),
+        )
+      },
+      /**
+       * #action
+       */
+      setStatus(status?: { msg: string; onCancel?: () => void }) {
+        self.status = status
       },
     }))
     .views(self => ({
@@ -2711,8 +2716,18 @@ function stateModelFactory() {
        * #action
        */
       fit() {
-        this.fitVertically()
-        this.fitHorizontally()
+        // Each direction's viewport depends on the other's result: fitting the
+        // rows while the columns still overflow measures against a height the
+        // minimap is taking, and fitting the columns while the rows still
+        // overflow measures against a width the vertical scrollbar is taking.
+        // A second pass measures against the geometry the first pass produced,
+        // which is the one the reader ends up looking at.
+        transaction(() => {
+          for (let pass = 0; pass < 2; pass++) {
+            this.fitHorizontally()
+            this.fitVertically()
+          }
+        })
       },
       /**
        * #action

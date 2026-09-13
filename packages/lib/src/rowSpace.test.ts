@@ -43,4 +43,8 @@ test('fit vertically leaves every row on screen', () => {
   const model = makeModel()
   model.fitVertically()
   expect(model.totalHeight).toBeLessThanOrEqual(model.msaAreaHeight)
+  // and the rows own that space: nothing else is stacked in it
+  expect(model.msaAreaHeight).toBe(
+    model.height - model.headerHeight - model.totalTrackAreaHeight,
+  )
 })
