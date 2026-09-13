@@ -151,9 +151,16 @@ before its coordinates mean anything on it:
 ```bash
 # same length means substitutions only, so residue n is residue n in both;
 # a length difference is an indel, and every boundary after it has moved
-curl -sf "https://rest.uniprot.org/uniprotkb/$accession.fasta" |
+curl -sf "https://rest.uniprot.org/uniprotkb/P0DTC2.fasta" |
   tail -n +2 | tr -d '\n' | wc -c
 ```
+
+```
+1273
+```
+
+1273 is what the SARS-CoV-2 row is too. Doing that for every row with an
+accession:
 
 ```
 SARS-CoV-2   P0DTC2 same length, 0 substitution(s)
@@ -191,9 +198,9 @@ InterPro release 110.0; reading precomputed pfam matches...
 
 The same four-part architecture down the betacoronavirus rows: S1 N-terminal
 domain, S1 receptor-binding, S1 C-terminal, then S2. 229E and NL63 carry the
-alphacoronavirus S1 signature instead, one box where the others have three, and
-the three rows the arrows point at have no boxes because no UniProtKB entry
-could supply coordinates for them.
+alphacoronavirus S1 signature instead, one box where the others have three. The
+three rows the arrows point at are empty: two of those isolates are in no
+UniProtKB entry, and the third is HKU1, whose entry the length check dropped.
 
 ## 6. The four columns nobody else has
 
@@ -239,13 +246,38 @@ supply the correspondence:
 
 ```bash
 curl -s https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/6vxx |
-  jq '.["6vxx"].UniProt.P0DTC2.mappings[] | select(.chain_id == "A")'
+  jq -c '.["6vxx"].UniProt.P0DTC2.mappings[] | select(.chain_id == "A") |
+         {unp_start, unp_end, start: .start.residue_number,
+          end: .end.residue_number, identity}'
 ```
 
 ```
-SIFTS row 14-1211 is 6VXX 33-1230 (offset 19)
-the entity is 1281 residues, identity 0.97 to P0DTC2
-32 residues before the mapped region and 51 after it belong to no part of P0DTC2
+{"unp_start":14,"unp_end":1211,"start":33,"end":1230,"identity":0.97}
+```
+
+One block, offset by 19 for its whole length, and an identity of 0.97 rather
+than 1. Both of those are the construct, which the entry will describe if asked:
+
+```bash
+curl -s https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/6vxx |
+  jq -r '.["6vxx"][0] | .length, .sequence[:32], .sequence[-51:]'
+```
+
+```
+1281
+MGILPSPGMPALLSLVSLLSVLLMGCVAETGT
+GSGRENLYFQGGGGSGYIPEAPRDGQAYVRKDGEWVLLSTFLGHHHHHHHH
+```
+
+The deposited entity is 1281 residues. It opens with 32 that are not spike, a
+signal peptide the expression vector supplied, and ends with 51 more that are
+not spike either: a TEV site, a foldon that trimerizes it, and a His tag. That
+is where the 19 comes from, and the rest of the offset arithmetic follows it.
+
+Comparing the mapped stretch of the entity against the row position by position
+turns up five differences, which the build script prints:
+
+```
 6VXX 701 is S where row residue 682 is R
 6VXX 702 is G where row residue 683 is R
 6VXX 704 is G where row residue 685 is R
@@ -253,30 +285,25 @@ the entity is 1281 residues, identity 0.97 to P0DTC2
 6VXX 1006 is P where row residue 987 is V
 ```
 
-One block, offset by 19 for its whole length. The offset is the construct: the
-deposited entity opens with 32 residues of an expression signal peptide that are
-not spike, and ends with 51 residues of linker, tag and trimerization foldon
-that are not spike either. The five differences inside the block are engineering
-too. The three arginines of the furin site are S, G and G in the entity, which
-is the site being disabled so the trimer stays intact, and K986P and V987P are
-the two prolines that hold it in the prefusion shape.
+The three arginines of the furin site are S, G and G here, which is the site
+being disabled so the trimer survives purification, and K986P and V987P are the
+two prolines that hold it in the prefusion shape.
 
 Author numbering is a third system again:
 
 ```bash
 curl -s https://www.ebi.ac.uk/pdbe/api/pdb/entry/polymer_coverage/6vxx/chain/A |
-  jq '.["6vxx"].molecules[0].chains[0].observed[0]'
+  jq -c '.["6vxx"].molecules[0].chains[0].observed[0].start'
 ```
 
 ```
-12 observed stretches; the first starts at label_seq_id 46, which the entry's
-author numbering calls 27
+{"residue_number":46,"author_residue_number":27,"author_insertion_code":null,"struct_asym_id":"A"}
 ```
 
-Twelve stretches with coordinates, out of one continuous chain. What the entry
-calls residue 27 is the 46th position of its own SEQRES, and the layer uses
-`label_seq_id` throughout, because author numbering carries insertion codes and
-integer arithmetic on it is wrong.
+Twelve stretches have coordinates, out of one continuous chain, and the first
+begins here. What the entry calls residue 27 is the 46th position of its own
+SEQRES, and the layer uses `label_seq_id` throughout, because author numbering
+carries insertion codes and integer arithmetic on it is wrong.
 
 Both halves together are the `residueMappings` layer: the SIFTS block as a
 segment, the gaps between the observed stretches as `unobserved`, and the
@@ -351,14 +378,15 @@ residue at all: 229E and NL63 carry an insertion there.
 Across the regions UniProt annotates on this row, what the structure resolved
 varies the way a prefusion trimer should:
 
-| Region                | Observed | Declared, not resolved |
-| --------------------- | -------: | ---------------------: |
-| RBD (319-541)         |      193 |                     30 |
-| RBM (437-508)         |       42 |                     30 |
-| PRRA insert (681-684) |        0 |                      4 |
-| Fusion peptide        |       12 |                     10 |
-| HR1 (920-970)         |       51 |                      0 |
-| HR2 (1163-1202)       |        0 |                     40 |
+| Region                   | Observed | Declared, not resolved |
+| ------------------------ | -------: | ---------------------: |
+| RBD (319-541)            |      193 |                     30 |
+| RBM (437-508)            |       42 |                     30 |
+| PRRA insert (681-684)    |        0 |                      4 |
+| Furin cleavage (685-686) |        0 |                      2 |
+| Fusion peptide (816-837) |       12 |                     10 |
+| HR1 (920-970)            |       51 |                      0 |
+| HR2 (1163-1202)          |        0 |                     40 |
 
 The receptor-binding motif is the tip that swings up to meet ACE2 and is half
 unresolved in this closed trimer; HR2 sits past residue 1147, where the model
@@ -397,8 +425,9 @@ offset 19. The two stretches either side of the hole end at 695 and resume at
 
 ## 10. Open the whole thing
 
-Four files and three layers. The files are hosted; the layers ride in the URL,
-because they are a few kilobytes and the alignment is not:
+Three hosted files and three layers. The files go behind URLs, because an
+alignment does not fit in a link; the layers go in the link, because a few
+kilobytes do:
 
 ```json
 {
@@ -409,13 +438,14 @@ because they are a few kilobytes and the alignment is not:
     "colorSchemeName": "clustalx_protein_dynamic",
     "msaFilehandle": { "uri": "https://example.org/spike.afa" },
     "treeFilehandle": { "uri": "https://example.org/spike.nwk" },
-    "gffFilehandle": { "uri": "https://example.org/spike-domains.gff" },
-    "columnTracks": [{ "id": "6vxx-coverage" }],
-    "highlights": [{ "row": "SARS-CoV-2", "start": 681, "end": 684 }],
-    "residueMappings": [{ "row": "SARS-CoV-2" }]
+    "gffFilehandle": { "uri": "https://example.org/spike-domains.gff" }
   }
 }
 ```
+
+Add the `columnTracks`, `highlights` and `residueMappings` entries from the
+sections above beside those three, URL-encode the whole object, and hang it off
+the app as `?data=`.
 
 [![](../media/spike-structure-final.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A400%2C%22treeAreaWidth%22%3A170%2C%22colWidth%22%3A0.8%2C%22rowHeight%22%3A22%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fspike%2Fspike.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fspike%2Fspike.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fspike%2Fspike-domains.gff%22%7D%2C%22showDomainLegend%22%3Afalse%2C%22columnTracks%22%3A%5B%7B%22id%22%3A%226vxx-coverage%22%2C%22name%22%3A%226VXX%20chain%20A%22%2C%22kind%22%3A%22text%22%2C%22row%22%3A%22SARS-CoV-2%22%2C%22data%22%3A%22NNNNNNNNNNNNNUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUOOOOOOOOUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUOOOOOOOOUUUUUUUOOOOOOOUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN%22%2C%22colors%22%3A%7B%22O%22%3A%22%232e7d32%22%2C%22U%22%3A%22%23e65100%22%2C%22N%22%3A%22%23cfd8dc%22%7D%2C%22height%22%3A16%7D%5D%2C%22highlights%22%3A%5B%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A319%2C%22end%22%3A541%2C%22label%22%3A%22RBD%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A437%2C%22end%22%3A508%2C%22label%22%3A%22RBM%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A681%2C%22end%22%3A684%2C%22label%22%3A%22PRRA%20insert%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A685%2C%22end%22%3A686%2C%22label%22%3A%22Furin%20cleavage%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A816%2C%22end%22%3A837%2C%22label%22%3A%22Fusion%20peptide%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A920%2C%22end%22%3A970%2C%22label%22%3A%22HR1%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A1163%2C%22end%22%3A1202%2C%22label%22%3A%22HR2%22%7D%5D%2C%22residueMappings%22%3A%5B%7B%22row%22%3A%22SARS-CoV-2%22%2C%22accession%22%3A%22P0DTC2%22%2C%22structure%22%3A%7B%22id%22%3A%226VXX%22%2C%22kind%22%3A%22experimental%22%2C%22asymId%22%3A%22A%22%2C%22url%22%3A%22https%3A%2F%2Ffiles.rcsb.org%2Fdownload%2F6VXX.cif%22%7D%2C%22segments%22%3A%5B%7B%22rowStart%22%3A14%2C%22rowEnd%22%3A1211%2C%22structStart%22%3A33%2C%22structEnd%22%3A1230%7D%5D%2C%22unobserved%22%3A%5B%5B33%2C45%5D%2C%5B89%2C98%5D%2C%5B163%2C183%5D%2C%5B192%2C204%5D%2C%5B265%2C281%5D%2C%5B464%2C465%5D%2C%5B474%2C480%5D%2C%5B488%2C507%5D%2C%5B521%2C521%5D%2C%5B640%2C659%5D%2C%5B696%2C707%5D%2C%5B847%2C872%5D%2C%5B1167%2C1230%5D%5D%2C%22rowLength%22%3A1273%2C%22generated%22%3A%7B%22by%22%3A%22sifts%22%2C%22date%22%3A%222026-09-13%22%7D%7D%5D%7D%7D)
 
