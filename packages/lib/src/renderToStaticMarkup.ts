@@ -1,3 +1,4 @@
+import { colord } from 'colord'
 import { flushSync } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 
@@ -37,11 +38,37 @@ export function renderToStaticMarkup(node: React.ReactElement) {
     // export ever taken. The markup is a string by here and needs no DOM.
     root.unmount()
   }
-  // SVG 1.1 presentation attributes (`fill`, `stroke`) take a <color>, which
-  // excludes rgba() -- alpha belongs in a separate fill-opacity. Illustrator and
-  // older Inkscape drop an element whose fill they cannot parse, so alpha is
-  // stripped rather than left to break the shape. MUI palette values are the
-  // usual source. Dropping rather than converting is what the figure snapshots
-  // encode.
-  return html.replaceAll(/\brgba\((.+?),[^,]+?\)/g, 'rgb($1)')
+  return svgSafeColors(html)
+}
+
+const tag = /<[a-zA-Z][^>]*>/g
+const colorAttr = /\b(fill|stroke|stop-color)="([^"]+)"/g
+
+/**
+ * Rewrites every color an SVG 1.1 presentation attribute cannot hold.
+ *
+ * `fill`, `stroke` and `stop-color` take a <color>, which is a keyword, a hex
+ * triplet or rgb() -- not rgba(), which MUI palette values are full of, and not
+ * hsl(), which the percent-identity scheme colors with. Illustrator and older
+ * Inkscape drop an element whose fill they cannot parse, so the minimap thumb
+ * came out opaque and the identity coloring came out missing. Alpha moves to
+ * the matching -opacity attribute, unless the element already carries one.
+ */
+function svgSafeColors(html: string) {
+  return html.replaceAll(tag, el =>
+    el.replaceAll(colorAttr, (match, attr: string, value: string) => {
+      if (!/^(rgba|hsl)/i.test(value)) {
+        return match
+      }
+      const color = colord(value)
+      if (!color.isValid()) {
+        return match
+      }
+      const alpha = color.alpha()
+      const hex = color.alpha(1).toHex()
+      return alpha === 1 || el.includes(`${attr}-opacity=`)
+        ? `${attr}="${hex}"`
+        : `${attr}="${hex}" ${attr}-opacity="${alpha}"`
+    }),
+  )
 }
