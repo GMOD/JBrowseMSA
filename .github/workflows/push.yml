@@ -28,6 +28,11 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # the model API reference is generated from doc tags in model.ts, and
+      # nothing else notices when a new member lands without a generator run
+      - name: Check the model API docs are current
+        run: node scripts/check-apidocs.mjs
+
       # what npm would receive: every manifest's bin/main/types/exports has to
       # exist in the tarball
       - name: Check the packs

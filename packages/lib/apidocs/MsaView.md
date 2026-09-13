@@ -80,6 +80,22 @@ IOptionalIType<IArrayType<ISimpleType<string>>, [undefined]>
 collapsed: stripDefault(types.array(types.string), [])
 ```
 
+#### property: columnTracks
+
+tracks supplied as data rather than computed from the alignment: per-column
+values drawn as bars, or a per-column string drawn as a text track. See
+docs/layers.md
+
+```js
+// type signature
+IOptionalIType<IArrayType<IType<ColumnTrackSpec, ColumnTrackSpec, ColumnTrackSpec>>, [undefined]>
+// code
+columnTracks: stripDefault(
+          types.array(types.frozen<ColumnTrackSpec>()),
+          [],
+        )
+```
+
 #### property: colWidth
 
 width of columns, px
@@ -222,6 +238,24 @@ msaFilehandle: types.maybe(FileLocation)
 IMaybe<ISimpleType<string>>
 // code
 relativeTo: types.maybe(types.string)
+```
+
+#### property: residueMappings
+
+which residue of which structure each row's residues are, as data. The viewer
+cannot infer this -- matching a row to a structure by sequence equality fails
+for a tagged construct, a truncation or a subsequence row, and fails in the
+direction that looks like it worked -- so it arrives computed. See
+docs/layers.md
+
+```js
+// type signature
+IOptionalIType<IArrayType<IType<ResidueMapping, ResidueMapping, ResidueMapping>>, [undefined]>
+// code
+residueMappings: stripDefault(
+          types.array(types.frozen<ResidueMapping>()),
+          [],
+        )
 ```
 
 #### property: rowHeight
@@ -373,6 +407,15 @@ Annotation[]
 annotations: [] as Annotation[]
 ```
 
+#### volatile: arcTrackHeight
+
+```js
+// type signature
+number
+// code
+arcTrackHeight: 50
+```
+
 #### volatile: blockSize
 
 size of blocks of content to be drawn, px
@@ -444,7 +487,8 @@ the currently hovered tree node ID and its descendant leaf names
 { nodeId: string; descendantNames: string[]; }
 // code
 hoveredTreeNode: undefined as
-        { nodeId: string; descendantNames: string[] } | undefined
+        | { nodeId: string; descendantNames: string[] }
+        | undefined
 ```
 
 #### volatile: loadingMSA
@@ -555,10 +599,24 @@ sequenceLogoTrackHeight: 80
 
 ```js
 // type signature
-{ msg: string; url?: string; onCancel?: () => void; }
+{ msg: string; onCancel?: () => void; }
 // code
-status: undefined as
-        { msg: string; url?: string; onCancel?: () => void } | undefined
+status: undefined as { msg: string; onCancel?: () => void } | undefined
+```
+
+#### volatile: transientHighlights
+
+transient highlights keyed by who asked for them. One slot cannot hold two
+sources -- a structure viewer's hover and a genome view's hover both want to
+point at a column, and with one slot whoever clears last erases the other's.
+Keyed by owner, each source adds and removes only its own. Not persisted: a
+hover is not part of the document.
+
+```js
+// type signature
+Record<string, Highlight[]>
+// code
+transientHighlights: {} as Record<string, Highlight[]>
 ```
 
 #### volatile: volatileWidth
@@ -699,6 +757,23 @@ Map<unknown, unknown>
 ```js
 // type
 any
+```
+
+#### getter: columnTrackContent
+
+a data track's values or string, projected from its row's residues onto
+alignment columns when it names a row
+
+```js
+// type
+Map<string, { values?: number[]; data?: string; arcs?: Arc[]; }>
+```
+
+#### getter: columnTrackModels
+
+```js
+// type
+BasicTrack[]
 ```
 
 #### getter: conservation
@@ -855,6 +930,17 @@ number
 any[]
 ```
 
+#### getter: mappedStructures
+
+the structures the loaded alignment has usable mappings onto. A row can have
+several -- an experimental entry and a predicted model, say -- so a host that
+means a particular one has to name it.
+
+```js
+// type
+any
+```
+
 #### getter: maxBranchLength
 
 max branch length across the tree, used to scale phylogram x-positions
@@ -1007,6 +1093,18 @@ row index of the reference row (`relativeTo`), undefined when unset
 unknown
 ```
 
+#### getter: residueMappingProblems
+
+every reason a mapping is being ignored, so a host can say which. A mapping
+outlives the alignment it was computed for; when the two no longer agree the
+lookups have to refuse, and refusing invisibly is how "there is no structure
+here" gets confused with "this data is stale".
+
+```js
+// type
+ResidueMappingProblem[]
+```
+
 #### getter: resolvedHighlights
 
 `highlights` projected onto what is on screen: residue spans go through the
@@ -1055,6 +1153,17 @@ Map<unknown, unknown>
 ```js
 // type
 any
+```
+
+#### getter: secondaryStructureArcs
+
+the base pairs of the consensus secondary structure, as arcs. The WUSS string is
+collapsed through the hidden columns before it is parsed, so the pairs land in
+the same visible column space the text track does
+
+```js
+// type
+Arc[]
 ```
 
 #### getter: secondaryStructureConsensus
@@ -1214,6 +1323,35 @@ Record<string, Record<string, string>>
 any
 ```
 
+#### getter: unshareableData
+
+the loaded documents this view's own snapshot cannot carry, largest first. A
+file opened from disk or pasted in becomes inline text, and DataModel drops an
+inline document past `maxInlineSnapshotBytes` rather than put megabytes of
+sequence into a session or a URL.
+
+Dropping it is right. Dropping it silently is what makes a copied link open an
+empty viewer, so the header says so and the standalone app stops rewriting the
+address bar while this is non-empty. A document fetched from a URL never appears
+here whatever its size: the snapshot keeps the filehandle and refetches through
+it.
+
+```js
+// type
+UnshareableData[]
+```
+
+#### getter: usableResidueMappings
+
+the mappings that still fit the loaded alignment. A row-level problem takes the
+whole mapping out; a single malformed segment takes only itself, since the rest
+of the mapping is still a claim about residues that exist.
+
+```js
+// type
+ResidueMapping[]
+```
+
 #### getter: verticalScrollbarWidth
 
 ```js
@@ -1278,6 +1416,18 @@ the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 globalColToVisibleCol: (globalCol: number) => number
 ```
 
+#### method: rowResidue
+
+The row residue a structure residue is, the same lookup backwards, and refusing
+on the same terms. `asymId` picks between mappings onto the same entry, which a
+homodimer -- two rows, two chains, one id -- always needs; without it such a
+lookup is ambiguous and gets nothing.
+
+```js
+// type signature
+rowResidue: (structureId: string, position: number, asymId?: string) => RowResidue
+```
+
 #### method: seqPosToGlobalCol
 
 Convert a sequence position (ungapped) to a global column index.
@@ -1295,6 +1445,25 @@ combines seqPosToGlobalCol and globalColToVisibleCol.
 ```js
 // type signature
 seqPosToVisibleCol: (rowName: string, seqPos: number) => any
+```
+
+#### method: structureResidue
+
+The structure residue a row residue is, or undefined. Refusing is the point: the
+guess this replaces answered every query, with a wrong residue when it did not
+know.
+
+It also refuses when the answer is not unique. A row commonly maps onto several
+structures -- an experimental entry and two predicted models -- and returning
+whichever came first would be the same class of wrong, quieter. Name one with
+`structureId`, or use `mappedStructures` to see what there is.
+
+Positions are 1-based, as `residueMappings` and `highlights` are -- note that
+the column helpers above take 0-based ones.
+
+```js
+// type signature
+structureResidue: (rowName: string, seqPos: number, structureId?: string) => StructureResidue
 ```
 
 #### method: visibleColToRowLetter
@@ -1333,13 +1502,36 @@ visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => any
 
 ### MsaView - Actions
 
+#### action: applyHighlight
+
+show `highlights` on behalf of `owner`, replacing whatever that owner showed
+before and leaving every other owner's alone. The object is replaced rather than
+mutated so one assignment is the observable change.
+
+```js
+// type signature
+applyHighlight: (owner: string, highlights: Highlight[]) => void
+```
+
 #### action: calculateNeighborJoiningTreeFromMSA
 
-Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances
+Calculate a neighbor joining tree from the current MSA using BLOSUM62 distances.
+Refuses above `maxNeighborJoiningRows`: the join loop is cubic and runs on the
+main thread, so 800 rows is a ten-second freeze with no progress and no cancel,
+and a tree that size wants a tool built for it anyway.
 
 ```js
 // type signature
 calculateNeighborJoiningTreeFromMSA: () => void
+```
+
+#### action: clearHighlight
+
+drop what `owner` was showing, leaving every other owner's in place
+
+```js
+// type signature
+clearHighlight: (owner: string) => void
 ```
 
 #### action: doScrollX
@@ -1432,6 +1624,20 @@ flattened it: InterProScan, GFF, user uploads, NCBI CDD.
 setAnnotations: (annotations: Annotation[]) => void
 ```
 
+#### action: setArcTrackHeight
+
+```js
+// type signature
+setArcTrackHeight: (arg: number) => void
+```
+
+#### action: setColumnTracks
+
+```js
+// type signature
+setColumnTracks: (tracks: ColumnTrackSpec[]) => void
+```
+
 #### action: setColWidth
 
 set col width (px)
@@ -1490,6 +1696,19 @@ set error state
 ```js
 // type signature
 setError: (error?: unknown) => void
+```
+
+#### action: setGFF
+
+keep the GFF text the way the alignment and the tree are kept, rather than only
+its parsed annotations. The annotations are volatile, so a file opened from disk
+used to leave no trace in the snapshot at all -- not the text, and not the
+filehandle, which is cleared once a blob is read. An autorun parses this back
+into annotations.
+
+```js
+// type signature
+setGFF: (result: string) => void
 ```
 
 #### action: setGFFFilehandle
@@ -1684,7 +1903,7 @@ setShowOnly: (node?: string) => void
 
 ```js
 // type signature
-setStatus: (status?: { msg: string; url?: string; onCancel?: () => void; }) => void
+setStatus: (status?: { msg: string; onCancel?: () => void; }) => void
 ```
 
 #### action: setSubFeatureRows
