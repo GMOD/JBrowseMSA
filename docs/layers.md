@@ -107,6 +107,14 @@ the same rule that keeps a large inline alignment out of a shared URL. Point a
 large alignment at a URL and keep the track under that size, or host the values
 and set them at runtime with `model.setColumnTracks(...)`.
 
+A `?data=` link is the tighter limit of the two, and it is not ours: the server
+in front of gmod.org answers a request line over 8,192 characters with 414
+rather than the page. That is the whole `GET /JBrowseMSA/demo/?data=… HTTP/1.1`,
+the URL-encoded snapshot included, so three tracks of a few hundred values fit
+and much more than that does not. Rounding is what buys the room, since `87,`
+costs three characters where `0.87,` costs five: scale the values to integers
+and say so in `max`.
+
 ## highlights
 
 A labeled band over a column range or a residue range, or a tint over a set of
