@@ -110,9 +110,3 @@ export function computeRowInsertions(blanks: number[], seq: string) {
 export function len(a: { end: number; start: number }) {
   return a.end - a.start
 }
-
-// https://sonnhammer.sbc.su.se/Stockholm.html
-// gaps can be a . or - in stockholm
-export function isBlank(s?: string) {
-  return s === '-' || s === '.'
-}

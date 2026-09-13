@@ -2,9 +2,27 @@ import { expect, test } from 'vitest'
 
 import {
   globalColToVisibleCol,
+  seqPosOfGlobalCol,
   visibleColToGlobalCol,
-  visibleColToSeqPos,
 } from './rowCoordinateCalculations.ts'
+import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
+
+// what the model does for a mouse position: visible column -> global column ->
+// the row's own ungapped position
+function visibleColToSeqPos({
+  seq,
+  blanks,
+  visibleCol,
+}: {
+  seq: string
+  blanks: number[]
+  visibleCol: number
+}) {
+  return seqPosOfGlobalCol(
+    buildSeqPosIndex(seq),
+    visibleColToGlobalCol(blanks, visibleCol),
+  )
+}
 
 // Tests for visibleColToGlobalCol (visible → global)
 test('visibleColToGlobalCol with blanks at positions [2, 5, 8]', () => {

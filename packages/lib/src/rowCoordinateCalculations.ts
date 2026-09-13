@@ -1,5 +1,3 @@
-import { isBlank } from './util.ts'
-
 /**
  * MSA Coordinate Systems:
  *
@@ -93,65 +91,23 @@ export function visibleColsBefore(blanks: number[], globalCol: number) {
 }
 
 /**
- * Convert a visible column to a row-specific sequence position.
- * Returns undefined if the position is a gap in the sequence.
+ * The ungapped position a row holds at a global column, or undefined when that
+ * column is a gap in the row or past its end.
  *
- * @param seq - The row's sequence string (including gaps)
- * @param blanks - Sorted array of global column indices that are hidden
- * @param visibleCol - The visible column index
- * @returns The sequence position, or undefined if it's a gap
+ * A binary search of the row's seqPos index (ascending), not a scan of the row:
+ * this answers on every mouse move, and scanning a 30k-column row per event is
+ * the whole frame.
+ *
+ * @param index - The row's seqPos -> global column index (buildSeqPosIndex)
+ * @param globalCol - The global column index in the full MSA
  */
-export function visibleColToSeqPos({
-  seq,
-  blanks,
-  visibleCol,
-}: {
-  seq: string
-  blanks: number[]
-  visibleCol: number
-}) {
-  // First convert the visible column to global column
-  const globalCol = visibleColToGlobalCol(blanks, visibleCol)
-  const seqLen = seq.length
-
-  // Check if the position in the sequence is a gap
-  if (globalCol < seqLen && isBlank(seq[globalCol])) {
+export function seqPosOfGlobalCol(
+  index: Int32Array | undefined,
+  globalCol: number,
+) {
+  if (!index) {
     return undefined
   }
-
-  // Count non-gap characters up to the global position
-  let seqPos = 0
-  for (let i = 0; i < globalCol && i < seqLen; i++) {
-    if (!isBlank(seq[i])) {
-      seqPos++
-    }
-  }
-
-  return globalCol < seqLen ? seqPos : undefined
-}
-
-/**
- * Convert a visible column to a row-specific sequence position, with row lookup.
- *
- * @param rowName - The name of the row
- * @param visibleCol - The visible column index
- * @param rowMap - Map from row name to sequence string
- * @param blanks - Sorted array of global column indices that are hidden
- * @returns The sequence position, or undefined if row not found or position is a gap
- */
-export function visibleColToSeqPosForRow({
-  rowName,
-  visibleCol,
-  rowMap,
-  blanks,
-}: {
-  rowName: string
-  visibleCol: number
-  rowMap: Map<string, string>
-  blanks: number[]
-}) {
-  const seq = rowMap.get(rowName)
-  return seq !== undefined
-    ? visibleColToSeqPos({ seq, visibleCol, blanks })
-    : undefined
+  const seqPos = partitionPoint(index.length, i => index[i]! >= globalCol)
+  return index[seqPos] === globalCol ? seqPos : undefined
 }

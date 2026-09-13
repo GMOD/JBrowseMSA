@@ -79,8 +79,8 @@ import { parseAsn1 } from './parseAsn1.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
 import {
   globalColToVisibleCol,
+  seqPosOfGlobalCol,
   visibleColToGlobalCol,
-  visibleColToSeqPosForRow,
   visibleColsBefore,
 } from './rowCoordinateCalculations.ts'
 import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
@@ -199,6 +199,12 @@ function trackIsOff(
 ) {
   return turnedOffTracks.get(id) ?? (defaultOff || defaultOffTracks.has(id))
 }
+
+// seqPos -> column indexes, per row, hung off the parse the rows came from so
+// they are collected with it. A computed would rebuild every row's index on
+// each miss, and rebuild all of them again whenever it was read outside a
+// reactive context.
+const seqPosIndexCache = new WeakMap<object, Map<string, Int32Array>>()
 
 // A segment asserts a 1:1 run, so its two sides have to be the same length.
 // One that is not is malformed data, and the arithmetic below would answer
@@ -739,10 +745,23 @@ function stateModelFactory() {
 
       /**
        * #action
-       *
+       * switch to another alignment of a multi-alignment file (Stockholm). The
+       * new alignment has its own rows and its own tree, so everything naming
+       * the old one's -- the collapsed node ids, the subtree in focus, the
+       * reference row, the scroll position -- goes with it
        */
       setCurrentAlignment(n: number) {
-        self.currentAlignment = n
+        if (n === self.currentAlignment) {
+          return
+        }
+        transaction(() => {
+          self.currentAlignment = n
+          self.collapsed.clear()
+          this.setShowOnly(undefined)
+          this.drawRelativeTo(undefined)
+          self.scrollX = 0
+          self.scrollY = 0
+        })
       },
 
       /**
@@ -1178,24 +1197,51 @@ function stateModelFactory() {
       },
 
       /**
-       * #getter
-       * per-row index of the global column holding each ungapped sequence
-       * position, so seqPos -> column is a lookup rather than a scan of the row.
-       * The domain overlay resolves thousands of these per redraw.
+       * #method
+       * index of the global column holding each ungapped sequence position of a
+       * row, so seqPos -> column is a lookup rather than a scan. The domain
+       * overlay resolves thousands of these per redraw.
+       *
+       * Built per row, on the row asked for: the first lookup used to index
+       * every row in the alignment. The cache is keyed on the parse the rows
+       * came from, so a new alignment brings a new one.
        */
-      get seqPosGlobalColIndex() {
-        return new Map(
-          this.rows.map(
-            ([name, seq]) => [name, buildSeqPosIndex(seq)] as const,
-          ),
-        )
+      seqPosIndex(rowName: string): Int32Array | undefined {
+        const MSA = this.MSA
+        if (!MSA) {
+          return undefined
+        }
+        let cache = seqPosIndexCache.get(MSA)
+        if (!cache) {
+          cache = new Map()
+          seqPosIndexCache.set(MSA, cache)
+        }
+        let index = cache.get(rowName)
+        if (!index) {
+          const seq = MSA.getRow(rowName)
+          if (!seq) {
+            return undefined
+          }
+          index = buildSeqPosIndex(seq)
+          cache.set(rowName, index)
+        }
+        return index
       },
 
       /**
        * #getter
+       * every sequence the alignment holds, keyed by row name, whatever the
+       * tree currently shows. `rows` is the rows on screen; this is the rows
+       * that exist, and every lookup about a named row goes through it --
+       * collapsing a clade hides rows, it does not delete their sequence
        */
       get rowMap() {
-        return new Map(this.rows)
+        const MSA = this.MSA
+        return new Map(
+          MSA?.getNames()
+            .map(name => [name, MSA.getRow(name)] as const)
+            .filter(([, seq]) => !!seq),
+        )
       },
       /**
        * #getter
@@ -1557,7 +1603,7 @@ function stateModelFactory() {
             return items
           }
           const out = Array.from({ length: width }, () => fill)
-          const index = self.seqPosGlobalColIndex.get(track.row)
+          const index = self.seqPosIndex(track.row)
           items.forEach((item, seqPos) => {
             const col = index?.[seqPos]
             if (col !== undefined) {
@@ -1575,7 +1621,7 @@ function stateModelFactory() {
         // to where that column went instead of taking the whole arc with it
         const resolve = (track: ColumnTrackSpec, pos: number) => {
           const col = track.row
-            ? self.seqPosGlobalColIndex.get(track.row)?.[pos - 1]
+            ? self.seqPosIndex(track.row)?.[pos - 1]
             : pos - 1
           if (col === undefined || col < 0 || col >= width) {
             return undefined
@@ -1717,8 +1763,9 @@ function stateModelFactory() {
        * @returns The letter at that position, or undefined if it's a gap
        */
       visibleColToRowLetter(rowName: string, visibleCol: number) {
-        const { rowMap, blanks } = self
-        return rowMap.get(rowName)?.[visibleColToGlobalCol(blanks, visibleCol)]
+        return self.rowMap.get(rowName)?.[
+          this.visibleColToGlobalCol(visibleCol)
+        ]
       },
 
       /**
@@ -1726,22 +1773,23 @@ function stateModelFactory() {
        * Convert a visible column to a row-specific sequence position (0-based).
        * Returns undefined if the position is a gap in the sequence.
        *
-       * CROSS-REPO CONTRACT: this and the sibling coordinate converters
-       * (seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) are used
-       * by jbrowse-plugin-protein3d to translate between alignment columns and
-       * structure/sequence residue positions across gaps. Keep them stable.
+       * PUBLIC API: this and the sibling coordinate converters
+       * (visibleColToGlobalCol, seqPosToVisibleCol, globalColToVisibleCol,
+       * seqPosToGlobalCol) are how a host translates between alignment columns
+       * and a row's residue positions across gaps. Keep them stable.
        *
        * @param rowName - The name of the row
        * @param visibleCol - The visible column index
        * @returns The sequence position (0-based), or undefined if it's a gap
        */
       visibleColToSeqPos(rowName: string, visibleCol: number) {
-        return visibleColToSeqPosForRow({
-          rowName,
-          visibleCol,
-          rowMap: self.rowMap,
-          blanks: self.blanks,
-        })
+        // a binary search of the row's index, not a scan of the row: this
+        // answers on every mouse move, and a 30k-column row scanned per event
+        // is the whole frame
+        return seqPosOfGlobalCol(
+          self.seqPosIndex(rowName),
+          this.visibleColToGlobalCol(visibleCol),
+        )
       },
 
       /**
@@ -1777,18 +1825,37 @@ function stateModelFactory() {
 
       /**
        * #method
+       * Convert a visible column index (what a mouse handler reports) back to a
+       * column of the full alignment. Hidden columns shift everything to their
+       * right, so a host that holds per-column data of its own has to make this
+       * hop before indexing it.
+       *
+       * @param visibleCol - The visible column index
+       * @returns The global column index in the full MSA
+       */
+      visibleColToGlobalCol(visibleCol: number) {
+        const { blanks, hideGapsEffective } = self
+        return hideGapsEffective
+          ? visibleColToGlobalCol(blanks, visibleCol)
+          : visibleCol
+      },
+
+      /**
+       * #method
        * Convert a sequence position (ungapped) to a global column index.
+       * Returns undefined for a row the alignment does not have -- answering
+       * anyway is how a mistyped or stale row name came to highlight column 0.
        *
        * @param rowName - The name of the row
        * @param seqPos - The sequence position (0-based, ungapped)
-       * @returns The global column index in the full MSA
+       * @returns The global column index in the full MSA, or undefined
        */
       seqPosToGlobalCol(rowName: string, seqPos: number) {
         const seq = self.rowMap.get(rowName)
         if (seq === undefined) {
-          return 0
+          return undefined
         }
-        const col = self.seqPosGlobalColIndex.get(rowName)?.[seqPos]
+        const col = self.seqPosIndex(rowName)?.[seqPos]
         // past the end of the ungapped sequence: 0 for the degenerate all-gap
         // row, otherwise one past the last column
         return col ?? (seqPos === 0 ? 0 : seq.length)
@@ -1805,7 +1872,9 @@ function stateModelFactory() {
        */
       seqPosToVisibleCol(rowName: string, seqPos: number) {
         const globalCol = this.seqPosToGlobalCol(rowName, seqPos)
-        return this.globalColToVisibleCol(globalCol)
+        return globalCol === undefined
+          ? undefined
+          : this.globalColToVisibleCol(globalCol)
       },
 
       /**
@@ -1819,7 +1888,7 @@ function stateModelFactory() {
         const problems: ResidueMappingProblem[] = []
         for (const mapping of self.residueMappings) {
           const where = { row: mapping.row, structureId: mapping.structure.id }
-          const residues = self.seqPosGlobalColIndex.get(mapping.row)?.length
+          const residues = self.seqPosIndex(mapping.row)?.length
           if (residues === undefined) {
             problems.push({
               ...where,
@@ -2158,16 +2227,34 @@ function stateModelFactory() {
        * for it anyway.
        */
       calculateNeighborJoiningTreeFromMSA() {
-        if (self.rows.length < 2) {
+        // every sequence in the alignment, not the rows on screen: a collapsed
+        // clade is a display state, and building the tree from what it leaves
+        // showing drops the sequences it hides out of the result
+        const rows = [...self.rowMap]
+        if (rows.length < 2) {
           throw new Error('Need at least 2 sequences to build a tree')
         }
-        if (self.rows.length > maxNeighborJoiningRows) {
+        if (rows.length > maxNeighborJoiningRows) {
           throw new Error(
-            `Neighbor joining here is capped at ${maxNeighborJoiningRows} sequences and this alignment has ${self.rows.length}. Build the tree with FastTree or IQ-TREE and open it alongside the alignment: https://gmod.org/JBrowseMSA/tutorials/protein_family`,
+            `Neighbor joining here is capped at ${maxNeighborJoiningRows} sequences and this alignment has ${rows.length}. Build the tree with FastTree or IQ-TREE and open it alongside the alignment: https://gmod.org/JBrowseMSA/tutorials/protein_family`,
           )
         }
-        const newickTree = calculateNeighborJoiningTree(self.rows)
-        self.setTree(newickTree)
+        this.replaceTree(calculateNeighborJoiningTree(rows))
+      },
+
+      /**
+       * #action
+       * swap in a different tree over the same alignment. Node ids are derived
+       * from the path (node-0-0-1), so a `collapsed` or `showOnly` id held over
+       * from the old tree matches a real node in the new one and folds whatever
+       * happens to sit there -- the ids go with the tree they name.
+       */
+      replaceTree(newick: string) {
+        transaction(() => {
+          self.collapsed.clear()
+          self.setShowOnly(undefined)
+          self.setTree(newick)
+        })
       },
 
       /**
@@ -2458,15 +2545,14 @@ function stateModelFactory() {
               // gap run -- and a residue whose column is itself hidden
               // collapses onto the neighbouring boundary instead of dropping
               // the band. A band whose every column is hidden spans nothing
-              // and is left out.
-              const startCol = visibleColsBefore(
-                blanks,
-                self.seqPosToGlobalCol(name, annotation.start - 1),
-              )
-              const endCol = visibleColsBefore(
-                blanks,
-                self.seqPosToGlobalCol(name, annotation.end - 1) + 1,
-              )
+              // and is left out, as is one naming a row the alignment lacks.
+              const start = self.seqPosToGlobalCol(name, annotation.start - 1)
+              const end = self.seqPosToGlobalCol(name, annotation.end - 1)
+              if (start === undefined || end === undefined) {
+                return undefined
+              }
+              const startCol = visibleColsBefore(blanks, start)
+              const endCol = visibleColsBefore(blanks, end + 1)
               return endCol > startCol
                 ? { annotation, startCol, endCol }
                 : undefined
@@ -2571,7 +2657,7 @@ function stateModelFactory() {
        * is dropped. Row names that match no row are ignored.
        */
       get resolvedHighlights(): ResolvedHighlight[] {
-        const { blanks, rowNamesSet, rowMap, transientHighlights } = self
+        const { blanks, rowNamesSet, transientHighlights } = self
         const toVisible = (globalCol: number) => {
           const visible = self.globalColToVisibleCol(globalCol)
           return visible ?? visibleColsBefore(blanks, globalCol)
@@ -2596,11 +2682,13 @@ function stateModelFactory() {
           let startGlobal = start - 1
           let endGlobal = end - 1
           if (row !== undefined) {
-            if (!rowMap.has(row)) {
+            const rowStart = self.seqPosToGlobalCol(row, start - 1)
+            const rowEnd = self.seqPosToGlobalCol(row, end - 1)
+            if (rowStart === undefined || rowEnd === undefined) {
               return []
             }
-            startGlobal = self.seqPosToGlobalCol(row, start - 1)
-            endGlobal = self.seqPosToGlobalCol(row, end - 1)
+            startGlobal = rowStart
+            endGlobal = rowEnd
           }
           const startCol = toVisible(startGlobal)
           const endVisible = self.globalColToVisibleCol(endGlobal)

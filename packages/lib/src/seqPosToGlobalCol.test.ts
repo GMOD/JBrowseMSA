@@ -44,16 +44,21 @@ describe('seqPosToGlobalCol', () => {
     expect(colsOf('---..--', [0, 1])).toEqual([0, 7])
   })
 
-  test('an empty row reports column 0', () => {
-    expect(colsOf('', [0])).toEqual([0])
+  test('a row with no residues at all gets no answer', () => {
+    // an empty row carries no sequence, so it is not a row these coordinates
+    // are about -- the same refusal a name the alignment lacks gets
+    expect(colsOf('', [0])).toEqual([undefined])
   })
 
-  test('an unknown row reports column 0', () => {
+  test('an unknown row gets no answer at all', () => {
+    // it used to answer 0, so a mistyped or stale row name highlighted the
+    // first column of an unrelated row instead of nothing
     const model = MSAModelF().create({
       type: 'MsaView',
       data: { msa: '>r\nACGT' },
     })
     model.setWidth(800)
-    expect(model.seqPosToGlobalCol('nope', 2)).toBe(0)
+    expect(model.seqPosToGlobalCol('nope', 2)).toBeUndefined()
+    expect(model.seqPosToVisibleCol('nope', 2)).toBeUndefined()
   })
 })

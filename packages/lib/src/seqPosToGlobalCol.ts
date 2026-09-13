@@ -19,5 +19,7 @@ export function buildSeqPosIndex(row: string) {
       index[n++] = col
     }
   }
-  return index.subarray(0, n)
+  // slice, not subarray: a subarray keeps the whole row-length buffer alive,
+  // and a gappy alignment's indexes are held for as long as the parse is
+  return index.slice(0, n)
 }
