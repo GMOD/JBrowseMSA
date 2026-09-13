@@ -1,0 +1,61 @@
+# git-cliff configuration — https://git-cliff.org/docs/configuration
+#
+# Matches the shape used across the GMOD repos. The key setting is
+# filter_unconventional = false plus a catch-all `.*` parser at the end, so a
+# commit that isn't in "type: subject" form still lands in the changelog under
+# "Other Changes" instead of silently vanishing.
+
+[changelog]
+header = """
+# CHANGELOG
+
+Generated from the commit history by [git-cliff](https://git-cliff.org);
+`scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
+were written by hand and are kept at the bottom.\n
+"""
+body = """
+{% if version -%}
+## [{{ version | trim_start_matches(pat="v") }}](https://github.com/GMOD/JBrowseMSA/compare/{% if previous %}{{ previous.version }}{% else %}{{ version }}{% endif %}...{{ version }}) ({{ timestamp | date(format="%Y-%m-%d") }})
+{% else -%}
+## [Unreleased]
+{% endif %}
+{% for group, commits in commits | group_by(attribute="group") %}\
+### {{ group | striptags | trim }}
+
+{% for commit in commits %}\
+- {% if commit.breaking %}**BREAKING** {% endif %}{{ commit.message | split(pat="\n") | first | trim | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/GMOD/JBrowseMSA/commit/{{ commit.id }}))
+{% endfor %}
+{% endfor %}\
+"""
+trim = true
+# Keep a header for every tag, even a release with nothing but skipped
+# (e.g. dependency-bump) commits — every prior tag has an entry.
+render_always = true
+
+[git]
+conventional_commits = true
+# Do NOT drop commits that aren't conventional-format — route them to the
+# catch-all group below instead.
+filter_unconventional = false
+require_conventional = false
+filter_commits = false
+tag_pattern = "v[0-9]*"
+sort_commits = "oldest"
+
+commit_parsers = [
+  { message = "^v?\\d+\\.\\d+\\.\\d+$", skip = true },
+  { message = "^Merge", skip = true },
+  { message = "^chore\\(deps", skip = true },
+  # release bookkeeping from the older tagging flow
+  { message = "(?i)\\[skip ci\\] bump version", skip = true },
+  { message = "^feat", group = "Features" },
+  { message = "^fix", group = "Bug Fixes" },
+  { message = "^perf", group = "Performance Improvements" },
+  { message = "^revert", group = "Reverts" },
+  { message = "^refactor", group = "Refactoring" },
+  { message = "^docs", group = "Documentation" },
+  { message = "^test", group = "Tests" },
+  { message = "^style", group = "Styling" },
+  { message = "^(chore|ci|build)", group = "Chores" },
+  { message = ".*", group = "Other Changes" },
+]

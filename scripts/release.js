@@ -103,9 +103,16 @@ run('node scripts/sync-r-bundle.mjs')
 // Commit the version bump, tag, and push. The pushed tag triggers publish.yml
 // (npm), and the push to main triggers deploy-docs.yml (GitHub Pages).
 const tag = `v${newVersion}`
+
+// Write this release's section from the commits it contains, so the changelog
+// cannot fall years behind the tags again (see cliff.toml)
+console.log('\nWriting the changelog entry...')
+run(`pnpm exec git-cliff --tag ${tag} --unreleased --prepend CHANGELOG.md`)
+
 console.log(`\nCreating git tag ${tag}...`)
 const changed = [
   ...packages.map(pkg => `packages/${pkg}/package.json`),
+  'CHANGELOG.md',
   'packages/lib/src/version.ts',
   'packages/r-msaview/inst/htmlwidgets/lib/react-msaview.umd.js',
   'packages/r-msaview/inst/htmlwidgets/msaview.yaml',

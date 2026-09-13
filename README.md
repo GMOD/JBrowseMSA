@@ -140,6 +140,12 @@ re-render when observed model properties change.
 Run `scripts/release.js` to create and push a new git tag. We use npm trusted
 publishing, so pushing a tag to GitHub launches the npm release automatically.
 
+It also writes the release's [CHANGELOG](CHANGELOG.md) section from the commits
+it contains, with [git-cliff](https://git-cliff.org) and the groups in
+[cliff.toml](cliff.toml) — the changelog had stopped at v3.1.3 while the
+packages were on 6.5.0, which is what happens when writing it is a separate step
+someone has to remember.
+
 ## Related projects
 
 - [jbrowse-plugin-msaview](https://github.com/GMOD/jbrowse-plugin-msaview) — a

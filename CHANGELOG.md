@@ -1,5 +1,1114 @@
 # CHANGELOG
 
+Generated from the commit history by [git-cliff](https://git-cliff.org);
+`scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
+were written by hand and are kept at the bottom.
+
+## [6.5.0](https://github.com/GMOD/JBrowseMSA/compare/v6.4.2...v6.5.0) (2026-09-05)
+
+### Chores
+
+- Block a release until CI is green on the commit being tagged ([41ec9ab](https://github.com/GMOD/JBrowseMSA/commit/41ec9ab9be5fd2d90321f77860fe7d446baa175a))
+
+### Documentation
+
+- Two links that build their alignment on open ([b507c39](https://github.com/GMOD/JBrowseMSA/commit/b507c399686502701ae052bd8b5f02bd847d4cba))
+
+### Styling
+
+- Format gallery.astro ([8b549a1](https://github.com/GMOD/JBrowseMSA/commit/8b549a1df4ee34109f7b2161a7f72eb62dd5556f))
+
+## [6.4.1](https://github.com/GMOD/JBrowseMSA/compare/v6.4.0...v6.4.1) (2026-09-03)
+
+### Chores
+
+- Provision pnpm 11.25.0 in CI ([080cbb3](https://github.com/GMOD/JBrowseMSA/commit/080cbb391ffebdcf2361b421c39666b18abbfae6))
+
+## [6.4.0](https://github.com/GMOD/JBrowseMSA/compare/v6.3.0...v6.4.0) (2026-09-03)
+
+### Bug Fixes
+
+- Regenerate the R help page, declare jsonlite for its tests, and unbreak the layers link and two formatter drifts ([f173b76](https://github.com/GMOD/JBrowseMSA/commit/f173b76187c66e0a140cd79e6c3dccb6fa6791d8))
+- Own renderToStaticMarkup instead of taking it from the core barrel ([f8ae8c9](https://github.com/GMOD/JBrowseMSA/commit/f8ae8c90091872281fc280046b3a47a82ba17b3f))
+
+### Refactoring
+
+- Name the residue, not the column, in the JBrowse session links ([ff1a643](https://github.com/GMOD/JBrowseMSA/commit/ff1a643de133c802f258b6729cabb2ab20fa13dc))
+
+## [6.3.0](https://github.com/GMOD/JBrowseMSA/compare/v6.2.3...v6.3.0) (2026-09-02)
+
+### Bug Fixes
+
+- Omit an absent gff from the widget config ([51a613c](https://github.com/GMOD/JBrowseMSA/commit/51a613c1cadfc90776666f089efcfd1cd87d3669))
+- Size the page to hold the domain key, fail fast on a load error ([34e452f](https://github.com/GMOD/JBrowseMSA/commit/34e452fa3a950cb0fc7ef21bade375ccd09873bb))
+- Export ExportSvgOptions so a host's inferred model type is nameable ([768675b](https://github.com/GMOD/JBrowseMSA/commit/768675b6734f156f7e23e44cc95fc3c976d0b8fa))
+
+### Documentation
+
+- Layers that take data, the viewer as an agent's render target ([9b8e5f9](https://github.com/GMOD/JBrowseMSA/commit/9b8e5f9ad01ca2ac275743fe62fcab8ad72460ef))
+- React prop, R argument, layers reference, F12 example ([0e8c72e](https://github.com/GMOD/JBrowseMSA/commit/0e8c72ea173b01bbda22092aedb307ad57938dd7))
+- Teach the React prop, the R widget, the examples and the docs about columnTracks ([d6f96ba](https://github.com/GMOD/JBrowseMSA/commit/d6f96bad977503c751b1c89c74faad33d29ebdc8))
+- Record the two shipped data layers ([47e2892](https://github.com/GMOD/JBrowseMSA/commit/47e289225f970559fcfa2d5e12b73c3e9d8ea95b))
+- Regenerate help for the highlights argument ([9c2a4ed](https://github.com/GMOD/JBrowseMSA/commit/9c2a4edb2d21f4ff5fc9fcb04e7d5bd7a066b100))
+
+### Features
+
+- Labeled highlights in residue, column, or row coordinates ([e567d59](https://github.com/GMOD/JBrowseMSA/commit/e567d598bf523d5751903efceeac97fbe0770c42))
+- Column tracks supplied as data, drawn beside the computed ones ([10b37ed](https://github.com/GMOD/JBrowseMSA/commit/10b37ed1c598bb21e6ae2c56425d3895daf25828))
+- Help pages, R CMD check in CI, install line, Biostrings tests ([b14e3c4](https://github.com/GMOD/JBrowseMSA/commit/b14e3c47a7e850f554e2f1e2dcc8b7e2500b0b78))
+- Draw the export background as one image via @napi-rs/canvas ([31feb21](https://github.com/GMOD/JBrowseMSA/commit/31feb2132a65a647c301161477e89841df3535f6))
+- Implement drawImage as a cropped, scaled <image> ([95fb9ae](https://github.com/GMOD/JBrowseMSA/commit/95fb9ae234779e9cfd84e61a8705b63180deac56))
+
+### Refactoring
+
+- Theme-aware borders, export named after the file, shared test setup ([7d666d8](https://github.com/GMOD/JBrowseMSA/commit/7d666d8c2befa135a5d64df954b36d5e08de6cb5))
+
+## [6.2.3](https://github.com/GMOD/JBrowseMSA/compare/v6.2.2...v6.2.3) (2026-09-02)
+
+### Bug Fixes
+
+- Point the cli README's react-msaview link at GitHub ([d43892a](https://github.com/GMOD/JBrowseMSA/commit/d43892a8f305d0b18e9d390ce35f6be96f041bf9))
+
+### Features
+
+- Refuse to release when main has diverged from origin ([909fc54](https://github.com/GMOD/JBrowseMSA/commit/909fc546cc65234185fddcef1060da6046bc0312))
+
+## [6.2.2](https://github.com/GMOD/JBrowseMSA/compare/v6.2.0...v6.2.2) (2026-09-02)
+
+### Bug Fixes
+
+- Treat dropped inline data as uninitialized, and repair a few smaller slips ([1e2f04a](https://github.com/GMOD/JBrowseMSA/commit/1e2f04a26121071a1881ca02bacf1030b8f29d85))
+- Keep exon projection inside a short row, and annotate the color schemes ([0ad791b](https://github.com/GMOD/JBrowseMSA/commit/0ad791b21e7730aff571f437de3d0972ffbb1143))
+- Clear data-referencing view state on reset ([e75ca13](https://github.com/GMOD/JBrowseMSA/commit/e75ca137476396a1aa8a03c19bb49d55fa88158d))
+- Clear tree-shape state in reset() so the next file opens unfolded ([4728991](https://github.com/GMOD/JBrowseMSA/commit/47289916b3c840c2f599d904b4f6fc3ac83c29d6))
+- Drop duplicate setTreeMetadataFilehandle from rebase merge ([96c7c6a](https://github.com/GMOD/JBrowseMSA/commit/96c7c6a97256561f957f24e499deb5b6640bdda6))
+
+### Refactoring
+
+- Drop the gene explorer for jb2hubs' protein browser ([f4ae402](https://github.com/GMOD/JBrowseMSA/commit/f4ae402f3134e11b17f3974486cc499ff284c53a))
+- Reset() by default-snapshot with a preserved-preferences allowlist ([8361cf6](https://github.com/GMOD/JBrowseMSA/commit/8361cf6be14d7dd6369f738f1e4010f21029f22a))
+
+## [6.2.0](https://github.com/GMOD/JBrowseMSA/compare/v6.1.1...v6.2.0) (2026-08-26)
+
+### Bug Fixes
+
+- Skip attributes whose value is undefined ([7412117](https://github.com/GMOD/JBrowseMSA/commit/7412117967d90d0a481b754c242a1f502667b3e8))
+- Take the theme background, and export only what the viewport shows ([f6eefd2](https://github.com/GMOD/JBrowseMSA/commit/f6eefd2158d691d2f37e4a87a5ff5a57381e92a1))
+- Show progress, and warn about what actually costs ([ea27d67](https://github.com/GMOD/JBrowseMSA/commit/ea27d6710b9e68006ced050143954e935ab5fb97))
+- Pin the model id so exports are reproducible ([7d2f8bc](https://github.com/GMOD/JBrowseMSA/commit/7d2f8bc5d019f7382f608bb2597b637c2549f522))
+
+### Chores
+
+- Regenerate the README figures ([3c1380b](https://github.com/GMOD/JBrowseMSA/commit/3c1380b971769ae65969656f2b4a33cffa8b44ec))
+- Regenerate the README figures ([9f267dc](https://github.com/GMOD/JBrowseMSA/commit/9f267dc6e14b06d0bd3fed10e18947fddc8fa9ee))
+
+### Features
+
+- Name each track in the exported figure ([0f468c4](https://github.com/GMOD/JBrowseMSA/commit/0f468c4c049661eedbe8dedf89cc09aebceaaf20))
+- --col-width/--row-height, and a guide built around the figures ([1c389d6](https://github.com/GMOD/JBrowseMSA/commit/1c389d615b4629bb870439a2813b9bdd6f82e94a))
+
+### Performance Improvements
+
+- Stop emitting text attributes that are already the svg default ([ce5d18d](https://github.com/GMOD/JBrowseMSA/commit/ce5d18d53dc9d0ce54448f4018c0c23a9d8329c2))
+- Draw the alignment background as one image ([8e87d01](https://github.com/GMOD/JBrowseMSA/commit/8e87d01997216469c689f47404e52dd957558bac))
+
+### Refactoring
+
+- Share the headless render shims with the cli ([e0fe5c7](https://github.com/GMOD/JBrowseMSA/commit/e0fe5c7a6a67529a4cdb6b846a2421aa751c3e0b))
+
+## [6.1.1](https://github.com/GMOD/JBrowseMSA/compare/v6.1.0...v6.1.1) (2026-08-26)
+
+### Bug Fixes
+
+- Keep the gene search box filled on a ?gene= link ([fcd244e](https://github.com/GMOD/JBrowseMSA/commit/fcd244ebb6c6978d8234e593b7027289d5e04c89))
+- Keep tree nodes clickable when node bubbles are hidden ([7135aa3](https://github.com/GMOD/JBrowseMSA/commit/7135aa37b80a01c07cea233a6738b7f75ffc2eb6))
+
+### Refactoring
+
+- Split the gene explorer and give the preview the page width ([f8bc3f7](https://github.com/GMOD/JBrowseMSA/commit/f8bc3f77a2000592b9a210b93584ab1d1d16abb0))
+
+## [6.1.0](https://github.com/GMOD/JBrowseMSA/compare/v6.0.0...v6.1.0) (2026-08-25)
+
+### Bug Fixes
+
+- Stop the track row overhanging the alignment it annotates ([3eb335a](https://github.com/GMOD/JBrowseMSA/commit/3eb335a246e8fa4d6ce332f8ce66f02ca26e0fcb))
+- Restore the gene explorer's tiled layout, and look up the canonical symbol ([aabd619](https://github.com/GMOD/JBrowseMSA/commit/aabd6198ddb2cf438a7948381766846269a767a9))
+
+### Chores
+
+- Drop dead deps, refresh the stale architecture notes ([80a0612](https://github.com/GMOD/JBrowseMSA/commit/80a06121bf694c9c5c5928ceedc9fc7a562f7e99))
+- One script per UCSC assembly, hg38 output byte-identical ([566048e](https://github.com/GMOD/JBrowseMSA/commit/566048e14f415636f4215df08fe738e01a1e368a))
+- Choose transcripts from the alignment itself, close blocks after the last run ([bb5a834](https://github.com/GMOD/JBrowseMSA/commit/bb5a83409fa5b2f24bfecb93bbcefa38e19e2a23))
+- Name retired-id transcripts by the gene whose coding span they overlap ([24bee1f](https://github.com/GMOD/JBrowseMSA/commit/24bee1f8d333f474ae2c5a74475753ed15908940))
+
+### Documentation
+
+- Figures for the logo track, and one fewer copy of the jsdom shim ([fac716d](https://github.com/GMOD/JBrowseMSA/commit/fac716d35df6ae5419e1c5a283e26f3e818dc1e8))
+- The tracks note describes the shape the code now has ([67659a3](https://github.com/GMOD/JBrowseMSA/commit/67659a32d718fbd66103c5c15a8c26a6f2869211))
+- Capture the neighbor-joining scaling idea ([b7cfba8](https://github.com/GMOD/JBrowseMSA/commit/b7cfba8b39d0749e8df394dfb4fb12736c4afaa7))
+- One file per idea, and close the four we won't do ([c77cca7](https://github.com/GMOD/JBrowseMSA/commit/c77cca7605a084b867ef36f87df5e41cdfdaeb2a))
+- The gene explorer is no longer human-only, and has one name ([fe4cb23](https://github.com/GMOD/JBrowseMSA/commit/fe4cb235eec2936530c45408ac59f1e5f11aea4c))
+- Measure ortholog sources beyond NCBI, prototype the PANTHER one ([01c5cbc](https://github.com/GMOD/JBrowseMSA/commit/01c5cbca5dd84eded8befcaa4502980cf90cc847))
+- Record the raster cache and the transformed scroll containers ([b1a5948](https://github.com/GMOD/JBrowseMSA/commit/b1a5948681556912a718a79844eb0bc120f7676b))
+
+### Features
+
+- Sequence logo track ([105406c](https://github.com/GMOD/JBrowseMSA/commit/105406ce7d1024b41ad5a57cc5731cabc5f799e0))
+- Read minus-strand genes 5'→3', optional hg38 tracks, alignment preview, ortholog carry-over ([54d5eda](https://github.com/GMOD/JBrowseMSA/commit/54d5eda5968ff7ef4218ce0007a9566878b611d0))
+- Non-human sessions open on their jb2hubs genome, with the alignment built by the plugin ([725e1cb](https://github.com/GMOD/JBrowseMSA/commit/725e1cbce2ed016930a7a33093708e08e31cd9bf))
+- Ask PANTHER for the orthologs of fly, worm, Arabidopsis and yeast genes ([1b0253d](https://github.com/GMOD/JBrowseMSA/commit/1b0253d8b55dbdcd8cd8ba6451159f8428f364cb))
+
+### Performance Improvements
+
+- Index BLOSUM62 by charcode instead of a Map of upper-cased characters ([800c59a](https://github.com/GMOD/JBrowseMSA/commit/800c59a69eccaab58933d6d76fa21b0093eda20b))
+- Measure tree labels once, raise the letter floor, size blocksY to the viewport ([c9cea63](https://github.com/GMOD/JBrowseMSA/commit/c9cea6341c7d61122c1bf157d1fc7a10665d3d48))
+- Draw MSA tiles from a zoom-independent raster cache ([d115164](https://github.com/GMOD/JBrowseMSA/commit/d115164a41a82c49649862ffbbc73162c1ffa432))
+- Scroll the MSA, tree and track blocks with one transform ([1ba1024](https://github.com/GMOD/JBrowseMSA/commit/1ba1024fa67f9c7d6feaf4066ea62af19d65ee1b))
+
+### Refactoring
+
+- One canvas host and one draw dispatch for every track kind ([d852b39](https://github.com/GMOD/JBrowseMSA/commit/d852b39b456da8cae4a91af5ea8dfff8f8eb14d7))
+- One Shannon entropy, shared by the conservation and logo tracks ([74ef9ba](https://github.com/GMOD/JBrowseMSA/commit/74ef9ba521012e40262d08446df19f5b4ceacca8))
+- Hoist the InterProScan program table out of the dialog ([ffdf2b3](https://github.com/GMOD/JBrowseMSA/commit/ffdf2b39eb3037733e4a2c356f2e1e4dea5bbe23))
+- Drop the PANTHER prototype the plugin superseded ([cafd06e](https://github.com/GMOD/JBrowseMSA/commit/cafd06ef4006e05b9df987acc01e3b17ce46ca50))
+
+### Styling
+
+- Wrap CLAUDE.md the way oxfmt does ([5558820](https://github.com/GMOD/JBrowseMSA/commit/55588202dcb16ae55132cad6093cb12eb814085b))
+
+### Tests
+
+- Share the puppeteer plumbing, assert the tiled layout, probe live strings ([ee96fee](https://github.com/GMOD/JBrowseMSA/commit/ee96fee94aebf8d31a48e2ddfdb8037c2f4e4451))
+- Read the ProteinView check off the decoded session ([dd05321](https://github.com/GMOD/JBrowseMSA/commit/dd05321e6d95898ef0ab37915c84f8db53900247))
+- Assert the flipped loc lands as reversed, descending displayed regions ([699af73](https://github.com/GMOD/JBrowseMSA/commit/699af73fc35410fae16a77d3da315cfe3aec7cba))
+- Read the genome view's init through a typed helper ([696ceaa](https://github.com/GMOD/JBrowseMSA/commit/696ceaae1c6df0c61bce807626f596c6f89d1170))
+
+## [6.0.0](https://github.com/GMOD/JBrowseMSA/compare/v5.10.0...v6.0.0) (2026-08-18)
+
+### Bug Fixes
+
+- Show a failed load instead of spinning on it forever (#111) ([9d8af2e](https://github.com/GMOD/JBrowseMSA/commit/9d8af2ed3af44d8670ea7d9495b50e78b0ae46cf))
+- Gate the label gutter on the same condition that draws labels ([60f73a8](https://github.com/GMOD/JBrowseMSA/commit/60f73a8a60d6d59cfca2382ff1908382ed993738))
+- Keep domain bands that start or end in a hidden column ([32828f6](https://github.com/GMOD/JBrowseMSA/commit/32828f6e837e4befaf687200582ca65cc5d72ca3))
+- A deep newick no longer overflows the stack while getting node ids ([d77f465](https://github.com/GMOD/JBrowseMSA/commit/d77f465f5afcd024ea866ee6c64a4c65f0b10133))
+- Honor an explicit -o, match EBI status exactly, handle data-less tracks ([82f15f3](https://github.com/GMOD/JBrowseMSA/commit/82f15f3def736552971247f64b772a282827941f))
+- Fit horizontally was 20px wider than the alignment canvas ([856d749](https://github.com/GMOD/JBrowseMSA/commit/856d749056de7ecd6d64789cbf3512f48dd8ca56))
+- Line the minimap up with the alignment it maps ([c07f6ac](https://github.com/GMOD/JBrowseMSA/commit/c07f6ac33b68d16c28ebb4feed8272649866994c))
+- Contrast letters against the domain box that is actually on top ([29e3787](https://github.com/GMOD/JBrowseMSA/commit/29e378779ff5a0bcd3af97f2ec3d23c22d4de2eb))
+- A one-sequence named vector is sequences, not alignment text ([a17ed06](https://github.com/GMOD/JBrowseMSA/commit/a17ed0678f80068aa2e6ecf044be7b4f4a5b3300))
+- Run the state model doc generator again ([7581ce5](https://github.com/GMOD/JBrowseMSA/commit/7581ce5c6d096bc53c3351e9ef69b8f2dc3270f2))
+- Stop statedocs reformatting the package with the wrong formatter ([0654dd5](https://github.com/GMOD/JBrowseMSA/commit/0654dd5225f9917004125b736c4628f0cefc58e4))
+
+### Chores
+
+- Refresh the R package's vendored bundle on every release ([c5cfb77](https://github.com/GMOD/JBrowseMSA/commit/c5cfb777615451971907b295d5d822acea1a03ee))
+
+### Performance Improvements
+
+- Stop asking InterPro for the same protein twice (#110) ([49f9fd5](https://github.com/GMOD/JBrowseMSA/commit/49f9fd5f024d63361a817bd2d9dae7038915fff2))
+- Stop re-walking the tree on every mousemove over the same node ([9f7f284](https://github.com/GMOD/JBrowseMSA/commit/9f7f2844c2482db2dd86bd1f3b45c0ed0b8a4d81))
+
+### Refactoring
+
+- Dedup drag handles, binary-search column mapping, drop dead code ([bea28c1](https://github.com/GMOD/JBrowseMSA/commit/bea28c1b8c6b5cb237427c628b4815a8b48c26db))
+- Stop scanning the rest of the PDB after ENDMDL ([3dd9f9f](https://github.com/GMOD/JBrowseMSA/commit/3dd9f9fd9bcf344944a07421e9c5d841f09fcf42))
+- Make overlay annotations the model's own shape, not InterProScan's ([dc5c523](https://github.com/GMOD/JBrowseMSA/commit/dc5c5230668cadf0aede8163118071454d0c74b1))
+- Call them annotations in the UI, not domains ([d5288c9](https://github.com/GMOD/JBrowseMSA/commit/d5288c9710494388c0fe0e6bd554ea1cdcd0ffca))
+
+### Tests
+
+- Cover the resize handles and scrollbars, unflake the caterpillar tests ([a4d061f](https://github.com/GMOD/JBrowseMSA/commit/a4d061f068f46ff925b7d8ff5afdf864604b2b54))
+- Cover the minimap in the viewport SVG export ([8fad91e](https://github.com/GMOD/JBrowseMSA/commit/8fad91e6e320f5ee7c6c70eda28cd98719855046))
+- Stop collecting tests out of sibling worktrees ([a519d26](https://github.com/GMOD/JBrowseMSA/commit/a519d265ad815d6d0a29ac52e3efa77b0e60f85c))
+
+## [5.10.0](https://github.com/GMOD/JBrowseMSA/compare/v5.9.0...v5.10.0) (2026-08-17)
+
+### Bug Fixes
+
+- Ragged rows in NJ, duplicate ids in clustal/emf parsers ([9204f9c](https://github.com/GMOD/JBrowseMSA/commit/9204f9c60616631427e5eb39f9c9db58d9a535b9))
+- Draw domain boxes across the whole alignment ([543b908](https://github.com/GMOD/JBrowseMSA/commit/543b908b623b77a4c9c504d526a945eca8891120))
+- Redraw after React resizes a canvas ([cef23a5](https://github.com/GMOD/JBrowseMSA/commit/cef23a51cc7d46b0e99cbb48fca948f8394dfa7e))
+- Stop spreading one argument per sequence ([eb81f70](https://github.com/GMOD/JBrowseMSA/commit/eb81f70b6ad40a5da72e97278868ca56a4a7e890))
+
+### Chores
+
+- Point every JBrowse link at code/jb2/main ([bf21625](https://github.com/GMOD/JBrowseMSA/commit/bf2162561e066dc72ffd0c8f1044695bb8d3ee84))
+- Re-wrap the three READMEs bf21625 left unformatted ([256b3e5](https://github.com/GMOD/JBrowseMSA/commit/256b3e5ce592020986401e95aaf0490295c15f2a))
+
+### Documentation
+
+- Regenerate the stale README figures ([915bc48](https://github.com/GMOD/JBrowseMSA/commit/915bc4816777e6c263e66e29208052b1faa5abf8))
+
+### Refactoring
+
+- One reactive filehandle loader, guarded for all four ([347ddd1](https://github.com/GMOD/JBrowseMSA/commit/347ddd16e9c8462b4dd12b3a94b306a432ab986f))
+- Drop the unused seqPosToGlobalCol scan ([2f5a908](https://github.com/GMOD/JBrowseMSA/commit/2f5a908a5cb2a4ddee5cd5e0b1e953ceee42d284))
+- Share the crosshair colors, collapse repeated menu/overlay markup ([91097c8](https://github.com/GMOD/JBrowseMSA/commit/91097c86c4bd14ccc670083fac8bf42bd38131ca))
+- Build the collapsed-node set once per render ([68af2a2](https://github.com/GMOD/JBrowseMSA/commit/68af2a25907f96da5d8769ff382bc33cc698fdba))
+
+## [5.9.0](https://github.com/GMOD/JBrowseMSA/compare/v5.8.0...v5.9.0) (2026-08-17)
+
+### Features
+
+- Persist the domain legend's expanded state ([4b955c6](https://github.com/GMOD/JBrowseMSA/commit/4b955c6f3e55d9b4acc3393c1e505c42a908555c))
+
+## [5.8.0](https://github.com/GMOD/JBrowseMSA/compare/v5.7.3...v5.8.0) (2026-08-16)
+
+### Bug Fixes
+
+- Scale the cladogram by the tree area, not max branch length ([4342404](https://github.com/GMOD/JBrowseMSA/commit/4342404931c253aad7611c45a3fa07fa262b1099))
+- Keep inline gff in the snapshot ([145f632](https://github.com/GMOD/JBrowseMSA/commit/145f6322c73a3f3685ad34884186dc88149b9729))
+- Take the alignment width from the widest row ([89b665f](https://github.com/GMOD/JBrowseMSA/commit/89b665f0efde057457464d1881c5262474fa1ea2))
+- Keep feature type and strand when writing GFF ([94ad35c](https://github.com/GMOD/JBrowseMSA/commit/94ad35c04e53fdf2c86a2775af93b3c34d8cb79c))
+- Treat '.' as a gap, like the rest of the viewer ([5e765df](https://github.com/GMOD/JBrowseMSA/commit/5e765df813e1bef10cf9b5dbd406885cd5823a47))
+- Carry BLAST tree labels and branch lengths into the tree ([978b87b](https://github.com/GMOD/JBrowseMSA/commit/978b87b8ca211e4d076b7092ee40e52f3bf97430))
+- Compute labelsWidth without spreading every row ([af9da3e](https://github.com/GMOD/JBrowseMSA/commit/af9da3e6df117c85fc0090ab73516323cba8252b))
+
+### Chores
+
+- Reflow the ideas.md paragraphs the formatter rewrapped ([bfe795c](https://github.com/GMOD/JBrowseMSA/commit/bfe795c84d3a36779a78f4ab64e8ef141fe865dc))
+
+### Performance Improvements
+
+- Index Clustal and EMF rows by name ([eedb5eb](https://github.com/GMOD/JBrowseMSA/commit/eedb5ebbc3151f62a91837cc2d5e1b26a54ff2c6))
+
+### Refactoring
+
+- Tighten a few domain and label inconsistencies ([97dd69e](https://github.com/GMOD/JBrowseMSA/commit/97dd69e4c41f3e9695470c80543f90d58b75e67d))
+- Destructure treeWidth with its siblings ([df22dae](https://github.com/GMOD/JBrowseMSA/commit/df22daecb5c46e2e50837b727a2472d72a02f26f))
+- Reuse getUngappedSequence in SequenceTextArea ([39d7d2e](https://github.com/GMOD/JBrowseMSA/commit/39d7d2e09a4ea71c6b69dfb7b5532b018c0af2cf))
+- Use @gmod/newick for parsing and tree traversal ([e96b9e9](https://github.com/GMOD/JBrowseMSA/commit/e96b9e9e270f0722acae89bb09fdd527e43681c6))
+
+### Tests
+
+- Pin A3M match-column correspondence ([7ec2765](https://github.com/GMOD/JBrowseMSA/commit/7ec276571b6e28d71e8bd5bb80a1fa686bd2f5b7))
+
+## [5.7.3](https://github.com/GMOD/JBrowseMSA/compare/v5.7.2...v5.7.3) (2026-08-13)
+
+### Bug Fixes
+
+- An A3M insert must not consume a match column ([7c64125](https://github.com/GMOD/JBrowseMSA/commit/7c6412585a05a140e25d37579fcd303fc864ac0d))
+- Keep Stockholm rows in file order ([30ef04f](https://github.com/GMOD/JBrowseMSA/commit/30ef04fa8a92fffee0b8bb9153a96c73244314a0))
+- Restore Newick names quoted only in part ([021c2c2](https://github.com/GMOD/JBrowseMSA/commit/021c2c2bfcbb4f2b38a600cbdcacbc2c252ea655))
+
+### Documentation
+
+- The domain legend clips because 60% is of the wrong box ([3606c51](https://github.com/GMOD/JBrowseMSA/commit/3606c5136d1adde7bee10682ccd4bf0245329e00))
+- Retract the legend-clipping diagnosis, it is not clipped ([942c940](https://github.com/GMOD/JBrowseMSA/commit/942c9409389a2d5eac355de449079304263e6a8d))
+
+### Refactoring
+
+- Tidy the GFF conversions and BaseMSA ([04857ef](https://github.com/GMOD/JBrowseMSA/commit/04857efda53059c6866f128cbee5580d28277130))
+
+## [5.7.2](https://github.com/GMOD/JBrowseMSA/compare/v5.7.1...v5.7.2) (2026-08-09)
+
+### Chores
+
+- Reflow the CLAUDE.md paragraph the formatter rewrapped ([2446876](https://github.com/GMOD/JBrowseMSA/commit/24468767caf97cf51c9371171ac5b8e30b191187))
+
+### Features
+
+- Name the gappyness slider with a data-testid ([7cd10eb](https://github.com/GMOD/JBrowseMSA/commit/7cd10eb591f7521a4d5e7d84828c903b39b29379))
+
+## [5.7.1](https://github.com/GMOD/JBrowseMSA/compare/v5.7.0...v5.7.1) (2026-08-06)
+
+### Bug Fixes
+
+- Build the CLI for real, correct stale dev docs ([4c8b155](https://github.com/GMOD/JBrowseMSA/commit/4c8b155913ae0ed833cd48e14707c9e3b1f654bf))
+- Inline statusMessageText so old jbrowse hosts don't blow up ([bfadbaa](https://github.com/GMOD/JBrowseMSA/commit/bfadbaa57455ec172cc7cbfd5f369bd999e2cd77))
+
+### Chores
+
+- Allowlist Wnt and CONSTANS in the spell checker ([84dd262](https://github.com/GMOD/JBrowseMSA/commit/84dd2622f4560faaec0c0e790b875290fe964e91))
+- Pnpm-only workspace, drop yarn residue ([89c4e74](https://github.com/GMOD/JBrowseMSA/commit/89c4e7403faf4feb1bf922f1c811341f6d313bf7))
+
+### Documentation
+
+- Regenerate every figure, and retarget the stale settings spec ([8e1b054](https://github.com/GMOD/JBrowseMSA/commit/8e1b0542117380f0164fe1be01c2becd6b6c7af4))
+
+### Features
+
+- NLRP1 orthologs, an example where architecture differs ([4fb6b46](https://github.com/GMOD/JBrowseMSA/commit/4fb6b46ef8351c7b326c9aff9ebcc6d41660411a))
+- Anchored callouts, composed figures, column-lock demo ([2906070](https://github.com/GMOD/JBrowseMSA/commit/2906070580706edd09394f901f2c77f6fd10d7c5))
+
+### Styling
+
+- Brace the single-statement ifs oxlint's curly rule flags ([56f3f40](https://github.com/GMOD/JBrowseMSA/commit/56f3f4015e91dd5b91c81736fe8fd7534ce4e4b2))
+- Run oxfmt/prettier over the files the switch missed ([e510b39](https://github.com/GMOD/JBrowseMSA/commit/e510b391b6c4ce97706f80deb9b8994689b2aae1))
+
+## [5.7.0](https://github.com/GMOD/JBrowseMSA/compare/v5.6.3...v5.7.0) (2026-08-06)
+
+### Bug Fixes
+
+- Use theme text color for letters without a colored background ([30d066d](https://github.com/GMOD/JBrowseMSA/commit/30d066d4141eb80393460ef86fcc0d2a0c3fa3df))
+- Don't let a malformed treeMetadata file take down the view ([bcba029](https://github.com/GMOD/JBrowseMSA/commit/bcba029fbedf803d0777ac8b203f8e2e39f7ecc4))
+- Depend on @jbrowse/core from npm, not the vendored tarball path ([322bca6](https://github.com/GMOD/JBrowseMSA/commit/322bca6547a5a062eda60b4a215199d43f430807))
+- Commit the clustal-js/typescript bumps the lockfile already has ([4d2354c](https://github.com/GMOD/JBrowseMSA/commit/4d2354c9a35919ae9b58affa6df7acb4cfcdfe54))
+- Pass theme through to renderAllTracks ([97d80f3](https://github.com/GMOD/JBrowseMSA/commit/97d80f3ede50b06ce1f45c9fabaaf30ef278d97f))
+- Import BaseTooltip from its own module, plus oxfmt import ordering ([434381c](https://github.com/GMOD/JBrowseMSA/commit/434381c2253bf1f08c8c6cb9499460c55113f2a2))
+
+### Chores
+
+- Switch to oxlint + oxfmt, drop ESLint ([a1244fd](https://github.com/GMOD/JBrowseMSA/commit/a1244fd7586cf8c43ec2e4532419f020a2b661e6))
+
+### Features
+
+- Add live Nextstrain pathogens example ([40251df](https://github.com/GMOD/JBrowseMSA/commit/40251dfd2c9084629c17bfe92f13d23a0f8d7b1d))
+
+### Other Changes
+
+- Mobx 7, mobx-react 10, mst 6, react 19.2.8, MUI-9 @jbrowse/core ([4dcffad](https://github.com/GMOD/JBrowseMSA/commit/4dcffadc3a0cf913e4f2e738ae7be09a9cd86c53))
+
+## [5.6.3](https://github.com/GMOD/JBrowseMSA/compare/v5.6.2...v5.6.3) (2026-07-30)
+
+### Bug Fixes
+
+- Export ColumnCounts, DomainBand, TidyDomainAnnotation ([cc34b0a](https://github.com/GMOD/JBrowseMSA/commit/cc34b0a931ab0323c5e8205ef1709051f42c6f50))
+
+## [5.6.2](https://github.com/GMOD/JBrowseMSA/compare/v5.6.1...v5.6.2) (2026-07-30)
+
+### Bug Fixes
+
+- Degrade to types.optional where the host mst lacks stripDefault ([fa11446](https://github.com/GMOD/JBrowseMSA/commit/fa1144662c28f1e77d9c81695f0a22bfa9f05d88))
+
+### Chores
+
+- Disable setup-node auto pnpm-cache under Corepack ([0a3d59e](https://github.com/GMOD/JBrowseMSA/commit/0a3d59e1b07baf8d9621eaf51b2d786d689370c7))
+- Provision pnpm via Corepack in CI and publish workflows ([d9d26c0](https://github.com/GMOD/JBrowseMSA/commit/d9d26c0399d523ff0cd9bce872e99efb3bcc5df3))
+
+### Documentation
+
+- Feature JBrowse integration as top-level Demo ([1604e19](https://github.com/GMOD/JBrowseMSA/commit/1604e19da3e01959d997944a54fffb1a51c2c643))
+- Prune completed handoffs, consolidate notes into agent-docs ([729fc44](https://github.com/GMOD/JBrowseMSA/commit/729fc44399eaecf83a2207d3def604f5eeb1262e))
+- Regenerate figures ([28a36cb](https://github.com/GMOD/JBrowseMSA/commit/28a36cb0a72c6eab32c5643b9f8b2a1577e81495))
+
+### Features
+
+- Multi-species gene explorer (NCBI + GenArk + UniProt + EBI) ([55bdc32](https://github.com/GMOD/JBrowseMSA/commit/55bdc32c53721a2450d3be6eb07d4a3dc1eb0138))
+
+### Performance Improvements
+
+- Fix quadratic tree/overlay hot paths, tally columns in typed arrays ([0700ee6](https://github.com/GMOD/JBrowseMSA/commit/0700ee633e8b11d7fa68a2dc4c14ec10da26bce7))
+
+## [5.6.1](https://github.com/GMOD/JBrowseMSA/compare/v5.6.0...v5.6.1) (2026-07-24)
+
+### Bug Fixes
+
+- Resolve typecheck error and prettier formatting failures ([d1cff75](https://github.com/GMOD/JBrowseMSA/commit/d1cff75c9b59d34e35b12158e2e8ceda5d7f2015))
+
+### Chores
+
+- Provision pnpm via Corepack instead of pnpm/action-setup ([987fdc8](https://github.com/GMOD/JBrowseMSA/commit/987fdc84b63183a94c7a61e81e9adcda8946e566))
+
+## [5.6.0](https://github.com/GMOD/JBrowseMSA/compare/v5.5.0...v5.6.0) (2026-07-24)
+
+### Chores
+
+- Drop duplicate --github-actions flag from hyperlink args ([e621794](https://github.com/GMOD/JBrowseMSA/commit/e621794680bf6493fa557d6ac1d90520bb83bdb5))
+- Enforce prettier formatting; guard color-scheme docs against drift ([3f4911b](https://github.com/GMOD/JBrowseMSA/commit/3f4911b3c3e204bb31ba7b633275b31a87a3d4f4))
+- Bump actions off deprecated Node 20 runtime ([e41318b](https://github.com/GMOD/JBrowseMSA/commit/e41318b0b7476e5de90c46e5f9c84930658d29ed))
+
+### Documentation
+
+- Fix broken links, document all CLI commands, add hyperlink CI check ([b24d815](https://github.com/GMOD/JBrowseMSA/commit/b24d815b48042b81a4799313ca15b96f856f8c3d))
+- Fix invalid color-scheme names in R package docs ([aff9045](https://github.com/GMOD/JBrowseMSA/commit/aff9045091c798cc13c8b2609f14dd218f668da4))
+- Polish copy, fix gene-explorer state leaks and clipboard feedback ([96775f9](https://github.com/GMOD/JBrowseMSA/commit/96775f9b9e29aab38dd15de8b9d81cacf12f2b3f))
+
+### Features
+
+- Label header icons, add mobile nav, fix site label drift ([a41c675](https://github.com/GMOD/JBrowseMSA/commit/a41c675c86be1d39c10d6a1be083765dfb95d94e))
+- Group header nav into dropdowns, move STL into details dialog ([ac974d8](https://github.com/GMOD/JBrowseMSA/commit/ac974d81f58322cbb769e483933fe43973896324))
+- Add APG keyboard interaction to header nav dropdowns ([89891b6](https://github.com/GMOD/JBrowseMSA/commit/89891b657bf3269834eb39411e516b7a38ebc0a8))
+
+### Other Changes
+
+- Fix website import paths broken by the repo-root move ([fc80afc](https://github.com/GMOD/JBrowseMSA/commit/fc80afc1e73d5254d68fe4591fb50838bf0a663b))
+- Allowlist "colinear" for typos; drop redundant gallery example ([b77c292](https://github.com/GMOD/JBrowseMSA/commit/b77c2924617db91aa3507728613b878fd96d1aa6))
+- Render gallery figures at native resolution ([b16fdd9](https://github.com/GMOD/JBrowseMSA/commit/b16fdd95886b72c22683967549eea9041cf58962))
+- Curate gallery around unique viewer capabilities ([37d340b](https://github.com/GMOD/JBrowseMSA/commit/37d340bb8e77ea52ca2eed253d4f61710816fb51))
+- Lint gene-explorer, debounce type-ahead, parallelize gene load ([b0703fa](https://github.com/GMOD/JBrowseMSA/commit/b0703fa62d060318602c089df86a4062700486e6))
+- Migrate to MUI v9 ([5f385e6](https://github.com/GMOD/JBrowseMSA/commit/5f385e6789b3ea8d4112ec4f59b4fc96d5bce626))
+- Vendor local MUI-v9 @jbrowse/core tarballs ([febb7e9](https://github.com/GMOD/JBrowseMSA/commit/febb7e98c762ded6b6aaa39b699b672f67e92018))
+- Gene explorer: 3D structure for any gene; misc cleanup ([612b438](https://github.com/GMOD/JBrowseMSA/commit/612b438e253b433899dc1c661b7f662c0d70ddc7))
+- Note the any-gene 3D path (UniProt-sourced protein sequence) ([c62502a](https://github.com/GMOD/JBrowseMSA/commit/c62502a6781ae6291cd74f9fec92f0bda6f2e568))
+- Prune shipped items, keep only open work + reference ([a5c025b](https://github.com/GMOD/JBrowseMSA/commit/a5c025b485ce7158f9269bceabe13e300618a5f4))
+- Gene explorer: fix stuck spinner, collapse fetch to one race-safe effect ([87e5ccb](https://github.com/GMOD/JBrowseMSA/commit/87e5ccb70990450590dc45a381cdcd992355ec6d))
+- Disable Astro compressHTML so inter-element whitespace is preserved ([c610e98](https://github.com/GMOD/JBrowseMSA/commit/c610e98a76e4acf48ea39863ca3f9d57f36c2a2b))
+- Drop now-redundant {' '} spacers from .astro files ([5f60413](https://github.com/GMOD/JBrowseMSA/commit/5f604133ae4d5b7177895a3e217f952a75b24ec0))
+- Gene explorer: fix stale type-ahead suggestions, dedupe FASTA parse ([b6c426e](https://github.com/GMOD/JBrowseMSA/commit/b6c426ee22238807b01568e765e9aa7fa8951b7c))
+- Simplify header: remove duplicated "More settings" dialog and scroll-zoom checkbox ([bcc4877](https://github.com/GMOD/JBrowseMSA/commit/bcc487767085f85cb0a99bc11c232d891e8cf0b9))
+- Use @jbrowse/core/util/tss-react ([2c996e5](https://github.com/GMOD/JBrowseMSA/commit/2c996e5cc8d7f4eeefe08e7e503dc9e3d55ffa2e))
+- Fix README page-import path, dedupe social image, tidy geneExplorer ([3033b5f](https://github.com/GMOD/JBrowseMSA/commit/3033b5fc154638bfdeaa1a3782bad19c721e3acd))
+- Gene explorer: extract effects into hooks, derive busy, add tests ([d3565a1](https://github.com/GMOD/JBrowseMSA/commit/d3565a1c94e9c7810da1213bc5be8d4d9c0930de))
+- Add per-column stats tooltip and property-conservation track ([53a9c5b](https://github.com/GMOD/JBrowseMSA/commit/53a9c5ba48e9d5dc7d42735ce6ea46f73a2894e2))
+- Dedup canvas-block rendering boilerplate in packages/lib ([f56be47](https://github.com/GMOD/JBrowseMSA/commit/f56be4737c2d001a051f9d076f24ddcff01cb13f))
+- Lint ([2711f20](https://github.com/GMOD/JBrowseMSA/commit/2711f20dccbe67de0417d32e38fa501fffe0a993))
+- Updates ([a878076](https://github.com/GMOD/JBrowseMSA/commit/a878076d93dd12b5e1f0d4bdb3196622887a3ed8))
+- Sync search box to URL gene, extract UI helpers ([fcda42d](https://github.com/GMOD/JBrowseMSA/commit/fcda42d4e913aa084ab81a1fceb30a9a42265a06))
+- Trim geneExplorer public surface, drop dead JBrowseFigure title ([61a8bc3](https://github.com/GMOD/JBrowseMSA/commit/61a8bc3bf69f04d4dce9f22ef366245dc37a08b2))
+- Bump deps ([2a9c99f](https://github.com/GMOD/JBrowseMSA/commit/2a9c99fe75118271415ff52882a7279f9f607327))
+- Add minimumReleaseAge of 3 days as supply-chain safeguard ([dcf3da7](https://github.com/GMOD/JBrowseMSA/commit/dcf3da78c5c5825d5734739a842e86efb4cf5963))
+- Test GeneExplorer state machine (busy, race-safety, clear, error) ([76a92e3](https://github.com/GMOD/JBrowseMSA/commit/76a92e3eadd77e41f61946f5d3dc4960024964ea))
+- Group sidebar by category, share shell, highlight source ([7973844](https://github.com/GMOD/JBrowseMSA/commit/7973844704d640c9609632097a56d47d73581dba))
+- Exempt recently-bumped toolchain deps from minimumReleaseAge ([11fd2ce](https://github.com/GMOD/JBrowseMSA/commit/11fd2ce43f1cd8420e01a135a7ddb1dd28f4100a))
+- Gene explorer: add 3D-print STL download of the AlphaFold structure ([9c0344d](https://github.com/GMOD/JBrowseMSA/commit/9c0344dd439431ce4d5674e3fbad0ea83d9f872b))
+
+### Performance Improvements
+
+- Don't load the live viewer bundle on mobile ([61d4c09](https://github.com/GMOD/JBrowseMSA/commit/61d4c09fa7102321df2b6a800f595958b0154304))
+
+### Refactoring
+
+- Use types.stripDefault to minimize snapshots, drop hand-rolled postProcessSnapshot ([3cffa45](https://github.com/GMOD/JBrowseMSA/commit/3cffa450cf3fd1c57c2384beabb47b11fb23c8ca))
+
+### Styling
+
+- Prettier reflow on r-msaview README and colorSchemes docs test ([3dc7bf9](https://github.com/GMOD/JBrowseMSA/commit/3dc7bf9000b37736751cf4704a7c5570bbb68b55))
+
+## [5.5.0](https://github.com/GMOD/JBrowseMSA/compare/v5.4.1...v5.5.0) (2026-06-28)
+
+### Other Changes
+
+- Annotate F12 figure: red-box correspondence + Screenshot label ([006e032](https://github.com/GMOD/JBrowseMSA/commit/006e032d37a062407061bf088754c8e29bb40be8))
+- Interlink docs pages; add CLI website page; fill autogen overview/descriptions ([7626418](https://github.com/GMOD/JBrowseMSA/commit/76264189563152f54d994ae2e376b65fdd50142c))
+- Add protein↔genome linked genome-browser examples (SRC, BRAF, TP53) ([9f7adc1](https://github.com/GMOD/JBrowseMSA/commit/9f7adc155338a4af085411bebf055b716ccec152))
+- Screenshots ([f33d694](https://github.com/GMOD/JBrowseMSA/commit/f33d694f36c3f9b0a90eb4c04a52e9429d035d7d))
+- Update deps to latest (Babel 8, Astro 7, @astrojs/react 6) ([7412b48](https://github.com/GMOD/JBrowseMSA/commit/7412b486e593e429af744fe1686a5895813c7920))
+- Deep-linkable docs headings and examples gallery ([8bdfc46](https://github.com/GMOD/JBrowseMSA/commit/8bdfc46d7e3476095e6c86e6430d3cab169149c6))
+- Trim genome-browser page prose ([94ea27d](https://github.com/GMOD/JBrowseMSA/commit/94ea27d956b48868dc1940a92695af6cbfb8518d))
+- Migrate to @eslint-react/eslint-plugin; fix alignment-selector key; refactor SVG export ([5f02c70](https://github.com/GMOD/JBrowseMSA/commit/5f02c703c1bd41b65a6563f95e0ef05c67a6c387))
+- Dedup and trim docs prose ([632d0c0](https://github.com/GMOD/JBrowseMSA/commit/632d0c07da390d215ea18ac5f0384e5cae3aeaad))
+- Genome-browser examples: canonical MANE transcript, ClinVar, autogen figures ([92ffd24](https://github.com/GMOD/JBrowseMSA/commit/92ffd24ab573db8d6ac729e75ce9ad5f9309d482))
+- Embed the genome-browser screenshots as live-link figures ([799cfb6](https://github.com/GMOD/JBrowseMSA/commit/799cfb605ca83f0c16ff6894b26841059594bdee))
+- Flagship genome + alignment + 3D-structure example ([8c19a9b](https://github.com/GMOD/JBrowseMSA/commit/8c19a9b38dc36bc493f527191dd383c63fbba1cf))
+- Genome-browser 3D example: highlight a motif, make the MSA band visible ([46b5998](https://github.com/GMOD/JBrowseMSA/commit/46b599828d80de2cbcaa212339aed80c51bf127b))
+- Lead with the 3D example, downplay the rest ([ada5687](https://github.com/GMOD/JBrowseMSA/commit/ada56878dd5c581704eabf0a0520d94a0a8a466b))
+- Gene explorer: any-gene → collapsed-intron + 100-way MSA + AlphaFold ([d7cf331](https://github.com/GMOD/JBrowseMSA/commit/d7cf33119745431e3f5463ead2b3802768203b86))
+- Gene explorer: name-indexed bgzip MSA (by gene symbol) replacing tabix-by-locus ([ee437dd](https://github.com/GMOD/JBrowseMSA/commit/ee437ddd91caa6c22605b270163517b1b432e779))
+- Fix typos CI: ignore species-id data files + whitelist prose tokens ([decf965](https://github.com/GMOD/JBrowseMSA/commit/decf965413a085318743a708dcdf4835ab8fc2bf))
+- Gene explorer: curated example genes with on-click descriptions ([6a1db1e](https://github.com/GMOD/JBrowseMSA/commit/6a1db1e622040ef33e425c47bdb62ca9fbf1fc8a))
+- Whitelist ALS (disease) in typos config ([daa9712](https://github.com/GMOD/JBrowseMSA/commit/daa97129ac14e2070b5b088c7504d84299d6da3b))
+- Gene explorer: race fix, URL deep-linking, session-JSON view, doc links ([faccc17](https://github.com/GMOD/JBrowseMSA/commit/faccc1796b89831ec36dbd581f1d265ab997c1ae))
+- Gene explorer: knownCanonical CDS model for coordinate-consistent linkage ([91fd0ec](https://github.com/GMOD/JBrowseMSA/commit/91fd0ecc654a89bcde1c96d36c6771de26f6141b))
+- Gene explorer: collapse-introns checkbox + 40bp exon window ([93d23f8](https://github.com/GMOD/JBrowseMSA/commit/93d23f858274a8b505a8370949325fc5cdfdf48c))
+- Gene explorer: live 3D->LGV puppeteer test + page robustness fixes ([1863aab](https://github.com/GMOD/JBrowseMSA/commit/1863aab0211af6fdb5abd9f5ff6966bfccbdba79))
+- Trim JBrowse-integration page, add gallery, drop genome-browser tab ([b4120b1](https://github.com/GMOD/JBrowseMSA/commit/b4120b1ce73b4ed7f932e099548e8bd746989c48))
+- Apply JBrowse navy theme to React islands and site accent ([6382daa](https://github.com/GMOD/JBrowseMSA/commit/6382daa718e3210176791ee92f0b1e2a688a4a73))
+- Drop metadata chips for plain MUI Typography in gene explorer ([f0f865b](https://github.com/GMOD/JBrowseMSA/commit/f0f865b52212f06eb098e85b38f6d24e954ecbbf))
+- Gene explorer: emit canonical refnames in the JBrowse session ([bdf274a](https://github.com/GMOD/JBrowseMSA/commit/bdf274a0dac1232155ade4401f9af34ce42fb038))
+- Add gene-explorer three-way linkage figure (3D→genome→alignment) ([b371272](https://github.com/GMOD/JBrowseMSA/commit/b3712724d97d5a871a197dfaa0d348b9c86a55c6))
+- Honor "color letters instead of background" toggle for all color schemes ([4b231c7](https://github.com/GMOD/JBrowseMSA/commit/4b231c7ec6d80ebb5952237e4a5211d72082fddf))
+- Gene explorer: use percent_identity_dynamic MSA coloring ([5e8a00d](https://github.com/GMOD/JBrowseMSA/commit/5e8a00d0b71aa1fd37c7830b3d55b5efcb8ffcb8))
+- Gene explorer: remove embedded react-msaview live preview ([797a87a](https://github.com/GMOD/JBrowseMSA/commit/797a87a7c4bf4f23eaf1824bedf58d12edb2d0f9))
+- Fix JSX-whitespace dropped spaces around links; add prettier-plugin-astro ([a1ae446](https://github.com/GMOD/JBrowseMSA/commit/a1ae446f0f2634f54649f0a3d177d2beff7ac3bc))
+- Gene explorer: encode the JBrowse session in the URL hash to fix HTTP 414 ([dcb0bf6](https://github.com/GMOD/JBrowseMSA/commit/dcb0bf6ee4e229b09c6c608c9ec7bf5f3d6b96b1))
+- Gene explorer: redesign form into a card with a single help modal ([998163a](https://github.com/GMOD/JBrowseMSA/commit/998163a7065bfb1c5dbff18a533c477054a94017))
+- Add F12 cetacean gene-loss DNA example + genestructure CLI ([a580a1d](https://github.com/GMOD/JBrowseMSA/commit/a580a1d083063a6b394d49ee428138bf7383166e))
+- MSA domains: hover tooltips, color-key legend, and SVG legend export ([dbe2d8a](https://github.com/GMOD/JBrowseMSA/commit/dbe2d8a674cc84fc576e23d2a7178bca5de2121a))
+- Add gene arrow maps ([923fe8e](https://github.com/GMOD/JBrowseMSA/commit/923fe8e06d3ead55ed9c354ca4893282cef1d4ae))
+- Initial work on combined figure ([cc78b4b](https://github.com/GMOD/JBrowseMSA/commit/cc78b4b27ec2a8c257dcf337e3cbf637e1b35132))
+- F12 combined figure: publication-grade local-build render + gallery section ([2733f55](https://github.com/GMOD/JBrowseMSA/commit/2733f5524f939f60ff507093a65fbaffa4715df1))
+- Build UMD with esbuild, drop webpack/babel toolchain ([6370020](https://github.com/GMOD/JBrowseMSA/commit/6370020bf3ef02279e1bc1a426bedec5efd4727f))
+- Gene explorer: plain example list, side-by-side layout, details dialog ([2f863fe](https://github.com/GMOD/JBrowseMSA/commit/2f863fe3f77ea5e4ee83d654db063e02348c162d))
+- Move website package to repo root ([3cca73b](https://github.com/GMOD/JBrowseMSA/commit/3cca73b9fd68cc5cc9fc8d7576d1b7752e340d4d))
+- Fix broken GitHub link, og:image, tabindex, mobile header, gallery CLS, GeneExplorer URL sync ([70dbe48](https://github.com/GMOD/JBrowseMSA/commit/70dbe4852c2f623ad845bd7f652b32bf6b713cfa))
+- Drop picked state, fix prose figure CLS, clean double blank line ([83c05ec](https://github.com/GMOD/JBrowseMSA/commit/83c05ec8fa70c51cdafa803c35b91ffe172ce800))
+- Fix lint errors in geneExplorer.ts, drop intermediate span vars ([6f25d17](https://github.com/GMOD/JBrowseMSA/commit/6f25d175ceb88e64482ee90bbc81ab3fae20036c))
+- MSA feature overlay: arrow beyond boundary, no legend title, smaller track label ([ac8b65f](https://github.com/GMOD/JBrowseMSA/commit/ac8b65fce3e2bf40e033a5eaf385f3d33514511e))
+- Simplify feature-overlay and legend rendering ([ba81e1b](https://github.com/GMOD/JBrowseMSA/commit/ba81e1b6d5b927d92934ffe38548e7398eda6402))
+- Gene-model exon overlay; simplify+reorganize gallery ([c77ba89](https://github.com/GMOD/JBrowseMSA/commit/c77ba893c1376ae2b88de1f09768647a1ad843cb))
+
+### Tests
+
+- Assert the LGV actually renders the highlight overlay (DOM), not just the model getter ([93eb931](https://github.com/GMOD/JBrowseMSA/commit/93eb931ad06e20cb51e10ed632e2d4e66ced3800))
+
+## [5.4.1](https://github.com/GMOD/JBrowseMSA/compare/v5.4.0...v5.4.1) (2026-06-27)
+
+### Other Changes
+
+- Update deps ([1ad30ed](https://github.com/GMOD/JBrowseMSA/commit/1ad30ed2d3d514501a9c5711db1ee5b6a8c69e0d))
+- Bump autogen docs ([50b6ede](https://github.com/GMOD/JBrowseMSA/commit/50b6edea99dbe5740d4181e96a61663a904c1c51))
+- Remove apidocs check ([c448fb3](https://github.com/GMOD/JBrowseMSA/commit/c448fb38e571e638c20d012e4cd00f2522bdc99c))
+- Updates ([d45feff](https://github.com/GMOD/JBrowseMSA/commit/d45feff5ee38097a2da07f206f4acc5f5d76d1d1))
+- Fix gap-stripping, tree NaN, row ordering; dedup parser/model code ([f44bc15](https://github.com/GMOD/JBrowseMSA/commit/f44bc15d516346a15e314e5c1de7f93e38dc8fd8))
+- Misc refactors ([3409b9a](https://github.com/GMOD/JBrowseMSA/commit/3409b9af794f3fd8a67ab81e3bb7f57a751ba919))
+- Add genome-browser docs page + declarative MSA column highlight ([5cdd1f0](https://github.com/GMOD/JBrowseMSA/commit/5cdd1f026a5514100b5658c45955d4040306eaaa))
+
+## [5.4.0](https://github.com/GMOD/JBrowseMSA/compare/v5.3.0...v5.4.0) (2026-06-20)
+
+### Other Changes
+
+- Widen website max-width from 960px to 1400px ([cdd2da0](https://github.com/GMOD/JBrowseMSA/commit/cdd2da0b3d72a4f7cccb854d56097a2069f3525d))
+- Scope 1400px max-width to homepage only ([9018412](https://github.com/GMOD/JBrowseMSA/commit/901841258ca67db06e90565b68755c6a0b933b7d))
+- Render user guide screenshots as captioned figures ([3d6233a](https://github.com/GMOD/JBrowseMSA/commit/3d6233aaa1b0abe29fd0b7909e1b5e0c28948bdc))
+- Remove orphaned doc images, regenerate guide screenshots ([f569d4d](https://github.com/GMOD/JBrowseMSA/commit/f569d4df801060583878506b6c80c0a83e0c6efd))
+- Add progress and cancel support to index file downloads ([188a4a0](https://github.com/GMOD/JBrowseMSA/commit/188a4a04aa55cd3f855df531d8dfb599a0b6d13d))
+- Simplify download progress: drop redundant generation guards and trim tests ([6524080](https://github.com/GMOD/JBrowseMSA/commit/652408049b5173b992d6177af54f4b56920e965d))
+- Add Rfam Lysine riboswitch (RF00168) Stockholm example data ([7e06c03](https://github.com/GMOD/JBrowseMSA/commit/7e06c0317c176e7d27f8ff3ea5a097c102fb9fb0))
+- Add real-data examples: Src-family kinase domains and Lysine riboswitch tree ([df797d5](https://github.com/GMOD/JBrowseMSA/commit/df797d5872f0d92a6741fcdfaa5a1163883cce6c))
+- Make examples page full-width via fullBleed layout prop ([b321aeb](https://github.com/GMOD/JBrowseMSA/commit/b321aeb66670e533392b7770d108918fb1295e44))
+- Rewrite user guide, link figures to live app, upgrade screenshot tooling ([918b4f5](https://github.com/GMOD/JBrowseMSA/commit/918b4f522534c6f936d190404dd60fb1e88aad8c))
+- Fit examples app between header and footer (no clip/double-scroll) ([c6130c2](https://github.com/GMOD/JBrowseMSA/commit/c6130c20bfc8cdb266d0f6c70a69f188183615e2))
+- Draw collapsed clades as triangles with tip counts ([442c6f9](https://github.com/GMOD/JBrowseMSA/commit/442c6f94fbee53753c606b39254c1cff53babaeb))
+- Commit sequence snapshots for deterministic, offline regen ([5b67994](https://github.com/GMOD/JBrowseMSA/commit/5b67994066b830c7c7a228417e2a7d5c1698807e))
+- Regenerate collapse figure: triangle + tip count, no internal node label ([5bf45bf](https://github.com/GMOD/JBrowseMSA/commit/5bf45bf697708338b5025815cf392d7e66d8db91))
+- Make collapsed-clade triangles clickable and hoverable ([feccdaf](https://github.com/GMOD/JBrowseMSA/commit/feccdafc922ee28716b20bf76a58c8be3d826f67))
+- Host large example data as files instead of inlining in figure live-links ([1c117dc](https://github.com/GMOD/JBrowseMSA/commit/1c117dc318dd7a3899b3f13e9f02e59c930b4118))
+- Document provenance of hosted example data files ([7939488](https://github.com/GMOD/JBrowseMSA/commit/79394888369ac7c3754806a4371997160e60c06e))
+- Add 4 more phylogeny examples: histone H4, cytochrome c, prestin, p53 ([18566a6](https://github.com/GMOD/JBrowseMSA/commit/18566a62a74542afe5f70d565809f227e0f23248))
+- Add tree-of-life (EF-1a/EF-Tu) and insulin examples ([39859a4](https://github.com/GMOD/JBrowseMSA/commit/39859a40d8efc3ca1fd107c860397680d8782328))
+- Add tRNA and hammerhead ribozyme RNA secondary-structure examples ([87bd142](https://github.com/GMOD/JBrowseMSA/commit/87bd1429420b43e0115129b71c7645a651529b90))
+- Add InterPro domain overlays + precomputed-InterPro CLI path ([1a0e871](https://github.com/GMOD/JBrowseMSA/commit/1a0e87119282338239bdf97ea055c4893e25e52e))
+- Rm todos ([e9380ca](https://github.com/GMOD/JBrowseMSA/commit/e9380ca2c83fa5e0d31c027b4216ca0f3e9c3e34))
+- Fix A3M misdetection of soft-masked FASTA; add explicit msaFormat override ([c539c54](https://github.com/GMOD/JBrowseMSA/commit/c539c54a50b623b3c7f08286f4cb0a87e6966ee0))
+
+## [5.3.0](https://github.com/GMOD/JBrowseMSA/compare/v5.2.1...v5.3.0) (2026-06-20)
+
+### Other Changes
+
+- Update release.js ([50dbc64](https://github.com/GMOD/JBrowseMSA/commit/50dbc64c043afd939c61971de89f3a11c0083378))
+- Fix release script and pin pnpm 11 via packageManager ([021a2e4](https://github.com/GMOD/JBrowseMSA/commit/021a2e404d1542b32a7370ae311127e2f8dcde4d))
+
+## [5.2.1](https://github.com/GMOD/JBrowseMSA/compare/v5.2.0...v5.2.1) (2026-06-19)
+
+### Other Changes
+
+- Remove completed todo ([4059489](https://github.com/GMOD/JBrowseMSA/commit/405948943c75669d3c2ab7261e6495c0ba6fa495))
+- Less docs ([590af18](https://github.com/GMOD/JBrowseMSA/commit/590af1860c3ae144b6f79cab798738f1db4a93f5))
+- Less docs ([650ab27](https://github.com/GMOD/JBrowseMSA/commit/650ab2707bf807d723c303f37e386790028a2709))
+- Bump deps ([a343331](https://github.com/GMOD/JBrowseMSA/commit/a343331ed1175e0b3e6d0f2cb1dcbc305381d0b9))
+- Simplify and optimize MsaView model ([352ef65](https://github.com/GMOD/JBrowseMSA/commit/352ef651a5543466681b99108ec490d357a16691))
+- Add smooth scroll-zoom with cursor anchoring and a scroll-zoom toggle ([9d2a2f0](https://github.com/GMOD/JBrowseMSA/commit/9d2a2f0975ff93e26ed8de88a3a908bbaea9058c))
+- Tune wheel/pinch zoom with adaptive delta normalization ([e12a344](https://github.com/GMOD/JBrowseMSA/commit/e12a344b35c35570d82408619d570e3525a479cf))
+- Bias vertical zoom anchor toward the top ([54eecb6](https://github.com/GMOD/JBrowseMSA/commit/54eecb6f02b1fcda79708ac5f63a2911e7a12ac3))
+- Unify zoom bounds; cap stepwise zoom-in ([c89a465](https://github.com/GMOD/JBrowseMSA/commit/c89a465c081e6ad15c0e07157722b1a7365b8adc))
+- Remove eslint-plugin-unicorn ([4ed7a16](https://github.com/GMOD/JBrowseMSA/commit/4ed7a16eb762ab790cfc425438d3826721822b66))
+- Add examples/figures and fix parser, scroll, and CLI bugs ([b78c953](https://github.com/GMOD/JBrowseMSA/commit/b78c953d3aad6399a5b05e155298c40bd5819beb))
+- Reorganize READMEs and add R example figures ([ec8e4ea](https://github.com/GMOD/JBrowseMSA/commit/ec8e4ea4687f1f167a59fc2c3def363ad55a3294))
+- Remove outdated hero, make figures deterministic, document gff props ([2d4c700](https://github.com/GMOD/JBrowseMSA/commit/2d4c7002fe717dfdf4a74d56de2ce0205b734fef))
+- Make READMEs human-readable with audience-based navigation ([dfba24a](https://github.com/GMOD/JBrowseMSA/commit/dfba24a32adda51503acf80eed2dd1bfbffa9bdd))
+- Add puppeteer screenshot system and refresh user-guide images ([07f8d29](https://github.com/GMOD/JBrowseMSA/commit/07f8d294bdf2840a38de2b84485f62f805e16605))
+- Port jbrowse-components docgen improvements: auto-detect composition from types.compose() AST, token-aware comment removal, #example support, and section helpers ([9142014](https://github.com/GMOD/JBrowseMSA/commit/91420147dd79a25889ca0bc216a9d903bfd3f498))
+- Tighten msa-parsers return types and replace || with ?? ([322af6b](https://github.com/GMOD/JBrowseMSA/commit/322af6b9860cf19994dff0cf166e995d4185ea6b))
+- Apply model linter fixes, add #example to MsaView docs, and add CI apidocs freshness check ([83f14a9](https://github.com/GMOD/JBrowseMSA/commit/83f14a97d0611dcbd7b73d12da0b4c82460bc630))
+- Add Astro documentation website (unified portal) ([21e54eb](https://github.com/GMOD/JBrowseMSA/commit/21e54eb41a5aebb32b46d417bec008c8fc1bfc53))
+- Refactor and clean up model.ts and util.ts ([7319531](https://github.com/GMOD/JBrowseMSA/commit/7319531378aa4be4d3b5bd8cfeb2bf02c860e20f))
+- Wire up docs-site deployment (gmod.org/JBrowseMSA + /demo app) ([56a0c53](https://github.com/GMOD/JBrowseMSA/commit/56a0c53f221e686ad64422044a3bf5ab07af2d44))
+- Pin Vite 7 within Astro's subtree to silence the version warning ([ea28f45](https://github.com/GMOD/JBrowseMSA/commit/ea28f45fbf0171a539a8a73d5f7e5fd240d6426d))
+- Use CSS flexbox middle-ellipsis for long sequence names in header ([a727dc8](https://github.com/GMOD/JBrowseMSA/commit/a727dc8f4ae95d498e51ae2d877276c3fab24a52))
+- Fix resize handles: visible, draggable, consistent styling ([c2baa3a](https://github.com/GMOD/JBrowseMSA/commit/c2baa3a3b894470fc5effad30186241190dbb29b))
+- Lint and format ([e0aeb53](https://github.com/GMOD/JBrowseMSA/commit/e0aeb53feefc4c4d4b46dc886ce0d5f0dc328883))
+- Add GitHub icon to header nav, fix SVG dark mode backgrounds ([a90cc93](https://github.com/GMOD/JBrowseMSA/commit/a90cc9343d379817b77335adcf404cad55268c34))
+- Add GitHub icon to header nav, fix SVG dark mode backgrounds ([b67ba86](https://github.com/GMOD/JBrowseMSA/commit/b67ba864995660d56ed89d13b9351748025f4907))
+- Updates ([c962673](https://github.com/GMOD/JBrowseMSA/commit/c9626736d974cdf676a57d74168d3ab95070c64e))
+- Fix deprecated Astro markdown plugin config ([14fe53b](https://github.com/GMOD/JBrowseMSA/commit/14fe53b05393cb9df3905258aaad25bfdf05a2bf))
+- Fix broken Astro markdown config import ([3247fef](https://github.com/GMOD/JBrowseMSA/commit/3247fef145d4001fe66478a91fa8814866156c58))
+- - parseAsn1.ts — fixed a latent type error (Object.fromEntries spread losing name/parent types) with ([ac94ff1](https://github.com/GMOD/JBrowseMSA/commit/ac94ff1fe82e4e8f2c1fb767c7b55e8671fb5378))
+- Robustness fixes and SVG export simplification (#107) ([81defca](https://github.com/GMOD/JBrowseMSA/commit/81defca186fcc783845468a99a825c0304d34948))
+
+## [5.2.0](https://github.com/GMOD/JBrowseMSA/compare/v5.1.1...v5.2.0) (2026-05-30)
+
+### Other Changes
+
+- Less sidebar text ([b62b723](https://github.com/GMOD/JBrowseMSA/commit/b62b72384b0d63b017086796d57391a3ade4bb76))
+- Simplify block rendering, fix blocksY clamp, drop redundant nref redraw ([31b0b90](https://github.com/GMOD/JBrowseMSA/commit/31b0b9048e73e75baf3ec9aec746cebb97c86550))
+- Remove dead code, add RenderCtx type, document cross-repo deps ([297de75](https://github.com/GMOD/JBrowseMSA/commit/297de7571bed61777acc58015cf09c15e6630490))
+- Bugfixes, type improvements, and || -> ?? cleanups ([216f172](https://github.com/GMOD/JBrowseMSA/commit/216f1722edfb5bd2af6a4abda408b2cacae94901))
+- Rendering optimizations: eliminate per-frame allocations and redundant work ([84d7c89](https://github.com/GMOD/JBrowseMSA/commit/84d7c8971422adee967b0b5fd0a8b03781175bf3))
+- Clean up renderMSABlock: hoist fillStyle, drop dead params, add early-exit ([024ad26](https://github.com/GMOD/JBrowseMSA/commit/024ad26efc6762d4f1b90592d2568e19d3b76ddf))
+- Columns→Map, labelWidthMap pre-computed, darkenForContrast already guarded ([4f7f4d2](https://github.com/GMOD/JBrowseMSA/commit/4f7f4d2cd74e1f834f2046e668fe15d27a07f93c))
+
+## [5.1.1](https://github.com/GMOD/JBrowseMSA/compare/v5.1.0...v5.1.1) (2026-05-29)
+
+### Other Changes
+
+- Downgrade, not working with mui v9 ([69ac2c1](https://github.com/GMOD/JBrowseMSA/commit/69ac2c190128e3858e807871e95e1ef21b81b81d))
+
+## [5.1.0](https://github.com/GMOD/JBrowseMSA/compare/v5.0.16...v5.1.0) (2026-05-29)
+
+### Other Changes
+
+- Add approved builds ([bfbc8eb](https://github.com/GMOD/JBrowseMSA/commit/bfbc8eb6de1084c64cd9e98650b7e5e89741af36))
+- Bump deps ([4d17046](https://github.com/GMOD/JBrowseMSA/commit/4d170469d5500577e2fd1d8bbfaa354b820f6ed2))
+- Add lightweight Vite examples gallery for react-msaview ([cbf9861](https://github.com/GMOD/JBrowseMSA/commit/cbf986165e06b03271c93b1af87ca4b424d1ae93))
+- Simplify lib: fix drag-scroll leaks, dedup hooks/menus, extract ClustalX ([69ded1b](https://github.com/GMOD/JBrowseMSA/commit/69ded1bb97966e7e807ffb430d7db82fc106dc31))
+- Abort interpro ([fe5ba1c](https://github.com/GMOD/JBrowseMSA/commit/fe5ba1cd79e4ddbb92331295035d9fee35628b70))
+- Pin fflate to 0.8.2 to fix attw CI ([726e107](https://github.com/GMOD/JBrowseMSA/commit/726e107bb9cbd70b598b12cca09bfd572522eedf))
+- Fix canvas font bug and optimize tree rendering ([22924e3](https://github.com/GMOD/JBrowseMSA/commit/22924e30cefddda9b76278d4a4a99e8b915ad52b))
+- Release storybook ([dade78b](https://github.com/GMOD/JBrowseMSA/commit/dade78b1e06c21b9610eba0bb8f02e1b104accd6))
+- Port improved state-model docgen from jbrowse-components ([ce3b4f9](https://github.com/GMOD/JBrowseMSA/commit/ce3b4f92367f2e018ae303d92f7f5e253836fa40))
+
+## [5.0.16](https://github.com/GMOD/JBrowseMSA/compare/v5.0.15...v5.0.16) (2026-05-02)
+
+### Other Changes
+
+- Fix build ([e85229e](https://github.com/GMOD/JBrowseMSA/commit/e85229e49510ec86e4081c81430e08123ef59586))
+
+## [5.0.15](https://github.com/GMOD/JBrowseMSA/compare/v5.0.14...v5.0.15) (2026-05-02)
+
+### Other Changes
+
+- Fix TypeScript type errors ([e04bc68](https://github.com/GMOD/JBrowseMSA/commit/e04bc68ff11d97e9c89cefd7abc4eedd5a9d1dc3))
+- Migrate from eslint-plugin-import to eslint-plugin-import-x ([f88ebef](https://github.com/GMOD/JBrowseMSA/commit/f88ebefd25ed58b4d8c5b97b95d360538a10ae82))
+- Add documentation explaining cladogram algorithm similarity to ape package ([9366085](https://github.com/GMOD/JBrowseMSA/commit/936608558af3f0ee5e227e7a85847dbf6826f4de))
+- Add build artifacts to prettierignore ([c8f7c05](https://github.com/GMOD/JBrowseMSA/commit/c8f7c05428b7caf73bda778b5d653c2b54692c65))
+
+## [5.0.14](https://github.com/GMOD/JBrowseMSA/compare/v5.0.13...v5.0.14) (2026-05-02)
+
+### Other Changes
+
+- Add publishing doc ([289122b](https://github.com/GMOD/JBrowseMSA/commit/289122b69bd6f5c302a403106e8b3bbb2f7e511e))
+- Bump deps ([ad4d77f](https://github.com/GMOD/JBrowseMSA/commit/ad4d77f311e44373f27690dc93dfa5ec86114e0c))
+- Fix drawing when show branch length off ([567b77c](https://github.com/GMOD/JBrowseMSA/commit/567b77c77eee7c20b909fa5b931d8fe24358744f))
+- Fix tree cladogram rendering to match standard phylogenetic layouts ([c6b4508](https://github.com/GMOD/JBrowseMSA/commit/c6b450803a5117970290d9785f7c9aaa97e4fca1))
+- Add tests for tree cladogram positioning logic ([6b806f4](https://github.com/GMOD/JBrowseMSA/commit/6b806f4c08bdab4d5af5df5284478cc3596fb229))
+
+## [5.0.13](https://github.com/GMOD/JBrowseMSA/compare/v5.0.12...v5.0.13) (2026-04-16)
+
+### Other Changes
+
+- No need to build locally with trusted publishing ([041fdb4](https://github.com/GMOD/JBrowseMSA/commit/041fdb424688ed584b8f8a9267760b2e7a908e5d))
+
+## [5.0.12](https://github.com/GMOD/JBrowseMSA/compare/v5.0.11...v5.0.12) (2026-04-16)
+
+### Other Changes
+
+- Bump npm ([90f2036](https://github.com/GMOD/JBrowseMSA/commit/90f20367d1df0e0f5e0f46a3fe77fcbb44d939f7))
+
+## [5.0.11](https://github.com/GMOD/JBrowseMSA/compare/v5.0.10...v5.0.11) (2026-04-16)
+
+### Other Changes
+
+- Add provenance ([1214c70](https://github.com/GMOD/JBrowseMSA/commit/1214c70117b05b8c2112907d829718b08893abee))
+
+## [5.0.10](https://github.com/GMOD/JBrowseMSA/compare/v5.0.9...v5.0.10) (2026-04-16)
+
+### Other Changes
+
+- Add repo ([ab070b7](https://github.com/GMOD/JBrowseMSA/commit/ab070b727d363c18d71e4be2170230ccbf34da98))
+
+## [5.0.8](https://github.com/GMOD/JBrowseMSA/compare/v5.0.7...v5.0.8) (2026-04-16)
+
+### Other Changes
+
+- Bump deps ([c15fec6](https://github.com/GMOD/JBrowseMSA/commit/c15fec627c1cb65d577ab5e50a809273c2dbc345))
+- Simplify codebase: remove d3 deps, extract shared patterns, compress data, fix ESM workspace setup ([da49be6](https://github.com/GMOD/JBrowseMSA/commit/da49be676339842fc63169924149de0008ef810e))
+- Fix build: widen BaseMSA.getRowData return type, cast header to Record, update lockfile ([47652a7](https://github.com/GMOD/JBrowseMSA/commit/47652a7abe3a58e24d357a6a7097a2b922c3d3d9))
+- Export HierarchyNode type to fix app build (TS2883) ([8f93107](https://github.com/GMOD/JBrowseMSA/commit/8f93107f7c3930aa61b1b0b0d38b2febbcc9402e))
+- Add trusted publishing workflow for npm (#102) ([92fa50e](https://github.com/GMOD/JBrowseMSA/commit/92fa50ee00ed7f6fe9e457d4ec3522448abdd128))
+- Add Docker/Singularity container support for CLI; fix EBI API one-seq-at-a-time submission (#104) ([78df348](https://github.com/GMOD/JBrowseMSA/commit/78df348a05c531ccb0c3f709d80f9078420f89bd))
+- Simplifications (#105) ([d4a777d](https://github.com/GMOD/JBrowseMSA/commit/d4a777d85ee5fb81190581bd8b16e804111f0599))
+- Add msaviewr R package (#103) ([4159aa9](https://github.com/GMOD/JBrowseMSA/commit/4159aa98db15940ac9819909f894dea18cfd0502))
+- Domains ([10c2fd1](https://github.com/GMOD/JBrowseMSA/commit/10c2fd140796b6a28ed2d28a46569e21e3012626))
+- Domains ([3692d66](https://github.com/GMOD/JBrowseMSA/commit/3692d668b6a9733e80f9b4450cd330b9e7b189ed))
+
+## [5.0.7](https://github.com/GMOD/JBrowseMSA/compare/v5.0.6...v5.0.7) (2026-03-24)
+
+### Other Changes
+
+- Fix colon in sequence names not resolving in newick tree by replacing with underscore  (#101) ([0aec066](https://github.com/GMOD/JBrowseMSA/commit/0aec06624aa991ea729b394084fe7d7714363ca7))
+
+## [5.0.6](https://github.com/GMOD/JBrowseMSA/compare/v5.0.5...v5.0.6) (2026-01-25)
+
+### Other Changes
+
+- Remove unused pako dep ([c92593c](https://github.com/GMOD/JBrowseMSA/commit/c92593c697ed4f30540fba4ed31e90a668e6aa5c))
+- Comnservation track resize ([72de929](https://github.com/GMOD/JBrowseMSA/commit/72de9293675e5f876e4abfbde8e59c641eb04202))
+- Add a3m ([3b4995d](https://github.com/GMOD/JBrowseMSA/commit/3b4995d5751bec4f83b962c3a00293bb13376bb7))
+- Resize direction ([7c7d39f](https://github.com/GMOD/JBrowseMSA/commit/7c7d39f414973318889f0687a8f4c77fe1671c4e))
+
+## [5.0.5](https://github.com/GMOD/JBrowseMSA/compare/v5.0.4...v5.0.5) (2026-01-25)
+
+### Other Changes
+
+- Updates ([fc1f3a4](https://github.com/GMOD/JBrowseMSA/commit/fc1f3a474548b87c9877f9009470d4efa3dd40f6))
+- Unified code code conservation bar unification ([64384cc](https://github.com/GMOD/JBrowseMSA/commit/64384cc99a543295df93dc745186720e1d013b84))
+- Unify ([915ce9c](https://github.com/GMOD/JBrowseMSA/commit/915ce9cf866680401488d72e1cb586b2d7823eb7))
+
+## [5.0.4](https://github.com/GMOD/JBrowseMSA/compare/v5.0.3...v5.0.4) (2026-01-25)
+
+### Other Changes
+
+- Add deploy ([9c168f8](https://github.com/GMOD/JBrowseMSA/commit/9c168f835efbbf0757448da14c434300268e563a))
+- Lint ([3f51974](https://github.com/GMOD/JBrowseMSA/commit/3f51974e675a52896f6aa40327e7940d9e90f3b8))
+- Add attw ("are the types wrong") checks (#100) ([38ad3c0](https://github.com/GMOD/JBrowseMSA/commit/38ad3c0ff9cf605451fd1196af76555022ecfe53))
+- Use term 'aa' instead of 'bp' for protein letters ([ce7e583](https://github.com/GMOD/JBrowseMSA/commit/ce7e583a3561852d7907aa84c63ec31c8f2fed17))
+- Type module ([9852c6c](https://github.com/GMOD/JBrowseMSA/commit/9852c6ce6a4cb6e4c653a85715296578f216940b))
+- Rename babel config ([5caf932](https://github.com/GMOD/JBrowseMSA/commit/5caf932917fd176ba7c57dafa55910a425ea826f))
+
+## [5.0.3](https://github.com/GMOD/JBrowseMSA/compare/v5.0.1...v5.0.3) (2026-01-24)
+
+### Other Changes
+
+- ESM refactorings (#99) ([bf1df7f](https://github.com/GMOD/JBrowseMSA/commit/bf1df7f5f6ecd3e9819f61d76264bdf240a07e20))
+- CLI package name ([846c952](https://github.com/GMOD/JBrowseMSA/commit/846c952e01c5ca850789b57c633df6f79b3ef0dc))
+- Synchronized release ([8581ae2](https://github.com/GMOD/JBrowseMSA/commit/8581ae26f9c1baff346e92467cc361ff05eb8112))
+
+## [5.0.1](https://github.com/GMOD/JBrowseMSA/compare/v4.8.1...v5.0.1) (2026-01-24)
+
+### Other Changes
+
+- Bumps ([de52c47](https://github.com/GMOD/JBrowseMSA/commit/de52c47dfc02d48134714c0e3d8ee25e16e0c4a9))
+- Re-order imports ([43affab](https://github.com/GMOD/JBrowseMSA/commit/43affabc5015a84ca6bec90d4c0c3b9e79670895))
+- Back to yarn (#97) ([5d88769](https://github.com/GMOD/JBrowseMSA/commit/5d88769dd816b26d8dc9bff60735f4acfdab9129))
+- Back to yarn (#97) ([485c0c1](https://github.com/GMOD/JBrowseMSA/commit/485c0c162a3834b46cf34d6a5b489e59a8ebede7))
+- Format ([3c75923](https://github.com/GMOD/JBrowseMSA/commit/3c75923ae64d7d68b9024ac578ce8b974f044c93))
+
+## [4.8.1](https://github.com/GMOD/JBrowseMSA/compare/v4.8.0...v4.8.1) (2026-01-09)
+
+### Other Changes
+
+- Externalize parsers ([d360a6e](https://github.com/GMOD/JBrowseMSA/commit/d360a6e6efd7443cf13103b99994a4d5b2b14e5a))
+
+## [4.8.0](https://github.com/GMOD/JBrowseMSA/compare/v4.6.0...v4.8.0) (2026-01-09)
+
+### Other Changes
+
+- Create more utilities to get the 'visible column' which is different from 'global' by including collapsed gappy columns (#95) ([a5160b3](https://github.com/GMOD/JBrowseMSA/commit/a5160b38859debc8808e0d979ed56a50dd6297c3))
+- Modularize parsers (#96) ([f0c806c](https://github.com/GMOD/JBrowseMSA/commit/f0c806c2351722cd525791b5478e64c19e9857b9))
+
+## [4.6.0](https://github.com/GMOD/JBrowseMSA/compare/v4.5.0...v4.6.0) (2026-01-08)
+
+### Other Changes
+
+- Better noTree label layout and setHighlightedColumns getter ([f4a0bc0](https://github.com/GMOD/JBrowseMSA/commit/f4a0bc0058499bb2d2ce906df7cb88c8420998f9))
+
+## [4.5.0](https://github.com/GMOD/JBrowseMSA/compare/v4.4.6...v4.5.0) (2026-01-08)
+
+### Other Changes
+
+- Update demo link in README.md ([e09a4d0](https://github.com/GMOD/JBrowseMSA/commit/e09a4d0bb52bd2006debedfdb7cb1740b2e3a307))
+- Bump deps ([24d9c69](https://github.com/GMOD/JBrowseMSA/commit/24d9c69ef7f5a30b0e713c99483f28112e9e99bf))
+- High priority comments ([3c0a9d7](https://github.com/GMOD/JBrowseMSA/commit/3c0a9d79ef1459dbc2d24382c02a228fc7e76f76))
+- Wow ([8f3e225](https://github.com/GMOD/JBrowseMSA/commit/8f3e225163ac08b1ac3766e4983b4744b608761a))
+- Better default filtering ([5aebd0e](https://github.com/GMOD/JBrowseMSA/commit/5aebd0e034e1cd461496a23bbb670b6cee4e5d18))
+- Speedups ([7ecc971](https://github.com/GMOD/JBrowseMSA/commit/7ecc971af3f344d0748602061f1f7fd47e663d5a))
+- Speed up blanks finding ([2835eee](https://github.com/GMOD/JBrowseMSA/commit/2835eeecff1147bb34d76ef4cb48e48872814531))
+- HideGaps effective ([b94625d](https://github.com/GMOD/JBrowseMSA/commit/b94625d033b12e3419fd9b2e9e0bd00bf46781a6))
+- Add a3m parser, add conservation track, add neighbor joining calculator, svg export fixes (#93) ([0d453ba](https://github.com/GMOD/JBrowseMSA/commit/0d453ba158f2f629256ff03f6d901dfbe42aa0b8))
+- ClustalX ([7b15d8c](https://github.com/GMOD/JBrowseMSA/commit/7b15d8c4b56c16f7f0a59e5053ce3e1e9ae0cbfb))
+- Fix lint (#94) ([095a9d6](https://github.com/GMOD/JBrowseMSA/commit/095a9d660ba6c69adfb86bbd4cef59fb4846eb2f))
+- Update ([123bcb8](https://github.com/GMOD/JBrowseMSA/commit/123bcb8629e8ba7fd09eee1ed89b6659ba08f44e))
+- Use yarn instead of npm run ([f90070a](https://github.com/GMOD/JBrowseMSA/commit/f90070a6c5be10b6469875f6db425bb871b6e772))
+
+## [4.4.6](https://github.com/GMOD/JBrowseMSA/compare/v4.4.5...v4.4.6) (2025-10-14)
+
+### Other Changes
+
+- Fix lint ([ef4c44b](https://github.com/GMOD/JBrowseMSA/commit/ef4c44beb132a7a1ef2304b5635baef964923bb7))
+- Update coordinate calcs ([4ec3919](https://github.com/GMOD/JBrowseMSA/commit/4ec39193b9c7b4e843142c1500c9d409ce6febf4))
+
+## [4.4.5](https://github.com/GMOD/JBrowseMSA/compare/v4.4.4...v4.4.5) (2025-10-09)
+
+### Other Changes
+
+- Add mouseover on tree nodes (#91) ([2e8efbe](https://github.com/GMOD/JBrowseMSA/commit/2e8efbe0002dd9bb7f8bebddaf1ff61d675febe0))
+- Use flatbush ([00d854c](https://github.com/GMOD/JBrowseMSA/commit/00d854cd0fd70d30d1b66595a1a6c76e8112ce0a))
+
+## [4.4.4](https://github.com/GMOD/JBrowseMSA/compare/v4.4.3...v4.4.4) (2025-07-31)
+
+### Other Changes
+
+- Vite 7 ([b97dc72](https://github.com/GMOD/JBrowseMSA/commit/b97dc7244e5920ae8a83daa95040340a8e413f3f))
+- Update USAGE ([40390e2](https://github.com/GMOD/JBrowseMSA/commit/40390e27549d93710c24cf5f4b43d869380bc8a9))
+- Fix typo ([079fa74](https://github.com/GMOD/JBrowseMSA/commit/079fa747cebc38e920d670a93f51be2fa6022e8e))
+- Update Usage ([435ac44](https://github.com/GMOD/JBrowseMSA/commit/435ac4477d2a17485032784c5f799956a296ecde))
+- Update USAGE.md ([3fd4ede](https://github.com/GMOD/JBrowseMSA/commit/3fd4ede7c5400e9bda3aeb55a72f7b84243165a3))
+- Update USAGE.md ([518d685](https://github.com/GMOD/JBrowseMSA/commit/518d685e6efaf7308cfe4d0d49ea876e40dbcd27))
+- Update USAGE.md ([be80a47](https://github.com/GMOD/JBrowseMSA/commit/be80a47a2564475681d733434774e4393999df5e))
+- Bump babel ([5af1926](https://github.com/GMOD/JBrowseMSA/commit/5af192689a17faed119093d9d893199db2d90571))
+- Pin to v5 mobx-state-tree ([7fdd592](https://github.com/GMOD/JBrowseMSA/commit/7fdd592c15c8b57ed8881418836993f47e60e9ed))
+
+## [4.4.3](https://github.com/GMOD/JBrowseMSA/compare/v4.4.2...v4.4.3) (2025-06-09)
+
+### Other Changes
+
+- Lint ([4cc2371](https://github.com/GMOD/JBrowseMSA/commit/4cc23717fdbac7b453880bc73d1b614cc9f7c53d))
+- Add repository ([6e27ee6](https://github.com/GMOD/JBrowseMSA/commit/6e27ee672015d15ab308c342dd8819ac783bcdfd))
+
+## [4.4.2](https://github.com/GMOD/JBrowseMSA/compare/v4.4.1...v4.4.2) (2025-06-06)
+
+### Other Changes
+
+- Simplify colStatsSums ([21b1b86](https://github.com/GMOD/JBrowseMSA/commit/21b1b86c8ef695c95c2441908122148c51efec09))
+- Check liveness ([9696699](https://github.com/GMOD/JBrowseMSA/commit/9696699ba8bec4fefb62a713c1137fdb0b0f1ba0))
+- Bump deps ([2e1fc74](https://github.com/GMOD/JBrowseMSA/commit/2e1fc74b2b34a6b63cd3128cf51c055ecac6185e))
+- Reduce precision ([b9760b8](https://github.com/GMOD/JBrowseMSA/commit/b9760b8199969732d2ee950b6b39b1e96bad887b))
+- Redo ([9a44c35](https://github.com/GMOD/JBrowseMSA/commit/9a44c357f81ec52f36835fb6401e4e79a2014a07))
+
+## [4.4.1](https://github.com/GMOD/JBrowseMSA/compare/v4.4.0...v4.4.1) (2025-05-30)
+
+### Other Changes
+
+- Rm settings ([44a171f](https://github.com/GMOD/JBrowseMSA/commit/44a171f99f052c89054d74dc8d13c54ea412d133))
+- Rm settings ([b71afbf](https://github.com/GMOD/JBrowseMSA/commit/b71afbfdbd50c41ac26f3f15982088280c85a896))
+- More menus ([49521b7](https://github.com/GMOD/JBrowseMSA/commit/49521b7fa68db3bcbea1e0571496b6a1ef05ac15))
+- Consistent notion of isBlank ([4b33e51](https://github.com/GMOD/JBrowseMSA/commit/4b33e515b5c0b19702173b2b4af9b8fd4faf3588))
+- Bold font when bgColor false ([28fcb61](https://github.com/GMOD/JBrowseMSA/commit/28fcb61b3a5264fe05c0f8337af2f91c0a9d2e91))
+- Hot path ([575f737](https://github.com/GMOD/JBrowseMSA/commit/575f737f99765431898da0af6cef768963db16da))
+- Fetch and maybe unzip util ([d7470a1](https://github.com/GMOD/JBrowseMSA/commit/d7470a10629b73f048ed04244ce25c290c7a913e))
+- Make one-based ([eb60624](https://github.com/GMOD/JBrowseMSA/commit/eb606248867ecdacd0b02611912df2b46069315c))
+- Rewrite for readability ([5a72431](https://github.com/GMOD/JBrowseMSA/commit/5a72431895e8f9b7d8e66ed3b3c9e4345cac4bc0))
+- Updates ([a34a233](https://github.com/GMOD/JBrowseMSA/commit/a34a2332aa12fc0e706432e92b70efeb33de2432))
+- Fix lint ([7b289a1](https://github.com/GMOD/JBrowseMSA/commit/7b289a1ee0da4a02315ccccac5281029bd3318f0))
+- More zoom reset ([0c36b91](https://github.com/GMOD/JBrowseMSA/commit/0c36b91c8e7fe5a402272ffc840bb1d116aa0ebc))
+
+## [4.4.0](https://github.com/GMOD/JBrowseMSA/compare/v4.3.0...v4.4.0) (2025-05-29)
+
+### Other Changes
+
+- Close after item click false ([939d4f0](https://github.com/GMOD/JBrowseMSA/commit/939d4f066838d907bf4684d0d6e29e7e30123753))
+- Better label ([94bd37a](https://github.com/GMOD/JBrowseMSA/commit/94bd37a887016fd888789576737e8abe35d04ea6))
+- Better label ([34323e9](https://github.com/GMOD/JBrowseMSA/commit/34323e91655134673ac22ab0152fb27c897e4901))
+
+## [4.3.0](https://github.com/GMOD/JBrowseMSA/compare/v4.2.0...v4.3.0) (2025-05-26)
+
+### Other Changes
+
+- Update ([b1fb501](https://github.com/GMOD/JBrowseMSA/commit/b1fb50164bc0d2237827a4b9836c59e6eea1efc7))
+- Format ([e1b34c3](https://github.com/GMOD/JBrowseMSA/commit/e1b34c36489d4b592df8ac42c9f05e2ed125d4a6))
+- Convert vanillajs build from rollup to webpack (#87) ([aa75c5a](https://github.com/GMOD/JBrowseMSA/commit/aa75c5a573e968689c252487bdfec9252dee579e))
+- Update USAGE.md ([3dc2b22](https://github.com/GMOD/JBrowseMSA/commit/3dc2b2292954b2cc41d3b7e064eae4958a9484bb))
+- Hide gaps true by default ([8d68623](https://github.com/GMOD/JBrowseMSA/commit/8d68623182a636dce60eb0f1248214f8579f19dd))
+- Typo ([4956cba](https://github.com/GMOD/JBrowseMSA/commit/4956cba3548d8b75713697d472b7f588561b9cf6))
+- Misc ([c60785a](https://github.com/GMOD/JBrowseMSA/commit/c60785a9c3ed3d4e70e44583132eba39a90a7656))
+- Open page by default ([90c6f0e](https://github.com/GMOD/JBrowseMSA/commit/90c6f0ed719c76c3ab557ed58319b4ea84f2bebb))
+- Replace with textfield select ([8a96a1a](https://github.com/GMOD/JBrowseMSA/commit/8a96a1ad979336a5aeea8236eacf12b3735bbd35))
+- No use of drawTreeText ([3231046](https://github.com/GMOD/JBrowseMSA/commit/3231046bc686c104846df85981d7ad28218a8e1a))
+- Whitespace ([cc35d85](https://github.com/GMOD/JBrowseMSA/commit/cc35d85364fd2b2f3532fc71e8b113c2325c8518))
+- Settings menu ([fd1173b](https://github.com/GMOD/JBrowseMSA/commit/fd1173bd6fe8eee0aea0bf884e6c6e7cf512a0ea))
+- Misc ([5ec95b5](https://github.com/GMOD/JBrowseMSA/commit/5ec95b58c81435399f1ae39b2c0f421dba9533ad))
+
+## [4.2.0](https://github.com/GMOD/JBrowseMSA/compare/v4.1.1...v4.2.0) (2025-05-23)
+
+### Other Changes
+
+- Misc ([121f562](https://github.com/GMOD/JBrowseMSA/commit/121f5623b538fef7ac6a651d015e2a1e0c51c066))
+- Bumps ([bca18b3](https://github.com/GMOD/JBrowseMSA/commit/bca18b302ce2d0a6e38f8be369b56b43cdcf85e0))
+- Refactors ([ffb0957](https://github.com/GMOD/JBrowseMSA/commit/ffb09572bfa196a658e33c5776df88adcda47485))
+- Lint ([b46f465](https://github.com/GMOD/JBrowseMSA/commit/b46f46510d1f56712652509ef482f3f2089095f2))
+- Rename 'Show entire view' to 'Fit to view' ([53fb565](https://github.com/GMOD/JBrowseMSA/commit/53fb565e4e0a646523cdbde6ed57e9d2b1982a73))
+- Show zoom star ([d9bac41](https://github.com/GMOD/JBrowseMSA/commit/d9bac41af64c5ab7802e63dada21e120e5616820))
+- Styles on zoom star ([3fa162d](https://github.com/GMOD/JBrowseMSA/commit/3fa162d7a63c640ec6e289cb0829c85587e6f15d))
+- Centralize key ([e9348c5](https://github.com/GMOD/JBrowseMSA/commit/e9348c502bb52a8851d90abdeba409d804cb1693))
+- Add parseAsn1 ([8fb8a47](https://github.com/GMOD/JBrowseMSA/commit/8fb8a4772e2f025fe19ec9c16ac06cf9b8a744f0))
+- Check 0 len tree ([0c47755](https://github.com/GMOD/JBrowseMSA/commit/0c47755b912e8bf3f89d4a3987862c2d7bab4e6b))
+- Fix lint ([986d533](https://github.com/GMOD/JBrowseMSA/commit/986d5337cfb4965ee06e5b56838b437f34648d6a))
+
+## [4.1.1](https://github.com/GMOD/JBrowseMSA/compare/v4.1.0...v4.1.1) (2025-05-19)
+
+### Other Changes
+
+- Add postcss ([3bf5401](https://github.com/GMOD/JBrowseMSA/commit/3bf54014ade55c96e6e6d495643569b8f66351a3))
+- Misc ([fdeda0c](https://github.com/GMOD/JBrowseMSA/commit/fdeda0c60911ad0f7813e8389d39d401e33a1126))
+- Fix high res scaling for retina ([fd80971](https://github.com/GMOD/JBrowseMSA/commit/fd80971677d0ec37e5ea84d3a8f0e3fb748b5adb))
+- Fix lint ([eae4f22](https://github.com/GMOD/JBrowseMSA/commit/eae4f2294dcbc5581486e366cb0696754d818b40))
+
+## [4.1.0](https://github.com/GMOD/JBrowseMSA/compare/v4.0.3...v4.1.0) (2025-05-03)
+
+### Other Changes
+
+- React 19 ([b166456](https://github.com/GMOD/JBrowseMSA/commit/b16645622c6b8c4f19192156eeded0cae2a0c400))
+- Bump deps ([b0d4fb5](https://github.com/GMOD/JBrowseMSA/commit/b0d4fb5079ecd29d5527706c483823ae3e057e3f))
+- Bump deps ([a7483f5](https://github.com/GMOD/JBrowseMSA/commit/a7483f52ec6010736f9052aa30e99e475a2b126b))
+- Updates ([a0ef132](https://github.com/GMOD/JBrowseMSA/commit/a0ef13292755d1ab4cabf111f45a09a775384e93))
+- Bump deps ([0516c86](https://github.com/GMOD/JBrowseMSA/commit/0516c8613b19e0de1239b933167c2c2999c59bba))
+- Update user_guide.md ([b1cc587](https://github.com/GMOD/JBrowseMSA/commit/b1cc5872c0127728fac19d8fafbc48cf0534f5f3))
+- Update material 6->7 ([2578100](https://github.com/GMOD/JBrowseMSA/commit/2578100f8f1b14215d7a269abf2044d0833684bf))
+- Lint fixes ([6bda054](https://github.com/GMOD/JBrowseMSA/commit/6bda054d0d14ba5bc6053ed3237a4fbd3a02e190))
+- No dep on x-data-grid ([7f09e7c](https://github.com/GMOD/JBrowseMSA/commit/7f09e7c95b9f2db1c9559a8c516fc53be20c70ce))
+- Rm grid item ([05de495](https://github.com/GMOD/JBrowseMSA/commit/05de495b973207e7a7c36506ed067430c9e18f8a))
+- Rm locals ([0616b09](https://github.com/GMOD/JBrowseMSA/commit/0616b094b9ccb3b7512af676d2b0e5efdb187758))
+- Deps ([0fb8732](https://github.com/GMOD/JBrowseMSA/commit/0fb8732ae4c6941bb028ec22d98b6b091de8ef05))
+- No need for tsx ([8111d75](https://github.com/GMOD/JBrowseMSA/commit/8111d758276ddebcce5ec9bf32371514871708b3))
+- Import form formatting ([08f2780](https://github.com/GMOD/JBrowseMSA/commit/08f278098c7a48b4592d28dba0b79d1a928601c4))
+- Add postcss rollup ([8905ed5](https://github.com/GMOD/JBrowseMSA/commit/8905ed57608f2d57653de8ebe26cb6bd2fffc260))
+
+## [4.0.3](https://github.com/GMOD/JBrowseMSA/compare/v4.0.2...v4.0.3) (2024-11-04)
+
+### Other Changes
+
+- Bump to rerun ci ([56887bb](https://github.com/GMOD/JBrowseMSA/commit/56887bb518e16655c2122c854afb1c4fa0091363))
+- Fix lint ([c38308f](https://github.com/GMOD/JBrowseMSA/commit/c38308f1c60c23df5e96e38a0fcffea3a319aa4f))
+- Bump deps ([b71c4a6](https://github.com/GMOD/JBrowseMSA/commit/b71c4a6b14d593f2b9ee56ef6afecd9a10fb59f8))
+- Misc ([3ab8c07](https://github.com/GMOD/JBrowseMSA/commit/3ab8c07c745ad85de4bee5825daedbf16a51474c))
+
+## [4.0.2](https://github.com/GMOD/JBrowseMSA/compare/v4.0.1...v4.0.2) (2024-09-16)
+
+### Other Changes
+
+- Add jbrowse_dna ([8257368](https://github.com/GMOD/JBrowseMSA/commit/825736806c29825955294e24acf552a33729acbe))
+
+## [4.0.1](https://github.com/GMOD/JBrowseMSA/compare/v4.0.0...v4.0.1) (2024-09-16)
+
+### Other Changes
+
+- Rm ([1697548](https://github.com/GMOD/JBrowseMSA/commit/1697548147221f8c3af13b17b5cbcc5441511f71))
+- Remove errant eslint deps ([eee5ce1](https://github.com/GMOD/JBrowseMSA/commit/eee5ce18491f75fd151d22623a48e9f00221d2f7))
+- Misc ([96e7fce](https://github.com/GMOD/JBrowseMSA/commit/96e7fce8feaaf080be919cbd6d7a83713021e6da))
+
+## [4.0.0](https://github.com/GMOD/JBrowseMSA/compare/v3.2.2...v4.0.0) (2024-09-06)
+
+### Other Changes
+
+- Remove treefam app from repo ([cecb3b0](https://github.com/GMOD/JBrowseMSA/commit/cecb3b0e26550e3559a5dd47d020e1cc0cc33992))
+
+## [3.2.2](https://github.com/GMOD/JBrowseMSA/compare/v3.2.1...v3.2.2) (2024-08-31)
+
+### Other Changes
+
+- Create example app of loading data from Ensembl and TreeFam (#83) ([0b526ba](https://github.com/GMOD/JBrowseMSA/commit/0b526baf4faee71e1ada55e190bacd843590b4c9))
+- Misc ([e8ccf18](https://github.com/GMOD/JBrowseMSA/commit/e8ccf18d346c320a813585f252f268926396b775))
+
+## [3.2.1](https://github.com/GMOD/JBrowseMSA/compare/v3.2.0...v3.2.1) (2024-08-19)
+
+### Other Changes
+
+- Add tsx ([82710bb](https://github.com/GMOD/JBrowseMSA/commit/82710bb3acd12a50eeaacae743d1a0a0932d078d))
+- Misc ([d827168](https://github.com/GMOD/JBrowseMSA/commit/d8271689d7e0d3ca2da235aa8e06679c3c8f0115))
+- Linting ([165fe55](https://github.com/GMOD/JBrowseMSA/commit/165fe551b62562ab1ffee07142099c7516a2a5e3))
+- Turning off setting applied ([526ba53](https://github.com/GMOD/JBrowseMSA/commit/526ba53dda06292784b63be0d4f1c37e17dc45ce))
+- Misc ([8aab1d1](https://github.com/GMOD/JBrowseMSA/commit/8aab1d18094fbcfbe6ca994f6341393565dd9edf))
+- Fixed calculations ([3dcd7e1](https://github.com/GMOD/JBrowseMSA/commit/3dcd7e1b4ce78bf2e8309b4023282728c7a74a8d))
+- Fixed coordinate calculations, and display currently hovered letter in header bar ([cbe99b5](https://github.com/GMOD/JBrowseMSA/commit/cbe99b5e13176749a05197fd02f356df655074c1))
+- Fix tsc ([bf1de37](https://github.com/GMOD/JBrowseMSA/commit/bf1de371bd81148ad0037b2733bf76695ecf4025))
+- Updates ([0ff2559](https://github.com/GMOD/JBrowseMSA/commit/0ff25596d0e11bd15dcb8a4d7d1b2063fa67bad5))
+
+## [3.2.0](https://github.com/GMOD/JBrowseMSA/compare/v3.1.12...v3.2.0) (2024-08-09)
+
+### Other Changes
+
+- Add vertical scroll bar, "none" color scheme, hide minimap when viewing small MSA, and other misc (#78) ([ccd2ffa](https://github.com/GMOD/JBrowseMSA/commit/ccd2ffaed214b7221b69cc107351813c0854f3c2))
+- Fix rendering of the leaf node, fixes #71 ([b1309a5](https://github.com/GMOD/JBrowseMSA/commit/b1309a5d3c4a34deb228bfa1b3b3c919e24683ed))
+- Revert "Fix rendering of the leaf node, fixes #71" ([9f1e71d](https://github.com/GMOD/JBrowseMSA/commit/9f1e71d6081e651c2dd0a905bdd420b95533c6dc))
+- Refactor approach for issue #71 ([01b2ff4](https://github.com/GMOD/JBrowseMSA/commit/01b2ff4d7b89f9f4cda37d0ef40cf1ae0656db01))
+- Additional improvements to show branch length, and domains ([a19f00b](https://github.com/GMOD/JBrowseMSA/commit/a19f00b431bf8577e70bce740bf6e96c9399df6b))
+- Disable domain menu items if unavailable ([af9d380](https://github.com/GMOD/JBrowseMSA/commit/af9d380f771f0192132527d69c5460acca30aad2))
+- Move zoom reset button ([c40da75](https://github.com/GMOD/JBrowseMSA/commit/c40da75fc3e0b4ac1ead996e67f7dd6891f30290))
+- Add optimizations to the canvas rendering (#80) ([c688964](https://github.com/GMOD/JBrowseMSA/commit/c688964d4d938a1ad046bb492b32da6390d21288))
+- Add optimizations to the canvas rendering (#80) ([6210cd7](https://github.com/GMOD/JBrowseMSA/commit/6210cd7670a6f2179a254498139502e1bdf0defe))
+- Allow user to configure amount of allowed "gappyness" (#81) ([319b25d](https://github.com/GMOD/JBrowseMSA/commit/319b25dce8acb1334bb917331d5dd647aba6f1de))
+
+## [3.1.12](https://github.com/GMOD/JBrowseMSA/compare/v3.1.11...v3.1.12) (2024-07-16)
+
+### Other Changes
+
+- Modularize ([26ce119](https://github.com/GMOD/JBrowseMSA/commit/26ce119516f11f82dfdb764c95624a7ed7f83d98))
+- Renames ([abcf83e](https://github.com/GMOD/JBrowseMSA/commit/abcf83ed1d9fbde78c41864c515db395b1a927e8))
+- Better status ([cf86a52](https://github.com/GMOD/JBrowseMSA/commit/cf86a52859e1f9621bcbc9becebb496f7358e542))
+- Swatch ([51bf5df](https://github.com/GMOD/JBrowseMSA/commit/51bf5df5fcec6cd4effb1f46d683113191a77517))
+- Consolidate menu ([33ac0e2](https://github.com/GMOD/JBrowseMSA/commit/33ac0e277f5fd8b6f65f3be6b0b073279f3a321a))
+- Consolidate menu ([969a008](https://github.com/GMOD/JBrowseMSA/commit/969a0084fb799d850ebcc735e90cb54defbed059))
+- Consolidate menu ([da3e00e](https://github.com/GMOD/JBrowseMSA/commit/da3e00e34884ddd7d0507bed81de703894a896fd))
+- Bump deps ([d62deb5](https://github.com/GMOD/JBrowseMSA/commit/d62deb5ada2bb05e25cb33a821e6a744fc5b3f4c))
+
+## [3.1.11](https://github.com/GMOD/JBrowseMSA/compare/v3.1.10...v3.1.11) (2024-07-09)
+
+### Other Changes
+
+- Bump deps ([0e41c14](https://github.com/GMOD/JBrowseMSA/commit/0e41c14f6ac69132bf07e0a430f0477c93c3922e))
+- Remove jest ([f7d0d0b](https://github.com/GMOD/JBrowseMSA/commit/f7d0d0b8ff501e077f562bc86ef3e568c102c21b))
+- Couple unused lint ([6001dae](https://github.com/GMOD/JBrowseMSA/commit/6001dae49c43d4b4ecc59dbaab4972eeb93caad3))
+- Couple unused lint ([8bb4ae5](https://github.com/GMOD/JBrowseMSA/commit/8bb4ae5fdfb40e1538ee4287e5bcaf5648758a01))
+- Add word-wrap:break-word ([fa4755c](https://github.com/GMOD/JBrowseMSA/commit/fa4755cbf3d956e400078630f51e44391be0684b))
+
+## [3.1.10](https://github.com/GMOD/JBrowseMSA/compare/v3.1.9...v3.1.10) (2024-04-18)
+
+### Other Changes
+
+- Export Accession type ([053f8f0](https://github.com/GMOD/JBrowseMSA/commit/053f8f09bdf47031d4cf3cb33bb95d7574e4fd8f))
+
+## [3.1.9](https://github.com/GMOD/JBrowseMSA/compare/v3.1.8...v3.1.9) (2024-04-18)
+
+### Other Changes
+
+- Unneeded deps ([0f0149a](https://github.com/GMOD/JBrowseMSA/commit/0f0149a8bd61252307687e12119f70610cece95c))
+
+## [3.1.8](https://github.com/GMOD/JBrowseMSA/compare/v3.1.7...v3.1.8) (2024-04-18)
+
+### Other Changes
+
+- Wow ([b26a85a](https://github.com/GMOD/JBrowseMSA/commit/b26a85a183a880dd5df34c8521e47b2adec8000a))
+- Add sequence to treenodeinfodialog ([406c04b](https://github.com/GMOD/JBrowseMSA/commit/406c04b4f7d133bd2dc9b46d805b96a9e8d36132))
+- Add test suite ([0944be1](https://github.com/GMOD/JBrowseMSA/commit/0944be19b9a1be8add8954c4083d9f4f23b7df31))
+- Starter kit ([adc0be3](https://github.com/GMOD/JBrowseMSA/commit/adc0be3319de991bc6d4fe9ca7422408baaf2d85))
+- Rename some files ([63ce057](https://github.com/GMOD/JBrowseMSA/commit/63ce057de9dece97a2785e7563ed000e227edb89))
+- Refactor ([e4c689c](https://github.com/GMOD/JBrowseMSA/commit/e4c689cf1c9eafd23bb5719345ed60ffe9ff2e36))
+- Fix drawing labels on MSA only views ([476be74](https://github.com/GMOD/JBrowseMSA/commit/476be74e11dbb3ef71f97f70f357d5fa85031d2a))
+- Fix drawing labels on MSA only views ([44510d7](https://github.com/GMOD/JBrowseMSA/commit/44510d7a112e7c942cbaccf49904d80a986ab131))
+- Small amount of modularizing ([99d4d04](https://github.com/GMOD/JBrowseMSA/commit/99d4d045ddaf7a597455dbe1ba9d001375f7875c))
+- Refactoring ([1cba077](https://github.com/GMOD/JBrowseMSA/commit/1cba07728cfb67b63876fb42bc839962c88a961b))
+- Features ([9deb8bc](https://github.com/GMOD/JBrowseMSA/commit/9deb8bc340604ca24fd5db41dc538077f7a00c47))
+- Updates ([266126b](https://github.com/GMOD/JBrowseMSA/commit/266126b23552419cf5d025254f909775fa0a42d7))
+- Misc ([31e159b](https://github.com/GMOD/JBrowseMSA/commit/31e159b3f399407ce1c26b86a89852114def3778))
+- Remove box track concept, it will now be changed to a per row thing ([22df092](https://github.com/GMOD/JBrowseMSA/commit/22df09285c43a186cc22a494c4c5cdffa1976310))
+- Misc ([f459f86](https://github.com/GMOD/JBrowseMSA/commit/f459f86159ad1d325d9850af0b78109186d541ea))
+- Remove unused ([83478ab](https://github.com/GMOD/JBrowseMSA/commit/83478ab071fd2b9f3861cfe6fc32fb7270164c8a))
+- Unused ([eff1d36](https://github.com/GMOD/JBrowseMSA/commit/eff1d36a2331e1a81cb80707a331bbc74efa2d28))
+- Render sequence in metadata ([71266bc](https://github.com/GMOD/JBrowseMSA/commit/71266bc5a8c68f17e1e80381ec6367e5634a4f36))
+- Copy sequences ([1b1c767](https://github.com/GMOD/JBrowseMSA/commit/1b1c767b6c397d432a2c6a5e5c55c95aab66ae7c))
+- Move files around ([aba5847](https://github.com/GMOD/JBrowseMSA/commit/aba584739245f2d3f7346385147b290a75a77016))
+- Misc ([c63a4e9](https://github.com/GMOD/JBrowseMSA/commit/c63a4e9e4c265de671a1ee30e82e420247ebaea7))
+- Misc ([99bed6c](https://github.com/GMOD/JBrowseMSA/commit/99bed6c40308d7fa247807957b48969480a88a14))
+- Lint ([cc7a6c2](https://github.com/GMOD/JBrowseMSA/commit/cc7a6c2964b77f539f82c2b4a54038be9d666742))
+- Lint ([c1a9a44](https://github.com/GMOD/JBrowseMSA/commit/c1a9a44699b076bc6a642b1995da3399e39a8dd0))
+- Better ability to clear state ([cb790f4](https://github.com/GMOD/JBrowseMSA/commit/cb790f47deed64f0daec2d537a6f9e30c9bc2942))
+- Better ability to clear state. Fixes #70 ([a53781a](https://github.com/GMOD/JBrowseMSA/commit/a53781ab4ac7319fbcd82fbf2c070cb12562fe9a))
+- Clean up ([3372525](https://github.com/GMOD/JBrowseMSA/commit/33725252cb30d0c0b3341af1b8c17adae78e6f0e))
+- Fix links ([f2d8412](https://github.com/GMOD/JBrowseMSA/commit/f2d8412b83586411de3a00319b7571332b6fc9a9))
+- Remove console logs ([b426df0](https://github.com/GMOD/JBrowseMSA/commit/b426df08876310ab5b4d831241376e7d85badf16))
+- Tidy annotations ([02ba1e7](https://github.com/GMOD/JBrowseMSA/commit/02ba1e7dcac3f984adba6e702f3a365e5768efec))
+- Add feature output to svg ([5ed37d6](https://github.com/GMOD/JBrowseMSA/commit/5ed37d606f1ab06b94828aa8cba3e57db680660a))
+- Add error message to the errorboundary ([57d36e5](https://github.com/GMOD/JBrowseMSA/commit/57d36e52695e3a160da2d11a9e9fcc82a83bea5d))
+- Catch errors in importform ([2854bca](https://github.com/GMOD/JBrowseMSA/commit/2854bca19361bc0c837ce504c2241b06128ae666))
+- Add zoom actions ([158fef8](https://github.com/GMOD/JBrowseMSA/commit/158fef82086727d46d21146c4b3dc7e8919e0f72))
+- Update docs ([b7bc66c](https://github.com/GMOD/JBrowseMSA/commit/b7bc66c35d3d81692d797762004fc088b5f5a4f5))
+- Use black instead of undefined for no palette ([a250fae](https://github.com/GMOD/JBrowseMSA/commit/a250fae04722ca68e4ad442cb3bf9171077c5f72))
+- Bump deps ([2bee594](https://github.com/GMOD/JBrowseMSA/commit/2bee5948ed893c11281ed16db8405796537ece4e))
+
+## [3.1.7](https://github.com/GMOD/JBrowseMSA/compare/v3.1.6...v3.1.7) (2024-02-28)
+
+### Other Changes
+
+- Add typos check ([a6fbab1](https://github.com/GMOD/JBrowseMSA/commit/a6fbab1104dd6f58bc76b72980b3564b8045a6ac))
+- Fix observability on settings ([d9c96d5](https://github.com/GMOD/JBrowseMSA/commit/d9c96d5a7939ce3cfa5ea390d83c4ce76c5349e3))
+
+## [3.1.6](https://github.com/GMOD/JBrowseMSA/compare/v3.1.5...v3.1.6) (2024-02-27)
+
+### Other Changes
+
+- Add datamodel docs ([6cc9795](https://github.com/GMOD/JBrowseMSA/commit/6cc9795bb2533dda6818e41567bdcf2e78cbfd2d))
+- Update lint ([6275bf5](https://github.com/GMOD/JBrowseMSA/commit/6275bf5f89fa1df4b7b53a720647ff88901091b2))
+- Modularize selected structures ([e1ccc3f](https://github.com/GMOD/JBrowseMSA/commit/e1ccc3f80861f6511a5cbba34624e80c6a529ee5))
+- Lazily export svg ([12636b2](https://github.com/GMOD/JBrowseMSA/commit/12636b26e44dd0985456cd07b52865a000cc0fc6))
+- Allow hiding leaf node (#68) ([972091d](https://github.com/GMOD/JBrowseMSA/commit/972091da0b3a0d04e37798a13714660270e56450))
+- Add click action ([3fa92ed](https://github.com/GMOD/JBrowseMSA/commit/3fa92ed1cc8ebdcd7dc26a68c7a0982c842df6f6))
+- Remove the margin when alignRight ([3b16f4f](https://github.com/GMOD/JBrowseMSA/commit/3b16f4f47db5b84fbf567242dfa83b0a08b5e506))
+- Unused dep ([34e98f6](https://github.com/GMOD/JBrowseMSA/commit/34e98f67c4fa6952f516ff83d44b63ee7a7cb800))
+
+## [3.1.5](https://github.com/GMOD/JBrowseMSA/compare/v3.1.4...v3.1.5) (2024-02-24)
+
+### Other Changes
+
+- Restore manual margin calculations for canvas left-side calculations ([dc0ca00](https://github.com/GMOD/JBrowseMSA/commit/dc0ca0004fd989a97cdf2f6b912f96ddfd3efa48))
+- Update deps ([66bdead](https://github.com/GMOD/JBrowseMSA/commit/66bdead30369f486e3b3dbdfdd9cde0b7cdc0529))
+- Fix lint ([03ddc29](https://github.com/GMOD/JBrowseMSA/commit/03ddc29b9d30396e0325f33eec00c974d61ae613))
+- Remove clustal 'track' ([ed6f5ca](https://github.com/GMOD/JBrowseMSA/commit/ed6f5ca60ab2253b4b4365824e843bdd7b4f0e12))
+
+## [3.1.4](https://github.com/GMOD/JBrowseMSA/compare/v3.1.3...v3.1.4) (2024-02-23)
+
+### Other Changes
+
+- Less transpiling ([6e68e7c](https://github.com/GMOD/JBrowseMSA/commit/6e68e7cafd37dd08ab1e70ee99ebef1f367eb77a))
+- Console.error ([fccc49f](https://github.com/GMOD/JBrowseMSA/commit/fccc49f8d599e5511d9494857a02079bef76893f))
+- Better theme support for dark mode ([853af90](https://github.com/GMOD/JBrowseMSA/commit/853af901a9d64fb5a43ac8071bd617d67b341853))
+- Updates ([da1be4d](https://github.com/GMOD/JBrowseMSA/commit/da1be4d11f5462b37bc6c7e733538d88b5773ac7))
+- Measure text using canvas ([9693a08](https://github.com/GMOD/JBrowseMSA/commit/9693a08276064aa2d46e5e61d3d869d243bdf115))
+- Mouse offset ([df64169](https://github.com/GMOD/JBrowseMSA/commit/df641699108bebeb8e4a69eadc0183a737ab5275))
+- Remove unused dep ([52adbd1](https://github.com/GMOD/JBrowseMSA/commit/52adbd12d8760d6668224f552f992d12b254ad40))
+- Fix mouseovers ([4bfef43](https://github.com/GMOD/JBrowseMSA/commit/4bfef43b59a8c34e7bbb8230c48ad5c85b26651a))
+- Make loading the main component ([9b102dd](https://github.com/GMOD/JBrowseMSA/commit/9b102ddadb7092c7195c62309dce7f9a116c666a))
+
 ## v3.1.3
 
 - Add ability to export entire MSA to SVG
