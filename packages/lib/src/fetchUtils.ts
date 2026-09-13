@@ -33,14 +33,18 @@ type ProgressFetcher = (
  * Fetch text from a filehandle while reporting download/unzip progress through
  * setStatus, and wiring a Cancel handler that aborts the underlying request.
  * The status is always cleared once the fetch settles. The fetcher is injectable
- * for testing.
+ * for testing, and so is the AbortController: a caller that can supersede its
+ * own request -- the model's loaders, when the filehandle changes under them --
+ * holds one and aborts the download it no longer wants.
  */
 export async function fetchTextWithProgress(
   loc: Filehandle,
   setStatus: (status?: FetchStatus) => void,
-  fetcher: ProgressFetcher = fetchAndMaybeUnzipText,
+  {
+    fetcher = fetchAndMaybeUnzipText,
+    controller = new AbortController(),
+  }: { fetcher?: ProgressFetcher; controller?: AbortController } = {},
 ) {
-  const controller = new AbortController()
   try {
     return await fetcher(loc, {
       signal: controller.signal,

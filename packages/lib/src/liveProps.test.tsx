@@ -7,6 +7,7 @@
 // user, whose changes inside the viewer have to survive the host's next render.
 import React, { act } from 'react'
 
+import { isAlive } from '@jbrowse/mobx-state-tree'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, test, vi } from 'vitest'
 
@@ -109,4 +110,65 @@ test('a change made inside the viewer survives the host re-rendering', () => {
   expect(model.height).toBe(320)
   expect(model.rowHeight).toBe(30)
   expect(model.colorSchemeName).toBe('flower')
+})
+
+test('the data layers follow their props', () => {
+  const model = show({ height: 300 })
+  expect(model.highlights).toEqual([])
+
+  show({
+    height: 300,
+    highlights: [{ start: 2, end: 4, label: 'motif' }],
+    columnTracks: [{ id: 't', name: 'T', kind: 'bar', values: [1, 0, 1] }],
+    residueMappings: [
+      {
+        row: 'human',
+        accession: 'P1',
+        structure: { id: '1ABC', kind: 'experimental', asymId: 'A' },
+        segments: [{ rowStart: 1, rowEnd: 7, structStart: 1, structEnd: 7 }],
+      },
+    ],
+    highlightColumns: [1, 2],
+  })
+
+  expect(model.highlights.map(h => h.label)).toEqual(['motif'])
+  expect(model.columnTracks.map(t => t.id)).toEqual(['t'])
+  expect(model.mappedStructures.map(m => m.structure.id)).toEqual(['1ABC'])
+  expect(model.highlightedColumns).toEqual([1, 2])
+})
+
+test('a layer passed as a fresh array each render is not replaced each render', () => {
+  const model = show({ height: 300, highlights: [{ start: 2, end: 4 }] })
+  const before = model.highlights[0]
+  show({ height: 301, highlights: [{ start: 2, end: 4 }] })
+  expect(model.highlights[0]).toBe(before)
+})
+
+test('unmounting destroys the model it built', async () => {
+  const model = show({ height: 300 })
+  act(() => {
+    root.unmount()
+  })
+  // deferred by a tick, so a StrictMode remount can cancel it
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 0))
+  })
+  expect(isAlive(model)).toBe(false)
+  // afterEach unmounts again, which is fine on an unmounted root
+})
+
+test('a StrictMode double mount keeps its model alive', async () => {
+  let captured2: MsaViewModel | undefined
+  act(() => {
+    root.render(
+      <React.StrictMode>
+        <MSAViewer msa={msa} height={300} />
+      </React.StrictMode>,
+    )
+  })
+  captured2 = captured
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 0))
+  })
+  expect(isAlive(captured2!)).toBe(true)
 })

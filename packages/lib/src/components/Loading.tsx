@@ -83,13 +83,23 @@ const Reset = observer(function ({
 })
 
 const Loading = observer(function ({ model }: { model: MsaViewModel }) {
-  const { isLoading, dataInitialized, error, msaFilehandle, treeFilehandle } =
-    model
+  const {
+    isLoading,
+    dataInitialized,
+    error,
+    resetCount,
+    msaFilehandle,
+    treeFilehandle,
+  } = model
   const hasPendingFilehandle = !!(msaFilehandle || treeFilehandle)
 
   return (
     <div>
+      {/* keyed on the reset counter: the boundary holds the error it caught
+          until it is remounted, so without this "Return to import form" put
+          the model back and left the error screen up */}
       <ErrorBoundary
+        key={resetCount}
         FallbackComponent={e => <Reset model={model} error={e.error} />}
       >
         {dataInitialized ? (

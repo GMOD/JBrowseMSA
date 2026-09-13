@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import useMeasure from '@jbrowse/core/util/useMeasure'
+import { destroy, isAlive } from '@jbrowse/mobx-state-tree'
 import { ThemeProvider } from '@mui/material/styles'
 
 import MSAModelF from '../model.ts'
@@ -93,6 +94,10 @@ export default function MSAViewer({
     }),
   )
 
+  const destroyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  )
+
   const [ref, { width }] = useMeasure()
   useEffect(() => {
     if (width) {
@@ -142,6 +147,45 @@ export default function MSAViewer({
   useEffect(() => {
     model.drawRelativeTo(relativeTo)
   }, [model, relativeTo])
+
+  // the data layers, keyed by content: a host that computes one inline hands a
+  // new array on every render, and replacing the model's copy each time would
+  // redraw the overlay for nothing
+  const highlightsKey = JSON.stringify(highlights ?? [])
+  useEffect(() => {
+    model.setHighlights(JSON.parse(highlightsKey))
+  }, [model, highlightsKey])
+  const columnTracksKey = JSON.stringify(columnTracks ?? [])
+  useEffect(() => {
+    model.setColumnTracks(JSON.parse(columnTracksKey))
+  }, [model, columnTracksKey])
+  const residueMappingsKey = JSON.stringify(residueMappings ?? [])
+  useEffect(() => {
+    model.setResidueMappings(JSON.parse(residueMappingsKey))
+  }, [model, residueMappingsKey])
+  const highlightColumnsKey = JSON.stringify(highlightColumns ?? null)
+  useEffect(() => {
+    model.setHighlightedColumns(JSON.parse(highlightColumnsKey) ?? undefined)
+  }, [model, highlightColumnsKey])
+
+  // the model owns a matchMedia listener and whatever fetches its filehandles
+  // started, so an unmounted viewer that keeps its model keeps those too. The
+  // destroy is deferred by a tick because React's StrictMode mounts, unmounts
+  // and remounts with the same state: the remount's effect cancels it
+  useEffect(() => {
+    if (destroyTimer.current !== undefined) {
+      clearTimeout(destroyTimer.current)
+      destroyTimer.current = undefined
+    }
+    return () => {
+      destroyTimer.current = setTimeout(() => {
+        destroyTimer.current = undefined
+        if (isAlive(model)) {
+          destroy(model)
+        }
+      })
+    }
+  }, [model])
 
   return (
     <ThemeProvider theme={theme}>

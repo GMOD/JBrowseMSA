@@ -10,6 +10,7 @@ import FileMenu from './FileMenu.tsx'
 import GappynessSlider from './GappynessSlider.tsx'
 import HeaderInfoArea from './HeaderInfoArea.tsx'
 import HeaderStatusArea from './HeaderStatusArea.tsx'
+import LoadWarnings from './LoadWarnings.tsx'
 import MSASettingsMenu from './MSASettingsMenu.tsx'
 import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
 import TreeSettingsMenu from './TreeSettingsMenu.tsx'
@@ -40,6 +41,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       </div>
       <HeaderInfoArea model={model} />
       <Spacer />
+      <LoadWarnings model={model} />
       <UnshareableDataWarning model={model} />
       <HeaderStatusArea model={model} />
       <Tooltip title="About">

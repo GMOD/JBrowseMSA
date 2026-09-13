@@ -6,6 +6,7 @@ import {
   applySnapshot,
   cast,
   getSnapshot,
+  isAlive,
   types,
 } from '@jbrowse/mobx-state-tree'
 import { colord } from 'colord'
@@ -579,6 +580,23 @@ function stateModelFactory() {
 
       /**
        * #volatile
+       * load problems the view carried on through: an optional layer that did
+       * not arrive, an overlay that did not parse. `error` is the other kind --
+       * it replaces the view, which is right for the alignment and wrong for a
+       * decorative file
+       */
+      warnings: [] as string[],
+
+      /**
+       * #volatile
+       * bumped by reset(). The React error boundary above the view keeps its
+       * caught error until it is remounted, so "Return to import form" did
+       * nothing after a render error until this became its key
+       */
+      resetCount: 0,
+
+      /**
+       * #volatile
        * overlay annotations drawn on the alignment, whatever their source.
        * Every source -- InterProScan, GFF, a user upload -- converts to this
        * flat list before it reaches the model, so nothing downstream of here
@@ -648,6 +666,22 @@ function stateModelFactory() {
        */
       setError(error?: unknown) {
         self.error = error
+      },
+
+      /**
+       * #action
+       * report something the view survived: a layer that failed to load, a
+       * file that failed to parse
+       */
+      addWarning(warning: string) {
+        self.warnings = [...self.warnings, warning]
+      },
+
+      /**
+       * #action
+       */
+      clearWarnings() {
+        self.warnings = []
       },
 
       /**
@@ -2427,6 +2461,13 @@ function stateModelFactory() {
       },
       /**
        * #action
+       * replace the alignment<->structure correspondence (see docs/layers.md)
+       */
+      setResidueMappings(mappings: ResidueMapping[]) {
+        self.residueMappings.replace(mappings)
+      },
+      /**
+       * #action
        */
       toggleTrack(id: string) {
         // the stored value is "is off", so the current shown state is exactly
@@ -2788,6 +2829,9 @@ function stateModelFactory() {
        * reach are cleared by hand.
        */
       reset() {
+        self.resetCount++
+        self.clearWarnings()
+        self.setStatus(undefined)
         applySnapshot(
           self,
           Object.fromEntries(
@@ -2911,41 +2955,62 @@ function stateModelFactory() {
          * Every loader carries a generation guard: the filehandle can change
          * mid-fetch (a second file picked while the first is still in flight),
          * and the slower earlier request must not clobber the data, status, or
-         * loading flag belonging to the newer one.
+         * loading flag belonging to the newer one. A superseded or cleared
+         * request is also aborted, rather than left downloading a file nothing
+         * is waiting for, and it gives back the status line it was writing --
+         * a reset() mid-download used to leave "Downloading file" and a Cancel
+         * button behind on the import form.
          *
          * `clearFilehandle` serves two purposes for the loaders that pass it.
          * A local file has no URL to refetch from, so the handle is dropped
          * once its bytes are in the model; and a fetch the user cancels drops
          * it too, returning the view to the import form rather than leaving a
          * stuck spinner.
+         *
+         * `what` names the layer in a failure message. An optional layer
+         * (annotations, row metadata) that fails to load is a warning: it is
+         * not worth replacing an alignment the reader is looking at with an
+         * error screen over a decorative file.
          */
         const loadOnFilehandleChange = ({
+          what,
           getFilehandle,
           onLoad,
           setLoading,
           clearFilehandle,
+          optional = false,
         }: {
+          what: string
           getFilehandle: () => FileLocationType | undefined
           onLoad: (text: string) => void
           setLoading?: (arg: boolean) => void
           clearFilehandle?: () => void
+          optional?: boolean
         }) => {
           let generation = 0
+          let cancelInFlight: (() => void) | undefined
+          addDisposer(self, () => {
+            cancelInFlight?.()
+          })
           addDisposer(
             self,
             autorun(async () => {
               const filehandle = getFilehandle()
-              // a cleared filehandle bumps the generation too, so a reset()
-              // mid-download invalidates the in-flight fetch instead of letting
-              // its onLoad land on the emptied model. That also orphans the
-              // invalidated run's `finally`, so the loading flag is cleared
-              // here on its behalf
               const current = ++generation
+              cancelInFlight?.()
+              cancelInFlight = undefined
               if (!filehandle) {
                 setLoading?.(false)
                 return
               }
-              const isCurrent = () => current === generation
+              const isCurrent = () => current === generation && isAlive(self)
+              const controller = new AbortController()
+              cancelInFlight = () => {
+                controller.abort()
+                if (isAlive(self)) {
+                  self.setStatus(undefined)
+                }
+              }
               try {
                 setLoading?.(true)
                 self.setError(undefined)
@@ -2956,6 +3021,7 @@ function stateModelFactory() {
                       self.setStatus(status)
                     }
                   },
+                  { controller },
                 )
                 if (isCurrent()) {
                   transaction(() => {
@@ -2971,11 +3037,16 @@ function stateModelFactory() {
                     clearFilehandle?.()
                   } else {
                     console.error(e)
-                    self.setError(e)
+                    if (optional) {
+                      self.addWarning(`The ${what} did not load: ${e}`)
+                    } else {
+                      self.setError(e)
+                    }
                   }
                 }
               } finally {
                 if (isCurrent()) {
+                  cancelInFlight = undefined
                   setLoading?.(false)
                 }
               }
@@ -2984,6 +3055,7 @@ function stateModelFactory() {
         }
 
         loadOnFilehandleChange({
+          what: 'tree',
           getFilehandle: () => self.treeFilehandle,
           onLoad: text => {
             self.setTree(text)
@@ -2999,6 +3071,8 @@ function stateModelFactory() {
         // treeMetadata is decorative and has no import-form step of its own, so
         // it keeps no loading flag and nothing to return to on cancel
         loadOnFilehandleChange({
+          what: 'row metadata',
+          optional: true,
           getFilehandle: () => self.treeMetadataFilehandle,
           onLoad: text => {
             self.setTreeMetadata(text)
@@ -3020,8 +3094,10 @@ function stateModelFactory() {
                 self.applyGFFText(gffText)
                 appliedGFF = true
               } catch (e) {
+                // a malformed overlay is not worth replacing the alignment
+                // with an error screen
                 console.error(e)
-                self.setError(e)
+                self.addWarning(`The annotations did not parse: ${e}`)
               }
             } else if (appliedGFF) {
               appliedGFF = false
@@ -3034,6 +3110,8 @@ function stateModelFactory() {
         // the autorun above parses it, so there is one parse path whether the
         // text arrived from a file or from a snapshot
         loadOnFilehandleChange({
+          what: 'annotations',
+          optional: true,
           getFilehandle: () => self.gffFilehandle,
           onLoad: text => {
             self.setGFF(text)
@@ -3044,6 +3122,7 @@ function stateModelFactory() {
         })
 
         loadOnFilehandleChange({
+          what: 'alignment',
           getFilehandle: () => self.msaFilehandle,
           onLoad: text => {
             self.setMSA(text)
