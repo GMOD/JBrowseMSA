@@ -132,4 +132,13 @@ seq2  GHIKL
       expect(() => parse(stockholm)).toThrow('More than one alignment found')
     })
   })
+
+  test('a sequence named constructor and a #=GF constructor tag parse', () => {
+    const [aln] = parseAll(
+      '# STOCKHOLM 1.0\n#=GF constructor x\nconstructor ACGT\nb ACGT\n//\n',
+    )
+    expect(aln?.seqname).toEqual(['constructor', 'b'])
+    expect(aln?.seqdata.constructor).toBe('ACGT')
+    expect(aln?.gf.constructor).toEqual(['x'])
+  })
 })

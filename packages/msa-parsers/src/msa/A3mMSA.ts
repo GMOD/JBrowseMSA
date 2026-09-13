@@ -1,5 +1,5 @@
 import BaseMSA from './BaseMSA.ts'
-import { splitFastaRecords } from './fastaRecords.ts'
+import { fastaSniff, splitFastaRecords } from './fastaRecords.ts'
 
 /**
  * A3M Format Parser
@@ -83,7 +83,7 @@ export default class A3mMSA extends BaseMSA {
   }
 
   static sniff(text: string): boolean {
-    if (!text.startsWith('>')) {
+    if (!fastaSniff(text)) {
       return false
     }
 
@@ -147,7 +147,7 @@ function expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
     }
   }
 
-  const expanded: Record<string, string> = {}
+  const expanded: Record<string, string> = Object.create(null)
 
   for (const [seqIdx, { matches, inserts }] of rows.entries()) {
     const result: string[] = []

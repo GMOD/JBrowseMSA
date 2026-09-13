@@ -273,3 +273,51 @@ describe('getWidth', () => {
     expect(parseMSA('>').getWidth()).toBe(0)
   })
 })
+
+describe('FASTA deflines', () => {
+  test('a > inside a defline does not start a record', () => {
+    const msa = parseMSA('>sp|P1|A x->y\nACGT\n>BRCA1 c.1799T>A\nACGA\n')
+    expect(msa.getNames()).toEqual(['sp|P1|A', 'BRCA1'])
+    expect(msa.getRow('BRCA1')).toBe('ACGA')
+  })
+
+  test('a tab ends the id', () => {
+    const msa = parseMSA('>a\tdesc\nACGT\n>b\tdesc\nACGT\n')
+    expect(msa.getNames()).toEqual(['a', 'b'])
+  })
+
+  test('names that are Object.prototype keys are ordinary rows', () => {
+    const msa = parseMSA('>__proto__\nACGT\n>constructor\nAC\n')
+    expect(msa.getNames()).toEqual(['__proto__', 'constructor'])
+    expect(msa.getRow('__proto__')).toBe('ACGT')
+    expect(msa.getWidth()).toBe(4)
+    const a3m = new A3mMSA('>__proto__\nACgGT\n>b\nACGT\n')
+    expect(a3m.getRow('__proto__')).toBe('ACGGT')
+  })
+})
+
+describe('parseMSA input normalization', () => {
+  test('sniffs past a byte order mark or leading blank lines', () => {
+    const fasta = '>a\nACGT\n>b\nACGT\n'
+    const stockholm = '# STOCKHOLM 1.0\na ACGT\nb ACGT\n//\n'
+    for (const prefix of ['﻿', '\n\n', ' \r\n']) {
+      expect(parseMSA(prefix + fasta)).toBeInstanceOf(FastaMSA)
+      expect(parseMSA(prefix + stockholm).getNames()).toEqual(['a', 'b'])
+    }
+  })
+
+  test('reads a ColabFold a3m, whose first line is a # header', () => {
+    const msa = parseMSA(
+      '#8\t1\n>101\nMKVLAAGT\n>UniRef100_A0A1\tscore\nMKVaLAAGT\n>UniRef100_B0B2\nMK-LAAgGT\n',
+    )
+    expect(msa).toBeInstanceOf(A3mMSA)
+    expect(msa.getNames()).toEqual(['101', 'UniRef100_A0A1', 'UniRef100_B0B2'])
+    expect(msa.getRow('101')).toBe('MKV.LAA.GT')
+  })
+
+  test('rejects an HTML page instead of reading it as Clustal', () => {
+    const page =
+      '<!DOCTYPE html>\n<html><head><title>404 Not Found</title></head>\n<body>Not found</body></html>\n'
+    expect(() => parseMSA(page)).toThrow(/HTML page/)
+  })
+})

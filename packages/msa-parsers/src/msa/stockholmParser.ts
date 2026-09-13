@@ -15,12 +15,12 @@ export interface StockholmData {
 
 function createStockholm(): StockholmData {
   return {
-    gf: {},
-    gc: {},
-    gs: {},
-    gr: {},
+    gf: Object.create(null),
+    gc: Object.create(null),
+    gs: Object.create(null),
+    gr: Object.create(null),
     seqname: [],
-    seqdata: {},
+    seqdata: Object.create(null),
   }
 }
 
@@ -82,17 +82,17 @@ export function parseAll(
       stock.gc[match[1]!] = (stock.gc[match[1]!] ?? '') + match[2]!
     } else if ((match = gsRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
-      const byName = (stock.gs[match[2]!] ??= {})
+      const byName = (stock.gs[match[2]!] ??= Object.create(null))
       ;(byName[match[1]!] ??= []).push(match[3]!)
     } else if ((match = grRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
-      const byName = (stock.gr[match[2]!] ??= {})
+      const byName = (stock.gr[match[2]!] ??= Object.create(null))
       byName[match[1]!] = (byName[match[1]!] ?? '') + match[3]!
     } else if ((match = lineRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
       const seqname = match[1]!
       const seqdata = match[2]!
-      if (!stock.seqdata[seqname]) {
+      if (stock.seqdata[seqname] === undefined) {
         stock.seqdata[seqname] = ''
         stock.seqname.push(seqname)
       }

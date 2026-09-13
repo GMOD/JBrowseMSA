@@ -3,6 +3,7 @@ import ClustalMSA from './ClustalMSA.ts'
 import EmfMSA from './EmfMSA.ts'
 import FastaMSA from './FastaMSA.ts'
 import StockholmMSA, { stockholmSniff } from './StockholmMSA.ts'
+import { fastaSniff } from './fastaRecords.ts'
 
 export { parseEmfTree } from 'emf-js'
 export { default as parseNewick } from './parseNewick.ts'
@@ -16,15 +17,23 @@ export type MSAParserType =
 
 export type MSAFormat = 'stockholm' | 'a3m' | 'fasta' | 'emf' | 'clustal'
 
+const htmlPage = /^<(!doctype\s+html|html[\s>])/i
+
 // when `format` is given the heuristic sniffing is bypassed -- callers that
 // already know the format (e.g. impg emitting fasta-aln) can force it rather
 // than rely on auto-detection, which is necessarily ambiguous between formats
 // that share a leading '>' (fasta vs a3m)
 export function parseMSA(
-  text: string,
+  input: string,
   currentAlignment = 0,
   format?: MSAFormat,
 ): MSAParserType {
+  const text = input.replace(/^\uFEFF/, '').trimStart()
+  if (htmlPage.test(text)) {
+    throw new Error(
+      'Received an HTML page, not an alignment. Check that the URL points at the file itself',
+    )
+  }
   if (format === 'stockholm') {
     return new StockholmMSA(text, currentAlignment)
   }
@@ -46,7 +55,7 @@ export function parseMSA(
   if (A3mMSA.sniff(text)) {
     return new A3mMSA(text)
   }
-  if (text.startsWith('>')) {
+  if (fastaSniff(text)) {
     return new FastaMSA(text)
   }
   if (text.startsWith('SEQ')) {

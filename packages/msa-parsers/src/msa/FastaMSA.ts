@@ -14,8 +14,8 @@ export default class FastaMSA extends BaseMSA {
   constructor(text: string) {
     super()
     const records = splitFastaRecords(text)
-    const seqdata: Record<string, string> = {}
-    const colonNormalized: Record<string, string> = {}
+    const seqdata: Record<string, string> = Object.create(null)
+    const colonNormalized: Record<string, string> = Object.create(null)
 
     for (const { id, seq } of records) {
       seqdata[id] = seq
