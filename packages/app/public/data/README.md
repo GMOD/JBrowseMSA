@@ -49,5 +49,22 @@ The files below back the JBrowse links on the
 | `tp53-p53.nh`                     | Newick            | ClustalW neighbor-joining tree for `tp53-p53-orthologs.fa`                                           |
 | `tp53-clinvar-pathogenic.vcf.gz`  | VCF (bgzip+tabix) | ClinVar (GRCh38) variants over the TP53 locus filtered to Pathogenic/Likely_pathogenic — weekly-updated source, count drifts |
 
+The `spike/` folder backs the
+[spike_structure tutorial](../../../../docs/tutorials/spike_structure.md) and is
+built by `docs/tutorials/scripts/build_spike_structure.sh`, which prints every
+number that page quotes:
+
+| File                 | Format                | Provenance                                                                                                             |
+| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `spike-rows.tsv`     | TSV                   | The tutorial's row table: NCBI protein accession, row label, UniProtKB entry where one exists                          |
+| `spike.afa`          | FASTA (aligned)       | Eleven coronavirus spike glycoproteins from NCBI efetch, aligned with `mafft --auto` (L-INS-i), 1660 columns            |
+| `spike.nwk`          | Newick                | `FastTree -lg` on the alignment above                                                                                  |
+| `spike-domains.gff`  | GFF3 (domains)        | InterPro 110.0 precomputed Pfam matches (`react-msaview-cli interpro`) for the 8 rows whose UniProt entry is the same sequence as the row |
+| `spike-layers.json`  | JSON (snapshot layers) | `highlights` from the P0DTC2 feature table, `residueMappings` from SIFTS plus PDBe polymer coverage for 6VXX chain A, and the coverage text track derived from it |
+
+`spike-layers.json` is not loaded by a filehandle: the figures' `?data=` links
+carry its three layers inline, and the file is here so the page can cite it and
+`scripts/screenshots/tutorial-specs/spike_structure.mjs` can read it.
+
 The formats are detected from file content (the `CLUSTAL` / `# STOCKHOLM` / `>` /
 `##gff` header), so the extensions above are only for readability.

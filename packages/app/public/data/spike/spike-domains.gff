@@ -1,0 +1,35 @@
+##gff-version 3
+# precomputed InterPro 110.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+SARS-CoV-2	InterProScan	protein_match	711	1232	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+SARS-CoV-2	InterProScan	protein_match	349	526	.	.	.	Name=IPR018548;signature_desc=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding;description=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding
+SARS-CoV-2	InterProScan	protein_match	33	337	.	.	.	Name=IPR032500;signature_desc=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal;description=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal
+SARS-CoV-2	InterProScan	protein_match	536	592	.	.	.	Name=IPR043607;signature_desc=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal;description=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal
+RaTG13	InterProScan	protein_match	707	1228	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+RaTG13	InterProScan	protein_match	349	526	.	.	.	Name=IPR018548;signature_desc=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding;description=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding
+RaTG13	InterProScan	protein_match	31	337	.	.	.	Name=IPR032500;signature_desc=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal;description=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal
+RaTG13	InterProScan	protein_match	536	592	.	.	.	Name=IPR043607;signature_desc=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal;description=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal
+SARS-CoV	InterProScan	protein_match	693	1214	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+SARS-CoV	InterProScan	protein_match	335	512	.	.	.	Name=IPR018548;signature_desc=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding;description=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding
+SARS-CoV	InterProScan	protein_match	33	324	.	.	.	Name=IPR032500;signature_desc=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal;description=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal
+SARS-CoV	InterProScan	protein_match	522	578	.	.	.	Name=IPR043607;signature_desc=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal;description=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal
+MERS-CoV	InterProScan	protein_match	780	1314	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+MERS-CoV	InterProScan	protein_match	394	527	.	.	.	Name=IPR018548;signature_desc=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding;description=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding
+MERS-CoV	InterProScan	protein_match	49	383	.	.	.	Name=IPR032500;signature_desc=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal;description=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal
+MERS-CoV	InterProScan	protein_match	1316	1353	.	.	.	Name=IPR043614;signature_desc=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion;description=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion
+HKU4	InterProScan	protein_match	779	1315	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+HKU4	InterProScan	protein_match	399	517	.	.	.	Name=IPR018548;signature_desc=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding;description=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding
+HKU4	InterProScan	protein_match	56	389	.	.	.	Name=IPR032500;signature_desc=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal;description=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal
+HKU4	InterProScan	protein_match	606	661	.	.	.	Name=IPR043607;signature_desc=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal;description=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal
+HKU4	InterProScan	protein_match	1317	1352	.	.	.	Name=IPR043614;signature_desc=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion;description=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion
+OC43	InterProScan	protein_match	789	1314	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+OC43	InterProScan	protein_match	347	441	.	.	.	Name=IPR018548;signature_desc=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding;description=Betacoronavirus%20spike%20glycoprotein%20S1%2C%20receptor%20binding
+OC43	InterProScan	protein_match	43	331	.	.	.	Name=IPR032500;signature_desc=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal;description=Betacoronavirus-like%20spike%20glycoprotein%20S1%2C%20N-terminal
+OC43	InterProScan	protein_match	619	677	.	.	.	Name=IPR043607;signature_desc=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal;description=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal
+229E	InterProScan	protein_match	26	430	.	.	.	Name=IPR002551;signature_desc=Coronavirus%20spike%20glycoprotein%20S1;description=Coronavirus%20spike%20glycoprotein%20S1
+229E	InterProScan	protein_match	581	1131	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+229E	InterProScan	protein_match	444	499	.	.	.	Name=IPR043607;signature_desc=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal;description=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal
+229E	InterProScan	protein_match	1135	1173	.	.	.	Name=IPR043614;signature_desc=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion;description=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion
+NL63	InterProScan	protein_match	204	610	.	.	.	Name=IPR002551;signature_desc=Coronavirus%20spike%20glycoprotein%20S1;description=Coronavirus%20spike%20glycoprotein%20S1
+NL63	InterProScan	protein_match	762	1312	.	.	.	Name=IPR002552;signature_desc=Coronavirus%20spike%20glycoprotein%20S2;description=Coronavirus%20spike%20glycoprotein%20S2
+NL63	InterProScan	protein_match	625	681	.	.	.	Name=IPR043607;signature_desc=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal;description=Coronavirus%20spike%20glycoprotein%20S1%2C%20C-terminal
+NL63	InterProScan	protein_match	1316	1356	.	.	.	Name=IPR043614;signature_desc=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion;description=Coronavirus%20spike%20glycoprotein%20S2%2C%20intravirion

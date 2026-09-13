@@ -21,6 +21,12 @@ export const tutorials: Tutorial[] = [
     blurb:
       'ClinVar, AlphaMissense and a saturation screen, each a bar per residue over the same fifteen-species p53 alignment. Three sources that share no data, one set of columns.',
   },
+  {
+    slug: 'spike_structure',
+    title: 'The insertion the structure did not resolve',
+    blurb:
+      'Eleven coronavirus spikes, the four residues SARS-CoV-2 alone carries, and a SIFTS correspondence saying which residues of that row PDB 6VXX actually resolved.',
+  },
 ]
 
 export const tutorialBySlug = new Map(tutorials.map(t => [t.slug, t]))

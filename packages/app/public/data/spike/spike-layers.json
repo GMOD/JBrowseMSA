@@ -1,0 +1,140 @@
+{
+  "columnTracks": [
+    {
+      "id": "6vxx-coverage",
+      "name": "6VXX chain A",
+      "kind": "text",
+      "row": "SARS-CoV-2",
+      "data": "NNNNNNNNNNNNNUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUOOOOOOOOUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUOOOOOOOOUUUUUUUOOOOOOOUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
+      "colors": {
+        "O": "#2e7d32",
+        "U": "#e65100",
+        "N": "#cfd8dc"
+      },
+      "height": 16
+    }
+  ],
+  "highlights": [
+    {
+      "row": "SARS-CoV-2",
+      "start": 319,
+      "end": 541,
+      "label": "RBD"
+    },
+    {
+      "row": "SARS-CoV-2",
+      "start": 437,
+      "end": 508,
+      "label": "RBM"
+    },
+    {
+      "row": "SARS-CoV-2",
+      "start": 681,
+      "end": 684,
+      "label": "PRRA insert"
+    },
+    {
+      "row": "SARS-CoV-2",
+      "start": 685,
+      "end": 686,
+      "label": "Furin cleavage"
+    },
+    {
+      "row": "SARS-CoV-2",
+      "start": 816,
+      "end": 837,
+      "label": "Fusion peptide"
+    },
+    {
+      "row": "SARS-CoV-2",
+      "start": 920,
+      "end": 970,
+      "label": "HR1"
+    },
+    {
+      "row": "SARS-CoV-2",
+      "start": 1163,
+      "end": 1202,
+      "label": "HR2"
+    }
+  ],
+  "residueMappings": [
+    {
+      "row": "SARS-CoV-2",
+      "accession": "P0DTC2",
+      "structure": {
+        "id": "6VXX",
+        "kind": "experimental",
+        "asymId": "A",
+        "url": "https://files.rcsb.org/download/6VXX.cif"
+      },
+      "segments": [
+        {
+          "rowStart": 14,
+          "rowEnd": 1211,
+          "structStart": 33,
+          "structEnd": 1230
+        }
+      ],
+      "unobserved": [
+        [
+          33,
+          45
+        ],
+        [
+          89,
+          98
+        ],
+        [
+          163,
+          183
+        ],
+        [
+          192,
+          204
+        ],
+        [
+          265,
+          281
+        ],
+        [
+          464,
+          465
+        ],
+        [
+          474,
+          480
+        ],
+        [
+          488,
+          507
+        ],
+        [
+          521,
+          521
+        ],
+        [
+          640,
+          659
+        ],
+        [
+          696,
+          707
+        ],
+        [
+          847,
+          872
+        ],
+        [
+          1167,
+          1230
+        ]
+      ],
+      "rowLength": 1273,
+      "generated": {
+        "by": "sifts",
+        "date": "2026-09-13"
+      }
+    }
+  ]
+}

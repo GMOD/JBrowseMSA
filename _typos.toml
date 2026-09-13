@@ -7,6 +7,9 @@ extend-exclude = [
   "*.nh",
   # generated from git history: abbreviated commit hashes read as words
   "CHANGELOG.md",
+  # aligned protein sequence: runs of one-letter codes that the checker reads as
+  # words (THN as THEN, and so on down the alphabet)
+  "*.afa",
   "packages/app/public/data/jbrowse-msa-combined-config.json",
 ]
 
