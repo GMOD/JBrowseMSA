@@ -42,8 +42,8 @@ From the repo root, `pnpm build:pages` builds this site plus the app into
 Astro's `_astro/` assets survive). The
 [Deploy docs site](../../.github/workflows/deploy-docs.yml) workflow uploads
 `pages-dist/` as a Pages artifact and deploys it via GitHub's native Pages
-action on every push to `main` — no `gh-pages` branch involved. Trigger it
-by hand with `workflow_dispatch` for an out-of-band deploy.
+action on every push to `main` — no `gh-pages` branch involved. Trigger it by
+hand with `workflow_dispatch` for an out-of-band deploy.
 
 The interactive **examples gallery** (`packages/examples`,
 jbrowse.org/storybook/msa) deploys separately and must be run locally (needs AWS
