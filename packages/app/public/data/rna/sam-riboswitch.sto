@@ -1,0 +1,86 @@
+# STOCKHOLM 1.0
+#=GF ID SAM_six_genomes
+#=GF DE SAM-I (S box) riboswitches found by cmsearch in six Firmicute genomes and aligned to the Rfam model
+#=GF SE Rfam RF00162 covariance model and seed alignment
+#=GF DR RFAM; RF00162;
+#=GF CC Built by docs/tutorials/scripts/build_rna_family.sh. SS_cons, the SAM contacts and the element names are the Rfam seed consensus, copied onto the consensus columns of the cmalign output.
+#=GF NH ((((Tten_TTE_RS08660:0.087244788,Tten_TTE_RS10275:0.183919858):0.040639906,(Tten_metK:0.134821017,Cace_metK:0.153624406):0.030896913):0.044528106,((Lmon_lmo0135:0.339129463,(Bsub_metE:0.068511936,Bsub_mtnK:0.035233733):0.334098690):0.006016864,(Lmon_lmo2419:0.182166894,(Cdif_metK:0.176225879,Cace_CA_RS02195:0.203976158):0.065210015):0.112912868):0.085861953):0.029654272,((Bsub_metN:0.125762524,Saur_SAOUHSC_00842:0.086691634):0.174845315,(((Lmon_lmo1681:0.238124973,Lmon_lmo0285:0.125352109):0.126168347,(Cace_metA:0.066766490,(((Bsub_metI:0.117891572,(Bsub_samT:0.238914297,Saur_SAOUHSC_00013:0.277233277):0.099246567):0.049103520,(Bsub_yoaD:0.121673222,Saur_2391667:0.258843880):0.077357223):0.090139433,((Lmon_lmo0595:0.030922144,Lmon_lmo0845:0.197484723):0.135445778,Bsub_cysH:0.192679784):0.000000005):0.010251629):0.083851773):0.000000005,Cace_CA_RS14325:0.175689049):0.009865021):0.045262102,((Saur_SAOUHSC_01909:0.218960498,(Lmon_metK:0.132138400,Bsub_metK:0.342543574):0.045839066):0.152521138,((Cace_1073888:0.220107904,(Bsub_yxjH:0.035110004,Bsub_yxjG:0.083071235):0.176965122):0.078141831,((Cace_CA_RS05240:0.129744427,(Cdif_CD630_RS06510:0.037147309,(Cdif_CD630_RS09005:0.073658992,(Cdif_CD630_RS08160:0.081721765,Cdif_CD630_RS09935:0.043358842):0.025443817):0.034888935):0.049536888):0.088668324,(Bsub_mtnW:0.264187936,Cace_metH:0.188579289):0.000000005):0.039385505):0.011698675):0.010542245);
+#=GS Bsub_samT             DE NC_000964.3:1180802-1180685 bifunctional homocysteine S-methyltransferase using (R,S)AdoMet and methylenetetrahydrofolate reductase [NAD(P)H]
+#=GS Tten_TTE_RS08660      DE NC_003869.1:1750369-1750270 methylenetetrahydrofolate reductase
+#=GS Cace_1073888          DE NC_003030.1:1073888-1073785 -
+#=GS Bsub_metI             DE NC_000964.3:1258304-1258424 cystathionine gamma-synthase and O-acetylhomoserine thiolyase
+#=GS Cdif_metK             DE NC_009089.1:174147-174250 methionine adenosyltransferase
+#=GS Bsub_metN             DE NC_000964.3:3364503-3364397 methionine ABC transporter (ATP-binding protein)
+#=GS Cace_CA_RS02195       DE NC_003030.1:453563-453665 trans-sulfuration enzyme family protein
+#=GS Bsub_yxjH             DE NC_000964.3:3997775-3997881 putative methyl-tetrahydrofolate methyltransferase (biofilm formation)
+#=GS Tten_TTE_RS10275      DE NC_003869.1:2076682-2076573 homoserine dehydrogenase
+#=GS Lmon_lmo1681          DE NC_003210.1:1739597-1739491 5-methyltetrahydropteroyltriglutamate--homocysteine S-methyltransferase
+#=GS Tten_metK             DE NC_003869.1:500243-500352 methionine adenosyltransferase
+#=GS Cace_metK             DE NC_003030.1:2991407-2991297 methionine adenosyltransferase
+#=GS Cdif_CD630_RS06510    DE NC_009089.1:1364065-1364171 homoserine dehydrogenase
+#=GS Cdif_CD630_RS08160    DE NC_009089.1:1724139-1724245 methionine ABC transporter ATP-binding protein
+#=GS Lmon_lmo0595          DE NC_003210.1:637926-637826 O-acetylhomoserine sulfhydrylase
+#=GS Bsub_yoaD             DE NC_000964.3:2025251-2025160 putative 2-hydroxyacid dehydrogenase
+#=GS Bsub_yxjG             DE NC_000964.3:3999166-3999272 putative methyltetrahydrofolate methyltransferase (biofilm formation)
+#=GS Cace_CA_RS14325       DE NC_003030.1:2914841-2914733 O-acetylhomoserine aminocarboxypropyltransferase/cysteine synthase family protein
+#=GS Lmon_lmo0285          DE NC_003210.1:309385-309266 lipoprotein
+#=GS Cdif_CD630_RS09005    DE NC_009089.1:1917604-1917499 MetQ/NlpA family ABC transporter substrate-binding protein
+#=GS Lmon_lmo2419          DE NC_003210.1:2491176-2491058 ABC transporter ATP-binding protein
+#=GS Saur_SAOUHSC_00842    DE NC_007795.1:812928-813031 ABC transporter ATP-binding protein
+#=GS Cace_metH             DE NC_003030.1:671356-671251 methionine synthase
+#=GS Cace_metA             DE NC_003030.1:1976371-1976471 homoserine O-acetyltransferase MetA
+#=GS Cace_CA_RS05240       DE NC_003030.1:1131537-1131641 methionine ABC transporter ATP-binding protein
+#=GS Cdif_CD630_RS09935    DE NC_009089.1:2110692-2110794 O-acetylhomoserine aminocarboxypropyltransferase/cysteine synthase family protein
+#=GS Bsub_cysH             DE NC_000964.3:1630115-1630220 (phospho)adenosine phosphosulfate reductase
+#=GS Saur_2391667          DE NC_007795.1:2391667-2391572 -
+#=GS Lmon_metK             DE NC_003210.1:1716651-1716543 S-adenosylmethionine synthetase
+#=GS Bsub_mtnW             DE NC_000964.3:1426876-1426976 2,3-diketo-5-methylthiopentyl-1-phosphate enolase (DK-MTP-1-P enolase)
+#=GS Saur_SAOUHSC_00013    DE NC_007795.1:15948-16046 hypothetical protein
+#=GS Saur_SAOUHSC_01909    DE NC_007795.1:1818979-1818869 S-adenosylmethionine synthetase
+#=GS Lmon_lmo0845          DE NC_003210.1:882770-882867 hypothetical protein
+#=GS Bsub_metK             DE NC_000964.3:3129333-3129195 S-adenosylmethionine synthetase
+#=GS Bsub_metE             DE NC_000964.3:1385891-1385736 cobalamin-independent methionine synthase
+#=GS Lmon_lmo0135          DE NC_003210.1:137133-137235 peptide ABC transporter substrate-binding protein
+#=GS Bsub_mtnK             DE NC_000964.3:1424683-1424527 methylthioribose kinase (methionine salvage pathway, promiscuous)
+Bsub_samT                  UUCUUAUCAAGAG.AAGCAGAGGGA..CUGGCCCGACGAAGCUU.CAGCAACC.GGUGUAAUGgcgau.cagccAU......................................................GACCAAGGUGCUAAAUC..CA.G.CAAGCUCGAAC.....AGCUUGGAAGAUAAGAA
+Tten_TTE_RS08660           CUCUUAUCAAGAG.AGGUGGAGGGA..CUGGCCCGAUGAAACC-.CGGCAACC.AGCCUUA--...........--......................................................GGGCAUGGUGCCAAUUC..CU.G.CAGCG---GUU.....UCGCUGAAAGAUGAGAG
+Cace_1073888               UCCUUAUCAAGAG.AAACGGAGGGA..CUGGCCCAAUGAUGUUU.CAGCAACC.AAGGUUUUA...........U-......................................................ACUUAUGGUGCUAAUUC..CA.G.CAGGA---UAU.....UUUCUGAAAGAUGAGGA
+Bsub_metI                  UUCUUAUCGUGAG.AGGUGGAGGGA..CUGGCCCUUAGAAACCU.CAGCAACC.GGCUUGUUUugcauuugcaaAG......................................................CGCCAAGGUGCUAAAUC..CA.G.CAAGCGUUUUUu...aUGCUUGGAAGAUAAGAA
+Cdif_metK                  ACCUUAUCAAGAG.AGGCUGAGGGA..UAGGCCCUGUGAAGCC-.CAGCAACC.ACCCAAA--...........UG......................................................GGAAAAGGUGCUAAUUC..CU.A.CAAGACAAA-A.....GUCUUGAAAGAUGAGGU
+Bsub_metN                  CUCUUAUCAAGAG.AGGUGGAGGGA..AGUGCCCUAUGAAGCC-.CGGCAACC.AUCAACACU...........GU......................................................UGAAAUGGUGCCAAUUC..AC.A.CGAAGCGUUCA.....GCUUUGAAAGAUGAGAG
+Cace_CA_RS02195            UUCUUAUCAAGAG.UGACGGAGGGA..UAGGCCCUAUGAAGUC-.CGGCAACA.UCCAAUUAU...........UU......................................................UGGAGAUGUGCUAAUUC..CU.A.CAGGUU----U.....AUCCUGAGAGAUGAGAA
+Bsub_yxjH                  ACCUUAUCAAGAG.AGGUGGAGGGA..CUGGCCCUAUGAUACC-.CGGCAACC.GCUGUUUCA...........AA......................................................CAGAAUGGUGCUAAAUC..CU.U.AAGAACAUUGC.....GUUCUUGCAGAUGAGGC
+Tten_TTE_RS10275           CUCUUAUCAAGAG.UGGUGGAGGGA..CUGGCCCGAUGAAACC-.CGGCAACCgGCACGU---...........AA......................................................GUGCUUGGUGCCAAUUC..CU.G.CAGGUUGGGGUuacccAGCCUGAGAGAUGAGAG
+Lmon_lmo1681               CUCUUAUAAUGAG.UGGUAGAGGGA..CUGGCCCGUUGAAACC-.CGGCAACC.UUUCAAUAC...........GU......................................................UGAAAAGGUGCUAAAUC..CU.G.CGAAGUGUGAU.....GCUUCGAGAGAUAAGAG
+Tten_metK                  CUCUUAUCAAGAG.AGGUGGAGGGA.aAGAGCCCGAUGAAACC-.CGGCAACC.UGUCCUUUU...........AA......................................................GGAUAAGGUGCCAAUUC..UC.U.CAGAAGAUUUUu...uCUUCUGAAAGAUGAGGG
+Cace_metK                  CUCUUAUCAAGAG.AGGUGGAGGGA.aAGGGCCCGUUGAAACC-.CGGCAACC.GAUGUAUUAauu....uaagUA......................................................CAUAAUGGUGCCAAUUC..CU.G.CAGAAU----U.....AUUCUGCAAGAUAAGAG
+Cdif_CD630_RS06510         AUCUUAUCAAGAG.UGGCAGAGGGA..CUGGCCCUGUGAAGCC-.CGGCAACC.AGUAUAUUUa........auUA......................................................UACAUUGGUGCUAAAUC..CU.G.CAGCAU---UU.....AUGCUGAAAGAUGAGUA
+Cdif_CD630_RS08160         GUCUUAUCAAGAG.UGGUGGAGGGA..CUGGCCCUUUGAAACC-.CGGCAACC.AGUAUAUUUu.........aUA......................................................UACAUUGGUGCUAAAUC..CU.G.CAACUA--AUA.....UAGUUGAUAGAUGAGUA
+Lmon_lmo0595               UUCUUAUCACGAA.AGGUGGAGGGA..CUGGCCCUUUGAAGCCU.UAGCAACC.GGAAUUU--...........AU......................................................UUUCACGGUGCUAAUUC..CA.G.CAGUAU-----.....AUUCUGAAAGAUAAGUC
+Bsub_yoaD                  UUUCUAUCCAGAG.AGGUGGAGGGA..CUGGCCCUAUGAAACCU.CGGCAACA.---------...........--u....................................................u----AUUGUGCCAAUUC..CA.G.CAAGC---GCU.....AGCUUGAAAGAUAGGAA
+Bsub_yxjG                  UCCUUAUCAAGAG.AGGUGGAGGGA..CUGGCCCUGCGAUACC-.CGGCAACC.GCUGUUU--...........AA......................................................CAGAAUGGUGCUAAAUC..CU.U.UAGAGCAAUGAu...uGCUCUUGAAGAUAAGGU
+Cace_CA_RS14325            GUCUUAUCAAGAG.AGGUGGAGGGA..CUGGCCCUAUGAAACC-.CAACAACCaGCAUUUUUUaa.......uuAG......................................................AUGUAUGGUGUUAAUUC..CU.G.CAAAGU---UA.....AUUUUGAGAGAUAAGAG
+Lmon_lmo0285               CUCUUAUCGAGAG.CGGCAGAGGGA..CUGGCCCGAUGAAGCC-.CGGCAACC.UAACUUUAUuuaa...gcauAA......................................................AGUGAAGGUGCUAAUUC..CA.G.CAAAAUGGUGUauuccGUUUUGGUAGAUAAGAG
+Cdif_CD630_RS09005         UUCUUAUCCAGAG.UGGUGAAGGGA..CUGGCCCUAUGAAACC-.CAGCAACC.AGUAUAUUUu........uaUA......................................................UACAUUGGUGCUAAAUC..CU.G.CAGUAU----U.....AUACUGAAAGAUGAGUC
+Lmon_lmo2419               AUCUUAUCCAGAG.UGGUGGAGGGA..AAUGCCCUAUGAAGCC-.CAGCAACCuAAACAAUAAuuca...uuauGU......................................................GUUUAAGGUGCUAAGUC..AU.G.CAGAACAACUAa..uuGUUCUGAAAGAUGAGAA
+Saur_SAOUHSC_00842         CUCUUAUCGAGAG.UGGUGGAGGGA..UGUGCCCUACGAAGCC-.CGGCAACC.GUCUUAU--...........AU......................................................AGAAAUGGUGCCAAUUC..AC.A.UAAAGUUUU-A.....ACUUUUGAAGAUGAGAG
+Cace_metH                  AUCUUAUCAAGAG.UGGUGGAGGGA..CUGGCCCUUUGAAACC-.CGGCAACCaGUAUAUUUUu........uaAU......................................................AUAUGUGGUGCUAAAUC..CU.G.CAGCA-----A.....ACGCUGAUAGAUGAGAA
+Cace_metA                  UUCUUAUCAAGA-.AGGUGGAGGGA..CUGGCCCUAUGAAGCCU.-GACAACC.GGCAAA---...........--......................................................UGU-ACGGUGUUAAUUC..CU.G.CAAAACUUAUU....uGUUUUGAAAGAUAAGAA
+Cace_CA_RS05240            CACUUAUCAAGAG.AGGUGGAGGGA..CCGGCCCUGUGAAGCC-.CAGCAACC.UGUAUAUGUua.......auUA......................................................UACAA-GGUGCUAAUUC..CU.G.CAGCG-----C.....UAGCUGAGAGAUGAGAA
+Cdif_CD630_RS09935         AUCUUAUCCAGAG.AGGUGGAGGGA..CUGGCCCUAUGAAACC-.CGGCAACC.AGUAUAUUU..........aUA......................................................UACAUUGGUGCUAAAUC..CU.G.CGGCG-----A.....AAGCUGAGAGAUGAGUA
+Bsub_cysH                  AACUUAUCAAGAG.CGGCUGAGGGA..CUGGACCUAUGAAGCC-.CGGCAACC.UGCAUAG--...........UU......................................................UGUAA-GGUGCUACUUC..CA.G.CAAAAUGAAUUc...cAUUUUGAAAGAUAAGGG
+Saur_2391667               CACUUAUCUAGAG.AGGUGGAGGGA..CUGGCCCUAUGAAGCCU.CGGCAACA.U--------...........--c...................................................uc---GAAUGUGCCAAUUC..CA.G.UAACCG--UAA.....UGGUUUGAAGAUAAGCA
+Lmon_metK                  CUCUUAUCCAGAG.CGGUAGAGGGA..CUGACCCUUUGAAGCC-.CAGCAACC.UACACAUAU...........AA......................................................GUGAAAGGUGCUAAUCU.gUU.G.CAGGAGUAUUA....uCUUCUGAACGAUGAGAG
+Bsub_mtnW                  UUCUUAUCAAGAGcAGGCAGAGGGA..CGAGCCCGAUGAAGCC-.CGGCAACC.GACUUAU--...........-A......................................................AAGCACGGUGCUAAUUC..UU.G.CAGCU----AG.....CGGCUGAGAGAUAAGAU
+Saur_SAOUHSC_00013         UUCUUAUUGUGAG.AAGUUGAGGGA.cUUGGCCCUGUGAUACUU.CAGCAACC.GACUUUA--...........-U......................................................AG-CACGGUGCUAAAAC..CA.A.CGAGU------.....UACUCGAAUGAUAAGUA
+Saur_SAOUHSC_01909         CUCUUAUCCUGAG.UGGUGGAGGGAcaUGGACCCAAUGAAACC-.CAGCAACC.UCUUUUUUA..........uAA......................................................AAGAAAGGUGCCAAACCguUU.G.CAGACAA-AUA.....GGUCUGAACGAUAAGAG
+Lmon_lmo0845               AACUUAUCAAGAA.AGGUGGAGGGU.uCUGGCCCCGUGAAGCCU.UGGCAACC.GGAUU----...........--......................................................UUUCACGGUGCCAAAUC..CA.G.CAGGU-----A.....ACACUGACAGAUAAGGC
+Bsub_metK                  CUCUUAUCCCGAGcUGGCGGAGGGA..CAGGCCCUAUGAAGCC-.CAGCAACC.GGUUUCUCU...........--guuauuuauuaugu.........................ucaacugagugagacAACCAAGGUGCUAACCU.gUU.G.CAAGGUUGUAUg..auUCCUUGAGCGAUAAGAG
+Bsub_metE                  CUCUUAUCGAGAGuUGGGCGAGGGA..UUGGCCUUUUGACCCCAaCAGCAACC.GACCGUA--...........--auaccauugugaaauggggcgcacugcuuuucgcgccgagacugaugucucauaAGGCACGGUGCUAAUUC..CA.U.CAGAU----UG.....UGUCUGAGAGAUGAGAG
+Lmon_lmo0135               UUCUUAUCAAGAG.UGGUGGAGGGA.aUCGGCCCAGUGAAACC-.CAGCAGCG.GAGCGC---...........AA......................................................GUUC--UAUGCUAAUUC..CG.AuCAGAA-GUAAU.....AUUCUGGCAGAUAAGUA
+Bsub_mtnK                  CUCUUAUCGAGAGuUGGGCGAGGGA.uUUGGCCUUUUGACCCCAaAAGCAACC.GACCGUA--...........--auuccauugugaaauggggcgcauuu.uuuucgcgccgagacgcuggucucuuaAGGCACGGUGCUAAUUC..CAuU.CAGAUC----U.....GAUCUGAGAGAUAAGAG
+#=GC SS_cons               ((((((((,,,,<.<<<<---<<<_..AAAA>>>------>>>>.><<<<-<<.<<<<_____...........__......................................................>>>>-->>>>>>,,,<a..aa.a.<<<<<<_____.....>>>>>>-->))))))))
+#=GC RNA_structural_elements [P1=5p=][J1][.===========..=================.][======.=========...........==......................................................===========][3][=..==.=.===========.....=========[=P1=3p]
+#=GC RNA_ligand_SAM        ======X===X==.===========..=================.====X===.=========...........==......................................................========XXX======..==.=.===========.....===========X=====
+#=GC RF                    cucUuAUcaAGAG.gGGcgGAGGGA..cuGGCCCuaUGAAgCCc.CgGCAACC.ccccuuuuu...........aa~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ggggAaGGUGCcAAuuC..Cu.g.Cgggccauaau.....ggcccGaaagAUaAgag
+//
