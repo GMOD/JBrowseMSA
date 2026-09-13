@@ -15,7 +15,7 @@
  */
 import * as esbuild from 'esbuild'
 
-await esbuild.build({
+const options = {
   entryPoints: ['src/index.ts'],
   bundle: true,
   format: 'esm',
@@ -27,4 +27,10 @@ await esbuild.build({
   legalComments: 'eof',
   define: { 'process.env.NODE_ENV': '"production"' },
   logLevel: 'info',
-})
+}
+
+if (process.argv.includes('--watch')) {
+  await (await esbuild.context(options)).watch()
+} else {
+  await esbuild.build(options)
+}
