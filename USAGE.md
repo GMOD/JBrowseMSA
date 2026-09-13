@@ -62,6 +62,7 @@ Props:
 | `columnTracks`      | `ColumnTrackSpec[]` | Tracks supplied as data (see below)                                  |
 | `highlights`        | `Highlight[]`       | Labeled highlights (see below)                                       |
 | `highlightColumns`  | `number[]`          | Columns (0-based) under a persistent overlay                         |
+| `residueMappings`   | `ResidueMapping[]`  | Which residue of which structure each row's residues are             |
 
 `height`, `colorScheme`, `colWidth`, `rowHeight`, `relativeTo`, `drawTree` and
 `treeAreaWidth` stay live: change one and the viewer follows, so a host can put
@@ -71,12 +72,13 @@ picked from the menu, a row dragged taller — is not undone by the host's next
 render. The data props are not among them: a new `msa`/`tree`/`gff` is a
 different alignment, which is a new model, which React spells `key`.
 
-### Highlights
+### Data layers
 
-Point at a residue, a column range, or a set of rows, with a label. Coordinates
-are 1-based and inclusive, as in GFF. With `row`, `start` and `end` are residues
-of that sequence and the viewer projects them through the alignment's gaps;
-without it they are alignment columns. `rows` tints whole rows instead.
+`highlights`, `columnTracks` and `residueMappings` take data the host computed
+and the viewer only draws: a labeled band over a residue or column range, a bar,
+text or arc track above the alignment, the residue-by-residue correspondence
+between a row and a structure. Each one is also a model property, so it travels
+in a shared URL and the SVG export draws it.
 
 ```tsx
 <MSAViewer
@@ -87,12 +89,16 @@ without it they are alignment columns. `rows` tints whole rows instead.
     { start: 40, end: 60, label: 'NES', color: 'rgba(0,120,255,0.25)' },
     { rows: ['beluga', 'dolphin'], label: 'frameshift carriers' },
   ]}
+  columnTracks={[
+    { id: 'dnds', name: 'dN/dS', kind: 'bar', values: dnds, max: 2, row: 'human' },
+  ]}
 />
 ```
 
-The list lives in the model snapshot (`model.setHighlights(...)` changes it), so
-a shared URL carries it, and the SVG export draws it. The full set of data
-layers is in [layers reference](https://gmod.org/JBrowseMSA/layers).
+Every field of every layer, and the coordinate rules they share, are in the
+[layers reference](https://gmod.org/JBrowseMSA/layers). At runtime
+`model.setHighlights(list)` and `model.setColumnTracks(tracks)` replace what the
+props set.
 
 ### One panel in your own page
 
@@ -175,31 +181,6 @@ model.fit() // fit both axes
 model.applyHighlight('protein3d', [{ row: 'human', start: 58, end: 58 }])
 model.clearHighlight('protein3d')
 ```
-
-## Tracks from your own data
-
-Anything computed per column, or per residue of one row, draws as a track above
-the alignment. The viewer scales, places, and exports it and computes nothing.
-
-```tsx
-<MSAViewer
-  msa={msa}
-  columnTracks={[
-    {
-      id: 'dnds',
-      name: 'dN/dS',
-      kind: 'bar',
-      values: dnds,
-      max: 2,
-      row: 'human',
-    },
-  ]}
-/>
-```
-
-`kind: 'text'` takes `data`, one character per column, with an optional `colors`
-map. `model.setColumnTracks(tracks)` replaces the set at runtime. The
-[layers reference](https://gmod.org/JBrowseMSA/layers) lists every field.
 
 ## Using react-msaview in a plain HTML file with UMD bundle
 
