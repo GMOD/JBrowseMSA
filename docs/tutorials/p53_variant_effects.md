@@ -1,8 +1,8 @@
 # Where p53's damaging variants fall
 
-Half of human tumors carry a change in the p53 protein, and the changes are not
-spread evenly along it. Three groups have said where the damage is, from data
-that shares no source: clinical laboratories reporting what they found in
+_TP53_ is the gene most often mutated in human cancer, and the mutations are not
+spread evenly along the protein it encodes. Three sources say where the damage
+is, and they share no data: clinical laboratories reporting what they found in
 patients, a model scoring every substitution that could exist, and a laboratory
 screen that grew cells carrying thousands of them. This page puts all three on
 the same p53 alignment, one bar per residue of the human row, over fifteen
@@ -27,12 +27,12 @@ Sequences from NCBI RefSeq, the clinical classifications from ClinVar, the
 predictions from AlphaMissense as the AlphaFold entry publishes them, and one
 saturation screen from MaveDB.
 
-- the 660 vertebrate orthologs NCBI lists for TP53, GeneID 7157, which is where
-  the accession list below came from:
+- the 660 vertebrate orthologs NCBI lists for _TP53_, GeneID 7157, which is
+  where the accession list below came from:
   https://api.ncbi.nlm.nih.gov/datasets/v2alpha/gene/id/7157/orthologs?taxon_filter=vertebrates
 - one protein per accession, all fifteen in one request:
   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=NP_000537.3&rettype=fasta&retmode=text
-- ClinVar's TP53 missense records, searched and then summarized:
+- ClinVar's _TP53_ missense records, searched and then summarized:
   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&retmax=5000&term=TP53%5Bgene%5D+AND+%22missense+variant%22%5Bmolecular+consequence%5D
 - the AlphaFold entry for P04637, which names its AlphaMissense file:
   https://alphafold.ebi.ac.uk/api/prediction/P04637
@@ -50,7 +50,7 @@ saturation screen from MaveDB.
 
 ## 1. Name the rows
 
-NCBI's ortholog set for TP53 is large enough that the work is choosing from it
+NCBI's ortholog set for _TP53_ is large enough that the work is choosing from it
 rather than finding it:
 
 ```bash
@@ -370,7 +370,7 @@ three residues from the N terminus:
 | P72     | P     |         4/15 |           7 |
 | P89     | P     |         4/15 |           0 |
 
-Zebrafish and human last shared an ancestor around 400 million years ago and
+Zebrafish and human last shared an ancestor more than 400 million years ago and
 both still carry an arginine at 248.
 
 ## 9. The control, at the other end of the protein
