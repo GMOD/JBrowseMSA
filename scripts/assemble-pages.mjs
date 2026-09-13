@@ -32,8 +32,9 @@ fs.rmSync(out, { recursive: true, force: true })
 fs.cpSync(websiteDist, out, { recursive: true })
 fs.cpSync(appDist, path.join(out, 'demo'), { recursive: true })
 
-// GitHub Pages runs Jekyll by default, which strips Astro's _astro/ dir;
-// .nojekyll disables that.
+// Jekyll would strip Astro's _astro/ dir. actions/deploy-pages writes its own
+// .nojekyll, so this one is belt and braces for the artifact and for anyone
+// serving pages-dist/ some other way.
 fs.writeFileSync(path.join(out, '.nojekyll'), '')
 
 console.log('assembled pages-dist (docs at /, app at /demo)')
