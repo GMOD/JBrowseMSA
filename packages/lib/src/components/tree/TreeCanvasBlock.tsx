@@ -8,7 +8,7 @@ import { createPortal } from 'react-dom'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'
-import { padding, renderTreeCanvas } from './renderTreeCanvas.ts'
+import { renderTreeCanvas } from './renderTreeCanvas.ts'
 import { useTreeHover } from './useTreeHover.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -58,7 +58,9 @@ const TreeCanvasBlock = observer(function ({
     useTreeHover({ model, offsetY })
 
   const { treeAreaWidth, blockSize, highResScaleFactor } = model
-  const width = treeAreaWidth + padding
+  // TreePanel clips to treeAreaWidth, so anything wider is backing store the
+  // viewer never sees -- it was 600px of it per block, at dpr squared
+  const width = treeAreaWidth
   const height = blockSize
 
   const canvasWidth = width * highResScaleFactor

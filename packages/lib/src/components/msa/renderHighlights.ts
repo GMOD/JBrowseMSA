@@ -14,6 +14,9 @@ export const highlightRowFill = 'rgba(255,140,0,0.18)'
 
 export const labelFontSize = 11
 const labelPad = 3
+// the label box a highlight draws above its band, and the reason a tree block
+// has to consider rows a little outside itself
+export const highlightLabelHeight = labelFontSize + labelPad * 2
 
 export function drawHighlightLabel({
   ctx,
@@ -33,7 +36,7 @@ export function drawHighlightLabel({
   setFontSize(ctx, labelFontSize)
   ctx.textAlign = 'start'
   const boxWidth = ctx.measureText(label).width + labelPad * 2
-  const boxHeight = labelFontSize + labelPad * 2
+  const boxHeight = highlightLabelHeight
   const left = boxWidth <= spanWidth ? x : x + spanWidth + 2
   ctx.fillStyle = theme.palette.background.paper
   ctx.fillRect(left, y, boxWidth, boxHeight)

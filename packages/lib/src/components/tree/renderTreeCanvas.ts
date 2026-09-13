@@ -7,6 +7,7 @@ import { setFontSize } from '../../setFontSize.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import {
   drawHighlightLabel,
+  highlightLabelHeight,
   highlightRowFill,
 } from '../msa/renderHighlights.ts'
 
@@ -16,16 +17,20 @@ import type { RenderCtx } from '../renderCtx.ts'
 import type { ClickMapIndex } from './clickMap.ts'
 import type { Theme } from '@mui/material'
 
-export const padding = 600
-
-const extendBounds = 5
 const radius = 2.5
 const d = radius * 2
 
-// whether a node's row-center y falls within the block being drawn, padded by
-// extendBounds so bubbles/labels/triangles straddling the edge still render
-function inYBlock(y: number, offsetY: number, by: number) {
-  return y > offsetY - extendBounds && y < offsetY + by + extendBounds
+// How far outside a block a node's row-center can sit and still draw into it: a
+// collapsed triangle reaches 0.42 rows each way, a tip label an em, and a
+// highlight label its whole box. Five pixels clipped all three at block edges.
+function blockPad(model: MsaViewModel) {
+  return Math.max(model.rowHeight, highlightLabelHeight)
+}
+
+// whether a node's row-center y falls within the block being drawn, padded so
+// bubbles/labels/triangles straddling the edge still render
+function inYBlock(y: number, offsetY: number, by: number, pad: number) {
+  return y > offsetY - pad && y < offsetY + by + pad
 }
 
 // Calculate node x-coordinate for both phylogram (with branch lengths) and
@@ -134,7 +139,7 @@ function renderCollapsedTriangles({
     if (collapsedSet.has(id)) {
       const apexX = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
       const y = node.x!
-      const inBlock = inYBlock(y, offsetY, by)
+      const inBlock = inYBlock(y, offsetY, by, blockPad(model))
       // in cladogram mode the hidden tips align at the right edge, otherwise use
       // the branch-length extent recorded in the model's hierarchy getter
       const baseX = showBranchLen ? (node.collapsedTipXFar ?? tipX) : tipX
@@ -213,7 +218,7 @@ function renderNodeBubbles({
     const { data } = node
     const y = node.x!
     const { id, name } = data
-    if (node.height >= 1 && inYBlock(y, offsetY, by)) {
+    if (node.height >= 1 && inYBlock(y, offsetY, by, blockPad(model))) {
       const isCollapsed = collapsedSet.has(id)
       if (draw) {
         ctx.strokeStyle = 'black'
@@ -279,6 +284,7 @@ function renderTreeLabels({
   // labels only exist for leaves, which are laid out top to bottom, so take the
   // same slice the MSA renderer uses instead of walking every tip per block
   const visibleLeaves = getVisibleLeaves({ model, offsetY, blockSizeY: by })
+  const pad = blockPad(model)
   const emHeight = ctx.measureText('M').width
   if (labelsAlignRight) {
     ctx.textAlign = 'right'
@@ -297,7 +303,7 @@ function renderTreeLabels({
     // a collapsed clade is drawn as a triangle + tip count; suppress its leaf
     // label when the "name" is just the auto-generated internal-node id
     const isAnonymousCollapsed = collapsedSet.has(id) && name === id
-    if (!isAnonymousCollapsed && inYBlock(y, offsetY, by)) {
+    if (!isAnonymousCollapsed && inYBlock(y, offsetY, by, pad)) {
       // note: +rowHeight/4 matches with -rowHeight/4 in msa
       const yp = y + fontSize / 4
       let xp = 0
@@ -376,11 +382,12 @@ function renderRowHighlights({
     blockSize,
   } = model
   const by = blockSizeYOverride ?? blockSize
+  const pad = blockPad(model)
   for (const { rowIndices, label, color } of resolvedHighlights) {
     ctx.fillStyle = color ?? highlightRowFill
     for (const index of rowIndices) {
       const y = index * rowHeight
-      if (inYBlock(y + rowHeight / 2, offsetY, by)) {
+      if (inYBlock(y + rowHeight / 2, offsetY, by, pad)) {
         ctx.fillRect(-marginLeft, y, treeAreaWidth, rowHeight)
       }
     }
@@ -388,7 +395,7 @@ function renderRowHighlights({
     if (
       label &&
       rowIndices.length &&
-      inYBlock(first * rowHeight, offsetY, by)
+      inYBlock(first * rowHeight, offsetY, by, pad)
     ) {
       drawHighlightLabel({
         ctx,

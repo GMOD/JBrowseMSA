@@ -7,13 +7,12 @@ import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { useWheelScroll } from '../../useWheelScroll.ts'
 import { referenceColor, treeHoverColor } from '../overlayColors.ts'
 import TreeCanvasBlock from './TreeCanvasBlock.tsx'
-import { padding } from './renderTreeCanvas.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
 const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { treeWidth, height, blocksY, treeAreaWidth, scrollY } = model
+  const { height, blocksY, treeAreaWidth, scrollY } = model
   const onScrollY = useCallback(
     (d: number) => {
       model.doScrollY(d)
@@ -77,7 +76,7 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
       style={{
         height,
         position: 'relative',
-        width: treeWidth + padding,
+        width: treeAreaWidth,
       }}
     >
       {/* one transform for the whole block set, matching MSACanvas: the tree

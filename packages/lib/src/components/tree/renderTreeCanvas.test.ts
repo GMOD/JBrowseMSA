@@ -278,3 +278,53 @@ describe('leaf label click targets', () => {
     }
   })
 })
+
+describe('block edge padding', () => {
+  // A highlight label is 17px tall and a collapsed triangle reaches 0.42 rows
+  // each way, so a row just outside a block still draws into it. The cull used
+  // to pad by 5px and clip them at every block boundary.
+  it('draws a highlight label for a row just above the block', () => {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: { msa: '>a\nA\n>b\nA\n>c\nA\n>d\nA\n>e\nA', tree: '(a,b,c,d,e);' },
+      highlights: [{ rows: ['d'], label: 'clade' }],
+    })
+    model.setWidth(1000)
+    model.setRowHeight(30)
+
+    const drawn: string[] = []
+    const ctx = {
+      font: '12px sans-serif',
+      measureText: (text: string) => ({ width: text.length * 6 }),
+      beginPath() {},
+      stroke() {},
+      fill() {},
+      arc() {},
+      setLineDash() {},
+      fillRect() {},
+      resetTransform() {},
+      scale() {},
+      translate() {},
+      moveTo() {},
+      lineTo() {},
+      fillText(text: string) {
+        drawn.push(text)
+      },
+    } as unknown as RenderCtx
+
+    // row 'd' starts at y=90, ten pixels above a block that starts at 100
+    renderTreeCanvas({
+      model,
+      ctx,
+      offsetY: 100,
+      blockSizeYOverride: 100,
+      theme: {
+        palette: {
+          text: { primary: '#000' },
+          background: { paper: '#fff' },
+        },
+      } as Theme,
+    })
+    expect(drawn).toContain('clade')
+  })
+})
