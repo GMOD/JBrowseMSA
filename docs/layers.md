@@ -238,7 +238,10 @@ that exist.
 `packages/examples/src/examples/kinaseStructure.json` is a real one, generated
 by `scripts/examples-gen/contacts.mjs` from SIFTS: the SRC_HUMAN row against
 chain A of 2SRC, one segment putting row residue 86 at structure residue 2, one
-unobserved range, and `rowLength: 536`.
+unobserved range, and `rowLength: 536`. The
+[spike_structure tutorial](https://gmod.org/JBrowseMSA/tutorials/spike_structure)
+builds another from scratch, against a construct whose numbering is offset by 19
+and whose furin loop has no coordinates at all.
 
 `model.residueMappingProblems` lists every one of those with a `scope`
 (`mapping` or `segment`) and a reason, because refusing invisibly leaves a host
