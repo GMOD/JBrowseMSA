@@ -18,7 +18,9 @@ const bare = (section: string) =>
 // backtick-quoted names, e.g. `jalview_taylor`. A glob like `jalview_*` and a
 // suffix like `_dynamic` fall outside the pattern, which is what we want.
 const quoted = (section: string) =>
-  [...section.matchAll(/`([a-z][a-z0-9_]+)`/g)].flatMap(m => (m[1] ? [m[1]] : []))
+  [...section.matchAll(/`([a-z][a-z0-9_]+)`/g)].flatMap(m =>
+    m[1] ? [m[1]] : [],
+  )
 
 const docs = [
   { file: '../../../USAGE.md', heading: '## Color schemes', names: bare },
@@ -30,24 +32,24 @@ const docs = [
   { file: '../../cli/README.md', heading: '### Color schemes', names: quoted },
 ]
 
-test.each(docs)('color schemes listed in $file all exist', ({
-  file,
-  heading,
-  names,
-}) => {
-  const doc = readFileSync(new URL(file, import.meta.url), 'utf8')
-  const start = doc.indexOf(`${heading}\n`)
-  expect(start, `could not find the "${heading}" section`).toBeGreaterThan(-1)
-  const rest = doc.slice(start + heading.length)
-  const end = rest.search(/\n#{1,3} /)
-  const section = end === -1 ? rest : rest.slice(0, end)
+test.each(docs)(
+  'color schemes listed in $file all exist',
+  ({ file, heading, names }) => {
+    const doc = readFileSync(new URL(file, import.meta.url), 'utf8')
+    const start = doc.indexOf(`${heading}\n`)
+    expect(start, `could not find the "${heading}" section`).toBeGreaterThan(-1)
+    const rest = doc.slice(start + heading.length)
+    const end = rest.search(/\n#{1,3} /)
+    const section = end === -1 ? rest : rest.slice(0, end)
 
-  const found = names(section)
-  expect(found.length).toBeGreaterThan(0)
+    const found = names(section)
+    expect(found.length).toBeGreaterThan(0)
 
-  const registered = new Set(Object.keys(colorSchemes))
-  const unknown = found.filter(name => !registered.has(name))
-  expect(unknown, `documented but not registered: ${unknown.join(', ')}`).toEqual(
-    [],
-  )
-})
+    const registered = new Set(Object.keys(colorSchemes))
+    const unknown = found.filter(name => !registered.has(name))
+    expect(
+      unknown,
+      `documented but not registered: ${unknown.join(', ')}`,
+    ).toEqual([])
+  },
+)

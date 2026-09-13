@@ -14,7 +14,10 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+)
 const dir = path.join(repoRoot, 'packages/lib/apidocs')
 
 const read = () =>
@@ -34,14 +37,19 @@ execFileSync('pnpm', ['--filter', 'react-msaview', 'statedocs'], {
 
 const generated = read()
 
-for (const file of new Set([...Object.keys(committed), ...Object.keys(generated)])) {
+for (const file of new Set([
+  ...Object.keys(committed),
+  ...Object.keys(generated),
+])) {
   fs.rmSync(path.join(dir, file), { force: true })
 }
 for (const [file, content] of Object.entries(committed)) {
   fs.writeFileSync(path.join(dir, file), content)
 }
 
-const stale = [...new Set([...Object.keys(committed), ...Object.keys(generated)])]
+const stale = [
+  ...new Set([...Object.keys(committed), ...Object.keys(generated)]),
+]
   .filter(file => committed[file] !== generated[file])
   .sort()
 

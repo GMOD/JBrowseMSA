@@ -13,7 +13,10 @@ URL-encode the JSON and put it in `?data=`, either bare or wrapped as
 `{"msaview": {...}}`, which is the form the app writes back to the address bar:
 
 ```js
-const snapshot = { type: 'MsaView', data: { msa: '>human\nMKAANSE\n>mouse\nMKA-NSE' } }
+const snapshot = {
+  type: 'MsaView',
+  data: { msa: '>human\nMKAANSE\n>mouse\nMKA-NSE' },
+}
 const url = `https://gmod.org/JBrowseMSA/demo/?data=${encodeURIComponent(JSON.stringify(snapshot))}`
 ```
 

@@ -90,7 +90,14 @@ in a shared URL and the SVG export draws it.
     { rows: ['beluga', 'dolphin'], label: 'frameshift carriers' },
   ]}
   columnTracks={[
-    { id: 'dnds', name: 'dN/dS', kind: 'bar', values: dnds, max: 2, row: 'human' },
+    {
+      id: 'dnds',
+      name: 'dN/dS',
+      kind: 'bar',
+      values: dnds,
+      max: 2,
+      row: 'human',
+    },
   ]}
 />
 ```

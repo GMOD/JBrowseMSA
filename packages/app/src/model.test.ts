@@ -35,7 +35,10 @@ test('?data= takes a bare MsaView snapshot, as docs/layers.md writes it', () => 
 test.each([
   ['unparseable JSON', '{"type":"MsaView",'],
   ['an object that is not a view', '{"data":{"msa":">a\\nA"}}'],
-  ['a snapshot the model rejects', '{"msaview":{"type":"MsaView","height":"tall"}}'],
+  [
+    'a snapshot the model rejects',
+    '{"msaview":{"type":"MsaView","height":"tall"}}',
+  ],
 ])('?data= with %s opens on an error', (_, param) => {
   const app = createApp(param)
   expect(String(app.msaview.error)).toMatch(/\?data= parameter/)

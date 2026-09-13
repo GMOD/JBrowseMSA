@@ -8,7 +8,10 @@ import { expect, test } from 'vitest'
 // for a prop that no longer exists is a broken copy-paste.
 test('the USAGE.md props table lists exactly the MSAViewer props', () => {
   const source = readFileSync(new URL('MSAViewer.tsx', import.meta.url), 'utf8')
-  const usage = readFileSync(new URL('../../../../USAGE.md', import.meta.url), 'utf8')
+  const usage = readFileSync(
+    new URL('../../../../USAGE.md', import.meta.url),
+    'utf8',
+  )
 
   const iface = /interface MSAViewerProps \{\n([\s\S]*?)\n\}/.exec(source)?.[1]
   expect(iface, 'could not find the MSAViewerProps interface').toBeTruthy()
@@ -19,5 +22,7 @@ test('the USAGE.md props table lists exactly the MSAViewer props', () => {
   expect(table, 'could not find the props table in USAGE.md').toBeTruthy()
   const documented = [...table!.matchAll(/^\| `(\w+)`/gm)].map(m => m[1])
 
-  expect([...documented].sort()).toEqual([...props].sort())
+  const alphabetical = (list: (string | undefined)[]) =>
+    [...list].sort((a, b) => (a ?? '').localeCompare(b ?? ''))
+  expect(alphabetical(documented)).toEqual(alphabetical(props))
 })
