@@ -129,49 +129,6 @@ export const specs = [
     settle: 2000,
     clip: 'viewer',
   },
-  {
-    name: 'domain-loss-annotated',
-    // The same capture as domain-loss, with the reading annotated: what is
-    // missing on the left, and what lines up on the right. Every callout is
-    // anchored to an alignment COLUMN range, so it tracks the domain rather
-    // than a pixel — re-running the aligner moves the boxes with the data.
-    // Column ranges are the Human row's domain spans (scripts/examples-gen).
-    viewportWidth: 1600,
-    url: fileSnap({
-      height: 430,
-      treeAreaWidth: 150,
-      colWidth: 0.7,
-      colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/nlrp1.aln' },
-      treeFilehandle: { uri: 'data/nlrp1.nh' },
-      gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
-    }),
-    settle: 2000,
-    clip: 'viewer',
-    annotations: [
-      { type: 'box', anchor: { col: 38, colEnd: 112 }, pad: 3 },
-      {
-        type: 'box',
-        anchor: { col: 370, colEnd: 1636 },
-        color: '#1565c0',
-        pad: 3,
-      },
-      {
-        type: 'text',
-        text: 'PYD annotated in 5 of 12 rows\n(the other 7 have sequence here — just no pyrin domain)',
-        fontSize: 15,
-        maxWidth: 340,
-        anchor: { col: 38, colEnd: 112, alignY: 'bottom', dy: 46 },
-      },
-      {
-        type: 'text',
-        text: 'the other six domains: all 12 rows, same columns',
-        fontSize: 15,
-        color: '#1565c0',
-        anchor: { col: 370, colEnd: 1636, alignY: 'bottom', dy: 46 },
-      },
-    ],
-  },
   // The controlled pair behind docs/media/column-lock.png. Same twelve
   // sequences, same domain GFF, same component, same palette, same tree (so the
   // rows sit in the same order in both). The ONLY difference is whether the

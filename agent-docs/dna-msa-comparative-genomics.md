@@ -39,10 +39,10 @@ alignment twice (one alignment representation, the on-message one).
 
 - Generator: `scripts/screenshots/f12-combined-figure.mjs` (`--force` to
   rewrite).
-- Outputs: `docs/media/f12-combined-overview.png` (exon architecture across the
-  tree) and `docs/media/f12-combined-closeup.png` (base resolution at the shared
+- Output: `docs/media/f12-combined-closeup.png` (base resolution at the shared
   cetacean frameshift: beluga/porpoise/dolphin/minke_whale show `-` where every
-  other mammal has `C`).
+  other mammal has `C`). A zoomed-out overview variant was dropped once nothing
+  referenced it or its generated session URL.
 - Data inlined from `packages/app/public/data/f12-cetacean-cds.stock` +
   `f12-cetacean-exons.gff`, so the session URL is self-contained.
 

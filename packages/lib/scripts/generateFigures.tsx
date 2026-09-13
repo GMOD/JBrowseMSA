@@ -83,12 +83,6 @@ const figures = [
     treeAreaWidth: 220,
     data: { msa: domainsMSA, tree: '', gff: domainsGFF },
   },
-  {
-    name: 'example-sequence-logo',
-    colorScheme: 'maeditor',
-    data: { msa: proteinMSA, tree: proteinTree },
-    tracks: ['sequence-logo'],
-  },
 ]
 
 test('generate README figures', async () => {
@@ -112,23 +106,12 @@ test('generate README figures', async () => {
     if (fig.treeAreaWidth !== undefined) {
       model.setTreeAreaWidth(fig.treeAreaWidth)
     }
-    // a figure opts into the track strip by naming the tracks it wants, so the
-    // other figures stay exactly as tall as they were
-    const tracks = fig.tracks ?? []
-    for (const id of tracks) {
-      model.toggleTrack(id)
-    }
-    for (const { model: t } of model.turnedOnTracks) {
-      if (!tracks.includes(t.id)) {
-        model.toggleTrack(t.id)
-      }
-    }
     model.setWidth(900)
     const svg = await renderToSvg(model, {
       theme,
       exportType: 'entire',
       includeMinimap: false,
-      includeTracks: tracks.length > 0,
+      includeTracks: false,
     })
     fs.writeFileSync(path.join(outDir, `${fig.name}.svg`), svg)
     console.log(`wrote ${fig.name}.svg`)

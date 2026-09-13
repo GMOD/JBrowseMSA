@@ -5,11 +5,10 @@
  *   (below) the react-msaview MsaView: the curated F12 cetacean CDS DNA
  *          alignment + species tree + the 14-exon overlay.
  *
- * Two variants are rendered:
- *   - overview: small colWidth so the whole exon architecture reads as colored
- *     bands down the tree (annotation lifted across every species).
- *   - closeup:  base resolution, scrolled to the shared cetacean frameshift
- *     (column 205) where the four cetaceans carry a 1bp deletion the others lack.
+ * One variant is rendered: base resolution, scrolled to the shared cetacean
+ * frameshift (column 205) where the four cetaceans carry a 1bp deletion the
+ * others lack. A zoomed-out overview was rendered here too until nothing
+ * referenced it -- the gallery links and shows the close-up.
  *
  * Deliberately NO MAF track here: a MAF track + the MsaView would show the same
  * alignment twice. One alignment representation, the on-message one.
@@ -122,11 +121,6 @@ const msaBase = {
 }
 
 const variants = [
-  {
-    name: 'overview',
-    viewport: { width: 1500, height: 900 },
-    msa: { ...msaBase, colWidth: 0.62, rowHeight: 19, height: 470 },
-  },
   {
     name: 'closeup',
     viewport: { width: 1500, height: 850 },
@@ -254,6 +248,11 @@ async function setupCaptureTarget() {
 
 async function main() {
   writeLinksModule()
+  // the links are built from the committed data alone, so regenerating them
+  // after a variant changes needs no browser and no jbrowse build
+  if (flag('links-only')) {
+    return
+  }
   const { jbrowseBase, configUrl, cleanup } = await setupCaptureTarget()
   const browser = await puppeteer.launch({
     headless: true,
