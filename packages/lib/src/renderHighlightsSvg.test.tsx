@@ -25,7 +25,10 @@ AC--FGHIKL
 >seq3
 ACDEFGHIKL`
 
-async function exportWith(highlights: Highlight[]) {
+async function exportWith(
+  highlights: Highlight[],
+  extra: { highlightColumns?: number[]; relativeTo?: string } = {},
+) {
   const model = MSAModelF().create({
     id: 'highlight-svg-test',
     type: 'MsaView',
@@ -33,6 +36,7 @@ async function exportWith(highlights: Highlight[]) {
     msaFormat: 'fasta',
     data: { msa },
     highlights,
+    ...extra,
   })
   model.setWidth(800)
   const svg = await renderToSvg(model, {
@@ -82,4 +86,30 @@ test('a row set tints the row in the tree and the alignment', async () => {
     expect.arrayContaining([`${treeAreaWidth}`, `${totalWidth}`]),
   )
   expect(svg).toContain('>odd one out<')
+})
+
+test('highlighted columns and the reference row export as they draw', async () => {
+  const { model, svg } = await exportWith([], {
+    highlightColumns: [1, 2],
+    relativeTo: 'seq2',
+  })
+  const { colWidth, rowHeight, totalWidth, totalHeight } = model
+
+  const band = rects(svg).find(r => r.includes('rgb(255,140,0)'))
+  expect(band).toContain(`x="${colWidth}"`)
+  expect(band).toContain(`width="${2 * colWidth}"`)
+  expect(band).toContain(`height="${totalHeight}"`)
+
+  const referenceTint = rects(svg).find(r => r.includes('rgb(0,128,255)'))
+  expect(referenceTint).toContain(`y="${rowHeight}"`)
+  expect(referenceTint).toContain(`width="${totalWidth}"`)
+  expect(referenceTint).toContain(`height="${rowHeight}"`)
+})
+
+test('a band across every column keeps the letters under it', async () => {
+  const { model, svg } = await exportWith([{ start: 1, end: 10 }])
+  expect(model.showMsaLetters).toBe(true)
+  // the band covers the alignment exactly, which svgcanvas used to read as a
+  // request to clear the drawing
+  expect((svg.match(/<text/g) ?? []).length).toBeGreaterThan(20)
 })

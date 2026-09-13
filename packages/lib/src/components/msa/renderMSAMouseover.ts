@@ -1,19 +1,8 @@
-import {
-  clickColor,
-  hoverColor,
-  multiRowHoverColor,
-  referenceColor,
-} from '../overlayColors.ts'
-import { renderHighlights } from './renderHighlights.ts'
+import { clickColor, hoverColor, multiRowHoverColor } from '../overlayColors.ts'
+import { renderPersistentHighlights } from './renderHighlights.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { Theme } from '@mui/material'
-
-// the persistent highlightColumns overlay: a stronger fill plus a solid border
-// so a domain/motif band reads clearly over the colored alignment cells (the
-// faint hover-style wash alone is invisible against clustalx coloring)
-const highlightColumnsFill = 'rgba(255,140,0,0.28)'
-const highlightColumnsBorder = 'rgba(210,90,0,0.95)'
 
 export function renderMouseover({
   ctx,
@@ -36,9 +25,7 @@ export function renderMouseover({
     mouseClickRow,
     mouseClickCol,
     highResScaleFactor,
-    referenceRowIndex,
     hoveredRowIndices,
-    highlightedColumnRuns,
   } = model
   ctx.resetTransform()
   ctx.clearRect(0, 0, width * highResScaleFactor, height * highResScaleFactor)
@@ -53,30 +40,7 @@ export function renderMouseover({
     ctx.fillRect(index * colWidth + scrollX, 0, colWidth, height)
   }
 
-  // the reference row (relativeTo) stays lit, as does every tip under a hovered
-  // tree node
-  if (referenceRowIndex !== undefined) {
-    ctx.fillStyle = referenceColor
-    rowBand(referenceRowIndex)
-  }
-  ctx.fillStyle = multiRowHoverColor
-  for (const rowIndex of hoveredRowIndices) {
-    rowBand(rowIndex)
-  }
-
-  // each contiguous run of highlighted columns draws as one filled, bordered
-  // band, so a domain/motif highlight stays visible over the alignment
-  ctx.lineWidth = 2
-  for (const { start, end } of highlightedColumnRuns) {
-    const x = start * colWidth + scrollX
-    const w = (end - start + 1) * colWidth
-    ctx.fillStyle = highlightColumnsFill
-    ctx.fillRect(x, 0, w, height)
-    ctx.strokeStyle = highlightColumnsBorder
-    ctx.strokeRect(x, 0, w, height)
-  }
-
-  renderHighlights({
+  renderPersistentHighlights({
     ctx,
     model,
     theme,
@@ -85,6 +49,12 @@ export function renderMouseover({
     width,
     height,
   })
+
+  // every tip under a hovered tree node stays lit
+  ctx.fillStyle = multiRowHoverColor
+  for (const rowIndex of hoveredRowIndices) {
+    rowBand(rowIndex)
+  }
 
   ctx.fillStyle = hoverColor
   if (mouseCol !== undefined) {

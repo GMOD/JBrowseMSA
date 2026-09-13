@@ -1,9 +1,13 @@
 import { setFontSize } from '../../setFontSize.ts'
+import { referenceColor } from '../overlayColors.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
+// a stronger fill plus a solid border, so a domain/motif band reads clearly over
+// the colored alignment cells (the faint hover-style wash alone is invisible
+// against clustalx coloring)
 export const highlightFill = 'rgba(255,140,0,0.28)'
 export const highlightBorder = 'rgba(210,90,0,0.95)'
 export const highlightRowFill = 'rgba(255,140,0,0.18)'
@@ -83,4 +87,49 @@ export function renderHighlights({
       drawHighlightLabel({ ctx, theme, label, x, y: 0, spanWidth })
     }
   }
+}
+
+/**
+ * Everything the alignment overlay owes to the document rather than to the
+ * mouse: the reference row's tint, a bordered band per run of highlighted
+ * columns, and the `highlights` layer. The live overlay canvas draws these
+ * under its hover and click bands, and the SVG export draws them and stops --
+ * a shared link that opens with columns highlighted exports with them too.
+ */
+export function renderPersistentHighlights({
+  ctx,
+  model,
+  theme,
+  offsetX,
+  offsetY,
+  width,
+  height,
+}: {
+  ctx: RenderCtx
+  model: MsaViewModel
+  theme: Theme
+  offsetX: number
+  offsetY: number
+  width: number
+  height: number
+}) {
+  const { colWidth, rowHeight, referenceRowIndex, highlightedColumnRuns } =
+    model
+
+  if (referenceRowIndex !== undefined) {
+    ctx.fillStyle = referenceColor
+    ctx.fillRect(0, referenceRowIndex * rowHeight - offsetY, width, rowHeight)
+  }
+
+  ctx.lineWidth = 2
+  for (const { start, end } of highlightedColumnRuns) {
+    const x = start * colWidth - offsetX
+    const w = (end - start + 1) * colWidth
+    ctx.fillStyle = highlightFill
+    ctx.fillRect(x, 0, w, height)
+    ctx.strokeStyle = highlightBorder
+    ctx.strokeRect(x, 0, w, height)
+  }
+
+  renderHighlights({ ctx, model, theme, offsetX, offsetY, width, height })
 }

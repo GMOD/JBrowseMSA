@@ -698,20 +698,11 @@ export class Context {
     this.__groupStack = []
   }
 
+  // A fill that happens to cover the context is still a fill: it paints over
+  // what is under it, exactly as the canvas would. Treating it as a clear threw
+  // the drawing away instead -- a full-width highlight band over an alignment
+  // took the export from 124 letters to 4.
   fillRect(x: number, y: number, width: number, height: number) {
-    const { a, b, c, d, e, f } = this.getTransform()
-    if (
-      JSON.stringify([a, b, c, d, e, f]) === JSON.stringify([1, 0, 0, 1, 0, 0])
-    ) {
-      if (
-        x === 0 &&
-        y === 0 &&
-        width === this.width &&
-        height === this.height
-      ) {
-        this.__clearCanvas()
-      }
-    }
     const rect = this.__createElement('rect', { x, y, width, height }, true)
     const parent = this.__closestGroupOrSvg()
     parent.appendChild(rect)
