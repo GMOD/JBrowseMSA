@@ -10,6 +10,12 @@ function safeDecode(val: string) {
   }
 }
 
+// InterProScan quotes some of its values (Ontology_term="GO:0008652",
+// Dbxref="InterPro:IPR001048"), and the quotes are not part of the term
+function unquote(val: string) {
+  return val.replace(/^"(.*)"$/, '$1')
+}
+
 function parseAttributes(col9?: string): Record<string, string | undefined> {
   if (!col9) {
     return {}
@@ -31,7 +37,7 @@ function parseAttributes(col9?: string): Record<string, string | undefined> {
           val
             ? val
                 .split(',')
-                .map(v => safeDecode(v).trim())
+                .map(v => unquote(safeDecode(v).trim()))
                 .join(' ')
             : undefined,
         ]
@@ -44,27 +50,37 @@ export function parseGFF(str?: string): GFFRecord[] {
   if (!str) {
     return []
   }
-  return str
-    .split('\n')
-    .map(f => f.trim())
-    .filter(f => !!f && !f.startsWith('#'))
-    .map(f => {
-      const parts = f.split('\t')
-      const [seq_id, source, type, start, end, score, strand, phase] = parts
-      const col9 = parts[8]
+  const lines: string[] = []
+  for (const raw of str.split('\n')) {
+    const line = raw.trim()
+    // InterProScan appends the sequences it scanned; every line past this is
+    // FASTA, and reading it as features gave rows named ">P51587"
+    if (line.startsWith('##FASTA')) {
+      break
+    }
+    // a feature is nine tab-separated columns, eight of them mandatory; a
+    // FASTA line in a file that omitted the ##FASTA directive is one
+    if (line && !line.startsWith('#') && line.split('\t').length >= 8) {
+      lines.push(line)
+    }
+  }
+  return lines.map(f => {
+    const parts = f.split('\t')
+    const [seq_id, source, type, start, end, score, strand, phase] = parts
+    const col9 = parts[8]
 
-      // attributes first, so a column-9 key colliding with a core column (e.g.
-      // "start=") can't turn a number field into a string
-      return {
-        ...parseAttributes(col9),
-        seq_id: seq_id ?? '',
-        source: source ?? '',
-        type: type ?? '',
-        start: Number(start) || 0,
-        end: Number(end) || 0,
-        score: Number(score) || 0,
-        strand: strand ?? '.',
-        phase: phase ?? '.',
-      }
-    })
+    // attributes first, so a column-9 key colliding with a core column (e.g.
+    // "start=") can't turn a number field into a string
+    return {
+      ...parseAttributes(col9),
+      seq_id: seq_id ?? '',
+      source: source ?? '',
+      type: type ?? '',
+      start: Number(start) || 0,
+      end: Number(end) || 0,
+      score: Number(score) || 0,
+      strand: strand ?? '.',
+      phase: phase ?? '.',
+    }
+  })
 }

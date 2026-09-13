@@ -67,17 +67,29 @@ seq2\tSource\ttype\t20\t30\t.\t.\t.\tName=test2`
     expect(result[0]?.seq_id).toBe('seq1')
   })
 
-  test('handles partial GFF lines gracefully', () => {
-    const gff = 'seq1\tSource\ttype'
-    const result = parseGFF(gff)
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({
-      seq_id: 'seq1',
-      source: 'Source',
-      type: 'type',
-      start: 0,
-      end: 0,
-    })
+  test('skips a line that is short of the mandatory columns', () => {
+    expect(parseGFF('seq1\tSource\ttype')).toEqual([])
+  })
+
+  test('reads an InterProScan GFF3, stopping at its FASTA section', () => {
+    const gff = `##gff-version 3
+##feature-ontology http://song.cvs.sourceforge.net/viewvc/song/ontology/sofa.obo?revision=1.269
+##interproscan-version 5.26-65.0
+##sequence-region P51587 1 30
+##seqid|source|type|start|end|score|strand|phase|attributes
+P51587\t.\tpolypeptide\t1\t30\t.\t+\t.\tmd5=fd0743a673ac69fb;ID=P51587
+P51587\tPfam\tprotein_match\t5\t20\t1.2E-45\t+\t.\tName=PF00634;signature_desc=BRCA2 repeat;Target=null 5 20;status=T;ID=match$8_5_20;Ontology_term="GO:0003677","GO:0006281";date=15-04-2013;Dbxref="InterPro:IPR002093"
+##FASTA
+>P51587
+MPIGSKERPTFFEIFKTRCNKADLGPISLN
+`
+    const records = parseGFF(gff)
+    expect(records.map(r => [r.type, r.start, r.end])).toEqual([
+      ['polypeptide', 1, 30],
+      ['protein_match', 5, 20],
+    ])
+    expect(records[1]?.Ontology_term).toBe('GO:0003677 GO:0006281')
+    expect(records[1]?.Dbxref).toBe('InterPro:IPR002093')
   })
 
   test('parses numeric score', () => {

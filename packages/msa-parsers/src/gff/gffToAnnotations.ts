@@ -26,6 +26,11 @@ function geneStrand({ type, strand }: GFFRecord): number | undefined {
   return GENE_LEVEL_TYPES.has(type) ? directional : undefined
 }
 
+// InterProScan describes the sequence it scanned before listing the matches
+// against it. Those lines span the whole row and carry no signature, so they
+// would draw a full-width block labelled by an md5.
+const WHOLE_SEQUENCE_TYPES = new Set(['polypeptide', 'nucleic_acid'])
+
 /**
  * Convert GFF records to annotations, one per record, in file order.
  *
@@ -34,26 +39,33 @@ function geneStrand({ type, strand }: GFFRecord): number | undefined {
  * name, with domain positions 1-based.
  */
 export function gffToAnnotations(gffRecords: GFFRecord[]): Annotation[] {
-  return gffRecords.map(record => {
-    const accession =
-      (record.Name as string) ||
-      (record.ID as string) ||
-      `${record.source}_${record.start}_${record.end}`
-    const name =
-      (record.signature_desc as string) || (record.Name as string) || accession
-    return {
-      id: record.seq_id,
-      accession,
-      name,
-      description:
-        (record.Ontology_term as string) ||
-        (record.description as string) ||
-        (record.Note as string) ||
+  return gffRecords
+    .filter(record => !WHOLE_SEQUENCE_TYPES.has(record.type))
+    .map(record => {
+      const accession =
+        (record.Name as string) ||
+        (record.ID as string) ||
+        `${record.source}_${record.start}_${record.end}`
+      const name =
+        (record.signature_desc as string) ||
+        (record.Name as string) ||
+        accession
+      return {
+        id: record.seq_id,
+        accession,
         name,
-      featureType: record.type,
-      start: record.start,
-      end: record.end,
-      strand: geneStrand(record),
-    }
-  })
+        // not Ontology_term: a GO id list is what the domain is annotated
+        // with, not what it is, and reading it first labelled every
+        // InterProScan domain "GO:0003677 GO:0006281"
+        description:
+          (record.description as string) ||
+          (record.Note as string) ||
+          (record.signature_desc as string) ||
+          name,
+        featureType: record.type,
+        start: record.start,
+        end: record.end,
+        strand: geneStrand(record),
+      }
+    })
 }

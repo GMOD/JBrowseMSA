@@ -75,6 +75,27 @@ test('gives gene-level features a direction but leaves exons/domains as blocks',
   })
 })
 
+test('drops the line describing the whole scanned sequence', () => {
+  expect(
+    gffToAnnotations([
+      record({ type: 'polypeptide', source: '.', md5: 'fd0743a673ac69fb' }),
+      record({ Name: 'PF00001' }),
+    ]).map(a => a.accession),
+  ).toEqual(['PF00001'])
+})
+
+test('describes a domain by its signature, not by its GO terms', () => {
+  expect(
+    gffToAnnotations([
+      record({
+        Name: 'PF00634',
+        signature_desc: 'BRCA2 repeat',
+        Ontology_term: 'GO:0003677 GO:0006281',
+      }),
+    ])[0]?.description,
+  ).toBe('BRCA2 repeat')
+})
+
 test('falls back from Name to ID to source and positions', () => {
   expect(
     gffToAnnotations([

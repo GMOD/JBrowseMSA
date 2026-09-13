@@ -115,23 +115,40 @@ describe('interProToGFF', () => {
     expect(lines.some(l => l.includes('seq2'))).toBe(true)
   })
 
-  test('skips matches without entry', () => {
+  test('keeps an unintegrated signature, which has no InterPro entry', () => {
+    // what InterProScan writes for every MobiDBLite hit, and for any member
+    // database signature InterPro has not integrated yet
     const results: Record<string, InterProScanResults> = {
       seq1: {
         matches: [
           {
-            signature: {},
+            signature: {
+              accession: 'mobidb-lite',
+              name: 'disorder_prediction',
+              description: null,
+              entry: null,
+            },
             locations: [{ start: 10, end: 50 }],
           },
         ],
         xref: [{ id: 'seq1' }],
       },
     }
-    const gff = interProToGFF(results)
-    const lines = gff.split('\n')
+    const lines = interProToGFF(results).split('\n')
 
-    expect(lines).toHaveLength(1)
-    expect(lines[0]).toBe('##gff-version 3')
+    expect(lines).toHaveLength(2)
+    expect(lines[1]).toContain('Name=mobidb-lite')
+    expect(lines[1]).toContain('signature_desc=disorder_prediction')
+  })
+
+  test('skips a match whose signature has no accession', () => {
+    const results: Record<string, InterProScanResults> = {
+      seq1: {
+        matches: [{ signature: {}, locations: [{ start: 10, end: 50 }] }],
+        xref: [{ id: 'seq1' }],
+      },
+    }
+    expect(interProToGFF(results)).toBe('##gff-version 3')
   })
 
   test('round-trips the feature type and strand of a gene-structure overlay', () => {

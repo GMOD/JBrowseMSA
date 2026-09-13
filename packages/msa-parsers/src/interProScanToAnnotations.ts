@@ -20,27 +20,35 @@ export function indexResultsByXref(results: InterProScanResults[]) {
 
 /**
  * Flatten InterProScan results, keyed by the row name they attach to, into one
- * annotation per signature location. A signature without an `entry` carries no
- * accession or name to color, filter or label by, so it is dropped.
+ * annotation per signature location.
+ *
+ * An unintegrated signature has no InterPro `entry` -- MobiDBLite's disorder
+ * calls, and many CDD, Pfam and PANTHER hits -- and falling back to the
+ * signature's own accession and name is the difference between drawing those
+ * and dropping them. Only a signature with no accession at all has nothing to
+ * color, filter or label by, and is dropped.
  */
 export function interProScanToAnnotations(
   results: Record<string, InterProScanResults>,
 ): Annotation[] {
   return Object.entries(results).flatMap(([id, { matches }]) =>
-    matches.flatMap(({ signature: { entry }, locations }) =>
-      entry
-        ? locations.map(({ start, end, strand }) => ({
-            id,
-            accession: entry.accession,
-            name: entry.name,
-            description: entry.description,
-            featureType: entry.featureType,
-            start,
-            end,
-            strand,
-          }))
-        : [],
-    ),
+    matches.flatMap(({ signature, locations }) => {
+      const { entry } = signature
+      const accession = entry?.accession ?? signature.accession
+      if (!accession) {
+        return []
+      }
+      const name = entry?.name ?? signature.name ?? accession
+      return locations.map(({ start, end, strand }) => ({
+        id,
+        accession,
+        name,
+        description: entry?.description ?? signature.description ?? name,
+        start,
+        end,
+        strand,
+      }))
+    }),
   )
 }
 
