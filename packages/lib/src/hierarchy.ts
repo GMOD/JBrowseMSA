@@ -172,15 +172,9 @@ export function calcDepthToLeaf<T>(node: HierarchyNode<T>): number {
   return node.depthToLeaf!
 }
 
-export function findMaxBranchLen(node: HierarchyNode): number {
-  let maxLen = 0
-  for (const n of descendants(node)) {
-    maxLen = Math.max(maxLen, n.len || 0)
-  }
-  return maxLen
-}
-
-// Max root-to-leaf sum of branch lengths within the subtree at d
+// Max root-to-leaf sum of branch lengths within the subtree at d. Negative
+// lengths are floored at zero, the same as setBrLength does when it lays the
+// tree out, so the extent this reports is the one that gets drawn
 export function maxLength(d: HierarchyNode): number {
   const nodes = descendants(d)
   const pathLen = new Map<HierarchyNode, number>()
@@ -192,7 +186,7 @@ export function maxLength(d: HierarchyNode): number {
         childMax = Math.max(childMax, pathLen.get(child)!)
       }
     }
-    pathLen.set(n, (n.data.length || 0) + childMax)
+    pathLen.set(n, Math.max(n.data.length || 0, 0) + childMax)
   }
   return pathLen.get(d)!
 }

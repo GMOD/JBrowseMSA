@@ -61,11 +61,9 @@ import {
   collapse,
   collapsedSubtreeMaxLength,
   find,
-  findMaxBranchLen,
   forEachDescendant,
   hierarchy,
   leaves,
-  links,
   maxLength,
   setBrLength,
   sort,
@@ -1334,10 +1332,13 @@ function stateModelFactory() {
       get hierarchy(): HierarchyNode<NodeWithIdsAndLength> {
         const r = this.root
         clusterLayout(r, this.totalHeight, self.treeWidth)
-        r.data.length = 0
-        const max = maxLength(r)
+        const max = this.rootToTipLength
         const k = max ? self.treeWidth / max : 0
-        setBrLength(r, 0, k)
+        // the displayed root starts at x=0 whatever branch length it carries,
+        // so its own length is subtracted here rather than zeroed on the parsed
+        // node -- `root` hands out the cached parse, and writing to it made
+        // showOnly shorten that branch for good
+        setBrLength(r, -Math.max(r.data.length || 0, 0), k)
         // for each collapsed clade, record the pixel x-position of its farthest
         // tip so the renderer can draw a triangle spanning the branch-length
         // extent of the hidden subtree
@@ -1366,10 +1367,23 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * max branch length across the tree, used to scale phylogram x-positions
+       * branch-length extent of the displayed tree, root to farthest tip, in
+       * the tree's own units
+       */
+      get rootToTipLength() {
+        const r = this.root
+        return maxLength(r) - Math.max(r.data.length || 0, 0)
+      },
+
+      /**
+       * #getter
+       * x-position of the farthest tip in a phylogram, px. The layout scales
+       * the longest root-to-tip path onto treeWidth, so that is where it lands
+       * -- and 0 for a tree carrying no lengths at all, which draws as a
+       * cladogram instead
        */
       get maxBranchLength() {
-        return findMaxBranchLen(this.hierarchy)
+        return this.rootToTipLength ? self.treeWidth : 0
       },
 
       /**
@@ -1384,7 +1398,7 @@ function stateModelFactory() {
        * #getter
        */
       get allBranchesLength0() {
-        return links(this.hierarchy).every(s => !s.source.data.length)
+        return this.rootToTipLength === 0
       },
 
       /**

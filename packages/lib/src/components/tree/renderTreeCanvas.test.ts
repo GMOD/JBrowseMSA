@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { calcDepthToLeaf, findMaxBranchLen } from '../../hierarchy.ts'
+import { calcDepthToLeaf } from '../../hierarchy.ts'
 import stateModelFactory from '../../model.ts'
 import { ClickMapIndex } from './clickMap.ts'
 import { getNodeX, renderTreeCanvas } from './renderTreeCanvas.ts'
@@ -65,22 +65,6 @@ describe('calcDepthToLeaf', () => {
     child.depthToLeaf = 99
     expect(calcDepthToLeaf(root)).toBe(1)
     expect(child.depthToLeaf).toBe(99)
-  })
-})
-
-describe('findMaxBranchLen', () => {
-  it('uses the node itself when it is a leaf', () => {
-    expect(findMaxBranchLen(leaf('a', 1.5))).toBe(1.5)
-  })
-
-  it('takes the max across descendants', () => {
-    expect(
-      findMaxBranchLen(internal('p', [leaf('a', 0.5), leaf('b', 1.5)], 0.3)),
-    ).toBe(1.5)
-  })
-
-  it('treats a missing len as 0', () => {
-    expect(findMaxBranchLen(leaf('a'))).toBe(0)
   })
 })
 

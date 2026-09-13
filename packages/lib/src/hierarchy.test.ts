@@ -5,7 +5,6 @@ import {
   collapse,
   collapsedSubtreeMaxLength,
   find,
-  findMaxBranchLen,
   hierarchy,
   leaves,
   maxLength,
@@ -223,6 +222,6 @@ describe('deep (caterpillar) trees do not overflow the stack', () => {
     expect(maxLength(h)).toBe(depth)
     expect(calcDepthToLeaf(h)).toBe(depth)
     setBrLength(h, 0, 1)
-    expect(findMaxBranchLen(h)).toBe(depth)
+    expect(leaves(h).at(-1)!.len).toBe(depth)
   })
 })
