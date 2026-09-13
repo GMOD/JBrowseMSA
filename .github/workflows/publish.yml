@@ -18,7 +18,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v5
         with:
-          node-version: '24'
+          node-version: 22.x
           # pnpm is provisioned by Corepack below, after this step
           package-manager-cache: false
           registry-url: 'https://registry.npmjs.org'
@@ -26,4 +26,7 @@ jobs:
         run: corepack enable
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      # a tarball whose bin or exports point at files the build never made is
+      # how react-msaview-cli reached npm with no dist at all
+      - run: pnpm check:pack
       - run: pnpm publish -r --access public --no-git-checks --provenance

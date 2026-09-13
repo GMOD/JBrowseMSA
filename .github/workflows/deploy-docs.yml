@@ -1,7 +1,8 @@
 name: Deploy docs site
 
-# Builds the docs website (gmod.org/JBrowseMSA) with the demo app at /demo and
-# publishes it via GitHub's native Pages deployment (no gh-pages branch).
+# Builds the docs website (gmod.org/JBrowseMSA) with the demo app at /demo,
+# checks its links, and publishes it via GitHub's native Pages deployment (no
+# gh-pages branch).
 on:
   push:
     branches: [main]
@@ -17,26 +18,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
-      - name: Use Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 22.x
-          # setup-node v5 auto-caches based on the packageManager field, but
-          # that runs pnpm before Corepack has provisioned it; disable it here.
-          package-manager-cache: false
-
-      # Corepack pins pnpm to the packageManager field in package.json; run it
-      # after setup-node so node lives in the user-owned toolcache and no sudo
-      # is needed. Replaces pnpm/action-setup.
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/setup
 
       - name: Build pages bundle (docs + /demo app)
         run: pnpm build:pages
+
+      # The site is served under /JBrowseMSA, so stage it at that path before
+      # checking — otherwise the absolute /JBrowseMSA/... links won't resolve.
+      # This runs on the bundle about to deploy, so a broken link stops the
+      # deploy instead of being found in a job that built the site a second time.
+      - name: Stage site under its base path
+        run: |
+          mkdir -p _linkcheck/JBrowseMSA
+          cp -r pages-dist/. _linkcheck/JBrowseMSA/
+
+      - name: Check internal links and anchors
+        uses: untitaker/hyperlink@0.3.2
+        with:
+          # the action already passes --github-actions; don't repeat it here
+          args: _linkcheck/ --check-anchors
 
       - uses: actions/configure-pages@v5
 

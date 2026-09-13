@@ -1,0 +1,39 @@
+name: Setup
+description: Node, Corepack-provisioned pnpm, a cached store, and dependencies
+
+inputs:
+  install:
+    description: Run pnpm install
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 22.x
+        # setup-node's own cache runs pnpm before Corepack has provisioned it
+        package-manager-cache: false
+
+    # Corepack pins pnpm to the packageManager field in package.json; run it
+    # after setup-node so node lives in the user-owned toolcache and no sudo is
+    # needed. Replaces pnpm/action-setup.
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    - name: Locate the pnpm store
+      id: store
+      shell: bash
+      run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/cache@v4
+      with:
+        path: ${{ steps.store.outputs.path }}
+        key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: pnpm-${{ runner.os }}-
+
+    - name: Install dependencies
+      if: inputs.install == 'true'
+      shell: bash
+      run: pnpm install
