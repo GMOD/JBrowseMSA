@@ -262,8 +262,10 @@ jq -n \
     retrieved: $date,
     row: "Human",
     highlights: [
-      {row: "Human", start: 102, end: 292, label: "DNA-binding"},
-      {row: "Human", start: 325, end: 356, label: "Oligomerization"}
+      {row: "Human", start: 102, end: 292, label: "DNA-binding",
+        color: "rgba(255,140,0,0.15)"},
+      {row: "Human", start: 325, end: 356, label: "Oligomerization",
+        color: "rgba(255,140,0,0.15)"}
     ],
     columnTracks: [
       {

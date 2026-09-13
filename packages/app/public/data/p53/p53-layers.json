@@ -7,13 +7,15 @@
       "row": "Human",
       "start": 102,
       "end": 292,
-      "label": "DNA-binding"
+      "label": "DNA-binding",
+      "color": "rgba(255,140,0,0.15)"
     },
     {
       "row": "Human",
       "start": 325,
       "end": 356,
-      "label": "Oligomerization"
+      "label": "Oligomerization",
+      "color": "rgba(255,140,0,0.15)"
     }
   ],
   "columnTracks": [
