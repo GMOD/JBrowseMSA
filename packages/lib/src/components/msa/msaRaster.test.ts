@@ -2,7 +2,7 @@
 import { beforeAll, expect, test } from 'vitest'
 
 import MSAModelF from '../../model.ts'
-import { drawMsaRaster, rasterPixels } from './msaRaster.ts'
+import { cssColorToPixel, drawMsaRaster, rasterPixels } from './msaRaster.ts'
 
 import type { RasterSpec } from './msaRaster.ts'
 
@@ -18,7 +18,12 @@ function hexBytes(css: string) {
   ]
 }
 
-const drawn: unknown[] = []
+interface Draw {
+  image: { width: number; height: number }
+  args: number[]
+  smoothing: boolean
+}
+const drawn: Draw[] = []
 
 beforeAll(() => {
   HTMLCanvasElement.prototype.getContext = function () {
@@ -47,8 +52,8 @@ beforeAll(() => {
         height,
       }),
       putImageData: () => {},
-      drawImage: (image: unknown) => {
-        drawn.push(image)
+      drawImage(image: { width: number; height: number }, ...args: number[]) {
+        drawn.push({ image, args, smoothing: this.imageSmoothingEnabled })
       },
     } as unknown as CanvasRenderingContext2D
   } as unknown as typeof HTMLCanvasElement.prototype.getContext
@@ -89,6 +94,35 @@ test('one pixel per cell, reference matches and short rows', () => {
   expect([...px.slice(9, 12)]).toEqual([0, 0, 0])
 })
 
+test('averaging covers columns without touching rows', () => {
+  const px = rasterPixels({
+    spec: {
+      ...spec,
+      relativeTo: undefined,
+      colorAt: (_col, letter) =>
+        ({ M: '#ff0000', K: '#0000ff', L: '#00ff00' })[letter],
+    },
+    col0: 0,
+    row0: 0,
+    width: 2,
+    height: 3,
+    colSpan: 2,
+    toPixel: cssColorToPixel,
+  })
+  const rgba = (p: number) => [...new Uint8Array(Uint32Array.from([p]).buffer)]
+
+  // the two columns of a pixel average together...
+  expect(rgba(px[0]!)).toEqual([128, 0, 128, 255])
+  // ...and the pixel that covers only one of its two columns keeps that
+  // column's color at half alpha rather than borrowing the row below
+  expect(rgba(px[1]!)).toEqual([0, 255, 0, 128])
+  // every row is still its own row of pixels
+  expect(rgba(px[2]!)).toEqual([128, 0, 128, 255])
+  expect(rgba(px[4]!)).toEqual([128, 0, 128, 255])
+  // 'c' has no cells at all under its second pixel
+  expect(px[5]).toBe(0)
+})
+
 test('sampling steps over columns and rows', () => {
   const px = rasterPixels({
     spec,
@@ -122,6 +156,10 @@ function tilesFor(model: ReturnType<typeof make>) {
   return [...drawn]
 }
 
+function imagesFor(model: ReturnType<typeof make>) {
+  return tilesFor(model).map(d => d.image)
+}
+
 // only the two palette entries the raster reads
 const theme = () =>
   ({
@@ -133,13 +171,29 @@ const theme = () =>
 
 test('a zoom reuses the tiles, a recolor rebuilds them', () => {
   const model = make()
-  const tile = tilesFor(model)[0]
+  const tile = imagesFor(model)[0]
   expect(tile).toBeDefined()
 
   model.setColWidth(3)
   model.setRowHeight(2)
-  expect(tilesFor(model)[0]).toBe(tile)
+  expect(imagesFor(model)[0]).toBe(tile)
 
   model.setColorSchemeName('clustalx_protein_dynamic')
-  expect(tilesFor(model)[0]).not.toBe(tile)
+  expect(imagesFor(model)[0]).not.toBe(tile)
+})
+
+test('a column zoom past a pixel per cell averages columns, not rows', () => {
+  const model = make()
+  model.setColWidth(0.25)
+  const [draw] = tilesFor(model)
+
+  expect(draw).toBeDefined()
+  // smoothing would blur the rows together, so the tile arrives pre-averaged
+  // along the columns it needs and is blitted one row per row
+  expect(draw!.smoothing).toBe(false)
+  expect(draw!.image.width).toBe(Math.ceil(model.numColumns / 4))
+  expect(draw!.image.height).toBe(model.numRows)
+  const [, , , , , , width, height] = draw!.args
+  expect(width).toBeCloseTo(draw!.image.width * model.colWidth * 4)
+  expect(height).toBeCloseTo(model.numRows * model.rowHeight)
 })

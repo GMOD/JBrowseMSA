@@ -63,6 +63,20 @@ export function cssColorToPixel(css: string) {
   return packed
 }
 
+function cellPixelFn(spec: RasterSpec, toPixel: (css: string) => number) {
+  const { columns, relativeTo, colorAt, bg, hover } = spec
+  const bgPixel = toPixel(bg)
+  const hoverPixel = toPixel(hover)
+  const reference = relativeTo ? columns.get(relativeTo) : undefined
+  return (name: string, col: number, letter: string) => {
+    if (reference && name !== relativeTo && letter === reference[col]) {
+      return hoverPixel
+    }
+    const color = colorAt(col, letter)
+    return color === undefined ? bgPixel : toPixel(color)
+  }
+}
+
 /**
  * Packs a rectangle of the alignment into one pixel per cell, in `rowNames`
  * order, ready to hand to putImageData. Cells past the end of a row, and rows
@@ -70,7 +84,9 @@ export function cssColorToPixel(css: string) {
  * also leaves behind.
  *
  * `colStep`/`rowStep` sample instead of covering, which is how the minimap fits
- * a whole alignment into a 12px bar.
+ * a whole alignment into a 12px bar. `colSpan`/`rowSpan` average each block of
+ * that many cells into one pixel instead, so a zoom below a device pixel per
+ * column still shows every column's color without blending neighbouring rows.
  */
 export function rasterPixels({
   spec,
@@ -80,7 +96,10 @@ export function rasterPixels({
   height,
   colStep = 1,
   rowStep = 1,
+  colSpan = 1,
+  rowSpan = 1,
   toPixel = cssColorToPixel,
+  out = new Uint32Array(width * height),
 }: {
   spec: RasterSpec
   col0: number
@@ -89,13 +108,27 @@ export function rasterPixels({
   height: number
   colStep?: number
   rowStep?: number
+  colSpan?: number
+  rowSpan?: number
   toPixel?: (css: string) => number
+  out?: Uint32Array
 }) {
-  const { rowNames, columns, relativeTo, colorAt, bg, hover } = spec
-  const out = new Uint32Array(width * height)
-  const bgPixel = toPixel(bg)
-  const hoverPixel = toPixel(hover)
-  const reference = relativeTo ? columns.get(relativeTo) : undefined
+  if (colSpan > 1 || rowSpan > 1) {
+    averagePixels({
+      spec,
+      col0,
+      row0,
+      width,
+      height,
+      colSpan,
+      rowSpan,
+      toPixel,
+      out,
+    })
+    return out
+  }
+  const { rowNames, columns } = spec
+  const cellPixel = cellPixelFn(spec, toPixel)
 
   for (let r = 0; r < height; r++) {
     const name = rowNames[row0 + r * rowStep]
@@ -106,7 +139,6 @@ export function rasterPixels({
     if (!str) {
       continue
     }
-    const isReference = name === relativeTo
     const base = r * width
     for (let c = 0; c < width; c++) {
       const col = col0 + c * colStep
@@ -114,21 +146,92 @@ export function rasterPixels({
       if (letter === undefined) {
         break
       }
-      if (reference && !isReference && letter === reference[col]) {
-        out[base + c] = hoverPixel
-      } else {
-        const color = colorAt(col, letter)
-        out[base + c] = color === undefined ? bgPixel : toPixel(color)
-      }
+      out[base + c] = cellPixel(name, col, letter)
     }
   }
   return out
 }
 
-// Getting a context object back is not the same as getting one that can do
-// this: the headless render shim hands back a context carrying only measureText,
-// which a truthiness test accepts and putImageData then does not survive. Name
-// the methods the raster actually calls, so every caller degrades together.
+function averagePixels({
+  spec,
+  col0,
+  row0,
+  width,
+  height,
+  colSpan,
+  rowSpan,
+  toPixel,
+  out,
+}: {
+  spec: RasterSpec
+  col0: number
+  row0: number
+  width: number
+  height: number
+  colSpan: number
+  rowSpan: number
+  toPixel: (css: string) => number
+  out: Uint32Array
+}) {
+  const { rowNames, columns } = spec
+  const cellPixel = cellPixelFn(spec, toPixel)
+  const cells = colSpan * rowSpan
+  const rShift = littleEndian ? 0 : 24
+  const gShift = littleEndian ? 8 : 16
+  const bShift = littleEndian ? 16 : 8
+  const aShift = littleEndian ? 24 : 0
+  const names: string[] = []
+  const strs: string[] = []
+
+  for (let r = 0; r < height; r++) {
+    names.length = 0
+    strs.length = 0
+    for (let dr = 0; dr < rowSpan; dr++) {
+      const name = rowNames[row0 + r * rowSpan + dr]
+      const str = name === undefined ? undefined : columns.get(name)
+      if (name !== undefined && str) {
+        names.push(name)
+        strs.push(str)
+      }
+    }
+    const base = r * width
+    for (let c = 0; c < width; c++) {
+      // premultiplied, so a cell past the end of a row dilutes the alpha of its
+      // pixel rather than darkening its color
+      let sumR = 0
+      let sumG = 0
+      let sumB = 0
+      let sumA = 0
+      for (let i = 0; i < strs.length; i++) {
+        const str = strs[i]!
+        const name = names[i]!
+        for (let dc = 0; dc < colSpan; dc++) {
+          const col = col0 + c * colSpan + dc
+          const letter = str[col]
+          if (letter === undefined) {
+            break
+          }
+          const p = cellPixel(name, col, letter)
+          const a = (p >>> aShift) & 255
+          sumR += ((p >>> rShift) & 255) * a
+          sumG += ((p >>> gShift) & 255) * a
+          sumB += ((p >>> bShift) & 255) * a
+          sumA += a
+        }
+      }
+      out[base + c] =
+        sumA === 0
+          ? 0
+          : packRgba(
+              Math.round(sumR / sumA),
+              Math.round(sumG / sumA),
+              Math.round(sumB / sumA),
+              Math.round(sumA / cells),
+            )
+    }
+  }
+}
+
 function usableRasterCtx(ctx: unknown): ctx is RasterCtx {
   const c = ctx as Record<string, unknown> | null
   return (
@@ -154,13 +257,17 @@ function makeRasterCanvas(width: number, height: number) {
     : undefined
 }
 
-function paint(pixels: Uint32Array, width: number, height: number) {
+function paint(
+  width: number,
+  height: number,
+  fill: (out: Uint32Array) => void,
+) {
   const made = makeRasterCanvas(width, height)
   if (!made) {
     return undefined
   }
   const image = made.ctx.createImageData(width, height)
-  new Uint32Array(image.data.buffer).set(pixels)
+  fill(new Uint32Array(image.data.buffer))
   made.ctx.putImageData(image, 0, 0)
   return made.canvas
 }
@@ -223,8 +330,29 @@ function getCache(model: MsaViewModel, theme: Theme) {
   return next
 }
 
-function getTile(cache: RasterCache, tileRow: number, tileCol: number) {
-  const key = `${tileRow}_${tileCol}`
+// Cells averaged into one tile pixel along an axis: the smallest power of two
+// that brings a pixel back to at least one device pixel. Powers of two keep the
+// number of distinct tile sets a zoom sweep builds to a handful.
+function cellsPerPixel(devicePixelsPerCell: number) {
+  return devicePixelsPerCell >= 1
+    ? 1
+    : 2 ** Math.ceil(Math.log2(1 / devicePixelsPerCell))
+}
+
+function getTile({
+  cache,
+  tileRow,
+  tileCol,
+  colSpan,
+  rowSpan,
+}: {
+  cache: RasterCache
+  tileRow: number
+  tileCol: number
+  colSpan: number
+  rowSpan: number
+}) {
+  const key = `${colSpan}_${rowSpan}_${tileRow}_${tileCol}`
   const hit = cache.tiles.get(key)
   if (hit) {
     // re-inserting makes this the newest entry: a Map iterates in insertion
@@ -233,18 +361,31 @@ function getTile(cache: RasterCache, tileRow: number, tileCol: number) {
     cache.tiles.set(key, hit)
     return hit
   }
-  const col0 = tileCol * rasterTileSize
-  const row0 = tileRow * rasterTileSize
-  const width = Math.min(rasterTileSize, cache.numColumns - col0)
-  const height = Math.min(rasterTileSize, cache.numRows - row0)
+  const col0 = tileCol * rasterTileSize * colSpan
+  const row0 = tileRow * rasterTileSize * rowSpan
+  const width = Math.min(
+    rasterTileSize,
+    Math.ceil((cache.numColumns - col0) / colSpan),
+  )
+  const height = Math.min(
+    rasterTileSize,
+    Math.ceil((cache.numRows - row0) / rowSpan),
+  )
   if (width <= 0 || height <= 0) {
     return undefined
   }
-  const canvas = paint(
-    rasterPixels({ spec: cache.spec, col0, row0, width, height }),
-    width,
-    height,
-  )
+  const canvas = paint(width, height, out => {
+    rasterPixels({
+      spec: cache.spec,
+      col0,
+      row0,
+      width,
+      height,
+      colSpan,
+      rowSpan,
+      out,
+    })
+  })
   if (!canvas) {
     return undefined
   }
@@ -263,6 +404,11 @@ function getTile(cache: RasterCache, tileRow: number, tileCol: number) {
  * one-pixel-per-cell tiles. The tiles do not depend on the zoom level, so a zoom
  * frame costs a handful of drawImage calls instead of a fillRect per visible
  * cell -- which ran to 885ms per block at the minimum column width.
+ *
+ * Below a device pixel per cell the tiles average cells together instead, and
+ * only along the axis that needs it. Leaving the downsampling to the browser's
+ * image smoothing blurred both axes at once: at fit-to-width, where only the
+ * columns are narrow, every row boundary turned into a gradient.
  */
 export function drawMsaRaster({
   ctx,
@@ -279,17 +425,18 @@ export function drawMsaRaster({
 }) {
   const { colWidth, rowHeight, blockSize, highResScaleFactor } = model
   const cache = getCache(model, theme)
+  const colSpan = cellsPerPixel(colWidth * highResScaleFactor)
+  const rowSpan = cellsPerPixel(rowHeight * highResScaleFactor)
 
   ctx.resetTransform()
   ctx.scale(highResScaleFactor, highResScaleFactor)
   ctx.translate(-offsetX, -offsetY)
-  // below a pixel per cell a tile carries more cells than the block has room
-  // for, so let the browser downsample it rather than letting whichever cell
-  // landed last win
-  ctx.imageSmoothingEnabled = colWidth < 1 || rowHeight < 1
+  ctx.imageSmoothingEnabled = false
 
-  const tileWidth = rasterTileSize * colWidth
-  const tileHeight = rasterTileSize * rowHeight
+  const pixelWidth = colWidth * colSpan
+  const pixelHeight = rowHeight * rowSpan
+  const tileWidth = rasterTileSize * pixelWidth
+  const tileHeight = rasterTileSize * pixelHeight
   const firstCol = Math.max(0, Math.floor(offsetX / tileWidth))
   const lastCol = Math.floor((offsetX + blockSize) / tileWidth)
   const firstRow = Math.max(0, Math.floor(offsetY / tileHeight))
@@ -297,7 +444,7 @@ export function drawMsaRaster({
 
   for (let tileRow = firstRow; tileRow <= lastRow; tileRow++) {
     for (let tileCol = firstCol; tileCol <= lastCol; tileCol++) {
-      const tile = getTile(cache, tileRow, tileCol)
+      const tile = getTile({ cache, tileRow, tileCol, colSpan, rowSpan })
       if (tile) {
         ctx.drawImage(
           tile,
@@ -307,8 +454,8 @@ export function drawMsaRaster({
           tile.height,
           tileCol * tileWidth,
           tileRow * tileHeight,
-          tile.width * colWidth,
-          tile.height * rowHeight,
+          tile.width * pixelWidth,
+          tile.height * pixelHeight,
         )
       }
     }
@@ -353,7 +500,9 @@ export function canvasHref(canvas: RasterCanvas | undefined) {
 }
 
 // A canvas much past this many pixels fails to allocate, and the browser's own
-// per-side limit is lower still, so a raster bigger than either samples down.
+// per-side limit is lower still, so a raster bigger than either averages down,
+// per axis: an alignment wide enough to hit the limit on columns alone keeps
+// every row.
 // The result is still drawn across the same rectangle -- it loses cell-exact
 // detail at a size where no figure could show it anyway.
 const maxImagePixels = 64e6
@@ -391,31 +540,40 @@ export function rasterImageHref({
     return undefined
   }
   const cache = getCache(model, theme)
-  let step = 1
-  while (
-    Math.ceil(numCols / step) * Math.ceil(numRows / step) > maxImagePixels ||
-    Math.ceil(numCols / step) > maxImageSide ||
-    Math.ceil(numRows / step) > maxImageSide
-  ) {
-    step *= 2
+  let colSpan = 1
+  let rowSpan = 1
+  while (Math.ceil(numCols / colSpan) > maxImageSide) {
+    colSpan *= 2
   }
-  const width = Math.ceil(numCols / step)
-  const height = Math.ceil(numRows / step)
+  while (Math.ceil(numRows / rowSpan) > maxImageSide) {
+    rowSpan *= 2
+  }
+  while (
+    Math.ceil(numCols / colSpan) * Math.ceil(numRows / rowSpan) >
+    maxImagePixels
+  ) {
+    if (numCols / colSpan >= numRows / rowSpan) {
+      colSpan *= 2
+    } else {
+      rowSpan *= 2
+    }
+  }
+  const width = Math.ceil(numCols / colSpan)
+  const height = Math.ceil(numRows / rowSpan)
 
   return canvasHref(
-    paint(
+    paint(width, height, out => {
       rasterPixels({
         spec: cache.spec,
         col0,
         row0,
         width,
         height,
-        colStep: step,
-        rowStep: step,
-      }),
-      width,
-      height,
-    ),
+        colSpan,
+        rowSpan,
+        out,
+      })
+    }),
   )
 }
 
@@ -447,7 +605,7 @@ export function msaThumbnail({
     const h = Math.ceil(numRows / rowStep)
     cache.thumbnail = {
       height,
-      canvas: paint(
+      canvas: paint(w, h, out => {
         rasterPixels({
           spec: cache.spec,
           col0: 0,
@@ -456,10 +614,9 @@ export function msaThumbnail({
           height: h,
           colStep,
           rowStep,
-        }),
-        w,
-        h,
-      ),
+          out,
+        })
+      }),
     }
   }
   return cache.thumbnail.canvas
