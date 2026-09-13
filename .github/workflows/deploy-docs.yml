@@ -8,6 +8,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# configure-pages reads the Pages config, which a repo with restricted default
+# token permissions would otherwise refuse
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 # allow one concurrent deploy; let an in-progress run finish
 concurrency:
   group: pages
