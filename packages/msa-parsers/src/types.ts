@@ -20,6 +20,15 @@ export interface NodeWithIdsAndLength {
   length: number
 }
 
+// a per-column text track a file carries inline, such as a Stockholm #=GC line
+export interface MSATrack {
+  id: string
+  name: string
+  data?: string
+  customColorScheme?: Record<string, string>
+  defaultOff?: boolean
+}
+
 export interface GFFRecord {
   seq_id: string
   source: string

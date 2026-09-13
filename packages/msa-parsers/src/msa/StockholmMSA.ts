@@ -3,7 +3,7 @@ import BaseMSA from './BaseMSA.ts'
 import parseNewick from './parseNewick.ts'
 import { parseAll } from './stockholmParser.ts'
 
-import type { NodeWithIds } from '../types.ts'
+import type { MSATrack, NodeWithIds } from '../types.ts'
 import type { StockholmData } from './stockholmParser.ts'
 
 export default class StockholmMSA extends BaseMSA {
@@ -97,40 +97,62 @@ export default class StockholmMSA extends BaseMSA {
     return this.MSA.gc.SS_cons
   }
 
-  get tracks(): {
-    id: string
-    name: string
-    data?: string
-    customColorScheme?: Record<string, string>
-  }[] {
+  /**
+   * One text track per `#=GC` line, and one per `#=GR` line that stays hidden
+   * until asked for: a Pfam seed carries a few per-row active-site lines, but
+   * an Rfam family carries a structure line for every row with a PDB entry.
+   */
+  get tracks(): MSATrack[] {
+    const { seq_cons, SS_cons, ...otherGc } = this.MSA.gc
     return [
       {
         id: 'seqConsensus',
         name: 'Sequence consensus',
-        data: this.seqConsensus,
+        data: seq_cons,
         customColorScheme: {},
       },
       {
         id: 'secondaryStruct',
         name: 'Secondary-structure',
-        data: this.secondaryStructureConsensus,
-        // WUSS notation pairs base-paired columns as open/close brackets of
-        // several nesting types (<>, (), [], {}); color all opens one way and
-        // closes the other so every helix (e.g. the tRNA acceptor stem, which
-        // is written with parens) is highlighted, not just the <> arms.
-        customColorScheme: {
-          '<': 'lightblue',
-          '(': 'lightblue',
-          '[': 'lightblue',
-          '{': 'lightblue',
-          '>': 'pink',
-          ')': 'pink',
-          ']': 'pink',
-          '}': 'pink',
-        },
+        data: SS_cons,
+        customColorScheme: wussColors,
       },
+      ...Object.entries(otherGc).map(([tag, data]) => ({
+        id: `gc-${tag}`,
+        name: tag,
+        data,
+        customColorScheme: structureColors(tag),
+      })),
+      ...Object.entries(this.MSA.gr).flatMap(([tag, byRow]) =>
+        Object.entries(byRow).map(([row, data]) => ({
+          id: `gr-${row}-${tag}`,
+          name: `${row} ${tag}`,
+          data,
+          customColorScheme: structureColors(tag),
+          defaultOff: true,
+        })),
+      ),
     ]
   }
+}
+
+// WUSS writes base-paired columns as open/close brackets of several nesting
+// types (<>, (), [], {}); coloring every open one way and every close the other
+// highlights each helix, including the tRNA acceptor stem written with parens
+const wussColors: Record<string, string> = {
+  '<': 'lightblue',
+  '(': 'lightblue',
+  '[': 'lightblue',
+  '{': 'lightblue',
+  '>': 'pink',
+  ')': 'pink',
+  ']': 'pink',
+  '}': 'pink',
+}
+
+// `SS`, and Rfam's per-structure `2GIS_A_SS`
+function structureColors(tag: string) {
+  return tag === 'SS' || tag.endsWith('_SS') ? wussColors : {}
 }
 
 export { sniff as stockholmSniff } from './stockholmParser.ts'

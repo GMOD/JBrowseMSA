@@ -16,6 +16,8 @@ export interface BasicTrackModel {
   associatedRowName?: string
   height: number
   kind: TrackKind
+  // hidden until the user asks for it, unless they have already chosen
+  defaultOff?: boolean
 }
 
 export interface TextTrackModel extends BasicTrackModel {

@@ -1,4 +1,4 @@
-import type { NodeWithIds } from '../types.ts'
+import type { MSATrack, NodeWithIds } from '../types.ts'
 
 export default abstract class BaseMSA {
   abstract getMSA(): unknown
@@ -63,12 +63,7 @@ export default abstract class BaseMSA {
     return undefined
   }
 
-  get tracks(): {
-    id: string
-    name: string
-    data?: string
-    customColorScheme?: Record<string, string>
-  }[] {
+  get tracks(): MSATrack[] {
     return []
   }
 }

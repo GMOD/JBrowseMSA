@@ -191,11 +191,15 @@ export const preservedOnReset = new Set([
 // until they touch that track, and then its value is whether the track is OFF.
 // Reading the default through this is what lets a track ship hidden without
 // writing an entry into every snapshot and shared URL.
+// A track the file itself supplies says whether it starts hidden, since only
+// the file knows how many of them there are: a Pfam seed carries a couple of
+// #=GR lines, an Rfam family one per row.
 function trackIsOff(
   turnedOffTracks: { get: (id: string) => boolean | undefined },
   id: string,
+  defaultOff?: boolean,
 ) {
-  return turnedOffTracks.get(id) ?? defaultOffTracks.has(id)
+  return turnedOffTracks.get(id) ?? (defaultOff || defaultOffTracks.has(id))
 }
 
 // A segment asserts a 1:1 run, so its two sides have to be the same length.
@@ -1713,7 +1717,11 @@ function stateModelFactory() {
       toggleTrack(id: string) {
         // the stored value is "is off", so the current shown state is exactly
         // what the flipped entry should hold
-        self.turnedOffTracks.set(id, !trackIsOff(self.turnedOffTracks, id))
+        const defaultOff = self.MSA?.tracks.find(t => t.id === id)?.defaultOff
+        self.turnedOffTracks.set(
+          id,
+          !trackIsOff(self.turnedOffTracks, id, defaultOff),
+        )
       },
       /**
        * #action
@@ -1981,7 +1989,7 @@ function stateModelFactory() {
        */
       get turnedOnTracks() {
         return this.tracks.filter(
-          f => !trackIsOff(self.turnedOffTracks, f.model.id),
+          f => !trackIsOff(self.turnedOffTracks, f.model.id, f.model.defaultOff),
         )
       },
 

@@ -292,6 +292,25 @@ c  A--GT
     expect(leaves(parseMSA(stockholm).getTree())).toEqual(['a', 'b', 'c'])
   })
 
+  test('exposes #=GC and #=GR lines as tracks, the per-row ones hidden', () => {
+    const msa = parseMSA(`# STOCKHOLM 1.0
+#=GC SS_cons <<..>>
+#=GC RF      xxxxxx
+#=GR a SS    <<..>>
+a  ACGTAC
+//
+`)
+    expect(
+      msa.tracks.map(t => [t.id, t.name, t.data, t.defaultOff ?? false]),
+    ).toEqual([
+      ['seqConsensus', 'Sequence consensus', undefined, false],
+      ['secondaryStruct', 'Secondary-structure', '<<..>>', false],
+      ['gc-RF', 'RF', 'xxxxxx', false],
+      ['gr-a-SS', 'a SS', '<<..>>', true],
+    ])
+    expect(msa.tracks.at(-1)?.customColorScheme).toHaveProperty('<')
+  })
+
   test('reads PDB cross-references with multi-character chain ids', () => {
     expect(parseMSA(stockholm).getStructures()).toEqual({
       a: [{ pdb: '1abc', chain: 'AB', startPos: 3, endPos: 40 }],

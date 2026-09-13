@@ -259,8 +259,12 @@ closes it and shows its details.
   the non-gap residues, then the whole stack is scaled by the column's occupancy
   — a column that is mostly gaps stays short even when the few residues left in
   it agree.
-- **Secondary structure** and other annotation rows carried inline by a
-  Stockholm file appear as text tracks, colored by the active scheme.
+- **Secondary structure** and the other annotation rows a Stockholm file carries
+  inline appear as text tracks, colored by the active scheme. Every `#=GC` line
+  gets one — `SS_cons`, `seq_cons`, Rfam's `RF` and motif lines. Every `#=GR`
+  line gets one too, named `<row> <tag>`, but starts hidden: a Pfam seed carries
+  a couple of per-row active-site lines and an Rfam family carries a structure
+  line per row with a PDB entry. Turn them on from Settings → Tracks.
 - **Base pairs** — the same `#=GC SS_cons` annotation drawn as arcs joining the
   columns that pair, on whenever a Stockholm file carries one. A pseudoknot
   takes its own color: WUSS writes those pairs as `A`/`a` rather than brackets
