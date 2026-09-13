@@ -62,6 +62,9 @@ export function parseAll(
   const options = opts ?? {}
   const db: StockholmData[] = []
   let stock: StockholmData | null = null
+  // one tree spans consecutive `#=GF NH` lines, so a `#=GF TN` naming the
+  // next tree, or any other #=GF line, ends it
+  let treeContinues = false
 
   const lines = text.split('\n')
   for (const line of lines) {
@@ -69,6 +72,7 @@ export function parseAll(
 
     if (formatStartRegex.test(line)) {
       stock = createStockholm()
+      treeContinues = false
     } else if (formatEndRegex.test(line)) {
       if (stock) {
         db.push(stock)
@@ -76,7 +80,14 @@ export function parseAll(
       stock = null
     } else if ((match = gfRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
-      ;(stock.gf[match[1]!] ??= []).push(match[2]!)
+      const tag = match[1]!
+      const values = (stock.gf[tag] ??= [])
+      if (tag === 'NH' && treeContinues && values.length > 0) {
+        values[values.length - 1] += match[2]!
+      } else {
+        values.push(match[2]!)
+      }
+      treeContinues = tag === 'NH'
     } else if ((match = gcRegex.exec(line))) {
       stock = ensureStock(stock, !!options.strict)
       stock.gc[match[1]!] = (stock.gc[match[1]!] ?? '') + match[2]!

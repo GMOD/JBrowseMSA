@@ -133,6 +133,19 @@ seq2  GHIKL
     })
   })
 
+  test('joins a tree split across #=GF NH lines, starting a new one at TN', () => {
+    const [aln] = parseAll(`# STOCKHOLM 1.0
+#=GF TN first
+#=GF NH (a:0.1,(b:0.2,
+#=GF NH c:0.3):0.4);
+#=GF TN second
+#=GF NH (a,b,c);
+a ACGT
+//`)
+    expect(aln?.gf.NH).toEqual(['(a:0.1,(b:0.2,c:0.3):0.4);', '(a,b,c);'])
+    expect(aln?.gf.TN).toEqual(['first', 'second'])
+  })
+
   test('a sequence named constructor and a #=GF constructor tag parse', () => {
     const [aln] = parseAll(
       '# STOCKHOLM 1.0\n#=GF constructor x\nconstructor ACGT\nb ACGT\n//\n',

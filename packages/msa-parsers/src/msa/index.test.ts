@@ -274,6 +274,32 @@ describe('getWidth', () => {
   })
 })
 
+describe('StockholmMSA', () => {
+  const stockholm = `# STOCKHOLM 1.0
+#=GF NH (a:0.1,(b:0.2,
+#=GF NH c:0.3):0.4);
+#=GS a DR PDB; 1ABC AB; 3-40;
+#=GS b DR PDB; 2xyz A; -2-20;
+a  AC-GT
+b  ACGGT
+c  A--GT
+//
+`
+
+  test('reads a tree split across #=GF NH lines', () => {
+    const leaves = (n: NewickNode): string[] =>
+      n.children?.length ? n.children.flatMap(leaves) : [`${n.name}`]
+    expect(leaves(parseMSA(stockholm).getTree())).toEqual(['a', 'b', 'c'])
+  })
+
+  test('reads PDB cross-references with multi-character chain ids', () => {
+    expect(parseMSA(stockholm).getStructures()).toEqual({
+      a: [{ pdb: '1abc', chain: 'AB', startPos: 3, endPos: 40 }],
+      b: [{ pdb: '2xyz', chain: 'A', startPos: -2, endPos: 20 }],
+    })
+  })
+})
+
 describe('FASTA deflines', () => {
   test('a > inside a defline does not start a record', () => {
     const msa = parseMSA('>sp|P1|A x->y\nACGT\n>BRCA1 c.1799T>A\nACGA\n')

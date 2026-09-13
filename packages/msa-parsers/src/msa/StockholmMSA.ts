@@ -62,7 +62,7 @@ export default class StockholmMSA extends BaseMSA {
   }
 
   getStructures() {
-    const pdbRegex = /PDB; +(\S+) +(\S); ([0-9]+)-([0-9]+)/
+    const pdbRegex = /PDB; +(\S+) +([^;\s]+); *(-?[0-9]+)-(-?[0-9]+)/
     const drEntries = this.MSA.gs.DR ?? {}
     const result: Record<
       string,
