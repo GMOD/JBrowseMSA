@@ -1989,7 +1989,8 @@ function stateModelFactory() {
        */
       get turnedOnTracks() {
         return this.tracks.filter(
-          f => !trackIsOff(self.turnedOffTracks, f.model.id, f.model.defaultOff),
+          f =>
+            !trackIsOff(self.turnedOffTracks, f.model.id, f.model.defaultOff),
         )
       },
 
