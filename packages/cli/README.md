@@ -69,18 +69,19 @@ GPCR examples in
 react-msaview-cli export-svg --msa <file> [options]
 ```
 
-| Option                   | Description                                  | Default         |
-| ------------------------ | -------------------------------------------- | --------------- |
-| `--msa <file>`           | MSA file (FASTA, Stockholm, Clustal, A3M)    | _required_      |
-| `--tree <file>`          | Newick tree file                             |                 |
-| `--gff <file>`           | Domain or exon GFF (from the commands below) |                 |
-| `-o, --output <file>`    | Output SVG file path                         | `alignment.svg` |
-| `--color-scheme <name>`  | Color scheme                                 | `maeditor`      |
-| `--col-width <px>`       | Width of one alignment column                | `12`            |
-| `--row-height <px>`      | Height of one alignment row                  | `16`            |
-| `--width <px>`           | Viewport width, which sets the tree area     | `1200`          |
-| `--height <px>`          | Viewport height                              | `600`           |
-| `--tree-area-width <px>` | Tree panel width in pixels                   |                 |
+| Option                   | Description                                    | Default         |
+| ------------------------ | ---------------------------------------------- | --------------- |
+| `--msa <file>`           | MSA file (FASTA, Stockholm, Clustal, A3M, EMF) | _required_      |
+| `--tree <file>`          | Newick tree file                               |                 |
+| `--gff <file>`           | Domain or exon GFF (from the commands below)   |                 |
+| `-o, --output <file>`    | Output SVG file path                           | `alignment.svg` |
+| `--color-scheme <name>`  | Color scheme                                   | `maeditor`      |
+| `--col-width <px>`       | Width of one alignment column                  | `12`            |
+| `--row-height <px>`      | Height of one alignment row                    | `16`            |
+| `--width <px>`           | Viewport width, which sets the tree area       | `1200`          |
+| `--height <px>`          | Viewport height                                | `600`           |
+| `--tree-area-width <px>` | Tree panel width in pixels                     |                 |
+| `--format <name>`        | Force the MSA format instead of sniffing it    |                 |
 
 ### Sizing the figure
 
@@ -132,9 +133,11 @@ conservation shows up as color rather than as something you have to read off.
 
 ### Output
 
-The SVG is pure vector: every cell is its own rectangle, so it scales without
-limit but grows with the alignment. A 10-row by 856-column figure is about
-700KB. Converting to PNG or PDF for a journal:
+The SVG scales without limit and grows with the alignment. The background is one
+embedded image where @napi-rs/canvas is installed, and a rectangle per cell
+where it is not — the letters, the tree and the annotations are vector either
+way. A 10-row by 856-column figure is about 700KB. Converting to PNG or PDF for
+a journal:
 
 ```bash
 rsvg-convert -w 2000 alignment.svg -o alignment.png
@@ -160,14 +163,23 @@ react-msaview-cli interpro <accessions.tsv> [options]
 ```
 
 The input is one accession per line, optionally followed by a tab- or
-space-separated row label; lines starting with `#` are ignored. The output GFF
-is byte-for-byte compatible with the `interproscan` command.
+space-separated row label; lines starting with `#` are ignored. The output goes
+through the same writer the `interproscan` command's does, plus a `#` header
+line naming the InterPro release the coordinates came from.
 
-| Option                | Description                       | Default       |
-| --------------------- | --------------------------------- | ------------- |
-| `-o, --output <file>` | Output GFF file path              | `domains.gff` |
-| `--database <name>`   | InterPro member db to read        | `pfam`        |
-| `--no-cache`          | Re-fetch, ignoring the disk cache | off           |
+| Option                | Description                                     | Default       |
+| --------------------- | ----------------------------------------------- | ------------- |
+| `-o, --output <file>` | Output GFF file path                            | `domains.gff` |
+| `--database <name>`   | InterPro member db to read                      | `pfam`        |
+| `--msa <file>`        | Alignment to check the rows of (see below)      |               |
+| `--format <name>`     | Force the `--msa` format instead of sniffing it |               |
+| `--no-cache`          | Re-fetch, ignoring the disk cache               | off           |
+
+Matches are computed on UniProt's canonical sequence, so a row that is an
+isoform or a fragment puts them on the wrong residues. Pass `--msa` and each
+row's ungapped length is checked against the protein's, with a warning naming
+any that disagree. An accession that resolves to no matches is called out too,
+rather than leaving its row silently undecorated.
 
 ```bash
 react-msaview-cli interpro accessions.tsv -o domains.gff
@@ -200,16 +212,19 @@ proteins, anything InterPro has not already scanned.
 react-msaview-cli interproscan <input-msa> [options]
 ```
 
-| Option                       | Description                                            | Default                                 |
-| ---------------------------- | ------------------------------------------------------ | --------------------------------------- |
-| `-o, --output <file>`        | Output GFF file path                                   | `domains.gff`                           |
-| `--local`                    | Use a local InterProScan installation instead of EBI   | `false`                                 |
-| `--docker`                   | Run InterProScan via the `interpro/interproscan` image | `false`                                 |
-| `--singularity`              | Run InterProScan via a Singularity/Apptainer container | `false`                                 |
-| `--singularity-image <img>`  | Singularity image to use                               | `docker://interpro/interproscan:latest` |
-| `--interproscan-path <path>` | Path to local interproscan.sh                          | `interproscan.sh`                       |
-| `--programs <list>`          | Comma-separated list of InterProScan programs          | `PfamA,CDD`                             |
-| `--email <email>`            | Email for EBI API (used only for EBI API runs)         | `user@example.com`                      |
+| Option                       | Description                                            | Default                                     |
+| ---------------------------- | ------------------------------------------------------ | ------------------------------------------- |
+| `-o, --output <file>`        | Output GFF file path                                   | `domains.gff`                               |
+| `--local`                    | Use a local InterProScan installation instead of EBI   | `false`                                     |
+| `--docker`                   | Run InterProScan via the `interpro/interproscan` image | `false`                                     |
+| `--singularity`              | Run InterProScan via a Singularity/Apptainer container | `false`                                     |
+| `--docker-image <img>`       | Docker image to run                                    | `interpro/interproscan:5.78-109.0`          |
+| `--singularity-image <img>`  | Singularity image to use                               | `docker://interpro/interproscan:5.78-109.0` |
+| `--interproscan-path <path>` | Path to local interproscan.sh                          | `interproscan.sh`                           |
+| `--interproscan-data <dir>`  | Member database `data/` to mount into the container    |                                             |
+| `--programs <list>`          | Comma-separated list of programs, in EBI API naming    | `PfamA,CDD`                                 |
+| `--format <name>`            | Force the MSA format instead of sniffing it            |                                             |
+| `--email <email>`            | Email for EBI API (used only for EBI API runs)         | `user@example.com`                          |
 
 By default (no backend flag) the CLI submits sequences to the EBI InterProScan
 REST API one at a time. `--local`, `--docker`, and `--singularity` instead run
@@ -237,15 +252,26 @@ react-msaview-cli interproscan alignment.fasta -o domains.gff \
 Docker mounts a temp directory into the `interpro/interproscan` container, runs
 the scan on the whole alignment at once, and reads the JSON back out.
 
+The published image carries InterProScan but **not** its member database data,
+which is a separate multi-gigabyte download. Fetch and unpack the matching
+release's `data/` directory (see the
+[InterProScan docs](https://interproscan-docs.readthedocs.io/)) and point
+`--interproscan-data` at it; it is mounted at `/opt/interproscan/data`, where
+both container backends look for it.
+
 The EBI API has usage limits: sequences go one at a time, sequentially, to avoid
 overwhelming the server. Past about 100 sequences, use a local or container
 backend.
 
 #### InterProScan programs
 
-`--programs` takes any combination of `PfamA` (in the default), `CDD` (in the
-default), `SMART`, `SUPERFAMILY`, `Gene3D`, `PANTHER`, `TIGRFAM`, `Hamap`,
-`ProSiteProfiles`, `ProSitePatterns`, `PRINTS`, `PIRSF`, and `MobiDBLite`.
+`--programs` takes the EBI API's names — `PfamA` and `CDD` (the default),
+`SMART`, `SuperFamily`, `Gene3d`, `PANTHER`, `TIGRFAM`, `HAMAP`,
+`PrositeProfiles`, `PrositePatterns`, `PRINTS`, `PIRSF`, `MobiDBLite`, `Coils`,
+`SFLD` — whichever backend runs. InterProScan 5 spells several of them
+differently (`Pfam`, not `PfamA`; `NCBIfam`, which absorbed TIGRFAM; `Hamap`;
+`SUPERFAMILY`; `Gene3D`), and the local, Docker and Singularity backends get the
+translated names.
 
 ```bash
 react-msaview-cli interproscan alignment.fasta -o domains.gff \
@@ -289,7 +315,10 @@ react-msaview-cli genestructure aln.fa --transcript NM_000505.4 --ref human
 
 ## Input formats
 
-The CLI detects the MSA format from the file:
+The CLI sniffs the format from the file's content, not from its name, and
+`--format` (`fasta`, `a3m`, `stockholm`, `clustal`, `emf`) settles it when the
+guess is wrong — FASTA and A3M share a leading `>`, so telling them apart is a
+heuristic:
 
 - **FASTA** (`.fasta`, `.fa`, `.faa`)
 - **Clustal** (`.clustal`, `.aln`)
@@ -299,10 +328,11 @@ The CLI detects the MSA format from the file:
 
 ## Annotation output format
 
-The annotation commands write standard GFF3, one `protein_match` line per hit.
-`start`/`end` are 1-based positions in the **ungapped** sequence (gaps are
-stripped before scanning), and the attributes carry the signature accession,
-name, and description:
+The annotation commands write standard GFF3, one line per feature —
+`protein_match` for a domain from `interpro`/`interproscan`, `exon` for a
+segment from `genestructure`. `start`/`end` are 1-based positions in the
+**ungapped** sequence, and the attributes carry the accession, name, and
+description:
 
 ```gff
 ##gff-version 3
@@ -318,9 +348,8 @@ $ react-msaview-cli interproscan gpcrs.fasta -o domains.gff --docker
 Reading MSA from gpcrs.fasta...
 Found 4 sequences
 Processing 4 non-empty sequences...
-Running InterProScan via Docker...
-  Running InterProScan via Docker on 4 sequences (image: interpro/interproscan:latest)...
-  docker run --rm -v /tmp/interproscan-Xyz12:/data interpro/interproscan:latest -i /data/input.fasta -o /data/output.json -f JSON -appl PfamA,CDD
+  Running InterProScan via Docker on 4 sequences...
+  docker run --rm -v /tmp/interproscan-Xyz12:/data -v /opt/interproscan-5.78-109.0/data:/opt/interproscan/data interpro/interproscan:5.78-109.0 -i /data/input.fasta -o /data/output.json -f JSON -appl Pfam,CDD
 Converting results to GFF...
 Writing output to domains.gff...
 Done!
@@ -349,7 +378,9 @@ msaview(msa = "alignment.fasta", gff = "domains.gff")
 
 ## Troubleshooting
 
-**EBI API timeout.** Use `--local`, `--docker`, or `--singularity` to run
+**EBI API timeout.** A single sequence has been measured at fifteen minutes in
+the queue; the CLI waits an hour per job and keeps the results of the sequences
+that did finish. Use `--local`, `--docker`, or `--singularity` to run
 InterProScan yourself. For large datasets those are much faster than the API
 regardless.
 
@@ -367,8 +398,9 @@ nucleotide; try other `--programs`; verify the input parses as one of the
 formats above.
 
 **The exported figure is enormous.** `export-svg` draws the whole alignment at
-`--col-width` per column. Drop `--col-width` until it fits — below ~8px the
-residue letters stop drawing, which is most of the file size.
+`--col-width` per column. Drop `--col-width` until it fits — below 5px (or below
+half the row height) the residue letters stop drawing, which is most of the file
+size.
 
 ## Uses
 

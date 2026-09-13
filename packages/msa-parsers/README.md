@@ -30,12 +30,15 @@ pnpm add msa-parsers
 
 ### Parsing MSA files
 
-The `parseMSA` function auto-detects the format:
+`parseMSA` sniffs the format from the content, not from the file name. Pass a
+format as the third argument to settle it yourself -- FASTA and A3M share a
+leading `>`, so auto-detection between them is a heuristic:
 
 ```typescript
 import { parseMSA } from 'msa-parsers'
 
 const msa = parseMSA(fileContents)
+const stockholm = parseMSA(fileContents, 0, 'stockholm')
 
 // Get sequence names
 const names = msa.getNames()
@@ -56,7 +59,8 @@ const tree = msa.getTree()
 import { FastaMSA, StockholmMSA, ClustalMSA } from 'msa-parsers'
 
 const fasta = new FastaMSA(fastaContents)
-const stockholm = new StockholmMSA(stockholmContents)
+// a Stockholm file can hold several alignments; the second argument picks one
+const stockholm = new StockholmMSA(stockholmContents, 0)
 const clustal = new ClustalMSA(clustalContents)
 ```
 
@@ -71,15 +75,26 @@ const treeWithIds = generateNodeIds(tree)
 
 ### GFF and InterProScan utilities
 
+Every source of overlay annotations converts to one flat list of `Annotation` (a
+row name, an accession, a name, a description and a 1-based inclusive interval),
+and that list is what the viewer draws.
+
 ```typescript
-import { parseGFF, gffToInterProResults, interProToGFF } from 'msa-parsers'
+import {
+  annotationsToGFF,
+  gffToAnnotations,
+  interProScanResponseToAnnotations,
+  parseGFF,
+} from 'msa-parsers'
 
-// Parse GFF file
-const records = parseGFF(gffContents)
+// GFF3 (including InterProScan's own output) to annotations
+const annotations = gffToAnnotations(parseGFF(gffContents))
 
-// Convert between GFF and InterProScan formats
-const interProResults = gffToInterProResults(records)
-const gffString = interProToGFF(interProResults, seqId)
+// an InterProScan JSON response to the same shape
+const fromScan = interProScanResponseToAnnotations(response)
+
+// and back out as GFF3, with optional `#` header lines
+const gffString = annotationsToGFF(annotations, ['written by my pipeline'])
 ```
 
 ## License
