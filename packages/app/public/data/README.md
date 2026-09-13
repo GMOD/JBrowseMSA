@@ -29,10 +29,10 @@ node scripts/screenshots/writeExampleData.mjs
 | `lysine.stock`       | `lysineMSA`        | Stockholm (tree+SS) | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded |
 | `f12-cetacean-cds.stock` | `f12CdsMSA`    | Stockholm (tree)    | Coagulation factor XII coding alignment across mammals (UCSC cactus 241-way), tree embedded; F12 disabled in cetaceans, intact in the manatee — see `scripts/f12-cetacean` |
 | `f12-cetacean-exons.gff` | `f12ExonsGFF`  | GFF3 (gene structure) | F12 14-exon structure projected onto every alignment row (`react-msaview-cli genestructure --gene F12 --ref human`); each exon `Name=exon-N` so it is one color across species |
-| `nlrp1.aln`          | `nlrp1MSA`         | FASTA (aligned)     | NLRP1 across 12 vertebrates, UniProt via `scripts/examples-gen/datasets/nlrp1.tsv`, ClustalW — the PYD domain is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish |
+| `nlrp1.aln`          | `nlrp1MSA`         | FASTA (aligned)     | NLRP1 across 12 vertebrates, UniProt via `scripts/examples-gen/datasets/nlrp1.tsv`, ClustalW, 1666 columns — the PYD domain is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish; the alignment `docs/tutorials/protein_family.md` builds |
 | `nlrp1.nh`           | `nlrp1Tree`        | Newick              | Neighbor-joining tree for `nlrp1.aln`                                                                      |
-| `nlrp1-domains.gff`  | `nlrp1DomainsGFF`  | InterProScan GFF3   | Pfam domains for the same twelve proteins                                                                  |
-| `nlrp1-unaligned.aln` | (the aligner's input) | FASTA (padded)  | The same twelve sequences unaligned, right-padded to one width so column N is residue N — the control panel in the column-lock figure (`docs/media/column-lock.png`) |
+| `nlrp1-domains.gff`  | `nlrp1DomainsGFF`  | GFF3 (InterPro)     | Pfam matches for the same twelve accessions from InterPro's precomputed set, release 110.0 (`react-msaview-cli interpro`) |
+| `nlrp1-unaligned.aln` | (the aligner's input) | FASTA (padded)  | The same twelve sequences unaligned, right-padded to one width so column N is residue N — the control panel in the column-lock figure (`docs/media/column-lock.png`) and the first figure of the tutorial |
 
 The files below back the JBrowse links on the
 [gallery](https://gmod.org/JBrowseMSA/gallery) page, built by

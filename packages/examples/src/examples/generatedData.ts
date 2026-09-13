@@ -628,7 +628,7 @@ MAAQDLVPGVQAQETEDSEEHRTAPPAQAEMAGGAELQWPWYLESREKKEPKEFQLRLPDAHSRHSPGETVAQVEAS--G
 export const nlrp1Tree = `(((((Mouse:0.11672,Rat:0.11797):0.05644,Hamster:0.14779):0.05664,Zebrafish:0.56540):0.02478,Hedgehog:0.22128):0.01141,(((Human:0.00884,Chimp:0.00680):0.04656,Rhesus:0.05678):0.12744,Dog:0.20390):0.00245,((Cow:0.16775,Pig:0.17915):0.02261,Horse:0.16576):0.00954);`
 
 export const nlrp1DomainsGFF = `##gff-version 3
-# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+# precomputed InterPro 110.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Human	InterProScan	protein_match	809	829	.	.	.	Name=IPR001611;signature_desc=Leucine%20Rich%20Repeat;description=Leucine%20Rich%20Repeat
 Human	InterProScan	protein_match	1380	1461	.	.	.	Name=IPR001315;signature_desc=Caspase%20recruitment%20domain;description=Caspase%20recruitment%20domain
 Human	InterProScan	protein_match	9	83	.	.	.	Name=IPR004020;signature_desc=PAAD%2FDAPIN%2FPyrin%20domain;description=PAAD%2FDAPIN%2FPyrin%20domain

@@ -1,5 +1,5 @@
 ##gff-version 3
-# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+# precomputed InterPro 110.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
 Human	InterProScan	protein_match	809	829	.	.	.	Name=IPR001611;signature_desc=Leucine%20Rich%20Repeat;description=Leucine%20Rich%20Repeat
 Human	InterProScan	protein_match	1380	1461	.	.	.	Name=IPR001315;signature_desc=Caspase%20recruitment%20domain;description=Caspase%20recruitment%20domain
 Human	InterProScan	protein_match	9	83	.	.	.	Name=IPR004020;signature_desc=PAAD%2FDAPIN%2FPyrin%20domain;description=PAAD%2FDAPIN%2FPyrin%20domain
