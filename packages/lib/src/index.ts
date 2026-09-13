@@ -1,10 +1,12 @@
 // PUBLIC API — consumed by external JBrowse 2 plugins. Changing or removing any
 // export here is a breaking change for downstream repos:
-//   - jbrowse-plugin-msaview   (wraps MSAModelF + MSAView into a JBrowse view)
-//   - jbrowse-plugin-protein3d (drives MSA<->structure hover/highlight sync)
+//   - jbrowse-plugin-msaview (wraps MSAModelF + MSAView into a JBrowse view)
+//   - jbrowse-plugin-tview   (the same, for a tree-first view)
 // Those plugins also reach into the MsaViewModel instance at runtime; the model
 // members they rely on (e.g. mouseCol/setMousePos, setHighlightedColumns,
 // seqPosToVisibleCol/visibleColToSeqPos) are flagged inline in model.ts.
+// jbrowse-plugin-protein3d no longer depends on this package at all: it reads
+// the msaview plugin's model through a structural type of its own.
 export { renderToSvg } from './renderToSvg.tsx'
 export type { ExportSvgOptions } from './renderToSvg.tsx'
 // renderToSvg outside a browser needs DOM bits jsdom omits; react-msaview-cli
@@ -13,6 +15,10 @@ export {
   CHAR_WIDTH_RATIO,
   installHeadlessRenderEnv,
 } from './headlessRenderEnv.ts'
+// the row count past which calculateNeighborJoiningTreeFromMSA refuses, so a
+// host can gate its own menu item on the same number instead of offering a
+// button that throws
+export { maxNeighborJoiningRows } from './constants.ts'
 export { default as MSAView } from './components/Loading.tsx'
 export { default as MSAViewer } from './components/MSAViewer.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'

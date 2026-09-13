@@ -139,10 +139,13 @@ const PSEUDOKNOT_ARC = '#e15759'
 
 // a data track over this size stays in the live model but leaves the snapshot,
 // the same rule DataModel applies to an inline document
+function columnTrackSizes(tracks?: readonly ColumnTrackSpec[]) {
+  return (tracks ?? []).map(t => JSON.stringify(t).length)
+}
+
 function smallColumnTracks(tracks?: ColumnTrackSpec[]) {
-  const kept = tracks?.filter(
-    t => JSON.stringify(t).length <= maxInlineSnapshotBytes,
-  )
+  const sizes = columnTrackSizes(tracks)
+  const kept = tracks?.filter((_t, i) => sizes[i]! <= maxInlineSnapshotBytes)
   return kept?.length ? { columnTracks: kept } : {}
 }
 
@@ -200,6 +203,10 @@ function trackIsOff(
 ) {
   return turnedOffTracks.get(id) ?? (defaultOff || defaultOffTracks.has(id))
 }
+
+// one array for every "nothing under the pointer", since a fresh [] is a fresh
+// value to every observer of it
+const noDomains: Annotation[] = []
 
 // seqPos -> column indexes, per row, hung off the parse the rows came from so
 // they are collected with it. A computed would rebuild every row's index on
@@ -597,6 +604,15 @@ function stateModelFactory() {
 
       /**
        * #volatile
+       * set by a host that restores the loaded documents by its own means --
+       * a jbrowse session that holds them, a page that refetches them on load.
+       * `unshareableData` then reports nothing, since what it warns about is a
+       * link that opens empty, and under such a host the link does not
+       */
+      hostCarriesData: false,
+
+      /**
+       * #volatile
        * overlay annotations drawn on the alignment, whatever their source.
        * Every source -- InterProScan, GFF, a user upload -- converts to this
        * flat list before it reaches the model, so nothing downstream of here
@@ -686,11 +702,20 @@ function stateModelFactory() {
 
       /**
        * #action
+       * declare that this host restores the loaded documents itself, which
+       * takes down the "Not in the link" warning. See `hostCarriesData`
+       */
+      setHostCarriesData(arg: boolean) {
+        self.hostCarriesData = arg
+      },
+
+      /**
+       * #action
        * set mouse position (row, column) in the MSA
        *
-       * CROSS-REPO CONTRACT: jbrowse-plugin-protein3d calls this (and reads the
-       * `mouseCol` volatile) to sync MSA<->3D-structure hover. Keep the name and
-       * signature stable; see that repo's ProteinToMsaHoverSync.tsx.
+       * PUBLIC API: a host drives this (and reads the `mouseCol` volatile) to
+       * sync the alignment's hover with a view of its own -- a genome view, a
+       * 3D structure. Keep the name and signature stable.
        */
       setMousePos(col?: number, row?: number) {
         self.mouseCol = col
@@ -701,9 +726,9 @@ function stateModelFactory() {
        * #action
        * set highlighted columns
        *
-       * CROSS-REPO CONTRACT: called by jbrowse-plugin-msaview
-       * (afterCreateAutoruns.ts) to highlight alignment columns. It has no
-       * in-repo caller, so do not flag it as dead code — it is public API.
+       * PUBLIC API: jbrowse-plugin-msaview calls this from its
+       * afterCreateAutoruns to highlight alignment columns, and MSAViewer
+       * passes its `highlightColumns` prop through it. Not dead code.
        */
       setHighlightedColumns(columns?: number[]) {
         self.highlightedColumns = columns
@@ -938,13 +963,6 @@ function stateModelFactory() {
     }))
     .views(self => ({
       /**
-       * #method
-       * unused here, but can be used by derived classes to add extra items
-       */
-      extraViewMenuItems() {
-        return []
-      },
-      /**
        * #getter
        */
       get colorScheme() {
@@ -991,9 +1009,21 @@ function stateModelFactory() {
        * stops rewriting the address bar while this is non-empty. A document
        * fetched from a URL never appears here whatever its size: the snapshot
        * keeps the filehandle and refetches through it.
+       *
+       * Nothing is unshareable when the host says it carries the data itself
+       * (`setHostCarriesData`) -- inside a session that reloads these documents
+       * from somewhere of its own, the warning is simply wrong.
        */
       get unshareableData(): UnshareableData[] {
+        if (self.hostCarriesData) {
+          return []
+        }
         const { data } = self
+        // a data track past the limit leaves the snapshot the same way an
+        // inline document does, and left unreported the same way too
+        const trackBytes = columnTrackSizes(self.columnTracks)
+          .filter(bytes => bytes > maxInlineSnapshotBytes)
+          .reduce((a, b) => a + b, 0)
         return (
           [
             ['alignment', data.msa, self.msaFilehandle],
@@ -1002,10 +1032,13 @@ function stateModelFactory() {
             ['row metadata', data.treeMetadata, self.treeMetadataFilehandle],
           ] as const
         )
-          .flatMap(([what, text, filehandle]) =>
+          .flatMap<UnshareableData>(([what, text, filehandle]) =>
             !filehandle && text && text.length > maxInlineSnapshotBytes
               ? [{ what, bytes: text.length }]
               : [],
+          )
+          .concat(
+            trackBytes ? [{ what: 'data tracks', bytes: trackBytes }] : [],
           )
           .sort((a, b) => b.bytes - a.bytes)
       },
@@ -1614,19 +1647,24 @@ function stateModelFactory() {
        * #getter
        */
       get adapterTrackModels(): BasicTrack[] {
-        const { rowHeight, MSA, hideGapsEffective, blanks } = self
-        const tracks = MSA?.tracks ?? []
-        return tracks
-          .filter(t => !!t.data)
-          .map(t => ({
-            model: {
-              ...t,
-              kind: 'text' as const,
-              data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
-              height: rowHeight,
-            },
-            ReactComponent: TrackBlocks,
-          }))
+        const { MSA, hideGapsEffective, blanks } = self
+        const tracks = (MSA?.tracks ?? []).filter(t => !!t.data)
+        if (tracks.length === 0) {
+          // reading rowHeight up front made every zoom frame rebuild the track
+          // list, and the canvases redraw on the track object they are handed
+          // changing
+          return []
+        }
+        const { rowHeight } = self
+        return tracks.map(t => ({
+          model: {
+            ...t,
+            kind: 'text' as const,
+            data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
+            height: rowHeight,
+          },
+          ReactComponent: TrackBlocks,
+        }))
       },
 
       /**
@@ -1700,18 +1738,21 @@ function stateModelFactory() {
        * #getter
        */
       get columnTrackModels(): BasicTrack[] {
-        const defaultHeight = {
-          bar: self.conservationTrackHeight,
-          arc: self.arcTrackHeight,
-          text: self.rowHeight,
-          logo: self.sequenceLogoTrackHeight,
-        }
+        // read per kind, not up front: a text track is the only kind sized by
+        // the row height, and reading it here rebuilt every data track on every
+        // vertical zoom step
+        const defaultHeight = (kind: ColumnTrackSpec['kind']) =>
+          kind === 'bar'
+            ? self.conservationTrackHeight
+            : kind === 'arc'
+              ? self.arcTrackHeight
+              : self.rowHeight
         return self.columnTracks.map(track => ({
           model: {
             id: track.id,
             name: track.name,
             kind: track.kind,
-            height: track.height ?? defaultHeight[track.kind],
+            height: track.height ?? defaultHeight(track.kind),
             // the spec has one `color`; bar and arc are separate track models
             // that read it under their own name
             barColor: track.color,
@@ -1726,53 +1767,71 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      get tracks(): BasicTrack[] {
-        const conservationTrack = {
-          id: 'conservation',
-          name: 'Conservation',
-          kind: 'bar' as const,
-          height: self.conservationTrackHeight,
-          barColor: 'gray',
-        }
-        const propertyConservationTrack = {
-          id: 'property-conservation',
-          name: 'Property conservation',
-          kind: 'bar' as const,
-          height: self.conservationTrackHeight,
-          barColor: '#6a51a3',
-        }
-        const sequenceLogoTrack = {
-          id: 'sequence-logo',
-          name: 'Sequence logo',
-          kind: 'logo' as const,
-          height: self.sequenceLogoTrackHeight,
-        }
+      /**
+       * #getter
+       * the consensus secondary structure as a track, when there is one. Its
+       * own getter so the object keeps its identity across a zoom: the canvas
+       * redraws on the track it is handed changing, and rebuilding these
+       * alongside everything else made every zoom frame redraw every track
+       */
+      get basePairTrackModels(): BasicTrack[] {
         const arcs = this.secondaryStructureArcs
-        const basePairTrack = arcs?.length
+        return arcs?.length
           ? [
               {
-                id: 'base-pairs',
-                name: 'Base pairs',
-                kind: 'arc' as const,
-                height: self.arcTrackHeight,
-                arcs,
+                model: {
+                  id: 'base-pairs',
+                  name: 'Base pairs',
+                  kind: 'arc' as const,
+                  height: self.arcTrackHeight,
+                  arcs,
+                },
+                ReactComponent: TrackBlocks,
               },
             ]
           : []
+      },
+
+      /**
+       * #getter
+       * the tracks computed from the alignment itself, which depend on their
+       * own heights and on the alphabet -- and on nothing zoom changes
+       */
+      get computedTrackModels(): BasicTrack[] {
+        return [
+          {
+            id: 'conservation',
+            name: 'Conservation',
+            kind: 'bar' as const,
+            height: self.conservationTrackHeight,
+            barColor: 'gray',
+          },
+          ...(self.sequenceType === 'amino'
+            ? [
+                {
+                  id: 'property-conservation',
+                  name: 'Property conservation',
+                  kind: 'bar' as const,
+                  height: self.conservationTrackHeight,
+                  barColor: '#6a51a3',
+                },
+              ]
+            : []),
+          {
+            id: 'sequence-logo',
+            name: 'Sequence logo',
+            kind: 'logo' as const,
+            height: self.sequenceLogoTrackHeight,
+          },
+        ].map(model => ({ model, ReactComponent: TrackBlocks }))
+      },
+
+      get tracks(): BasicTrack[] {
         return [
           ...this.adapterTrackModels,
-          ...basePairTrack.map(model => ({
-            model,
-            ReactComponent: TrackBlocks,
-          })),
+          ...this.basePairTrackModels,
           ...this.columnTrackModels,
-          ...[
-            conservationTrack,
-            ...(self.sequenceType === 'amino'
-              ? [propertyConservationTrack]
-              : []),
-            sequenceLogoTrack,
-          ].map(model => ({ model, ReactComponent: TrackBlocks })),
+          ...this.computedTrackModels,
         ]
       },
 
@@ -2639,14 +2698,19 @@ function stateModelFactory() {
        * domain annotations under the mouse, hit-tested against the exact visible
        * column span each box is drawn at (so it matches the overlay across gaps)
        */
-      get mouseOverDomains() {
+      get mouseOverDomains(): Annotation[] {
         const { mouseCol } = self
         const name = self.mouseOverRowName
-        return name !== undefined && mouseCol !== undefined
-          ? (this.domainBands.get(name) ?? [])
-              .filter(b => mouseCol >= b.startCol && mouseCol < b.endCol)
-              .map(b => b.annotation)
-          : []
+        if (name === undefined || mouseCol === undefined) {
+          return noDomains
+        }
+        const hits = (this.domainBands.get(name) ?? [])
+          .filter(b => mouseCol >= b.startCol && mouseCol < b.endCol)
+          .map(b => b.annotation)
+        // the shared empty array, so moving the mouse across an alignment with
+        // no annotations does not hand every canvas block a new value to
+        // re-render on
+        return hits.length > 0 ? hits : noDomains
       },
 
       /**

@@ -173,7 +173,7 @@ export interface RowResidue {
  * would go to load it differently.
  */
 export interface UnshareableData {
-  what: 'alignment' | 'tree' | 'annotations' | 'row metadata'
+  what: 'alignment' | 'tree' | 'annotations' | 'row metadata' | 'data tracks'
   bytes: number
 }
 

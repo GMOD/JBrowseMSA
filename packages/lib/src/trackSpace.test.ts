@@ -5,6 +5,7 @@
 // get. Two getters used to compute the alignment viewport and neither
 // subtracted them: the last rows scrolled under the bottom edge with no way to
 // reach them, and fit-to-height sized the rows to a space that was not there.
+import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
 import MSAModelF from './model.ts'
@@ -69,4 +70,34 @@ test('closing a track hands its space to the rows', () => {
   const track = model.turnedOnTracks[0]!
   model.toggleTrack(track.model.id)
   expect(model.msaAreaHeight).toBe(before + track.model.height)
+})
+
+test('a zoom does not rebuild the track objects', () => {
+  const model = makeModel()
+  // observed the way the track area observes them, so the computeds cache
+  const dispose = autorun(() => model.turnedOnTracks)
+  const before = model.turnedOnTracks.map(t => t.model)
+
+  model.setRowHeight(model.rowHeight * 1.5)
+  model.setColWidth(model.colWidth * 1.5)
+
+  // each canvas redraws when the track object it was handed changes, so a
+  // rebuilt list redrew every track on every zoom frame
+  const after = model.turnedOnTracks.map(t => t.model)
+  expect(after.length).toBe(before.length)
+  for (let i = 0; i < after.length; i++) {
+    expect(after[i]).toBe(before[i])
+  }
+  dispose()
+})
+
+test('hovering an alignment with no annotations changes nothing', () => {
+  const model = makeModel()
+  const dispose = autorun(() => model.mouseOverDomains)
+  const before = model.mouseOverDomains
+  model.setMousePos(3, 2)
+  expect(model.mouseOverDomains).toBe(before)
+  model.setMousePos(4, 2)
+  expect(model.mouseOverDomains).toBe(before)
+  dispose()
 })
