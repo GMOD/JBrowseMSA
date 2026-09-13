@@ -16,26 +16,21 @@
   ],
   "scripts": {
     "clean": "node --eval \"fs.rmSync('dist',{recursive:true,force:true})\" --input-type=module",
-    "build": "tsc",
-    "watch": "tsc --watch",
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
     "test": "vitest"
   },
   "devDependencies": {
+    "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
     "@types/jsdom": "^28.0.3",
-    "@types/node": "^26.1.2"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@jbrowse/core": "^4.3.0",
-    "@mui/material": "^9.2.0",
-    "jsdom": "^30.0.1",
-    "mobx": "^7.0.0",
+    "@types/node": "^26.1.2",
+    "esbuild": "^0.28.1",
     "mobx-react": "^10.0.0",
     "msa-parsers": "workspace:*",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
     "react-msaview": "workspace:*"
+  },
+  "dependencies": {
+    "jsdom": "^30.0.1"
   },
   "optionalDependencies": {
     "@napi-rs/canvas": "^1.0.8"

@@ -153,46 +153,31 @@ importers:
 
   packages/cli:
     dependencies:
-      '@emotion/react':
-        specifier: ^11.14.0
-        version: 11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0)
-      '@emotion/styled':
-        specifier: ^11.14.1
-        version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0)
-      '@jbrowse/core':
-        specifier: file:../../vendor-jbrowse/jbrowse-core.tgz
-        version: file:vendor-jbrowse/jbrowse-core.tgz(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
-      '@mui/material':
-        specifier: ^9.2.0
-        version: 9.2.0(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
-      mobx:
-        specifier: ^7.0.0
-        version: 7.0.0
-      mobx-react:
-        specifier: ^10.0.0
-        version: 10.0.0(mobx@7.0.0)(react@19.2.8)
-      msa-parsers:
-        specifier: workspace:*
-        version: link:../msa-parsers
-      react:
-        specifier: ^19.2.8
-        version: 19.2.8
-      react-dom:
-        specifier: ^19.2.8
-        version: 19.2.8(react@19.2.8)
-      react-msaview:
-        specifier: workspace:*
-        version: link:../lib
     devDependencies:
+      '@jbrowse/core':
+        specifier: file:../../vendor-jbrowse/jbrowse-core.tgz
+        version: file:vendor-jbrowse/jbrowse-core.tgz(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
       '@types/jsdom':
         specifier: ^28.0.3
         version: 28.0.3
       '@types/node':
         specifier: ^26.1.2
         version: 26.1.2
+      esbuild:
+        specifier: ^0.28.1
+        version: 0.28.1
+      mobx-react:
+        specifier: ^10.0.0
+        version: 10.0.0(mobx@7.0.0)(react@19.2.8)
+      msa-parsers:
+        specifier: workspace:*
+        version: link:../msa-parsers
+      react-msaview:
+        specifier: workspace:*
+        version: link:../lib
     optionalDependencies:
       '@napi-rs/canvas':
         specifier: ^1.0.8
@@ -253,7 +238,7 @@ importers:
         specifier: file:../../vendor-jbrowse/jbrowse-core.tgz
         version: file:vendor-jbrowse/jbrowse-core.tgz(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react@19.2.8)(supports-color@7.2.0))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@7.2.0)
       '@jbrowse/mobx-state-tree':
-        specifier: ^6.0.0
+        specifier: '>=5.0.0'
         version: 6.0.0(mobx@7.0.0)
       '@jbrowse/svgcanvas':
         specifier: workspace:*
@@ -271,7 +256,7 @@ importers:
         specifier: ^4.6.2
         version: 4.6.2
       mobx:
-        specifier: '>=7.0.0'
+        specifier: '>=6.0.0'
         version: 7.0.0
       mobx-react:
         specifier: '>=9.0.0'
