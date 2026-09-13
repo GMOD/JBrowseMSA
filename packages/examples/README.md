@@ -3,7 +3,8 @@
 A lightweight Vite site demonstrating different ways to use `react-msaview`.
 Each example renders a live viewer alongside its own source code.
 
-Deployed at https://jbrowse.org/storybook/msa/
+Deployed at https://gmod.org/JBrowseMSA/examples, which renders these same
+examples as part of the docs site.
 
 ### Protein alignment with a tree
 
@@ -136,8 +137,10 @@ Outputs a static site to `dist/` (relative `base`, so it works under the
 
 ## Deploy
 
-CI deploys automatically on pushes to `main` (see `.github/workflows/push.yml`).
-To deploy manually:
+A push to `main` deploys these examples as part of the docs site
+(gmod.org/JBrowseMSA/examples), which builds this package. The standalone copy
+at jbrowse.org/storybook/msa has no CI behind it — upload it by hand, with AWS
+credentials:
 
 ```sh
 pnpm --filter examples build

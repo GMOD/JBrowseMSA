@@ -23,9 +23,9 @@ Jump to what you need:
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Use the viewer** — load data, explore, export an image                | [User guide](docs/user_guide.md) · [live app](https://gmod.org/JBrowseMSA/demo/) · [docs site](https://gmod.org/JBrowseMSA)                            |
 | **Build the files to open** — sequences to alignment, tree, annotations | [Tutorials](docs/tutorials/) · [live](https://gmod.org/JBrowseMSA/tutorials)                                                                           |
-| **Embed the React component** in your own app                           | [Usage & embedding guide](USAGE.md) · [live code examples](https://jbrowse.org/storybook/msa) · [model API reference](packages/lib/apidocs/MsaView.md) |
+| **Embed the React component** in your own app                           | [Usage & embedding guide](USAGE.md) · [live code examples](https://gmod.org/JBrowseMSA/examples) · [model API reference](packages/lib/apidocs/MsaView.md) |
 | **Use it from R** (ape, Biostrings, ggtree, Shiny)                      | [R package README](packages/r-msaview/README.md)                                                                                                       |
-| **Annotate protein domains** from an alignment                          | [CLI README](packages/cli/) — batch InterProScan → GFF                                                                                                 |
+| **Annotate protein domains or exons**, or render a figure headlessly    | [CLI README](packages/cli/) — `interpro`, `interproscan`, `genestructure`, `export-svg`                                                                 |
 | **Contribute / hack on the code**                                       | [Development](#development)                                                                                                                            |
 
 ## Quick start (React)
@@ -50,7 +50,7 @@ lives in [USAGE.md](USAGE.md#zero-config-component-recommended), which pins the
 mobx, mobx-state-tree and MUI majors the viewer has to share with
 `@jbrowse/core`; that guide also covers the model-based API, the UMD bundle, and
 every prop. Runnable snippets are in the
-[live examples](https://jbrowse.org/storybook/msa).
+[live examples](https://gmod.org/JBrowseMSA/examples).
 
 ## Quick start (R)
 
@@ -78,8 +78,8 @@ labelled boxes on the alignment:
 | [packages/lib](packages/lib/)                 | Main react-msaview React component                         |
 | [website](website/)                           | Docs site (deployed at gmod.org/JBrowseMSA)                |
 | [packages/app](packages/app/)                 | Demo application (deployed at gmod.org/JBrowseMSA/demo)    |
-| [packages/examples](packages/examples/)       | Live usage examples (deployed at the Storybook link above) |
-| [packages/cli](packages/cli/)                 | Command-line tools (batch InterProScan)                    |
+| [packages/examples](packages/examples/)       | Live usage examples (deployed at gmod.org/JBrowseMSA/examples) |
+| [packages/cli](packages/cli/)                 | Domain/exon GFFs and headless SVG export                   |
 | [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                    |
 | [packages/r-msaview](packages/r-msaview/)     | R htmlwidget (ape/ggtree/Biostrings/treeio interop)        |
 | [packages/svgcanvas](packages/svgcanvas/)     | SVG canvas rendering (ESM fork of svgcanvas)               |
@@ -129,10 +129,11 @@ re-render when observed model properties change.
   [Deploy docs site](.github/workflows/deploy-docs.yml) workflow deploys it via
   GitHub's native Pages action on every push to `main`. Trigger it by hand with
   `workflow_dispatch` for an out-of-band deploy.
-- **Examples gallery → jbrowse.org/storybook/msa** is deployed separately and
-  **must be run locally** (it needs AWS credentials). Build it with
-  `pnpm --filter examples build`, then upload `packages/examples/dist/` by hand
-  — there is no `deploy:` script for this one yet.
+- **Examples gallery → gmod.org/JBrowseMSA/examples** rides along: the docs
+  site's examples page renders `packages/examples`, so that push deploys it too.
+  The older standalone copy at jbrowse.org/storybook/msa is a hand upload
+  (`pnpm --filter examples build`, then sync `packages/examples/dist/` with AWS
+  credentials) and lags behind whenever nobody runs it.
 
 ## Releasing
 

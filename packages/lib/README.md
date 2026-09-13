@@ -37,10 +37,10 @@ For full control use the `MSAModelF` / `MSAView` model-based API — see the
 ## Docs & links
 
 - [Usage & embedding guide](../../USAGE.md) — props, model API, UMD bundle, R
-- [Live examples](https://jbrowse.org/storybook/msa) — runnable snippets
+- [Live examples](https://gmod.org/JBrowseMSA/examples) — runnable snippets
 - [Model API reference](apidocs/MsaView.md)
 - [Main repository](https://github.com/GMOD/JBrowseMSA)
-- [CLI](../cli/) — batch InterProScan → GFF domain annotations
+- [CLI](../cli/) — domain and exon GFFs, plus headless SVG export
 - [msa-parsers](../msa-parsers/) — standalone parsing library
 - [ProteinBrowser](https://github.com/GMOD/proteinbrowser) — full protein
   analysis suite built on this viewer

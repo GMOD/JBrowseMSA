@@ -7,7 +7,8 @@ whole alignment in the URL — the user-guide figures link to live views this
 way, keeping those links small (the lysine Stockholm alone is ~26 KB inline).
 
 They are **generated**, not hand-maintained — each is written verbatim from a
-constant in `packages/examples/src/examples/exampleData.ts`, which carries the
+constant in `packages/examples/src/examples/exampleData.ts` (hand-authored) or
+`generatedData.ts` (built by `scripts/examples-gen`), which carry the
 authoritative provenance comment for every dataset. Regenerate after changing a
 source constant:
 
@@ -25,8 +26,13 @@ node scripts/screenshots/writeExampleData.mjs
 | `lysine.stock`       | `lysineMSA`        | Stockholm (tree+SS) | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded |
 | `f12-cetacean-cds.stock` | `f12CdsMSA`    | Stockholm (tree)    | Coagulation factor XII coding alignment across mammals (UCSC cactus 241-way), tree embedded; F12 disabled in cetaceans, intact in the manatee — see `scripts/f12-cetacean` |
 | `f12-cetacean-exons.gff` | `f12ExonsGFF`  | GFF3 (gene structure) | F12 14-exon structure projected onto every alignment row (`react-msaview-cli genestructure --gene F12 --ref human`); each exon `Name=exon-N` so it is one color across species |
+| `nlrp1.aln`          | `nlrp1MSA`         | FASTA (aligned)     | NLRP1 across 12 vertebrates, UniProt via `scripts/examples-gen/datasets/nlrp1.tsv`, ClustalW — the PYD domain is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish |
+| `nlrp1.nh`           | `nlrp1Tree`        | Newick              | Neighbor-joining tree for `nlrp1.aln`                                                                      |
+| `nlrp1-domains.gff`  | `nlrp1DomainsGFF`  | InterProScan GFF3   | Pfam domains for the same twelve proteins                                                                  |
+| `nlrp1-unaligned.aln` | (the aligner's input) | FASTA (padded)  | The same twelve sequences unaligned, right-padded to one width so column N is residue N — the control panel in the column-lock figure (`docs/media/column-lock.png`) |
 
-The files below back the **Genome browser** docs page (JBrowse integration), built by
+The files below back the JBrowse links on the
+[gallery](https://gmod.org/JBrowseMSA/gallery) page, built by
 `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
 (see their READMEs), not by `writeExampleData.mjs`:
 
