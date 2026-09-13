@@ -20,6 +20,9 @@ node scripts/screenshots/writeExampleData.mjs
 
 | File                 | Source constant    | Format              | Provenance                                                                                                 |
 | -------------------- | ------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `il2ra.aln`          | `proteinMSA`       | CLUSTAL             | IL2RA/IL2RB/IL2RG across mammals, the small protein alignment the Getting started examples and the homepage viewer show |
+| `il2ra.nh`           | `proteinTree`      | Newick              | Tree for `il2ra.aln`                                                                                       |
+| `nucleotide.fa`      | `nucleotideMSA`    | FASTA               | Four toy DNA sequences, for the nucleotide color schemes                                                   |
 | `kinase.aln`         | `kinaseMSA`        | CLUSTAL             | Src-family kinases (SRC/YES/FYN/FGR/HCK/LYN/LCK/BLK, human + SRC mouse/chick), full-length UniProt sequences aligned with Clustal Omega |
 | `kinase.nh`          | `kinaseTree`       | Newick              | Clustal Omega guide tree for the alignment above                                                           |
 | `kinase-domains.gff` | `kinaseDomainsGFF` | InterProScan GFF3   | `react-msaview-cli interproscan kinase.aln` against the EBI InterProScan API (PfamA, CDD)                  |

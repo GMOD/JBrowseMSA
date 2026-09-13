@@ -44,6 +44,11 @@ function rightPadToBlock(fasta) {
 // format is detected from content (CLUSTAL/# STOCKHOLM/>/##gff headers), so the
 // extensions here are only for human readability
 const files = {
+  // the Getting started examples load these over HTTP rather than importing a
+  // constant, so their source runs unchanged when someone copies it out
+  'il2ra.aln': readConst('proteinMSA'),
+  'il2ra.nh': readConst('proteinTree'),
+  'nucleotide.fa': readConst('nucleotideMSA'),
   'kinase.aln': readConst('kinaseMSA'),
   'kinase.nh': readConst('kinaseTree'),
   'kinase-domains.gff': readConst('kinaseDomainsGFF'),

@@ -21,8 +21,8 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
       <div style={{ width: '50%' }}>
         {error ? <ErrorMessage error={error} /> : null}
         <Typography>
-          Open an MSA file (stockholm or clustal format) and/or a tree file
-          (newick format).
+          Open an MSA file (FASTA, Stockholm, Clustal, A3M or EMF format) and/or
+          a tree file (Newick format).
         </Typography>
         <Typography color="error">
           Note: you can open up just an MSA or just a tree, both are not

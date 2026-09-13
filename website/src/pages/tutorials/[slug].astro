@@ -13,10 +13,14 @@ export function getStaticPaths() {
       eager: true,
     },
   )
-  return Object.entries(pages).map(([file, page]) => ({
-    params: { slug: file.split('/').pop()!.replace(/\.md$/, '') },
-    props: { page },
-  }))
+  // tutorials.ts is the list; the glob only supplies the rendered markdown. The
+  // directory also holds CLAUDE.md, which is authoring instructions, not a page.
+  return Object.entries(pages)
+    .map(([file, page]) => ({
+      params: { slug: file.split('/').pop()!.replace(/\.md$/, '') },
+      props: { page },
+    }))
+    .filter(({ params }) => tutorialBySlug.has(params.slug))
 }
 
 const { page } = Astro.props as { page: MarkdownPage }

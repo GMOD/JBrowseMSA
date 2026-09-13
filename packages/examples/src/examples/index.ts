@@ -102,7 +102,7 @@ export const examples: Example[] = [
     name: 'Zero-config viewer',
     category: 'Getting started',
     description:
-      'The simplest usage: pass alignment + tree text as strings to MSAViewer.',
+      'The simplest usage: point MSAViewer at an alignment and a tree. Copy it and it runs.',
     Component: ZeroConfig,
     source: ZeroConfigSrc,
   },

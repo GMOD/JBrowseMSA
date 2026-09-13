@@ -3,46 +3,89 @@ import Viewer from '../components/Viewer.tsx'
 import Base from '../layouts/Base.astro'
 
 const base = import.meta.env.BASE_URL
-const cards = [
+const formats = [
   {
-    title: 'User guide',
-    body: 'Features, file formats, and a tour of the app.',
-    href: `${base}/guide`,
+    what: 'Alignment',
+    formats:
+      'FASTA (gaps already inserted), Stockholm (.stock, may carry its own tree and secondary structure), Clustal (.aln), A3M, EMF',
   },
   {
-    title: 'Tutorials',
-    body: 'Prepare the data outside the viewer: sequences to alignment to tree to annotations.',
-    href: `${base}/tutorials`,
+    what: 'Tree',
+    formats: 'Newick (.nh), or the tree embedded in a Stockholm or EMF file',
   },
   {
-    title: 'Embedding',
-    body: 'Add the viewer to your app: props, model API, UMD bundle.',
-    href: `${base}/embedding`,
+    what: 'Annotations',
+    formats:
+      'GFF3 — InterProScan domains, exon and gene models, anything with per-row coordinates — or InterProScan JSON',
+  },
+]
+const steps = [
+  {
+    n: '1',
+    title: 'Open your files',
+    body: 'Alignment, tree and annotations, from your computer or a URL. Nothing is uploaded: the parsing and drawing happen in your browser.',
+    cards: [
+      {
+        title: 'Standalone app',
+        body: 'Open your own files and explore them.',
+        href: `${base}/demo/`,
+        cta: true,
+      },
+      {
+        title: 'User guide',
+        body: 'A tour of the viewer: navigation, color schemes, tracks, exporting, and sharing a link to a view.',
+        href: `${base}/guide`,
+      },
+      {
+        title: 'Gallery',
+        body: 'Alignments that carry a finding, each one a link that opens it.',
+        href: `${base}/gallery`,
+      },
+    ],
   },
   {
-    title: 'Gallery',
-    body: 'Alignments that tell a biological story, plus connected JBrowse sessions.',
-    href: `${base}/gallery`,
+    n: '2',
+    title: 'Build the files',
+    body: 'The work before the viewer — sequences to alignment to tree to annotations — happens outside it, in a handful of commands.',
+    cards: [
+      {
+        title: 'Tutorials',
+        body: 'Start-to-finish walkthroughs ending on a link that opens the result.',
+        href: `${base}/tutorials`,
+      },
+      {
+        title: 'CLI',
+        body: 'Domain and exon GFFs from InterPro, InterProScan or RefSeq, and headless SVG export.',
+        href: `${base}/cli`,
+      },
+    ],
   },
   {
-    title: 'Examples',
-    body: 'A live gallery of usage patterns with source.',
-    href: `${base}/examples`,
-  },
-  {
-    title: 'Standalone app',
-    body: 'Open your own alignment, tree, and domain annotations.',
-    href: `${base}/demo/`,
-  },
-  {
-    title: 'R package (msaviewr)',
-    body: 'ape, Biostrings, ggtree, treeio, and Shiny interop.',
-    href: `${base}/r-package`,
-  },
-  {
-    title: 'CLI',
-    body: 'Batch InterProScan → GFF domain annotations.',
-    href: `${base}/cli`,
+    n: '3',
+    title: 'Put it in your own page',
+    body: 'One React component, or a script tag, or an R call. The same viewer the app runs.',
+    cards: [
+      {
+        title: 'Embedding',
+        body: 'Props, the model API, and the UMD bundle.',
+        href: `${base}/embedding`,
+      },
+      {
+        title: 'Examples',
+        body: 'A live gallery of usage patterns, with the source of each.',
+        href: `${base}/examples`,
+      },
+      {
+        title: 'Layers',
+        body: 'Highlights, data tracks and structure mappings, carried in the snapshot and drawn without computing anything.',
+        href: `${base}/layers`,
+      },
+      {
+        title: 'R package (msaviewr)',
+        body: 'ape, Biostrings, ggtree, treeio, and Shiny interop.',
+        href: `${base}/r-package`,
+      },
+    ],
   },
 ]
 ---
@@ -66,17 +109,41 @@ const cards = [
     <Viewer client:only="react" base={base} />
   </section>
 
-  <section>
-    <h2>Documentation</h2>
-    <div class="cards">
-      {
-        cards.map(card => (
-          <a class="card" href={card.href}>
-            <h3>{card.title}</h3>
-            <p>{card.body}</p>
-          </a>
-        ))
-      }
-    </div>
-  </section>
+  {
+    steps.map(step => (
+      <section class="step">
+        <h2>
+          <span class="step-n">{step.n}</span>
+          {step.title}
+        </h2>
+        <p class="step-body">{step.body}</p>
+        <div class="cards">
+          {step.cards.map(card => (
+            <a class:list={['card', { primary: card.cta }]} href={card.href}>
+              <h3>{card.title}</h3>
+              <p>{card.body}</p>
+            </a>
+          ))}
+        </div>
+        {step.n === '1' && (
+          <table class="formats">
+            <thead>
+              <tr>
+                <th>Input</th>
+                <th>Formats it reads</th>
+              </tr>
+            </thead>
+            <tbody>
+              {formats.map(row => (
+                <tr>
+                  <th scope="row">{row.what}</th>
+                  <td>{row.formats}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+    ))
+  }
 </Base>

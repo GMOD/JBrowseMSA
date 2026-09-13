@@ -1,15 +1,16 @@
 import { MSAViewer } from 'react-msaview'
 
-import { proteinMSA, proteinTree } from './exampleData'
+const BASE = 'https://gmod.org/JBrowseMSA/demo/data'
 
-// The MSAViewer component is the simplest entry point: pass alignment and tree
-// text as strings and it creates the model, measures width, and applies the
-// JBrowse theme for you.
+// The MSAViewer component is the simplest entry point: point it at an alignment
+// and a tree and it creates the model, measures width, and applies the JBrowse
+// theme for you. Both files are hosted, so this example runs as-is wherever it
+// is pasted; `msa` and `tree` take the text directly when you already have it.
 export default function ZeroConfig() {
   return (
     <MSAViewer
-      msa={proteinMSA}
-      tree={proteinTree}
+      msaFilehandle={{ uri: `${BASE}/il2ra.aln`, locationType: 'UriLocation' }}
+      treeFilehandle={{ uri: `${BASE}/il2ra.nh`, locationType: 'UriLocation' }}
       colorScheme="maeditor"
       height={550}
     />
