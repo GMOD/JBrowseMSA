@@ -5,5 +5,5 @@
     "jsx": "react-jsx",
     "allowJs": true
   },
-  "include": ["eslint.config.mjs", "scripts", "*.config.ts"]
+  "include": ["scripts", "*.config.ts"]
 }

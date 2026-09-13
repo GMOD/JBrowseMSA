@@ -18,8 +18,8 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "tsc",
-    "watch": "tsc --watch",
+    "build": "tsc --project tsconfig.build.json",
+    "watch": "tsc --project tsconfig.build.json --watch",
     "test": "vitest"
   },
   "dependencies": {

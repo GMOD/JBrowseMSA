@@ -20,10 +20,12 @@
   "files": [
     "dist",
     "bundle",
-    "src"
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=18"
   },
   "scripts": {
     "clean": "rimraf dist bundle",
@@ -38,10 +40,10 @@
   },
   "peerDependencies": {
     "@jbrowse/core": ">=2.0.0",
-    "@jbrowse/mobx-state-tree": "^6.0.0",
+    "@jbrowse/mobx-state-tree": ">=5.0.0",
     "@mui/icons-material": ">=5.0.0",
     "@mui/material": ">=5.0.0",
-    "mobx": ">=7.0.0",
+    "mobx": ">=6.0.0",
     "mobx-react": ">=9.0.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
