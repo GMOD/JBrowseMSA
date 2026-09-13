@@ -6,7 +6,10 @@
 // The app reads a `?data=` URL param as a JSON model snapshot, so we can
 // deep-link a fully loaded alignment instead of driving the import form.
 
+import fs from 'node:fs'
+
 import { hasConst, readConst, readJson } from './exampleConsts.mjs'
+import { fileSnap } from './snap.mjs'
 
 // The phylogeny examples (MyD88/globin/ACE2/opsins/…) are real datasets built
 // reproducibly into the examples package by scripts/examples-gen. The opsin
@@ -37,17 +40,6 @@ function data(extra) {
       ...extra,
     },
   }
-  return `?data=${encodeURIComponent(JSON.stringify(snap))}`
-}
-
-// Like data(), but with no inline-alignment default: for specs that load their
-// (large) alignment from a hosted file via *Filehandle props pointing at
-// data/<file> (written by scripts/screenshots/writeExampleData.mjs, served at
-// the app root). Keeps the deep-link a few hundred bytes instead of tens of KB.
-// The uri is relative, so it resolves against the page — localhost during
-// capture, gmod.org/JBrowseMSA/demo/ once deployed.
-function fileSnap(msaview) {
-  const snap = { msaview: { type: 'MsaView', ...msaview } }
   return `?data=${encodeURIComponent(JSON.stringify(snap))}`
 }
 
@@ -697,4 +689,21 @@ export const specs = [
     settle: 2000,
     clip: 'viewer',
   },
+  ...(await tutorialSpecs()),
 ]
+
+// One module per tutorial under tutorial-specs/, each exporting `specs`, so
+// tutorials written in parallel don't all append to this array
+async function tutorialSpecs() {
+  const dir = new URL('tutorial-specs/', import.meta.url)
+  const files = fs.existsSync(dir)
+    ? fs
+        .readdirSync(dir)
+        .filter(f => f.endsWith('.mjs'))
+        .sort()
+    : []
+  const modules = await Promise.all(
+    files.map(f => import(new URL(f, dir).href)),
+  )
+  return modules.flatMap(m => m.specs)
+}

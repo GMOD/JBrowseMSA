@@ -52,7 +52,9 @@ node scripts/screenshots/generate.mjs --check                        # flakiness
 
 ### Adding an app spec
 
-Edit [`specs.mjs`](specs.mjs):
+Edit [`specs.mjs`](specs.mjs), or for a tutorial's figures add a module under
+`tutorial-specs/` that exports `specs` (see `docs/tutorials/CLAUDE.md`). Pass
+`--port=N` when two captures run at once.
 
 ```js
 {

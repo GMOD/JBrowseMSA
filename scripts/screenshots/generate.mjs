@@ -42,7 +42,6 @@ import {
 import { specs } from './specs.mjs'
 
 const appDist = path.join(repoRoot, 'packages', 'app', 'dist')
-const PORT = 5599
 // Below this fraction of differing pixels a re-render keeps the committed PNG.
 // Headless-Chrome sub-pixel glyph jitter drifts text-heavy shots ~0.2% run to
 // run; 0.5% absorbs that while still letting a real edit through.
@@ -55,6 +54,7 @@ const exact = flag('exact')
 const filterTokens = listOpt('filter')
 const diffThreshold = numOpt('diff-threshold', DEFAULT_DIFF_THRESHOLD)
 const concurrency = numOpt('concurrency', headed ? 1 : 4)
+const PORT = numOpt('port', 5599)
 
 async function runAction(page, action) {
   if (action.click) {
