@@ -388,7 +388,7 @@ export const specs = [
       colWidth: 0.7,
       colorSchemeName: 'clustalx_protein_dynamic',
       highlights: [
-        { start: PYD_START + 1, end: PYD_END + 1, label: 'PYD (Pfam PF02758)' },
+        { start: PYD_START + 1, end: PYD_END + 1, label: 'PYD, Pfam PF02758' },
       ],
       ...files,
     }),

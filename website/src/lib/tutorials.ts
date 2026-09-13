@@ -13,7 +13,7 @@ export const tutorials: Tutorial[] = [
     slug: 'protein_family',
     title: 'A protein family from a list of accessions',
     blurb:
-      'Twelve UniProt accessions to an alignment, a tree and Pfam domains, in four commands outside the viewer. Ends on a link that shows which lineages lost a domain.',
+      'Twelve UniProt accessions to an alignment, a tree and Pfam domains, in four commands outside the viewer. Every step has a figure, and the last one is a link that shows which lineages lost a domain.',
   },
 ]
 
