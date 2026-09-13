@@ -13,7 +13,7 @@
  * `pnpm sync:r-bundle` (after a build) to refresh in between.
  *
  * The bundle is stamped with a version banner so CI can check the committed
- * artifact itself rather than a sidecar file -- see the `r-bundle` job.
+ * artifact itself rather than a sidecar file -- see the `r-package` job.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -25,6 +25,7 @@ const src = path.join(rootDir, 'packages/lib/bundle/index.js')
 const rPkg = path.join(rootDir, 'packages/r-msaview')
 const dest = path.join(rPkg, 'inst/htmlwidgets/lib/react-msaview.umd.js')
 const yamlPath = path.join(rPkg, 'inst/htmlwidgets/msaview.yaml')
+const descriptionPath = path.join(rPkg, 'DESCRIPTION')
 
 export const BANNER_PREFIX = '/* react-msaview '
 
@@ -54,6 +55,12 @@ export function readYamlVersion() {
   return /^\s*version:\s*(\S+)/m.exec(fs.readFileSync(yamlPath, 'utf8'))?.[1]
 }
 
+export function readDescriptionVersion() {
+  return /^Version:\s*(\S+)/m.exec(
+    fs.readFileSync(descriptionPath, 'utf8'),
+  )?.[1]
+}
+
 function sync() {
   if (!fs.existsSync(src)) {
     console.error(
@@ -75,6 +82,15 @@ function sync() {
       .replace(/^(\s*version:\s*)\S+/m, `$1${version}`),
   )
 
+  // msaviewr is the same release as everything else in the workspace: it ships
+  // this bundle and nothing but this bundle
+  fs.writeFileSync(
+    descriptionPath,
+    fs
+      .readFileSync(descriptionPath, 'utf8')
+      .replace(/^(Version:\s*)\S+/m, `$1${version}`),
+  )
+
   const kb = Math.round(fs.statSync(dest).size / 1024)
   console.log(`Synced react-msaview.umd.js to ${version} (${kb} KB)`)
 }
@@ -89,6 +105,7 @@ function check() {
   const problems = [
     ['bundle banner', readBundleVersion()],
     ['msaview.yaml version', readYamlVersion()],
+    ['DESCRIPTION version', readDescriptionVersion()],
   ].filter(([, found]) => found !== version)
 
   if (problems.length > 0) {

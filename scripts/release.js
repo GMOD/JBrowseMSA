@@ -109,6 +109,7 @@ const changed = [
   'packages/lib/src/version.ts',
   'packages/r-msaview/inst/htmlwidgets/lib/react-msaview.umd.js',
   'packages/r-msaview/inst/htmlwidgets/msaview.yaml',
+  'packages/r-msaview/DESCRIPTION',
 ].join(' ')
 run(`git add ${changed}`)
 run(`git commit -m "${tag}"`)
