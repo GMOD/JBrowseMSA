@@ -11,11 +11,12 @@ vertebrates from human to zebrafish, and ends on a link that opens the result.
 ## Prerequisites
 
 - `curl`, `jq` and `awk`
-- MAFFT and FastTree. `apt install mafft fasttree` on Debian/Ubuntu,
+- MAFFT and FastTree. `apt install mafft fasttree` on Debian or Ubuntu,
   `brew install mafft fasttree` on macOS, or run the biocontainers with docker:
   `quay.io/biocontainers/mafft:7.525--h031d066_1` and
   `quay.io/biocontainers/fasttree:2.1.11--h031d066_4`. The build script takes
   either.
+- nothing to read along: every figure below links to the live view it captured
 
 Nothing runs inside the viewer. The alignment, the tree and the three tracks are
 files this page builds first, and the viewer draws what it is given.
@@ -26,21 +27,26 @@ Sequences from NCBI RefSeq, the clinical classifications from ClinVar, the
 predictions from AlphaMissense as the AlphaFold entry publishes them, and one
 saturation screen from MaveDB.
 
-- The 660 vertebrate orthologs NCBI lists for TP53, GeneID 7157, which is where
+- the 660 vertebrate orthologs NCBI lists for TP53, GeneID 7157, which is where
   the accession list below came from:
   https://api.ncbi.nlm.nih.gov/datasets/v2alpha/gene/id/7157/orthologs?taxon_filter=vertebrates
-- One protein per accession, all fifteen in one request:
+- one protein per accession, all fifteen in one request:
   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=NP_000537.3&rettype=fasta&retmode=text
 - ClinVar's TP53 missense records, searched and then summarized:
   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&retmax=5000&term=TP53%5Bgene%5D+AND+%22missense+variant%22%5Bmolecular+consequence%5D
-- The AlphaFold entry for P04637, which names its AlphaMissense file:
+- the AlphaFold entry for P04637, which names its AlphaMissense file:
   https://alphafold.ebi.ac.uk/api/prediction/P04637
-- That file, 7,467 substitutions with a pathogenicity score each:
+- that file, 7,467 substitutions with a pathogenicity score each:
   https://alphafold.ebi.ac.uk/files/AF-P04637-F1-aa-substitutions.csv
-- The Giacomelli 2018 screen, scores for 8,274 variants, CC0:
+- the Giacomelli 2018 screen, scores for 8,274 variants, CC0:
   https://api.mavedb.org/api/v1/score-sets/urn:mavedb:00000068-a-1/scores
-- The domain boundaries the bands draw, as UniProt annotates them:
+- the domain boundaries the bands draw, as UniProt annotates them:
   https://rest.uniprot.org/uniprotkb/P04637.json?fields=ft_domain,ft_region
+- the alignment the commands below write, hosted so the figures can link to it:
+  https://gmod.org/JBrowseMSA/demo/data/p53/p53-vertebrates.afa
+- its tree: https://gmod.org/JBrowseMSA/demo/data/p53/p53-vertebrates.nh
+- the three tracks, as the viewer takes them:
+  https://gmod.org/JBrowseMSA/demo/data/p53/p53-layers.json
 
 ## 1. Name the rows
 
@@ -99,12 +105,29 @@ awk 'NR == FNR {split($0, row, "\t"); label[row[1]] = row[2]; next}
 
 Check the lengths before aligning them:
 
+<!-- from: scripts/build_p53_variant_effects.sh -->
+
+```bash
+awk '/^>/ {if (name) print name, n; name = $0; n = 0; next} {n += length($0)}
+  END {print name, n}' p53.fasta
 ```
-Human 393     Elephant 390    Chicken 367
-Macaque 393   Mouse 390       Turtle 409
-Cow 386       Rat 391         Anole 395
-Pig 386       Opossum 361     Frog 362
-Horse 381     Dog 381         Zebrafish 374
+
+```
+>Human 393
+>Macaque 393
+>Cow 386
+>Pig 386
+>Horse 381
+>Dog 381
+>Elephant 390
+>Mouse 390
+>Rat 391
+>Opossum 361
+>Chicken 367
+>Turtle 409
+>Anole 395
+>Frog 362
+>Zebrafish 374
 ```
 
 Fifteen records between 361 and 409 residues. p53 is a short protein and every
