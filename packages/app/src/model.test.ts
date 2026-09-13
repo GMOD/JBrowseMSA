@@ -33,7 +33,7 @@ test('?data= takes a bare MsaView snapshot, as docs/layers.md writes it', () => 
 })
 
 test.each([
-  ['unparseable JSON', '{"type":"MsaView",'],
+  ['unparsable JSON', '{"type":"MsaView",'],
   ['an object that is not a view', '{"data":{"msa":">a\\nA"}}'],
   [
     'a snapshot the model rejects',

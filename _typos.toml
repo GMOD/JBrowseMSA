@@ -5,6 +5,8 @@ extend-exclude = [
   # phylogenetic trees + the demo config are full of UCSC species db ids
   # (panTro4, HLturTru4, ...) that the spell checker reads as typos
   "*.nh",
+  # generated from git history: abbreviated commit hashes read as words
+  "CHANGELOG.md",
   "packages/app/public/data/jbrowse-msa-combined-config.json",
 ]
 
