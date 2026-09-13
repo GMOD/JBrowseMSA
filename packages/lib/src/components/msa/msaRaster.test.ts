@@ -52,7 +52,11 @@ beforeAll(() => {
         height,
       }),
       putImageData: () => {},
-      drawImage(image: { width: number; height: number }, ...args: number[]) {
+      drawImage(
+        this: { imageSmoothingEnabled: boolean },
+        image: { width: number; height: number },
+        ...args: number[]
+      ) {
         drawn.push({ image, args, smoothing: this.imageSmoothingEnabled })
       },
     } as unknown as CanvasRenderingContext2D

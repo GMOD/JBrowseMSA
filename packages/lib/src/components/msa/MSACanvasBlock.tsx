@@ -1,10 +1,10 @@
 import React from 'react'
 
 import BaseTooltip from '@jbrowse/core/ui/BaseTooltip'
+import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
-import { useColorContrast } from '../../useColorContrast.ts'
 import ColumnStats from './ColumnStats.tsx'
 import { drawMsaRaster, rasterSupported } from './msaRaster.ts'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
@@ -22,8 +22,8 @@ const MSACanvasBlock = observer(function ({
   offsetX: number
   offsetY: number
 }) {
-  const { colorScheme, blockSize, highResScaleFactor } = model
-  const { theme, contrastScheme } = useColorContrast(colorScheme)
+  const { blockSize, highResScaleFactor } = model
+  const theme = useTheme()
   const { tooltipPoint, onMouseMove, onClick, onMouseLeave } = useMsaBlockMouse(
     {
       model,
@@ -56,14 +56,13 @@ const MSACanvasBlock = observer(function ({
         theme,
         offsetX,
         offsetY,
-        contrastScheme,
         model,
         rasterTiles,
       })
     },
     width: canvasSize,
     height: canvasSize,
-    deps: [model, offsetX, offsetY, theme, contrastScheme],
+    deps: [model, offsetX, offsetY, theme],
   })
 
   const { hoveredInsertion, mouseOverDomains, showColumnStats } = model

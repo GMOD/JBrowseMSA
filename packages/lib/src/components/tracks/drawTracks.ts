@@ -1,5 +1,6 @@
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { setFontSize } from '../../setFontSize.ts'
+import { contrastTextFn } from '../../util.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
 
 import type { ColumnCounts } from '../../columnCounts.ts'
@@ -108,9 +109,9 @@ export function drawTextTrackContent({
   ctx,
   data,
   colorScheme,
-  contrastScheme,
+  contrastText,
   bgColor,
-  textColor,
+  drawLetters,
   colWidth,
   rowHeight,
   offsetX,
@@ -119,9 +120,9 @@ export function drawTextTrackContent({
   ctx: RenderCtx
   data: string | undefined
   colorScheme: Record<string, string>
-  contrastScheme: Record<string, string>
+  contrastText: (color: string | undefined) => string
   bgColor: boolean
-  textColor: string
+  drawLetters: boolean
   colWidth: number
   rowHeight: number
   offsetX: number
@@ -133,7 +134,6 @@ export function drawTextTrackContent({
     colWidth,
   })
   const str = data?.slice(xStart, xEnd)
-  const drawLetters = rowHeight >= 10 && colWidth >= rowHeight / 2
 
   for (let i = 0; str && i < str.length; i++) {
     const letter = str[i]!
@@ -145,10 +145,10 @@ export function drawTextTrackContent({
       ctx.fillRect(x, 0, colWidth, rowHeight)
     }
     if (drawLetters) {
-      // a letter on a colored tile needs the tile's contrast color; otherwise it
-      // sits on the plain background and takes the theme's text color
-      ctx.fillStyle = fill ? (contrastScheme[upper] ?? 'black') : textColor
-      ctx.fillText(letter, x + colWidth / 2, rowHeight / 2 + 1)
+      // a letter on a colored tile needs that tile's contrast color; otherwise
+      // it sits on the plain background and takes the theme's text color
+      ctx.fillStyle = contrastText(fill)
+      ctx.fillText(letter, x + colWidth / 2, rowHeight / 2)
     }
   }
 }
@@ -249,7 +249,6 @@ export function drawTrackBlock({
   offsetX,
   offsetY = 0,
   theme,
-  contrastScheme,
   blockSizeXOverride,
   highResScaleFactorOverride,
 }: {
@@ -259,7 +258,6 @@ export function drawTrackBlock({
   offsetX: number
   offsetY?: number
   theme: Theme
-  contrastScheme: Record<string, string>
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
 }) {
@@ -271,6 +269,7 @@ export function drawTrackBlock({
     colorScheme: modelColorScheme,
     fontSize,
     rowHeight,
+    showMsaLetters,
     alphabetMaxBits,
     highResScaleFactor,
   } = model
@@ -333,14 +332,17 @@ export function drawTrackBlock({
     }
     case 'text': {
       ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
       setFontSize(ctx, fontSize)
       drawTextTrackContent({
         ctx,
         data,
         colorScheme: customColorScheme ?? modelColorScheme,
-        contrastScheme,
+        contrastText: contrastTextFn(theme),
         bgColor,
-        textColor,
+        // a text track is one alignment row tall, so it shows letters exactly
+        // when the alignment does
+        drawLetters: showMsaLetters,
         colWidth,
         rowHeight,
         offsetX,
@@ -361,7 +363,6 @@ export function renderAllTracks({
   model,
   ctx,
   offsetX,
-  contrastScheme,
   theme,
   blockSizeXOverride,
   highResScaleFactorOverride,
@@ -369,7 +370,6 @@ export function renderAllTracks({
   model: MsaViewModel
   ctx: RenderCtx
   offsetX: number
-  contrastScheme: Record<string, string>
   theme: Theme
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
@@ -383,7 +383,6 @@ export function renderAllTracks({
       offsetX,
       offsetY: currentY,
       theme,
-      contrastScheme,
       blockSizeXOverride,
       highResScaleFactorOverride,
     })

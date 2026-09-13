@@ -36,14 +36,37 @@ export function transform<T>(
   return Object.fromEntries(Object.entries(obj).map(cb))
 }
 
-export function colorContrast(
-  colorScheme: Record<string, string>,
-  theme: Theme,
-) {
-  return transform(colorScheme, ([letter, color]) => [
-    letter,
-    theme.palette.getContrastText(colord(color).toHex()),
-  ])
+const contrastTextCaches = new WeakMap<Theme, Map<string, string>>()
+
+/**
+ * Readable letter color over a given cell color, memoized per theme.
+ *
+ * A dynamic scheme colors a cell from its column, so there is no letter->color
+ * table to precompute a contrast table from; asking per cell color covers the
+ * dynamic schemes, the static ones and a track's own `colors` alike. An
+ * uncolored cell sits on the theme's background, where the theme's own text
+ * color is what stays readable -- `black` turned every gap and every uncolored
+ * cell invisible in the dark theme.
+ */
+export function contrastTextFn(theme: Theme) {
+  let cache = contrastTextCaches.get(theme)
+  if (!cache) {
+    cache = new Map()
+    contrastTextCaches.set(theme, cache)
+  }
+  const fallback = theme.palette.text.primary
+  return (color: string | undefined) => {
+    if (!color) {
+      return fallback
+    }
+    const hit = cache.get(color)
+    if (hit !== undefined) {
+      return hit
+    }
+    const out = theme.palette.getContrastText(colord(color).toHex())
+    cache.set(color, out)
+    return out
+  }
 }
 
 export function dropBlanks<T>(blanks: number[], arr: T[]) {

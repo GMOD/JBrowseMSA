@@ -1,9 +1,9 @@
 import React from 'react'
 
+import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
-import { useColorContrast } from '../../useColorContrast.ts'
 import { TrackResizeHandle } from '../ResizeHandles.tsx'
 import { drawTrackBlock } from './drawTracks.ts'
 
@@ -19,11 +19,9 @@ const TrackBlock = observer(function ({
   track: BasicTrack
   offsetX: number
 }) {
-  const { blockSize, colorScheme, highResScaleFactor } = model
-  const { height, customColorScheme } = track.model
-  const { theme, contrastScheme } = useColorContrast(
-    customColorScheme ?? colorScheme,
-  )
+  const { blockSize, highResScaleFactor } = model
+  const { height } = track.model
+  const theme = useTheme()
   const canvasWidth = blockSize * highResScaleFactor
   const canvasHeight = height * highResScaleFactor
 
@@ -31,11 +29,11 @@ const TrackBlock = observer(function ({
     draw: ctx => {
       ctx.resetTransform()
       ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-      drawTrackBlock({ model, ctx, track, offsetX, theme, contrastScheme })
+      drawTrackBlock({ model, ctx, track, offsetX, theme })
     },
     width: canvasWidth,
     height: canvasHeight,
-    deps: [model, track, offsetX, theme, contrastScheme],
+    deps: [model, track, offsetX, theme],
   })
 
   return (

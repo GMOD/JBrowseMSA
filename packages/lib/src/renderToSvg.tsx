@@ -13,7 +13,6 @@ import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { renderToStaticMarkup } from './renderToStaticMarkup.ts'
-import { colorContrast } from './util.ts'
 
 import type { MsaViewModel } from './model.ts'
 import type { Context as ContextType } from '@jbrowse/svgcanvas'
@@ -162,8 +161,7 @@ function MsaSvg({
     legendWidth > 0
       ? Math.max(layout.height, legendTop + legendHeight(visibleDomainTypes))
       : layout.height
-  const contrastScheme = colorContrast(model.colorScheme, theme)
-  const props = { Context, model, theme, layout, contrastScheme }
+  const props = { Context, model, theme, layout }
 
   const body = (
     <>
@@ -274,16 +272,9 @@ interface LayerProps {
   theme: Theme
   layout: Layout
   Context: typeof ContextType
-  contrastScheme: Record<string, string>
 }
 
-function CoreRendering({
-  model,
-  theme,
-  layout,
-  Context,
-  contrastScheme,
-}: LayerProps) {
+function CoreRendering({ model, theme, layout, Context }: LayerProps) {
   const { contentHeight, offsetX, offsetY, msaAreaWidth } = layout
   const { treeAreaWidth, id } = model
 
@@ -315,7 +306,6 @@ function CoreRendering({
     model,
     theme,
     ctx: msaCtx,
-    contrastScheme,
     offsetX,
     offsetY,
     blockSizeXOverride: msaAreaWidth,
@@ -412,13 +402,7 @@ function rasterBackground({
   ) : undefined
 }
 
-function TrackRendering({
-  model,
-  theme,
-  layout,
-  Context,
-  contrastScheme,
-}: LayerProps) {
+function TrackRendering({ model, theme, layout, Context }: LayerProps) {
   const { trackHeight, offsetX, msaAreaWidth } = layout
   const { treeAreaWidth, id } = model
 
@@ -426,7 +410,6 @@ function TrackRendering({
   renderAllTracks({
     model,
     ctx,
-    contrastScheme,
     theme,
     offsetX,
     blockSizeXOverride: msaAreaWidth,

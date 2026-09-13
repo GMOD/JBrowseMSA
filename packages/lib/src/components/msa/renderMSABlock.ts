@@ -1,5 +1,5 @@
 import { setFontSize } from '../../setFontSize.ts'
-import { adjustColorForContrast } from '../../util.ts'
+import { adjustColorForContrast, contrastTextFn } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import { domainBandCursor } from './domainBandCursor.ts'
 import { tileColorFn } from './tileColor.ts'
@@ -15,7 +15,6 @@ export function renderMSABlock({
   model,
   offsetX,
   offsetY,
-  contrastScheme,
   ctx,
   theme,
   highResScaleFactorOverride,
@@ -27,7 +26,6 @@ export function renderMSABlock({
   offsetY: number
   theme: Theme
   model: MsaViewModel
-  contrastScheme: Record<string, string>
   ctx: RenderCtx
   highResScaleFactorOverride?: number
   blockSizeXOverride?: number
@@ -68,7 +66,6 @@ export function renderMSABlock({
     model,
     ctx,
     theme,
-    contrastScheme,
     xStart,
     xEnd,
     visibleLeaves,
@@ -90,23 +87,10 @@ export function renderMSABlock({
   ctx.resetTransform()
 }
 
-// Letter color to use over a domain box, keyed by accession. Domain fills come
-// from a categorical palette that has no fixed lightness, so ask the theme for a
-// readable text color per fill instead of assuming dark-on-light.
-function domainLetterColors(model: MsaViewModel, theme: Theme) {
-  return new Map(
-    Object.entries(model.fillPalette).map(([accession, fill]) => [
-      accession,
-      theme.palette.getContrastText(fill),
-    ]),
-  )
-}
-
 function drawTilesAndText({
   model,
   ctx,
   theme,
-  contrastScheme,
   visibleLeaves,
   xStart,
   xEnd,
@@ -117,7 +101,6 @@ function drawTilesAndText({
   model: MsaViewModel
   theme: Theme
   ctx: RenderCtx
-  contrastScheme: Record<string, string>
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   xStart: number
   xEnd: number
@@ -139,10 +122,14 @@ function drawTilesAndText({
   const tiles = drawTiles && bgColor
   const paintTiles = tiles && !rasterTiles
   if (paintTiles || showMsaLetters) {
-    // over raster tiles the letters take their color from contrastScheme, so
-    // the scheme lookup per cell is pure waste
-    const needsColor = paintTiles || !tiles
+    // a letter takes its color from the cell it lands on, so the scheme lookup
+    // is only waste when nothing draws letters
+    const needsColor = paintTiles || showMsaLetters
     const tileColor = tileColorFn(model)
+    // Domain fills come from a categorical palette with no fixed lightness, and
+    // a dynamic scheme colors a cell from its column, so a readable letter color
+    // is a question about the cell's own color rather than about its letter.
+    const contrastText = contrastTextFn(theme)
     const offsetXAligned = xStart * colWidth
     const halfColWidth = colWidth / 2
     // note: -rowHeight/4 matches +rowHeight/4 in tree
@@ -151,9 +138,6 @@ function drawTilesAndText({
     // on a domain box or on the plain background; sub-row layout stacks the boxes
     // above the letters, so those rows are all plain background
     const overDomains = !drawTiles && !subFeatureRows
-    const domainColors = overDomains
-      ? domainLetterColors(model, theme)
-      : undefined
 
     for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
       const node = visibleLeaves[i]!
@@ -186,18 +170,23 @@ function drawTilesAndText({
             const covering = bandAt(col)
             ctx.fillStyle = covering
               ? // on top of a domain box: contrast against the box fill
-                domainColors!.get(covering.annotation.accession)!
-              : tiles
-                ? // on top of a colored tile
-                  (contrastScheme[letter] ?? 'black')
-                : !drawTiles || !color
-                  ? // plain background, uncolored letters
-                    theme.palette.text.primary
-                  : // letter-color mode: darken/lighten to stay readable
-                    adjustColorForContrast(
-                      color,
-                      theme.palette.background.default,
-                    )
+                contrastText(model.fillPalette[covering.annotation.accession])
+              : isMatchingReference
+                ? // the dot sits on the faint reference-match wash, which is
+                  // the theme's background with a little of its text color in it
+                  theme.palette.text.primary
+                : tiles
+                  ? // on top of a colored tile, or on the background where the
+                    // scheme gives that cell no color
+                    contrastText(color)
+                  : !drawTiles || !color
+                    ? // plain background, uncolored letters
+                      theme.palette.text.primary
+                    : // letter-color mode: darken/lighten to stay readable
+                      adjustColorForContrast(
+                        color,
+                        theme.palette.background.default,
+                      )
             ctx.fillText(
               isMatchingReference ? '.' : letter,
               x + halfColWidth,
