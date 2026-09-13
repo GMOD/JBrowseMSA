@@ -6,8 +6,24 @@ The simplest way to use react-msaview in a React app. Handles model creation,
 width measurement, and theming automatically.
 
 ```sh
-pnpm add react-msaview @jbrowse/core @mui/material react react-dom @emotion/styled @emotion/react
+npm install react-msaview @jbrowse/core@4 mobx@6 mobx-react@9 \
+  @jbrowse/mobx-state-tree@5 @mui/material@7 @mui/icons-material@7 \
+  @emotion/react @emotion/styled react react-dom
 ```
+
+The majors are pinned because the viewer shares mobx, mobx-state-tree and MUI
+with `@jbrowse/core`, and there has to be exactly one copy of each. Two copies
+of mobx-state-tree and the first render throws "Identifier types can only be
+instantiated as direct child of a model type"; two copies of MUI and a theme
+built by one reaches components from the other, which throws too. The versions
+above are the ones `@jbrowse/core` 4 depends on. Core 5 moves the set together
+to mobx 7, `@jbrowse/mobx-state-tree` 6 and MUI 9; install those majors together
+and the same rule holds. Left unpinned, npm resolves each peer to its own latest
+and hands you the two-copy tree.
+
+CI installs exactly this line outside the workspace with plain npm and renders
+the snippet below in a headless browser (`scripts/npm-smoke.mjs`), so it is
+tested rather than remembered.
 
 ```tsx
 import { MSAViewer } from 'react-msaview'

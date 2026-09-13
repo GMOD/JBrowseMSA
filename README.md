@@ -30,10 +30,6 @@ Jump to what you need:
 
 ## Quick start (React)
 
-```sh
-pnpm add react-msaview @jbrowse/core @mui/material @emotion/react @emotion/styled react react-dom
-```
-
 ```tsx
 import { MSAViewer } from 'react-msaview'
 
@@ -49,9 +45,11 @@ export default function App() {
 }
 ```
 
-No model creation, width management, or theme provider needed. For the
-model-based API, UMD bundle, and full prop reference see [USAGE.md](USAGE.md),
-and browse runnable snippets in the
+No model creation, width management, or theme provider needed. The install line
+lives in [USAGE.md](USAGE.md#zero-config-component-recommended), which pins the
+mobx, mobx-state-tree and MUI majors the viewer has to share with
+`@jbrowse/core`; that guide also covers the model-based API, the UMD bundle, and
+every prop. Runnable snippets are in the
 [live examples](https://jbrowse.org/storybook/msa).
 
 ## Quick start (R)

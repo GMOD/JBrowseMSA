@@ -8,9 +8,10 @@ many color schemes, and SVG export.
 
 ## Install
 
-```sh
-pnpm add react-msaview @jbrowse/core @mui/material @emotion/react @emotion/styled react react-dom
-```
+The viewer shares mobx, mobx-state-tree and MUI with `@jbrowse/core` and needs
+one copy of each, so the install line pins those majors to what your
+`@jbrowse/core` depends on. It lives in the
+[usage & embedding guide](../../USAGE.md#zero-config-component-recommended).
 
 ## Quick start
 
