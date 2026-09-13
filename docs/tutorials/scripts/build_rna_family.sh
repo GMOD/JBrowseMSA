@@ -399,6 +399,32 @@ for label, cols in classes:
     mean, count_of = identity(cols)
     print(f'  {label:10s} {count_of:3d} columns, commonest base in {100 * mean:.1f}% of rows')
 
+# Which column pairs best with each of the most variable columns, searched
+# against every column rather than against the structure. A variable column
+# that is in a helix should find its own partner
+print('\n  the ten most variable columns, and the column each pairs best with:')
+print('  col  commonest base   best partner   SS_cons pairs them with')
+partner = {}
+for i, j, _ in pairs:
+    partner[i] = j
+    partner[j] = i
+variable = sorted(occupied, key=lambda i: identity([i])[0])[:10]
+recovered = 0
+for i in variable:
+    best, best_at = 0, None
+    for j in occupied:
+        if j != i:
+            ok, n = count(i, j)
+            if n and ok / n > best:
+                best, best_at = ok / n, j
+    named = partner.get(i)
+    recovered += best_at == named
+    print(
+        f'  {i + 1:3d}  {100 * identity([i])[0]:13.0f}%   {best_at + 1:5d} at {100 * best:3.0f}%'
+        f'   {named + 1 if named is not None else "-":>5}'
+    )
+print(f'  {recovered} of {len(variable)} find the partner SS_cons names')
+
 print('\n  every pair, as alignment columns (1-based):')
 print('  cols        kind        can pair   base pairs seen')
 for i, j, pk in pairs:
