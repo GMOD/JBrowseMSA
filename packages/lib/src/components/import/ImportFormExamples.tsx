@@ -9,7 +9,7 @@ import { load } from './util.ts'
 import type { MsaViewModel } from '../../model.ts'
 
 const BASE = 'https://jbrowse.org/genomes/multiple_sequence_alignments'
-const TREES = 'https://jbrowse.org/genomes/newicktrees'
+const TREES = 'https://jbrowse.org/genomes/newick_trees'
 
 // each example either points at remote files (msa/tree/gff urls) or carries its
 // data inline, which is what the two bundled small ones do
@@ -35,11 +35,7 @@ const examples: Example[] = [
     inline: { msa: smallMSAOnly },
   },
   {
-    label: 'PFAM SARS-CoV2 multi-stockholm',
-    msa: `${BASE}/pfam-cov2.stock`,
-  },
-  {
-    label: 'PFAM SARS-CoV2 multi-stockholm w/ domains loaded',
+    label: 'PFAM SARS-CoV2 multi-stockholm with domains',
     msa: `${BASE}/pfam-cov2.stock`,
     gff: `${BASE}/pfam-cov2-domains.gff`,
   },

@@ -95,7 +95,6 @@ pnpm install
 | Command                              | What it does                                                                        |
 | ------------------------------------ | ----------------------------------------------------------------------------------- |
 | `pnpm dev`                           | Run the demo app with hot reload (edits in `packages/lib/src/`)                     |
-| `pnpm --filter examples dev`         | Run the live examples gallery                                                       |
 | `pnpm build`                         | Build all packages                                                                  |
 | `pnpm test`                          | Run the test suite                                                                  |
 | `pnpm figures`                       | Regenerate the README figures (headless SVG, `packages/lib/scripts`)                |
@@ -131,9 +130,8 @@ re-render when observed model properties change.
   `workflow_dispatch` for an out-of-band deploy.
 - **Examples gallery → gmod.org/JBrowseMSA/examples** rides along: the docs
   site's examples page renders `packages/examples`, so that push deploys it too.
-  The older standalone copy at jbrowse.org/storybook/msa is a hand upload
-  (`pnpm --filter examples build`, then sync `packages/examples/dist/` with AWS
-  credentials) and lags behind whenever nobody runs it.
+  That package is the examples' source, not a site of its own — the standalone
+  Vite copy that used to be uploaded to jbrowse.org/storybook/msa is gone.
 
 ## Releasing
 

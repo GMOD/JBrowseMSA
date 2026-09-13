@@ -7,6 +7,13 @@
 // in the genome view's own gene track at launch. Nothing here is generated.
 const HUB_HG38 = 'https://jbrowse.org/ucsc/hg38/config.json'
 
+// The links that build their alignment on open need this plugin release at
+// jbrowse.org/plugins/jbrowse-plugin-msaview/latest. Flip `live` once it ships.
+export const buildOnOpen = {
+  needsPlugin: '3.5.0',
+  live: false,
+}
+
 function specUrl(views: Record<string, unknown>[]) {
   return `https://jbrowse.org/code/jb2/main/?config=${encodeURIComponent(HUB_HG38)}&session=spec-${encodeURIComponent(JSON.stringify({ views }))}`
 }

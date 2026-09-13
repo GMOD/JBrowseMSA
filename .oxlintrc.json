@@ -106,7 +106,6 @@
     "packages/lib/esbuild.mjs",
     "packages/lib/vite.config.ts",
     "packages/lib/docgen",
-    "packages/examples/vite.config.ts",
     "packages/app/vite.config.ts",
     "packages/r-msaview",
     "website/**/*.astro",
