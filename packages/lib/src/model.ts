@@ -564,6 +564,15 @@ function stateModelFactory() {
 
       /**
        * #volatile
+       * heights of individual `columnTracks`, by track id. A data track is
+       * resized on its own: the shared per-kind heights below belong to the
+       * tracks the viewer computes, and dragging a data track's handle used to
+       * resize those instead.
+       */
+      columnTrackHeights: {} as Record<string, number>,
+
+      /**
+       * #volatile
        * taller than the conservation track by default: the logo spends its
        * height on stacked glyphs, and a 40px stack of four residues leaves each
        * one too short to identify
@@ -1770,7 +1779,10 @@ function stateModelFactory() {
             id: track.id,
             name: track.name,
             kind: track.kind,
-            height: track.height ?? defaultHeight(track.kind),
+            height:
+              self.columnTrackHeights[track.id] ??
+              track.height ??
+              defaultHeight(track.kind),
             // the spec has one `color`; bar and arc are separate track models
             // that read it under their own name
             barColor: track.color,
@@ -2890,6 +2902,12 @@ function stateModelFactory() {
        */
       setConservationTrackHeight(arg: number) {
         self.conservationTrackHeight = arg
+      },
+      /**
+       * #action
+       */
+      setColumnTrackHeight(id: string, height: number) {
+        self.columnTrackHeights = { ...self.columnTrackHeights, [id]: height }
       },
       /**
        * #action

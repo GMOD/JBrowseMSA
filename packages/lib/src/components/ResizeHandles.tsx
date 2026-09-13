@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import DragHandle from './DragHandle.tsx'
 
 import type { MsaViewModel } from '../model.ts'
-import type { TrackKind } from '../types.ts'
+import type { BasicTrack, TrackKind } from '../types.ts'
 
 export const VerticalResizeHandle = observer(function ({
   model,
@@ -51,59 +51,53 @@ export const HorizontalResizeHandle = observer(function ({
   )
 })
 
-// The height behind each resizable track kind. Both bar tracks read one height
-// so conservation and property conservation stay directly comparable; the logo
-// keeps its own, being taller by default. Text tracks are absent: they are one
-// alignment row tall and follow rowHeight, so the zoom controls already size
-// them.
-const trackHeights: Partial<
-  Record<
-    TrackKind,
-    {
-      get: (model: MsaViewModel) => number
-      set: (model: MsaViewModel, height: number) => void
-    }
-  >
+// The volatile behind each resizable kind of computed track. Both bar tracks
+// write one height so conservation and property conservation stay directly
+// comparable; the logo keeps its own, being taller by default. Text tracks are
+// absent: they are one alignment row tall and follow rowHeight, so the zoom
+// controls already size them.
+const setTrackHeight: Partial<
+  Record<TrackKind, (model: MsaViewModel, height: number) => void>
 > = {
-  bar: {
-    get: model => model.conservationTrackHeight,
-    set: (model, height) => {
-      model.setConservationTrackHeight(height)
-    },
+  bar: (model, height) => {
+    model.setConservationTrackHeight(height)
   },
-  logo: {
-    get: model => model.sequenceLogoTrackHeight,
-    set: (model, height) => {
-      model.setSequenceLogoTrackHeight(height)
-    },
+  logo: (model, height) => {
+    model.setSequenceLogoTrackHeight(height)
   },
-  arc: {
-    get: model => model.arcTrackHeight,
-    set: (model, height) => {
-      model.setArcTrackHeight(height)
-    },
+  arc: (model, height) => {
+    model.setArcTrackHeight(height)
   },
 }
 
 export const TrackResizeHandle = observer(function ({
   model,
-  kind,
+  track,
 }: {
   model: MsaViewModel
-  kind: TrackKind
+  track: BasicTrack
 }) {
-  const height = trackHeights[kind]
+  const { id, kind, height } = track.model
+  const setHeight = setTrackHeight[kind]
+  // a data track carries its own height, so its handle resizes that track --
+  // dragging one used to resize every track of its kind instead
+  const ownHeight = model.columnTracks.some(t => t.id === id)
   const onDrag = useCallback(
     (delta: number, startHeight: number) => {
-      height?.set(model, Math.max(10, startHeight + delta))
+      const next = Math.max(10, startHeight + delta)
+      if (ownHeight) {
+        model.setColumnTrackHeight(id, next)
+      } else {
+        setTrackHeight[kind]?.(model, next)
+      }
     },
-    [model, height],
+    [model, id, kind, ownHeight],
   )
-  return height ? (
+  return setHeight ? (
     <DragHandle
       axis="y"
       variant="resizer"
-      getStart={() => height.get(model)}
+      getStart={() => height}
       onDrag={onDrag}
       style={{
         position: 'absolute',

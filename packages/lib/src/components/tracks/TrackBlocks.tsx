@@ -100,7 +100,7 @@ const TrackBlocks = observer(function ({
           <TrackBlock key={bx} model={model} track={track} offsetX={bx} />
         ))}
       </div>
-      <TrackResizeHandle model={model} kind={kind} />
+      <TrackResizeHandle model={model} track={track} />
     </div>
   )
 })

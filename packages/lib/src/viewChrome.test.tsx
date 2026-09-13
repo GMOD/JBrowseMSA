@@ -132,3 +132,22 @@ test('dragging the scrollbar thumb scrolls the alignment', async () => {
   await drag(thumb, { x: 40 })
   expect(model.scrollX).toBeLessThan(0)
 })
+
+test("dragging a data track's divider resizes that track alone", async () => {
+  act(() => {
+    model.setColumnTracks([
+      { id: 'dnds', name: 'dN/dS', kind: 'bar', values: [1, 0.5, 0.25] },
+    ])
+  })
+  const conservation = model.conservationTrackHeight
+  const before = model.turnedOnTracks.find(t => t.model.id === 'dnds')!.model
+    .height
+
+  // the data track sits above the computed ones, so its handle is the first
+  await drag(byCursor('ns-resize')[0]!, { y: 30 })
+
+  expect(
+    model.turnedOnTracks.find(t => t.model.id === 'dnds')!.model.height,
+  ).toBe(before + 30)
+  expect(model.conservationTrackHeight).toBe(conservation)
+})
