@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { calcDepthToLeaf } from '../../hierarchy.ts'
+import { calcDepthToLeaf, links } from '../../hierarchy.ts'
 import stateModelFactory from '../../model.ts'
 import { ClickMapIndex } from './clickMap.ts'
 import { getNodeX, renderTreeCanvas } from './renderTreeCanvas.ts'
@@ -326,5 +326,68 @@ describe('block edge padding', () => {
       } as Theme,
     })
     expect(drawn).toContain('clade')
+  })
+})
+
+describe('block culling', () => {
+  // The renderer skips whole subtrees that miss the block, which is what keeps a
+  // 200k-tip tree at a few dozen nodes per draw. It has to skip exactly the
+  // links that do not reach the block and no others -- a branch crossing it
+  // belongs to a subtree that starts above and ends below.
+  function linksDrawn(offsetY: number, by: number) {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: { tree: '(((a,b),(c,d)),((e,f),(g,h)));' },
+    })
+    model.setWidth(1000)
+    model.setRowHeight(30)
+    model.setDrawLabels(false)
+    model.setDrawNodeBubbles(false)
+
+    let moves = 0
+    const ctx = {
+      font: '12px sans-serif',
+      measureText: (t: string) => ({ width: t.length * 6 }),
+      beginPath() {},
+      stroke() {},
+      fill() {},
+      arc() {},
+      setLineDash() {},
+      fillRect() {},
+      fillText() {},
+      resetTransform() {},
+      scale() {},
+      translate() {},
+      moveTo() {
+        moves++
+      },
+      lineTo() {},
+    } as unknown as RenderCtx
+
+    renderTreeCanvas({
+      model,
+      ctx,
+      offsetY,
+      blockSizeYOverride: by,
+      theme: { palette: { text: { primary: '#000' } } } as Theme,
+    })
+
+    const expected = links(model.hierarchy).filter(({ source, target }) => {
+      const y1 = Math.min(source.x!, target.x!)
+      const y2 = Math.max(source.x!, target.x!)
+      return offsetY + by >= y1 && y2 >= offsetY
+    }).length
+    return { moves, expected }
+  }
+
+  it('draws every link that reaches a middle block, and no others', () => {
+    const { moves, expected } = linksDrawn(120, 30)
+    expect(expected).toBeGreaterThan(0)
+    expect(moves).toBe(expected)
+  })
+
+  it('draws every link that reaches the first block', () => {
+    const { moves, expected } = linksDrawn(0, 30)
+    expect(moves).toBe(expected)
   })
 })

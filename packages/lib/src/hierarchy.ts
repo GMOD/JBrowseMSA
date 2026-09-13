@@ -25,6 +25,11 @@ export interface HierarchyNode<T = NodeWithIds> extends CoreHierarchyNode<T> {
   parent: HierarchyNode<T> | null
   x?: number
   y?: number
+  // the span of `x` over this node's subtree, set by clusterLayout. Leaves are
+  // laid out in order, so a subtree occupies one contiguous run of rows and a
+  // renderer can skip the whole thing when the run misses its block.
+  xMin?: number
+  xMax?: number
   len?: number
   depthToLeaf?: number
   _children?: HierarchyNode<T>[] | null
@@ -75,16 +80,26 @@ export function clusterLayout<T>(
   }
 
   // x of an internal node is the mean of its children's x, so process in
-  // post-order (children before parents)
+  // post-order (children before parents). The subtree span comes from the same
+  // pass, for the block culls in the tree renderer.
   const nodes = descendants(root)
   for (let i = nodes.length - 1; i >= 0; i--) {
     const node = nodes[i]!
     if (node.children) {
       let sum = 0
+      let min = Infinity
+      let max = -Infinity
       for (const child of node.children) {
         sum += child.x!
+        min = Math.min(min, child.xMin!)
+        max = Math.max(max, child.xMax!)
       }
       node.x = sum / node.children.length
+      node.xMin = min
+      node.xMax = max
+    } else {
+      node.xMin = node.x
+      node.xMax = node.x
     }
   }
 

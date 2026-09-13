@@ -1,8 +1,4 @@
-import {
-  calcDepthToLeaf,
-  forEachDescendant,
-  forEachLink,
-} from '../../hierarchy.ts'
+import { calcDepthToLeaf } from '../../hierarchy.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import {
@@ -31,6 +27,39 @@ function blockPad(model: MsaViewModel) {
 // bubbles/labels/triangles straddling the edge still render
 function inYBlock(y: number, offsetY: number, by: number, pad: number) {
   return y > offsetY - pad && y < offsetY + by + pad
+}
+
+/**
+ * Every node whose subtree reaches into the block, skipping the subtrees that
+ * do not. A subtree's leaves are one contiguous run of rows -- clusterLayout
+ * records the run as xMin/xMax -- so a block of a 200k-tip tree visits a few
+ * dozen nodes instead of every one of them, three times over.
+ *
+ * A link out of a visited node is still drawn even when the child it reaches is
+ * pruned, which is what keeps a branch that crosses the block from vanishing.
+ */
+function forEachNodeInBlock(
+  root: HierarchyNode,
+  offsetY: number,
+  by: number,
+  pad: number,
+  cb: (node: HierarchyNode) => void,
+) {
+  const top = offsetY - pad
+  const bottom = offsetY + by + pad
+  const stack = [root]
+  while (stack.length > 0) {
+    const node = stack.pop()!
+    if (node.xMax! < top || node.xMin! > bottom) {
+      continue
+    }
+    cb(node)
+    if (node.children) {
+      for (const child of node.children) {
+        stack.push(child)
+      }
+    }
+  }
 }
 
 // Calculate node x-coordinate for both phylogram (with branch lengths) and
@@ -74,26 +103,30 @@ function renderTree({
   const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
   const by = blockSizeYOverride ?? blockSize
   ctx.strokeStyle = theme.palette.text.primary
-  forEachLink(hierarchy, (source, target) => {
+  forEachNodeInBlock(hierarchy, offsetY, by, blockPad(model), source => {
     const sy = source.x!
-    const ty = target.x!
-    const tx = getNodeX(target, showBranchLen, tipX, maxDepthToLeaf)
     const sx = getNodeX(source, showBranchLen, tipX, maxDepthToLeaf)
-    if (tx === undefined || sx === undefined) {
+    if (sx === undefined || !source.children) {
       return
     }
-
-    const y1 = Math.min(sy, ty)
-    const y2 = Math.max(sy, ty)
-    // 1d line intersection to check if line crosses block at all, this is an
-    // optimization that allows us to skip drawing most tree links outside the
-    // block
-    if (offsetY + by >= y1 && y2 >= offsetY) {
-      ctx.beginPath()
-      ctx.moveTo(sx, sy)
-      ctx.lineTo(sx, ty)
-      ctx.lineTo(tx, ty)
-      ctx.stroke()
+    for (const target of source.children) {
+      const ty = target.x!
+      const tx = getNodeX(target, showBranchLen, tipX, maxDepthToLeaf)
+      if (tx === undefined) {
+        continue
+      }
+      const y1 = Math.min(sy, ty)
+      const y2 = Math.max(sy, ty)
+      // 1d line intersection to check if line crosses block at all, this is an
+      // optimization that allows us to skip drawing most tree links outside the
+      // block
+      if (offsetY + by >= y1 && y2 >= offsetY) {
+        ctx.beginPath()
+        ctx.moveTo(sx, sy)
+        ctx.lineTo(sx, ty)
+        ctx.lineTo(tx, ty)
+        ctx.stroke()
+      }
     }
   })
 }
@@ -134,7 +167,7 @@ function renderCollapsedTriangles({
   }
   const by = blockSizeYOverride ?? blockSize
   const halfHeight = Math.max(2, rowHeight * 0.42)
-  forEachDescendant(hierarchy, node => {
+  forEachNodeInBlock(hierarchy, offsetY, by, blockPad(model), node => {
     const { id, name } = node.data
     if (collapsedSet.has(id)) {
       const apexX = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
@@ -210,7 +243,7 @@ function renderNodeBubbles({
     marginLeft: ml,
   } = model
   const by = blockSizeYOverride ?? blockSize
-  forEachDescendant(hierarchy, node => {
+  forEachNodeInBlock(hierarchy, offsetY, by, blockPad(model), node => {
     const x = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
     if (x === undefined) {
       return
