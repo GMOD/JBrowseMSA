@@ -301,7 +301,7 @@ before drawing. The same projection is what makes the PYD read as a gap: the
 five rows that carry it draw it in one place, and the seven that do not leave
 that place empty.
 
-## The row that is empty for another reason
+## The rows that are blank for another reason
 
 Cow, Hedgehog and Zebrafish have no leucine-rich repeats called at all, where
 Human has three and Rhesus four:
