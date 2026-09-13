@@ -8,6 +8,18 @@ and the SVG export draws it. Wherever a row is named, positions are that row's
 residues, 1-based and inclusive, as in GFF; the viewer projects them through the
 alignment's gaps. Without a row they are alignment columns.
 
+Every example below is an `MsaView` snapshot. To open one in the standalone app,
+URL-encode the JSON and put it in `?data=`, either bare or wrapped as
+`{"msaview": {...}}`, which is the form the app writes back to the address bar:
+
+```js
+const snapshot = { type: 'MsaView', data: { msa: '>human\nMKAANSE\n>mouse\nMKA-NSE' } }
+const url = `https://gmod.org/JBrowseMSA/demo/?data=${encodeURIComponent(JSON.stringify(snapshot))}`
+```
+
+The [user guide](https://gmod.org/JBrowseMSA/guide#link-to-a-view) covers what
+else a link needs: file URIs, CORS, and the size limit on inline data.
+
 ## columnTracks
 
 A track above the alignment, supplied as data. `kind: "bar"` draws one bar per

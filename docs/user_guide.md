@@ -35,7 +35,7 @@ sequences to alignment to tree to annotations, with the commands to run.
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | **Alignment** | FASTA (gaps already inserted), Stockholm (`.stock`, single or multi-alignment, may embed a tree and SS), Clustal (`.aln`), A3M, EMF |
 | **Tree**      | Newick (`.nh`), or the tree embedded in a Stockholm/EMF file                                                                        |
-| **Domains**   | InterProScan GFF3 (generate it with the [CLI](https://github.com/GMOD/JBrowseMSA/tree/main/packages/cli))                           |
+| **Domains**   | InterProScan GFF3 (generate it with the [CLI](https://gmod.org/JBrowseMSA/cli))                                                     |
 
 Stockholm files may carry both the tree and a secondary-structure annotation
 inline, so a single file can populate the whole view. A "multi-Stockholm" file
@@ -125,7 +125,8 @@ Building that file is a job for the [CLI](https://gmod.org/JBrowseMSA/cli):
 accessions in seconds, and `interproscan` scans sequences InterPro has not seen.
 The
 [protein family tutorial](https://gmod.org/JBrowseMSA/tutorials/protein_family)
-walks through both.
+walks through both, and **Annotations → How to get a domain file...** opens it
+from the app.
 
 [![](media/real-domains.png)][live-real-domains]
 
@@ -149,7 +150,7 @@ protein's domains sit at its own residue positions. The shared domains scatter
 into a staircase, because the proteins differ in length and in what they carry
 at the N terminus. In the bottom panel the same domains land in the same
 columns: NACHT starts at residue 328 in human and residue 93 in hamster — 235
-residues apart — and the two are drawn in alignment columns 370 and 371.
+residues apart — and the two are drawn in alignment columns 371 and 372.
 
 That is what makes a domain overlay comparable across a family rather than a row
 of independent cartoons.
@@ -186,10 +187,9 @@ options to copy them and to show/hide gaps.
 - **Point at something** before you share. The snapshot carries labeled
   highlights: a residue of a named sequence, a column range, or a set of rows,
   each with a note that draws beside it. They are written into the view state
-  (see the
-  [layers reference](https://github.com/GMOD/JBrowseMSA/blob/main/docs/layers.md)),
-  so a link can open on "R248, conserved in 651 of 658 orthologs" rather than on
-  a bare column.
+  (see the [layers reference](https://gmod.org/JBrowseMSA/layers)), so a link
+  can open on "R248, conserved in 651 of 658 orthologs" rather than on a bare
+  column.
 - **Export an image** with **Export SVG** (file menu) for a crisp, scalable
   figure of the current viewport or the entire alignment, optionally including
   the minimap and annotation tracks.
@@ -198,6 +198,45 @@ options to copy them and to show/hide gaps.
 
 The Export SVG dialog — choose the whole alignment or just the current viewport,
 and whether to include the minimap and tracks.
+
+## Link to a view
+
+Copying the URL is the everyday way to share a view, and a script can also build
+one. The app reads one query parameter, `?data=`, holding the URL-encoded JSON
+of the view:
+
+```js
+const view = {
+  type: 'MsaView',
+  msaFilehandle: { uri: 'https://example.org/kinase.aln' },
+  colorSchemeName: 'clustalx_protein_dynamic',
+  highlights: [{ row: 'SRC_HUMAN', start: 530, end: 530, label: 'Y530' }],
+}
+const url = `https://gmod.org/JBrowseMSA/demo/?data=${encodeURIComponent(JSON.stringify(view))}`
+```
+
+Either that bare `MsaView` snapshot or the `{"msaview": {...}}` wrapper the app
+writes back to the address bar works. Every field is listed in the
+[layers reference](https://gmod.org/JBrowseMSA/layers) and the
+[model API docs](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/apidocs/MsaView.md);
+a snapshot the app cannot read opens on an error naming the problem, not on the
+import form.
+
+Three things decide whether the link works for the person who opens it:
+
+- **Where the files live.** A `uri` is resolved against the app's own address,
+  so `data/kinase.aln` means `gmod.org/JBrowseMSA/demo/data/kinase.aln` — fine
+  for the hosted examples, wrong for a link you send. Use an absolute URL.
+- **CORS.** The browser fetches those URLs from `gmod.org`, so the server
+  holding them has to send `Access-Control-Allow-Origin`. GitHub Pages, S3 with
+  a CORS rule, and the public EBI/NCBI/PDBe APIs do; most institutional web
+  servers and Google Drive do not, and the view then opens on a fetch error.
+- **Size.** A pasted or locally-opened file travels inside the link, but only up
+  to 50 kB of it. Past that the alignment stays in the running viewer and leaves
+  the snapshot rather than turning the link into a megabyte of URL, the header
+  says **Not in the link**, and the app drops the parameter instead of writing a
+  URL that opens empty. Serve the file over HTTP and open it by URL, and the
+  link carries the address rather than the file, at any size.
 
 ## Tracks
 

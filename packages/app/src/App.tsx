@@ -7,27 +7,13 @@ import { ThemeProvider } from '@mui/material/styles'
 import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 
-// locals
-import AppGlobal from './model'
+import { createApp } from './model'
 
 import type { AppModel } from './model'
 
-const urlParams = new URLSearchParams(window.location.search)
-const val = urlParams.get('data')
-
-function parseData(data: string | null) {
-  let result = { msaview: { type: 'MsaView' as const } }
-  if (data) {
-    try {
-      result = JSON.parse(data)
-    } catch (e) {
-      console.error('Failed to parse ?data= URL param', e)
-    }
-  }
-  return result
-}
-
-const mymodel = AppGlobal.create(parseData(val))
+const mymodel = createApp(
+  new URLSearchParams(window.location.search).get('data'),
+)
 
 // Published for the screenshot harness the way jbrowse-web publishes
 // window.JBrowseSession: a callout that wants to point at alignment column 38
