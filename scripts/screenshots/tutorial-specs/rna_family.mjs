@@ -10,7 +10,9 @@
 //
 // `height` is the model's, and it has to cover the tracks above the alignment
 // plus 37 rows plus room for a callout pill under the last one: a short panel
-// drops the bottom rows and parks a bottom-anchored pill off the frame.
+// drops the bottom rows and parks a bottom-anchored pill off the frame. Two of
+// those tracks are the file's own `#=GC RNA_ligand_SAM` and `#=GC RF` lines,
+// each one row tall, so the chrome grows with rowHeight.
 
 import { fileSnap } from '../snap.mjs'
 
@@ -18,15 +20,17 @@ const msa = { uri: 'data/rna/sam-riboswitch.sto' }
 const RED = '#e3242b'
 const BLUE = '#1565c0'
 const ROWS = 37
+const GC_TRACKS = 2
 
 function view(extra) {
+  const rowHeight = extra.rowHeight ?? 15
   return fileSnap({
     treeAreaWidth: 240,
     colWidth: 8,
-    rowHeight: 15,
     colorSchemeName: 'nucleotide',
     msaFilehandle: msa,
-    height: 150 + ROWS * 15 + 40,
+    height: 150 + (ROWS + GC_TRACKS) * rowHeight + 40,
+    rowHeight,
     ...extra,
   })
 }
@@ -39,7 +43,7 @@ function zoom(firstCol, extra) {
   return view({
     colWidth,
     rowHeight,
-    height: 245 + ROWS * rowHeight + 70,
+    height: 245 + (ROWS + GC_TRACKS) * rowHeight + 70,
     scrollX: -(firstCol - 1) * colWidth,
     ...extra,
   })
@@ -127,7 +131,7 @@ export const specs = [
     // the seven columns Rfam marks as SAM contacts, as labeled highlights, with
     // the sequence logo on to show how little they vary
     url: view({
-      height: 200 + ROWS * 15 + 40,
+      height: 200 + (ROWS + GC_TRACKS) * 15 + 40,
       turnedOffTracks: { 'sequence-logo': false },
       highlights: [
         { start: 7, end: 7, label: 'SAM' },
@@ -177,7 +181,7 @@ export const specs = [
       treeAreaWidth: 330,
       colWidth: 3,
       rowHeight: 17,
-      height: 150 + ROWS * 17 + 40,
+      height: 150 + (ROWS + GC_TRACKS) * 17 + 40,
       highlights: [
         {
           rows: ['Bsub_yxjG', 'Bsub_yxjH'],

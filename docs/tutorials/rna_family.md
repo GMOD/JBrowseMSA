@@ -145,8 +145,10 @@ writes back only the helices its model holds.
 
 Both alignments mark their consensus columns in `#=GC RF`, so the k-th consensus
 column of one is the k-th of the other, and the build script copies the seed's
-`SS_cons` across that correspondence, along with the columns Rfam marks as SAM
-contacts.
+`SS_cons` across that correspondence, along with `RNA_ligand_SAM`, the columns
+Rfam marks as touching the ligand. It leaves `RNA_structural_elements` behind:
+the seed spells the element names across its own columns, insert columns
+included, so a per-column copy keeps the brackets and loses the labels.
 
 ```
 4 pseudoknot pairs copied from the seed
@@ -182,17 +184,20 @@ else needs configuring.
 }
 ```
 
-[![](../media/rna-family-overview.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A8%2C%22rowHeight%22%3A15%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A745%7D%7D)
+[![](../media/rna-family-overview.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A8%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A775%2C%22rowHeight%22%3A15%7D%7D)
 
 37 riboswitches, 187 columns. The tree on the left comes from the `#=GF NH`
 line, the Secondary-structure track from `#=GC SS_cons`, and the Base pairs arcs
 from that same string: blue for the nested helices, red for the pseudoknot. The
-blank band across the middle is that variable stem loop, most of the 62 columns
-that are gaps in 90% or more of the rows.
+other two tracks are the file's remaining `#=GC` lines, drawn as they stand:
+`RNA_ligand_SAM`, with an X at each column that touches the ligand, and `RF`,
+the model's own consensus sequence. The blank band across the middle is that
+variable stem loop, most of the 62 columns that are gaps in 90% or more of the
+rows.
 
 ## 7. The arc that crosses the others
 
-[![](../media/rna-family-pseudoknot.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A8%2C%22rowHeight%22%3A15%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A745%7D%7D)
+[![](../media/rna-family-pseudoknot.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A8%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A775%2C%22rowHeight%22%3A15%7D%7D)
 
 The same view with the pseudoknot marked. Its four pairs join columns 28-31 to
 147-153, and every blue arc between those ends passes underneath rather than
@@ -204,7 +209,7 @@ and the color records here.
 Zoomed to the helix that runs from column 13 to column 46, the trade the page
 opened with is legible a row at a time.
 
-[![](../media/rna-family-helix.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A26%2C%22rowHeight%22%3A17%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A944%2C%22scrollX%22%3A-312%7D%7D)
+[![](../media/rna-family-helix.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A26%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A978%2C%22rowHeight%22%3A17%2C%22scrollX%22%3A-312%7D%7D)
 
 Columns 18 and 41 in red, columns 35 and 36 in blue. Column 18 is U in 26 rows,
 C in 9 and G in 2; column 41 is G in 18, A in 17 and C in 2. Read as a pair they
@@ -219,11 +224,11 @@ alignment for whatever does pair with them.
 ## 9. Where the ligand touches
 
 Seven columns of the Rfam consensus are annotated as contacts with SAM, and the
-build script carries that annotation into the Stockholm as `#=GC RNA_ligand_SAM`
-alongside the structure. Written into the snapshot as `highlights`, the same
-seven columns land as labeled bands.
+`#=GC RNA_ligand_SAM` track marks each of them with an X. Written into the
+snapshot as `highlights` as well, the same seven columns get a labeled band that
+runs down the rows.
 
-[![](../media/rna-family-sam.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A8%2C%22rowHeight%22%3A15%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A795%2C%22turnedOffTracks%22%3A%7B%22sequence-logo%22%3Afalse%7D%2C%22highlights%22%3A%5B%7B%22start%22%3A7%2C%22end%22%3A7%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A11%2C%22end%22%3A11%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A50%2C%22end%22%3A50%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A139%2C%22end%22%3A141%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A182%2C%22end%22%3A182%2C%22label%22%3A%22SAM%22%7D%5D%7D%7D)
+[![](../media/rna-family-sam.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A8%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A825%2C%22rowHeight%22%3A15%2C%22turnedOffTracks%22%3A%7B%22sequence-logo%22%3Afalse%7D%2C%22highlights%22%3A%5B%7B%22start%22%3A7%2C%22end%22%3A7%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A11%2C%22end%22%3A11%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A50%2C%22end%22%3A50%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A139%2C%22end%22%3A141%2C%22label%22%3A%22SAM%22%7D%2C%7B%22start%22%3A182%2C%22end%22%3A182%2C%22label%22%3A%22SAM%22%7D%5D%7D%7D)
 
 Columns 7, 11, 50, 139, 140, 141 and 182, with the sequence logo track switched
 on above them. Averaged over the seven, the commonest base holds 99.2% of the
@@ -234,7 +239,7 @@ alignment is not.
 Three of the seven, columns 139 to 141, are one side of a helix whose other side
 is at columns 48 to 50.
 
-[![](../media/rna-family-frozen-pair.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A30%2C%22rowHeight%22%3A17%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A944%2C%22scrollX%22%3A-3960%7D%7D)
+[![](../media/rna-family-frozen-pair.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22colWidth%22%3A30%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A978%2C%22rowHeight%22%3A17%2C%22scrollX%22%3A-3960%7D%7D)
 
 Columns 139, 140 and 141 read U, G and C down the rows. They pair with 50, 49
 and 48, and those pairs are AU in 37 rows, CG in 37 and GC in 35. A helix column
@@ -249,7 +254,7 @@ the next row.
 
 ## 10. What the tree did with them
 
-[![](../media/rna-family-tree.png)](<https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A330%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A17%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A819%2C%22highlights%22%3A%5B%7B%22rows%22%3A%5B%22Bsub_yxjG%22%2C%22Bsub_yxjH%22%5D%2C%22color%22%3A%22rgba(21%2C101%2C192%2C0.18)%22%7D%5D%7D%7D>)
+[![](../media/rna-family-tree.png)](<https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A330%2C%22colWidth%22%3A3%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A853%2C%22rowHeight%22%3A17%2C%22highlights%22%3A%5B%7B%22rows%22%3A%5B%22Bsub_yxjG%22%2C%22Bsub_yxjH%22%5D%2C%22color%22%3A%22rgba(21%2C101%2C192%2C0.18)%22%7D%5D%7D%7D>)%22%7D%5D%7D%7D>)
 
 The tree with the whole alignment beside it at three pixels per column. Rows
 that lead the same gene in different species mostly do not come out together:

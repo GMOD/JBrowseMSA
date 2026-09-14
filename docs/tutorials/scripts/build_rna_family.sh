@@ -180,15 +180,18 @@ cmalign --noprob -o cmalign.sto $RFAM.cm hits.fa > cmalign.out
 
 echo "== 7. put the pseudoknot back"
 # A covariance model is nested by construction: cmalign writes back the helices
-# the model has and nothing else, so the pseudoknot Rfam annotates as A/a, the
-# SAM contacts and the structural element names survive only in the seed. Both
-# alignments mark consensus columns in #=GC RF, so the k-th consensus column of
-# one is the k-th of the other.
+# the model has and nothing else, so the pseudoknot Rfam annotates as A/a and
+# the SAM contacts survive only in the seed. Both alignments mark consensus
+# columns in #=GC RF, so the k-th consensus column of one is the k-th of the
+# other.
 python3 - $RFAM.seed.sto cmalign.sto annotated.sto <<'EOF'
 import sys
 
 seed_path, aln_path, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
-COPY = ('SS_cons', 'RNA_structural_elements', 'RNA_ligand_SAM')
+# not RNA_structural_elements: the seed spells its element names across its own
+# columns, insert columns included, so a per-column copy keeps the brackets and
+# loses the labels
+COPY = ('SS_cons', 'RNA_ligand_SAM')
 
 
 def read(path):
