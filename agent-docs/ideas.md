@@ -9,8 +9,8 @@ nobody has to work it out again.
 
 ## Open, roughly in the order I would argue for them
 
-- [Layers that take data](ideas/data-layers.md): the viewer as an agent's
-  render target, with column tracks from values, labeled highlights in residue
+- [Layers that take data](ideas/data-layers.md): the viewer as an agent's render
+  target, with column tracks from values, labeled highlights in residue
   coordinates, colored GFF features and row strips from metadata. Several items
   below change as a result, since an agent can compute them and store the result
   in the snapshot for the viewer to draw. `columnTracks` and `highlights`
@@ -28,9 +28,9 @@ nobody has to work it out again.
   falls back to a wrong 1:1 map, with no warning, when that fails. Make the
   correspondence a snapshot layer, and give highlights an owner so two sync
   sources stop overwriting each other. The item below depends on it.
-- [Conservation on 3D structure](ideas/conservation-on-structure.md): the
-  column ↔ residue half of the contract with protein3d is done; the row ↔
-  structure half still relies on the sequence-equality match above.
+- [Conservation on 3D structure](ideas/conservation-on-structure.md): the column
+  ↔ residue half of the contract with protein3d is done; the row ↔ structure
+  half still relies on the sequence-equality match above.
 - [Ortholog sources beyond NCBI](ideas/ortholog-sources-beyond-ncbi.md): NCBI
   has no orthologs for yeast, worm or plant genes, so the gene explorer's
   cross-species alignment fails for four of its seven species. Measurements
@@ -50,9 +50,9 @@ nobody has to work it out again.
   `build-data.mjs` already builds them. Host the files, including `.cds`, and
   replace each species' on-demand alignment with a single read of the hosted
   one.
-- [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md):
-  the join loop is cubic. The file explains why `@gmod/hclust`'s fix for the
-  same loop does not port, and what does.
+- [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md): the
+  join loop is cubic. The file explains why `@gmod/hclust`'s fix for the same
+  loop does not port, and what does.
 
 ## Closed
 

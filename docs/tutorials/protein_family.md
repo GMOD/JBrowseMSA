@@ -110,8 +110,8 @@ awk '/^>/{name=$0; next}{print name, length($0)}' family.fasta
 >Zebrafish 1355
 ```
 
-All twelve records have plausible lengths for a full-length _NLRP1_. A
-truncated fragment or a stray isoform would show up here as an outlier length.
+All twelve records have plausible lengths for a full-length _NLRP1_. A truncated
+fragment or a stray isoform would show up here as an outlier length.
 
 The viewer opens unaligned sequences as readily as an alignment, once every row
 is the same length. Right-pad the shorter ones and `family.fasta` loads as a
@@ -188,8 +188,8 @@ move.
 
 ## 5. Ask InterPro what the domains are
 
-InterPro precomputes matches for every UniProtKB sequence, so for accessions
-the CLI looks them up:
+InterPro precomputes matches for every UniProtKB sequence, so for accessions the
+CLI looks them up:
 
 ```bash
 react-msaview-cli interpro accessions.tsv -o family-domains.gff

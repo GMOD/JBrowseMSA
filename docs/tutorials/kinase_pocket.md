@@ -146,8 +146,8 @@ Total time: 13.70 seconds  Unique: 474/474  Bad splits: 0/471
 474 rows sits just under `maxNeighborJoiningRows`, the viewer's 500-sequence cap
 on its built-in neighbor joining. That neighbor joining is a distance method
 with no model of amino acid substitution. FastTree fits one, and on 474
-sequences it is also the faster of the two. Past the cap, the app's error message points to
-this page.
+sequences it is also the faster of the two. Past the cap, the app's error
+message points to this page.
 
 The tree orders the alignment's rows by clade, so neighboring rows are related
 kinases. Clicking any tip opens a node-info dialog with its row metadata from

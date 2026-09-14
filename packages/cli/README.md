@@ -301,9 +301,9 @@ react-msaview-cli genestructure <input-msa> --gene <symbol> --ref <rowname> [opt
 The command maps the chosen transcript's exon boundaries onto the reference
 row's columns, then projects them into every other row's ungapped coordinates.
 An exon that picks up a frameshifting indel in one lineage therefore gets
-shorter on that row and stays in the same columns as the rest. The reference
-row must be the transcript's coding sequence; the CLI warns if its length
-doesn't match.
+shorter on that row and stays in the same columns as the rest. The reference row
+must be the transcript's coding sequence; the CLI warns if its length doesn't
+match.
 
 | Option                | Description                                   | Default             |
 | --------------------- | --------------------------------------------- | ------------------- |

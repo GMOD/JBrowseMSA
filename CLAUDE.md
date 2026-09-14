@@ -33,9 +33,9 @@ them, and follow it in this file too: agents copy the prose here as house voice.
 `docs/tutorials/*.md` are reader-facing walkthroughs of the data preparation
 done outside the viewer: sequences to alignment to tree to annotations, ending
 on a `?data=` URL that opens the result. Each step of a tutorial consumes what
-the step before produced. Every command in it has been run, and the prose
-quotes the numbers it printed. `docs/tutorials/scripts/build_<topic>.sh` runs
-the whole pipeline, and the `## Reproduce it end to end` section curls it.
+the step before produced. Every command in it has been run, and the prose quotes
+the numbers it printed. `docs/tutorials/scripts/build_<topic>.sh` runs the whole
+pipeline, and the `## Reproduce it end to end` section curls it.
 
 Adding one means a file there plus an entry in `website/src/lib/tutorials.ts`;
 `website/src/pages/tutorials/[slug].astro` globs the directory and `index.astro`
@@ -74,10 +74,10 @@ is data preparation. See `viewer-not-analysis-tool` in the memory and
   pixel per cell a tile averages cells into a pixel, the browser's smoothing
   blurs both axes, and at fit-to-width only the columns are narrow.
   `MSACanvasBlock` decides whether the raster applies and passes `rasterTiles`
-  to `renderMSABlock`. The SVG export draws the same background as one
-  `<image>` (`rasterImageHref`) where a canvas can be read back, and falls back
-  to per-cell rects where it cannot (jsdom). Letters stay `fillText`, since a
-  glyph sprite atlas measured 2-3x slower.
+  to `renderMSABlock`. The SVG export draws the same background as one `<image>`
+  (`rasterImageHref`) where a canvas can be read back, and falls back to
+  per-cell rects where it cannot (jsdom). Letters stay `fillText`, since a glyph
+  sprite atlas measured 2-3x slower.
 - `contrastTextFn(theme)` in `util.ts` picks a letter's color from the
   background of the cell it lands on, memoized per theme. A dynamic scheme has
   no letter->color table to precompute from, and a text track has its own
@@ -91,13 +91,13 @@ is data preparation. See `viewer-not-analysis-tool` in the memory and
   `@gmod/newick` now, shared with the tree sidebar in jbrowse-components, and
   the file is a typing shim that re-exports them plus this viewer's own layout
   helpers. There is no d3 dependency.
-- `packages/svgcanvas` implements only the calls the renderers make:
-  rectangles, paths, arcs and glyphs. It dropped gradients, patterns, clipping,
-  rotation, bezier curves, stroked text, shadows and `drawImage`, and it omits
-  attributes whose value equals the SVG default (`stroke="none"` on a fill, an
-  empty `stroke-dasharray`, a matrix transform duplicating x/y). Adding a
-  renderer call means adding it there. `renderToSvg` splices each layer's
-  serialized markup into the React page as a string, so React never parses it.
+- `packages/svgcanvas` implements only the calls the renderers make: rectangles,
+  paths, arcs and glyphs. It dropped gradients, patterns, clipping, rotation,
+  bezier curves, stroked text, shadows and `drawImage`, and it omits attributes
+  whose value equals the SVG default (`stroke="none"` on a fill, an empty
+  `stroke-dasharray`, a matrix transform duplicating x/y). Adding a renderer
+  call means adding it there. `renderToSvg` splices each layer's serialized
+  markup into the React page as a string, so React never parses it.
 - Tracks (conservation, sequence logo, the position ruler, the Stockholm text
   tracks) carry a `kind` discriminator and share one draw module,
   `components/tracks/drawTracks.ts`. `drawTrackBlock` there applies the
@@ -116,10 +116,9 @@ is data preparation. See `viewer-not-analysis-tool` in the memory and
   UMD build. The bundle resolves it at runtime against the core the host
   jbrowse-web ships, which is often much older than the one in this workspace.
   Importing a freshly added core export therefore typechecks and passes tests
-  here but is `undefined` on a deployed host (`TypeError: X is not a
-  function`). Prefer long-established core exports; when a new one is a trivial
-  helper, inline it (see `statusMessageText` in
-  `packages/lib/src/fetchUtils.ts`).
+  here but is `undefined` on a deployed host (`TypeError: X is not a function`).
+  Prefer long-established core exports; when a new one is a trivial helper,
+  inline it (see `statusMessageText` in `packages/lib/src/fetchUtils.ts`).
 
   Core can also drop a long-established export, and a bundle that built and
   booted then throws the first time a user reaches the code that reads it. Core
@@ -138,8 +137,7 @@ is data preparation. See `viewer-not-analysis-tool` in the memory and
 - `packages/lib/src/components/MSAViewer.tsx`: zero-config declarative wrapper
 - `packages/lib/src/components/Loading.tsx`: exported as MSAView, handles
   loading/import states
-- `packages/lib/src/components/msa/renderMSABlock.ts`: core MSA canvas
-  rendering
+- `packages/lib/src/components/msa/renderMSABlock.ts`: core MSA canvas rendering
 - `packages/lib/src/components/tree/renderTreeCanvas.ts`: tree canvas rendering
 - `packages/lib/src/index.ts`: public API exports (MSAView, MSAViewer,
   MSAModelF)

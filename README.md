@@ -19,14 +19,14 @@ An interactive multiple sequence alignment viewer.
 
 Jump to what you need:
 
-| You want to…                                                            | Start here                                                                                                                                                |
-| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Use the viewer**: load data, explore, export an image                 | [User guide](docs/user_guide.md) · [live app](https://gmod.org/JBrowseMSA/demo/) · [docs site](https://gmod.org/JBrowseMSA)                               |
-| **Build the files to open**: sequences to alignment, tree, annotations  | [Tutorials](docs/tutorials/) · [live](https://gmod.org/JBrowseMSA/tutorials)                                                                              |
-| **Embed the React component** in your own app                           | [Usage & embedding guide](USAGE.md) · [live code examples](https://gmod.org/JBrowseMSA/examples) · [model API reference](packages/lib/apidocs/MsaView.md) |
-| **Use it from R** (ape, Biostrings, ggtree, Shiny)                      | [R package README](packages/r-msaview/README.md)                                                                                                          |
-| **Annotate protein domains or exons**, or render a figure headlessly    | [CLI README](packages/cli/): `interpro`, `interproscan`, `genestructure`, `export-svg`                                                                    |
-| **Contribute / hack on the code**                                       | [Development](#development)                                                                                                                               |
+| You want to…                                                           | Start here                                                                                                                                                |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Use the viewer**: load data, explore, export an image                | [User guide](docs/user_guide.md) · [live app](https://gmod.org/JBrowseMSA/demo/) · [docs site](https://gmod.org/JBrowseMSA)                               |
+| **Build the files to open**: sequences to alignment, tree, annotations | [Tutorials](docs/tutorials/) · [live](https://gmod.org/JBrowseMSA/tutorials)                                                                              |
+| **Embed the React component** in your own app                          | [Usage & embedding guide](USAGE.md) · [live code examples](https://gmod.org/JBrowseMSA/examples) · [model API reference](packages/lib/apidocs/MsaView.md) |
+| **Use it from R** (ape, Biostrings, ggtree, Shiny)                     | [R package README](packages/r-msaview/README.md)                                                                                                          |
+| **Annotate protein domains or exons**, or render a figure headlessly   | [CLI README](packages/cli/): `interpro`, `interproscan`, `genestructure`, `export-svg`                                                                    |
+| **Contribute / hack on the code**                                      | [Development](#development)                                                                                                                               |
 
 ## Quick start (React)
 

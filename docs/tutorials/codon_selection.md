@@ -253,10 +253,9 @@ curl -O https://raw.githubusercontent.com/GMOD/JBrowseMSA/main/docs/tutorials/sc
 bash build_codon_selection.sh
 ```
 
-With no arguments the script writes every file into the current directory.
-Point it at another gene by editing the `GENE_ID` and the `--transcript`
-argument to `genestructure`; the CDS-selection and stop-codon QC steps are
-generic.
+With no arguments the script writes every file into the current directory. Point
+it at another gene by editing the `GENE_ID` and the `--transcript` argument to
+`genestructure`; the CDS-selection and stop-codon QC steps are generic.
 
 ## See also
 

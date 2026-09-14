@@ -17,5 +17,5 @@ Wiring a second toolchain into the generator is a bigger change. It adds
 heavyweight external binaries to a script that exists so that
 `apt-get install clustalw` reproduces the examples, and the trees it would
 produce only feed demo data. `../neighbor-joining-scaling.md` reaches the same
-conclusion from the other direction: pointing users at FastTree/IQ-TREE is better
-than improving this repo's phylogenetics.
+conclusion from the other direction: pointing users at FastTree/IQ-TREE is
+better than improving this repo's phylogenetics.

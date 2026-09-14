@@ -3,11 +3,11 @@
 **Closed: measured, not a bug.** The measurements are recorded here so the item
 is not filed again.
 
-A long-running claim downstream in JBrowse held that the view's fixed height cuts
-off `DomainLegend.tsx` once an alignment carries more distinct CDD domains than
-fit, and that the fix was to scroll it or cap it. We measured it on a real page:
-a twelve-row NLRP1 ortholog alignment, 18 legend entries, MsaView under an LGV
-in an 878px viewport.
+A long-running claim downstream in JBrowse held that the view's fixed height
+cuts off `DomainLegend.tsx` once an alignment carries more distinct CDD domains
+than fit, and that the fix was to scroll it or cap it. We measured it on a real
+page: a twelve-row NLRP1 ortholog alignment, 18 legend entries, MsaView under an
+LGV in an 878px viewport.
 
 - `maxHeight: '60%'` resolves. The Paper is 330px, which is 60% of the 550px
   `MSAPanel` wrapper. A percentage max-height resolves against a positioned

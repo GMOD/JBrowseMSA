@@ -164,8 +164,8 @@ msaview(msa = seqs, gff = domains, color_scheme = "clustalx_protein_dynamic")
 ### Labeled highlights
 
 Mark a residue, a column range, or a set of rows, with a label saved in the
-widget. Coordinates are 1-based and inclusive; `row` makes `start` and
-`end` residues of that sequence, projected through the alignment's gaps.
+widget. Coordinates are 1-based and inclusive; `row` makes `start` and `end`
+residues of that sequence, projected through the alignment's gaps.
 
 ```r
 msaview(
@@ -342,9 +342,9 @@ Dynamic (computed per-column): `clustalx_protein_dynamic`,
 The widget's JavaScript is `inst/htmlwidgets/lib/react-msaview.umd.js`, a
 generated bundle. Installing an R package runs no Node, so the package commits
 the built file. `scripts/release.js` refreshes the bundle from the build it just
-made, so every release ships matching JavaScript, and CI fails when the committed
-bundle's version stamp differs from `packages/lib`. To refresh the bundle by hand
-from the repo root:
+made, so every release ships matching JavaScript, and CI fails when the
+committed bundle's version stamp differs from `packages/lib`. To refresh the
+bundle by hand from the repo root:
 
 ```sh
 pnpm build && pnpm sync:r-bundle

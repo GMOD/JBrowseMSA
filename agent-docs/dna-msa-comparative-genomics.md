@@ -4,8 +4,8 @@ This doc supports the Apollo renewal. The goal is a figure of JBrowse's MSA
 viewer, with its tree, in a combined JBrowse view that also shows a gene
 annotation track, ideally over a DNA alignment. The figure argues that _we
 already have an MSA viewer, so an MSA **editor** (for automated annotation
-liftover across many species) is a short step._ This doc records what was
-built, the strategy, and the next workstreams.
+liftover across many species) is a short step._ This doc records what was built,
+the strategy, and the next workstreams.
 
 ## Argument for the editor
 
@@ -24,9 +24,9 @@ Each level loosens the coordinate model:
 - **Level 1: column-locked MSA** (react-msaview). Every species shares columns,
   which suits base-level editing and liftover within an aligned gene or region.
   This level is the **MSA editor** (the grant).
-- **Level 2: synteny / graph** (gggenomes / pangenome). Species share no columns;
-  links, ribbons or graph edges show relationships, including rearrangements and
-  annotation on alternate paths.
+- **Level 2: synteny / graph** (gggenomes / pangenome). Species share no
+  columns; links, ribbons or graph edges show relationships, including
+  rearrangements and annotation on alternate paths.
 
 ---
 
@@ -41,12 +41,13 @@ same alignment twice.
 
 - Generator: `scripts/screenshots/f12-combined-figure.mjs` (`--force` to
   rewrite).
-- Output: `docs/media/f12-combined-closeup.png`, at base resolution on the shared
-  cetacean frameshift, where beluga/porpoise/dolphin/minke_whale show `-` and
-  every other mammal has `C`. We dropped a zoomed-out overview variant once no
-  page referenced it or its generated session URL.
-- The generator inlines data from `packages/app/public/data/f12-cetacean-cds.stock`
-  and `f12-cetacean-exons.gff`, so the session URL is self-contained.
+- Output: `docs/media/f12-combined-closeup.png`, at base resolution on the
+  shared cetacean frameshift, where beluga/porpoise/dolphin/minke_whale show `-`
+  and every other mammal has `C`. We dropped a zoomed-out overview variant once
+  no page referenced it or its generated session URL.
+- The generator inlines data from
+  `packages/app/public/data/f12-cetacean-cds.stock` and
+  `f12-cetacean-exons.gff`, so the session URL is self-contained.
 
 ### Technical notes that cost time
 
@@ -87,16 +88,17 @@ figure, render against a locally rebuilt plugin:
 
 ## Workstream 2: gggenomes-style synteny view (design, not started)
 
-The proposal is a sibling view to the MSA that is **not column-locked**. It draws
-per-genome gene arrows, extending the existing gene-arrow map (`drawGeneArrow` in
+The proposal is a sibling view to the MSA that is **not column-locked**. It
+draws per-genome gene arrows, extending the existing gene-arrow map
+(`drawGeneArrow` in
 packages/lib/src/components/msa/renderBoxFeatureCanvasBlock.ts), plus a layer of
 links or ribbons between adjacent genomes: a parallelogram for direct synteny
 and a twisted ribbon for an inversion (cf. gggenomes, whose tracks borrow from
 ggtree/ggraph/gggenes).
 
 - Data model: sequences (one row per genome), features (genes per genome) and
-  **links** (synteny blocks between adjacent genome pairs). Do NOT force the data
-  into MSA columns; the view exists to show gene-order conservation and
+  **links** (synteny blocks between adjacent genome pairs). Do NOT force the
+  data into MSA columns; the view exists to show gene-order conservation and
   rearrangements, which a fixed-column MSA cannot draw.
 - This view leads toward pangenome visualization, since a graph is roughly many
   genomes plus links. Pangenome linearization is hard; the valuable target is

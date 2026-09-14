@@ -32,17 +32,17 @@ For each verb or noun that is not literally true of its subject, ask what
 literal word it stands for, and write that word. Keep a figure only when no
 literal phrase exists or the field uses it as a term ("memory leak").
 
-| Figure | Literal |
-|---|---|
-| earns its place | is needed, is used |
-| buys the room | saves N characters |
-| a one-way door | irreversible |
-| rots, drifts | falls out of date when X changes |
-| fight over it | both write it |
-| the edge | the exception |
-| a second door | a second entry point |
-| reads loud / quiet | has high / low values |
-| the dangerous shape | the case that breaks: name it |
+| Figure              | Literal                          |
+| ------------------- | -------------------------------- |
+| earns its place     | is needed, is used               |
+| buys the room       | saves N characters               |
+| a one-way door      | irreversible                     |
+| rots, drifts        | falls out of date when X changes |
+| fight over it       | both write it                    |
+| the edge            | the exception                    |
+| a second door       | a second entry point             |
+| reads loud / quiet  | has high / low values            |
+| the dangerous shape | the case that breaks: name it    |
 
 ## A cleft sentence
 
@@ -91,8 +91,8 @@ An adverb standing in for the mechanism of a failure. Name what the reader sees
 instead, or drop the adverb.
 
 > returning whichever came first would be the same class of wrong, quieter →
-> returning the first match would place the highlight on a wrong residue with
-> no error
+> returning the first match would place the highlight on a wrong residue with no
+> error
 
 ## An aphorism opening or closing a section
 
@@ -133,7 +133,7 @@ or what was found.
 ## Em-dash asides
 
 One in a paragraph is punctuation; three is a writer avoiding sentence
-boundaries. A ` -- ` in a code comment is the same habit. Promote one to its own
+boundaries. A `--` in a code comment is the same habit. Promote one to its own
 sentence, demote one to a comma. Tutorials use none.
 
 ## Bug history in a comment
@@ -189,5 +189,5 @@ sentences ("a MultipleAlignment is an alignment").
 - **An established idiom.** "travels in the link" and "the row reads threonine"
   recur across every page on purpose.
 - **Generated prose.** `packages/lib/apidocs/*.md` comes from the doc comments
-  in `model.ts` via docgen, and the live-link block in `docs/user_guide.md` comes
-  from `scripts/screenshots/genGuideLinks.mjs`. Fix the source.
+  in `model.ts` via docgen, and the live-link block in `docs/user_guide.md`
+  comes from `scripts/screenshots/genGuideLinks.mjs`. Fix the source.

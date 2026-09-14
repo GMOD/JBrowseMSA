@@ -6,17 +6,17 @@ an agent writes into. JBrowse Desktop already works this way over MCP: one
 becomes a track through a `FromConfigAdapter` whose features sit in the track
 config, so the track saves and reopens with the session
 (`~/src/jbrowse-components/website/docs/agents_recipes.md`, "Show a value you
-computed as a track"). The MSA equivalent is a set of layers whose data is stored
-in the snapshot, in coordinates an agent already has, and drawn by the viewer's
-existing render paths.
+computed as a track"). The MSA equivalent is a set of layers whose data is
+stored in the snapshot, in coordinates an agent already has, and drawn by the
+viewer's existing render paths.
 
 ## What already follows the pattern
 
 - **Row features.** The CLI runs InterProScan, and the viewer draws whatever GFF
-  arrives and has no domain-specific code. `data.gff` persists
-  in the snapshot, `Annotation` carries the row name and 1-based residue
-  coordinates, and `annotationsByRow` projects them into columns. Every other layer
-  should follow the same contract.
+  arrives and has no domain-specific code. `data.gff` persists in the snapshot,
+  `Annotation` carries the row name and 1-based residue coordinates, and
+  `annotationsByRow` projects them into columns. Every other layer should follow
+  the same contract.
 - **Text tracks.** A Stockholm `#=GC` line becomes a per-column text track with
   its own color map (`adapterTrackModels`).
 - **Row metadata.** `data.treeMetadata` is a JSON map from row name to string
@@ -53,22 +53,24 @@ own conservation has nowhere to put it.
 
 `values` index alignment columns unless `row` is given, in which case they index
 that row's residues and `seqPosToGlobalCol` projects them, the same rule GFF
-features follow. `max` normalizes; without it, the viewer treats the values as 0 to 1. The
-`text` kind is the existing Stockholm track with its data supplied inline. The work is
-a `columnTracks` property, a getter that merges them into `tracks`, one lookup
-in `barTrackValues`, and the `hideGaps` skip that text tracks already do. A 30
-kb genome alignment gives a 30k-element array, so the same 50 kb snapshot rule
-as `DataModel` applies, with a `columnTracksFilehandle` for anything bigger.
+features follow. `max` normalizes; without it, the viewer treats the values as 0
+to 1. The `text` kind is the existing Stockholm track with its data supplied
+inline. The work is a `columnTracks` property, a getter that merges them into
+`tracks`, one lookup in `barTrackValues`, and the `hideGaps` skip that text
+tracks already do. A 30 kb genome alignment gives a 30k-element array, so the
+same 50 kb snapshot rule as `DataModel` applies, with a `columnTracksFilehandle`
+for anything bigger.
 
 ### 2. Row features with their own color and glyph
 
 `fillPalette` assigns colors by accession from a fixed palette, so an agent
-cannot color pathogenic features red and benign ones grey. GFF3 already has a `color=` attribute
-convention (JBrowse and IGV both honor it). Read it into `Annotation.color`, let
-it override the palette, and let `featureType` pick the glyph: box for a domain,
-arrow for a gene, the existing exon path for `exon`. A JSON
-`features: Annotation[]` field beside `data.gff` saves the agent serializing to
-GFF, but GFF text stays the persisted form and the documented one.
+cannot color pathogenic features red and benign ones grey. GFF3 already has a
+`color=` attribute convention (JBrowse and IGV both honor it). Read it into
+`Annotation.color`, let it override the palette, and let `featureType` pick the
+glyph: box for a domain, arrow for a gene, the existing exon path for `exon`. A
+JSON `features: Annotation[]` field beside `data.gff` saves the agent
+serializing to GFF, but GFF text stays the persisted form and the documented
+one.
 
 ### 3. Row strips from metadata
 
@@ -86,8 +88,9 @@ key drawn as a colored column between the tree and the alignment, with a legend.
 A categorical key with no `colors` takes the ggplot palette in
 `ggplotPalettes.ts`. One extra field, `tint: "clade"`, shades the row background
 across tree label and alignment by that key, and that field covers all of
-[row-group-coloring](row-group-coloring.md) as data. The strip canvas is a new narrow panel that scrolls with `TreeCanvas`,
-so the portal rule for transformed containers in `CLAUDE.md` applies to it.
+[row-group-coloring](row-group-coloring.md) as data. The strip canvas is a new
+narrow panel that scrolls with `TreeCanvas`, so the portal rule for transformed
+containers in `CLAUDE.md` applies to it.
 
 ### 4. Highlights with labels, in residue coordinates
 
@@ -119,17 +122,17 @@ is adding the map to that key.
 
 ### Out of scope
 
-A per-cell color matrix. A matrix generalizes everything above, but it
-breaks the raster tile cache's key, is quadratic in the snapshot, and every
-real ask so far decomposes into a row feature, a column track, or a highlight.
-Revisit if an agent produces one that does not.
+A per-cell color matrix. A matrix generalizes everything above, but it breaks
+the raster tile cache's key, is quadratic in the snapshot, and every real ask so
+far decomposes into a row feature, a column track, or a highlight. Revisit if an
+agent produces one that does not.
 
 ## The contract
 
-- Every layer is a snapshot field. The standalone app writes the snapshot to `?data=`, the plugin
-  takes the same fields through a session spec and through `run_javascript` on
-  the live `MsaView` model, and the CLI should take a whole snapshot for
-  `export-svg` instead of only `msa`, `tree`, and `gff`.
+- Every layer is a snapshot field. The standalone app writes the snapshot to
+  `?data=`, the plugin takes the same fields through a session spec and through
+  `run_javascript` on the live `MsaView` model, and the CLI should take a whole
+  snapshot for `export-svg` instead of only `msa`, `tree`, and `gff`.
 - A layer that names a row uses row-residue coordinates, 1-based inclusive as
   GFF is. The viewer projects them to columns, since it holds the gap structure.
 - Large documents follow the `DataModel` rule: inline under 50 kb, otherwise a

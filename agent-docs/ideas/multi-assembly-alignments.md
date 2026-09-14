@@ -5,9 +5,9 @@ read from a hosted bgzip. `scripts/gene-explorer/build-data.mjs` now builds the
 same three-file index for `mm39`, `dm6` and `ce11` (and the bigger `dm6-124way`
 / `ce11-135way`), keyed by the species' own symbols and with `.cds` sequence
 names that match the GenArk 2bit the explorer already displays those species on.
-The remaining work is hosting the outputs and wiring `website/src/lib/geneExplorer.ts`
-to use them. The survey behind the choice of assemblies is in
-`scripts/gene-explorer/README.md`.
+The remaining work is hosting the outputs and wiring
+`website/src/lib/geneExplorer.ts` to use them. The survey behind the choice of
+assemblies is in `scripts/gene-explorer/README.md`.
 
 ## Host
 
@@ -63,23 +63,24 @@ Per entry the website needs:
 For a non-human gene the explorer today calls NCBI Datasets (locus), UniProt
 (accession + sequence) and E-utils `gene_table` (the CDS model), then picks an
 isoform by UniProt length. With a hosted alignment, the `.cds` line for the
-symbol is the CDS model the alignment was translated from, so the MSA row and the
-`connectedFeature` share codon ordinals by construction. The human path uses the
-same reasoning to prefer knownCanonical over RefSeq Select. `loadSpeciesGene`
-therefore becomes: resolve the locus (for the assembly accession and a
-fallback), try `fetchGeneCds(symbol)` against the species' `.cds`, and only fall
-back to `fetchTranscriptNcbi` when the symbol is not in the index.
+symbol is the CDS model the alignment was translated from, so the MSA row and
+the `connectedFeature` share codon ordinals by construction. The human path uses
+the same reasoning to prefer knownCanonical over RefSeq Select.
+`loadSpeciesGene` therefore becomes: resolve the locus (for the assembly
+accession and a fallback), try `fetchGeneCds(symbol)` against the species'
+`.cds`, and only fall back to `fetchTranscriptNcbi` when the symbol is not in
+the index.
 
 `.cds` refNames for these assemblies are already the GenArk names
 (`NC_000077.7`, `NT_033777.3`), so `toCanonicalRefName` must NOT strip `chr`
-from them. The function is a no-op on an accession, but its comment's
-human-only assumption needs removing. The `assemblyAccession` the session embeds stays the one NCBI
-reports, which the build asserts is the GenArk assembly in its table
+from them. The function is a no-op on an accession, but its comment's human-only
+assumption needs removing. The `assemblyAccession` the session embeds stays the
+one NCBI reports, which the build asserts is the GenArk assembly in its table
 (GCF_000001635.27, GCF_000001215.4, GCF_000002985.6).
 
 `proteinSequence` for the 3D view comes from the MSA's reference row, ungapped,
-as `loadHumanGene` does, since that row is the translation of the `.cds` model. The UniProt
-sequence stays the fallback for genes outside the index.
+as `loadHumanGene` does, since that row is the translation of the `.cds` model.
+The UniProt sequence stays the fallback for genes outside the index.
 
 ## Species that stay on-demand
 

@@ -122,10 +122,10 @@ Load a GFF3 annotation file from the import form, or from **Annotations → Open
 annotation file...**, to overlay domains on the alignment. The overlay accepts
 any GFF3, including exon and gene models; InterProScan output is the most common
 input. The dialog also takes the JSON an InterProScan run returns and converts
-it to GFF3 as it loads. Either way the annotations travel in the shared link with
-the rest of the view. The viewer translates each row's annotation coordinates
-into alignment columns, so they line up across the family even where gaps shift
-the underlying sequence positions.
+it to GFF3 as it loads. Either way the annotations travel in the shared link
+with the rest of the view. The viewer translates each row's annotation
+coordinates into alignment columns, so they line up across the family even where
+gaps shift the underlying sequence positions.
 
 The [CLI](https://gmod.org/JBrowseMSA/cli) builds the file:
 `react-msaview-cli interpro` reads InterPro's precomputed matches for UniProt
@@ -163,11 +163,11 @@ across the whole family in one column range.
 [![](media/domain-loss-closeup.png)][live-domain-loss-closeup]
 
 The same alignment at base resolution. The five rows with a pyrin (PYD) domain
-carry it over real sequence. The rows without one still have sequence there: cow,
-pig, horse and zebrafish have residues in those columns with no PYD called over
-them, and only the rodents are mostly gap. At whole-protein zoom the two cases
-look alike, so zoom to base resolution to tell "no domain annotated" from "no
-sequence".
+carry it over real sequence. The rows without one still have sequence there:
+cow, pig, horse and zebrafish have residues in those columns with no PYD called
+over them, and only the rodents are mostly gap. At whole-protein zoom the two
+cases look alike, so zoom to base resolution to tell "no domain annotated" from
+"no sequence".
 
 ## Viewing metadata
 
@@ -189,8 +189,8 @@ options to copy them and to show/hide gaps.
 - **Point at something** before you share. The snapshot carries labeled
   highlights: a residue of a named sequence, a column range, or a set of rows,
   each with a note drawn beside it. The view state stores them (see the
-  [layers reference](https://gmod.org/JBrowseMSA/layers)), so a link can open
-  on a band labeled "R248, conserved in 651 of 658 orthologs".
+  [layers reference](https://gmod.org/JBrowseMSA/layers)), so a link can open on
+  a band labeled "R248, conserved in 651 of 658 orthologs".
 - **Export an image** with **Export SVG** (file menu): a vector figure of the
   current viewport or the entire alignment, optionally with the minimap and
   annotation tracks.
@@ -252,17 +252,17 @@ label, at the left, also closes it and shows its details.
   class instead of exact identity. It shows sites held constant by conservative
   substitution, which identity-based conservation counts as variable. Protein
   alignments only, on by default.
-- **Sequence logo**: the residues of each column stacked by the information
-  they carry, tallest on top, each letter's height its share of the column's
-  total. Off by default. Column height is information content in bits, so it
-  tops out at log2(20) for protein and log2(4) for nucleotide, and a column
-  whose residues are evenly split draws nothing at all. Frequencies come from
-  the non-gap residues, and the track then scales the whole stack by the
-  column's occupancy, so a column that is mostly gaps stays short even when its
-  few residues agree.
+- **Sequence logo**: the residues of each column stacked by the information they
+  carry, tallest on top, each letter's height its share of the column's total.
+  Off by default. Column height is information content in bits, so it tops out
+  at log2(20) for protein and log2(4) for nucleotide, and a column whose
+  residues are evenly split draws nothing at all. Frequencies come from the
+  non-gap residues, and the track then scales the whole stack by the column's
+  occupancy, so a column that is mostly gaps stays short even when its few
+  residues agree.
 - **Position**: column numbers with a tick under each, at whatever spacing the
-  zoom leaves room for. Off by default. The track counts alignment columns.
-  When the view is drawn relative to a row (**Relative to** in a row's menu), it
+  zoom leaves room for. Off by default. The track counts alignment columns. When
+  the view is drawn relative to a row (**Relative to** in a row's menu), it
   counts that row's residues and skips the columns where the row has a gap.
 - **Secondary structure** and the other annotation rows a Stockholm file carries
   inline appear as text tracks, colored by the active scheme. Every `#=GC` line
@@ -286,12 +286,12 @@ Check "include tracks" in the export dialog to include tracks in an SVG export.
 
 A host can also supply a track as data. A `columnTracks` entry in the shared URL
 or session carries per-column values drawn as bars, a per-column string drawn
-like a Stockholm annotation line, or pairs of positions drawn as arcs. Values can
-index alignment columns or the residues of one row, and each track gets a name,
-a color and its own menu entry. Use an arc track for a pairing: a disulfide
-bond, a residue contact from a structure, a base pair the file does not already
-annotate. The [layers reference](https://gmod.org/JBrowseMSA/layers) lists the
-fields.
+like a Stockholm annotation line, or pairs of positions drawn as arcs. Values
+can index alignment columns or the residues of one row, and each track gets a
+name, a color and its own menu entry. Use an arc track for a pairing: a
+disulfide bond, a residue contact from a structure, a base pair the file does
+not already annotate. The [layers reference](https://gmod.org/JBrowseMSA/layers)
+lists the fields.
 
 ## Settings reference
 
@@ -314,9 +314,9 @@ not with the size of the file.
 
 The whole Globin family from Pfam (PF00042) as the InterPro API serves it:
 20,705 sequences over 672 columns, 20 MB of Stockholm behind a 3 MB gzipped
-response. The first column paints about four seconds after the link opens.
-After that the canvas draws only the tiles on screen, so scrolling and zooming
-stay interactive.
+response. The first column paints about four seconds after the link opens. After
+that the canvas draws only the tiles on screen, so scrolling and zooming stay
+interactive.
 
 ## Embedding and related projects
 

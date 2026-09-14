@@ -7,8 +7,8 @@ data: a snapshot layer naming the correspondence, computed once by a producer
 such as SIFTS, an AlphaFold model or a curator. The viewer looks the
 correspondence up and returns nothing when there is no entry. This follows
 [layers that take data](data-layers.md), where an agent computes a value and the
-snapshot stores it for the viewer to draw, applied to the one coordinate hop this
-repo does not own.
+snapshot stores it for the viewer to draw, applied to the one coordinate hop
+this repo does not own.
 
 Background reading that prompted this: `~/ideas/sequence-structure-interop.md`,
 local and deliberately outside the repo.
@@ -63,11 +63,11 @@ the viewer already projects them through `seqPosToVisibleCol`, and every other
 layer keys the same way: GFF features, `highlights` with a `row`, and
 `columnTracks` whose `values` index a named row's residues.
 
-**Segments, because SIFTS uses segments.** `UniProtStructureSegment` in protein3d
-is already `{unpStart, unpEnd, structStart, structEnd}`; this layer uses the same
-fields with the alignment row in place of a UniProt accession. A dozen numbers
-covers a case that a dense per-residue array would spend kilobytes on. Segments
-also define unmapped: **a position no segment covers is unmapped.**
+**Segments, because SIFTS uses segments.** `UniProtStructureSegment` in
+protein3d is already `{unpStart, unpEnd, structStart, structEnd}`; this layer
+uses the same fields with the alignment row in place of a UniProt accession. A
+dozen numbers covers a case that a dense per-residue array would spend kilobytes
+on. Segments also define unmapped: **a position no segment covers is unmapped.**
 
 **The segment geometry encodes three states, so the layer has no status field.**
 A position a segment covers is mapped and observed. A position listed in
@@ -81,8 +81,8 @@ that could drift apart.
 Structure positions are `label_seq_id`, the 1-based index into the entity's
 SEQRES, which is protein3d's native coordinate plus one. The layer leaves author
 numbering out: it carries insertion codes, so `100A` sorts between `100` and
-`101` and integer arithmetic on it is wrong. The structure viewer can derive auth
-numbering for display.
+`101` and integer arithmetic on it is wrong. The structure viewer can derive
+auth numbering for display.
 
 The API consists of two model methods:
 
@@ -116,14 +116,14 @@ persisted `highlights` array, so a transient highlight resolves through the same
 row projection as a document one and draws above it. `reset()` drops the map
 because a hover belongs to the file that was open. `setHighlightedColumns` was
 left as it was: it is a cross-repo contract with jbrowse-plugin-msaview and
-renders through a different path, so `applyHighlight` sits beside it. Its callers
-should migrate.
+renders through a different path, so `applyHighlight` sits beside it. Its
+callers should migrate.
 
 ## What it unlocks
 
 [Conservation on 3D structure](conservation-on-structure.md) becomes wiring with
-no lookup step. That file assumes this already, but it cannot work while the
-row ↔ structure anchor is a sequence-equality guess.
+no lookup step. That file assumes this already, but it cannot work while the row
+↔ structure anchor is a sequence-equality guess.
 
 A **multi-structure overlay** becomes possible without a structural aligner.
 Take the columns where two rows both map to observed residues, feed those
@@ -166,8 +166,8 @@ mappings are contiguous segments in every case seen so far.
    return undefined when the answer is not unique.** A row mapped onto four
    structures is that review's own worked example, and returning the first
    mapping is the ambiguity-reported-as-exact fault it criticises.
-   **`unobserved` is in structure positions**, so a residue can be unobserved and
-   outside the mapped region at once; the example range in this file implies
+   **`unobserved` is in structure positions**, so a residue can be unobserved
+   and outside the mapped region at once; the example range in this file implies
    that without stating it. **The viewer ignores a stale mapping.** The review's
    sharpest criticism is that the digest check stops at the fixture boundary and
    never travels with the data, and a mapping loaded against a re-aligned or
@@ -186,5 +186,5 @@ mappings are contiguous segments in every case seen so far.
 ## Notes
 
 `conservation-on-structure.md` cited `website/src/lib/proteinStl.ts` for
-in-browser AlphaFold fetching. That file no longer exists, and the citation there
-has been corrected.
+in-browser AlphaFold fetching. That file no longer exists, and the citation
+there has been corrected.

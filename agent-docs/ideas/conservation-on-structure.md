@@ -1,9 +1,9 @@
 # Conservation mapped onto 3D structure
 
 `seqPosToVisibleCol` and `visibleColToSeqPos` are already a documented
-cross-repo contract with jbrowse-plugin-protein3d. The proposal pushes per-column
-conservation _into_ the structure coloring, and the column ↔ residue half of the
-coordinate math is done.
+cross-repo contract with jbrowse-plugin-protein3d. The proposal pushes
+per-column conservation _into_ the structure coloring, and the column ↔ residue
+half of the coordinate math is done.
 
 The row ↔ structure half is not. protein3d currently guesses at hover time which
 alignment row a structure belongs to, and which of its residues a row position

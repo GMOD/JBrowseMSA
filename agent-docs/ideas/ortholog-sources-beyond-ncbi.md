@@ -33,9 +33,9 @@ yeast 559292, Arabidopsis 3702.
 On stability, PANTHER publishes a numbered release a year (19 today), has run
 the same `services/oai` endpoints since 2019, and is the GO consortium's
 enrichment backend. Its docs sit behind a Cloudflare challenge, so the rate
-limit is unpublished, and none of the probes above needed a key. OMA versions its
-API (`api/version/`) and its data release, and the two slow calls above show it
-also stalls. Ensembl's own
+limit is unpublished, and none of the probes above needed a key. OMA versions
+its API (`api/version/`) and its data release, and the two slow calls above show
+it also stalls. Ensembl's own
 [status feed](https://www.ensembl.info/category/07-status/) records mirror
 outages in January 2026 and a beta outage in June 2026, and the project is
 migrating to a new platform. The 35 s ping and the 503 above measure what a user
@@ -48,12 +48,12 @@ page's own inputs, a gene symbol and a taxon id, returns a UniProt accession per
 target species in under a second, covers every species the page offers and 137
 more, and its `LDO` flag is a defensible one-to-one pick where one exists.
 Sequences come from one UniProt batch call. PANTHER returns a gene it cannot map
-in `unmapped_ids`, and OMA covers that case: it takes the UniProt accession
-the page already has, and `protein/<acc>/orthologs/` plus `bulk_retrieve` gives
-rows with the same fields, choosing per taxon the row with the best `rel_type` (`1:1` >
-`1:n` > `m:1` > `m:n`) and lowest `distance`. OMA is second rather than first
-because its pairwise sets drop whole clades for many-to-many families (Antp: 76
-insects, no vertebrate), where PANTHER still lists 26 orthologs.
+in `unmapped_ids`, and OMA covers that case: it takes the UniProt accession the
+page already has, and `protein/<acc>/orthologs/` plus `bulk_retrieve` gives rows
+with the same fields, choosing per taxon the row with the best `rel_type`
+(`1:1` > `1:n` > `m:1` > `m:n`) and lowest `distance`. OMA is second rather than
+first because its pairwise sets drop whole clades for many-to-many families
+(Antp: 76 insects, no vertebrate), where PANTHER still lists 26 orthologs.
 
 OrthoDB is not worth adding. Its single `fasta` call is the most convenient
 response of any source, but the group level decides what comes back, and at the
@@ -73,7 +73,8 @@ Omega on the website (`ebiAlign.ts`), `launchMSA` in the plugin.
 The plugin is the better place. `doLaunchOrthologs.ts` already handles the query
 row, the labels, the tree metadata and the aligner, and the website is moving
 towards emitting `orthologParams` instead of building the alignment itself. The
-integration point is `fetchOrthologRows` in `src/utils/ncbiOrthologs.ts`, whose rows are
+integration point is `fetchOrthologRows` in `src/utils/ncbiOrthologs.ts`, whose
+rows are
 `{ label, taxId, geneId, protein, sequence, scientificName, commonName }`. A
 `source: 'ncbi' | 'panther'` on `OrthologParams` (default `ncbi`, so every
 existing link keeps its meaning) would pick the fetcher; the PANTHER fetcher
@@ -91,16 +92,16 @@ them.
 jbrowse-plugin-msaview 3.3.0 ships PANTHER. `source: 'ncbi' | 'panther'` on
 `OrthologParams` defaults to `ncbi` and dispatches to
 `src/utils/pantherOrthologs.ts`, which returns rows with the same fields as
-`fetchOrthologRows`, so the query row, the labels, the aligner and the CDD overlay
-take the same rows regardless of source. A **Source** select on the Orthologs tab offers the same
-choice interactively, remembered in local storage. The website emits
-`source: 'panther'` for fly, worm, Arabidopsis and yeast.
+`fetchOrthologRows`, so the query row, the labels, the aligner and the CDD
+overlay take the same rows regardless of source. A **Source** select on the
+Orthologs tab offers the same choice interactively, remembered in local storage.
+The website emits `source: 'panther'` for fly, worm, Arabidopsis and yeast.
 
 The CDD overlay question this note left open is settled: `efetch` serves a
 Swiss-Prot accession as a GenPept record with CDD Regions, exactly as it serves
-a RefSeq one, and returns HTTP 400 for a TrEMBL accession. A mixed batch
-returns the Swiss-Prot records and drops the rest, so domains land on the
-reviewed rows and the alignment is unaffected either way.
+a RefSeq one, and returns HTTP 400 for a TrEMBL accession. A mixed batch returns
+the Swiss-Prot records and drops the rest, so domains land on the reviewed rows
+and the alignment is unaffected either way.
 
 The prototype module this note was written around,
 `website/src/lib/orthologs/panther.ts`, is deleted. The plugin builds the
@@ -120,7 +121,7 @@ identity of this protein", which UniProt has already clustered.
 its UniRef50 (or 90) cluster, and lists the members one per species, reference
 proteomes by default, from rest.uniprot.org (CORS `*`). Human TP53: 191 members,
 129 in reference proteomes, about two seconds. Paired with
-`msaAlgorithm: 'browser'` the launch makes no EBI call; on the day the source was
-built, EBI took 12 to 15 minutes per phmmer job. A cluster cannot reach remote
-homologs, so phmmer stays for that; both are session-spec sources
+`msaAlgorithm: 'browser'` the launch makes no EBI call; on the day the source
+was built, EBI took 12 to 15 minutes per phmmer job. A cluster cannot reach
+remote homologs, so phmmer stays for that; both are session-spec sources
 (`orthologParams`, `searchParams`) and jb2hubs' protein browser offers each.

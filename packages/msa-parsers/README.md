@@ -31,8 +31,8 @@ pnpm add msa-parsers
 ### Parsing MSA files
 
 `parseMSA` sniffs the format from the content, not from the file name. FASTA and
-A3M share a leading `>`, so telling them apart is heuristic; pass a format as the
-third argument to override the guess:
+A3M share a leading `>`, so telling them apart is heuristic; pass a format as
+the third argument to override the guess:
 
 ```typescript
 import { parseMSA } from 'msa-parsers'

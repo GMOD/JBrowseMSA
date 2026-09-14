@@ -11,8 +11,8 @@ npm install react-msaview @jbrowse/core@4 mobx@6 mobx-react@9 \
   @emotion/react @emotion/styled react react-dom
 ```
 
-The line pins the majors because the viewer shares mobx, mobx-state-tree and
-MUI with `@jbrowse/core`, and the app needs exactly one copy of each. With two
+The line pins the majors because the viewer shares mobx, mobx-state-tree and MUI
+with `@jbrowse/core`, and the app needs exactly one copy of each. With two
 copies of mobx-state-tree, the first render throws "Identifier types can only be
 instantiated as direct child of a model type". With two copies of MUI, a theme
 built by one copy reaches components from the other, which also throws. The
@@ -43,31 +43,31 @@ export default function App() {
 
 Props:
 
-| Prop                | Type                | Description                                                          |
-| ------------------- | ------------------- | -------------------------------------------------------------------- |
-| `msa`               | `string`            | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                 |
-| `tree`              | `string`            | Newick tree text                                                     |
-| `gff`               | `string`            | Annotations to overlay (GFF3 text)                                   |
-| `msaFilehandle`     | `FileLocation`      | Remote file location for alignment                                   |
-| `treeFilehandle`    | `FileLocation`      | Remote file location for tree                                        |
-| `gffFilehandle`     | `FileLocation`      | Remote file location for domain GFF                                  |
-| `colorScheme`       | `string`            | Color scheme name (see below)                                        |
-| `height`            | `number`            | Widget height in pixels                                              |
-| `colWidth`          | `number`            | Per-column width in pixels (horizontal zoom)                         |
-| `rowHeight`         | `number`            | Per-row height in pixels (vertical zoom)                             |
-| `allowedGappyness`  | `number`            | Hide columns at least this percent gaps (default 100, hide nothing)  |
-| `relativeTo`        | `string`            | Row name to diff every other row against; matches draw as `.`        |
-| `drawTree`          | `boolean`           | Draw the phylogeny (default true); false leaves a label gutter       |
-| `treeAreaWidth`     | `number`            | Fixed width of the tree/label gutter                                 |
-| `autoTreeAreaWidth` | `boolean`           | Size that gutter to the labels; pair with `drawTree: false`          |
-| `columnTracks`      | `ColumnTrackSpec[]` | Tracks supplied as data (see below)                                  |
-| `highlights`        | `Highlight[]`       | Labeled highlights (see below)                                       |
-| `highlightColumns`  | `number[]`          | Columns (0-based) under a persistent overlay                         |
-| `residueMappings`   | `ResidueMapping[]`  | Structure residue for each residue of a row                          |
+| Prop                | Type                | Description                                                         |
+| ------------------- | ------------------- | ------------------------------------------------------------------- |
+| `msa`               | `string`            | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                |
+| `tree`              | `string`            | Newick tree text                                                    |
+| `gff`               | `string`            | Annotations to overlay (GFF3 text)                                  |
+| `msaFilehandle`     | `FileLocation`      | Remote file location for alignment                                  |
+| `treeFilehandle`    | `FileLocation`      | Remote file location for tree                                       |
+| `gffFilehandle`     | `FileLocation`      | Remote file location for domain GFF                                 |
+| `colorScheme`       | `string`            | Color scheme name (see below)                                       |
+| `height`            | `number`            | Widget height in pixels                                             |
+| `colWidth`          | `number`            | Per-column width in pixels (horizontal zoom)                        |
+| `rowHeight`         | `number`            | Per-row height in pixels (vertical zoom)                            |
+| `allowedGappyness`  | `number`            | Hide columns at least this percent gaps (default 100, hide nothing) |
+| `relativeTo`        | `string`            | Row name to diff every other row against; matches draw as `.`       |
+| `drawTree`          | `boolean`           | Draw the phylogeny (default true); false leaves a label gutter      |
+| `treeAreaWidth`     | `number`            | Fixed width of the tree/label gutter                                |
+| `autoTreeAreaWidth` | `boolean`           | Size that gutter to the labels; pair with `drawTree: false`         |
+| `columnTracks`      | `ColumnTrackSpec[]` | Tracks supplied as data (see below)                                 |
+| `highlights`        | `Highlight[]`       | Labeled highlights (see below)                                      |
+| `highlightColumns`  | `number[]`          | Columns (0-based) under a persistent overlay                        |
+| `residueMappings`   | `ResidueMapping[]`  | Structure residue for each residue of a row                         |
 
 The viewer applies changes to every prop above except `msa`, `tree`, `gff` and
-the three filehandles, so a host can put a control on one without remounting
-and re-fetching the alignment. Each prop updates only its own setting when it
+the three filehandles, so a host can put a control on one without remounting and
+re-fetching the alignment. Each prop updates only its own setting when it
 changes, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `columnTracks`, `residueMappings`,

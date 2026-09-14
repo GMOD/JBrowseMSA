@@ -89,8 +89,8 @@ contact; bar and text tracks hold one value per position. Both ends of an arc
 are alignment columns, or residues of `row`, so a contact map computed in a
 protein's own numbering lands on the alignment without conversion. The viewer
 draws arcs on one baseline in the order given. A `color` on an individual arc
-overrides the track's, so one track can separate classes of pair, such as
-nested helices and a pseudoknot.
+overrides the track's, so one track can separate classes of pair, such as nested
+helices and a pseudoknot.
 
 An RNA Stockholm file needs no arc track, because `#=GC SS_cons` already pairs
 the columns. The viewer draws a **Base pairs** track from it and gives
@@ -211,11 +211,11 @@ model.rowResidue(structureId, position, asymId?) // -> {rowName, seqPos} | undef
 ```
 
 Both return `undefined` when no mapping covers the position, **and also when
-more than one does**. A row commonly maps onto several structures,
-such as an experimental entry and a couple of predicted models, and a homodimer
-maps two rows onto two chains of one id. Returning the first mapping found would
-give a wrong residue with no sign of the error. Name one structure or chain with
-the optional argument, or read `mappedStructures` to see what is available.
+more than one does**. A row commonly maps onto several structures, such as an
+experimental entry and a couple of predicted models, and a homodimer maps two
+rows onto two chains of one id. Returning the first mapping found would give a
+wrong residue with no sign of the error. Name one structure or chain with the
+optional argument, or read `mappedStructures` to see what is available.
 
 ### Staleness
 
@@ -230,8 +230,8 @@ these holds:
 - A segment covers residues past the end of the row, which shows the same
   mismatch when `rowLength` is missing.
 
-When a segment is malformed, its two sides differing in length so it cannot be
-a 1:1 run, the viewer drops only that segment and keeps using the rest of the
+When a segment is malformed, its two sides differing in length so it cannot be a
+1:1 run, the viewer drops only that segment and keeps using the rest of the
 mapping.
 
 `packages/examples/src/examples/kinaseStructure.json` is a real mapping,
