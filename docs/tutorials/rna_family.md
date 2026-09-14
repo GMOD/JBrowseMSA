@@ -14,28 +14,29 @@ Four tools do the work, and none of them run inside the viewer: `curl`,
 ## Prerequisites
 
 - `curl` and `python3`
-- Infernal 1.1, for `cmsearch` and `cmalign` — `apt install infernal` on
-  Debian/Ubuntu, `brew install infernal` on macOS
-- FastTree — `apt install fasttree`, or `brew install fasttree`
+- Infernal 1.1 for `cmsearch` and `cmalign`, `apt install infernal` on Debian or
+  Ubuntu, `brew install infernal` on macOS
+- FastTree, `apt install fasttree`, or `brew install fasttree`
+- nothing to read along: every figure below links to the live view it captured
 
 ## Where the data comes from
 
 Rfam release 15.1 for the family, NCBI RefSeq for the genomes and their
 annotation, and the RCSB PDB for one crystal structure.
 
-- The RF00162 covariance model: https://rfam.org/family/RF00162/cm
-- The RF00162 seed alignment, 457 curated sequences with the consensus
+- the RF00162 covariance model: https://rfam.org/family/RF00162/cm
+- the RF00162 seed alignment, 457 curated sequences with the consensus
   structure: https://rfam.org/family/RF00162/alignment/stockholm
-- One RefSeq genome per request, here Bacillus subtilis 168:
+- one RefSeq genome per request, here Bacillus subtilis 168:
   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_000964.3&rettype=fasta&retmode=text
   The other five are NC_003869.1, NC_003030.1, NC_003210.1, NC_007795.1 and
   NC_009089.1.
-- The annotation of a 1500 nt window of one of those records, which names the
+- the annotation of a 1500 nt window of one of those records, which names the
   gene a hit leads:
   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_000964.3&seq_start=1179185&seq_stop=1180684&strand=2&rettype=ft&retmode=text
-- The sequence of the crystallized aptamer, PDB 2GIS:
+- the sequence of the crystallized aptamer, PDB 2GIS:
   https://www.rcsb.org/fasta/entry/2GIS
-- The finished alignment every link on this page opens, rehosted because
+- the finished alignment every link on this page opens, rehosted because
   rfam.org sends no `Access-Control-Allow-Origin` header and a browser cannot
   read it: https://gmod.org/JBrowseMSA/demo/data/rna/sam-riboswitch.sto
 
@@ -260,7 +261,7 @@ A tree from 187 columns of a 108 nt RNA orders the rows so that related ones sit
 together, which is scaffolding for reading the alignment rather than a result of
 its own.
 
-## 11. Check it against the alignment
+## 11. Check it against the raw data
 
 The figures show the consensus structure Rfam supplies. The last step of the
 build script re-derives what it can from the alignment alone, and prints three
@@ -333,8 +334,9 @@ numbers quoted here are the ones it prints.
 ## See also
 
 - [Data layers](https://gmod.org/JBrowseMSA/layers)
-- [User guide](https://gmod.org/JBrowseMSA/guide)
 - [A protein family from a list of accessions](https://gmod.org/JBrowseMSA/tutorials/protein_family)
+- [The insertion the structure did not resolve](https://gmod.org/JBrowseMSA/tutorials/spike_structure)
+- [User guide](https://gmod.org/JBrowseMSA/guide)
 
 ## References
 
