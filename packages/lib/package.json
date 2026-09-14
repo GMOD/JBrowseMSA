@@ -64,7 +64,7 @@
     "esbuild": "^0.28.1"
   },
   "dependencies": {
-    "@gmod/newick": "^1.0.0",
+    "@gmod/newick": "^1.0.3",
     "@jbrowse/svgcanvas": "workspace:*",
     "colord": "^2.9.3",
     "flatbush": "^4.6.2",
