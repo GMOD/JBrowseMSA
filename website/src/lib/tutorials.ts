@@ -39,6 +39,12 @@ export const tutorials: Tutorial[] = [
     blurb:
       'Search six bacterial genomes with an Rfam covariance model, align the 37 hits back to it, and read the consensus structure off the result: helix arcs, a pseudoknot, and the columns that hold still because the ligand touches them.',
   },
+  {
+    slug: 'phylogeny_at_scale',
+    title: 'An RSV phylogeny from a public Nextstrain build',
+    blurb:
+      'A Nextstrain tree of 1,840 RSV genomes, reconstructed to one whole-genome alignment and opened at every scale from the whole tree to a single variable column.',
+  },
 ]
 
 export const tutorialBySlug = new Map(tutorials.map(t => [t.slug, t]))
