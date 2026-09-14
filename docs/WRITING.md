@@ -166,6 +166,22 @@ A caption with no verb, or a bullet with a dropped subject.
 A reader arriving by deep link has no antecedent for "It", "This" or "That".
 Name the subject.
 
+## Synonym cycling
+
+A reader assumes a track, a lane and a layer are three different things. Pick
+the term the code uses and repeat it.
+
+## An announcer or a count
+
+"Two constraints shape the design" and "for three reasons" name the shape of
+what follows. Write the first constraint.
+
+## Documentation as a changelog
+
+A doc describes current behavior. "We switched to X after Y broke" belongs in
+the commit message. When a passage is wrong, rewrite it; a paragraph appended to
+correct the one above leaves both for the reader to reconcile.
+
 ## Stock sentences
 
 A caution or framing sentence repeated from page to page ("scaffolding for
