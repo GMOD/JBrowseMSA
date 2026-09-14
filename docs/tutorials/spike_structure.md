@@ -14,10 +14,11 @@ one row and one chain.
 
 - `curl` and `jq`
 - python3, which is what the build script does its JSON lookups in
-- MAFFT: `apt install mafft` on Debian/Ubuntu, `brew install mafft` on macOS
-- FastTree: `apt install fasttree`, or `brew install fasttree`
-- [react-msaview-cli](https://gmod.org/JBrowseMSA/cli) for the domain GFF:
+- MAFFT, `apt install mafft` on Debian or Ubuntu, `brew install mafft` on macOS
+- FastTree, `apt install fasttree`, or `brew install fasttree`
+- [react-msaview-cli](https://gmod.org/JBrowseMSA/cli) for the domain GFF,
   `npm install -g react-msaview-cli`, NodeJS v22+
+- nothing to read along: every figure below links to the live view it captured
 
 ## Where the data comes from
 
@@ -25,22 +26,28 @@ Eleven spike glycoproteins as NCBI holds them, the UniProtKB entry for the
 SARS-CoV-2 one, InterPro release 110.0 for the domains, and PDBe for everything
 about the structure.
 
-- All eleven protein sequences, one request:
-  `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=YP_009724390.1&rettype=fasta&retmode=text`
-- The UniProtKB entry, for its sequence and its feature table:
-  `https://rest.uniprot.org/uniprotkb/P0DTC2.json`
-- Precomputed Pfam matches for one accession:
-  `https://www.ebi.ac.uk/interpro/api/entry/pfam/protein/uniprot/P0DTC2/`
-- The SIFTS residue correspondence between UniProt and the PDB entry:
-  `https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/6vxx`
-- Which residues of chain A have coordinates:
-  `https://www.ebi.ac.uk/pdbe/api/pdb/entry/polymer_coverage/6vxx/chain/A`
-- The sequence the entry actually deposited, tags included:
-  `https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/6vxx`
-- The structure itself, for a viewer that wants to draw it:
-  `https://files.rcsb.org/download/6VXX.cif`
+- all eleven protein sequences, one request:
+  https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=YP_009724390.1&rettype=fasta&retmode=text
+- the UniProtKB entry, for its sequence and its feature table:
+  https://rest.uniprot.org/uniprotkb/P0DTC2.json
+- precomputed Pfam matches for one accession:
+  https://www.ebi.ac.uk/interpro/api/entry/pfam/protein/uniprot/P0DTC2/
+- the SIFTS residue correspondence between UniProt and the PDB entry:
+  https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/6vxx
+- which residues of chain A have coordinates:
+  https://www.ebi.ac.uk/pdbe/api/pdb/entry/polymer_coverage/6vxx/chain/A
+- the sequence the entry actually deposited, tags included:
+  https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/6vxx
+- the structure itself, for a viewer that wants to draw it:
+  https://files.rcsb.org/download/6VXX.cif
+- the alignment the commands below write, hosted so the figures can link to it:
+  https://gmod.org/JBrowseMSA/demo/data/spike/spike.afa
+- its tree: https://gmod.org/JBrowseMSA/demo/data/spike/spike.nwk
+- its domains: https://gmod.org/JBrowseMSA/demo/data/spike/spike-domains.gff
+- the three layers, as the build script wrote them:
+  https://gmod.org/JBrowseMSA/demo/data/spike/spike-layers.json
 
-Every one of these serves a single record per request and sends
+Every API endpoint here serves a single record per request and sends
 `Access-Control-Allow-Origin: *`.
 
 ## 1. Name the rows
