@@ -392,7 +392,7 @@ hardcoded view type
 
 ```js
 // type signature
-ISimpleType<"MsaView">
+ILiteralType<"MsaView">
 // code
 type: types.literal('MsaView')
 ```
