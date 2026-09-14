@@ -69,10 +69,25 @@ export const specs = [
       // are 0-based pixel offsets) -- so the live link shows the same four
       // columns the screenshot's callouts point at
       highlights: [
-        { start: 30, end: 30, label: 'catalytic K', color: 'rgba(21,101,192,0.25)' },
-        { start: 77, end: 77, label: 'gatekeeper', color: 'rgba(227,36,43,0.25)' },
+        {
+          start: 30,
+          end: 30,
+          label: 'catalytic K',
+          color: 'rgba(21,101,192,0.25)',
+        },
+        {
+          start: 77,
+          end: 77,
+          label: 'gatekeeper',
+          color: 'rgba(227,36,43,0.25)',
+        },
         { start: 141, end: 143, label: 'DFG', color: 'rgba(46,125,50,0.25)' },
-        { start: 102, end: 102, label: 'control', color: 'rgba(117,117,117,0.25)' },
+        {
+          start: 102,
+          end: 102,
+          label: 'control',
+          color: 'rgba(117,117,117,0.25)',
+        },
       ],
       ...FILES,
     }),
