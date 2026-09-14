@@ -131,3 +131,4 @@ pages-dist
 !vendor-jbrowse/jbrowse-core.tgz
 !vendor-jbrowse/jbrowse-render-core.tgz
 .claude
+__pycache__/
