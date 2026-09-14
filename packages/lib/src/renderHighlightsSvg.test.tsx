@@ -113,3 +113,53 @@ test('a band across every column keeps the letters under it', async () => {
   // request to clear the drawing
   expect((svg.match(/<text/g) ?? []).length).toBeGreaterThan(20)
 })
+
+// label boxes, as `x|y` of the text inside them
+function labels(svg: string) {
+  return [...svg.matchAll(/<text([^>]*)>([^<]*)<\/text>/g)].map(m => ({
+    text: m[2]!,
+    x: Number(/x="([\d.-]+)"/.exec(m[1]!)?.[1]),
+    y: Number(/y="([\d.-]+)"/.exec(m[1]!)?.[1]),
+  }))
+}
+
+test('two labels a column apart do not overdraw each other', async () => {
+  const { svg } = await exportWith([
+    { start: 4, end: 4, label: 'p248' },
+    { start: 5, end: 5, label: 'p249' },
+  ])
+  const drawn = labels(svg)
+  const first = drawn.find(l => l.text === 'p248')!
+  const second = drawn.find(l => l.text === 'p249')!
+
+  expect(first).toBeDefined()
+  expect(second).toBeDefined()
+  // both labels are wider than the single column they title, so the second one
+  // steps down a row rather than landing on top of the first
+  expect(second.y).toBeGreaterThanOrEqual(first.y + 17)
+})
+
+test('a band scrolled off the left keeps its label in frame', async () => {
+  const model = MSAModelF().create({
+    id: 'highlight-scroll-test',
+    type: 'MsaView',
+    height: 400,
+    msaFormat: 'fasta',
+    data: { msa: `>seq1\n${'ACDEFGHIKL'.repeat(30)}` },
+    highlights: [{ start: 1, end: 200, label: 'kinase domain' }],
+  })
+  model.setWidth(1000)
+  model.doScrollX(-1000)
+  expect(model.scrollX).toBe(-1000)
+
+  const svg = await renderToSvg(model, {
+    theme: createJBrowseTheme(),
+    exportType: 'viewport',
+  })
+  // the alignment layer sits at its own origin, so an x inside it is on screen
+  // -- the band starts 1000px to the left of it
+  const label = labels(svg).find(l => l.text === 'kinase domain')!
+  expect(label).toBeDefined()
+  expect(label.x).toBeGreaterThanOrEqual(0)
+  expect(label.x).toBeLessThan(model.msaCanvasWidth)
+})

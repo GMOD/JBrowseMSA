@@ -18,6 +18,23 @@ const labelPad = 3
 // has to consider rows a little outside itself
 export const highlightLabelHeight = labelFontSize + labelPad * 2
 
+export interface LabelBox {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+
+/**
+ * A highlight's label, over its band where it fits and beside it where it does
+ * not, kept inside `bounds` and out of the way of the labels already placed.
+ *
+ * Two single-residue highlights a column apart both want the same few pixels to
+ * the right of their bands, and a band scrolled off the left edge wants its
+ * label off-frame with it: the first overdrew two labels into an unreadable
+ * smudge, the second left the visible band untitled. Pass `placed` and each
+ * later label steps down a row instead of over the one before.
+ */
 export function drawHighlightLabel({
   ctx,
   theme,
@@ -25,6 +42,8 @@ export function drawHighlightLabel({
   x,
   y,
   spanWidth,
+  bounds,
+  placed,
 }: {
   ctx: RenderCtx
   theme: Theme
@@ -32,16 +51,33 @@ export function drawHighlightLabel({
   x: number
   y: number
   spanWidth: number
+  bounds?: { min: number; max: number }
+  placed?: LabelBox[]
 }) {
   setFontSize(ctx, labelFontSize)
   ctx.textAlign = 'start'
   const boxWidth = ctx.measureText(label).width + labelPad * 2
   const boxHeight = highlightLabelHeight
-  const left = boxWidth <= spanWidth ? x : x + spanWidth + 2
+  let left = boxWidth <= spanWidth ? x : x + spanWidth + 2
+  if (bounds) {
+    left = Math.max(bounds.min, Math.min(left, bounds.max - boxWidth))
+  }
+  let top = y
+  if (placed) {
+    const overlaps = (box: LabelBox) =>
+      box.left < left + boxWidth &&
+      box.right > left &&
+      box.top < top + boxHeight &&
+      box.bottom > top
+    while (placed.some(overlaps)) {
+      top += boxHeight
+    }
+    placed.push({ left, right: left + boxWidth, top, bottom: top + boxHeight })
+  }
   ctx.fillStyle = theme.palette.background.paper
-  ctx.fillRect(left, y, boxWidth, boxHeight)
+  ctx.fillRect(left, top, boxWidth, boxHeight)
   ctx.fillStyle = theme.palette.text.primary
-  ctx.fillText(label, left + labelPad, y + labelPad + labelFontSize - 2)
+  ctx.fillText(label, left + labelPad, top + labelPad + labelFontSize - 2)
 }
 
 /**
@@ -69,6 +105,7 @@ export function renderHighlights({
   height: number
 }) {
   const { resolvedHighlights, colWidth, rowHeight } = model
+  const placed: LabelBox[] = []
   ctx.lineWidth = 2
   for (const { rowIndices, color } of resolvedHighlights) {
     ctx.fillStyle = color ?? highlightRowFill
@@ -87,7 +124,16 @@ export function renderHighlights({
     ctx.strokeStyle = color ?? highlightBorder
     ctx.strokeRect(x, 0, spanWidth, height)
     if (label) {
-      drawHighlightLabel({ ctx, theme, label, x, y: 0, spanWidth })
+      drawHighlightLabel({
+        ctx,
+        theme,
+        label,
+        x,
+        y: 0,
+        spanWidth,
+        bounds: { min: 0, max: width },
+        placed,
+      })
     }
   }
 }

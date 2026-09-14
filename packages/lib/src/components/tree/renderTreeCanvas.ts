@@ -9,6 +9,7 @@ import {
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
+import type { LabelBox } from '../msa/renderHighlights.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { ClickMapIndex } from './clickMap.ts'
 import type { Theme } from '@mui/material'
@@ -416,6 +417,7 @@ function renderRowHighlights({
   } = model
   const by = blockSizeYOverride ?? blockSize
   const pad = blockPad(model)
+  const placed: LabelBox[] = []
   for (const { rowIndices, label, color } of resolvedHighlights) {
     ctx.fillStyle = color ?? highlightRowFill
     for (const index of rowIndices) {
@@ -437,6 +439,8 @@ function renderRowHighlights({
         x: -marginLeft + 2,
         y: first * rowHeight,
         spanWidth: treeAreaWidth,
+        bounds: { min: -marginLeft, max: treeAreaWidth - marginLeft },
+        placed,
       })
     }
   }
