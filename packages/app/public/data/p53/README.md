@@ -11,7 +11,7 @@ sequences from NCBI and the variant effects from ClinVar, AlphaFold and MaveDB.
 | `p53-vertebrates.nh`   | Newick          | FastTree 2.1.11 `-lg` on the alignment above                                                                                     |
 | `p53-layers.json`      | JSON            | The three per-residue tracks over the Human row (ClinVar, AlphaMissense, MaveDB) plus the domain bands, as `MsaView` snapshot fields |
 
-The viewer loads the alignment and the tree by URL. It does not load
-`p53-layers.json`: a `columnTracks` value list travels inside the snapshot, so
-the tutorial's links carry the numbers and this file is where they come from,
-for the figures' specs and for anyone who wants the values.
+The viewer loads the alignment and the tree by URL. The tutorial's links carry
+the `columnTracks` values inside the snapshot, so the viewer never loads
+`p53-layers.json`. The file records where those values came from, for the
+figures' specs and for readers who want the numbers.

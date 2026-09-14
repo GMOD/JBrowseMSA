@@ -108,8 +108,7 @@ aa <- AAStringSet(c(
 msaview(msa = aa, color_scheme = "clustal")
 
 # DNAMultipleAlignment
-# every row has to be the same length: a MultipleAlignment is an alignment,
-# and Biostrings rejects a ragged one
+# Biostrings rejects a MultipleAlignment whose rows differ in length
 aln <- DNAMultipleAlignment(c(
   seq1 = "ATGCGATCGATCGATCG--ATCG",
   seq2 = "ATGCGATCGATCGATCGATCGAC",
@@ -164,8 +163,8 @@ msaview(msa = seqs, gff = domains, color_scheme = "clustalx_protein_dynamic")
 
 ### Labeled highlights
 
-Point at a residue, a column range, or a set of rows, with a label that travels
-with the widget. Coordinates are 1-based and inclusive; `row` makes `start` and
+Mark a residue, a column range, or a set of rows, with a label saved in the
+widget. Coordinates are 1-based and inclusive; `row` makes `start` and
 `end` residues of that sequence, projected through the alignment's gaps.
 
 ```r
@@ -180,10 +179,10 @@ msaview(
 
 ### A track from your own numbers
 
-Anything you compute per column, or per residue of one sequence, draws as a
-track above the alignment through `column_tracks`. The viewer scales bars by
-`max` (default 1) and, when `row` names a sequence, places each value on that
-sequence's residues so gaps in the alignment fall out correctly.
+`column_tracks` draws values you compute per column, or per residue of one
+sequence, as a track above the alignment. The viewer scales bars by `max`
+(default 1). When `row` names a sequence, the viewer places each value on that
+sequence's residues and skips the columns where the sequence has a gap.
 
 ```r
 hydropathy <- c(I = 4.5, V = 4.2, L = 3.8, F = 2.8, C = 2.5, M = 1.9, A = 1.8,
@@ -208,8 +207,8 @@ A `kind = "text"` track takes `data`, one character per column, and an optional
 
 ### With ggtree
 
-Pass a ggtree plot object directly as the `tree` argument. The phylogenetic
-topology is extracted automatically.
+Pass a ggtree plot object directly as the `tree` argument, and `msaview` reads
+the tree out of it.
 
 ```r
 library(ggtree)
@@ -229,8 +228,8 @@ msaview(msa = seqs, tree = p, color_scheme = "nucleotide")
 
 ### ggtree with annotations
 
-Annotated ggtree plots work too. Only the tree topology is extracted;
-ggtree-specific annotations (colors, labels, metadata) stay in ggtree.
+Annotated ggtree plots work too. `msaview` takes only the tree; the colors,
+labels and metadata stay in the ggtree plot.
 
 ```r
 metadata <- data.frame(
@@ -340,12 +339,12 @@ Dynamic (computed per-column): `clustalx_protein_dynamic`,
 
 ## Development
 
-The widget's JavaScript lives at `inst/htmlwidgets/lib/react-msaview.umd.js`. It
-is generated, not edited: installing an R package runs no node, so the bundle is
-vendored rather than built on demand. `scripts/release.js` refreshes it from the
-build it just made, so every release ships matching JavaScript, and CI fails if
-the committed bundle's version stamp has drifted from `packages/lib`. To refresh
-it by hand from the repo root:
+The widget's JavaScript is `inst/htmlwidgets/lib/react-msaview.umd.js`, a
+generated bundle. Installing an R package runs no Node, so the package commits
+the built file. `scripts/release.js` refreshes the bundle from the build it just
+made, so every release ships matching JavaScript, and CI fails when the committed
+bundle's version stamp differs from `packages/lib`. To refresh the bundle by hand
+from the repo root:
 
 ```sh
 pnpm build && pnpm sync:r-bundle

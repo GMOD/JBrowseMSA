@@ -4,13 +4,12 @@
 #' react-msaview. Accepts a wide range of R and Bioconductor objects for
 #' both alignments and phylogenetic trees.
 #'
-#' Row names are normalized on the way in: whitespace and the Newick grammar
-#' characters become underscores, in the alignment, the tree, a GFF data
-#' frame's \code{seqname}, and the row a highlight or column track names. The
-#' two formats mangle a name like \code{Homo sapiens} differently otherwise --
-#' ape writes \code{Homo_sapiens} while the FASTA header keeps the space, which
-#' the viewer reads as a row called \code{Homo} -- and the tree then matches no
-#' row.
+#' \code{msaview} replaces whitespace and the Newick grammar characters in row
+#' names with underscores, in the alignment, the tree, a GFF data frame's
+#' \code{seqname}, and the row a highlight or column track names. Without that,
+#' ape writes \code{Homo sapiens} as \code{Homo_sapiens}, the FASTA header keeps
+#' the space, the viewer reads that row as \code{Homo}, and no tree tip matches
+#' it.
 #'
 #' @param msa Alignment data. Can be:
 #'   \itemize{
@@ -171,9 +170,8 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     column_tracks = NULL, show_branch_len = NULL,
                     highlights = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
-  # a URL is for the viewer to fetch, not for R to read: reading it here would
-  # need an HTTP client, and passing it on as document text drew a one-row
-  # alignment whose name was the URL
+  # the viewer fetches a URL itself; passed on as document text, a URL draws a
+  # one-row alignment named after it
   msa_text <- if (is_url(msa)) NULL else convert_msa(msa)
   tree_text <- if (is_url(tree)) NULL else convert_tree(tree)
   gff_text <- if (is_url(gff)) NULL else convert_gff(gff)
@@ -181,7 +179,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   config <- list(type = "MsaView")
   if (!is.null(msa_text) || !is.null(tree_text) || !is.null(gff_text)) {
     # a NULL element survives list() and serializes as JSON null, which the
-    # viewer's model rejects; an absent gff has to be absent
+    # viewer's model rejects; assigning gff with $<- drops a NULL instead
     config$data <- list(msa = msa_text %||% "", tree = tree_text %||% "")
     config$data$gff <- gff_text
   }
@@ -271,8 +269,8 @@ looks_like_path <- function(x) {
 convert_msa <- function(msa) {
   if (is.null(msa)) return(NULL)
 
-  # names are what mark a character vector as sequences rather than alignment
-  # text, so a one-sequence named vector is still FASTA input, not a document
+  # a named character vector holds sequences, so even a one-element named
+  # vector becomes FASTA
   if (is.character(msa) && !is.null(names(msa))) {
     return(to_fasta(msa))
   }
@@ -338,16 +336,15 @@ uri_location <- function(x) {
   if (is_url(x)) list(uri = x, locationType = "UriLocation") else NULL
 }
 
-#' The one name rule
+#' Sanitize row names for FASTA and Newick
 #'
-#' An alignment row is named by its FASTA defline up to the first whitespace,
-#' and a Newick label cannot hold the grammar characters unquoted, so the two
-#' formats mangle a name like \code{Homo sapiens} or \code{chr1:1-100}
-#' differently -- ape writes \code{Homo_sapiens} and \code{chr1-1-100}, the
-#' FASTA header keeps the space and the viewer reads the row as \code{Homo}.
-#' Names that do not match are names that match no row. Applying one
-#' substitution to both sides, and to the row named by a GFF feature, a
-#' highlight or a track, is what keeps them the same string.
+#' The viewer names an alignment row by its FASTA defline up to the first
+#' whitespace, and a Newick label cannot hold the grammar characters unquoted.
+#' ape writes \code{Homo sapiens} and \code{chr1:1-100} as \code{Homo_sapiens}
+#' and \code{chr1-1-100}, while the FASTA header keeps the space and the viewer
+#' reads the row as \code{Homo}. Applying one substitution to the alignment, the
+#' tree, and the row a GFF feature, highlight or track names gives every side
+#' the same string.
 #'
 #' @param x Character vector of names.
 #' @return The names with whitespace and Newick grammar characters replaced by
@@ -357,8 +354,8 @@ sanitize_names <- function(x) {
   gsub("[[:space:],:;()\\[\\]'\"]+", "_", as.character(x), perl = TRUE)
 }
 
-# Indexed by position, not by name: looking sequences up by name hands every
-# duplicate the first match. An unnamed entry gets a placeholder header.
+# Indexes by position, not by name, since a lookup by name gives every duplicate
+# the first match. An unnamed entry gets a placeholder header.
 to_fasta <- function(seqs) {
   nms <- names(seqs)
   if (is.null(nms)) nms <- rep("", length(seqs))

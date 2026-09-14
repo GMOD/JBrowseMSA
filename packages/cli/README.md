@@ -3,28 +3,29 @@
 Annotate a multiple sequence alignment and render it to a publication figure,
 from the command line, with no browser in the loop.
 
-Two things live here, and they compose:
+The CLI has two groups of commands, and the second draws what the first writes:
 
-- **Annotate** — build a domain or exon GFF for an alignment, from InterPro's
+- **Annotate**: build a domain or exon GFF for an alignment, from InterPro's
   precomputed matches (`interpro`), a live InterProScan run (`interproscan`), or
   a RefSeq transcript's exon model (`genestructure`).
-- **Render** — draw the alignment, its tree, and those annotations to a
-  standalone SVG (`export-svg`). This is the same renderer the web viewer uses,
-  driven headlessly, so the figure matches what the app shows.
+- **Render**: draw the alignment, its tree, and those annotations to a
+  standalone SVG (`export-svg`). The command runs the web viewer's renderer
+  headlessly, so the figure matches what the app shows.
 
 ## Prerequisites
 
 - NodeJS v22+
 
-Nothing else for `export-svg` and `interpro`. `interproscan` needs a backend to
-scan with — the EBI web API (the default, no install), or Docker, Singularity,
-or a local InterProScan (see [interproscan](#interproscan)).
+`export-svg` and `interpro` need nothing else. `interproscan` needs a backend to
+scan with: the EBI web API (the default, no install), Docker, Singularity, or a
+local InterProScan (see [interproscan](#interproscan)).
 
 `export-svg` draws the alignment background as one embedded image when
-[@napi-rs/canvas](https://www.npmjs.com/package/@napi-rs/canvas) is present. It
-is an optional dependency with prebuilt binaries, so a normal install brings it
-in; on a platform it does not cover, the export still works and draws a
-rectangle per cell instead, which is much larger and slower for big alignments.
+[@napi-rs/canvas](https://www.npmjs.com/package/@napi-rs/canvas) is present. The
+package is an optional dependency with prebuilt binaries, so a normal install
+brings it in. On a platform with no prebuilt binary, the export draws a
+rectangle per cell, which makes a much larger file and runs slower on big
+alignments.
 
 ## Setup
 
@@ -55,9 +56,10 @@ react-msaview-cli export-svg --msa kinases.aln --tree kinases.nwk \
 
 ![Src-family kinases: tree, SH3/SH2/kinase domain architecture, and the color key](../../docs/media/cli-domains.png)
 
-The domain architecture reads straight down the alignment — SH3, then SH2, then
-the catalytic domain — because every row is drawn in the alignment's own column
-space. The key on the right is generated from the domains actually present.
+The domain architecture reads straight down the alignment: SH3, then SH2, then
+the catalytic domain. The renderer draws every row in the alignment's column
+space, so each domain lands in the same columns in every row. The key on the
+right lists the domains present in the GFF.
 
 Every figure on this page is `export-svg` output, drawn from the Src-kinase and
 GPCR examples in
@@ -91,8 +93,8 @@ react-msaview-cli export-svg --msa <file> [options]
 `--tracks` names the tracks to draw above the alignment, by id, or `all` for
 every one this alignment has: `conservation`, `property-conservation` (protein
 only), `sequence-logo`, `position-ruler`, `base-pairs` (a Stockholm `SS_cons`
-line), and any track ids the file itself carries. A name matching no track is
-reported rather than silently dropped.
+line), and any track ids the file itself carries. The CLI reports a name that
+matches no track.
 
 ```bash
 react-msaview-cli export-svg --msa kinases.aln --tracks conservation,position-ruler \
@@ -102,10 +104,9 @@ react-msaview-cli export-svg --msa kinases.aln --tracks conservation,position-ru
 ### Sizing the figure
 
 `export-svg` draws the **entire** alignment unless `--viewport` asks for the
-`--width` x `--height` window at the top left instead, so the output is normally
-as wide as the alignment is long — `--width` and `--height` size the viewport
-the model lays out in, not the figure. What scales the figure is `--col-width`
-and `--row-height`:
+`--width` x `--height` window at the top left, so the output is normally as wide
+as the alignment is long. `--width` and `--height` size the viewport the model
+lays out in, not the figure. `--col-width` and `--row-height` scale the figure:
 
 ```bash
 ## a 90-column alignment at the default 12px columns: letters are legible
@@ -122,12 +123,11 @@ react-msaview-cli export-svg --msa kinases.aln --tree kinases.nwk \
 
 ![The same kinase family drawn as a colored overview beside its tree](../../docs/media/cli-quickstart.png)
 
-Residue letters draw only where there is room for them — columns at least 5px
-wide and wider than half the row height, rows at least 8px tall — which is the
-same rule the app applies as you zoom out. Below that you get the colored
-overview above, and for a whole-alignment figure that is usually what you want:
-the conserved blocks and the gaps are the signal at that scale, and the letters
-would be unreadable ink.
+Residue letters draw only in columns at least 5px wide and wider than half the
+row height, and in rows at least 8px tall. The app applies the same rule as you
+zoom out. Below that size the figure is the colored overview above, which
+usually suits a whole-alignment figure: at that scale the conserved blocks and
+gaps are visible, and letters would be too small to read.
 
 ### Color schemes
 
@@ -142,47 +142,43 @@ react-msaview-cli export-svg --msa gpcrs.fa \
 `cinema`, and the `jalview_*` family (`jalview_zappo`, `jalview_taylor`,
 `jalview_hydrophobicity`, `jalview_buried`, `jalview_prophelix`,
 `jalview_propstrand`, `jalview_propturn`) color each residue by identity. The
-two `_dynamic` schemes — `clustalx_protein_dynamic` and
-`percent_identity_dynamic` — color by what the column actually contains, so
-conservation shows up as color rather than as something you have to read off.
-`nucleotide`, `clustalx_dna`, `jbrowse_dna` and `rainbow_dna` are for DNA;
-`none` turns background color off.
+two `_dynamic` schemes, `clustalx_protein_dynamic` and
+`percent_identity_dynamic`, color each residue by the composition of its column,
+so conserved columns stand out by color. `nucleotide`, `clustalx_dna`,
+`jbrowse_dna` and `rainbow_dna` are for DNA; `none` turns background color off.
 
 ### Output
 
-The SVG scales without limit and grows with the alignment. The background is one
-embedded image where @napi-rs/canvas is installed, and a rectangle per cell
-where it is not — the letters, the tree and the annotations are vector either
-way. A 10-row by 856-column figure is about 700KB. Converting to PNG or PDF for
-a journal:
+The SVG grows with the alignment: a 10-row by 856-column figure is about 700KB.
+The background is one embedded image where @napi-rs/canvas is installed, and a
+rectangle per cell where it is not. The letters, the tree and the annotations
+are vector either way. To convert to PNG or PDF for a journal:
 
 ```bash
 rsvg-convert -w 2000 alignment.svg -o alignment.png
 inkscape alignment.svg --export-filename=alignment.pdf
 ```
 
-Exports are reproducible — the same input gives the same bytes, so a figure can
-be regenerated in CI and diffed.
+The same input gives the same bytes, so CI can regenerate a figure and diff it.
 
 ## Annotating
 
 ### interpro
 
 Build a domain GFF from InterPro's **precomputed** matches for UniProtKB
-accessions, instead of submitting sequences to a live InterProScan job. Every
-UniProtKB sequence already has InterPro matches computed and served by the EBI
-InterPro API, so for inputs that are real UniProt accessions this is instant,
-deterministic, and version-pinnable — no email or rate-limited job submission.
-Prefer this over `interproscan` whenever your rows are UniProt accessions.
+accessions. The EBI InterPro API already serves matches for every UniProtKB
+sequence, so the lookup returns in seconds, gives the same result for a given
+InterPro release, and needs no email or rate-limited job. Use this instead of
+`interproscan` whenever your rows are UniProt accessions.
 
 ```bash
 react-msaview-cli interpro <accessions.tsv> [options]
 ```
 
 The input is one accession per line, optionally followed by a tab- or
-space-separated row label; lines starting with `#` are ignored. The output goes
-through the same writer the `interproscan` command's does, plus a `#` header
-line naming the InterPro release the coordinates came from.
+space-separated row label. The command skips lines starting with `#`. It writes
+through the same GFF writer as `interproscan`, and adds a `#` header line naming
+the InterPro release the coordinates came from.
 
 | Option                | Description                                     | Default       |
 | --------------------- | ----------------------------------------------- | ------------- |
@@ -192,11 +188,10 @@ line naming the InterPro release the coordinates came from.
 | `--format <name>`     | Force the `--msa` format instead of sniffing it |               |
 | `--no-cache`          | Re-fetch, ignoring the disk cache               | off           |
 
-Matches are computed on UniProt's canonical sequence, so a row that is an
-isoform or a fragment puts them on the wrong residues. Pass `--msa` and each
-row's ungapped length is checked against the protein's, with a warning naming
-any that disagree. An accession that resolves to no matches is called out too,
-rather than leaving its row silently undecorated.
+InterPro computes matches on UniProt's canonical sequence, so on a row that is
+an isoform or a fragment the matches land on the wrong residues. With `--msa`,
+the CLI compares each row's ungapped length against the protein's and warns
+about any that differ. It also warns about any accession with no matches.
 
 ```bash
 react-msaview-cli interpro accessions.tsv -o domains.gff
@@ -205,25 +200,23 @@ react-msaview-cli interpro accessions.tsv -o domains.gff --database cdd
 
 #### Caching
 
-The InterPro API serves one protein per request — there is no batch endpoint —
-so the request count is fixed at one per distinct accession. To keep that from
-being paid twice, every response is cached on disk under
-`$XDG_CACHE_HOME/react-msaview-cli/interpro` (override with
-`REACT_MSAVIEW_CACHE`), keyed by InterPro release so a new release misses
-cleanly rather than serving coordinates computed against the old one. Proteins
-with no matches are cached too, so they are not re-fetched every run.
+The InterPro API serves one protein per request and has no batch endpoint, so a
+run makes one request per distinct accession. The CLI caches every response on
+disk under `$XDG_CACHE_HOME/react-msaview-cli/interpro` (override with
+`REACT_MSAVIEW_CACHE`), keyed by InterPro release, so a new release fetches
+fresh coordinates. The cache also records proteins with no matches, so a re-run
+does not fetch them again.
 
-A re-run of the same dataset therefore makes one request — the release lookup —
-and answers the rest from disk. That also makes a failed run resumable: retries
-are automatic with backoff, and if the API is still unreachable the accessions
-already fetched stay cached, so re-running picks up where it stopped instead of
-asking EBI for all of them again.
+A re-run of the same dataset makes one request, the release lookup, and reads
+the rest from disk. A failed run can therefore resume. The CLI retries with
+backoff, and if the API stays unreachable, the accessions it already fetched
+stay cached, so the next run fetches only the rest.
 
 ### interproscan
 
 Run InterProScan on all sequences in an MSA file and output results as GFF3. Use
-this when the rows are not UniProt accessions — a de novo assembly, predicted
-proteins, anything InterPro has not already scanned.
+this when the rows are not UniProt accessions: a de novo assembly, predicted
+proteins, or anything else InterPro has not scanned.
 
 ```bash
 react-msaview-cli interproscan <input-msa> [options]
@@ -244,17 +237,17 @@ react-msaview-cli interproscan <input-msa> [options]
 | `--email <email>`            | Email for EBI API (used only for EBI API runs)         | `user@example.com`                          |
 
 By default (no backend flag) the CLI submits sequences to the EBI InterProScan
-REST API one at a time. `--local`, `--docker`, and `--singularity` instead run
+REST API one at a time. `--local`, `--docker`, and `--singularity` run
 InterProScan on the whole alignment locally, which is much faster for large
 datasets.
 
 #### Choosing a backend
 
 ```bash
-## EBI web API — no install, but one sequential submission per sequence
+## EBI web API: no install, one sequential submission per sequence
 react-msaview-cli interproscan alignment.fasta -o domains.gff --email you@example.com
 
-## Docker — no InterProScan install, whole alignment in one run
+## Docker: no InterProScan install, whole alignment in one run
 react-msaview-cli interproscan alignment.fasta -o domains.gff --docker
 
 ## a local install
@@ -273,22 +266,20 @@ The published image carries InterProScan but **not** its member database data,
 which is a separate multi-gigabyte download. Fetch and unpack the matching
 release's `data/` directory (see the
 [InterProScan docs](https://interproscan-docs.readthedocs.io/)) and point
-`--interproscan-data` at it; it is mounted at `/opt/interproscan/data`, where
-both container backends look for it.
+`--interproscan-data` at it. Both container backends mount it at
+`/opt/interproscan/data` and look for it there.
 
-The EBI API has usage limits: sequences go one at a time, sequentially, to avoid
-overwhelming the server. Past about 100 sequences, use a local or container
-backend.
+The EBI API has usage limits, so the CLI submits sequences one at a time. Past
+about 100 sequences, use a local or container backend.
 
 #### InterProScan programs
 
-`--programs` takes the EBI API's names — `PfamA` and `CDD` (the default),
-`SMART`, `SuperFamily`, `Gene3d`, `PANTHER`, `TIGRFAM`, `HAMAP`,
+`--programs` takes the EBI API's names whichever backend runs: `PfamA` and `CDD`
+(the default), `SMART`, `SuperFamily`, `Gene3d`, `PANTHER`, `TIGRFAM`, `HAMAP`,
 `PrositeProfiles`, `PrositePatterns`, `PRINTS`, `PIRSF`, `MobiDBLite`, `Coils`,
-`SFLD` — whichever backend runs. InterProScan 5 spells several of them
-differently (`Pfam`, not `PfamA`; `NCBIfam`, which absorbed TIGRFAM; `Hamap`;
-`SUPERFAMILY`; `Gene3D`), and the local, Docker and Singularity backends get the
-translated names.
+`SFLD`. InterProScan 5 spells several of them differently (`Pfam`, not `PfamA`;
+`NCBIfam`, which absorbed TIGRFAM; `Hamap`; `SUPERFAMILY`; `Gene3D`), and the
+CLI passes the translated names to the local, Docker and Singularity backends.
 
 ```bash
 react-msaview-cli interproscan alignment.fasta -o domains.gff \
@@ -298,20 +289,21 @@ react-msaview-cli interproscan alignment.fasta -o domains.gff \
 ### genestructure
 
 Build a **gene-structure GFF** for a coding-sequence alignment from a RefSeq
-transcript, overlaid the same way InterProScan domains are. The exon model is
-fetched from the NCBI Datasets v2 API; each species' Nth exon is named `exon-N`,
-so a given exon is the same color in every row and the exon architecture reads
-straight down the alignment.
+transcript, overlaid the same way InterProScan domains are. The command fetches
+the exon model from the NCBI Datasets v2 API and names each species' Nth exon
+`exon-N`, so a given exon is the same color in every row and the exon
+architecture reads straight down the alignment.
 
 ```bash
 react-msaview-cli genestructure <input-msa> --gene <symbol> --ref <rowname> [options]
 ```
 
-The exon boundaries of the chosen transcript are mapped onto the reference row's
-columns, then projected into every other row's own ungapped coordinates — so an
-exon that picks up a frameshifting indel in one lineage gets shorter on exactly
-that row while staying column-aligned with the rest. The reference row must be
-the transcript's coding sequence (the CLI warns if its length doesn't match).
+The command maps the chosen transcript's exon boundaries onto the reference
+row's columns, then projects them into every other row's ungapped coordinates.
+An exon that picks up a frameshifting indel in one lineage therefore gets
+shorter on that row and stays in the same columns as the rest. The reference
+row must be the transcript's coding sequence; the CLI warns if its length
+doesn't match.
 
 | Option                | Description                                   | Default             |
 | --------------------- | --------------------------------------------- | ------------------- |
@@ -332,20 +324,19 @@ react-msaview-cli genestructure aln.fa --transcript NM_000505.4 --ref human
 
 ## Input formats
 
-The CLI sniffs the format from the file's content, not from its name, and
-`--format` (`fasta`, `a3m`, `stockholm`, `clustal`, `emf`) settles it when the
-guess is wrong — FASTA and A3M share a leading `>`, so telling them apart is a
-heuristic:
+The CLI sniffs the format from the file's content, not from its name. `--format`
+(`fasta`, `a3m`, `stockholm`, `clustal`, `emf`) overrides a wrong guess. FASTA
+and A3M share a leading `>`, so the CLI tells them apart heuristically.
 
 - **FASTA** (`.fasta`, `.fa`, `.faa`)
 - **Clustal** (`.clustal`, `.aln`)
 - **Stockholm** (`.sto`, `.stockholm`)
-- **A3M** (`.a3m`) — AlphaFold/ColabFold
-- **EMF** (`.emf`) — Ensembl Multi Format
+- **A3M** (`.a3m`), from AlphaFold/ColabFold
+- **EMF** (`.emf`), Ensembl Multi Format
 
 ## Annotation output format
 
-The annotation commands write standard GFF3, one line per feature —
+The annotation commands write standard GFF3, one line per feature:
 `protein_match` for a domain from `interpro`/`interproscan`, `exon` for a
 segment from `genestructure`. `start`/`end` are 1-based positions in the
 **ungapped** sequence, and the attributes carry the accession, name, and
@@ -374,12 +365,12 @@ Done!
 
 ## Using the GFF elsewhere
 
-The same file the CLI writes loads into every other front end.
+The web viewer, the React component and the R package all load the file the CLI
+writes.
 
 In the web viewer, select it in the import form's **Annotation GFF file or URL**
-field. (The **Annotations > Open InterProScan results...** menu item takes
-InterProScan JSON rather than GFF, so use the import form for the file generated
-above.)
+field, or open it over a loaded alignment with **Annotations > Open annotation
+file...**, which also accepts the JSON an InterProScan run returns.
 
 In the React component, pass it inline as the `gff` prop:
 
@@ -395,11 +386,10 @@ msaview(msa = "alignment.fasta", gff = "domains.gff")
 
 ## Troubleshooting
 
-**EBI API timeout.** A single sequence has been measured at fifteen minutes in
-the queue; the CLI waits an hour per job and keeps the results of the sequences
-that did finish. Use `--local`, `--docker`, or `--singularity` to run
-InterProScan yourself. For large datasets those are much faster than the API
-regardless.
+**EBI API timeout.** We measured one sequence waiting fifteen minutes in the
+queue. The CLI waits an hour per job and keeps the results of the sequences that
+finished. Use `--local`, `--docker`, or `--singularity` to run InterProScan
+yourself; on large datasets they are much faster than the API.
 
 **Local InterProScan not found.**
 
@@ -415,9 +405,9 @@ nucleotide; try other `--programs`; verify the input parses as one of the
 formats above.
 
 **The exported figure is enormous.** `export-svg` draws the whole alignment at
-`--col-width` per column. Drop `--col-width` until it fits — below 5px (or below
-half the row height) the residue letters stop drawing, which is most of the file
-size.
+`--col-width` per column. Lower `--col-width` until it fits. Below 5px, or below
+half the row height, the residue letters stop drawing, and they account for most
+of the file size.
 
 ## Uses
 

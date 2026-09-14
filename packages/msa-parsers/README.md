@@ -30,9 +30,9 @@ pnpm add msa-parsers
 
 ### Parsing MSA files
 
-`parseMSA` sniffs the format from the content, not from the file name. Pass a
-format as the third argument to settle it yourself -- FASTA and A3M share a
-leading `>`, so auto-detection between them is a heuristic:
+`parseMSA` sniffs the format from the content, not from the file name. FASTA and
+A3M share a leading `>`, so telling them apart is heuristic; pass a format as the
+third argument to override the guess:
 
 ```typescript
 import { parseMSA } from 'msa-parsers'
@@ -77,7 +77,7 @@ const treeWithIds = generateNodeIds(tree)
 
 Every source of overlay annotations converts to one flat list of `Annotation` (a
 row name, an accession, a name, a description and a 1-based inclusive interval),
-and that list is what the viewer draws.
+and the viewer draws that list.
 
 ```typescript
 import {

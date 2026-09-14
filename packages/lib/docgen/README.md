@@ -1,5 +1,5 @@
-This folder contains scripts to auto-generate state model API docs from JSDoc
-comments in `src/`. Generated output goes to `apidocs/`.
+The scripts in `docgen/` generate the state model API docs in `apidocs/` from
+JSDoc comments in `src/`.
 
 Run from `packages/lib`:
 
@@ -12,12 +12,12 @@ pnpm statedocs
 Mark declarations with JSDoc tags. One `#stateModel` per file.
 
 ```
-#stateModel ModelName   — factory function or const for the model
-#property               — types.model property
-#volatile               — volatile (runtime-only) property
-#getter                 — computed view getter
-#method                 — view that takes arguments
-#action                 — action
+#stateModel ModelName   factory function or const for the model
+#property               types.model property
+#volatile               volatile (runtime-only) property
+#getter                 computed view getter
+#method                 view that takes arguments
+#action                 action
 ```
 
 Optionally add `#example` blocks at the end of a JSDoc comment:
@@ -34,7 +34,6 @@ Optionally add `#example` blocks at the end of a JSDoc comment:
 
 ## Composition graph
 
-The generator derives model composition automatically from `types.compose(...)`
-calls in the source — no need to maintain a manual `extends` list. The
-"Inherited members" section in each generated doc reflects what is composed in
-code.
+The generator reads model composition from the `types.compose(...)` calls in the
+source, so there is no `extends` list to maintain. The "Inherited members"
+section in each generated doc lists what the code composes.
