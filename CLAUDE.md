@@ -58,13 +58,21 @@ data preparation — see `viewer-not-analysis-tool` in the memory and
   new analysis is a tutorial plus a snapshot layer (`docs/layers.md`), not a
   menu item.
 - The alignment background on screen comes from `components/msa/msaRaster.ts`:
-  one pixel per cell, built lazily in 512-cell tiles and blitted with
+  one pixel per cell, built lazily in 512-pixel tiles and blitted with
   `drawImage`, so a zoom frame costs a few blits instead of a `fillRect` per
-  visible cell. The cache keys on everything a cell's color depends on and on
-  nothing that zoom changes. `MSACanvasBlock` decides whether the raster applies
-  and tells `renderMSABlock` via `rasterTiles`; the SVG export passes nothing
-  and keeps the per-cell rect path, which is what its snapshots encode. Letters
-  stay `fillText` — a glyph sprite atlas measured 2-3x slower.
+  visible cell. The cache keys on everything a cell's color depends on; the tile
+  map inside it keys on that plus the cells-per-pixel span, since below a device
+  pixel per cell a tile averages cells into a pixel — per axis, because the
+  browser's own smoothing blurs both and at fit-to-width only the columns are
+  narrow. `MSACanvasBlock` decides whether the raster applies and tells
+  `renderMSABlock` via `rasterTiles`; the SVG export draws the same background
+  as one `<image>` (`rasterImageHref`) wherever a canvas reads back, and falls
+  back to the per-cell rect path where none does (jsdom). Letters stay
+  `fillText` — a glyph sprite atlas measured 2-3x slower.
+- A letter's color is a question about the cell it lands on, not about the
+  letter: `contrastTextFn(theme)` in `util.ts` answers it, memoized per theme. A
+  dynamic scheme has no letter->color table to precompute from, and a text track
+  has its own `colors`.
 - The minimap bar draws the same raster sampled down to at most 2000 columns.
 - Blocks are positioned at their offsets only; `scrollX`/`scrollY` live on one
   transformed container per panel (`MSACanvas`, `TreeCanvas`, `TrackBlocks`).
@@ -74,14 +82,23 @@ data preparation — see `viewer-not-analysis-tool` in the memory and
   `@gmod/newick` now, shared with the tree sidebar in jbrowse-components, and
   the file is a typing shim that re-exports them plus this viewer's own layout
   helpers. There is no d3 dependency.
-- Tracks (conservation, sequence logo, the Stockholm text tracks) carry a `kind`
-  discriminator and share one draw module, `components/tracks/drawTracks.ts`.
-  `drawTrackBlock` there owns the transform and dispatches on `kind`; the live
-  view calls it from `components/tracks/TrackBlocks.tsx`, the one canvas host
-  every kind uses, and the SVG export calls it through `renderAllTracks`. Adding
-  a track kind means a new `kind`, a draw function in that module, and a case in
-  `drawTrackBlock` — not a second rendering path or a second component.
-  `TrackResizeHandle` maps a kind to the model volatile holding its height.
+- `packages/svgcanvas` is cut down to the calls the renderers make — rectangles,
+  paths, arcs, glyphs. Gradients, patterns, clipping, rotation, bezier curves,
+  stroked text, shadows and `drawImage` are gone, and so is every attribute svg
+  already assumes (`stroke="none"` on a fill, an empty `stroke-dasharray`, a
+  matrix transform saying what x/y say). Adding a renderer call means adding it
+  there. `renderToSvg` splices each layer's serialized markup into the React
+  page as a string rather than handing it back to React to parse.
+- Tracks (conservation, sequence logo, the position ruler, the Stockholm text
+  tracks) carry a `kind` discriminator and share one draw module,
+  `components/tracks/drawTracks.ts`. `drawTrackBlock` there owns the transform
+  and dispatches on `kind`; the live view calls it from
+  `components/tracks/TrackBlocks.tsx`, the one canvas host every kind uses, and
+  the SVG export calls it through `renderAllTracks`. Adding a track kind means a
+  new `kind`, a draw function in that module, and a case in `drawTrackBlock` —
+  not a second rendering path or a second component. `TrackResizeHandle` writes
+  a kind's shared volatile height, except for a `columnTracks` track, which
+  carries its own.
 - `turnedOffTracks` records only the user's explicit show/hide choices. An id is
   absent until they touch that track, and the value then means "off", so a
   hidden-by-default track (see `defaultOffTracks` in `model.ts`) adds nothing to
