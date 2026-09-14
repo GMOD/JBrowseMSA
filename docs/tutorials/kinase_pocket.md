@@ -250,7 +250,7 @@ this page quotes. See [Prerequisites](#prerequisites) for what it needs on
 
 ## See also
 
-- [A protein family from a list of accessions](protein_family)
+- [A protein family from a list of accessions](https://gmod.org/JBrowseMSA/tutorials/protein_family)
 - [CLI](https://gmod.org/JBrowseMSA/cli)
 - [User guide](https://gmod.org/JBrowseMSA/guide)
 - [Data layers](https://gmod.org/JBrowseMSA/layers)

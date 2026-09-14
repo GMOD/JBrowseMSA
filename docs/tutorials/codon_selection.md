@@ -106,11 +106,11 @@ docker run --rm -v "$PWD":/data -w /data \
 From the protein translation rather than the codons: more signal at this depth
 of divergence. Read the support values before trusting the topology, the same
 move as the neighbor-joining caveat in
-[a protein family from a list of accessions](protein_family). The weakest node
-in this tree has a local support of 0.135, the second-weakest 0.177, both around
-the boundary between Old World monkey lineages, exactly where a single gene's
-tree is expected to waver. Everything below only depends on branch lengths, not
-on that part of the topology being right.
+[a protein family from a list of accessions](https://gmod.org/JBrowseMSA/tutorials/protein_family).
+The weakest node in this tree has a local support of 0.135, the second-weakest
+0.177, both around the boundary between Old World monkey lineages, exactly where
+a single gene's tree is expected to waver. Everything below only depends on
+branch lengths, not on that part of the topology being right.
 
 [![](../media/codon-alignment-tree.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A170%2C%22rowHeight%22%3A11%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftrim5%2Ftrim5-cds.stock%22%7D%2C%22colWidth%22%3A0.7%2C%22height%22%3A420%7D%7D)
 
@@ -266,7 +266,7 @@ generic.
 
 ## See also
 
-- [A protein family from a list of accessions](protein_family)
+- [A protein family from a list of accessions](https://gmod.org/JBrowseMSA/tutorials/protein_family)
 - [CLI](https://gmod.org/JBrowseMSA/cli)
 - [Data layers](https://gmod.org/JBrowseMSA/layers)
 - [User guide](https://gmod.org/JBrowseMSA/guide)
