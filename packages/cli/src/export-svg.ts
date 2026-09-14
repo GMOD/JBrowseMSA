@@ -37,6 +37,9 @@ export async function exportSvg({
   colWidth,
   rowHeight,
   format,
+  tracks,
+  viewport,
+  minimap,
 }: {
   msaFile: string
   treeFile?: string
@@ -49,6 +52,9 @@ export async function exportSvg({
   colWidth?: number
   rowHeight?: number
   format?: MSAFormat
+  tracks?: string[]
+  viewport?: boolean
+  minimap?: boolean
 }) {
   const { MSAModelF, renderToSvg, installHeadlessRenderEnv } =
     await import('react-msaview')
@@ -88,11 +94,32 @@ export async function exportSvg({
   }
   model.setWidth(width)
 
+  // exactly the named tracks, `all` for every one there is. A name matching no
+  // track is a typo worth saying out loud: the figure would otherwise come back
+  // quietly missing the track it was drawn for
+  if (tracks) {
+    const ids = new Set(model.tracks.map(t => t.model.id))
+    for (const name of tracks) {
+      if (name !== 'all' && !ids.has(name)) {
+        console.warn(
+          `no track "${name}" here; this alignment has ${[...ids].join(', ')}`,
+        )
+      }
+    }
+    const wanted = (id: string) => tracks.includes('all') || tracks.includes(id)
+    for (const { model: track } of model.tracks) {
+      const on = model.turnedOnTracks.some(t => t.model.id === track.id)
+      if (on !== wanted(track.id)) {
+        model.toggleTrack(track.id)
+      }
+    }
+  }
+
   const svg = await renderToSvg(model, {
     theme,
-    exportType: 'entire',
-    includeMinimap: false,
-    includeTracks: false,
+    exportType: viewport ? 'viewport' : 'entire',
+    includeMinimap: minimap,
+    includeTracks: !!tracks && model.turnedOnTracks.length > 0,
   })
   fs.writeFileSync(outputFile, svg)
 }

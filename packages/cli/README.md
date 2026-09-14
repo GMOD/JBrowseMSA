@@ -82,13 +82,30 @@ react-msaview-cli export-svg --msa <file> [options]
 | `--height <px>`          | Viewport height                                | `600`           |
 | `--tree-area-width <px>` | Tree panel width in pixels                     |                 |
 | `--format <name>`        | Force the MSA format instead of sniffing it    |                 |
+| `--tracks <list>`        | Tracks to draw above the alignment, by id      | none            |
+| `--viewport`             | Draw the viewport instead of the whole thing   |                 |
+| `--minimap`              | Include the minimap bar (`--viewport` only)    |                 |
+
+### Tracks
+
+`--tracks` names the tracks to draw above the alignment, by id, or `all` for
+every one this alignment has: `conservation`, `property-conservation` (protein
+only), `sequence-logo`, `position-ruler`, `base-pairs` (a Stockholm `SS_cons`
+line), and any track ids the file itself carries. A name matching no track is
+reported rather than silently dropped.
+
+```bash
+react-msaview-cli export-svg --msa kinases.aln --tracks conservation,position-ruler \
+  -o kinases.svg
+```
 
 ### Sizing the figure
 
-`export-svg` always draws the **entire** alignment, so the output is as wide as
-the alignment is long — `--width` and `--height` size the viewport the model
-lays out in, not the figure. What scales the figure is `--col-width` and
-`--row-height`:
+`export-svg` draws the **entire** alignment unless `--viewport` asks for the
+`--width` x `--height` window at the top left instead, so the output is normally
+as wide as the alignment is long — `--width` and `--height` size the viewport
+the model lays out in, not the figure. What scales the figure is `--col-width`
+and `--row-height`:
 
 ```bash
 ## a 90-column alignment at the default 12px columns: letters are legible

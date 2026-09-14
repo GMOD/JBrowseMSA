@@ -48,6 +48,17 @@ const options = {
   'row-height': {
     type: 'string',
   },
+  tracks: {
+    type: 'string',
+  },
+  viewport: {
+    type: 'boolean',
+    default: false,
+  },
+  minimap: {
+    type: 'boolean',
+    default: false,
+  },
   local: {
     type: 'boolean',
     default: false,
@@ -187,6 +198,12 @@ OPTIONS (export-svg):
   --tree-area-width <px>        Tree panel width in pixels (optional)
   --col-width <px>              Width of one alignment column (default: 12)
   --row-height <px>             Height of one alignment row (default: 16)
+  --tracks <list>               Tracks to draw above the alignment, by id, or
+                                "all" (e.g. conservation,position-ruler).
+                                None by default
+  --viewport                    Draw the --width x --height viewport at the top
+                                left, instead of the entire alignment
+  --minimap                     Include the minimap bar (--viewport only)
 
   -h, --help                    Show this help message
 
@@ -194,6 +211,8 @@ EXAMPLES:
   react-msaview-cli export-svg --msa alignment.fasta -o alignment.svg
   react-msaview-cli export-svg --msa alignment.fasta --tree tree.nwk -o alignment.svg
   react-msaview-cli export-svg --msa alignment.fasta --gff domains.gff --color-scheme clustalx_protein_dynamic -o alignment.svg
+  react-msaview-cli export-svg --msa alignment.fasta --tracks conservation,position-ruler -o alignment.svg
+  react-msaview-cli export-svg --msa alignment.fasta --viewport --minimap -o viewport.svg
 
   react-msaview-cli interproscan alignment.fasta -o domains.gff
   react-msaview-cli interproscan alignment.fasta -o domains.gff --docker
@@ -259,6 +278,9 @@ async function main() {
           ? parseFloat(values['row-height'])
           : undefined,
       format,
+      tracks: values.tracks?.split(',').map(s => s.trim()),
+      viewport: values.viewport,
+      minimap: values.minimap,
     })
     console.log(`wrote ${outputFile}`)
   } else if (command === 'interproscan') {
