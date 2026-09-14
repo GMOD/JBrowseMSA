@@ -94,13 +94,12 @@ react-msaview. Accepts a wide range of R and Bioconductor objects for
 both alignments and phylogenetic trees.
 }
 \details{
-Row names are normalized on the way in: whitespace and the Newick grammar
-characters become underscores, in the alignment, the tree, a GFF data
-frame's \code{seqname}, and the row a highlight or column track names. The
-two formats mangle a name like \code{Homo sapiens} differently otherwise --
-ape writes \code{Homo_sapiens} while the FASTA header keeps the space, which
-the viewer reads as a row called \code{Homo} -- and the tree then matches no
-row.
+\code{msaview} replaces whitespace and the Newick grammar characters in row
+names with underscores, in the alignment, the tree, a GFF data frame's
+\code{seqname}, and the row a highlight or column track names. Without that,
+ape writes \code{Homo sapiens} as \code{Homo_sapiens}, the FASTA header keeps
+the space, the viewer reads that row as \code{Homo}, and no tree tip matches
+it.
 }
 \examples{
 \dontrun{
