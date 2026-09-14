@@ -3,14 +3,19 @@
 extend-exclude = [
   "packages/r-msaview/inst/htmlwidgets/lib/",
   # phylogenetic trees + the demo config are full of UCSC species db ids
-  # (panTro4, HLturTru4, ...) that the spell checker reads as typos
+  # (panTro4, HLturTru4, ...) and gene symbols (CHEK1, LIMK1, MAK, ...) that
+  # the spell checker reads as typos
   "*.nh",
+  "*.nwk",
   # generated from git history: abbreviated commit hashes read as words
   "CHANGELOG.md",
   # aligned protein sequence: runs of one-letter codes that the checker reads as
   # words (THN as THEN, and so on down the alphabet)
   "*.afa",
   "packages/app/public/data/jbrowse-msa-combined-config.json",
+  # gene symbols and UniProt accessions read as typos (CHEK1, LIMK1, MAK,
+  # Q8IY84, ...)
+  "packages/app/public/data/kinase-pocket/kinase-pocket-metadata.json",
 ]
 
 [default.extend-words]
@@ -34,3 +39,8 @@ SER = "SER"
 THR = "THR"
 Ser = "Ser"
 Thr = "Thr"
+# gene name: the ABL1/ABL2 kinases (Abelson murine leukemia), read as a
+# truncated "able"
+ABL = "ABL"
+Abl = "Abl"
+abl = "abl"

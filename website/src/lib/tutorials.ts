@@ -27,6 +27,12 @@ export const tutorials: Tutorial[] = [
     blurb:
       'Eleven coronavirus spikes, the four residues SARS-CoV-2 alone carries, and a SIFTS correspondence saying which residues of that row PDB 6VXX actually resolved.',
   },
+  {
+    slug: 'kinase_pocket',
+    title: 'Reading cross-reactivity off the kinase pocket',
+    blurb:
+      '474 human kinase domains, hmmalign and FastTree, one alignment. The gatekeeper column reads threonine in 19% of them, a small-molecule inhibitor cross-reactivity map in one number.',
+  },
 ]
 
 export const tutorialBySlug = new Map(tutorials.map(t => [t.slug, t]))

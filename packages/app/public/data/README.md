@@ -66,5 +66,15 @@ number that page quotes:
 carry its three layers inline, and the file is here so the page can cite it and
 `scripts/screenshots/tutorial-specs/spike_structure.mjs` can read it.
 
+The files below back the **Kinase pocket** tutorial
+(`docs/tutorials/kinase_pocket.md`), built by
+`docs/tutorials/scripts/build_kinase_pocket.sh`, not by `writeExampleData.mjs`:
+
+| File | Format | Provenance |
+| ---- | ------ | ---------- |
+| `kinase-pocket/kinase-pocket.afa` | FASTA (aligned) | 474 of the 512 UniProt `pkinfam.txt` human kinases, the ones whose Pkinase domain (PF00069) clears Pfam's gathering threshold, aligned to that HMM with `hmmalign --trim` (262 columns) |
+| `kinase-pocket/kinase-pocket.nwk` | Newick | FastTree from the alignment above |
+| `kinase-pocket/kinase-pocket-metadata.json` | JSON (`treeMetadata`) | Each row's kinase group (AGC/CAMK/CK1/CMGC/NEK/RGC/STE/TKL/TK/Other) and UniProt accession, read by the tree's node-info dialog |
+
 The formats are detected from file content (the `CLUSTAL` / `# STOCKHOLM` / `>` /
 `##gff` header), so the extensions above are only for readability.

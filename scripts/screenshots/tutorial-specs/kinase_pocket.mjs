@@ -11,15 +11,18 @@ const FILES = {
   },
 }
 
-// alignment columns (1-based) landmark residues sit at, read off ABL1 in the
-// hosted alignment: catalytic lysine K271 at col 30, gatekeeper T315 at col
-// 77, the DFG motif (D381-F382-G383) at cols 141-143. See "Read off the
-// pocket" in the tutorial for how these were found.
-const CAT_LYS = 30
-const GATEKEEPER = 77
-const DFG_START = 141
-const DFG_END = 143
-const CONTROL = 102
+// landmark columns, read off ABL1 in the hosted alignment: catalytic lysine
+// K271, gatekeeper T315, the DFG motif (D381-F382-G383). See "Read off the
+// pocket" in the tutorial for how these were found -- there they are 1-based
+// (col 30, 77, 141-143), matching highlights/GFF convention everywhere else
+// in this viewer; annotation anchors here are the odd one out (0-based, since
+// `col * colWidth` is a raw pixel offset), so every constant below is that
+// 1-based column minus one.
+const CAT_LYS = 29
+const GATEKEEPER = 76
+const DFG_START = 140
+const DFG_END = 142
+const CONTROL = 101
 
 export const specs = [
   {
@@ -61,6 +64,16 @@ export const specs = [
       drawLabels: false,
       colorSchemeName: 'clustalx_protein_dynamic',
       turnedOffTracks: { 'sequence-logo': false },
+      // persisted bands under the four called-out columns, in 1-based
+      // alignment coordinates (unlike the annotation anchors below, which
+      // are 0-based pixel offsets) -- so the live link shows the same four
+      // columns the screenshot's callouts point at
+      highlights: [
+        { start: 30, end: 30, label: 'catalytic K', color: 'rgba(21,101,192,0.25)' },
+        { start: 77, end: 77, label: 'gatekeeper', color: 'rgba(227,36,43,0.25)' },
+        { start: 141, end: 143, label: 'DFG', color: 'rgba(46,125,50,0.25)' },
+        { start: 102, end: 102, label: 'control', color: 'rgba(117,117,117,0.25)' },
+      ],
       ...FILES,
     }),
     settle: 2500,
@@ -74,15 +87,10 @@ export const specs = [
       },
       {
         type: 'text',
-        text: 'catalytic K · 93.5%',
+        text: 'K, 93.5%',
         color: '#1565c0',
         fontSize: 16,
-        anchor: {
-          col: CAT_LYS,
-          alignY: 'top',
-          alignX: 'left',
-          dy: -14,
-        },
+        anchor: { col: CAT_LYS, alignY: 'top', dy: -14 },
       },
       {
         type: 'box',
@@ -92,10 +100,10 @@ export const specs = [
       },
       {
         type: 'text',
-        text: 'gatekeeper · T in 19%',
+        text: 'gatekeeper, T in 19%',
         color: '#e3242b',
         fontSize: 16,
-        anchor: { col: GATEKEEPER, alignY: 'top', dy: -14 },
+        anchor: { col: GATEKEEPER, alignY: 'top', dy: -38 },
       },
       {
         type: 'box',
@@ -105,7 +113,7 @@ export const specs = [
       },
       {
         type: 'text',
-        text: 'DFG motif',
+        text: 'DFG',
         color: '#2e7d32',
         fontSize: 16,
         anchor: { col: DFG_START, colEnd: DFG_END, alignY: 'top', dy: -14 },
@@ -118,15 +126,10 @@ export const specs = [
       },
       {
         type: 'text',
-        text: 'control · not conserved',
+        text: 'not conserved',
         color: '#757575',
         fontSize: 16,
-        anchor: {
-          col: CONTROL,
-          alignY: 'top',
-          alignX: 'right',
-          dy: -14,
-        },
+        anchor: { col: CONTROL, alignY: 'top', dy: -38 },
       },
     ],
   },
@@ -137,15 +140,21 @@ export const specs = [
     // the small threonine gatekeeper the drug's methylpiperazine arm reaches
     // past to a back pocket only a small gatekeeper leaves open.
     viewportWidth: 1100,
-    viewportHeight: 260,
+    viewportHeight: 300,
     url: fileSnap({
-      height: 220,
+      height: 280,
       treeAreaWidth: 110,
       colWidth: 34,
       rowHeight: 46,
       colorSchemeName: 'clustalx_protein_dynamic',
+      // both tracks read over all 474 rows regardless of which two are
+      // visible here, so they add height without adding information -- off
+      turnedOffTracks: { conservation: true, 'property-conservation': true },
       scrollX: -(GATEKEEPER - 8) * 34,
-      scrollY: -339 * 46,
+      // ABL1/ABL2 are rows 101/102 of the 474-leaf FastTree order (found by
+      // reading window.MSAVIEW_MODEL.leaves in a real render -- the app's
+      // tip order is not the input file's or a plain alphabetical one)
+      scrollY: -101 * 46,
       ...FILES,
     }),
     settle: 2000,
@@ -173,15 +182,18 @@ export const specs = [
     // phenylalanine here is a structural reason why: it fills the pocket a
     // small gatekeeper leaves open.
     viewportWidth: 1100,
-    viewportHeight: 300,
+    viewportHeight: 340,
     url: fileSnap({
-      height: 260,
+      height: 320,
       treeAreaWidth: 110,
       colWidth: 34,
       rowHeight: 46,
       colorSchemeName: 'clustalx_protein_dynamic',
+      turnedOffTracks: { conservation: true, 'property-conservation': true },
       scrollX: -(GATEKEEPER - 8) * 34,
-      scrollY: -194 * 46,
+      // CDK2/CDK3/CDK1 are rows 261-263, adjacent in that order (not
+      // numeric order) in the FastTree tip layout
+      scrollY: -261 * 46,
       ...FILES,
     }),
     settle: 2000,
@@ -189,15 +201,15 @@ export const specs = [
     annotations: [
       {
         type: 'box',
-        anchor: { col: GATEKEEPER, rowLabel: 'CDK1', rowLabelEnd: 'CDK3' },
+        anchor: { col: GATEKEEPER, rowLabel: 'CDK2', rowLabelEnd: 'CDK1' },
         color: '#e3242b',
       },
       {
         type: 'text',
-        text: 'same column, CDK1-3',
+        text: 'same column, CDK1/2/3',
         color: '#e3242b',
         fontSize: 18,
-        anchor: { col: GATEKEEPER, rowLabel: 'CDK1', alignY: 'top', dy: -18 },
+        anchor: { col: GATEKEEPER, rowLabel: 'CDK2', alignY: 'top', dy: -18 },
       },
     ],
   },
