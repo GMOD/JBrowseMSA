@@ -26,6 +26,8 @@ export default function A3m() {
     <MSAViewer
       msaFilehandle={{ uri: A3M, locationType: 'UriLocation' }}
       colorScheme="clustalx_protein_dynamic"
+      drawTree={false}
+      treeAreaWidth={130}
       allowedGappyness={50}
       colWidth={9}
       rowHeight={2}

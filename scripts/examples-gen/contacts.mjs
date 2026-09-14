@@ -85,7 +85,7 @@ const atoms = await fetchStructure(PDB)
 const mappings = await fetchSifts(PDB, ACCESSION)
 const points = residuePoints(atoms, CHAIN)
 const toUniprot = sequenceToUniprot(mappings, CHAIN)
-const rowSeq = readRow('kinase.fa', ROW)
+const rowSeq = readRow('kinase.aln', ROW)
 checkRowNumbering({ points, toUniprot, seq: rowSeq, row: ROW, pdb: PDB })
 
 const mapping = residueMapping({

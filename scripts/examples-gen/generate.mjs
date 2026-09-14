@@ -226,7 +226,7 @@ for (const d of todo) {
   }
   fs.writeFileSync(path.join(dir, 'input.fasta'), inputFasta)
   const { msa, tree } = buildOne(d)
-  write(`${d.name}.fa`, msa)
+  write(`${d.name}.aln`, msa)
   write(`${d.name}.nh`, `${tree}\n`)
   // The domain GFF is produced out of band by `react-msaview-cli interpro` and
   // committed beside the accessions (see README.md); its seq_ids are the row

@@ -55,6 +55,7 @@ Props:
 | `height`            | `number`            | Widget height in pixels                                              |
 | `colWidth`          | `number`            | Per-column width in pixels (horizontal zoom)                         |
 | `rowHeight`         | `number`            | Per-row height in pixels (vertical zoom)                             |
+| `allowedGappyness`  | `number`            | Hide columns at least this percent gaps (default 100, hide nothing)  |
 | `relativeTo`        | `string`            | Row name to diff every other row against; matches draw as `.`        |
 | `drawTree`          | `boolean`           | Draw the phylogeny (default true); false leaves a label gutter       |
 | `treeAreaWidth`     | `number`            | Fixed width of the tree/label gutter                                 |

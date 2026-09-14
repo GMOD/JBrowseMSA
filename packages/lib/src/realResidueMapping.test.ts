@@ -13,7 +13,7 @@
 // the published package.
 import { expect, test } from 'vitest'
 
-import kinaseMSA from '../../examples/data/kinase.fa?raw'
+import kinaseMSA from '../../examples/data/kinase.aln?raw'
 import structure from '../../examples/src/examples/kinaseStructure.json'
 import MSAModelF from './model.ts'
 

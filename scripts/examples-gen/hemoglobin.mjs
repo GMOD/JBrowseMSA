@@ -45,7 +45,7 @@ const outFile = path.resolve(
 )
 
 const PDB = '1a3n'
-const MSA = 'globin.fa'
+const MSA = 'globin.aln'
 // 1A3N is the alpha2-beta2 tetramer, so each chain appears twice (A/C alpha,
 // B/D beta). One chain per row keeps the forward lookup unique -- two mappings
 // from one row onto one structure id is exactly the ambiguity

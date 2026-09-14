@@ -23,6 +23,8 @@ export default function PfamGlobin() {
     <MSAViewer
       msaFilehandle={{ uri: PFAM, locationType: 'UriLocation' }}
       colorScheme="clustalx_protein_dynamic"
+      drawTree={false}
+      treeAreaWidth={130}
       allowedGappyness={50}
       colWidth={9}
       rowHeight={2}

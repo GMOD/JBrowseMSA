@@ -107,7 +107,7 @@ export const specs = [
       treeAreaWidth: 175,
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/kinase.fa' },
+      msaFilehandle: { uri: 'data/kinase.aln' },
       treeFilehandle: { uri: 'data/kinase.nh' },
       gffFilehandle: { uri: 'data/kinase-domains.gff' },
     }),
@@ -129,7 +129,7 @@ export const specs = [
       treeAreaWidth: 150,
       colWidth: 0.7,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/nlrp1.fa' },
+      msaFilehandle: { uri: 'data/nlrp1.aln' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
     }),
@@ -181,7 +181,7 @@ export const specs = [
       treeAreaWidth: 150,
       colWidth: 0.7,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/nlrp1.fa' },
+      msaFilehandle: { uri: 'data/nlrp1.aln' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
     }),
@@ -224,7 +224,7 @@ export const specs = [
       // PYD block (col 38) starts just inside the frame
       scrollX: -34 * 14,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/nlrp1.fa' },
+      msaFilehandle: { uri: 'data/nlrp1.aln' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
     }),
@@ -388,7 +388,7 @@ export const specs = [
       treeAreaWidth: 150,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/myd88.fa' },
+      msaFilehandle: { uri: 'data/myd88.aln' },
       treeFilehandle: { uri: 'data/myd88.nh' },
     }),
     settle: 2000,
@@ -403,7 +403,7 @@ export const specs = [
       treeAreaWidth: 215,
       colWidth: 7,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/globin.fa' },
+      msaFilehandle: { uri: 'data/globin.aln' },
       treeFilehandle: { uri: 'data/globin.nh' },
     }),
     settle: 2000,
@@ -422,7 +422,7 @@ export const specs = [
       colWidth: 14,
       rowHeight: 20,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/globin.fa' },
+      msaFilehandle: { uri: 'data/globin.aln' },
       treeFilehandle: { uri: 'data/globin.nh' },
       highlights: [
         {
@@ -448,6 +448,28 @@ export const specs = [
     }),
     settle: 2500,
     clip: 'viewer',
+    // The band is one column wide under a full-color alignment, so the callout
+    // is what makes it findable in a still. Anchored to the cell, not a pixel:
+    // 0-based column 21 of the Human_beta row is its residue 7.
+    annotations: [
+      {
+        type: 'box',
+        anchor: { col: 21, rowLabel: 'Human_beta' },
+        pad: 2,
+      },
+      {
+        type: 'text',
+        text: 'row residue 7 · p.Glu7Val · 1A3N B:6',
+        fontSize: 15,
+        maxWidth: 500,
+        anchor: {
+          col: 21,
+          rowLabel: 'Human_beta',
+          alignY: 'bottom',
+          dy: 30,
+        },
+      },
+    ],
   },
   {
     name: 'host-range',
@@ -461,7 +483,7 @@ export const specs = [
       treeAreaWidth: 250,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/ace2.fa' },
+      msaFilehandle: { uri: 'data/ace2.aln' },
       treeFilehandle: { uri: 'data/ace2.nh' },
       highlights: ace2Interface.highlights.map((h, i) => ({
         ...h,
@@ -483,7 +505,7 @@ export const specs = [
             treeAreaWidth: 200,
             colWidth: 4,
             colorSchemeName: 'clustalx_protein_dynamic',
-            msaFilehandle: { uri: 'data/opsins.fa' },
+            msaFilehandle: { uri: 'data/opsins.aln' },
             treeFilehandle: { uri: 'data/opsins.nh' },
             gffFilehandle: { uri: 'data/opsins-domains.gff' },
           }),
@@ -501,7 +523,7 @@ export const specs = [
       treeAreaWidth: 150,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/histone_h4.fa' },
+      msaFilehandle: { uri: 'data/histone_h4.aln' },
       treeFilehandle: { uri: 'data/histone_h4.nh' },
     }),
     settle: 2000,
@@ -515,7 +537,7 @@ export const specs = [
       treeAreaWidth: 160,
       colWidth: 9,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/cytochrome_c.fa' },
+      msaFilehandle: { uri: 'data/cytochrome_c.aln' },
       treeFilehandle: { uri: 'data/cytochrome_c.nh' },
     }),
     settle: 2000,
@@ -530,7 +552,7 @@ export const specs = [
       treeAreaWidth: 230,
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/prestin.fa' },
+      msaFilehandle: { uri: 'data/prestin.aln' },
       treeFilehandle: { uri: 'data/prestin.nh' },
     }),
     settle: 2500,
@@ -549,7 +571,7 @@ export const specs = [
       colWidth: 3,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/p53.fa' },
+      msaFilehandle: { uri: 'data/p53.aln' },
       treeFilehandle: { uri: 'data/p53.nh' },
       gffFilehandle: { uri: 'data/p53-domains.gff' },
     }),
@@ -586,7 +608,7 @@ export const specs = [
       // the domain overlay says the same thing as the two bands but paints
       // every row of every domain, which buries the bars this figure is about
       turnedOffTracks: { 'property-conservation': true },
-      msaFilehandle: { uri: 'data/p53.fa' },
+      msaFilehandle: { uri: 'data/p53.aln' },
       treeFilehandle: { uri: 'data/p53.nh' },
       highlights: [
         { row: 'Human', start: 100, end: 288, label: 'DNA-binding domain' },
@@ -623,7 +645,7 @@ export const specs = [
       // the arcs and the domain boxes are the figure; the conservation
       // histograms would take a third of it to say nothing about either
       turnedOffTracks: { conservation: true, 'property-conservation': true },
-      msaFilehandle: { uri: 'data/kinase.fa' },
+      msaFilehandle: { uri: 'data/kinase.aln' },
       treeFilehandle: { uri: 'data/kinase.nh' },
       gffFilehandle: { uri: 'data/kinase-domains.gff' },
       columnTracks: [
@@ -677,7 +699,7 @@ export const specs = [
       treeAreaWidth: 215,
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/ef1a.fa' },
+      msaFilehandle: { uri: 'data/ef1a.aln' },
       treeFilehandle: { uri: 'data/ef1a.nh' },
     }),
     settle: 2500,
@@ -692,7 +714,7 @@ export const specs = [
       treeAreaWidth: 150,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/insulin.fa' },
+      msaFilehandle: { uri: 'data/insulin.aln' },
       treeFilehandle: { uri: 'data/insulin.nh' },
     }),
     settle: 2000,

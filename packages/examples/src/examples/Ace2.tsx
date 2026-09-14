@@ -1,7 +1,7 @@
 import { MSAViewer } from 'react-msaview'
 
 import interface6m0j from './ace2Interface.json'
-import { ace2DomainsGFF, ace2MSA, ace2Tree } from './data'
+import { ace2MSA, ace2Tree } from './data'
 
 import type { Highlight, ResidueMapping } from 'react-msaview'
 
@@ -11,8 +11,9 @@ import type { Highlight, ResidueMapping } from 'react-msaview'
 // residue protein to dots, so the handful of divergent spike-contact positions
 // that drive host susceptibility stand out — the comparative host-range analysis
 // of Damas et al. 2020, PNAS (https://doi.org/10.1073/pnas.2010146117).
-// Built by scripts/examples-gen. The InterProScan overlay shows the catalytic
-// peptidase M2 domain and the C-terminal collectrin domain.
+// Built by scripts/examples-gen. No domain overlay here on purpose: ACE2's
+// peptidase domain covers most of the protein, and painting it would bury the
+// twenty columns this example is about.
 //
 // Which positions those are is a fact about a structure, not about this
 // alignment, so it arrives as data: the 20 ACE2 residues with an atom within
@@ -28,7 +29,6 @@ export default function Ace2() {
     <MSAViewer
       msa={ace2MSA}
       tree={ace2Tree}
-      gff={ace2DomainsGFF}
       relativeTo="Human"
       colorScheme="clustalx_protein_dynamic"
       height={480}

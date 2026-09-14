@@ -27,7 +27,7 @@ node scripts/examples-gen/generate.mjs --fetch
 node scripts/examples-gen/generate.mjs myd88 ace2
 ```
 
-Output goes to `packages/examples/data/` as plain files — `<name>.fa` for the
+Output goes to `packages/examples/data/` as plain files — `<name>.aln` for the
 alignment, `<name>.nh` for the tree, `<name>-domains.gff` for the domain overlay
 — which the gallery imports with Vite's `?raw`, the screenshot specs read, and
 `scripts/screenshots/writeExampleData.mjs` copies into the demo app so a

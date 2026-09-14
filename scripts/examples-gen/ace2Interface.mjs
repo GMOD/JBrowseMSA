@@ -48,7 +48,7 @@ const ACE2_CHAIN = 'A'
 const RBD_CHAIN = 'E'
 const ACCESSION = 'Q9BYF1' // ACE2_HUMAN, the alignment's reference row
 const ROW = 'Human'
-const MSA = 'ace2.fa'
+const MSA = 'ace2.aln'
 // The usual interface cutoff: two heavy atoms within 4 A are in contact. C-beta
 // distance would be the wrong measure here, since two long side chains reach
 // each other from much further apart than their C-betas are.
