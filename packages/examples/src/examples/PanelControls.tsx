@@ -6,14 +6,12 @@ import { MSAViewer } from 'react-msaview'
 
 import { insulinMSA } from './data'
 
-// A purpose-built page usually wants less than the standalone app shows, and
-// wants its own controls on what is left. Every toggle here is a prop: the
-// viewer follows them on the mounted model, so flipping one costs nothing and
-// re-fetches nothing, and none of it needs the model API.
+// A page embedding one panel usually shows less than the standalone app, with
+// its own controls on the rest. Every toggle here is a prop, and the viewer
+// applies it to the mounted model with no remount, no refetch and no model API.
 //
-// `drawTree={false}` with `autoTreeAreaWidth` is the pairing to reach for when
-// there is no tree to draw — the gutter shrinks to the labels instead of
-// reserving its full default width for a phylogeny that never appears.
+// With no tree to draw, `drawTree={false}` plus `autoTreeAreaWidth` sizes the
+// gutter to the labels alone.
 export default function PanelControls() {
   const [expanded, setExpanded] = useState(false)
   const [diff, setDiff] = useState(true)

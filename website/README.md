@@ -1,9 +1,8 @@
 # website
 
-The documentation portal for JBrowseMSA — a small [Astro](https://astro.build)
-site (plain Astro + React, mirroring the jbrowse-components website). It unifies
-the existing docs and embeds the **live viewer** as a React island on the
-homepage.
+The documentation site for JBrowseMSA, a small [Astro](https://astro.build) site
+(plain Astro + React, like the jbrowse-components website). The site renders the
+repo's docs and embeds the **live viewer** as a React island on the homepage.
 
 ```sh
 pnpm --filter website dev       # local dev server

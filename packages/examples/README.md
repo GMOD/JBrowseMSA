@@ -2,20 +2,18 @@
 
 The live examples behind the website's
 [examples page](https://gmod.org/JBrowseMSA/examples): each one a small
-component that renders the viewer, shown beside its own source. This package is
-not an app — the website imports `src/ExampleBrowser.tsx` and mounts it there.
+component that renders the viewer, shown beside its own source. The package has
+no app of its own; the website imports `src/ExampleBrowser.tsx` and mounts it.
 
-`src/examples/catalog.ts` is the list. It carries what each example is, in the
-words the examples page prints and the
-[gallery](https://gmod.org/JBrowseMSA/gallery) captions, so a story is written
-once and cannot drift between the two pages.
+`src/examples/catalog.ts` is the list. It holds the text the examples page
+prints and the [gallery](https://gmod.org/JBrowseMSA/gallery) captions, so both
+pages read one copy.
 
 `data/` holds the alignments, trees and annotation files the examples import
-with Vite's `?raw`. They are files, not string constants: the same bytes feed
-the live examples, the screenshot specs, the SVG figures, and — copied by
-`scripts/screenshots/writeExampleData.mjs` — the demo app's `?data=` deep links.
-`scripts/examples-gen/README.md` says where each one comes from and how to
-rebuild it.
+with Vite's `?raw`. The same bytes feed the live examples, the screenshot specs
+and the SVG figures, and `scripts/screenshots/writeExampleData.mjs` copies them
+into the demo app for its `?data=` deep links. `scripts/examples-gen/README.md`
+says where each file comes from and how to rebuild it.
 
 ## Adding an example
 

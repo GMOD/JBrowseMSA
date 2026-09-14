@@ -16,7 +16,7 @@ const formats = [
   {
     what: 'Annotations',
     formats:
-      'GFF3 — InterProScan domains, exon and gene models, anything with per-row coordinates — or InterProScan JSON',
+      'GFF3 (InterProScan domains, exon and gene models, anything with per-row coordinates), or InterProScan JSON',
   },
 ]
 const steps = [
@@ -46,7 +46,7 @@ const steps = [
   {
     n: '2',
     title: 'Build the files',
-    body: 'The work before the viewer — sequences to alignment to tree to annotations — happens outside it, in a handful of commands.',
+    body: 'A handful of commands take sequences to an alignment, a tree and annotations for the viewer to open.',
     cards: [
       {
         title: 'Tutorials',
@@ -63,7 +63,7 @@ const steps = [
   {
     n: '3',
     title: 'Put it in your own page',
-    body: 'One React component, or a script tag, or an R call. The same viewer the app runs.',
+    body: 'Embed the viewer the app runs as a React component, a script tag or an R call.',
     cards: [
       {
         title: 'Embedding',
@@ -77,7 +77,7 @@ const steps = [
       },
       {
         title: 'Layers',
-        body: 'Highlights, data tracks and structure mappings, carried in the snapshot and drawn without computing anything.',
+        body: 'Highlights, data tracks and structure mappings you compute, carried in the snapshot for the viewer to draw.',
         href: `${base}/layers`,
       },
       {
@@ -98,9 +98,10 @@ const steps = [
   <section class="hero">
     <h1>JBrowseMSA</h1>
     <p class="tagline">
-      An interactive multiple sequence alignment viewer — phylogenetic tree,
-      protein domains, and many color schemes, scaling to very large alignments.
-      Everything runs in the browser; nothing is uploaded.
+      An interactive multiple sequence alignment viewer with a phylogenetic
+      tree, protein domains and many color schemes, scaling to alignments of
+      tens of thousands of rows. Everything runs in the browser; nothing is
+      uploaded.
     </p>
   </section>
 

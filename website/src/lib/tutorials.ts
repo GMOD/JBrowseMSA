@@ -1,6 +1,6 @@
 // The tutorials in docs/tutorials, in reading order. The markdown is the page;
-// this is what the index card and the browser title need and markdown has no
-// place to put. A new tutorial is a file there plus an entry here.
+// this list holds the index card text and the browser title, which markdown has
+// no field for. Adding a tutorial means a file there plus an entry here.
 export interface Tutorial {
   /** basename of the file in docs/tutorials, without .md */
   slug: string
@@ -19,19 +19,19 @@ export const tutorials: Tutorial[] = [
     slug: 'p53_variant_effects',
     title: "Where p53's damaging variants fall",
     blurb:
-      'ClinVar, AlphaMissense and a saturation screen, each a bar per residue over the same fifteen-species p53 alignment. Three sources that share no data, one set of columns.',
+      'ClinVar, AlphaMissense and a saturation screen, each a bar per residue over the same fifteen-species p53 alignment. The three sources share no data and draw over the same columns.',
   },
   {
     slug: 'spike_structure',
-    title: 'The insertion the structure did not resolve',
+    title: 'The SARS-CoV-2 furin insert and PDB 6VXX',
     blurb:
-      'Eleven coronavirus spikes, the four residues SARS-CoV-2 alone carries, and a SIFTS correspondence saying which residues of that row PDB 6VXX actually resolved.',
+      'Eleven coronavirus spikes, the four residues only SARS-CoV-2 carries, and a SIFTS correspondence recording which residues of that row PDB 6VXX resolved.',
   },
   {
     slug: 'kinase_pocket',
     title: 'Reading cross-reactivity off the kinase pocket',
     blurb:
-      '474 human kinase domains, hmmalign and FastTree, one alignment. The gatekeeper column reads threonine in 19% of them, a small-molecule inhibitor cross-reactivity map in one number.',
+      '474 human kinase domains aligned with hmmalign, with a FastTree tree. The page compares the ATP-pocket residues of kinases imatinib inhibits with those it does not; the gatekeeper column reads threonine in 19% of them.',
   },
   {
     slug: 'rna_family',
@@ -49,7 +49,7 @@ export const tutorials: Tutorial[] = [
     slug: 'codon_selection',
     title: 'TRIM5 and the primate antiviral arms race',
     blurb:
-      '32 TRIM5 orthologs to a codon alignment, a tree, an exon structure and a per-codon dN/dS track from HyPhy. Ends on a link where the variable patch behind HIV-1 restriction reads loud and a zinc-finger control reads quiet.',
+      '32 TRIM5 orthologs to a codon alignment, a tree, an exon structure and a per-codon dN/dS track from HyPhy. Ends on a link where the variable patch behind HIV-1 restriction has high dN/dS and a zinc-finger control has low dN/dS.',
   },
 ]
 

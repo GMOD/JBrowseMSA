@@ -2,10 +2,10 @@ import { MSAViewer } from 'react-msaview'
 
 import { proteinMSA, proteinTree } from './data'
 
-// The viewer computes nothing here. The host scores each residue of one row
-// (Kyte-Doolittle hydropathy of the human sequence), and the columnTracks prop
-// carries the numbers in; `row` places them on that sequence's residues, so
-// alignment gaps fall out, and `max` sets the value drawn at full height.
+// The host scores each residue of one row (Kyte-Doolittle hydropathy of the
+// human sequence) and passes the numbers in through the columnTracks prop.
+// `row` places them on that sequence's residues, so alignment gaps come out
+// right, and `max` sets the value drawn at full height.
 const hydropathy: Record<string, number> = {
   I: 4.5,
   V: 4.2,

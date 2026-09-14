@@ -3,15 +3,14 @@ import { MSAViewer } from 'react-msaview'
 import { myd88DomainsGFF, myd88MSA, myd88Tree } from './data'
 
 // MyD88 (a TLR/IL-1R signalling adaptor) across mammals, including three bats.
-// The InterProScan overlay shows its two-domain architecture — an N-terminal
-// Death domain and a C-terminal TIR domain — on every row.
-// `relativeTo="Human"` diffs every row against human, so identical residues
-// render as "." and only the lineage-specific substitutions show as letters —
-// the same reading aid used in comparative-immunology papers, here paired with
-// the inferred phylogeny. Fruit-bat MyD88 changes that dampen TLR signalling are
-// a focus of Tian et al. 2023, Sci. Adv.
-// (https://pmc.ncbi.nlm.nih.gov/articles/PMC10162675/).
-// Data built by scripts/examples-gen (UniProt+ClustalW).
+// The InterProScan overlay shows its N-terminal Death domain and C-terminal TIR
+// domain on every row. `relativeTo="Human"` diffs every row against human, so
+// identical residues render as "." and only the lineage-specific substitutions
+// show as letters, the reading aid comparative-immunology papers use, here
+// beside the inferred phylogeny. Tian et al. 2023, Sci. Adv.
+// (https://pmc.ncbi.nlm.nih.gov/articles/PMC10162675/) studies fruit-bat MyD88
+// changes that dampen TLR signalling. Data built by scripts/examples-gen
+// (UniProt+ClustalW).
 export default function Myd88() {
   return (
     <MSAViewer

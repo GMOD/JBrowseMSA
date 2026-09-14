@@ -1,8 +1,8 @@
-// The example data, one constant per file in ../../data. The files are what is
-// canonical: `scripts/examples-gen/generate.mjs` writes them, the CLI writes the
-// domain GFFs, `scripts/screenshots/writeExampleData.mjs` copies them to the
-// demo app so a deep link can fetch one, and every consumer reads the same
-// bytes instead of a copy pasted into a string.
+// The example data, one constant per file in ../../data. The files are
+// canonical: `scripts/examples-gen/generate.mjs` writes them, the CLI writes
+// the domain GFFs, `scripts/screenshots/writeExampleData.mjs` copies them to
+// the demo app so a deep link can fetch one, and every consumer reads the same
+// bytes.
 
 import ace2DomainsGFF from '../../data/ace2-domains.gff?raw'
 import ace2MSA from '../../data/ace2.aln?raw'

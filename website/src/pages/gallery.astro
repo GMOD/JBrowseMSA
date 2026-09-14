@@ -17,16 +17,15 @@ import {
 
 const base = import.meta.env.BASE_URL
 
-// The figures and their captions come from the examples catalog, which is also
-// what the examples page reads, so a story is written once. Each figure names a
-// screenshot spec (scripts/screenshots/specs.mjs), and that spec's `?data=` URL
-// is the live link under the image -- the figure and the link therefore open the
-// same state by construction. A compose spec stacks other captures and has no
-// state of its own, so it gets no link.
+// The figures and captions come from the examples catalog, which the examples
+// page also reads. Each figure names a screenshot spec
+// (scripts/screenshots/specs.mjs), and that spec's `?data=` URL is the live link
+// under the image, so the figure and the link open the same state. A compose
+// spec stacks other captures and has no state of its own, so it gets no link.
 //
-// The deployed app, not `${base}/demo/`, for the same reason the user guide's
-// live links use it: a query string on an internal link is a shape the
-// deploy's link checker has no reason to understand.
+// The links point at the deployed app instead of `${base}/demo/`, as the user
+// guide's live links do, because the deploy's link checker does not understand a
+// query string on an internal link.
 const figures = catalog.flatMap(entry =>
   (entry.figures ?? []).map(figure => {
     const spec = specs.find(s => s.name === figure.src)
@@ -47,33 +46,33 @@ const figures = catalog.flatMap(entry =>
 
 <Base
   title="Gallery — JBrowseMSA"
-  description="A gallery of react-msaview: alignments that tell a biological story on their own, and connected JBrowse sessions linking genome, alignment, and 3D structure."
+  description="A gallery of react-msaview: alignments that each carry a biological finding, and connected JBrowse sessions linking genome, alignment, and 3D structure."
   wide
 >
   <article class="prose">
     <h1>Gallery</h1>
     <p>
-      Two kinds of example: the standalone react-msaview viewer, where the
-      biology reads straight off the alignment and tree, and react-msaview
-      running inside JBrowse, connected to a genome view and 3D structure. Each
-      is built reproducibly from public data by the scripts in the repo.
+      Two kinds of example: the standalone react-msaview viewer showing an
+      alignment and tree, and react-msaview running inside JBrowse, connected to
+      a genome view and 3D structure. Scripts in the repo build each one from
+      public data.
     </p>
 
     <h2 id="standalone">Standalone react-msaview</h2>
     <p>
-      Just an alignment, a tree, and optional feature overlays — no genome
-      browser. Each figure shows a distinct viewer capability: domain overlays,
-      reference diffing, data layers, tree topology, RNA secondary structure,
-      base-pair arcs, gene arrows, base-resolution DNA, scale. Click one to open
-      the demo app in the state it was captured in — the figure and the link
-      come from the same screenshot spec. The full set of examples, live and
-      interactive with their source, is on the
-      <a href={`${base}/examples`}>examples</a> page.
+      These figures show an alignment, a tree and optional feature overlays,
+      with no genome browser. Each figure shows one viewer capability: domain
+      overlays, reference diffing, data layers, tree topology, RNA secondary
+      structure, base-pair arcs, gene arrows, base-resolution DNA, scale. Click
+      one to open the demo app in the state it was captured in; the figure and
+      the link come from the same screenshot spec. The
+      <a href={`${base}/examples`}>examples</a> page has the full set, live and
+      with their source.
     </p>
 
     {figures.map(f => (
       <Figure src={`${f.src}.png`} alt={f.caption} href={f.href}>
-        <strong>{f.title}</strong> — {f.caption}
+        <strong>{f.title}.</strong> {f.caption}
       </Figure>
     ))}
 
@@ -84,9 +83,9 @@ const figures = catalog.flatMap(entry =>
         JBrowse 2 plugin
       </a>
       : the alignment and tree open <em>inside</em> JBrowse, connected to a
-      genome view and — with
-      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a> —
-      the AlphaFold structure. Selecting a region in any view lights the
+      genome view and, with
+      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a>,
+      the AlphaFold structure. Selecting a region in any view highlights the
       matching columns, codons, and residues in the others. Each example below
       is one declarative URL.
     </p>
@@ -94,15 +93,15 @@ const figures = catalog.flatMap(entry =>
     <JBrowseFigure
       src="f12-combined-closeup.png"
       href={f12CombinedCloseupUrl}
-      alt="A single JBrowse session at base resolution over F12 exon 3: the RefSeq gene annotation track on top and the react-msaview DNA alignment with its species tree below, the four cetaceans showing a gap where every other mammal has a C — the shared single-base frameshift — with the highlighted column linking the genome to the alignment"
-      body="Genome ↔ alignment in one JBrowse session: the F12 locus (RefSeq annotation, top) over the react-msaview DNA alignment + species tree, zoomed to base resolution at exon 3. The highlighted column ties the genome to the alignment — the four cetaceans carry a single-base deletion (a gap where every other mammal has a C) that disables the gene. This is the viewer an MSA editor would build on: the 14-exon model is already registered to the alignment columns and lifted onto each species."
+      alt="A single JBrowse session at base resolution over F12 exon 3: the RefSeq gene annotation track on top and the react-msaview DNA alignment with its species tree below. The four cetaceans show a gap where every other mammal has a C, the shared single-base frameshift, and the highlighted column links the genome to the alignment"
+      body="Genome ↔ alignment in one JBrowse session: the F12 locus (RefSeq annotation, top) over the react-msaview DNA alignment + species tree, zoomed to base resolution at exon 3. The highlighted column links the genome to the alignment. The four cetaceans carry a single-base deletion (a gap where every other mammal has a C) that disables the gene. The 14-exon model is registered to the alignment columns and lifted onto each species."
     />
 
     <JBrowseFigure
       src="genome-browser-tp53-protein3d.png"
       href={tp53Protein3d}
-      alt="JBrowse: the TP53 gene with ClinVar, the p53 ortholog alignment, and the AlphaFold structure, all connected, with the nuclear export signal motif lit across genome, alignment, and 3D structure"
-      body="Genome ↔ alignment ↔ 3D structure: the TP53 gene (RefSeq + ClinVar), the p53 ortholog alignment, and the AlphaFold structure as one connected session, opened with the nuclear export signal motif (residues 339–350) lit across all three — the same motif highlighted on the genome, the alignment column, and the folded structure at once."
+      alt="JBrowse: the TP53 gene with ClinVar, the p53 ortholog alignment, and the AlphaFold structure, all connected, with the nuclear export signal motif highlighted across genome, alignment, and 3D structure"
+      body="Genome ↔ alignment ↔ 3D structure: the TP53 gene (RefSeq + ClinVar), the p53 ortholog alignment, and the AlphaFold structure as one connected session. It opens with the nuclear export signal motif (residues 339–350) highlighted on the genome, the alignment columns, and the folded structure."
     />
 
     <p>The same connected pattern without the structure view:</p>
@@ -144,7 +143,7 @@ const figures = catalog.flatMap(entry =>
             </a>{' '}
             — every reference-proteome protein in UniProtKB within 50% identity
             of p53, looked up from UniProt and aligned to the transcript in the
-            browser. No job at any service, so it opens in seconds.
+            browser. It submits no job to any service, so it opens in seconds.
           </li>
           <li>
             <a href={tp53PhmmerRp15} target="_blank" rel="noopener">
@@ -159,26 +158,24 @@ const figures = catalog.flatMap(entry =>
       </>
     )}
 
-    <h2 id="embedded">Or one panel, in a page you write</h2>
+    <h2 id="embedded">Embedding one panel</h2>
     <p>
-      A connected session is the most a reader can be handed and also the most
-      they have to take in: three linked views, each with its own tracks, menus
-      and coordinate system. When a page has one question to answer, the other
-      shape is to embed the viewer alone and put only the controls that question
-      needs around it — the alignment without the genome browser, the tree
-      turned off when there is no meaningful tree, a diff toggle and an expand
-      button beside it.
+      A connected session shows three linked views, each with its own tracks,
+      menus and coordinate system. A page with one question can embed the viewer
+      alone, with only the controls that question needs around it: the alignment
+      without the genome browser, the tree turned off when there is no
+      meaningful tree, a diff toggle and an expand button beside it.
     </p>
     {/* No `#controls-from-props` fragment here: ExampleBrowser reads the hash
-      as a route rather than scrolling to an element, so the examples page is
-      client:only and carries no such id. hyperlink --check-anchors is right to
-      call that a broken anchor, and it fails the build. */}
+      as a route instead of scrolling to an element, so the examples page is
+      client:only and carries no such id. hyperlink --check-anchors reports that
+      as a broken anchor and fails the build. */}
     <p>
-      That is a react-msaview component in your own page rather than a JBrowse
-      session, and the props drive it live, so a toggle costs no remount and no
-      refetch. The <a href={`${base}/embedding`}>embedding guide</a> has the
-      recipe, and the <strong>Controls from props</strong> entry on the
-      <a href={`${base}/examples`}>examples</a> page is it running.
+      The embedded panel is a react-msaview component in your own page, and its
+      props update it live, so a toggle costs no remount and no refetch. The
+      <a href={`${base}/embedding`}>embedding guide</a> has the recipe, and the
+      <strong>Controls from props</strong> entry on the
+      <a href={`${base}/examples`}>examples</a> page runs it.
     </p>
   </article>
 </Base>

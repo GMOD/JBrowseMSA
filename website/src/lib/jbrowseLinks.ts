@@ -1,10 +1,11 @@
 // Self-contained JBrowse session URLs for the gallery's "Inside JBrowse"
 // section.
 //
-// The short-form links are written by hand: since jbrowse-plugin-msaview 3.5
-// a spec names the transcript (`connectedTranscript`) and what to build
+// The short-form links below are written by hand: since jbrowse-plugin-msaview
+// 3.5 a spec names the transcript (`connectedTranscript`) and what to build
 // (`orthologParams` / `searchParams`), and the plugin looks the exon model up
-// in the genome view's own gene track at launch. Nothing here is generated.
+// in the genome view's own gene track at launch. The long URLs at the bottom
+// of the file are generator output.
 const HUB_HG38 = 'https://jbrowse.org/ucsc/hg38/config.json'
 
 // The links that build their alignment on open need this plugin release at
@@ -32,7 +33,7 @@ const tp53Genome = {
 
 // TP53's UniRef50 cluster: every reference-proteome entry in UniProtKB within
 // 50% identity of p53, aligned to the transcript's translation in the browser.
-// No job at any service, so it opens in seconds.
+// It submits no job to any service, so it opens in seconds.
 export const tp53UnirefBrowser = specUrl([
   tp53Genome,
   {
