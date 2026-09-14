@@ -241,7 +241,10 @@ chain A of 2SRC, one segment putting row residue 86 at structure residue 2, one
 unobserved range, and `rowLength: 536`. The
 [spike_structure tutorial](https://gmod.org/JBrowseMSA/tutorials/spike_structure)
 builds another from scratch, against a construct whose numbering is offset by 19
-and whose furin loop has no coordinates at all.
+and whose furin loop has no coordinates at all. `hemoglobinSickle.json` is the
+smallest reason to have the layer at all: the sickle-cell substitution is
+residue 7 of the row and residue 6 of PDB 1A3N chain B, and the mapping is what
+converts the one into the other rather than a reader subtracting one.
 
 `model.residueMappingProblems` lists every one of those with a `scope`
 (`mapping` or `segment`) and a reason, because refusing invisibly leaves a host

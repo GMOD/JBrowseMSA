@@ -1,4 +1,5 @@
-// Reuse the same example data as the examples gallery (a pure-strings module).
+// Reuse the same example data as the examples page: the IL2RA alignment and its
+// tree, read from the files in packages/examples/data.
 export {
   proteinMSA,
   proteinTree,

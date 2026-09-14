@@ -13,6 +13,10 @@ canvas with a tiled rendering system for scalability.
   now that the viewer no longer scans
 - `packages/msa-parsers` — parsers for Stockholm, FASTA, Clustal, Newick, EMF,
   A3M, GFF
+- `packages/examples` — the live examples the website's /examples page mounts.
+  `src/examples/catalog.ts` is the single source for what each example is (the
+  gallery page reads its captions from there), and `data/` holds the alignments,
+  trees and GFFs as files, which `writeExampleData.mjs` copies into the app
 - `packages/svgcanvas` — vendored ESM fork of svgcanvas for SVG export
 - `packages/r-msaview` — R htmlwidget package with ggtree/Biostrings/treeio
   interop
