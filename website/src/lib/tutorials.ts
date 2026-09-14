@@ -45,6 +45,12 @@ export const tutorials: Tutorial[] = [
     blurb:
       'A Nextstrain tree of 1,840 RSV genomes, reconstructed to one whole-genome alignment and opened at every scale from the whole tree to a single variable column.',
   },
+  {
+    slug: 'codon_selection',
+    title: 'TRIM5 and the primate antiviral arms race',
+    blurb:
+      '32 TRIM5 orthologs to a codon alignment, a tree, an exon structure and a per-codon dN/dS track from HyPhy. Ends on a link where the variable patch behind HIV-1 restriction reads loud and a zinc-finger control reads quiet.',
+  },
 ]
 
 export const tutorialBySlug = new Map(tutorials.map(t => [t.slug, t]))
