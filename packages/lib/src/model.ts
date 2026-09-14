@@ -128,13 +128,12 @@ function parseTreeText(text: string) {
   return parseNewick(text.startsWith('SEQ') ? parseEmfTree(text).tree : text)
 }
 
-// Tracks that start hidden. The sequence logo answers a narrower question than
-// conservation does and costs three times the vertical space, so it waits to be
-// asked for.
+// The sequence logo is three times the conservation track's height, so it
+// starts hidden.
 const defaultOffTracks = new Set(['sequence-logo', 'position-ruler'])
 
-// base-pair arcs: one color for the nested helices, one for a pseudoknot, whose
-// whole point is that it crosses them
+// base-pair arcs: one color for nested helices, one for pseudoknots, which cross
+// them
 const HELIX_ARC = '#4e79a7'
 const PSEUDOKNOT_ARC = '#e15759'
 
@@ -154,17 +153,13 @@ function smallColumnTracks(tracks?: ColumnTrackSpec[]) {
  * The snapshot properties reset() carries across a return to the import form:
  * display preferences and layout, nothing derived from the loaded file.
  *
- * reset() applies a default snapshot filtered to this list, so the list is the
- * whole decision: a property left off it resets to its default, a visible and
- * benign failure. The previous shape — a hand-maintained list of things to
- * CLEAR — failed in the dangerous direction: a forgotten property silently
- * carried the previous file's state into the next one, and because node ids
- * are path-derived (node-0-0-1), a stale `collapsed` or `showOnly` id matched
- * a real node in the new tree and folded it. Downstream composed properties
- * (e.g. the jbrowse plugin's) are not on the list, so they reset too.
+ * reset() applies a default snapshot filtered to this list, so any property
+ * left off it resets, including downstream composed ones (e.g. the jbrowse
+ * plugin's). Node ids are path-derived (node-0-0-1), so a carried-over
+ * `collapsed` or `showOnly` id would match a real node in the next tree and
+ * fold it.
  *
- * Exported for modelReset.test.ts, which checks that everything off this list
- * matches a freshly created model after reset().
+ * Exported for modelReset.test.ts.
  */
 export const preservedOnReset = new Set([
   'id',
@@ -190,13 +185,10 @@ export const preservedOnReset = new Set([
   'showDomainLegend',
 ])
 
-// `turnedOffTracks` records the user's explicit choices only: an id is absent
-// until they touch that track, and then its value is whether the track is OFF.
-// Reading the default through this is what lets a track ship hidden without
-// writing an entry into every snapshot and shared URL.
-// A track the file itself supplies says whether it starts hidden, since only
-// the file knows how many of them there are: a Pfam seed carries a couple of
-// #=GR lines, an Rfam family one per row.
+// `turnedOffTracks` holds only the user's explicit choices, so a hidden-by-default
+// track writes nothing into the snapshot. A file-supplied track passes its own
+// `defaultOff`, since the count varies by file: a Pfam seed has a couple of #=GR
+// lines, an Rfam family one per row.
 function trackIsOff(
   turnedOffTracks: { get: (id: string) => boolean | undefined },
   id: string,
@@ -205,20 +197,16 @@ function trackIsOff(
   return turnedOffTracks.get(id) ?? (defaultOff || defaultOffTracks.has(id))
 }
 
-// one array for every "nothing under the pointer", since a fresh [] is a fresh
-// value to every observer of it
+// shared empty result, so observers don't see a fresh [] as a change
 const noDomains: Annotation[] = []
 
-// seqPos -> column indexes, per row, hung off the parse the rows came from so
-// they are collected with it. A computed would rebuild every row's index on
-// each miss, and rebuild all of them again whenever it was read outside a
-// reactive context.
+// seqPos -> column indexes per row, keyed on the parse so they are garbage
+// collected with it. A computed would rebuild every row's index when read
+// outside a reactive context.
 const seqPosIndexCache = new WeakMap<object, Map<string, Int32Array>>()
 
-// A segment asserts a 1:1 run, so its two sides have to be the same length.
-// One that is not is malformed data, and the arithmetic below would answer
-// anyway -- with a residue that is off by however much the sides disagree. Skip
-// it, the same refusal an uncovered position gets.
+// A segment is a 1:1 run. A segment whose sides differ in length is malformed,
+// and the lookups treat it like an uncovered position.
 function sameLength(segment: ResidueSegment) {
   return (
     segment.rowEnd - segment.rowStart ===
@@ -226,11 +214,9 @@ function sameLength(segment: ResidueSegment) {
   )
 }
 
-// Does the content need a scrollbar? fit() divides the viewport by the row or
-// column count and multiplies it back, so an exact fit lands a fraction of a
-// pixel over -- enough for a `>` to answer yes and hand the reader a minimap or
-// a scrollbar for half a pixel of nothing, which then shrinks the viewport and
-// leaves a gap.
+// fit() divides the viewport by the row or column count and multiplies back, so
+// an exact fit can land a fraction of a pixel over. A plain `>` would then show
+// a scrollbar that shrinks the viewport and leaves a gap.
 function overflows(content: number, viewport: number) {
   return content - viewport > 0.5
 }
@@ -279,10 +265,8 @@ function stateModelFactory() {
         /**
          * #property
          * whether the domain legend is expanded. The legend floats over the
-         * top-right of the alignment, so on a tall panel it covers real
-         * residues -- persisting the state is what lets a reader collapse it
-         * and keep it collapsed, and what lets a session or a figure open with
-         * it already out of the way.
+         * top-right of the alignment and covers residues, so a session or
+         * figure can open with it collapsed.
          */
         showDomainLegend: stripDefault(types.boolean, defaultShowDomainLegend),
         /**
@@ -397,9 +381,8 @@ function stateModelFactory() {
         turnedOffTracks: stripDefault(types.map(types.boolean), {}),
         /**
          * #property
-         * tracks supplied as data rather than computed from the alignment:
-         * per-column values drawn as bars, or a per-column string drawn as a
-         * text track. See docs/layers.md
+         * tracks supplied as data: per-column values drawn as bars, or a
+         * per-column string drawn as a text track. See docs/layers.md
          */
         columnTracks: stripDefault(
           types.array(types.frozen<ColumnTrackSpec>()),
@@ -408,11 +391,10 @@ function stateModelFactory() {
 
         /**
          * #property
-         * which residue of which structure each row's residues are, as data.
-         * The viewer cannot infer this -- matching a row to a structure by
-         * sequence equality fails for a tagged construct, a truncation or a
-         * subsequence row, and fails in the direction that looks like it
-         * worked -- so it arrives computed. See docs/layers.md
+         * row-to-structure residue correspondence, computed outside the viewer
+         * (e.g. from SIFTS). Matching by sequence equality places a tagged
+         * construct, a truncation or a subsequence row on the wrong residue.
+         * See docs/layers.md
          */
         residueMappings: stripDefault(
           types.array(types.frozen<ResidueMapping>()),
@@ -433,10 +415,9 @@ function stateModelFactory() {
         /**
          * #property
          * the user's explicit hide choices per annotation accession, keyed by
-         * accession with the value meaning "off", the same shape as
-         * `turnedOffTracks`. An accession the user has never touched is absent
-         * and drawn, so a file of two hundred domain types adds nothing to the
-         * shared URL until someone filters one out
+         * accession with the value meaning "off", like `turnedOffTracks`. An
+         * untouched accession is absent and drawn, so the shared URL grows
+         * only with the user's filters
          */
         turnedOffFeatures: stripDefault(types.map(types.boolean), {}),
         /**
@@ -457,7 +438,7 @@ function stateModelFactory() {
          * labeled highlights in 1-based inclusive coordinates: a column span
          * `{start, end}`, a residue span `{row, start, end}` of a named row,
          * or a row set `{rows}`, each with an optional `label` and `color`.
-         * Persists in the snapshot, so a computed answer travels in the URL.
+         * Persists in the snapshot and the URL.
          */
         highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
       }),
@@ -473,9 +454,7 @@ function stateModelFactory() {
       status: undefined as { msg: string; onCancel?: () => void } | undefined,
       /**
        * #volatile
-       * high resolution scale factor, helps make canvas look better on hi-dpi
-       * screens. derived from the device pixel ratio so canvases are crisp on
-       * retina/4k displays and not needlessly oversized on standard ones
+       * canvas scale factor, from the device pixel ratio
        */
       highResScaleFactor:
         typeof window === 'undefined' ? 1 : window.devicePixelRatio,
@@ -544,11 +523,8 @@ function stateModelFactory() {
 
       /**
        * #volatile
-       * transient highlights keyed by who asked for them. One slot cannot hold
-       * two sources -- a structure viewer's hover and a genome view's hover
-       * both want to point at a column, and with one slot whoever clears last
-       * erases the other's. Keyed by owner, each source adds and removes only
-       * its own. Not persisted: a hover is not part of the document.
+       * transient highlights keyed by owner, so a structure viewer's hover and
+       * a genome view's hover each clear only their own. Not persisted.
        */
       transientHighlights: {} as Record<string, Highlight[]>,
 
@@ -564,18 +540,15 @@ function stateModelFactory() {
 
       /**
        * #volatile
-       * heights of individual `columnTracks`, by track id. A data track is
-       * resized on its own: the shared per-kind heights below belong to the
-       * tracks the viewer computes, and dragging a data track's handle used to
-       * resize those instead.
+       * heights of individual `columnTracks`, by track id. The shared per-kind
+       * heights below apply only to computed tracks.
        */
       columnTrackHeights: {} as Record<string, number>,
 
       /**
        * #volatile
-       * taller than the conservation track by default: the logo spends its
-       * height on stacked glyphs, and a 40px stack of four residues leaves each
-       * one too short to identify
+       * taller than the conservation track: in a 40px stack of four residues
+       * each glyph is too short to identify
        */
       sequenceLogoTrackHeight: 80,
 
@@ -597,36 +570,31 @@ function stateModelFactory() {
 
       /**
        * #volatile
-       * load problems the view carried on through: an optional layer that did
-       * not arrive, an overlay that did not parse. `error` is the other kind --
-       * it replaces the view, which is right for the alignment and wrong for a
-       * decorative file
+       * non-fatal load problems: an optional layer that failed to load, an
+       * overlay that failed to parse. `error` replaces the view and is for the
+       * alignment itself
        */
       warnings: [] as string[],
 
       /**
        * #volatile
-       * bumped by reset(). The React error boundary above the view keeps its
-       * caught error until it is remounted, so "Return to import form" did
-       * nothing after a render error until this became its key
+       * bumped by reset(). The error boundary above the view uses it as its key,
+       * since the boundary keeps its caught error until remounted
        */
       resetCount: 0,
 
       /**
        * #volatile
-       * set by a host that restores the loaded documents by its own means --
-       * a jbrowse session that holds them, a page that refetches them on load.
-       * `unshareableData` then reports nothing, since what it warns about is a
-       * link that opens empty, and under such a host the link does not
+       * set by a host that restores the loaded documents itself, such as a
+       * jbrowse session or a page that refetches them. `unshareableData` then
+       * reports nothing
        */
       hostCarriesData: false,
 
       /**
        * #volatile
-       * overlay annotations drawn on the alignment, whatever their source.
-       * Every source -- InterProScan, GFF, a user upload -- converts to this
-       * flat list before it reaches the model, so nothing downstream of here
-       * knows which one it came from
+       * overlay annotations drawn on the alignment. InterProScan JSON, GFF and
+       * user uploads all convert to this flat list
        */
       annotations: [] as Annotation[],
     }))
@@ -672,8 +640,8 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * high-res scale factor, tracks the device pixel ratio so canvases stay
-       * crisp when the window moves between monitors or the browser zooms
+       * update the canvas scale factor when the device pixel ratio changes
+       * (moving between monitors, browser zoom)
        */
       setHighResScaleFactor(arg: number) {
         self.highResScaleFactor = arg
@@ -696,8 +664,8 @@ function stateModelFactory() {
 
       /**
        * #action
-       * report something the view survived: a layer that failed to load, a
-       * file that failed to parse
+       * record a non-fatal load problem: a layer that failed to load, a file
+       * that failed to parse
        */
       addWarning(warning: string) {
         self.warnings = [...self.warnings, warning]
@@ -713,7 +681,7 @@ function stateModelFactory() {
       /**
        * #action
        * declare that this host restores the loaded documents itself, which
-       * takes down the "Not in the link" warning. See `hostCarriesData`
+       * hides the "Not in the link" warning. See `hostCarriesData`
        */
       setHostCarriesData(arg: boolean) {
         self.hostCarriesData = arg
@@ -723,9 +691,9 @@ function stateModelFactory() {
        * #action
        * set mouse position (row, column) in the MSA
        *
-       * PUBLIC API: a host drives this (and reads the `mouseCol` volatile) to
-       * sync the alignment's hover with a view of its own -- a genome view, a
-       * 3D structure. Keep the name and signature stable.
+       * Public API: a host calls this (and reads `mouseCol`) to sync hover with
+       * its own view, such as a genome view or 3D structure. Keep the name and
+       * signature stable.
        */
       setMousePos(col?: number, row?: number) {
         self.mouseCol = col
@@ -736,9 +704,9 @@ function stateModelFactory() {
        * #action
        * set highlighted columns
        *
-       * PUBLIC API: jbrowse-plugin-msaview calls this from its
-       * afterCreateAutoruns to highlight alignment columns, and MSAViewer
-       * passes its `highlightColumns` prop through it. Not dead code.
+       * Public API: jbrowse-plugin-msaview calls this from its
+       * afterCreateAutoruns, and MSAViewer passes its `highlightColumns` prop
+       * through it.
        */
       setHighlightedColumns(columns?: number[]) {
         self.highlightedColumns = columns
@@ -751,10 +719,8 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * show `highlights` on behalf of `owner`, replacing whatever that owner
-       * showed before and leaving every other owner's alone. The object is
-       * replaced rather than mutated so one assignment is the observable
-       * change.
+       * show `highlights` for `owner`, replacing that owner's previous ones and
+       * leaving other owners' in place
        */
       applyHighlight(owner: string, highlights: Highlight[]) {
         self.transientHighlights = {
@@ -764,7 +730,7 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * drop what `owner` was showing, leaving every other owner's in place
+       * remove `owner`'s highlights, leaving other owners' in place
        */
       clearHighlight(owner: string) {
         if (owner in self.transientHighlights) {
@@ -819,10 +785,9 @@ function stateModelFactory() {
 
       /**
        * #action
-       * switch to another alignment of a multi-alignment file (Stockholm). The
-       * new alignment has its own rows and its own tree, so everything naming
-       * the old one's -- the collapsed node ids, the subtree in focus, the
-       * reference row, the scroll position -- goes with it
+       * switch to another alignment of a multi-alignment file (Stockholm).
+       * Clears the collapsed node ids, the subtree in focus, the reference row
+       * and the scroll position, which all refer to the previous alignment
        */
       setCurrentAlignment(n: number) {
         if (n === self.currentAlignment) {
@@ -924,11 +889,10 @@ function stateModelFactory() {
 
       /**
        * #action
-       * keep the GFF text the way the alignment and the tree are kept, rather
-       * than only its parsed annotations. The annotations are volatile, so a
-       * file opened from disk used to leave no trace in the snapshot at all --
-       * not the text, and not the filehandle, which is cleared once a blob is
-       * read. An autorun parses this back into annotations.
+       * store the GFF text in the snapshot like the alignment and tree. The
+       * parsed annotations are volatile and a blob filehandle is cleared once
+       * read, so the text is the only persisted copy. An autorun parses it
+       * into annotations.
        */
       setGFF(result: string) {
         self.data.setGFF(result)
@@ -960,16 +924,14 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * whether this host brings the loaded documents back by means the
-       * snapshot cannot see, which is what decides whether `unshareableData`
-       * has anything to warn about.
+       * whether the host restores the loaded documents outside the snapshot.
+       * When true, `unshareableData` is empty.
        *
-       * A simple host flips the `hostCarriesData` volatile. A host whose
-       * answer depends on how the view was opened overrides this getter in a
-       * `.views` block of its own composed model -- jbrowse-plugin-msaview's
-       * indexed-location views refetch from a URL the session holds, while its
-       * data-store views really are absent from a link someone pastes
-       * elsewhere. `unshareableData` reads it off `self`, so an override wins.
+       * A simple host sets `hostCarriesData`. A host where this depends on how
+       * the view was opened overrides the getter in its own composed model's
+       * `.views` block; jbrowse-plugin-msaview's indexed-location views refetch
+       * from a URL the session holds, while its data-store views do not.
+       * `unshareableData` reads it off `self`, so an override takes effect.
        */
       get hostRestoresData() {
         return self.hostCarriesData
@@ -992,8 +954,8 @@ function stateModelFactory() {
        * #getter
        */
       get colorScheme() {
-        // colorSchemeName is a free string (menus, snapshots, URL params); fall
-        // back to the default rather than returning undefined on a stale name
+        // colorSchemeName is a free string (menus, snapshots, URL params), so a
+        // stale name falls back to the default
         return (
           colorSchemes[self.colorSchemeName] ??
           colorSchemes[defaultColorSchemeName]!
@@ -1025,29 +987,23 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * the loaded documents this view's own snapshot cannot carry, largest
-       * first. A file opened from disk or pasted in becomes inline text, and
-       * DataModel drops an inline document past `maxInlineSnapshotBytes`
-       * rather than put megabytes of sequence into a session or a URL.
+       * loaded documents left out of the snapshot, largest first. A file opened
+       * from disk or pasted in becomes inline text, and DataModel drops an
+       * inline document past `maxInlineSnapshotBytes`.
        *
-       * Dropping it is right. Dropping it silently is what makes a copied link
-       * open an empty viewer, so the header says so and the standalone app
-       * stops rewriting the address bar while this is non-empty. A document
-       * fetched from a URL never appears here whatever its size: the snapshot
-       * keeps the filehandle and refetches through it.
+       * The header lists these, and the standalone app stops rewriting the
+       * address bar while the list is non-empty, so a copied link does not
+       * open an empty viewer unannounced. A document fetched from a URL never
+       * appears here, since the snapshot keeps its filehandle.
        *
-       * Nothing is unshareable when the host restores the data by its own
-       * means (see `hostRestoresData`) -- inside a session that reloads these
-       * documents from somewhere the snapshot does not show, the warning is
-       * simply wrong.
+       * Empty when `hostRestoresData` is true.
        */
       get unshareableData(): UnshareableData[] {
         if (self.hostRestoresData) {
           return []
         }
         const { data } = self
-        // a data track past the limit leaves the snapshot the same way an
-        // inline document does, and left unreported the same way too
+        // data tracks past the limit also leave the snapshot
         const trackBytes = columnTrackSizes(self.columnTracks)
           .filter(bytes => bytes > maxInlineSnapshotBytes)
           .reduce((a, b) => a + b, 0)
@@ -1074,11 +1030,9 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * extra per-row attributes, keyed by row name. Parsed defensively: the
-       * source is a user-supplied document (treeMetadataFilehandle, or a
-       * session snapshot), and this computed is read by labelWidthMap on every
-       * layout, so a malformed file would otherwise throw out of rendering and
-       * take the whole view down over a decorative field.
+       * extra per-row attributes, keyed by row name. labelWidthMap reads this
+       * on every layout, so a malformed user-supplied file returns {} instead
+       * of throwing out of rendering.
        */
       get treeMetadata(): Record<string, Record<string, string> | undefined> {
         const text = self.data.treeMetadata
@@ -1286,10 +1240,8 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * number of rows the alignment occupies on screen. This is the leaf count,
-       * not `rows.length`: a tree leaf with no matching MSA row still takes up a
-       * row of vertical space (drawn blank), so row hit-testing and fit-to-height
-       * must count it.
+       * number of rows on screen: the leaf count, which includes tree leaves
+       * with no matching MSA row (drawn blank), unlike `rows.length`.
        */
       get numRows() {
         return this.leaves.length
@@ -1298,12 +1250,8 @@ function stateModelFactory() {
       /**
        * #method
        * index of the global column holding each ungapped sequence position of a
-       * row, so seqPos -> column is a lookup rather than a scan. The domain
-       * overlay resolves thousands of these per redraw.
-       *
-       * Built per row, on the row asked for: the first lookup used to index
-       * every row in the alignment. The cache is keyed on the parse the rows
-       * came from, so a new alignment brings a new one.
+       * row. The domain overlay resolves thousands of these per redraw. Built
+       * lazily per row and cached on the parse.
        */
       seqPosIndex(rowName: string): Int32Array | undefined {
         const MSA = this.MSA
@@ -1329,10 +1277,9 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * every sequence the alignment holds, keyed by row name, whatever the
-       * tree currently shows. `rows` is the rows on screen; this is the rows
-       * that exist, and every lookup about a named row goes through it --
-       * collapsing a clade hides rows, it does not delete their sequence
+       * every sequence in the alignment, keyed by row name, including rows a
+       * collapsed clade hides. `rows` holds only the rows on screen; lookups
+       * by row name use this
        */
       get rowMap() {
         const MSA = this.MSA
@@ -1479,10 +1426,8 @@ function stateModelFactory() {
         clusterLayout(r, this.totalHeight, self.treeWidth)
         const max = this.rootToTipLength
         const k = max ? self.treeWidth / max : 0
-        // the displayed root starts at x=0 whatever branch length it carries,
-        // so its own length is subtracted here rather than zeroed on the parsed
-        // node -- `root` hands out the cached parse, and writing to it made
-        // showOnly shorten that branch for good
+        // the displayed root starts at x=0, so subtract its length here; `root`
+        // returns the cached parse, which must not be mutated
         setBrLength(r, -Math.max(r.data.length || 0, 0), k)
         // for each collapsed clade, record the pixel x-position of its farthest
         // tip so the renderer can draw a triangle spanning the branch-length
@@ -1522,10 +1467,8 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * x-position of the farthest tip in a phylogram, px. The layout scales
-       * the longest root-to-tip path onto treeWidth, so that is where it lands
-       * -- and 0 for a tree carrying no lengths at all, which draws as a
-       * cladogram instead
+       * x-position of the farthest tip in a phylogram, px: treeWidth, or 0 for
+       * a tree with no branch lengths (drawn as a cladogram)
        */
       get maxBranchLength() {
         return this.rootToTipLength ? self.treeWidth : 0
@@ -1533,9 +1476,8 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * pixels per unit of branch length in the current phylogram layout, and 0
-       * in cladogram mode, where the x-positions carry no length at all. The
-       * scale bar over the tree is drawn from it.
+       * pixels per unit of branch length in the phylogram layout, 0 in
+       * cladogram mode. The tree's scale bar uses it.
        */
       get pxPerBranchLength() {
         const max = maxLength(this.root)
@@ -1599,19 +1541,16 @@ function stateModelFactory() {
        */
       get labelWidthMap() {
         const { showTreeText, leaves, treeMetadata } = self
-        // gated on the same condition the renderer draws labels under, so the
-        // gutter labelsWidth reserves and the labels actually drawn cannot
-        // disagree -- and so turning labels off hands their space to the tree.
-        // Measured at a fixed reference size and scaled by labelWidthScale:
-        // re-measuring every leaf on every vertical-zoom frame cost ~200ms on a
+        // gated on the renderer's label condition, so hidden labels reserve no
+        // gutter. Measured once at a reference size and scaled by
+        // labelWidthScale: re-measuring per vertical-zoom frame cost ~200ms on a
         // 50k-leaf tree
         return showTreeText
           ? new Map(
               leaves.map(node => {
                 const { name } = node.data
                 // `||`, matching renderTreeLabels: an empty genome falls back
-                // to the row name, and measuring '' would size the gutter (and
-                // the label's click target) to nothing
+                // to the row name
                 const displayName = treeMetadata[name]?.genome || name
                 return [
                   name,
@@ -1632,11 +1571,9 @@ function stateModelFactory() {
       },
 
       get labelsWidth() {
-        // a loop, not Math.max(...widths.values()): spreading a map of every
-        // leaf passes one argument per row, and the argument limit is somewhere
-        // around 125k -- so the bundled 230k-tip COVID tree threw
-        // "RangeError: Maximum call stack size exceeded" out of a getter the
-        // treeWidth autorun reads on load
+        // a loop, not Math.max(...): spreading passes one argument per leaf,
+        // and the ~125k argument limit throws RangeError on the 230k-tip COVID
+        // tree
         let max = 0
         for (const width of this.labelWidthMap.values()) {
           if (width > max) {
@@ -1662,9 +1599,8 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * the base pairs of the consensus secondary structure, as arcs. The WUSS
-       * string is collapsed through the hidden columns before it is parsed, so
-       * the pairs land in the same visible column space the text track does
+       * the base pairs of the consensus secondary structure, as arcs, in
+       * visible column space (hidden columns are removed before parsing)
        */
       get secondaryStructureArcs(): Arc[] | undefined {
         const { blanks, hideGapsEffective } = self
@@ -1688,9 +1624,8 @@ function stateModelFactory() {
         const { MSA, hideGapsEffective, blanks } = self
         const tracks = (MSA?.tracks ?? []).filter(t => !!t.data)
         if (tracks.length === 0) {
-          // reading rowHeight up front made every zoom frame rebuild the track
-          // list, and the canvases redraw on the track object they are handed
-          // changing
+          // return before reading rowHeight, so zooming does not rebuild the
+          // list and redraw every track canvas
           return []
         }
         const { rowHeight } = self
@@ -1729,11 +1664,9 @@ function stateModelFactory() {
         }
         const skip = <T>(items: T[]) =>
           hideGapsEffective ? dropBlanks(blanks, items) : items
-        // an arc names two positions rather than one per column, so it takes
-        // the same two steps the arrays take -- a row's residues onto columns,
-        // then columns onto the visible ones -- as a lookup. visibleColsBefore,
-        // not globalColToVisibleCol: an endpoint in a hidden column collapses
-        // to where that column went instead of taking the whole arc with it
+        // an arc endpoint maps row residue -> column -> visible column.
+        // visibleColsBefore, not globalColToVisibleCol, so an endpoint in a
+        // hidden column moves to the neighboring visible one and the arc stays
         const resolve = (track: ColumnTrackSpec, pos: number) => {
           const col = track.row
             ? self.seqPosIndex(track.row)?.[pos - 1]
@@ -1776,9 +1709,8 @@ function stateModelFactory() {
        * #getter
        */
       get columnTrackModels(): BasicTrack[] {
-        // read per kind, not up front: a text track is the only kind sized by
-        // the row height, and reading it here rebuilt every data track on every
-        // vertical zoom step
+        // read rowHeight only for text tracks, so vertical zoom does not
+        // rebuild the other data tracks
         const defaultHeight = (kind: ColumnTrackSpec['kind']) =>
           kind === 'bar'
             ? self.conservationTrackHeight
@@ -1794,8 +1726,6 @@ function stateModelFactory() {
               self.columnTrackHeights[track.id] ??
               track.height ??
               defaultHeight(track.kind),
-            // the spec has one `color`; bar and arc are separate track models
-            // that read it under their own name
             barColor: track.color,
             arcColor: track.color,
             customColorScheme: track.colors,
@@ -1807,13 +1737,9 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       */
-      /**
-       * #getter
-       * the consensus secondary structure as a track, when there is one. Its
-       * own getter so the object keeps its identity across a zoom: the canvas
-       * redraws on the track it is handed changing, and rebuilding these
-       * alongside everything else made every zoom frame redraw every track
+       * the consensus secondary structure as a track, when there is one. A
+       * separate getter keeps the object stable across zoom, so its canvas
+       * does not redraw
        */
       get basePairTrackModels(): BasicTrack[] {
         const arcs = this.secondaryStructureArcs
@@ -1835,8 +1761,8 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * the tracks computed from the alignment itself, which depend on their
-       * own heights and on the alphabet -- and on nothing zoom changes
+       * the tracks computed from the alignment; they depend on their heights
+       * and the alphabet, not on zoom
        */
       get computedTrackModels(): BasicTrack[] {
         return [
@@ -1919,19 +1845,18 @@ function stateModelFactory() {
        * Convert a visible column to a row-specific sequence position (0-based).
        * Returns undefined if the position is a gap in the sequence.
        *
-       * PUBLIC API: this and the sibling coordinate converters
-       * (visibleColToGlobalCol, seqPosToVisibleCol, globalColToVisibleCol,
-       * seqPosToGlobalCol) are how a host translates between alignment columns
-       * and a row's residue positions across gaps. Keep them stable.
+       * Public API, like the sibling converters (visibleColToGlobalCol,
+       * seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) hosts
+       * use to translate between columns and residue positions. Keep them
+       * stable.
        *
        * @param rowName - The name of the row
        * @param visibleCol - The visible column index
        * @returns The sequence position (0-based), or undefined if it's a gap
        */
       visibleColToSeqPos(rowName: string, visibleCol: number) {
-        // a binary search of the row's index, not a scan of the row: this
-        // answers on every mouse move, and a 30k-column row scanned per event
-        // is the whole frame
+        // binary search: this runs on every mouse move, and scanning a
+        // 30k-column row per event takes the whole frame
         return seqPosOfGlobalCol(
           self.seqPosIndex(rowName),
           this.visibleColToGlobalCol(visibleCol),
@@ -1971,10 +1896,9 @@ function stateModelFactory() {
 
       /**
        * #method
-       * Convert a visible column index (what a mouse handler reports) back to a
-       * column of the full alignment. Hidden columns shift everything to their
-       * right, so a host that holds per-column data of its own has to make this
-       * hop before indexing it.
+       * Convert a visible column index (what a mouse handler reports) to a
+       * column of the full alignment. A host indexing its own per-column data
+       * needs this when columns are hidden.
        *
        * @param visibleCol - The visible column index
        * @returns The global column index in the full MSA
@@ -1989,8 +1913,7 @@ function stateModelFactory() {
       /**
        * #method
        * Convert a sequence position (ungapped) to a global column index.
-       * Returns undefined for a row the alignment does not have -- answering
-       * anyway is how a mistyped or stale row name came to highlight column 0.
+       * Returns undefined for a row name the alignment does not have.
        *
        * @param rowName - The name of the row
        * @param seqPos - The sequence position (0-based, ungapped)
@@ -2025,10 +1948,8 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * every reason a mapping is being ignored, so a host can say which. A
-       * mapping outlives the alignment it was computed for; when the two no
-       * longer agree the lookups have to refuse, and refusing invisibly is how
-       * "there is no structure here" gets confused with "this data is stale".
+       * why each ignored residue mapping is ignored, so a host can tell a
+       * missing structure from a mapping made against a different alignment.
        */
       get residueMappingProblems(): ResidueMappingProblem[] {
         const problems: ResidueMappingProblem[] = []
@@ -2080,10 +2001,8 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * the mappings that still fit the loaded alignment. A row-level problem
-       * takes the whole mapping out; a single malformed segment takes only
-       * itself, since the rest of the mapping is still a claim about residues
-       * that exist.
+       * the mappings that fit the loaded alignment. A row-level problem drops
+       * the whole mapping; a malformed segment drops only that segment.
        */
       get usableResidueMappings(): ResidueMapping[] {
         const unusable = new Set(
@@ -2101,9 +2020,8 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * the structures the loaded alignment has usable mappings onto. A row can
-       * have several -- an experimental entry and a predicted model, say -- so
-       * a host that means a particular one has to name it.
+       * the structures with usable mappings. A row can map onto several, such
+       * as an experimental entry and a predicted model.
        */
       get mappedStructures() {
         return this.usableResidueMappings.map(m => ({
@@ -2114,18 +2032,12 @@ function stateModelFactory() {
 
       /**
        * #method
-       * The structure residue a row residue is, or undefined. Refusing is the
-       * point: the guess this replaces answered every query, with a wrong
-       * residue when it did not know.
+       * The structure residue for a row residue. Returns undefined when no
+       * segment covers `seqPos`, or when the row maps onto several structures
+       * and `structureId` does not pick one (see `mappedStructures`).
        *
-       * It also refuses when the answer is not unique. A row commonly maps onto
-       * several structures -- an experimental entry and two predicted models --
-       * and returning whichever came first would be the same class of wrong,
-       * quieter. Name one with `structureId`, or use `mappedStructures` to see
-       * what there is.
-       *
-       * Positions are 1-based, as `residueMappings` and `highlights` are --
-       * note that the column helpers above take 0-based ones.
+       * Positions are 1-based, like `residueMappings` and `highlights`; the
+       * column helpers above are 0-based.
        *
        * @param rowName - The alignment row
        * @param seqPos - Residue of that row, 1-based
@@ -2164,10 +2076,10 @@ function stateModelFactory() {
 
       /**
        * #method
-       * The row residue a structure residue is, the same lookup backwards, and
-       * refusing on the same terms. `asymId` picks between mappings onto the
-       * same entry, which a homodimer -- two rows, two chains, one id -- always
-       * needs; without it such a lookup is ambiguous and gets nothing.
+       * The row residue for a structure residue; the inverse of
+       * `structureResidue`, returning undefined in the same cases. `asymId`
+       * picks a chain when several mappings share an entry id, as in a
+       * homodimer.
        *
        * @param structureId - The structure's id, as the mapping names it
        * @param position - Residue of that structure, 1-based label_seq_id
@@ -2203,12 +2115,9 @@ function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
-       * the vertical space the alignment rows actually get: the widget height
-       * less everything stacked above and below them -- the header, the tracks,
-       * and the minimap when the columns overflow. Every consumer wants this
-       * same subtraction, so there is one of it: blocksY, maxScrollY, the
-       * vertical scrollbar and fitVertically all read it, and a second getter
-       * that forgot the tracks is what put the last rows out of reach.
+       * the vertical space for alignment rows: the widget height less the
+       * header, the tracks, and the minimap when columns overflow. Shared by
+       * blocksY, maxScrollY, the vertical scrollbar and fitVertically.
        */
       get msaAreaHeight() {
         return (
@@ -2226,13 +2135,12 @@ function stateModelFactory() {
         return sum(self.turnedOnTracks.map(r => r.model.height))
       },
       /**
-       * one representative annotation per accession, which is what the legend,
-       * the filter dialog and the palettes key off
+       * one representative annotation per accession, for the legend, the
+       * filter dialog and the palettes
        */
       get annotationTypes() {
-        // first occurrence wins. The representative supplies only the name,
-        // description and -- for ordinal segments -- the start that orders
-        // them, and those agree across an accession's instances
+        // first occurrence wins; only name, description and segment start are
+        // read from it
         const types = new Map<string, Annotation>()
         for (const annot of self.annotations) {
           if (!types.has(annot.accession)) {
@@ -2263,11 +2171,8 @@ function stateModelFactory() {
        * #getter
        */
       get dataInitialized() {
-        // truthiness, not `!== ''`: these are types.maybe, and DataModel's
-        // postProcessSnapshot drops a document over 50kb, so a restored session
-        // that inlined a large alignment comes back `undefined` here -- which
-        // `!== ''` reads as initialized and renders an empty view instead of
-        // the import form
+        // truthiness, not `!== ''`: DataModel drops an inline document over
+        // 50kb from the snapshot, so a restored session can hold `undefined`
         return !!(self.data.msa || self.data.tree) && !self.error
       },
       /**
@@ -2317,8 +2222,7 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * most-negative allowed scrollY, keeping the last row in view rather than
-       * letting the whole alignment scroll off the top.
+       * most-negative allowed scrollY, which keeps the last row in view
        */
       get maxScrollY() {
         return Math.min(-self.totalHeight + self.msaAreaHeight, 0)
@@ -2344,10 +2248,8 @@ function stateModelFactory() {
        * set hovered tree node and its descendants
        */
       setHoveredTreeNode(nodeId?: string) {
-        // the tree's mousemove handler calls this on every event, and both the
-        // lookup and the write are expensive: `find` walks the whole hierarchy,
-        // and a fresh object here invalidates hoveredRowIndices and redraws the
-        // tree and MSA overlays. Re-hovering the same node is the common case
+        // called on every tree mousemove; `find` walks the whole hierarchy and a
+        // new object redraws the tree and MSA overlays
         if (nodeId === self.hoveredTreeNode?.nodeId) {
           return
         }
@@ -2367,15 +2269,12 @@ function stateModelFactory() {
       /**
        * #action
        * Calculate a neighbor joining tree from the current MSA using BLOSUM62
-       * distances. Refuses above `maxNeighborJoiningRows`: the join loop is
-       * cubic and runs on the main thread, so 800 rows is a ten-second freeze
-       * with no progress and no cancel, and a tree that size wants a tool built
-       * for it anyway.
+       * distances. Throws above `maxNeighborJoiningRows`: the join loop is
+       * cubic and runs on the main thread, and 800 rows freeze the tab for ten
+       * seconds with no cancel.
        */
       calculateNeighborJoiningTreeFromMSA() {
-        // every sequence in the alignment, not the rows on screen: a collapsed
-        // clade is a display state, and building the tree from what it leaves
-        // showing drops the sequences it hides out of the result
+        // every sequence, including rows in collapsed clades
         const rows = [...self.rowMap]
         if (rows.length < 2) {
           throw new Error('Need at least 2 sequences to build a tree')
@@ -2390,10 +2289,9 @@ function stateModelFactory() {
 
       /**
        * #action
-       * swap in a different tree over the same alignment. Node ids are derived
-       * from the path (node-0-0-1), so a `collapsed` or `showOnly` id held over
-       * from the old tree matches a real node in the new one and folds whatever
-       * happens to sit there -- the ids go with the tree they name.
+       * swap in a different tree over the same alignment. Clears `collapsed`
+       * and `showOnly`, since path-derived node ids (node-0-0-1) from the old
+       * tree would match unrelated nodes in the new one.
        */
       replaceTree(newick: string) {
         transaction(() => {
@@ -2462,10 +2360,9 @@ function stateModelFactory() {
        * #action
        * Smoothly zoom by a continuous scaleFactor. The column under the cursor
        * (offsetX/offsetY, px relative to the MSA area) stays anchored
-       * horizontally. Vertically the anchor is biased toward the top: when the
-       * alignment nearly fits the viewport, snap to y=0 rather than pinning a
-       * random row under the cursor, with the bias fading out as the alignment
-       * grows taller than the viewport (where cursor-anchoring is useful).
+       * horizontally. Vertically the anchor is biased toward y=0 when the
+       * alignment nearly fits the viewport, fading to cursor-anchoring as the
+       * alignment grows taller than the viewport.
        * Drives wheel/trackpad-pinch zoom.
        */
       zoomToPos(scaleFactor: number, offsetX: number, offsetY: number) {
@@ -2489,9 +2386,7 @@ function stateModelFactory() {
           )
 
           const anchoredScrollY = offsetY - rowInView * self.rowHeight
-          // maxScrollY is -(totalHeight - visibleMsaHeight) when the alignment
-          // overflows, so -maxScrollY is exactly that overflow past the
-          // scrollable MSA viewport (0 when it fits)
+          // -maxScrollY is the overflow past the viewport, 0 when it fits
           const overflow = Math.max(0, -self.maxScrollY)
           const visibleHeight = self.totalHeight - overflow
           const topBias =
@@ -2520,13 +2415,11 @@ function stateModelFactory() {
 
       /**
        * #action
-       * Set the overlay annotations (an empty list clears them). Every source
-       * funnels through here after its own adapter has flattened it:
-       * InterProScan, GFF, user uploads, NCBI CDD.
+       * Set the overlay annotations (an empty list clears them). InterProScan,
+       * GFF, user uploads and NCBI CDD all arrive here as Annotation[].
        *
-       * It does not touch `showDomains`. Loading used to force the overlay on,
-       * and since a restored snapshot loads its GFF again on the way in, a link
-       * shared with the overlay hidden reopened with it drawn.
+       * Leaves `showDomains` alone, because a restored snapshot reloads its
+       * GFF and must keep a hidden overlay hidden.
        */
       setAnnotations(annotations: Annotation[]) {
         self.annotations = annotations
@@ -2577,8 +2470,6 @@ function stateModelFactory() {
        * #action
        */
       toggleTrack(id: string) {
-        // the stored value is "is off", so the current shown state is exactly
-        // what the flipped entry should hold
         const defaultOff = self.MSA?.tracks.find(t => t.id === id)?.defaultOff
         self.turnedOffTracks.set(
           id,
@@ -2601,9 +2492,9 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * width of the alignment canvas itself: the msa area less the vertical
-       * scrollbar sitting in it. Not usable from showHorizontalScrollbar, which
-       * feeds msaAreaHeight -> showVerticalScrollbar and would close a cycle
+       * width of the alignment canvas: the msa area less the vertical
+       * scrollbar. showHorizontalScrollbar must not read it, since that feeds
+       * msaAreaHeight -> showVerticalScrollbar and would form a cycle
        */
       get msaCanvasWidth() {
         return self.msaAreaWidth - this.verticalScrollbarWidth
@@ -2611,8 +2502,8 @@ function stateModelFactory() {
       /**
        * #getter
        * ordinal segment types (exons etc.), ordered by sequence position so
-       * exon-1..exon-14 read left-to-right; colored by alternating shade and
-       * labeled by number rather than each getting a distinct hue + legend row
+       * exon-1..exon-14 run left-to-right; colored by alternating shade and
+       * labeled by number, with no legend row
        */
       get segmentDomainTypes() {
         return [...self.annotationTypes.values()]
@@ -2665,9 +2556,9 @@ function stateModelFactory() {
       /**
        * #getter
        * the domain types currently drawn on the alignment (filtered-on), shared
-       * by the on-screen legend and the SVG export legend. Ordinal segments
-       * (exons) are excluded — they read as a numbered gene model, not a color
-       * key — so this is the categorical types ordered by sequence position
+       * by the on-screen legend and the SVG export legend: the categorical types
+       * ordered by sequence position. Ordinal segments (exons) are numbered on
+       * the band instead
        */
       get visibleDomainTypes() {
         return this.categoricalDomainTypes
@@ -2679,11 +2570,9 @@ function stateModelFactory() {
        * #getter
        * every filtered-on annotation resolved to the visible column span it is
        * drawn across, keyed by row name. Each row is ordered longest-first so a
-       * short domain nested inside a long one draws on top of it rather than
-       * under it. Resolving these once here rather than inside each canvas
-       * block removes a per-feature, per-block sequence position conversion
-       * from every redraw, and gives the letter renderer the band colors it
-       * needs to keep residues readable on top of the boxes.
+       * nested short domain draws on top. Resolved once here instead of per
+       * canvas block per redraw; the letter renderer also reads the band
+       * colors to pick legible letter colors.
        */
       get domainBands() {
         const { blanks } = self
@@ -2694,14 +2583,11 @@ function stateModelFactory() {
           const rowBands = annotations
             .toSorted((a, b) => len(b) - len(a))
             .map(annotation => {
-              // annotation positions are 1-based and inclusive. Both ends count
-              // the visible columns in front of a global column, so endCol is
-              // the exclusive column after the last residue's own column --
-              // the band stops there rather than stretching across a following
-              // gap run -- and a residue whose column is itself hidden
-              // collapses onto the neighbouring boundary instead of dropping
-              // the band. A band whose every column is hidden spans nothing
-              // and is left out, as is one naming a row the alignment lacks.
+              // annotation positions are 1-based and inclusive. endCol is
+              // exclusive, one past the last residue's column, so the band does
+              // not extend over a following gap run. An endpoint in a hidden
+              // column moves to the neighboring boundary. Bands with no visible
+              // columns, or naming a missing row, are dropped.
               const start = self.seqPosToGlobalCol(name, annotation.start - 1)
               const end = self.seqPosToGlobalCol(name, annotation.end - 1)
               if (start === undefined || end === undefined) {
@@ -2714,8 +2600,7 @@ function stateModelFactory() {
                 : undefined
             })
             .filter(notEmpty)
-            // numbered after the drop, so a band that resolved to nothing does
-            // not leave an empty sub-row behind it
+            // numbered after filtering, so dropped bands leave no empty sub-row
             .map((band, stackIndex) => ({ ...band, stackIndex }))
           if (rowBands.length > 0) {
             bands.set(name, rowBands)
@@ -2755,9 +2640,6 @@ function stateModelFactory() {
         const hits = (this.domainBands.get(name) ?? [])
           .filter(b => mouseCol >= b.startCol && mouseCol < b.endCol)
           .map(b => b.annotation)
-        // the shared empty array, so moving the mouse across an alignment with
-        // no annotations does not hand every canvas block a new value to
-        // re-render on
         return hits.length > 0 ? hits : noDomains
       },
 
@@ -2776,8 +2658,7 @@ function stateModelFactory() {
        * #getter
        * row indices highlighted by the current tree hover (a hovered internal
        * node highlights every tip below it). Shared by the tree and MSA overlay
-       * canvases so they cannot disagree, and resolved through the memoized
-       * name->index map rather than rebuilding a lookup on each mouse move.
+       * canvases, via the memoized name->index map.
        */
       get hoveredRowIndices() {
         const { hoveredTreeNode, rowNamesSet } = self
@@ -2791,8 +2672,8 @@ function stateModelFactory() {
       /**
        * #getter
        * contiguous runs of `highlightedColumns`, so a run of highlighted columns
-       * draws as one bordered band. Computed here because the overlay canvas
-       * redraws on every mouse move while the highlight itself rarely changes.
+       * draws as one bordered band. Memoized because the overlay canvas redraws
+       * on every mouse move.
        */
       get highlightedColumnRuns() {
         const { highlightedColumns } = self
@@ -2823,8 +2704,7 @@ function stateModelFactory() {
           const visible = self.globalColToVisibleCol(globalCol)
           return visible ?? visibleColsBefore(blanks, globalCol)
         }
-        // the document's own highlights first, then what each owner is showing
-        // right now, so a hover draws over a persisted band rather than under it
+        // persisted highlights first, so transient ones draw on top
         const all = [
           ...self.highlights,
           ...Object.values(transientHighlights).flat(),
@@ -2941,10 +2821,9 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * Return to the import form: every property off `preservedOnReset`
-       * (data, filehandles, collapsed/showOnly, zoom, scroll, ...) goes back
-       * to its default, then the file-derived volatiles applySnapshot cannot
-       * reach are cleared by hand.
+       * Return to the import form: reset every property not in
+       * `preservedOnReset` to its default, then clear the file-derived
+       * volatiles applySnapshot does not touch.
        */
       reset() {
         self.resetCount++
@@ -2977,8 +2856,8 @@ function stateModelFactory() {
       },
       /**
        * #action
-       * draw this annotation type, or stop drawing it. Only the "stop" is
-       * recorded -- see `turnedOffFeatures`
+       * show or hide an annotation type. Only hidden types are recorded; see
+       * `turnedOffFeatures`
        */
       setFilter(accession: string, shown: boolean) {
         if (shown) {
@@ -2992,12 +2871,8 @@ function stateModelFactory() {
        * #action
        */
       fit() {
-        // Each direction's viewport depends on the other's result: fitting the
-        // rows while the columns still overflow measures against a height the
-        // minimap is taking, and fitting the columns while the rows still
-        // overflow measures against a width the vertical scrollbar is taking.
-        // A second pass measures against the geometry the first pass produced,
-        // which is the one the reader ends up looking at.
+        // two passes: each direction's viewport depends on whether the other
+        // overflows (the minimap takes height, the vertical scrollbar width)
         transaction(() => {
           for (let pass = 0; pass < 2; pass++) {
             this.fitHorizontally()
@@ -3023,9 +2898,7 @@ function stateModelFactory() {
        */
       fitHorizontally() {
         if (self.numColumns > 0) {
-          // fitting to msaAreaWidth instead left the last ~20px of columns off
-          // the right edge -- and short of the width that shows a minimap, so
-          // nothing on screen said they were there
+          // msaCanvasWidth excludes the vertical scrollbar's 20px
           self.colWidth = clamp(
             self.msaCanvasWidth / self.numColumns,
             minColWidth,
@@ -3036,17 +2909,12 @@ function stateModelFactory() {
       },
 
       afterCreate() {
-        // seed the highlighted-columns overlay from the declarative property so
-        // a shared snapshot/URL opens with those columns highlighted (the
-        // volatile highlightedColumns can later be driven by genome-hover sync)
         if (self.highlightColumns?.length) {
           self.setHighlightedColumns(self.highlightColumns)
         }
 
-        // track the live device pixel ratio so canvas backing stores re-scale
-        // when the window moves between monitors or the browser zooms. The
-        // matchMedia query is pinned to the current ratio, so each change
-        // re-registers against the new one to keep tracking further moves.
+        // the matchMedia query is pinned to the current device pixel ratio, so
+        // each change re-registers against the new one
         if (
           typeof window !== 'undefined' &&
           typeof window.matchMedia === 'function'
@@ -3070,25 +2938,17 @@ function stateModelFactory() {
          * Fetch a filehandle whenever it changes, and hand the text to
          * `onLoad`.
          *
-         * Every loader carries a generation guard: the filehandle can change
-         * mid-fetch (a second file picked while the first is still in flight),
-         * and the slower earlier request must not clobber the data, status, or
-         * loading flag belonging to the newer one. A superseded or cleared
-         * request is also aborted, rather than left downloading a file nothing
-         * is waiting for, and it gives back the status line it was writing --
-         * a reset() mid-download used to leave "Downloading file" and a Cancel
-         * button behind on the import form.
+         * A generation guard keeps a slower superseded request from overwriting
+         * the newer one's data, status or loading flag. A superseded or cleared
+         * request is aborted and clears its status line.
          *
-         * `clearFilehandle` serves two purposes for the loaders that pass it.
-         * A local file has no URL to refetch from, so the handle is dropped
-         * once its bytes are in the model; and a fetch the user cancels drops
-         * it too, returning the view to the import form rather than leaving a
-         * stuck spinner.
+         * `clearFilehandle` runs after a local file loads, since a blob has no
+         * URL to refetch, and when the user cancels, which returns the view to
+         * the import form.
          *
-         * `what` names the layer in a failure message. An optional layer
-         * (annotations, row metadata) that fails to load is a warning: it is
-         * not worth replacing an alignment the reader is looking at with an
-         * error screen over a decorative file.
+         * `what` names the layer in a failure message. An `optional` layer
+         * (annotations, row metadata) that fails adds a warning instead of an
+         * error.
          */
         const loadOnFilehandleChange = ({
           what,
@@ -3186,8 +3046,7 @@ function stateModelFactory() {
           },
         })
 
-        // treeMetadata is decorative and has no import-form step of its own, so
-        // it keeps no loading flag and nothing to return to on cancel
+        // treeMetadata has no import-form step, so no loading flag or cancel
         loadOnFilehandleChange({
           what: 'row metadata',
           optional: true,
@@ -3197,11 +3056,8 @@ function stateModelFactory() {
           },
         })
 
-        // autorun parses inline gff text from data.gff. Text that goes away
-        // takes its annotations with it -- setData with a new alignment and no
-        // gff used to leave the previous file's annotations drawn over it --
-        // while annotations a host set directly are left alone, which is why
-        // this tracks what it applied instead of reading the current list
+        // parses data.gff into annotations. Clearing the text clears only the
+        // annotations this autorun applied, not ones a host set directly
         let appliedGFF = false
         addDisposer(
           self,
@@ -3212,8 +3068,6 @@ function stateModelFactory() {
                 self.applyGFFText(gffText)
                 appliedGFF = true
               } catch (e) {
-                // a malformed overlay is not worth replacing the alignment
-                // with an error screen
                 console.error(e)
                 self.addWarning(`The annotations did not parse: ${e}`)
               }
@@ -3224,9 +3078,7 @@ function stateModelFactory() {
           }),
         )
 
-        // gffFilehandle carries overlay annotations. It loads into data.gff and
-        // the autorun above parses it, so there is one parse path whether the
-        // text arrived from a file or from a snapshot
+        // gffFilehandle loads into data.gff, which the autorun above parses
         loadOnFilehandleChange({
           what: 'annotations',
           optional: true,
@@ -3253,19 +3105,12 @@ function stateModelFactory() {
           },
         })
 
-        // Keep the parse chain warm: reading self.columns transitively holds
-        // self.MSA (parseMSA) computed alive, so it is parsed once per data
-        // change rather than re-parsed on every non-reactive access. Do not
-        // remove.
+        // Keep computeds alive that are read outside reactions, so they are not
+        // recomputed on every access: self.columns (and through it the
+        // parseMSA result), and the column statistics that dynamic color
+        // schemes and the mousemove-driven hover tooltip read.
         // xref solution https://github.com/mobxjs/mobx/issues/266#issuecomment-222007278
         // xref problem https://github.com/GMOD/react-msaview/issues/75
-        //
-        // The column statistics are held for the same reason whenever something
-        // reads them off the reactive path: dynamic color schemes, and the hover
-        // tooltip, which is read from a mousemove handler. Without this the
-        // tooltip's cost depends on whether some visible track happens to be
-        // observing them, so closing the conservation track would silently turn
-        // every mouse move into a full-alignment recount.
         addDisposer(
           self,
           autorun(() => {
@@ -3287,10 +3132,9 @@ function stateModelFactory() {
           }),
         )
 
-        // autorun: when autoTreeAreaWidth is set and no tree is drawn, shrink the
-        // tree area to fit the row labels rather than padding it to the fixed
-        // default. Gated on noTree/!drawTree so it never fights the treeWidth sync
-        // below (treeAreaWidth here depends only on labelsWidth, not treeWidth).
+        // with autoTreeAreaWidth and no tree drawn, size the tree area to the
+        // labels. Gated on noTree/!drawTree so it does not loop with the
+        // treeWidth autorun below
         addDisposer(
           self,
           autorun(() => {
@@ -3304,14 +3148,10 @@ function stateModelFactory() {
           }),
         )
 
-        // treeWidth trails the tree area, less whatever the labels take out of
-        // it. A width that arrived with the snapshot is left alone until the
-        // tree area itself moves: a host that opens a view with a narrow tree
-        // beside wide labels -- jbrowse-plugin-msaview does, at treeWidth 100
-        // in a 200px area -- had its value overwritten on the first frame, and
-        // a restored session came back re-derived rather than as it was left.
-        // A getter cannot do this: labelsWidth is measured off the leaves,
-        // which are laid out against treeWidth.
+        // treeWidth follows the tree area less the labels. A non-default
+        // snapshot treeWidth (jbrowse-plugin-msaview opens at 100 in a 200px
+        // area) is kept until the tree area changes. Not a getter, because
+        // labelsWidth is measured off leaves laid out against treeWidth.
         let pinnedAreaWidth =
           self.treeWidth === defaultTreeWidth ? undefined : self.treeAreaWidth
         addDisposer(
@@ -3331,9 +3171,8 @@ function stateModelFactory() {
       },
     }))
     .postProcessSnapshot(({ data, columnTracks, ...rest }) => ({
-      // per-property defaults are stripped by the stripDefault helper; the only thing
-      // it can't express is this cross-field rule: drop inline tree/msa/metadata
-      // when a sibling filehandle can refetch them, keeping sessions/URLs small
+      // stripDefault handles per-property defaults; this drops inline documents
+      // whose filehandle can refetch them
       ...rest,
       ...smallColumnTracks(columnTracks),
       data: {
