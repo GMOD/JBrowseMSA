@@ -22,7 +22,27 @@ it knows nothing, says nothing, disagrees with nothing and earns nothing.
 > the height its frequency earns → a height proportional to its frequency
 
 The same covers an artifact given a purpose: "the failure this layer exists to
-avoid".
+avoid". The test: could the subject perform the verb if you ran the program? A
+parser can reject; a column cannot know. When it could not, name the actor, or
+use a verb of description (marks, contains, shows, is).
+
+## A figure of speech where a literal word exists
+
+For each verb or noun that is not literally true of its subject, ask what
+literal word it stands for, and write that word. Keep a figure only when no
+literal phrase exists or the field uses it as a term ("memory leak").
+
+| Figure | Literal |
+|---|---|
+| earns its place | is needed, is used |
+| buys the room | saves N characters |
+| a one-way door | irreversible |
+| rots, drifts | falls out of date when X changes |
+| fight over it | both write it |
+| the edge | the exception |
+| a second door | a second entry point |
+| reads loud / quiet | has high / low values |
+| the dangerous shape | the case that breaks: name it |
 
 ## A cleft sentence
 
@@ -101,6 +121,14 @@ Each relative clause relabels the one before it. Split into sentences.
 
 > a different alignment, which is a new model, which React spells `key` → A new
 > `msa`, `tree` or `gff` needs a new model, so change the component's `key`.
+
+## Density and padding
+
+Removing a trope often adds a clause for the mechanism, and the sentence grows.
+Give each fact its own sentence and break the paragraph where the subject
+changes. Match a document's length to its facts: no overview repeating the
+headings, no closing summary. A report or PR description leads with what changed
+or what was found.
 
 ## Em-dash asides
 
