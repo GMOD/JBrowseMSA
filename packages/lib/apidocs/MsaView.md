@@ -432,6 +432,19 @@ number
 blockSize: 500
 ```
 
+#### volatile: columnTrackHeights
+
+heights of individual `columnTracks`, by track id. A data track is resized on
+its own: the shared per-kind heights below belong to the tracks the viewer
+computes, and dragging a data track's handle used to resize those instead.
+
+```js
+// type signature
+Record<string, number>
+// code
+columnTrackHeights: {} as Record<string, number>
+```
+
 #### volatile: conservationTrackHeight
 
 ```js
@@ -1168,6 +1181,17 @@ misses. Empty for nucleotide alignments.
 number[]
 ```
 
+#### getter: pxPerBranchLength
+
+pixels per unit of branch length in the current phylogram layout, and 0 in
+cladogram mode, where the x-positions carry no length at all. The scale bar over
+the tree is drawn from it.
+
+```js
+// type
+number
+```
+
 #### getter: realAllowedGappyness
 
 ```js
@@ -1763,6 +1787,13 @@ setAnnotations: (annotations: Annotation[]) => void
 ```js
 // type signature
 setArcTrackHeight: (arg: number) => void
+```
+
+#### action: setColumnTrackHeight
+
+```js
+// type signature
+setColumnTrackHeight: (id: string, height: number) => void
 ```
 
 #### action: setColumnTracks
