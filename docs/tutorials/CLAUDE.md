@@ -2,8 +2,9 @@ Tutorials here follow the same rules as jbrowse-components'
 `website/docs/tutorials/CLAUDE.md`, which carries the reasoning. Read it before
 writing one. This file names what differs, and what a page in this repo needs.
 
-Show rather than tell: a figure per step, captions that say what is in the
-frame, minimal prose. No em-dashes anywhere, including code comments.
+Each step gets a figure, each caption describes what is in the frame, and the
+prose stays short. Use no em-dashes anywhere, including code comments. Follow
+`docs/WRITING.md`.
 
 ## The shape
 

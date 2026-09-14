@@ -1,19 +1,18 @@
 # Reading cross-reactivity off the kinase pocket
 
-Imatinib was designed against one kinase, BCR-ABL1, and turned out to hit half a
-dozen others (KIT, PDGFRA, CSF1R, LCK) well enough to matter clinically. The
-reason is structural: every human kinase folds the same ATP-binding pocket
-around the same three landmarks, so a drug built to fit one kinase's pocket
-often fits several. This page builds that pocket, aligned, across the whole
-human kinase family, and reads off why some kinases share a drug's attention and
-others don't.
+Imatinib was designed against one kinase, BCR-ABL1, and also inhibits half a
+dozen others (KIT, PDGFRA, CSF1R, LCK) well enough to matter clinically. Every
+human kinase folds the same ATP-binding pocket around the same three landmarks,
+so a drug built to fit one kinase's pocket often fits several. This page aligns
+that pocket across the whole human kinase family and compares the residues at
+those landmarks between kinases imatinib inhibits and kinases it does not.
 
 ## Prerequisites
 
 - `curl`, `python3`
 - docker, to run HMMER and FastTree as biocontainers
-  (`quay.io/biocontainers/hmmer`, `quay.io/biocontainers/fasttree`) rather than
-  installing either — both are also on `apt`/`brew` if you'd rather
+  (`quay.io/biocontainers/hmmer`, `quay.io/biocontainers/fasttree`); both are
+  also on `apt` and `brew`
 
 ## Where the data comes from
 
@@ -68,14 +67,14 @@ print(len(rows))
 ```
 
 512 entries across ten named groups (AGC, CAMK, CK1, CMGC, NEK, RGC, STE, TKL,
-Tyr, Other) plus six small "Atypical" families that don't share the others'
-fold. `Tyr` is the tyrosine kinases — ABL1 among them — and this page writes it
-as `TK`, the name kinase biology usually uses for that group.
+Tyr, Other) plus six small "Atypical" families that do not share the others'
+fold. `Tyr` is the tyrosine kinases, ABL1 among them, and this page writes it as
+`TK`, the name kinase biology usually uses for that group.
 
 ## 2. Fetch the sequences
 
-One UniProt sequence per accession, 50 accessions per request rather than 512
-separate ones:
+The script fetches one UniProt sequence per accession, 50 accessions per
+request:
 
 <!-- from: scripts/build_kinase_pocket.sh -->
 
@@ -89,15 +88,15 @@ with urllib.request.urlopen(url) as resp:
     fasta_text = resp.read().decode()
 ```
 
-512 records back for 512 accessions. Every kinase, full length, human only.
+The requests return 512 records for 512 accessions: every human kinase, full
+length.
 
 ## 3. Align the kinase domain
 
-A protein kinase is much more than its catalytic domain — regulatory regions,
-SH2/SH3 modules, transmembrane spans — and none of that lines up across the
-family the way the domain itself does. `hmmalign` against Pfam's Pkinase model
-(PF00069) pulls out just the domain and puts every kinase's copy of it in the
-same 262 columns:
+A protein kinase carries regulatory regions, SH2/SH3 modules and transmembrane
+spans outside its catalytic domain, and none of those line up across the family
+the way the domain does. `hmmalign` against Pfam's Pkinase model (PF00069)
+extracts the domain and puts every kinase's copy of it in the same 262 columns:
 
 <!-- from: scripts/build_kinase_pocket.sh -->
 
@@ -115,14 +114,13 @@ docker run --rm -v "$PWD:/work" -w /work quay.io/biocontainers/hmmer:3.4--h7d74f
   hmmalign --trim --outformat afa -o kinase.afa pf00069.hmm kept.fasta
 ```
 
-474 of the 512 entries clear the gathering threshold. The 38 that don't are
-almost all the six "Atypical" families (30 of 38): PI3/PI4-kinases, ADCKs and
-the rest use a related but different fold that this HMM isn't built to catch, so
-they drop out here rather than aligning badly. `--trim` removes the unaligned
-tails outside the domain; the lowercase insert-state characters `hmmalign`
-leaves in its `a2m` output get stripped in a following step, which is what turns
-a variable-width alignment into the HMM's own fixed 262 columns — every one of
-the 474 rows comes out exactly that length.
+474 of the 512 entries clear the gathering threshold. Of the 38 that do not, 30
+belong to the six "Atypical" families: PI3/PI4-kinases, ADCKs and the rest use a
+related but different fold that this HMM does not model, so `hmmsearch` drops
+them before alignment. `--trim` removes the unaligned tails outside the domain.
+A following step strips the lowercase insert-state characters `hmmalign` leaves
+in its `a2m` output, which reduces the alignment to the HMM's fixed 262 columns;
+all 474 rows come out exactly that length.
 
 [![](../media/kinase-pocket-family.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A960%2C%22treeAreaWidth%22%3A110%2C%22colWidth%22%3A4.6%2C%22rowHeight%22%3A2%2C%22drawLabels%22%3Afalse%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket-metadata.json%22%7D%7D%7D)
 
@@ -132,7 +130,7 @@ between them are the loops that make each kinase's pocket its own.
 
 ## 4. Build a tree
 
-FastTree, not the viewer's own neighbor joining:
+FastTree builds the tree:
 
 <!-- from: scripts/build_kinase_pocket.sh -->
 
@@ -146,27 +144,24 @@ Total time: 13.70 seconds  Unique: 474/474  Bad splits: 0/471
 ```
 
 474 rows sits just under `maxNeighborJoiningRows`, the viewer's 500-sequence cap
-on its own built-in neighbor joining — close enough that it's worth saying why
-this page doesn't rely on it anyway. Neighbor joining here is a distance method
-with no model of amino acid substitution; FastTree fits one, and on 474
-sequences it's also the faster of the two. Past the cap, the app's own error
-message points back at this page.
+on its built-in neighbor joining. That neighbor joining is a distance method
+with no model of amino acid substitution. FastTree fits one, and on 474
+sequences it is also the faster of the two. Past the cap, the app's error message points to
+this page.
 
-The row order the tree gives the alignment is not alphabetical and not the input
-file's: clicking any tip opens a node-info dialog reading its row metadata
-(`kinase-pocket-metadata.json`), which carries the UniProt accession and the
-kinase group — `TK`, `CMGC`, and so on — this page's later steps refer to by
-name.
+The tree orders the alignment's rows by clade, so neighboring rows are related
+kinases. Clicking any tip opens a node-info dialog with its row metadata from
+`kinase-pocket-metadata.json`: the UniProt accession and the kinase group (`TK`,
+`CMGC` and so on) that later steps refer to by name.
 
 ## 5. Read off the pocket
 
-Three residues make the ATP pocket what it is, and every kinase biologist names
-them the same way regardless of species or family: a catalytic lysine that
-anchors ATP's phosphates, a gatekeeper that sets how much room the back pocket
-has, and a DFG motif that switches the kinase between active and inactive
-conformations. ABL1 numbering is the one imatinib resistance mutations are
-usually reported in — K271, T315, D381-F382-G383 — and because ABL1 is a row in
-this alignment, finding its columns is just reading its own row:
+Three landmarks define the ATP pocket in every kinase family: a catalytic lysine
+that anchors ATP's phosphates, a gatekeeper that sets how much room the back
+pocket has, and a DFG motif that switches the kinase between active and inactive
+conformations. Imatinib resistance mutations are usually reported in ABL1
+numbering, as K271, T315 and D381-F382-G383. ABL1 is a row in this alignment, so
+walking its row gives the column of each landmark:
 
 ```python
 # ABL1's own row, ungapped, tells you which alignment column holds which of
@@ -181,35 +176,31 @@ columns and one column with nothing to do with the pocket called out:
 
 [![](../media/kinase-pocket-logo.png)](<https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A480%2C%22treeAreaWidth%22%3A110%2C%22colWidth%22%3A4.6%2C%22rowHeight%22%3A2%2C%22drawLabels%22%3Afalse%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22sequence-logo%22%3Afalse%7D%2C%22highlights%22%3A%5B%7B%22start%22%3A30%2C%22end%22%3A30%2C%22label%22%3A%22catalytic%20K%22%2C%22color%22%3A%22rgba(21%2C101%2C192%2C0.25)%22%7D%2C%7B%22start%22%3A77%2C%22end%22%3A77%2C%22label%22%3A%22gatekeeper%22%2C%22color%22%3A%22rgba(227%2C36%2C43%2C0.25)%22%7D%2C%7B%22start%22%3A141%2C%22end%22%3A143%2C%22label%22%3A%22DFG%22%2C%22color%22%3A%22rgba(46%2C125%2C50%2C0.25)%22%7D%2C%7B%22start%22%3A102%2C%22end%22%3A102%2C%22label%22%3A%22control%22%2C%22color%22%3A%22rgba(117%2C117%2C117%2C0.25)%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket-metadata.json%22%7D%7D%7D>)
 
-The catalytic lysine column is 93.5% K over all 474 rows — the built-in control
-this dataset carries the other way. The column 25 residues to its right, which
-sits between the gatekeeper and the DFG motif but isn't one of the three
-landmarks, has no majority residue at all: F, S, K, R, L and H each show up in
-double digits. Whatever makes the pocket columns worth naming isn't just "this
-is protein sequence", since a column right next to them shows none of it.
+The catalytic lysine column is 93.5% K over all 474 rows. The control is the
+column 25 residues to its right, which sits between the gatekeeper and the DFG
+motif but is not one of the three landmarks. That column has no majority
+residue: F, S, K, R, L and H each appear in double digits.
 
 ## 6. Compare the gatekeeper across two families
 
-The gatekeeper is where cross-reactivity gets decided: a small one (threonine)
-leaves a back pocket open that a bulkier one (phenylalanine, methionine,
-leucine) fills in. Imatinib's selectivity profile lines up with exactly this —
-ABL1, ABL2, KIT, PDGFRA, CSF1R and LCK, its known targets, all carry threonine
-here; the CDK family, which imatinib does not touch, carries phenylalanine:
+A small gatekeeper (threonine) leaves the back pocket open, and a bulkier one
+(phenylalanine, methionine, leucine) fills it. Imatinib's known targets, ABL1,
+ABL2, KIT, PDGFRA, CSF1R and LCK, all carry threonine at this position. The CDK
+family, which imatinib does not inhibit, carries phenylalanine:
 
 [![](../media/kinase-pocket-gatekeeper.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A280%2C%22treeAreaWidth%22%3A110%2C%22colWidth%22%3A34%2C%22rowHeight%22%3A46%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22conservation%22%3Atrue%2C%22property-conservation%22%3Atrue%7D%2C%22scrollX%22%3A-2312%2C%22scrollY%22%3A-4646%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket-metadata.json%22%7D%7D%7D)
 
 ([and the CDK1/2/3 view further down the same column](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A320%2C%22treeAreaWidth%22%3A110%2C%22colWidth%22%3A34%2C%22rowHeight%22%3A46%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22conservation%22%3Atrue%2C%22property-conservation%22%3Atrue%7D%2C%22scrollX%22%3A-2312%2C%22scrollY%22%3A-12006%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-pocket%2Fkinase-pocket-metadata.json%22%7D%7D%7D))
 
-Same alignment column, two row bands from the same tree. ABL1 and ABL2 read
-threonine; CDK1, CDK2 and CDK3 read phenylalanine, and the flanking rows in each
-band (MATK, CSK; CDK16, CDK17) show this isn't a two-family rule so much as a
-per-kinase one — CDK16 and CDK17 carry threonine despite sitting right next to
-CDK1-3 in the tree.
+Both views show the same alignment column in two row bands from the same tree.
+ABL1 and ABL2 read threonine, and CDK1, CDK2 and CDK3 read phenylalanine. The
+flanking rows are MATK and CSK in the first band and CDK16 and CDK17 in the
+second. CDK16 and CDK17 carry threonine, although they sit next to CDK1-3 in the
+tree.
 
 ## Check against the raw data
 
-Tallying the gatekeeper column across all 474 rows, rather than the half-dozen
-kinases named above:
+The script tallies the gatekeeper column across all 474 rows:
 
 ```python
 from collections import Counter
@@ -224,17 +215,13 @@ F   69  14.6%
 V   15   3.2%
 ```
 
-Threonine, the small gatekeeper imatinib and similar drugs rely on being able to
-reach past, sits at close to one in five human kinases — roughly the fraction
-kinase-selectivity surveys report. As an independent check, KLIFS — which
-curates an 85-residue kinase pocket from solved structures rather than from this
-alignment — puts the same position at 18.4% threonine over its 521 human kinase
-entries (96 of them), a match close enough that it's a check worth doing rather
-than a coincidence worth explaining away. KLIFS' own terms didn't turn up a
-license permitting redistribution, so nothing from it is hosted here; this is a
-live cross-check against its API
-(`https://klifs.net/api/kinase_information?species=Human`), not a second
-dataset.
+Threonine, the small gatekeeper that imatinib and similar drugs reach past,
+occurs in 19.0% of these human kinase domains. KLIFS curates an 85-residue
+kinase pocket from solved structures, independently of this alignment, and puts
+the same position at 18.4% threonine over its 521 human kinase entries (96 of
+them). KLIFS' terms grant no license to redistribute, so this page hosts nothing
+from it and queries its API live
+(`https://klifs.net/api/kinase_information?species=Human`).
 
 ## Reproduce it end to end
 
@@ -243,7 +230,7 @@ curl -O https://raw.githubusercontent.com/GMOD/JBrowseMSA/main/docs/tutorials/sc
 bash build_kinase_pocket.sh
 ```
 
-With no arguments it writes `kinase-pocket.afa`, `kinase-pocket.nwk` and
+With no arguments the script writes `kinase-pocket.afa`, `kinase-pocket.nwk` and
 `kinase-pocket-metadata.json` in the working directory, printing every number
 this page quotes. See [Prerequisites](#prerequisites) for what it needs on
 `PATH`.
@@ -263,7 +250,7 @@ this page quotes. See [Prerequisites](#prerequisites) for what it needs on
   _Nucleic Acids Research_ 53:D444-D456.
 - Eddy SR. Accelerated profile HMM searches. _PLoS Computational Biology_
   7:e1002195 (2011).
-- Price MN, Dehal PS, Arkin AP. FastTree 2 — approximately maximum-likelihood
+- Price MN, Dehal PS, Arkin AP. FastTree 2: approximately maximum-likelihood
   trees for large alignments. _PLoS ONE_ 5:e9490 (2010).
 - Kooistra AJ, Kanev GK, van Linden OP, Leurs R, de Esch IJ, de Graaf C. KLIFS:
   a structural kinase-ligand interaction database. _Nucleic Acids Research_
