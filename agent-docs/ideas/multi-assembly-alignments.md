@@ -5,7 +5,7 @@ read from a hosted bgzip. `scripts/gene-explorer/build-data.mjs` now builds the
 same three-file index for `mm39`, `dm6` and `ce11` (and the bigger `dm6-124way`
 / `ce11-135way`), keyed by the species' own symbols and with `.cds` sequence
 names that match the GenArk 2bit the explorer already displays those species on.
-What is left is hosting the outputs and wiring `website/src/lib/geneExplorer.ts`
+The remaining work is hosting the outputs and wiring `website/src/lib/geneExplorer.ts`
 to use them. The survey behind the choice of assemblies is in
 `scripts/gene-explorer/README.md`.
 
@@ -50,7 +50,7 @@ Per entry the website needs:
 - `MSA_GZ` = `${base}/${file}`; `.gzi`, `.idx`, `.cds` by suffix as today. The
   `getMsaIndex` / `getCdsIndex` memos become per-url (a `Map<url, Promise>`),
   since `memoizedTextIndex` currently closes over one url.
-- `TREE_URI` = `${base}/${db}.multiz${N}way.nh` — carry `N` in the table or
+- `TREE_URI` = `${base}/${db}.multiz${N}way.nh`; carry `N` in the table or
   derive it from the file name.
 - `querySeqName` = `db` (`'hg38'` is hard-coded in `fetchGeneMsa` and
   `msaViewHosted`; the reference row of every block is named by the db).
@@ -62,31 +62,31 @@ Per entry the website needs:
 
 For a non-human gene the explorer today calls NCBI Datasets (locus), UniProt
 (accession + sequence) and E-utils `gene_table` (the CDS model), then picks an
-isoform by UniProt length. With a hosted alignment the `.cds` line for the
-symbol is the CDS model — the one the alignment was translated from, so the MSA
-row and the `connectedFeature` share codon ordinals by construction, the same
-argument the human path makes for knownCanonical over RefSeq Select. So
-`loadSpeciesGene` becomes: resolve the locus (for the assembly accession and a
+isoform by UniProt length. With a hosted alignment, the `.cds` line for the
+symbol is the CDS model the alignment was translated from, so the MSA row and the
+`connectedFeature` share codon ordinals by construction. The human path uses the
+same reasoning to prefer knownCanonical over RefSeq Select. `loadSpeciesGene`
+therefore becomes: resolve the locus (for the assembly accession and a
 fallback), try `fetchGeneCds(symbol)` against the species' `.cds`, and only fall
 back to `fetchTranscriptNcbi` when the symbol is not in the index.
 
 `.cds` refNames for these assemblies are already the GenArk names
 (`NC_000077.7`, `NT_033777.3`), so `toCanonicalRefName` must NOT strip `chr`
-from them — it is a no-op on an accession, but the human-only assumption in its
-comment goes. The `assemblyAccession` the session embeds stays the one NCBI
+from them. The function is a no-op on an accession, but its comment's
+human-only assumption needs removing. The `assemblyAccession` the session embeds stays the one NCBI
 reports, which the build asserts is the GenArk assembly in its table
 (GCF_000001635.27, GCF_000001215.4, GCF_000002985.6).
 
 `proteinSequence` for the 3D view comes from the MSA's reference row, ungapped,
-as `loadHumanGene` does — it is the translation of the `.cds` model. The UniProt
+as `loadHumanGene` does, since that row is the translation of the `.cds` model. The UniProt
 sequence stays the fallback for genes outside the index.
 
-## What stays on-demand
+## Species that stay on-demand
 
 Zebrafish (NCBI reports GRCz12, UCSC has no danRer11 multiz), yeast (no exonAA
 export for sacCer3) and Arabidopsis (no UCSC genome) keep building their
-alignment at launch. Once these three are hosted, the on-demand path is the
-exception rather than the rule for the species the page offers.
+alignment at launch. Once mouse, fly and worm are hosted, only those three of
+the page's seven species use the on-demand path.
 
 ## Optional
 
