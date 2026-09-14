@@ -465,14 +465,17 @@ function TrackLabelsSVG({
   if (!drawLabels) {
     return null
   }
-  let y = 0
+  const labels = turnedOnTracks.map((track, i) => {
+    const { id, name, height } = track.model
+    const size = Math.min(height, fontSize)
+    const top = turnedOnTracks
+      .slice(0, i)
+      .reduce((acc, t) => acc + t.model.height, 0)
+    return { id, name, size, baseline: top + height / 2 + size / 3 }
+  })
   return (
     <>
-      {turnedOnTracks.map(track => {
-        const { id, name, height } = track.model
-        const size = Math.min(height, fontSize)
-        const baseline = y + height / 2 + size / 3
-        y += height
+      {labels.map(({ id, name, size, baseline }) => {
         return size < 5 ? null : (
           <text
             key={id}

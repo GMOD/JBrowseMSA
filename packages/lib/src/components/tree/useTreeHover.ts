@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { ClickMapIndex } from './clickMap.ts'
 
@@ -24,9 +24,7 @@ export function useTreeHover({
   model: MsaViewModel
   offsetY: number
 }) {
-  const clickMapRef = useRef<ClickMapIndex>(null)
-  clickMapRef.current ??= new ClickMapIndex()
-  const clickMap = clickMapRef.current
+  const [clickMap] = useState(() => new ClickMapIndex())
   const [hovered, setHovered] = useState<TreeHoverTarget>()
 
   // leaf labels win over the branch/bubble targets they overlap, so a click on a
