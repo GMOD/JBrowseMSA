@@ -3,14 +3,11 @@ import * as os from 'node:os'
 import * as path from 'node:path'
 
 // A disk cache and a backoff policy for the InterPro API, which serves
-// precomputed matches one protein per request -- there is no batch endpoint
-// (`?accession=a,b` is ignored and returns the full entry listing instead).
-// The request count is therefore fixed at one per distinct accession, so the
-// only way to be lighter on EBI is to not ask twice.
+// precomputed matches one protein per request; `?accession=a,b` is ignored and
+// returns the full entry listing.
 //
-// Cache entries are keyed by InterPro release, so a new release misses cleanly
-// rather than serving stale coordinates, and matchless proteins are cached too
-// so they are not re-fetched every run.
+// Cache entries are keyed by InterPro release, and proteins with no matches are
+// cached too.
 
 const CACHE_DIR =
   process.env.REACT_MSAVIEW_CACHE ??
@@ -20,9 +17,8 @@ const CACHE_DIR =
     'interpro',
   )
 
-// Accessions and database names reach the filesystem as path segments, so
-// anything outside this set is rejected rather than escaped -- a real UniProt
-// accession or member-database name never contains one.
+// Accessions and database names become path segments. Real UniProt accessions
+// and member-database names stay within this set.
 const SAFE_SEGMENT = /^[A-Za-z0-9_.-]+$/
 
 function entryPath(release: string, database: string, accession: string) {
@@ -44,8 +40,7 @@ export function readCached<T>(
       fs.readFileSync(entryPath(release, database, accession), 'utf8'),
     ) as T
   } catch {
-    // a missing or unreadable entry is a cache miss, never an error: the
-    // fetch below is always able to produce the value again
+    // a missing or unreadable entry is a cache miss
     return undefined
   }
 }
@@ -61,7 +56,7 @@ export function writeCached(
     fs.mkdirSync(path.dirname(file), { recursive: true })
     fs.writeFileSync(file, JSON.stringify(value), 'utf8')
   } catch (e) {
-    // an unwritable cache slows the next run down; it must not fail this one
+    // an unwritable cache must not fail the run
     console.warn(`  (could not cache ${accession}: ${e})`)
   }
 }
@@ -76,8 +71,7 @@ function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// Seconds from a Retry-After header, when the server names a wait we should
-// prefer over our own guess. Capped so a stray large value cannot hang a run.
+// Retry-After in ms, capped at 60s so a large value cannot hang a run
 function retryAfterMs(response: Response) {
   const header = response.headers.get('retry-after')
   const seconds = header ? Number(header) : Number.NaN
@@ -88,10 +82,6 @@ function retryAfterMs(response: Response) {
 
 /**
  * GET with exponential backoff on the statuses that mean "ask again later".
- *
- * Without this a single blip failed the whole run, and the user's fix was to
- * re-run and re-request every accession that had already succeeded -- turning
- * one transient error into a second full pass over the API.
  */
 export async function fetchWithRetry(
   url: string,
@@ -99,8 +89,7 @@ export async function fetchWithRetry(
 ) {
   let lastError: unknown
   for (let attempt = 0; attempt < attempts; attempt++) {
-    // the server's own Retry-After when it names one, else our exponential
-    // guess -- one wait per failed attempt, not the server's and then ours
+    // one wait per failed attempt: Retry-After when present, else exponential
     let wait = baseDelayMs * 2 ** attempt
     try {
       const response = await fetch(url)

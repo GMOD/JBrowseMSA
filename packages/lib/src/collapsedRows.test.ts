@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 //
-// Collapsing a clade hides rows. It used to delete them as far as the model was
-// concerned: the row lookups were all built from the displayed leaves, so a
-// mapped structure reported "no such row in the alignment", a domain resolved
-// to nothing, and rebuilding the tree from the alignment dropped every hidden
-// sequence out of the result.
+// Collapsing a clade hides rows from display only; row lookups, residue
+// mappings and neighbor joining still see them.
 import { expect, test } from 'vitest'
 
 import MSAModelF from './model.ts'
@@ -67,8 +64,7 @@ test('neighbor joining builds from the whole alignment', () => {
   model.calculateNeighborJoiningTreeFromMSA()
 
   expect(model.rowNames.toSorted()).toEqual(['a', 'b', 'c', 'd', 'e'])
-  // and the id that collapsed a clade of the old tree does not fold whatever
-  // sits at that path in the new one
+  // the old tree's collapsed ids do not apply to the new tree
   expect([...model.collapsed]).toEqual([])
   expect(id).toBeTruthy()
 })

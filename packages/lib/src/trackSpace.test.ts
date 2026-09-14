@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 //
-// The tracks sit between the header and the alignment inside a fixed-height,
-// overflow-hidden widget, so every pixel they take is a pixel the rows do not
-// get. Two getters used to compute the alignment viewport and neither
-// subtracted them: the last rows scrolled under the bottom edge with no way to
-// reach them, and fit-to-height sized the rows to a space that was not there.
+// The tracks sit between the header and the alignment inside a fixed-height
+// widget, so the alignment viewport has to subtract their height.
 import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
@@ -39,8 +36,6 @@ test('scrolling to the bottom reaches the last row', () => {
   const model = makeModel()
   expect(model.showVerticalScrollbar).toBe(true)
   model.setScrollY(-Infinity)
-  // the bottom of the alignment lands on the bottom of its viewport, not
-  // somewhere under the tracks
   expect(-model.scrollY + model.msaAreaHeight).toBe(model.totalHeight)
 })
 
@@ -81,8 +76,7 @@ test('a zoom does not rebuild the track objects', () => {
   model.setRowHeight(model.rowHeight * 1.5)
   model.setColWidth(model.colWidth * 1.5)
 
-  // each canvas redraws when the track object it was handed changes, so a
-  // rebuilt list redrew every track on every zoom frame
+  // each canvas redraws when its track object changes
   const after = model.turnedOnTracks.map(t => t.model)
   expect(after.length).toBe(before.length)
   for (let i = 0; i < after.length; i++) {

@@ -9,11 +9,8 @@
  * Copyright (c) 2014 Gliffy Inc.
  * Copyright (c) 2021 Zeno Zeng
  *
- * Vendored and converted to ESM/TypeScript for pure ESM compatibility, and cut
- * down to the drawing calls the renderers make: what a multiple sequence
- * alignment needs is rectangles, paths, arcs and a great many glyphs. Gradients,
- * patterns, clipping, rotation, bezier curves, stroked text, shadows and image
- * drawing are gone with the state they carried.
+ * Vendored, converted to ESM/TypeScript, and cut down to the calls the
+ * renderers make: rectangles, paths, arcs and glyphs.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -41,9 +38,8 @@ function getDominantBaseline(textBaseline: string): string {
 }
 
 /**
- * The value SVG already assumes for a text presentation attribute, so writing it
- * out says nothing. A text-heavy export repeats each of these on every glyph:
- * dropping the four below takes ~22% off a sequence-logo figure.
+ * SVG's initial values for text presentation attributes. Omitting them from
+ * every glyph takes ~22% off a sequence-logo figure.
  */
 const TEXT_ATTR_DEFAULTS: Record<string, string> = {
   'font-style': 'normal',
@@ -84,9 +80,8 @@ const STYLES: Record<string, any> = {
   textBaseline: {
     canvas: 'alphabetic',
   },
-  // null rather than an empty array: the canvas default is "no dashes", which is
-  // also the svg default, and the two have to compare equal or every stroke
-  // carries an empty stroke-dasharray
+  // null on both sides so the canvas and svg defaults compare equal and strokes
+  // carry no empty stroke-dasharray
   lineDash: {
     svgAttr: 'stroke-dasharray',
     canvas: null,
@@ -119,11 +114,10 @@ export class Context {
   __currentPosition: { x?: number; y?: number }
   __transformMatrix: DOMMatrix
   __transformMatrixStack?: DOMMatrix[]
-  // the parsed font, keyed by the `font` string that produced it: parsing costs
-  // a DOM element and a CSS parse, and a text-heavy export asks per glyph
+  // parsed fonts keyed by `font` string; each parse costs a DOM element and a
+  // CSS parse, and exports ask per glyph
   __fontCache = new Map<string, CSSStyleDeclaration>()
 
-  // Style properties
   strokeStyle: any
   fillStyle: any
   lineWidth: any
@@ -181,17 +175,15 @@ export class Context {
       elementName,
     )
     if (resetFill) {
-      // a placeholder: whichever of fill()/stroke() paints this element
-      // overwrites its own, and __applyStyleToCurrentElement drops the other
-      // when it is the svg default anyway
+      // placeholders: fill()/stroke() overwrite their own attribute, and
+      // __applyStyleToCurrentElement drops the other when it is the svg default
       element.setAttribute('fill', 'none')
       element.setAttribute('stroke', 'none')
     }
     for (const key of Object.keys(properties)) {
-      // an unset property means "no such attribute", not the string
-      // "undefined". __applyText passes optional attributes through
-      // unconditionally, so without this every glyph in an export carries
-      // text-decoration="undefined" -- invalid, and ~28 wasted bytes per letter
+      // __applyText passes optional attributes through unconditionally; skipping
+      // unset ones keeps an invalid text-decoration="undefined" (~28 bytes) off
+      // every glyph
       const value = properties[key]
       if (value !== undefined && value !== null) {
         element.setAttribute(key, value)
@@ -221,9 +213,9 @@ export class Context {
   }
 
   /**
-   * A translation is what an element's own x/y already say, and repeating it as
-   * a matrix costs ~35 bytes on every glyph of an alignment. Anything else --
-   * the scale a sequence-logo letter is stretched by -- still needs the matrix.
+   * A pure translation folds into the element's x/y, saving ~35 bytes per
+   * glyph. Any other transform, such as a sequence-logo letter's scale, is
+   * written as a matrix.
    */
   __applyTransformation(element: SVGElement, matrix?: DOMMatrix) {
     const { a, b, c, d, e, f } = matrix || this.getTransform()
@@ -262,7 +254,7 @@ export class Context {
           ? rgbaRegex.exec(value)
           : null
       if (matches) {
-        // SVG has no rgba(): the alpha belongs in its own -opacity attribute
+        // SVG has no rgba(); the alpha goes in the -opacity attribute
         currentElement.setAttribute(
           style.svgAttr,
           `rgb(${matches[1]},${matches[2]},${matches[3]})`,
@@ -279,9 +271,8 @@ export class Context {
       }
     }
 
-    // a filled element with no stroke does not have to say so: `none` is what
-    // svg assumes. The reverse is not true -- an unstroked fill defaults to
-    // black -- so a stroked element keeps its fill="none"
+    // svg defaults stroke to none, so a fill drops stroke="none". Fill defaults
+    // to black, so a stroked element keeps fill="none".
     if (type === 'fill' && currentElement.getAttribute('stroke') === 'none') {
       currentElement.removeAttribute('stroke')
     }
@@ -374,8 +365,8 @@ export class Context {
     this.__addPathCommand(`Q ${cp.x} ${cp.y} ${p.x} ${p.y}`)
   }
 
-  // paint-order only says something when the element carries both a fill and a
-  // stroke, which is the collapsed-clade triangle and nothing else
+  // paint-order matters only on an element with both fill and stroke: the
+  // collapsed-clade triangle
   __applyPaintOrder(order: string, other: string) {
     const current = this.__currentElement
     if (
@@ -399,10 +390,8 @@ export class Context {
     this.__applyStyleToCurrentElement('fill')
   }
 
-  // A fill that happens to cover the context is still a fill: it paints over
-  // what is under it, exactly as the canvas would. Treating it as a clear threw
-  // the drawing away instead -- a full-width highlight band over an alignment
-  // took the export from 124 letters to 4.
+  // A fill covering the whole context paints over what is under it, as on a
+  // canvas; it does not clear the drawing.
   fillRect(x: number, y: number, width: number, height: number) {
     const rect = this.__createElement('rect', { x, y, width, height }, true)
     this.__closestGroupOrSvg().appendChild(rect)

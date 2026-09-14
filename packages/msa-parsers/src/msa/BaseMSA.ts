@@ -8,13 +8,9 @@ export default abstract class BaseMSA {
   private width?: number
 
   /**
-   * Column count of the alignment: the length of its widest row.
-   *
-   * Not the first row's length. Ragged input is real -- a hand-edited fasta, or
-   * an aligner that stops a row at its last residue -- and taking row 0 makes
-   * every column past it unreachable when row 0 is the short one. The viewer's
-   * gap analysis already defines the column count this way, so anything else
-   * disagrees with it.
+   * Column count of the alignment: the length of its widest row, since a
+   * hand-edited fasta or some aligners leave rows short. The viewer's gap
+   * analysis counts columns the same way.
    */
   getWidth(): number {
     this.width ??= this.getNames().reduce(

@@ -1,10 +1,7 @@
 // @vitest-environment jsdom
 //
-// The zero-config component builds its model once, which used to mean the props
-// only seeded it: a host that wanted an expand button or a diff toggle had to
-// drop to MSAModelF and rebuild the width measuring, theming and syncing by
-// hand. These check that the props stay live -- and that they do not fight the
-// user, whose changes inside the viewer have to survive the host's next render.
+// MSAViewer builds its model once. These check that its props stay live, and
+// that changes made inside the viewer survive the host's next render.
 import React, { act } from 'react'
 
 import { isAlive } from '@jbrowse/mobx-state-tree'
@@ -18,9 +15,7 @@ import type { Root } from 'react-dom/client'
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true)
 
-// MSAViewer renders Loading, which draws to canvas once the data is ready.
-// Stubbing it keeps the test on the props-to-model wiring and hands us the
-// model MSAViewer built.
+// stub Loading, which draws to canvas, and capture the model MSAViewer built
 let captured: MsaViewModel | undefined
 vi.mock('./components/Loading.tsx', () => ({
   default: ({ model }: { model: MsaViewModel }) => {
@@ -98,9 +93,7 @@ test('the tree gutter follows drawTree and treeAreaWidth', () => {
 })
 
 test('a change made inside the viewer survives the host re-rendering', () => {
-  // the host passes height and nothing else; the user drags the rows taller and
-  // picks another scheme from the menu. A re-render for an unrelated reason
-  // must not snap either back
+  // the host passes only height; the user changes row height and scheme
   const model = show({ height: 300 })
   act(() => {
     model.setRowHeight(30)

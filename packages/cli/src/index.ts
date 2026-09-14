@@ -11,9 +11,8 @@ import { DEFAULT_DOCKER_IMAGE } from './runner.ts'
 import type { MSAFormat } from 'msa-parsers'
 
 const options = {
-  // no default: each command has its own, and comparing against a shared
-  // default here to detect "not passed" silently overrode an explicit
-  // `-o domains.gff` on the commands whose default is something else
+  // no default here: each command has its own, and a shared default cannot
+  // tell an explicit `-o` from an omitted one
   output: {
     type: 'string',
     short: 'o',

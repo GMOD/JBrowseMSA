@@ -6,16 +6,15 @@ import type { MSAFormat } from 'msa-parsers'
 
 // Build a gene-structure GFF (one feature per exon, per alignment row) that
 // react-msaview overlays on a coding-sequence alignment the same way it overlays
-// InterProScan domains. The exon model comes from NCBI Datasets v2 (RefSeq), so
-// for a CDS alignment whose reference row is a known transcript this is instant
-// and deterministic. Every species' Nth exon is named exon-N, so a given exon is
-// the same color in every row and the exon architecture reads down the alignment.
+// InterProScan domains. The exon model comes from NCBI Datasets v2 (RefSeq).
+// Every species' Nth exon is named exon-N, so a given exon has the same color in
+// every row.
 //
-// Method (reference projection): take the exon model of ONE transcript, find
+// Method (reference projection): take the exon model of one transcript, find
 // each coding exon's boundary columns on the reference row, then translate those
-// columns into every other row's own ungapped coordinates. An exon that picks up
-// a frameshifting indel in one lineage gets shorter on exactly that row while
-// staying column-aligned with the rest.
+// columns into every other row's ungapped coordinates. An exon with a
+// frameshifting indel in one lineage is shorter on that row and stays
+// column-aligned with the rest.
 
 const API = 'https://api.ncbi.nlm.nih.gov/datasets/v2'
 
@@ -84,10 +83,8 @@ async function fetchTranscripts(geneId: string): Promise<Transcript[]> {
   return transcripts
 }
 
-// a transcript is usable only if the report gives us both its CDS range and its
-// genomic exon mapping — the curated Select transcript occasionally lacks the
-// exon mapping (e.g. mouse Trp53 NM_011640), in which case we must fall back to
-// one that has it rather than emit an empty overlay
+// usable = the report has both a CDS range and a genomic exon mapping. The
+// Select transcript occasionally lacks the mapping (mouse Trp53 NM_011640).
 function usable(t: Transcript): boolean {
   return !!t.cds?.range[0] && !!t.genomic_locations?.[0]?.exons.length
 }
@@ -110,8 +107,7 @@ export function pickTranscript(
     }
     return match
   }
-  // prefer transcripts the report actually maps (CDS + exons); only if none are
-  // mapped do we fall back to the raw list (codingExons then errors clearly)
+  // with no usable transcript, codingExons reports the error
   const pool = transcripts.some(usable)
     ? transcripts.filter(usable)
     : transcripts
@@ -205,10 +201,8 @@ function prefixNonGap(row: string): number[] {
   return prefix
 }
 
-// ragged input is real -- a3m and hand-edited fasta both produce rows shorter
-// than the reference -- and such a row has no prefix entry for a column past
-// its own end. Everything out there is gap, so the count stops at the row's
-// total rather than reading off the end and writing NaN coordinates into the GFF
+// a3m and hand-edited fasta produce rows shorter than the reference; past a
+// row's end the count stays at its total instead of reading NaN
 function nonGapBefore(prefix: number[], col: number) {
   return prefix[Math.min(col, prefix.length - 1)]!
 }

@@ -36,9 +36,8 @@ const colorCache = new Map<string, number>()
 
 /**
  * CSS color string -> the packed pixel an ImageData holds for it. Painting a 1x1
- * canvas and reading it back handles every form a color scheme can produce --
- * hex, rgb(), hsl(), named -- without a parser of our own, and the cache means
- * each distinct color is resolved once per session rather than once per cell.
+ * canvas and reading it back parses hex, rgb(), hsl() and named colors; the
+ * cache resolves each distinct color once per session.
  */
 export function cssColorToPixel(css: string) {
   const hit = colorCache.get(css)
@@ -80,13 +79,12 @@ function cellPixelFn(spec: RasterSpec, toPixel: (css: string) => number) {
 /**
  * Packs a rectangle of the alignment into one pixel per cell, in `rowNames`
  * order, ready to hand to putImageData. Cells past the end of a row, and rows
- * with no sequence at all, stay transparent -- what the per-cell tile painter
- * also leaves behind.
+ * with no sequence, stay transparent, as in the per-cell painter.
  *
- * `colStep`/`rowStep` sample instead of covering, which is how the minimap fits
- * a whole alignment into a 12px bar. `colSpan`/`rowSpan` average each block of
- * that many cells into one pixel instead, so a zoom below a device pixel per
- * column still shows every column's color without blending neighbouring rows.
+ * `colStep`/`rowStep` sample every nth cell, which fits a whole alignment into
+ * the minimap's 12px bar. `colSpan`/`rowSpan` average each block of that many
+ * cells into one pixel, so a zoom below a device pixel per column still shows
+ * every column's color without blending neighbouring rows.
  */
 export function rasterPixels({
   spec,
@@ -292,8 +290,8 @@ interface RasterCache {
 
 const caches = new WeakMap<object, RasterCache>()
 
-// Everything a cell's color depends on. A change to any of them makes every
-// cached tile stale, which a fresh cache expresses without tracking which.
+// Everything a cell's color depends on; a change to any of them starts a fresh
+// cache.
 function rasterKeys(model: MsaViewModel, theme: Theme) {
   return [
     model.columns,
@@ -402,13 +400,12 @@ function getTile({
 /**
  * Paints the alignment background of one MSA block from cached
  * one-pixel-per-cell tiles. The tiles do not depend on the zoom level, so a zoom
- * frame costs a handful of drawImage calls instead of a fillRect per visible
- * cell -- which ran to 885ms per block at the minimum column width.
+ * frame costs a handful of drawImage calls. A fillRect per visible cell measured
+ * 885ms per block at the minimum column width.
  *
- * Below a device pixel per cell the tiles average cells together instead, and
- * only along the axis that needs it. Leaving the downsampling to the browser's
- * image smoothing blurred both axes at once: at fit-to-width, where only the
- * columns are narrow, every row boundary turned into a gradient.
+ * Below a device pixel per cell the tiles average cells together, per axis.
+ * The browser's image smoothing blurs both axes, which turns every row
+ * boundary into a gradient at fit-to-width, where only the columns are narrow.
  */
 export function drawMsaRaster({
   ctx,
@@ -467,12 +464,11 @@ export function drawMsaRaster({
 /**
  * A raster canvas as a PNG data URI, for embedding in the SVG export.
  *
- * toDataURL is the synchronous read-back. The DOM canvas has it, and so does a
- * node canvas standing in for OffscreenCanvas headlessly; a browser
- * OffscreenCanvas -- which is what the tile and thumbnail caches hold wherever
- * it exists -- gets copied onto a DOM canvas first. Returns undefined wherever
- * the read-back is unavailable (jsdom) rather than throwing, which is the
- * signal to fall back to drawing the thing in vector.
+ * toDataURL is the synchronous read-back. The DOM canvas and a headless node
+ * canvas have it; a browser OffscreenCanvas, which the tile and thumbnail
+ * caches hold where it exists, is copied onto a DOM canvas first. Returns
+ * undefined where read-back is unavailable (jsdom), and the caller then draws
+ * in vector.
  */
 export function canvasHref(canvas: RasterCanvas | undefined) {
   if (!canvas) {
@@ -499,12 +495,10 @@ export function canvasHref(canvas: RasterCanvas | undefined) {
   }
 }
 
-// A canvas much past this many pixels fails to allocate, and the browser's own
-// per-side limit is lower still, so a raster bigger than either averages down,
-// per axis: an alignment wide enough to hit the limit on columns alone keeps
-// every row.
-// The result is still drawn across the same rectangle -- it loses cell-exact
-// detail at a size where no figure could show it anyway.
+// A canvas much past this many pixels fails to allocate, and the browser's
+// per-side limit is lower still, so a larger raster averages down per axis and
+// is drawn across the same rectangle. An alignment that hits the limit on
+// columns alone keeps every row.
 const maxImagePixels = 64e6
 const maxImageSide = 16384
 
@@ -512,14 +506,12 @@ const maxImageSide = 16384
  * The alignment rectangle [col0, col0+numCols) x [row0, row0+numRows) as a PNG
  * data URI, for the SVG export.
  *
- * SVG has no blit, so the export cannot reuse the tile cache the live canvas
- * draws from: one <image> is the whole background instead. That is the
- * difference between an export that scales and one that does not -- the vector
- * path emits a <rect> per cell, and a 200x500 alignment exhausts the heap
- * building them.
+ * SVG has no blit, so the export draws the whole background as one <image>. The
+ * vector path emits a <rect> per cell, and a 200x500 alignment exhausts the
+ * heap building them.
  *
- * Returns undefined wherever a canvas cannot be read back (jsdom, notably),
- * which is the signal to keep the per-cell path.
+ * Returns undefined where a canvas cannot be read back (jsdom), and the caller
+ * then keeps the per-cell path.
  */
 export function rasterImageHref({
   model,
@@ -578,9 +570,8 @@ export function rasterImageHref({
 }
 
 /**
- * The whole alignment sampled down to a strip small enough to sit behind the
- * minimap thumb, cached alongside the block tiles because it goes stale under
- * exactly the same conditions.
+ * The whole alignment sampled down to a strip behind the minimap thumb, cached
+ * with the block tiles since the same keys invalidate both.
  */
 export function msaThumbnail({
   model,

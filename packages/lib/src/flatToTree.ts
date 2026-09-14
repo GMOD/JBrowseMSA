@@ -22,8 +22,7 @@ export function flatToTree(items: FlatItem[]): TreeNode {
         item.id,
         {
           id: `${item.id}`,
-          // the label is what NCBI's own tree viewer shows; falling back to the
-          // node id would render a tree of bare numbers
+          // NCBI's tree viewer shows the label
           name: item.label || `${item.id}`,
           ...(length !== undefined && Number.isFinite(length)
             ? { length }

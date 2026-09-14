@@ -12,9 +12,7 @@ function toggle(label: string, checked: boolean, set: (arg: boolean) => void) {
   }
 }
 
-// Every track the alignment can show, with its current state. Without this the
-// "Close" item on a track's own dropdown is a one-way door -- there is nowhere
-// else in the UI to turn a track back on.
+// the only place in the UI to turn a closed track back on
 function tracksSubMenu(model: MsaViewModel): MenuItem[] {
   const shown = new Set(model.turnedOnTracks.map(t => t.model.id))
   return model.tracks.map(({ model: { id, name } }) =>
@@ -39,8 +37,7 @@ export function msaSettingsMenuItems(model: MsaViewModel): MenuItem[] {
     toggle('Draw letters', drawMsaLetters, arg => {
       model.setDrawMsaLetters(arg)
     }),
-    // the checkbox reads as the inverse of the property it sets: bgColor draws
-    // the tile, and turning it off is what leaves the letter itself colored
+    // inverted: bgColor colors the tile, and off colors the letter
     toggle('Color letters instead of background of tiles', !bgColor, arg => {
       model.setBgColor(!arg)
     }),

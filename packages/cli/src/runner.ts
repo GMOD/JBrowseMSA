@@ -12,16 +12,13 @@ export interface Sequence {
 
 export type Backend = 'local' | 'docker' | 'singularity'
 
-// A real tag: interpro/interproscan publishes version tags only, so the
-// `:latest` this used to name does not resolve ("manifest unknown") and every
-// docker run failed before it started. InterProScan 6 is a different command
-// line, so this stays on the last 5.x.
+// interpro/interproscan publishes version tags only; `:latest` does not
+// resolve. InterProScan 6 has a different command line, so this stays on 5.x.
 export const DEFAULT_DOCKER_IMAGE = 'interpro/interproscan:5.78-109.0'
 
-// The EBI API and InterProScan 5 name the same analysis differently. The CLI
-// takes the API's names, since that is its default backend, and translates for
-// the ones that run InterProScan itself -- `-appl PfamA` is rejected outright,
-// and TIGRFAM is shipped as NCBIfam since InterProScan 5.56.
+// The CLI takes the EBI API's analysis names and translates them for local
+// InterProScan 5, which rejects `-appl PfamA` and ships TIGRFAM as NCBIfam
+// since 5.56.
 const LOCAL_PROGRAM_NAMES: Record<string, string> = {
   PfamA: 'Pfam',
   TIGRFAM: 'NCBIfam',
@@ -36,9 +33,8 @@ export function localProgramNames(programs: string[]) {
   return programs.map(p => LOCAL_PROGRAM_NAMES[p] ?? p)
 }
 
-// GO terms and pathways are intentionally not requested: an annotation carries
-// only the signature accession, name and description, so those extra lookups
-// would be discarded (and can fail in offline container setups).
+// no GO terms or pathways: annotations keep only accession, name and
+// description, and those lookups can fail offline
 function interProScanArgs(
   inputPath: string,
   outputPath: string,
@@ -58,8 +54,8 @@ function interProScanArgs(
 
 // tmpDir holds input.fasta and receives output.json; the container backends
 // mount it as /data, so the file always lands at tmpDir/output.json on the host.
-// dataDir is the member-database data/ directory, which the published image
-// does not carry -- a container run without it fails on the first analysis.
+// dataDir is the member-database data/ directory. The published image lacks it,
+// and a container run without it fails on the first analysis.
 export function backendCommand({
   backend,
   tmpDir,

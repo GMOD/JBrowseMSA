@@ -1,7 +1,6 @@
-// seqPos -> global column, exercised through the model method rather than the
-// buildSeqPosIndex primitive behind it: the method is what
-// jbrowse-plugin-protein3d calls (see the cross-repo note in model.ts), and it
-// owns the past-the-end answers the index alone cannot give.
+// Tests the model method, which jbrowse-plugin-protein3d calls (see the
+// cross-repo note in model.ts) and which handles past-the-end positions that
+// buildSeqPosIndex alone does not.
 import { describe, expect, test } from 'vitest'
 
 import MSAModelF from './model.ts'
@@ -45,14 +44,12 @@ describe('seqPosToGlobalCol', () => {
   })
 
   test('a row with no residues at all gets no answer', () => {
-    // an empty row carries no sequence, so it is not a row these coordinates
-    // are about -- the same refusal a name the alignment lacks gets
+    // treated like a row name the alignment lacks
     expect(colsOf('', [0])).toEqual([undefined])
   })
 
   test('an unknown row gets no answer at all', () => {
-    // it used to answer 0, so a mistyped or stale row name highlighted the
-    // first column of an unrelated row instead of nothing
+    // returning 0 would highlight the first column for a mistyped row name
     const model = MSAModelF().create({
       type: 'MsaView',
       data: { msa: '>r\nACGT' },

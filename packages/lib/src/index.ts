@@ -15,9 +15,8 @@ export {
   CHAR_WIDTH_RATIO,
   installHeadlessRenderEnv,
 } from './headlessRenderEnv.ts'
-// the row count past which calculateNeighborJoiningTreeFromMSA refuses, so a
-// host can gate its own menu item on the same number instead of offering a
-// button that throws
+// the row count above which calculateNeighborJoiningTreeFromMSA throws, for
+// hosts gating their own menu item
 export { maxNeighborJoiningRows } from './constants.ts'
 export { default as MSAView } from './components/Loading.tsx'
 export { default as MSAViewer } from './components/MSAViewer.tsx'

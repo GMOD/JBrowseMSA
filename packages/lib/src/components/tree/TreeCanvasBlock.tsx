@@ -58,8 +58,7 @@ const TreeCanvasBlock = observer(function ({
     useTreeHover({ model, offsetY })
 
   const { treeAreaWidth, blockSize, highResScaleFactor } = model
-  // TreePanel clips to treeAreaWidth, so anything wider is backing store the
-  // viewer never sees -- it was 600px of it per block, at dpr squared
+  // TreePanel clips to treeAreaWidth, so a wider canvas is wasted backing store
   const width = treeAreaWidth
   const height = blockSize
 

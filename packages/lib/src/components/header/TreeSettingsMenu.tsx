@@ -32,9 +32,7 @@ const TreeSettingsMenu = observer(function ({
                 type: 'subMenu' as const,
                 subMenu: [
                   {
-                    // the cap shows in the label rather than arriving as an
-                    // error after the click, since the click is what would
-                    // freeze the tab
+                    // the label shows the cap before a click would freeze the tab
                     label: tooManyRows
                       ? `Calculate neighbor joining tree (over ${maxNeighborJoiningRows} rows, use FastTree)`
                       : 'Calculate neighbor joining tree (BLOSUM62)',

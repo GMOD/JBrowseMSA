@@ -7,19 +7,11 @@ import type React from 'react'
 /**
  * Render a React element to a static markup string, for the SVG export.
  *
- * Inlined rather than imported from `@jbrowse/core/util` on purpose, and this
- * one is the removal direction of the rule in CLAUDE.md rather than the
- * addition direction. Core dropped `renderToStaticMarkup` from that barrel in
- * jbrowse-components 0d034e2bd8 -- deliberately, because it was the barrel's
- * only reach into react-dom and the barrel is loaded in the RPC worker, which
- * never renders. The export path is the only caller, so nothing here or in
- * jbrowse-plugin-msaview/-tview failed to build, lint, typecheck, or boot; the
- * published 3.4.0 and 2.2.1 bundles simply threw the first time a user asked
- * for an SVG on a v5 host.
- *
- * A rendering library asking its host for a renderer was the odd coupling. Both
- * `react-dom` and `react-dom/client` are long-established host externals, so
- * this costs a few hundred bytes in the plugin bundle and no duplicate react.
+ * Inlined because core removed `renderToStaticMarkup` from the
+ * `@jbrowse/core/util` barrel in jbrowse-components 0d034e2bd8; see the
+ * `@jbrowse/core` note in CLAUDE.md. `react-dom` and `react-dom/client` are
+ * host externals, so this adds a few hundred bytes to the plugin bundle and no
+ * duplicate react.
  */
 export function renderToStaticMarkup(node: React.ReactElement) {
   const div = document.createElement('div')
@@ -31,11 +23,9 @@ export function renderToStaticMarkup(node: React.ReactElement) {
     })
     html = div.innerHTML
   } finally {
-    // A real client root, not a server render: effects run, so every `observer`
-    // in the tree gets a live MobX reaction. Left mounted, an export of a large
-    // alignment keeps tens of thousands of detached nodes subscribed to the
-    // model and re-rendering into a dead div on every pan and zoom, once per
-    // export ever taken. The markup is a string by here and needs no DOM.
+    // effects run in a client root, so every `observer` holds a MobX reaction;
+    // a mounted export of a large alignment would keep tens of thousands of
+    // detached nodes re-rendering on every pan and zoom
     root.unmount()
   }
   return html
@@ -47,12 +37,11 @@ const colorAttr = /\b(fill|stroke|stop-color)="([^"]+)"/g
 /**
  * Rewrites every color an SVG 1.1 presentation attribute cannot hold.
  *
- * `fill`, `stroke` and `stop-color` take a <color>, which is a keyword, a hex
- * triplet or rgb() -- not rgba(), which MUI palette values are full of, and not
- * hsl(), which the percent-identity scheme colors with. Illustrator and older
- * Inkscape drop an element whose fill they cannot parse, so the minimap thumb
- * came out opaque and the identity coloring came out missing. Alpha moves to
- * the matching -opacity attribute, unless the element already carries one.
+ * `fill`, `stroke` and `stop-color` take a keyword, a hex triplet or rgb(). MUI
+ * palette values use rgba() and the percent-identity scheme uses hsl(), and
+ * Illustrator and older Inkscape drop an element whose fill they cannot parse.
+ * Alpha moves to the matching -opacity attribute unless the element already
+ * carries one.
  */
 export function svgSafeColors(html: string) {
   return html.replaceAll(tag, el =>

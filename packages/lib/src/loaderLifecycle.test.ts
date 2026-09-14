@@ -1,7 +1,4 @@
-// What a download that is no longer wanted leaves behind. The loaders guarded
-// against a stale response landing in the model, but the request itself ran to
-// completion, and the status line it was writing stayed on screen after a
-// reset -- "Downloading file" and a Cancel button, over the import form.
+// A superseded or reset download aborts its request and clears its status line.
 import { beforeEach, expect, test, vi } from 'vitest'
 
 import MSAModelF from './model.ts'

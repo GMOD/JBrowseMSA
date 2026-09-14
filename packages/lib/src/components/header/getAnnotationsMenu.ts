@@ -32,12 +32,9 @@ export function getAnnotationsMenu({ model }: { model: MsaViewModel }) {
         ])
       },
     },
-    // The viewer used to submit the whole alignment to the EBI iprscan5 queue
-    // and poll it for about fifteen minutes, capped at 140 rows and under a
-    // hardcoded email address. `react-msaview-cli interpro` answers the same
-    // question from InterPro's precomputed matches in seconds, and
-    // `interproscan` covers rows InterPro has not seen. Neither belongs in a
-    // browser tab, so this points at the page that walks through them.
+    // `react-msaview-cli interpro` reads InterPro's precomputed matches in
+    // seconds, and `interproscan` covers rows InterPro has not seen; this links
+    // the tutorial for both
     {
       label: 'How to get a domain file...',
       icon: MenuBook,

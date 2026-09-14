@@ -49,10 +49,8 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <div
       ref={ref}
-      // the MSA viewport: its rect is the origin every column/row offset is
-      // measured from (col*colWidth + scrollX, row*rowHeight + scrollY), which
-      // is what lets a screenshot callout anchor to an alignment column instead
-      // of a hand-measured pixel
+      // screenshot callouts anchor to columns from this rect's origin:
+      // col*colWidth + scrollX, row*rowHeight + scrollY
       data-testid="msa_canvas"
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}

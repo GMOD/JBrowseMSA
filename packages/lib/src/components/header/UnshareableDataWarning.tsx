@@ -26,10 +26,8 @@ function size(bytes: number) {
     : `${(bytes / 1_000_000).toFixed(1)} MB`
 }
 
-// The viewer holds documents its own snapshot does not carry, and until this
-// existed it said nothing about it: the view worked, the URL quietly lost the
-// data, and whoever copied the link found out from the person who opened it.
-// See `unshareableData` on the model.
+// Lists loaded documents the snapshot, and so a shared URL, omits. See
+// `unshareableData` on the model.
 const UnshareableDataWarning = observer(function ({
   model,
 }: {

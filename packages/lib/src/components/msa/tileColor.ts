@@ -1,10 +1,8 @@
 import type { MsaViewModel } from '../../model.ts'
 
-// Per-cell tile color for the active scheme. The scheme is fixed for the whole
-// block, so resolve which rule applies once rather than re-testing the scheme
-// name inside the innermost loop. Reading only the column table the active
-// scheme needs also keeps the other one -- a per-column map for every column of
-// the alignment -- from being computed at all.
+// Per-cell tile color for the active scheme, resolved once per block. Reading
+// only the active scheme's column table leaves the other per-column table
+// uncomputed.
 export function tileColorFn(model: MsaViewModel) {
   const { colorSchemeName } = model
   if (colorSchemeName === 'clustalx_protein_dynamic') {
@@ -23,8 +21,7 @@ export function tileColorFn(model: MsaViewModel) {
 }
 
 // The column table the active scheme colors from, or undefined for the static
-// schemes. Identity of this plus the scheme name is what a cache of rendered
-// colors has to key on.
+// schemes. A cache of rendered colors keys on its identity plus the scheme name.
 export function tileColorTable(model: MsaViewModel) {
   const { colorSchemeName } = model
   if (colorSchemeName === 'clustalx_protein_dynamic') {

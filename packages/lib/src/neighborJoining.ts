@@ -35,11 +35,8 @@ const NUM_SYMBOLS = BLOSUM62_KEYS.length
 const BLOSUM62 = Int8Array.from(BLOSUM62_DATA.flat())
 
 // charCode -> row/column in BLOSUM62, -1 for anything the matrix does not name.
-// A flat table rather than a Map of Maps keyed by an upper-cased character, for
-// the reason columnCounts.ts gives: the distance matrix is O(rows^2 * columns)
-// lookups, and on a 120x800 alignment the Map form spent nearly all of its time
-// allocating one-character strings in toUpperCase: 2.6s to build a tree, versus
-// 0.34s here for a byte-identical newick.
+// On a 120x800 alignment a Map keyed by upper-cased character took 2.6s to
+// build a tree, against 0.34s for this table.
 const symbolOfCode = new Int8Array(128).fill(-1)
 for (let i = 0; i < NUM_SYMBOLS; i++) {
   const key = BLOSUM62_KEYS[i]!
@@ -50,10 +47,7 @@ for (let i = 0; i < NUM_SYMBOLS; i++) {
 // gap, or past the end of a row shorter than the alignment
 const GAP = -2
 
-// stockholm and a3m write gaps as '.', not just '-'. Scoring a '.' as a residue
-// charges the pair the unknown-symbol penalty on every padded column, so two
-// sequences that differ only in where an unrelated row forced padding come out
-// as divergent.
+// stockholm and a3m also write gaps as '.'
 function symbolAt(seq: string, i: number) {
   if (i >= seq.length) {
     return GAP
@@ -71,10 +65,8 @@ function blosumScore(a: number, b: number) {
 }
 
 function computePairwiseDistance(seq1: string, seq2: string) {
-  // ragged input is real -- a3m and hand-edited fasta both produce rows shorter
-  // than the alignment -- so a row that stops early counts as gapped for the
-  // remainder, the same rule the model's `blanks` getter applies. Requiring
-  // equal lengths here instead made "build tree from MSA" throw on those files.
+  // a3m and hand-edited fasta produce short rows; past its end a row counts as
+  // gapped, as in the model's `blanks` getter
   const len = Math.max(seq1.length, seq2.length)
   let compared = 0
   let totalScore = 0
@@ -103,17 +95,14 @@ function computePairwiseDistance(seq1: string, seq2: string) {
     return 1
   }
 
-  // Convert similarity to distance using normalized BLOSUM62 score
-  // Higher scores mean more similar, so we invert
   if (maxPossibleScore <= 0) {
     return 1
   }
 
   const normalizedScore = totalScore / maxPossibleScore
-  // Clamp to valid range and convert to distance
   const clampedScore = Math.max(0.01, Math.min(1, normalizedScore))
 
-  // Use Kimura-like correction: d = -ln(similarity)
+  // Kimura-like correction: d = -ln(similarity)
   return -Math.log(clampedScore)
 }
 
@@ -160,7 +149,6 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
     }
   }
 
-  // Work with copies that we'll modify
   const D: number[][] = []
   for (let i = 0; i < n; i++) {
     D[i] = [...distances[i]!]
@@ -170,7 +158,6 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
   let remaining = n
 
   while (remaining > 2) {
-    // Find active indices
     const active: number[] = []
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i] !== undefined) {
@@ -178,7 +165,6 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
       }
     }
 
-    // Compute r values (sum of distances for each node)
     const r = new Map<number, number>()
     for (const i of active) {
       let sum = 0
@@ -190,7 +176,6 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
       r.set(i, sum)
     }
 
-    // Find pair with minimum Q value
     let minQ = Infinity
     let minI = -1
     let minJ = -1
@@ -209,21 +194,16 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
       }
     }
 
-    // Calculate branch lengths
     const dij = D[minI]![minJ]!
     const ri = r.get(minI)!
     const rj = r.get(minJ)!
 
-    // remaining is always > 2 inside this loop; the final two nodes are
-    // connected after it
     let limbI = dij / 2 + (ri - rj) / (2 * (remaining - 2))
     let limbJ = dij - limbI
 
-    // Ensure non-negative branch lengths
     limbI = Math.max(0, limbI)
     limbJ = Math.max(0, limbJ)
 
-    // Create new node
     const newNode: NJNode = {
       left: nodes[minI],
       right: nodes[minJ],
@@ -231,7 +211,7 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
       rightLength: limbJ,
     }
 
-    // Update distance matrix, reusing minI's slot for the merged node
+    // the merged node reuses minI's slot
     for (const k of active) {
       if (k !== minI && k !== minJ) {
         const newDist = (D[minI]![k]! + D[minJ]![k]! - dij) / 2
@@ -240,14 +220,12 @@ function neighborJoining(distances: number[][], names: string[]): NJNode {
       }
     }
 
-    // Mark minJ as removed
     nodes[minJ] = undefined
     nodes[minI] = newNode
 
     remaining--
   }
 
-  // Connect final two nodes
   const finalActive: number[] = []
   for (let i = 0; i < nodes.length; i++) {
     if (nodes[i] !== undefined) {
@@ -276,9 +254,7 @@ function withBranchLength(newick: string, branchLength?: number) {
     : `${newick}:${branchLength.toFixed(6)}`
 }
 
-// Emit Newick iteratively rather than recursively: an NJ tree of N leaves can
-// be a caterpillar of depth ~N, so recursion risks a stack overflow on large
-// alignments (matching the iterative-traversal convention in hierarchy.ts).
+// iterative: an NJ tree of N leaves can be a caterpillar of depth ~N
 function nodeToNewick(root: NJNode): string {
   const postOrder: NJNode[] = []
   const stack: NJNode[] = [root]

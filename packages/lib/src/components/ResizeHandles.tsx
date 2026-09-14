@@ -79,8 +79,7 @@ export const TrackResizeHandle = observer(function ({
 }) {
   const { id, kind, height } = track.model
   const setHeight = setTrackHeight[kind]
-  // a data track carries its own height, so its handle resizes that track --
-  // dragging one used to resize every track of its kind instead
+  // a data track carries its own height, so its handle resizes only that track
   const ownHeight = model.columnTracks.some(t => t.id === id)
   const onDrag = useCallback(
     (delta: number, startHeight: number) => {

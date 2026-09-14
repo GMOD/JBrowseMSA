@@ -2,9 +2,8 @@
  * The global column of every ungapped sequence position in a row, i.e.
  * index[seqPos] is the column holding the seqPos-th non-gap character.
  *
- * A row is indexed once and then answers seqPos -> column by lookup, which is
- * what makes the domain overlay affordable: it resolves one position per feature
- * per row on every redraw, and scanning the row for each would be quadratic.
+ * The domain overlay resolves one position per feature per row on every redraw,
+ * and scanning the row for each would be quadratic.
  *
  * @example
  * // Row: "A-TG-C" (A at 0, T at 2, G at 3, C at 5)

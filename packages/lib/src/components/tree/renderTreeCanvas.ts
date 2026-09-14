@@ -32,12 +32,12 @@ function inYBlock(y: number, offsetY: number, by: number, pad: number) {
 
 /**
  * Every node whose subtree reaches into the block, skipping the subtrees that
- * do not. A subtree's leaves are one contiguous run of rows -- clusterLayout
- * records the run as xMin/xMax -- so a block of a 200k-tip tree visits a few
- * dozen nodes instead of every one of them, three times over.
+ * do not. A subtree's leaves are one contiguous run of rows, recorded by
+ * clusterLayout as xMin/xMax, so a block of a 200k-tip tree visits a few dozen
+ * nodes.
  *
- * A link out of a visited node is still drawn even when the child it reaches is
- * pruned, which is what keeps a branch that crosses the block from vanishing.
+ * A link out of a visited node is drawn even when its child is pruned, so a
+ * branch crossing the block stays visible.
  */
 function forEachNodeInBlock(
   root: HierarchyNode,

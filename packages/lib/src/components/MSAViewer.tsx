@@ -27,9 +27,7 @@ interface MSAViewerProps {
   /** initial per-row pixel height */
   rowHeight?: number
   /**
-   * hide columns at least this percent gaps (default 100, i.e. hide nothing).
-   * A deep family's alignment is mostly insertions carried by a few members;
-   * dropping those columns is what makes the rest readable
+   * hide columns at least this percent gaps (default 100, i.e. hide nothing)
    */
   allowedGappyness?: number
   /** alignment columns (0-based) to highlight with a persistent overlay */
@@ -75,8 +73,7 @@ export default function MSAViewer({
   treeAreaWidth,
   autoTreeAreaWidth,
 }: MSAViewerProps) {
-  // lazy initializer: the model is created exactly once from the initial props
-  // (a stable MST instance — not a value safe to recompute, so not useMemo)
+  // useState, not useMemo: the MST instance must be created exactly once
   const [model] = useState(() =>
     MSAModelF().create({
       type: 'MsaView',
@@ -113,14 +110,10 @@ export default function MSAViewer({
     }
   }, [model, width])
 
-  // The props below stay live after mount: change one and it drives the model,
-  // so a host can put a control on the viewer -- an expand button, a diff
-  // toggle, a color-scheme picker -- without remounting it and re-fetching its
-  // alignment. Each effect depends only on its own prop, so a change the user
-  // makes inside the viewer (picking a scheme from the menu, dragging a row
-  // taller) survives the host's next render rather than being snapped back.
-  // Data props are not among them: new msa/tree/gff is a different alignment,
-  // which is a new model, which React spells `key`.
+  // These props stay live after mount, so a host control can drive the model
+  // without a remount. Each effect depends only on its own prop, so a change
+  // made inside the viewer survives the host's next render. A new msa, tree or
+  // gff needs a new model: change the component's `key`.
   useEffect(() => {
     if (height !== undefined) {
       model.setHeight(height)
@@ -156,14 +149,13 @@ export default function MSAViewer({
       model.setTreeAreaWidth(treeAreaWidth)
     }
   }, [model, treeAreaWidth])
-  // unguarded: dropping the prop is how a host turns the reference diff back off
+  // unguarded, so removing the prop turns the reference diff off
   useEffect(() => {
     model.drawRelativeTo(relativeTo)
   }, [model, relativeTo])
 
-  // the data layers, keyed by content: a host that computes one inline hands a
-  // new array on every render, and replacing the model's copy each time would
-  // redraw the overlay for nothing
+  // keyed by content, since a host computing a layer inline passes a new array
+  // on every render
   const highlightsKey = JSON.stringify(highlights ?? [])
   useEffect(() => {
     model.setHighlights(JSON.parse(highlightsKey))
@@ -181,10 +173,9 @@ export default function MSAViewer({
     model.setHighlightedColumns(JSON.parse(highlightColumnsKey) ?? undefined)
   }, [model, highlightColumnsKey])
 
-  // the model owns a matchMedia listener and whatever fetches its filehandles
-  // started, so an unmounted viewer that keeps its model keeps those too. The
-  // destroy is deferred by a tick because React's StrictMode mounts, unmounts
-  // and remounts with the same state: the remount's effect cancels it
+  // destroy releases the model's matchMedia listener and fetches. It waits a
+  // tick because StrictMode remounts with the same state, and the remount's
+  // effect cancels it.
   useEffect(() => {
     if (destroyTimer.current !== undefined) {
       clearTimeout(destroyTimer.current)

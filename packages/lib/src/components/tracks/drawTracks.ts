@@ -41,8 +41,8 @@ export function drawConservationBars({
   }
 }
 
-// the bar-track values live on model getters (kept off the plain track object so
-// the live canvas autorun stays reactive); select the right one by track id
+// bar-track values are model getters, off the plain track object, so the canvas
+// autorun stays reactive
 export function barTrackValues(model: MsaViewModel, trackId: string) {
   const supplied = model.columnTrackContent.get(trackId)?.values
   if (supplied) {
@@ -53,10 +53,8 @@ export function barTrackValues(model: MsaViewModel, trackId: string) {
     : model.conservation
 }
 
-// An arc's apex scales with how far it reaches, so a short helix stays shallow
-// and a long-range pair sweeps the full track height. The scale is sqrt rather
-// than linear because a contact map's spans are heavily skewed towards short
-// ones, which linear scaling flattens into a smear along the baseline.
+// An arc's apex scales with the square root of its span. Contact-map spans skew
+// short, and a linear scale flattens them along the baseline.
 export function drawArcs({
   ctx,
   arcs,
@@ -145,17 +143,13 @@ export function drawTextTrackContent({
       ctx.fillRect(x, 0, colWidth, rowHeight)
     }
     if (drawLetters) {
-      // a letter on a colored tile needs that tile's contrast color; otherwise
-      // it sits on the plain background and takes the theme's text color
       ctx.fillStyle = contrastText(fill)
       ctx.fillText(letter, x + colWidth / 2, rowHeight / 2)
     }
   }
 }
 
-// Column numbers every `step` columns, with a tick under each. The step is the
-// smallest 1/2/5 x 10^n that leaves room for a label, so a zoom changes how many
-// numbers appear rather than crowding them.
+// the smallest 1/2/5 x 10^n column step that leaves room for a label
 export function rulerStep(colWidth: number, minPixels = 55) {
   let step = 1
   const mantissas = [1, 2, 5]
@@ -215,17 +209,11 @@ export function drawColumnRuler({
   }
 }
 
-// Cap height as a fraction of the font size. Every logo letter is scaled from
-// one reference font size to the height its frequency earns, and that scale is
-// only right if we know how tall the glyph actually draws. Measuring per letter
-// would be exact but `measureText` reports no vertical box in the SVG export
-// backend, so the ratio is a constant: the cap height of the sans-serif faces
-// both backends use, within a percent or two. It only has to be consistent --
-// the same ratio for every letter is what makes the slices sum to the stack
-// height instead of drifting apart.
+// Cap height as a fraction of the font size, within a percent or two for the
+// sans-serif faces both backends use. `measureText` reports no vertical box in
+// the SVG export backend, so one constant ratio scales every logo letter, and
+// the slices sum to the stack height.
 const CAP_HEIGHT_RATIO = 0.72
-// letters below this many pixels are noise, and a stack that thin reads better
-// as the bar chart it approximates
 const MIN_LETTER_PX = 3
 
 export function drawSequenceLogo({
@@ -256,8 +244,8 @@ export function drawSequenceLogo({
   })
   const end = Math.min(xEnd, colStats.numColumns)
 
-  // one reference size for every glyph; each letter's own transform takes it
-  // from here to the height it earned, so the font is set once for the block
+  // one reference font size for the block; each letter's transform scales it to
+  // a height proportional to its frequency
   const referenceFontSize = trackHeight
   setFontSize(ctx, referenceFontSize)
   ctx.textAlign = 'left'
@@ -270,9 +258,7 @@ export function drawSequenceLogo({
       continue
     }
     const x = col * colWidth
-    // stack up from the baseline: the array is ascending, so the tallest letter
-    // lands on top, which is the convention that makes a logo readable at a
-    // glance
+    // the stack is ascending, so the tallest letter lands on top
     let bottom = trackHeight
     for (const { letter, bits } of stack) {
       const h = (bits / maxBits) * trackHeight
@@ -300,9 +286,9 @@ export function drawSequenceLogo({
 
 /**
  * Draw one track's content into a block of the alignment's column space, at
- * `offsetY` within the ctx. Owns the transform, so both callers -- the live
- * canvas blocks and the SVG export -- draw into the same coordinate space, and
- * adding a track kind means a `kind`, a draw function above, and a case here.
+ * `offsetY` within the ctx. Owns the transform, so the live canvas blocks and
+ * the SVG export draw into the same coordinate space. A new track kind needs a
+ * `kind`, a draw function above, and a case here.
  */
 export function drawTrackBlock({
   model,
@@ -397,8 +383,7 @@ export function drawTrackBlock({
       drawColumnRuler({
         ctx,
         numColumns,
-        // numbered by the reference row's own residues when the alignment is
-        // drawn relative to one, which is what the rest of the view counts in
+        // with relativeTo set, number by the reference row's residues
         label: relativeTo
           ? col => {
               const pos = model.visibleColToSeqPosOneBased(relativeTo, col)
@@ -423,8 +408,6 @@ export function drawTrackBlock({
         colorScheme: customColorScheme ?? modelColorScheme,
         contrastText: contrastTextFn(theme),
         bgColor,
-        // a text track is one alignment row tall, so it shows letters exactly
-        // when the alignment does
         drawLetters: showMsaLetters,
         colWidth,
         rowHeight,
@@ -440,7 +423,7 @@ export function drawTrackBlock({
 
 /**
  * Every turned-on track stacked top to bottom, for the SVG export. The live
- * view draws the same content one canvas block at a time -- see TrackBlocks.
+ * view draws the same content one canvas block at a time in TrackBlocks.
  */
 export function renderAllTracks({
   model,

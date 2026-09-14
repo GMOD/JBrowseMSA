@@ -19,18 +19,13 @@ export function maxBitsFor(sequenceType: 'dna' | 'rna' | 'amino') {
  * stack bottom-up in array order.
  *
  * Heights follow Schneider & Stephens: the column's information content is
- * `log2(alphabet) - H` bits, and each residue takes the share of that its own
- * frequency earns. Frequencies come from the non-gap residues only, so a column
- * of two residues and eight gaps is read as a two-way choice rather than a
- * ten-way one -- otherwise every gappy column would look uninformative for the
- * wrong reason.
+ * `log2(alphabet) - H` bits, split among residues by frequency. Frequencies
+ * count non-gap residues only, so two residues and eight gaps form a two-way
+ * choice.
  *
- * The whole stack is then scaled by the non-gap fraction, which plain WebLogo
- * does not do. Here it earns its place: the track sits directly under an
- * alignment where the gaps are visible, and a column that is 90% gap drawing a
- * full-height stack off its one remaining pair of residues reads as a conserved
- * site. Scaling makes stack height mean "how much this column tells you about
- * the family", matching what the conservation track above it already plots.
+ * Unlike plain WebLogo, the stack is then scaled by the non-gap fraction, so a
+ * 90%-gap column with one conserved pair does not draw a full-height stack, and
+ * stack height matches the conservation track.
  */
 export function columnLogoStack(
   colStats: ColumnCounts,

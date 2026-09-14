@@ -41,12 +41,9 @@ const contrastTextCaches = new WeakMap<Theme, Map<string, string>>()
 /**
  * Readable letter color over a given cell color, memoized per theme.
  *
- * A dynamic scheme colors a cell from its column, so there is no letter->color
- * table to precompute a contrast table from; asking per cell color covers the
- * dynamic schemes, the static ones and a track's own `colors` alike. An
- * uncolored cell sits on the theme's background, where the theme's own text
- * color is what stays readable -- `black` turned every gap and every uncolored
- * cell invisible in the dark theme.
+ * Keyed by cell color, since a dynamic scheme has no letter->color table; this
+ * covers static schemes and a track's own `colors` too. An uncolored cell gets
+ * the theme's text color, which stays readable in the dark theme.
  */
 export function contrastTextFn(theme: Theme) {
   let cache = contrastTextCaches.get(theme)

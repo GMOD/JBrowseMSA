@@ -16,8 +16,7 @@ const dna = {
   U: red[500],
 }
 
-// annotated rather than asserted: the wide type is what lets a free-string
-// scheme name index this, and an annotation still checks the literal against it
+// Record<string, ...> so a free-string scheme name can index it
 const colorSchemes: Record<string, Record<string, string>> = {
   none: {},
   nucleotide: dna,

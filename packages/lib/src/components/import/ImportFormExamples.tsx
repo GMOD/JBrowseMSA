@@ -11,8 +11,8 @@ import type { MsaViewModel } from '../../model.ts'
 const BASE = 'https://jbrowse.org/genomes/multiple_sequence_alignments'
 const TREES = 'https://jbrowse.org/genomes/newick_trees'
 
-// each example either points at remote files (msa/tree/gff urls) or carries its
-// data inline, which is what the two bundled small ones do
+// each example points at remote files (msa/tree/gff urls) or carries its data
+// inline, as the two small bundled ones do
 interface Example {
   label: string
   msa?: string

@@ -1,19 +1,15 @@
 import type { DomainBand } from '../../types.ts'
 
 /**
- * Left-to-right cursor over one row's domain bands, answering "which band is
- * drawn on top at this column" — the fill a letter there has to contrast
- * against.
+ * Left-to-right cursor over one row's domain bands that returns the band drawn
+ * on top at a column, for a letter's contrast color.
  *
- * Not simply the first band covering the column. The overlay paints in
- * `domainBands` order, largest first, so where signatures nest — a family
- * enclosing a domain, which InterProScan emits routinely — the box a reader
- * actually sees is the last one painted over that column. `stackIndex` is that
- * paint order.
+ * The overlay paints in `domainBands` order, largest first, so where signatures
+ * nest (InterProScan often emits a family enclosing a domain) the visible band
+ * is the last one painted. `stackIndex` is that paint order.
  *
- * `bands` must be sorted by start column (`domainBandsByStart`), and columns
- * must be visited in increasing order, which is what the block renderer does.
- * Both keep this to one pass over the bands per row rather than a scan per cell.
+ * `bands` must be sorted by start column (`domainBandsByStart`) and columns
+ * visited in increasing order, which keeps this to one pass per row.
  */
 export function domainBandCursor(bands: DomainBand[] | undefined) {
   let next = 0

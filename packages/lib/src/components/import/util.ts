@@ -16,8 +16,7 @@ export function load(
   }
   if (gffFile) {
     model.setGFFFilehandle(gffFile)
-    // asked for by hand, so drawn -- even if the reader hid the overlay
-    // earlier in this view
+    // a file opened by hand shows even if the overlay was hidden earlier
     model.setShowDomains(true)
   }
 }

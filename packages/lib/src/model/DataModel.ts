@@ -56,11 +56,8 @@ export function DataModelF() {
       },
     }))
     .postProcessSnapshot(snap =>
-      // a large document is dropped from the snapshot rather than inlined
-      // into a session or a shared URL, and every field here holds one, so
-      // the rule is the same for all of them. The parent model's
-      // `unshareableData` reports what this drops, since dropping it silently
-      // is how a copied link comes to open an empty viewer
+      // drops any field over maxInlineSnapshotBytes; the parent model's
+      // `unshareableData` reports what was dropped
       Object.fromEntries(
         Object.entries(snap).map(([key, text]) => [
           key,

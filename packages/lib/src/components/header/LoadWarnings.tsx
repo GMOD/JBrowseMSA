@@ -20,10 +20,9 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
-// An optional layer that failed -- a 404 on the annotations, a row-metadata
-// file that is not JSON -- used to go to `error`, which takes dataInitialized
-// down with it and replaces a perfectly good alignment with an error screen.
-// It says so here instead, and the reader dismisses it.
+// A failed optional layer, such as a 404 on the annotations or row metadata
+// that is not JSON, shows here as a dismissible warning. Setting `error` would
+// clear dataInitialized and hide the loaded alignment.
 const LoadWarnings = observer(function ({ model }: { model: MsaViewModel }) {
   const { warnings } = model
   const { classes } = useStyles()

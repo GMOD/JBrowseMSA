@@ -38,10 +38,8 @@ export interface HierarchyNode<T = NodeWithIds> extends CoreHierarchyNode<T> {
   collapsedTipXFar?: number
 }
 
-// The generic traversals live in @gmod/newick now, shared with the tree sidebar
-// in jbrowse-components. They are iterative there for the reason they were here:
-// a phylogenetic tree can be a caterpillar, whose depth equals its leaf count,
-// and the recursive form overflows the stack somewhere past 5000 tips.
+// The @gmod/newick traversals are iterative: a caterpillar tree's depth equals
+// its leaf count, and recursion overflows the stack past about 5000 tips.
 export {
   descendants,
   find,
@@ -54,11 +52,8 @@ export {
 }
 export type { HierarchyLink } from '@gmod/newick'
 
-// coreHierarchy builds base nodes, and the layout fields above are written onto
-// them afterwards by this package. Every one of those fields is optional, so the
-// two node types are mutually assignable and this needs no cast -- it exists
-// only to declare the wider return type, which is what lets those later
-// assignments typecheck.
+// declares the wider return type so the layout code can assign the optional
+// fields above onto coreHierarchy's nodes
 export function hierarchy<T>(
   data: T,
   childrenAccessor: (d: T) => T[] | undefined,

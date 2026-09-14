@@ -75,15 +75,13 @@ export async function exportSvg({
   const gff = gffFile ? fs.readFileSync(gffFile, 'utf8') : undefined
 
   const model = MSAModelF().create({
-    // a fixed id keeps the clipPath ids stable, so exporting the same input
-    // twice gives the same bytes -- an mst-generated one differs every run
+    // a fixed id keeps clipPath ids, and so the output bytes, stable across runs
     id: 'msaview-export',
     type: 'MsaView',
     height,
     colorSchemeName: colorScheme,
-    // an entire-alignment export is sized by the cells, not by --width/--height:
-    // these are what scale the figure, and shrinking them past the letter
-    // threshold is what turns a long alignment into a readable block diagram
+    // an entire-alignment export is sized by cell size, not --width/--height;
+    // cells below the letter threshold draw a long alignment as blocks
     ...(colWidth === undefined ? {} : { colWidth }),
     ...(rowHeight === undefined ? {} : { rowHeight }),
     ...(format ? { msaFormat: format } : {}),
@@ -94,9 +92,7 @@ export async function exportSvg({
   }
   model.setWidth(width)
 
-  // exactly the named tracks, `all` for every one there is. A name matching no
-  // track is a typo worth saying out loud: the figure would otherwise come back
-  // quietly missing the track it was drawn for
+  // exactly the named tracks, or `all`; a name matching no track is reported
   if (tracks) {
     const ids = new Set(model.tracks.map(t => t.model.id))
     for (const name of tracks) {

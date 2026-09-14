@@ -1,6 +1,6 @@
 // A file opened from disk or pasted in becomes inline text, and the snapshot
-// drops an inline document past maxInlineSnapshotBytes. The view keeps working,
-// so the only way anyone learns the link is empty is if the model says so.
+// drops an inline document past maxInlineSnapshotBytes. `unshareableData`
+// reports what was dropped.
 import { getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { expect, test } from 'vitest'
 
@@ -128,10 +128,9 @@ test('a host that restores the data itself silences the warning', () => {
 })
 
 test('a host can override the question per view, not just answer it once', () => {
-  // jbrowse-plugin-msaview has two shapes: a view opened at an indexed
-  // location refetches from a URL the session holds, while one backed by a
-  // browser-local data store really is absent from a pasted link. The answer
-  // is a getter so a composed model can decide per view.
+  // in jbrowse-plugin-msaview a view opened at an indexed location refetches
+  // from a URL, while one backed by a browser-local store is absent from a
+  // pasted link, so a composed model decides per view
   const Composed = stateModelFactory()
     .props({ refetchable: types.optional(types.boolean, false) })
     .views(self => ({

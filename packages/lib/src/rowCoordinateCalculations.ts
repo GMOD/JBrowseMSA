@@ -79,9 +79,8 @@ function countBlanksBefore(blanks: number[], globalCol: number) {
  * that is its own visible index; for a hidden one it is the index of the next
  * visible column, i.e. where the hidden column collapses to.
  *
- * That total answer is what spans want: resolving both ends of a span through
- * globalColToVisibleCol instead loses the whole span whenever either end lands
- * in a hidden column.
+ * Spans use this, since globalColToVisibleCol drops a span whenever either end
+ * lands in a hidden column.
  *
  * @param blanks - Sorted array of global column indices that are hidden
  * @param globalCol - The global column index in the full MSA
@@ -94,9 +93,8 @@ export function visibleColsBefore(blanks: number[], globalCol: number) {
  * The ungapped position a row holds at a global column, or undefined when that
  * column is a gap in the row or past its end.
  *
- * A binary search of the row's seqPos index (ascending), not a scan of the row:
- * this answers on every mouse move, and scanning a 30k-column row per event is
- * the whole frame.
+ * Binary-searches the row's ascending seqPos index; it runs on every mouse
+ * move, and scanning a 30k-column row per event takes the whole frame.
  *
  * @param index - The row's seqPos -> global column index (buildSeqPosIndex)
  * @param globalCol - The global column index in the full MSA

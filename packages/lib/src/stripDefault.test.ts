@@ -17,13 +17,10 @@ test('strips defaults from the snapshot when the host mst supports it', () => {
   expect(getSnapshot(model).a).toBeUndefined()
 })
 
-// The path that actually runs inside every RELEASED jbrowse-web: the host
-// supplies its own mobx-state-tree, and stripDefault only exists in the copy
-// that ships with unreleased @jbrowse/core. Calling it there used to throw while
-// the model was built, which error-paged the whole app. dev has the API, so
-// without stubbing it away this path is never exercised.
+// Released jbrowse-web hosts supply a mobx-state-tree without stripDefault. Dev
+// has the API, so the test deletes it to exercise the fallback.
 test('falls back to types.optional when the host mst lacks stripDefault', () => {
-  // @ts-expect-error deleting it is the point: simulate an older host
+  // @ts-expect-error simulate an older host
   delete types.stripDefault
   const model = types
     .model({ a: stripDefault(types.boolean, false) })

@@ -1,10 +1,8 @@
 // @vitest-environment jsdom
 //
-// Assigning width/height to a canvas resets its bitmap, and React assigns them
-// on every commit where they changed. A draw that ran during the mobx reaction
-// -- before React commits -- is therefore wiped by the resize that follows it,
-// which is what used to blank the tree on a tree-area drag and the consensus
-// tracks on a vertical zoom. So the hook has to draw again after the resize.
+// Assigning width/height to a canvas clears its bitmap, and React assigns them
+// after the mobx reaction has drawn, so the hook has to draw again after the
+// resize.
 import React, { act } from 'react'
 
 import { observable, runInAction } from 'mobx'

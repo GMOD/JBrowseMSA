@@ -5,17 +5,16 @@ import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
-// a stronger fill plus a solid border, so a domain/motif band reads clearly over
-// the colored alignment cells (the faint hover-style wash alone is invisible
-// against clustalx coloring)
+// a fill plus a solid border; the hover wash alone is invisible over clustalx
+// coloring
 export const highlightFill = 'rgba(255,140,0,0.28)'
 export const highlightBorder = 'rgba(210,90,0,0.95)'
 export const highlightRowFill = 'rgba(255,140,0,0.18)'
 
 export const labelFontSize = 11
 const labelPad = 3
-// the label box a highlight draws above its band, and the reason a tree block
-// has to consider rows a little outside itself
+// the label box above a highlight band; tree blocks also check rows this far
+// outside themselves
 export const highlightLabelHeight = labelFontSize + labelPad * 2
 
 export interface LabelBox {
@@ -29,11 +28,9 @@ export interface LabelBox {
  * A highlight's label, over its band where it fits and beside it where it does
  * not, kept inside `bounds` and out of the way of the labels already placed.
  *
- * Two single-residue highlights a column apart both want the same few pixels to
- * the right of their bands, and a band scrolled off the left edge wants its
- * label off-frame with it: the first overdrew two labels into an unreadable
- * smudge, the second left the visible band untitled. Pass `placed` and each
- * later label steps down a row instead of over the one before.
+ * `bounds` keeps the label of a band scrolled partly off the left edge visible.
+ * With `placed`, a label that would overlap an earlier one, as two
+ * single-residue highlights a column apart do, steps down a row.
  */
 export function drawHighlightLabel({
   ctx,
@@ -139,11 +136,10 @@ export function renderHighlights({
 }
 
 /**
- * Everything the alignment overlay owes to the document rather than to the
- * mouse: the reference row's tint, a bordered band per run of highlighted
- * columns, and the `highlights` layer. The live overlay canvas draws these
- * under its hover and click bands, and the SVG export draws them and stops --
- * a shared link that opens with columns highlighted exports with them too.
+ * The overlay parts that come from the snapshot: the reference row's tint, a
+ * bordered band per run of highlighted columns, and the `highlights` layer. The
+ * live overlay draws these under its hover and click bands; the SVG export
+ * draws only these.
  */
 export function renderPersistentHighlights({
   ctx,

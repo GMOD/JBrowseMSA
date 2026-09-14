@@ -1,10 +1,4 @@
 // @vitest-environment jsdom
-//
-// The correspondence between an alignment row and a structure is data, not
-// something the viewer can work out: matching by sequence equality fails for a
-// tagged construct, a truncation, or a row that is a subsequence of the entry.
-// So the lookups' most important behaviour is refusing -- returning nothing
-// where the guess they replace would have returned a plausible wrong residue.
 import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { expect, test } from 'vitest'
 
@@ -17,8 +11,7 @@ MKAANSEQ
 >beta
 MK--NSEQ`
 
-// the row is residues 1-8; the structure resolves 3-10, i.e. a construct whose
-// numbering runs two ahead. 5-6 are in SEQRES but were not resolved.
+// row residues 1-8 map to structure 3-10; 5-6 are in SEQRES without coordinates
 const mapping: ResidueMapping = {
   row: 'alpha',
   accession: 'P00001',
@@ -52,8 +45,6 @@ test('a mapped residue resolves both ways through the offset', () => {
 
 test('a residue in SEQRES without coordinates is mapped but not observed', () => {
   const model = makeModel([mapping])
-  // row residue 3 is structure residue 5, which the structure declares and did
-  // not resolve -- a different answer from "this protein has no such residue"
   expect(model.structureResidue('alpha', 3)).toEqual({
     structure: mapping.structure,
     position: 5,
@@ -72,8 +63,6 @@ test('nothing outside a segment gets an answer', () => {
 
 test('an unmapped row or structure gets nothing, not a fallback', () => {
   const model = makeModel([mapping])
-  // this is the case the 1:1 fallback answered wrongly: beta has no mapping,
-  // so beta residue 1 is not "structure residue 1"
   expect(model.structureResidue('beta', 1)).toBeUndefined()
   expect(model.structureResidue('nope', 1)).toBeUndefined()
   expect(model.rowResidue('9XYZ', 3)).toBeUndefined()
@@ -93,7 +82,6 @@ test('several segments cover a row broken by a disordered loop', () => {
   ])
   expect(model.structureResidue('alpha', 3)?.position).toBe(3)
   expect(model.structureResidue('alpha', 6)?.position).toBe(20)
-  // the gap between the segments is a hole, and a hole is unmapped
   expect(model.structureResidue('alpha', 4)).toBeUndefined()
   expect(model.rowResidue('1ABC', 21)?.seqPos).toBe(7)
 })
@@ -113,18 +101,14 @@ test('asymId picks between two chains of one entry, and is required to', () => {
   ])
   expect(model.rowResidue('1ABC', 4, 'B')?.rowName).toBe('beta')
   expect(model.rowResidue('1ABC', 4, 'A')?.rowName).toBe('alpha')
-  // a homodimer's chains both cover residue 4, so without one named the
-  // question has two answers and gets none. Returning whichever mapping came
-  // first would be the same wrong answer the layer exists to stop, quieter.
+  // both chains cover residue 4, so an unnamed chain is ambiguous
   expect(model.rowResidue('1ABC', 4)).toBeUndefined()
-  // past beta's last residue only one mapping covers it, so it answers
+  // only alpha covers residue 7
   expect(model.rowResidue('1ABC', 7)?.rowName).toBe('alpha')
   expect(model.rowResidue('1ABC', 7, 'B')).toBeUndefined()
 })
 
 test('a row on several structures needs one named', () => {
-  // the ordinary case: an experimental entry and two predicted models for the
-  // same sequence
   const segments = [{ rowStart: 1, rowEnd: 8, structStart: 1, structEnd: 8 }]
   const model = makeModel([
     { row: 'alpha', structure: { id: '1ABC', kind: 'experimental' }, segments },
@@ -148,9 +132,6 @@ test('a row on several structures needs one named', () => {
 })
 
 test('a mapping computed against a different sequence is refused, and says so', () => {
-  // alpha is 8 residues. A mapping that declares 142 was computed against
-  // something else -- a revision, a re-alignment, another protein entirely --
-  // and its arithmetic would still return a residue for every query
   const model = makeModel([{ ...mapping, rowLength: 142 }])
   expect(model.structureResidue('alpha', 1)).toBeUndefined()
   expect(model.rowResidue('1ABC', 3)).toBeUndefined()
@@ -172,8 +153,6 @@ test('a declared row length that matches is no obstacle', () => {
 })
 
 test('a segment past the end of the row condemns the whole mapping', () => {
-  // no rowLength declared, but a segment claiming residues the row does not
-  // have is the same evidence: this was not computed against this sequence
   const model = makeModel([
     {
       row: 'alpha',
@@ -210,9 +189,7 @@ test('a segment whose sides disagree in length is skipped, and reported', () => 
       ],
     },
   ])
-  // the malformed segment would have answered every one of those queries, off
-  // by however much its sides disagree; the well-formed one behind it answers,
-  // because the rest of a mapping is still a claim about residues that exist
+  // the well-formed segment still applies
   expect(model.structureResidue('alpha', 1)?.position).toBe(30)
   expect(model.structureResidue('alpha', 5)).toBeUndefined()
   expect(model.residueMappingProblems[0]?.reason).toBe(
@@ -227,9 +204,7 @@ test('the mapping travels in the snapshot', () => {
 })
 
 test('a structure residue reaches a column through the row it maps to', () => {
-  // what a host actually does with the lookup: structure hover -> row residue
-  // -> the column it sits in. beta skips two columns, so the arithmetic has to
-  // go through the row's gaps rather than treating residue n as column n.
+  // structure hover -> row residue -> column, through beta's two gap columns
   const model = makeModel([
     {
       row: 'beta',

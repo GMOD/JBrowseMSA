@@ -364,15 +364,13 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
 }
 
 /**
- * The alignment background as a single <image>, on the same terms the live
- * canvas uses it: no domain overlay painting its own boxes, background coloring
- * on, and a canvas we can actually read back.
+ * The alignment background as a single <image>, under the live canvas's
+ * conditions: no domain overlay boxes, background coloring on, and a canvas
+ * that reads back.
  *
- * One node replaces the <rect>-per-cell the vector path emits, which is what
- * lets an export of a real alignment finish at all. The image is one pixel per
- * cell drawn across the cells' own rectangle, so it upscales by whole cells --
- * image-rendering keeps those edges hard rather than smearing them, making it
- * pixel-for-pixel what the rects drew.
+ * The vector path's <rect> per cell exhausts the heap on a real alignment. The
+ * image is one pixel per cell, and image-rendering keeps the upscaled cell
+ * edges hard, so it matches the rects pixel for pixel.
  */
 function rasterBackground({
   model,

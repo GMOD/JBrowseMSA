@@ -5,9 +5,8 @@ export interface Accession {
   name: string
   description: string
 }
-// which renderer draws a track's content. Every track kind draws into the same
-// per-column coordinate space, so the kind picks the draw function rather than
-// the geometry -- see drawTracks.ts, which dispatches on it.
+// every kind draws into the same per-column space; drawTracks.ts dispatches on
+// it to pick the draw function
 export type TrackKind = 'text' | 'bar' | 'logo' | 'arc' | 'ruler'
 
 export interface BasicTrackModel {
@@ -31,8 +30,8 @@ export interface BarTrackModel extends BasicTrackModel {
   barColor?: string
 }
 
-// a pair of columns joined by an arc, already resolved to 0-based visible
-// columns -- what the renderer consumes
+// a pair of columns joined by an arc, resolved to 0-based visible columns for
+// the renderer
 export interface Arc {
   start: number
   end: number
@@ -77,11 +76,8 @@ export interface ColumnTrackSpec {
   height?: number
 }
 
-// One contiguous run where a row's residues and a structure's line up 1:1.
-// Segment-shaped because SIFTS is: a dozen numbers cover what a per-residue
-// array would spend kilobytes on, and it makes the refusal rule structural
-// rather than a vocabulary -- a position no segment covers is unmapped, and
-// there is no status field to disagree with.
+// One contiguous run where a row's residues and a structure's line up 1:1, as
+// SIFTS reports them. A position no segment covers is unmapped.
 export interface ResidueSegment {
   rowStart: number
   rowEnd: number
@@ -90,8 +86,8 @@ export interface ResidueSegment {
 }
 
 // the structure half of a mapping. `id` is whatever the producer calls the
-// entry (a PDB id, an AlphaFold accession); `asymId` names the chain, which is
-// what distinguishes two mappings onto the same entry
+// entry (a PDB id, an AlphaFold accession); `asymId` names the chain and
+// distinguishes two mappings onto the same entry
 export interface MappedStructure {
   id: string
   kind?: 'experimental' | 'predicted'
@@ -100,21 +96,16 @@ export interface MappedStructure {
 }
 
 /**
- * Which residue of which structure a row's residue is, as data. Computed by
- * whatever knows how -- SIFTS, an AlphaFold model, a curator -- and carried in
- * the snapshot, because the viewer cannot work it out: matching a row to a
- * structure by sequence equality fails for a construct with an expression tag,
- * a truncation, an engineered residue, or a row that is a subsequence of the
- * entry, and it fails in the direction that looks like it worked.
+ * The structure residue for each residue of a row, computed outside the viewer
+ * (SIFTS, an AlphaFold model, a curator). Sequence equality misplaces tagged
+ * constructs, truncations and subsequence rows; see docs/layers.md.
  *
  * Positions are 1-based and inclusive on both sides, as GFF and `highlights`
  * are. Structure positions are `label_seq_id`, the index into the entity's
- * SEQRES; author numbering carries insertion codes and stays out.
+ * SEQRES; author numbering carries insertion codes and is not used.
  *
  * `unobserved` is in structure positions: present in SEQRES with no
- * coordinates. Worth distinguishing from unmapped, because "the
- * crystallographer could not see it" and "this protein does not have that
- * residue" mean different things to a reader.
+ * coordinates, as distinct from a residue the structure lacks.
  */
 export interface ResidueMapping {
   row: string
@@ -123,11 +114,9 @@ export interface ResidueMapping {
   segments: ResidueSegment[]
   unobserved?: [number, number][]
   /**
-   * ungapped length of the row this was computed against. Optional, and worth
-   * setting: a mapping outlives the alignment it was made for, and pointing at
-   * residue 58 of a sequence that has since been re-aligned, revised or swapped
-   * is the failure this whole layer exists to avoid. Declared here, the viewer
-   * can notice and refuse instead of answering from stale arithmetic.
+   * ungapped length of the row this was computed against. When set, the viewer
+   * ignores the mapping if the loaded row's length differs, as it does after a
+   * re-alignment, revision or swapped sequence.
    */
   rowLength?: number
   generated?: {
@@ -137,25 +126,21 @@ export interface ResidueMapping {
   }
 }
 
-// why a mapping, or one segment of it, is not being used. Refusing silently
-// leaves a host unable to tell "no structure for this row" from "the mapping
-// no longer matches what is loaded", which are different problems with
-// different fixes.
+// why a mapping, or one segment of it, is ignored, so a host can tell "no
+// structure for this row" from "the mapping no longer matches what is loaded"
 export interface ResidueMappingProblem {
   row: string
   structureId: string
   /**
-   * `mapping` means the whole mapping is out: the evidence is about the row it
-   * claims, so nothing it says can be trusted. `segment` takes only that
-   * segment, since the rest of the mapping still describes residues that exist.
+   * `mapping` ignores the whole mapping, because the problem concerns its row.
+   * `segment` ignores only that segment and keeps the rest.
    */
   scope: 'mapping' | 'segment'
   reason: string
 }
 
-// what a lookup gives back: the structure residue a row residue is, or the row
-// residue a structure residue is. `observed` is false for a residue the
-// structure declares but did not resolve.
+// a lookup result in either direction. `observed` is false for a residue in
+// SEQRES with no coordinates.
 export interface StructureResidue {
   structure: MappedStructure
   position: number
@@ -168,24 +153,22 @@ export interface RowResidue {
 }
 
 /**
- * One loaded document that the snapshot leaves behind, and how big it is.
- * `what` names it the way the import form does, since that is where the reader
- * would go to load it differently.
+ * One loaded document that the snapshot omits, and its size. `what` uses the
+ * import form's names for the documents.
  */
 export interface UnshareableData {
   what: 'alignment' | 'tree' | 'annotations' | 'row metadata' | 'data tracks'
   bytes: number
 }
 
-// the overlay annotation itself lives in msa-parsers, alongside the adapters
-// that build it. TidyDomainAnnotation is its former name, kept because
-// downstream plugins name it in their emitted declarations.
+// Annotation is defined in msa-parsers. Downstream plugins' emitted
+// declarations still name TidyDomainAnnotation.
 export type { Annotation }
 export type TidyDomainAnnotation = Annotation
 
 // an annotation resolved to the visible column span it is drawn across.
-// stackIndex is its position among the bands its row actually draws, which the
-// sub-row layout uses to stack boxes.
+// stackIndex is its position among the bands drawn on its row, for the sub-row
+// layout.
 export interface DomainBand {
   annotation: Annotation
   startCol: number

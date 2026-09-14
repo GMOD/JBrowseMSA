@@ -45,10 +45,8 @@ async function getResults(jobId: string): Promise<InterProScanResponse> {
 
 const TERMINAL_FAILURES = new Set(['FAILURE', 'ERROR', 'NOT_FOUND'])
 
-// The queue has been measured at fifteen minutes for one sequence, so five
-// minutes of polling gave up on jobs that were still going to finish. Poll
-// every three seconds for an hour instead -- the wait is EBI's, and abandoning
-// a running job neither shortens it nor frees it.
+// We measured the queue at fifteen minutes for one sequence, so polling runs
+// for an hour.
 const POLL_INTERVAL_MS = 3000
 const MAX_WAIT_MS = 60 * 60 * 1000
 
@@ -57,9 +55,7 @@ async function waitForJob(jobId: string): Promise<void> {
   const maxAttempts = MAX_WAIT_MS / POLL_INTERVAL_MS
 
   while (attempts < maxAttempts) {
-    // the status endpoint returns a bare status token; match it exactly rather
-    // than by substring so an error page that happens to mention FINISHED
-    // cannot be read as success (nor one mentioning ERROR as a failure)
+    // exact match, so an error page mentioning FINISHED or ERROR is neither
     const status = (await checkStatus(jobId)).trim()
 
     if (status === 'FINISHED') {
@@ -94,9 +90,7 @@ export async function runEbiInterProScan(
     const seq = sequences[i]!
     console.log(`  [${i + 1}/${sequences.length}] Submitting ${seq.id}...`)
 
-    // one sequence failing used to throw away every result before it, after
-    // however many queue-minutes those took; keep them and say which rows the
-    // GFF is missing
+    // a failed sequence keeps earlier results and is reported as missing
     try {
       const jobId = await submitJob(seq, programs, email)
       console.log(`  Job: ${jobId}`)

@@ -1,18 +1,9 @@
 // @vitest-environment jsdom
 //
-// What a failed load LOOKS like, which is a different question from what the
-// model recorded. modelFilehandleLoaders.test.ts already pins the model half --
-// a rejected fetch sets `error` and clears `loadingMSA`, under the name "a
-// failed fetch surfaces as an error" -- and it passed throughout the whole time
-// a failed url showed the reader a spinner and nothing else.
-//
-// The error display was never missing. ImportForm renders `model.error`, and
-// the reader could not get to it: a non-abort failure KEEPS its filehandle
-// (only an abort clears it), so `hasPendingFilehandle` stayed true and
-// Loading.tsx took its spinner branch ahead of the import form, permanently.
-// Found on AlphaFold's `files/msa/` prefix answering 403 to every key in August
-// 2026 -- the view opened, said "Downloading file" with a Cancel button, and
-// was still saying it at 105s.
+// The rendered side of a failed load; modelFilehandleLoaders.test.ts covers the
+// model state. A non-abort failure keeps its filehandle, so
+// `hasPendingFilehandle` stays true and Loading.tsx must still show the error
+// rather than the spinner.
 import React, { act } from 'react'
 
 import { createRoot } from 'react-dom/client'
@@ -56,8 +47,7 @@ afterEach(() => {
 })
 
 test('a load that fails shows the error rather than a spinner forever', () => {
-  // the state the loader leaves behind on a 403: the filehandle it could not
-  // read is still set, nothing parsed, and the error recorded
+  // the loader's state after a 403
   model.setMSAFilehandle(uri('https://example.com/blocked.a3m'))
   model.setLoadingMSA(false)
   model.setError(new Error('HTTP 403 fetching blocked.a3m'))
@@ -75,16 +65,8 @@ test('a load still in flight is a spinner, not an error', () => {
   expect(container.textContent).not.toContain('Return to import form')
 })
 
-// A guard rather than a pin: this one passes without the fix too, because with
-// no filehandle left set the view reaches the ImportForm and that already shows
-// the error. It is here so the new branch cannot quietly swallow the case.
-//
-// It also records the surprise underneath: `dataInitialized` is itself
-// `(msa || tree) && !error`, so ANY error hides a loaded alignment, including a
-// tree or gff that 404s beside a good one -- setError is shared by every
-// filehandle loader. Whether a failed OPTIONAL file should blank a good
-// alignment is a real question and a wider one, since `dataInitialized` is read
-// in several places; narrowing it is a design change rather than this fix.
+// `dataInitialized` is `(msa || tree) && !error`, and every filehandle loader
+// shares setError, so a tree or gff that 404s hides a loaded alignment.
 test('an error over loaded data says so instead of a bare import form', () => {
   const loaded = MSAModelF().create({
     type: 'MsaView',

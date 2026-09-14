@@ -11,18 +11,14 @@ import {
 
 import type { MSAFormat } from 'msa-parsers'
 
-// Build a domain GFF from InterPro's PRECOMPUTED matches for UniProtKB
-// accessions, instead of submitting sequences to a live InterProScan job. Every
-// UniProtKB sequence already has InterPro matches computed and served by the
-// EBI InterPro API, so for inputs that are real UniProt accessions this is
-// instant, deterministic, version-pinnable (one InterPro release) and needs no
-// email or rate-limited job submission — see scripts/examples-gen/README.md.
+// Build a domain GFF from the InterPro API's precomputed matches for UniProtKB
+// accessions. The lookup returns in seconds, is pinned to one InterPro release,
+// and needs no email or job submission.
 //
 // Input: one accession per line, optional whitespace-separated row label
-// (`<accession>\t<label>`); lines starting with # are ignored. This is exactly
-// the scripts/examples-gen datasets/<name>.tsv format, so it can be run on those
-// directly. The output GFF is keyed by label and is written by the same
-// annotationsToGFF the interproscan command's output goes through.
+// (`<accession>\t<label>`); lines starting with # are ignored. The format matches
+// scripts/examples-gen datasets/<name>.tsv. The output GFF is keyed by label and
+// written by the same annotationsToGFF as the interproscan command.
 
 const API = 'https://www.ebi.ac.uk/interpro/api'
 
@@ -87,9 +83,8 @@ function parseAccessions(text: string): Accession[] {
   return out
 }
 
-// The one request a run makes regardless of cache state, and the thing that
-// makes caching safe: entries are keyed by release, so a new InterPro release
-// misses rather than serving coordinates computed against the old one.
+// requested on every run; cache entries are keyed by this release, so a new
+// release fetches fresh coordinates
 async function fetchRelease(): Promise<string> {
   const res = await fetchWithRetry(`${API}/`)
   if (!res.ok) {
@@ -100,11 +95,8 @@ async function fetchRelease(): Promise<string> {
 }
 
 /**
- * Every entry the member database has for one protein.
- *
- * The API pages at 20 results, so reading only the first page quietly dropped
- * the tail of a well-annotated protein -- P98161 has 24 InterPro entries and
- * the GFF carried 20 of them, cached as if complete.
+ * Every entry the member database has for one protein, following `next` across
+ * pages (P98161 has 24 InterPro entries, more than one default page of 20).
  */
 async function fetchEntries(
   accession: string,
@@ -135,8 +127,7 @@ export async function runInterProPrecomputed(
   const { inputFile, outputFile, database, noCache } = options
   console.log(`Reading accessions from ${inputFile}...`)
   const accessions = parseAccessions(fs.readFileSync(inputFile, 'utf8'))
-  // two rows can carry the same accession under different labels; that is one
-  // protein to look up, then copied to each label
+  // rows sharing an accession under different labels share one lookup
   const distinct = [...new Set(accessions.map(a => a.accession))]
   const extra =
     distinct.length === accessions.length
@@ -164,8 +155,7 @@ export async function runInterProPrecomputed(
       try {
         entries = await fetchEntries(accession, database)
       } catch (e) {
-        // every accession resolved so far is on disk, so the re-run this
-        // prompts resumes from here instead of asking EBI for them again
+        // accessions resolved so far are cached, so a re-run resumes here
         throw new Error(
           `${e}\n${i} of ${distinct.length} accessions are cached; re-run to resume from ${accession}.`,
         )
@@ -177,9 +167,7 @@ export async function runInterProPrecomputed(
     console.log(
       `  [${i + 1}/${distinct.length}] ${accession}: ${entries.length} ${database} entries${hit ? ' (cached)' : ''}`,
     )
-    // a typo, a non-UniProtKB id or a protein the database really has nothing
-    // for all look the same from here -- an empty answer that then caches as
-    // one, so say it once rather than leave the row silently undecorated
+    // a typo, a non-UniProtKB id and a protein with no matches all return empty
     if (entries.length === 0) {
       console.warn(
         `    no ${database} matches for ${accession}; check it is a UniProtKB accession and that --database is the right member database`,
@@ -224,9 +212,9 @@ export async function runInterProPrecomputed(
 /**
  * Warn where a row is not the protein the matches were computed on.
  *
- * The coordinates come from UniProt's canonical sequence. A row that is an
- * isoform or a fragment is a different length, and the domains then land on the
- * wrong residues -- silently, since nothing else in the file disagrees.
+ * The coordinates come from UniProt's canonical sequence. An isoform or fragment
+ * row has a different length, and its domains would land on wrong residues with
+ * no other sign of the problem.
  */
 function checkLengths(
   msaFile: string,

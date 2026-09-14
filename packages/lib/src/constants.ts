@@ -5,10 +5,8 @@ export const defaultHeight = 550
 export const defaultScrollX = 0
 export const defaultScrollY = 0
 export const defaultCurrentAlignment = 0
-// Annotations are loaded on purpose -- a gff filehandle, a file picked in the
-// dialog -- so they are drawn unless the reader has said otherwise. Since only
-// the "no" is stored, a shared link with the overlay hidden reopens hidden, and
-// one that never mentions it opens showing whatever annotations it carries.
+// Only a hidden overlay is stored, so a link that never mentions it opens
+// showing its annotations.
 export const defaultShowDomains = true
 export const defaultShowDomainLegend = true
 export const defaultHideGaps = true
@@ -17,10 +15,9 @@ export const defaultSubFeatureRows = false
 // row height for each stacked feature when subFeatureRows is on
 export const subFeatureRowHeight = 4
 
-// Feature types that are ordinal *segments* of a single transcript (exons and
-// the like) rather than categorical domains. Their identity is their position,
-// so the overlay alternates two shades to mark boundaries and labels them by
-// number, instead of assigning every one a distinct hue + legend row.
+// Feature types that are ordinal segments of one transcript. The overlay
+// alternates two shades across them and labels them by number, where a domain
+// type gets its own hue and legend row.
 export const segmentFeatureTypes = new Set([
   'exon',
   'CDS',
@@ -36,8 +33,8 @@ export const defaultDrawMsaLetters = true
 export const defaultScrollZoom = false
 
 // Cell size floors for drawing residue letters and tree labels. Below these a
-// 500px block holds thousands of glyphs, and fillText -- which no sprite atlas
-// beats, measured -- dominates every zoom frame.
+// 500px block holds thousands of glyphs, and fillText dominates every zoom
+// frame. A sprite atlas measured slower.
 export const minLetterRowHeight = 8
 export const minLetterColWidth = 5
 
@@ -66,17 +63,13 @@ export const defaultShowBranchLen = true
 export const defaultDrawTree = true
 export const defaultDrawNodeBubbles = true
 
-// Neighbor joining refuses above this many rows. The distance matrix is O(n^2*L)
-// and the join loop O(n^3), both on the main thread with no progress and no
-// cancel: 400 rows measured 1.5s, 800 rows 10s, and 1600 would be about seventy.
-// See agent-docs/ideas/neighbor-joining-scaling.md for why the RapidNJ fix is a
-// real algorithm change rather than a port, and why capping is the honest answer
-// -- NJ on thousands of sequences is the wrong tool however fast it runs.
+// Neighbor joining does not run above this many rows. The distance matrix is
+// O(n^2*L) and the join loop O(n^3), both on the main thread with no progress
+// and no cancel: 400 rows measured 1.5s, 800 rows 10s, and 1600 would be about
+// seventy. See agent-docs/ideas/neighbor-joining-scaling.md.
 export const maxNeighborJoiningRows = 500
 
-// The largest inline document the snapshot carries. Past this a pasted or
-// locally-opened file stays in the live model and leaves the snapshot, since a
-// session or a shared URL holding megabytes of sequence is not a link anyone
-// can send. `unshareableData` reads the same number, so what the viewer warns
-// about and what the snapshot drops cannot drift apart.
+// The largest inline document the snapshot carries. A larger pasted or
+// locally-opened file stays in the live model and out of the snapshot, keeping
+// shared URLs sendable. `unshareableData` warns using the same number.
 export const maxInlineSnapshotBytes = 50_000

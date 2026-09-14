@@ -15,8 +15,7 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
   const theme = useTheme()
   const { unit, s, w, polygonHeight, polygonPoints } = getMinimapLayout(model)
 
-  // the whole alignment, sampled down to the bar: it says where the conserved
-  // blocks and the gappy stretches are, which is what a scroll aims at
+  // the whole alignment, sampled down to the bar
   const barWidth = Math.round(msaCanvasWidth * highResScaleFactor)
   const barHeight = Math.round(MINIMAP_BAR_HEIGHT * highResScaleFactor)
   const ref = useCanvasAutorun({
