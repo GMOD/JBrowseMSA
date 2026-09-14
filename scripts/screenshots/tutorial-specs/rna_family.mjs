@@ -114,7 +114,7 @@ export const specs = [
       },
       {
         type: 'text',
-        text: 'columns 35 and 36: just as variable, unpaired, and no column in the alignment pairs with them above 76%',
+        text: 'columns 35 and 36: unpaired, and just as variable',
         fontSize: 15,
         maxWidth: 300,
         color: BLUE,

@@ -23,6 +23,10 @@ GENOMES="NC_000964.3:Bsub NC_003869.1:Tten NC_003030.1:Cace NC_003210.1:Lmon NC_
 EUTILS=https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi
 
 echo "== 1. the family: Rfam $RFAM covariance model and seed alignment"
+# to a file first: grep -m1 on a pipe closes it early, and under pipefail that
+# SIGPIPE on curl is a failed command
+curl -sf -o rfam-readme.txt https://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/README
+grep -m1 '^Release' rfam-readme.txt | sed 's/^/  Rfam /'
 [ -f $RFAM.cm ] || curl -sf -o $RFAM.cm "https://rfam.org/family/$RFAM/cm"
 [ -f $RFAM.seed.sto ] ||
   curl -sf -o $RFAM.seed.sto "https://rfam.org/family/$RFAM/alignment/stockholm"
@@ -228,7 +232,13 @@ with open(out_path, 'w') as fh:
     fh.write('//\n')
 
 pk = sum(1 for c in copied['SS_cons'] if c.isalpha() and c.isupper())
+gappy = sum(
+    1
+    for i in range(width)
+    if sum(1 for s in rows.values() if s[i] in '.-') >= 0.9 * len(rows)
+)
 print(f'  {len(order)} rows x {width} columns, {len(aln_cols)} consensus columns')
+print(f'  {gappy} columns are gaps in 90% or more of the rows')
 print(f'  {pk} pseudoknot pairs copied from the seed')
 EOF
 
@@ -401,29 +411,50 @@ for label, cols in classes:
 
 # Which column pairs best with each of the most variable columns, searched
 # against every column rather than against the structure. A variable column
-# that is in a helix should find its own partner
-print('\n  the ten most variable columns, and the column each pairs best with:')
-print('  col  commonest base   best partner   SS_cons pairs them with')
+# that is in a helix should find its own partner, and one that is not in a helix
+# should find nothing much
 partner = {}
 for i, j, _ in pairs:
     partner[i] = j
     partner[j] = i
-variable = sorted(occupied, key=lambda i: identity([i])[0])[:10]
-recovered = 0
-for i in variable:
+
+
+def best_partner(i):
     best, best_at = 0, None
     for j in occupied:
         if j != i:
             ok, n = count(i, j)
             if n and ok / n > best:
                 best, best_at = ok / n, j
-    named = partner.get(i)
-    recovered += best_at == named
-    print(
-        f'  {i + 1:3d}  {100 * identity([i])[0]:13.0f}%   {best_at + 1:5d} at {100 * best:3.0f}%'
-        f'   {named + 1 if named is not None else "-":>5}'
-    )
+    return best, best_at
+
+
+def partner_table(title, cols):
+    recovered = 0
+    print(f'\n  {title}')
+    print('  col  commonest base   best partner   SS_cons pairs them with')
+    for i in cols:
+        best, best_at = best_partner(i)
+        named = partner.get(i)
+        recovered += best_at == named
+        print(
+            f'  {i + 1:3d}  {100 * identity([i])[0]:13.0f}%   {best_at + 1:5d} at {100 * best:3.0f}%'
+            f'   {named + 1 if named is not None else "-":>5}'
+        )
+    return recovered
+
+
+variable = sorted(occupied, key=lambda i: identity([i])[0])[:10]
+recovered = partner_table(
+    'the ten most variable columns, and the column each pairs best with:', variable
+)
 print(f'  {recovered} of {len(variable)} find the partner SS_cons names')
+partner_table(
+    'the five most variable columns SS_cons leaves unpaired:',
+    sorted(
+        (i for i in occupied if i not in paired_cols), key=lambda i: identity([i])[0]
+    )[:5],
+)
 
 print('\n  every pair, as alignment columns (1-based):')
 print('  cols        kind        can pair   base pairs seen')
@@ -440,6 +471,56 @@ for i, j, pk in pairs:
     kind = 'knot ' if pk else 'helix'
     sam = 'SAM' if i in contacts or j in contacts else '   '
     print(f'  {i + 1:3d} {j + 1:4d}   {kind} {sam}  {ok:3d}/{n:<3d}    {seen}')
+EOF
+
+echo "== 11. which row is the one that was crystallized"
+# Rfam's SAM contact annotation comes from a crystal structure, PDB 2GIS. The
+# construct was cut from a genome this search covers, so one row should carry
+# its sequence
+curl -sf https://www.rcsb.org/fasta/entry/2GIS -o 2gis.fasta
+python3 - 2gis.fasta sam-riboswitch.sto <<'EOF'
+import sys
+
+crystal = ''.join(
+    line.strip() for line in open(sys.argv[1]) if not line.startswith('>')
+).upper()
+rows = {}
+for line in open(sys.argv[2]):
+    line = line.rstrip('\n')
+    if line and line[0] not in '#/':
+        name, seq = line.split()
+        rows[name] = rows.get(name, '') + seq
+
+
+def longest_shared(a, b):
+    """length of the longest substring the two sequences have in common"""
+    best = 0
+    prev = [0] * (len(b) + 1)
+    for i in range(1, len(a) + 1):
+        cur = [0] * (len(b) + 1)
+        for j in range(1, len(b) + 1):
+            if a[i - 1] == b[j - 1]:
+                cur[j] = prev[j - 1] + 1
+                best = max(best, cur[j])
+        prev = cur
+    return best
+
+
+scored = sorted(
+    (
+        (
+            longest_shared(
+                crystal,
+                rows[name].upper().replace('T', 'U').replace('.', '').replace('-', ''),
+            ),
+            name,
+        )
+        for name in rows
+    ),
+    reverse=True,
+)
+for length, name in scored[:3]:
+    print(f'  {name}: {length} nt shared with the 2GIS construct')
 EOF
 
 echo

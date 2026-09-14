@@ -76,5 +76,14 @@ The files below back the **Kinase pocket** tutorial
 | `kinase-pocket/kinase-pocket.nwk` | Newick | FastTree from the alignment above |
 | `kinase-pocket/kinase-pocket-metadata.json` | JSON (`treeMetadata`) | Each row's kinase group (AGC/CAMK/CK1/CMGC/NEK/RGC/STE/TKL/TK/Other) and UniProt accession, read by the tree's node-info dialog |
 
+The `rna/` folder backs the
+[rna_family tutorial](../../../../docs/tutorials/rna_family.md) and is built by
+`docs/tutorials/scripts/build_rna_family.sh`, which prints every number that
+page quotes:
+
+| File                     | Format              | Provenance                                                                                                                                                                                            |
+| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `rna/sam-riboswitch.sto` | Stockholm (tree+SS) | 37 SAM-I riboswitches found by `cmsearch` with the Rfam [RF00162](https://rfam.org/family/RF00162) model in six Firmicute genomes, aligned to it with `cmalign`, consensus structure and SAM contacts copied from the Rfam seed, FastTree tree embedded as `#=GF NH` |
+
 The formats are detected from file content (the `CLUSTAL` / `# STOCKHOLM` / `>` /
 `##gff` header), so the extensions above are only for readability.

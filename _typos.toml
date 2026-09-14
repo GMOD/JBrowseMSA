@@ -44,3 +44,7 @@ Thr = "Thr"
 ABL = "ABL"
 Abl = "Abl"
 abl = "abl"
+
+# the four-letter species prefix the RNA tutorial's row names carry for
+# Clostridium acetobutylicum
+Cace = "Cace"

@@ -33,6 +33,12 @@ export const tutorials: Tutorial[] = [
     blurb:
       '474 human kinase domains, hmmalign and FastTree, one alignment. The gatekeeper column reads threonine in 19% of them, a small-molecule inhibitor cross-reactivity map in one number.',
   },
+  {
+    slug: 'rna_family',
+    title: 'An RNA family, from a model and six genomes',
+    blurb:
+      'Search six bacterial genomes with an Rfam covariance model, align the 37 hits back to it, and read the consensus structure off the result: helix arcs, a pseudoknot, and the columns that hold still because the ligand touches them.',
+  },
 ]
 
 export const tutorialBySlug = new Map(tutorials.map(t => [t.slug, t]))
