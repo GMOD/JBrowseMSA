@@ -4,6 +4,147 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [7.0.0](https://github.com/GMOD/JBrowseMSA/compare/v6.5.0...v7.0.0) (2026-09-14)
+
+### Bug Fixes
+
+- Highlights keyed by owner, so two sources stop erasing each other ([c69541f](https://github.com/GMOD/JBrowseMSA/commit/c69541fba7559214c12d9031b7d24ea31efd0e84))
+- Verify the row's numbering instead of assuming it ([7850f83](https://github.com/GMOD/JBrowseMSA/commit/7850f83064146c6a5014e70b69f987ddfb78d9d3))
+- ResidueMappings refuses ambiguity and staleness ([3344552](https://github.com/GMOD/JBrowseMSA/commit/3344552054f515b665fc01331c27ce4e2a9f08a1))
+- RootDir is an emit concern, so put it in the config that emits ([077f69c](https://github.com/GMOD/JBrowseMSA/commit/077f69cdbf8147e6394069bb9db32aa319cac972))
+- Bundle the CLI so npm installs work ([7a137cd](https://github.com/GMOD/JBrowseMSA/commit/7a137cdf7cc7a14a82a1f47c18b041844bb26715))
+- Make the watch script actually watch ([caed4b2](https://github.com/GMOD/JBrowseMSA/commit/caed4b27f40f03329554645d426a2c51c35d3a4a))
+- Open a bare MsaView snapshot, and say when ?data= is unreadable ([a4281f5](https://github.com/GMOD/JBrowseMSA/commit/a4281f5497a49743891839f59a32bcd2089fd70c))
+- Split FASTA on line-start >, sniff past BOM and blank lines, read ColabFold a3m, reject HTML pages ([4a7dafe](https://github.com/GMOD/JBrowseMSA/commit/4a7dafef981cf76af0b1fa8173aa2d9bfe90e246))
+- Join a Stockholm tree split across #=GF NH lines, accept multi-character PDB chain ids ([cb137ea](https://github.com/GMOD/JBrowseMSA/commit/cb137ea279575331ccb9d67d6d4dca59ab6c8b4a))
+- Read InterProScan GFF3 as written, and keep unintegrated signatures ([df88360](https://github.com/GMOD/JBrowseMSA/commit/df88360ebf45c7217fada51580eb18559aaa6ed8))
+- Page the InterPro API, fix the docker image tag, and keep partial EBI results ([6f61f30](https://github.com/GMOD/JBrowseMSA/commit/6f61f3011e988ae21c78c2c9a8b3673798a0d007))
+- One name rule for the alignment, the tree and the annotations; fetch URLs as URLs ([203497e](https://github.com/GMOD/JBrowseMSA/commit/203497eac6c782f6747443acb52c4cd9248092f3))
+- The tracks come out of the alignment's own height ([010ad3c](https://github.com/GMOD/JBrowseMSA/commit/010ad3c62cccddc4bb9bf0ff28c2561a2407f1ce))
+- The tree layout stops writing on the parsed tree ([fb8dafc](https://github.com/GMOD/JBrowseMSA/commit/fb8dafcb567731ac2197a8b6f0701f85d1374b8a))
+- A collapsed clade hides rows, it does not delete them ([28c4959](https://github.com/GMOD/JBrowseMSA/commit/28c495946fbe4c6db8fb2317ddcb5230d1ee2810))
+- The annotation overlay remembers what the reader chose ([c873839](https://github.com/GMOD/JBrowseMSA/commit/c873839cf59e6b4bc1cc9b6271f7f43fb25c766d))
+- Loads that go wrong, and views that go away ([a45fff2](https://github.com/GMOD/JBrowseMSA/commit/a45fff21ed7f091e68f366f89e895371de1a3967))
+- A tree width that arrives with the view is the one it opens at ([a85d759](https://github.com/GMOD/JBrowseMSA/commit/a85d759b2c53bec4e5992c22a347f1c6dff3f2d6))
+- Downsample per axis, so fit-to-width keeps row boundaries ([4d964b1](https://github.com/GMOD/JBrowseMSA/commit/4d964b1493dc4d1682de446e1875cfb7d963d745))
+- Take a letter's color from the cell it lands on ([aaaf7d1](https://github.com/GMOD/JBrowseMSA/commit/aaaf7d18c4048c5b0a37296fc423390a204814e0))
+- Keep the overlay the document owns, and stop clearing fills ([4356f72](https://github.com/GMOD/JBrowseMSA/commit/4356f72e72735bc4d6806d8d7e892e529bacbded))
+- Hand SVG colors it can hold, alpha included ([cbd5eee](https://github.com/GMOD/JBrowseMSA/commit/cbd5eeea045af810d05d7e8d063122a292e9ae1f))
+- Pad the block cull by a row, and stop allocating 600px of it ([32fae14](https://github.com/GMOD/JBrowseMSA/commit/32fae148644ca663d209d9d392d898b47edef683))
+- Resize the data track you dragged, not its whole kind ([937e76d](https://github.com/GMOD/JBrowseMSA/commit/937e76de19fd6cd1adfaded989be26f2c4572cbb))
+- Keep a label on screen and off the one before it ([ff7e14f](https://github.com/GMOD/JBrowseMSA/commit/ff7e14fafe9d63a76730d14622a24630f3bab281))
+- Repair the COVID tree link, gate the 3.5-only gallery links, drop the duplicate examples app ([e6683a4](https://github.com/GMOD/JBrowseMSA/commit/e6683a4c8d7f1cc540fb8f2fec7252f7a9b771cf))
+- Point the figures' live links at the deployed app ([c0f197f](https://github.com/GMOD/JBrowseMSA/commit/c0f197ffc70b97cb53018f27090949e1eaf96962))
+- Put the protein_family links back on nlrp1.aln ([6f068cf](https://github.com/GMOD/JBrowseMSA/commit/6f068cf413078c4a2085a2d1a7910238fba43ebc))
+- Take @gmod/newick 1.0.3, which strips bracketed comments ([ac7b2b1](https://github.com/GMOD/JBrowseMSA/commit/ac7b2b1ba6564d2335839b5dfc0f1537ed6e313d))
+
+### Chores
+
+- Unbreak the spell check and the link check on main (#116) ([a4d8ca5](https://github.com/GMOD/JBrowseMSA/commit/a4d8ca50a916086a72fa12b7f1d5cf2603acd477))
+- Deploy Pages via GitHub's native Actions flow, drop gh-pages branch ([8a86767](https://github.com/GMOD/JBrowseMSA/commit/8a86767a09a97ad7e596ee28d4c94c93445333dd))
+- Per-tutorial spec modules, a --port flag, and tutorial conventions ([6eff587](https://github.com/GMOD/JBrowseMSA/commit/6eff5876e1ea55cc94a3b84ebf2f00f2724227f2))
+- Build the CLI in the root build, and check packs actually install ([7b86a54](https://github.com/GMOD/JBrowseMSA/commit/7b86a54e337b02594c6ce19162c99b6b2d85e3b4))
+- One setup action, PRs, a pinned typos, and no duplicated work ([d3b4af3](https://github.com/GMOD/JBrowseMSA/commit/d3b4af376fe502236f700a6b689483d6701c4bdd))
+- Give the Pages workflow the token scopes its actions need ([4f5210f](https://github.com/GMOD/JBrowseMSA/commit/4f5210fbd649dd024b4334f13ba7babeddcbb773))
+- Report the runner's Chrome before the smoke render ([89d6f9b](https://github.com/GMOD/JBrowseMSA/commit/89d6f9bd30235991de0c3abf2deb3d0d7c64b888))
+- Fail when the generated model API docs are stale ([49ed8ed](https://github.com/GMOD/JBrowseMSA/commit/49ed8edb578f3d40ab5cddab05d33f374ff40af5))
+- Generate the changelog from the tags, and keep it that way ([ae443a3](https://github.com/GMOD/JBrowseMSA/commit/ae443a365546c32eb0ca1e8b9d5f82a1e7f02da2))
+- Drop four figures nothing shows, and the specs behind them ([f16f7c1](https://github.com/GMOD/JBrowseMSA/commit/f16f7c14450002a02032dcecb48db57ed8abd21c))
+- Reconcile the lockfile with git-cliff ([c8a7d3d](https://github.com/GMOD/JBrowseMSA/commit/c8a7d3d5d8628a9a88cecf73550ab08fa6119bd1))
+- Oxfmt ([03bf967](https://github.com/GMOD/JBrowseMSA/commit/03bf9677d0b1508e1a6d6b2dddb11cbfacf3f8e9))
+- Protein-family tutorial figures, and InterPro 110.0 domains ([7565645](https://github.com/GMOD/JBrowseMSA/commit/756564541a6e66b3f192733457c55d621037ef0f))
+- Stop the spell check on the generated changelog ([c6a69f4](https://github.com/GMOD/JBrowseMSA/commit/c6a69f4f0324200f94629286e5c22ea974b60079))
+- Regenerate phylogeny-at-scale figures after rebase ([3b0801c](https://github.com/GMOD/JBrowseMSA/commit/3b0801cde916f98aa1056e6320ad323717e75fbd))
+- Regenerate TRIM5 figures after rebase onto main ([442dba5](https://github.com/GMOD/JBrowseMSA/commit/442dba5920a206ea2c1661e17f0bd23513f6753c))
+- Reconcile the data files with the names main links to ([c2ab87e](https://github.com/GMOD/JBrowseMSA/commit/c2ab87eac6f37428bd6c7fc0fefd3842213497df))
+- Regenerate every figure against the fixed raster ([5e2458d](https://github.com/GMOD/JBrowseMSA/commit/5e2458d149267de6d5e22eeacbcff37f02c99b35))
+
+### Documentation
+
+- The arc track, and a gallery figure for the pseudoknot ([708e1d2](https://github.com/GMOD/JBrowseMSA/commit/708e1d2022da77ac529979860ec8e0e406dd78e7))
+- Name the simpler shape beside the connected session ([5e5fbd1](https://github.com/GMOD/JBrowseMSA/commit/5e5fbd12401cfd533feb6fba0ce90487f597b175))
+- The alignment<->structure correspondence as a layer ([fab9c49](https://github.com/GMOD/JBrowseMSA/commit/fab9c49d442c22cf2772d71d2582033b745438b6))
+- The owner-keyed highlight API, and mark that step done ([d1bbd8e](https://github.com/GMOD/JBrowseMSA/commit/d1bbd8e73be7d878a048c7c7eea4b55c1585c0a8))
+- Tutorials, for the work that happens outside the viewer (#114) ([50a3ee7](https://github.com/GMOD/JBrowseMSA/commit/50a3ee7c949c7fe981452187901073c6edafd216))
+- ADR for the WebGL/GPU rendering rejection ([1bdb49d](https://github.com/GMOD/JBrowseMSA/commit/1bdb49d089199fbaf69456def4b5474aec7192c2))
+- One quick start, with the version pins that make it work ([ec5e639](https://github.com/GMOD/JBrowseMSA/commit/ec5e639d2739297c35e907ce9785d651e1ad9c75))
+- Say why pages-dist still writes .nojekyll ([7100d85](https://github.com/GMOD/JBrowseMSA/commit/7100d8525d7510cae2b70be5f7ab583d311929c4))
+- Point at the live examples page, and say what the CLI does now ([f228e9c](https://github.com/GMOD/JBrowseMSA/commit/f228e9cb97055d83c0a5d3115c363f7d416a6950))
+- Guard the props table, and stop restating the layers reference ([d29b4ce](https://github.com/GMOD/JBrowseMSA/commit/d29b4ce8337ea98465a6a60addaca66c7ba63c33))
+- Correct the CLI and msa-parsers READMEs ([1c5906e](https://github.com/GMOD/JBrowseMSA/commit/1c5906e3c73fab9a0e817242af9d82d98f571a60))
+- Rewrite the protein family page around its figures ([4632351](https://github.com/GMOD/JBrowseMSA/commit/46323512c5e3ceae683d002f1c3ca575a10e33b9))
+- The LRR section names three rows, so plural the heading ([ca78e0f](https://github.com/GMOD/JBrowseMSA/commit/ca78e0f06fa794a556af49618d77cbe248d1f849))
+- Build script and hosted data for the p53 variant-effect page ([6390679](https://github.com/GMOD/JBrowseMSA/commit/6390679a3852a7f4e6f0c06bc670b020d560f738))
+- Figures and specs for the p53 variant-effect page ([8001bcd](https://github.com/GMOD/JBrowseMSA/commit/8001bcd4a89ca9ad20d8e145880f0b7e1bc570c2))
+- Where p53's damaging variants fall ([5351d05](https://github.com/GMOD/JBrowseMSA/commit/5351d058997e347a11518d8044d505bfecfbbe15))
+- Match the p53 page to the protein family page's conventions ([5faa13c](https://github.com/GMOD/JBrowseMSA/commit/5faa13cb3dfd243674b165c0d30d7e179fb2725d))
+- The 8 kB request line a ?data= link has to fit in ([35ea582](https://github.com/GMOD/JBrowseMSA/commit/35ea5828eb0df618a0e0a6e57458add6f634c9d3))
+- Open on the gene rather than a tumor statistic ([e04bb3d](https://github.com/GMOD/JBrowseMSA/commit/e04bb3d20018a972d99268089e6fe2a1cfe1c471))
+- The closing link is the view, not the encoding ([4a6dbba](https://github.com/GMOD/JBrowseMSA/commit/4a6dbba6d3747bc66fa198dbf9fa376868790b0d))
+- Spike, 6VXX, and the residues the structure did not resolve ([00310e8](https://github.com/GMOD/JBrowseMSA/commit/00310e816ee418767328f6addb5a5192b91e00d0))
+- Show the real command output in the spike page ([5944e19](https://github.com/GMOD/JBrowseMSA/commit/5944e19be9327a7e510b6a9094e9a9c55dbd1ea3))
+- Point residueMappings at the tutorial that builds one ([a2cd902](https://github.com/GMOD/JBrowseMSA/commit/a2cd902aa2216f4fc42b54bbca738d617d2d42f4))
+- Match the sibling page's source list and prerequisites ([718e460](https://github.com/GMOD/JBrowseMSA/commit/718e460e1b7c22d317ffb4e56e5c8d75d15b2a65))
+- The live data-layer props, and regenerated state-model docs ([2478e06](https://github.com/GMOD/JBrowseMSA/commit/2478e060e7da23697fe4e736dba3ee104f7133ce))
+- Reading cross-reactivity off the kinase pocket ([6efc3ca](https://github.com/GMOD/JBrowseMSA/commit/6efc3ca9611c19519da516cc6e98da7940b17521))
+- Build script for the SAM-I riboswitch page ([6779966](https://github.com/GMOD/JBrowseMSA/commit/6779966c0d2612a8124f53353f697b7fa8a9fddc))
+- Figures for the SAM-I riboswitch page ([b03ad55](https://github.com/GMOD/JBrowseMSA/commit/b03ad55f02b12b5c93c2e1baf37267c78c0da23b))
+- An RNA family, from a model and six genomes ([4f8b4d4](https://github.com/GMOD/JBrowseMSA/commit/4f8b4d424ce6a63dcceb4e56004e77297aca405e))
+- Match the sibling pages' prerequisites and source list ([0e7bd99](https://github.com/GMOD/JBrowseMSA/commit/0e7bd9968e674366d89f3cdf645dfb2c79ae472c))
+- Quote the printed length range for the insert columns ([037f78a](https://github.com/GMOD/JBrowseMSA/commit/037f78a28488452e088ed4aef4cb8ccd5b8e19e4))
+- The file's own #=GC lines are tracks now ([bb01172](https://github.com/GMOD/JBrowseMSA/commit/bb0117254f33c90cd29d7829eaae86d3bcf749af))
+- Bring CLAUDE.md's rendering notes back in line with the code ([f9f2cc7](https://github.com/GMOD/JBrowseMSA/commit/f9f2cc7c9313b53b118a720d15710daf17c3b4fa))
+- A phylogeny-at-scale page, RSV-A at 1,840 tips ([6575106](https://github.com/GMOD/JBrowseMSA/commit/657510634dac5794b8db09a51f2766a96ee22103))
+- TRIM5 codon selection, from orthologs to a dN/dS track ([4c61a51](https://github.com/GMOD/JBrowseMSA/commit/4c61a515049a6ce077391a0af048d27982ef8dd5))
+- Three traps the figure specs keep hitting ([5243146](https://github.com/GMOD/JBrowseMSA/commit/5243146b2df7632d5bf40e1955e77c7193b366c9))
+- Point CLAUDE.md and the layers doc at the examples catalog ([803a7a5](https://github.com/GMOD/JBrowseMSA/commit/803a7a58babe09bf2576bb417d468cc397791534))
+- Absolute links between the tutorial pages ([3c625d8](https://github.com/GMOD/JBrowseMSA/commit/3c625d86b9aa52a8f54dfd84d072600db88d52de))
+- Regenerate the state model reference ([8fdc340](https://github.com/GMOD/JBrowseMSA/commit/8fdc3401c2478a056a083799080c335946e8c793))
+
+### Features
+
+- Arc track kind, and RNA base pairs drawn from SS_cons ([12cfca5](https://github.com/GMOD/JBrowseMSA/commit/12cfca5a52c808d179004e8dc9f66a356dff34f6))
+- A pseudoknot and a disulfide bond, drawn as arcs ([b30b362](https://github.com/GMOD/JBrowseMSA/commit/b30b3620e1bf499d4f2176d05f509882ff232545))
+- Arc tracks from the R widget ([c6e0fc3](https://github.com/GMOD/JBrowseMSA/commit/c6e0fc3ab59158f0fd9f0c48ec6465bd99f5747e))
+- A real contact map, Src autoinhibition ([ac39764](https://github.com/GMOD/JBrowseMSA/commit/ac39764fde4ae4e678beda636f858a432afff591))
+- MSAViewer props stay live after mount ([8fb1d67](https://github.com/GMOD/JBrowseMSA/commit/8fb1d6708671d94f858ecc5e0f10935ba7f081fd))
+- Where the disease variants are, from ClinVar ([a2d2aa4](https://github.com/GMOD/JBrowseMSA/commit/a2d2aa4953cd69aad92f577151e9f624f1014b59))
+- ResidueMappings, the alignment<->structure correspondence as data ([edaad06](https://github.com/GMOD/JBrowseMSA/commit/edaad0613b29d53bd0d2819af1054510743feba9))
+- Emit the SIFTS correspondence, not just what it derived ([049b2bf](https://github.com/GMOD/JBrowseMSA/commit/049b2bfde05b3948cd4fff052cfa0ccffaf3b45e))
+- A home page that reads as three steps, not eight equal cards ([0618470](https://github.com/GMOD/JBrowseMSA/commit/0618470680daa16ccbf9c82308796f1bf17d8ff4))
+- Draw every Stockholm #=GC line, and #=GR lines on request ([b3555ab](https://github.com/GMOD/JBrowseMSA/commit/b3555abb8f8ea11f598f0d8095fd8c2fef1f4c69))
+- Let a host answer "is this data in the link?" per view ([821a9ec](https://github.com/GMOD/JBrowseMSA/commit/821a9ec589b3fc5e76d3bf1c3c8857301408ef14))
+- A column position ruler and a branch-length scale bar ([5f68f72](https://github.com/GMOD/JBrowseMSA/commit/5f68f7292e082b9f1be2c3b23cea581adedb70f3))
+- Choose the tracks and the viewport for an SVG export ([1565a5c](https://github.com/GMOD/JBrowseMSA/commit/1565a5cba81305f66bca79eee6ceac308fd0c575))
+
+### Other Changes
+
+- Say when the data is not in the link, instead of losing it quietly (#113) ([d4580f0](https://github.com/GMOD/JBrowseMSA/commit/d4580f083cbd047b0558b43db973d4a9bdc89c3d))
+- Keep the R package's DESCRIPTION version with the rest ([06fb7b7](https://github.com/GMOD/JBrowseMSA/commit/06fb7b79933a9c1833c16a06f948c7099c064069))
+- Kinase-pocket data, build script and screenshot specs ([e483dda](https://github.com/GMOD/JBrowseMSA/commit/e483dda429dbf56e8f1a8966a6228f4955bb6fd4))
+
+### Performance Improvements
+
+- Skip the subtrees a block cannot see ([39835a9](https://github.com/GMOD/JBrowseMSA/commit/39835a955f97db4e117fe228bc91cdb586f018cc))
+- Cut svgcanvas to what the renderers draw, splice layers as strings ([3cd76cd](https://github.com/GMOD/JBrowseMSA/commit/3cd76cdc4a4587faff538043a9246de90c35271c))
+
+### Refactoring
+
+- Stop scanning and start pointing, for the two in-tab analyses (#115) ([a2f34f9](https://github.com/GMOD/JBrowseMSA/commit/a2f34f9a6d0475760951dd5c228fb67f6808208a))
+- What hosts can see, and what a zoom frame rebuilds ([a8769da](https://github.com/GMOD/JBrowseMSA/commit/a8769daa01b97610e4b65eb29a2c52c3cfde7b76))
+- The data is files, the story is written once ([d73de2c](https://github.com/GMOD/JBrowseMSA/commit/d73de2c16b3be4e63df64d647bb858ef41dde82d))
+
+### Styling
+
+- Oxfmt website/README.md so format:check passes ([b3f361b](https://github.com/GMOD/JBrowseMSA/commit/b3f361b53e2b275613ef9520b33190821964fd72))
+- Format, and keep the formatter off the generated changelog ([3115b53](https://github.com/GMOD/JBrowseMSA/commit/3115b5364d793420e0afccf73066d77359ab0441))
+- Format the kinase pocket tutorial ([761fd84](https://github.com/GMOD/JBrowseMSA/commit/761fd84c7ef570e56e5ebcc7c4ffa806dc250fbc))
+- Format the codon selection tutorial ([3339517](https://github.com/GMOD/JBrowseMSA/commit/33395176ce437b92b5ee6c4a520f597d6df78da5))
+
+### Tests
+
+- A Stockholm #=GR track stays hidden until toggled ([ed2152d](https://github.com/GMOD/JBrowseMSA/commit/ed2152da450f66fccbd0a3b40f8c6e733f879a50))
+
 ## [6.5.0](https://github.com/GMOD/JBrowseMSA/compare/v6.4.2...v6.5.0) (2026-09-05)
 
 ### Chores
