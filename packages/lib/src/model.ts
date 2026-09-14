@@ -131,7 +131,7 @@ function parseTreeText(text: string) {
 // Tracks that start hidden. The sequence logo answers a narrower question than
 // conservation does and costs three times the vertical space, so it waits to be
 // asked for.
-const defaultOffTracks = new Set(['sequence-logo'])
+const defaultOffTracks = new Set(['sequence-logo', 'position-ruler'])
 
 // base-pair arcs: one color for the nested helices, one for a pseudoknot, whose
 // whole point is that it crosses them
@@ -1533,6 +1533,17 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * pixels per unit of branch length in the current phylogram layout, and 0
+       * in cladogram mode, where the x-positions carry no length at all. The
+       * scale bar over the tree is drawn from it.
+       */
+      get pxPerBranchLength() {
+        const max = maxLength(this.root)
+        return this.showBranchLenEffective && max ? self.treeWidth / max : 0
+      },
+
+      /**
+       * #getter
        * max topological depth to a tip, used to scale cladogram x-positions
        */
       get maxDepthToLeaf() {
@@ -1852,6 +1863,13 @@ function stateModelFactory() {
             name: 'Sequence logo',
             kind: 'logo' as const,
             height: self.sequenceLogoTrackHeight,
+          },
+          // last, so it sits against the alignment it numbers
+          {
+            id: 'position-ruler',
+            name: 'Position',
+            kind: 'ruler' as const,
+            height: 20,
           },
         ].map(model => ({ model, ReactComponent: TrackBlocks }))
       },

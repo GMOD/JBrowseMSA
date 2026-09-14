@@ -8,7 +8,7 @@ export interface Accession {
 // which renderer draws a track's content. Every track kind draws into the same
 // per-column coordinate space, so the kind picks the draw function rather than
 // the geometry -- see drawTracks.ts, which dispatches on it.
-export type TrackKind = 'text' | 'bar' | 'logo' | 'arc'
+export type TrackKind = 'text' | 'bar' | 'logo' | 'arc' | 'ruler'
 
 export interface BasicTrackModel {
   id: string

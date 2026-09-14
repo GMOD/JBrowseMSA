@@ -153,6 +153,68 @@ export function drawTextTrackContent({
   }
 }
 
+// Column numbers every `step` columns, with a tick under each. The step is the
+// smallest 1/2/5 x 10^n that leaves room for a label, so a zoom changes how many
+// numbers appear rather than crowding them.
+export function rulerStep(colWidth: number, minPixels = 55) {
+  let step = 1
+  const mantissas = [1, 2, 5]
+  for (let i = 0; step * colWidth < minPixels; i++) {
+    step = mantissas[i % 3]! * 10 ** Math.floor(i / 3)
+  }
+  return step
+}
+
+const RULER_FONT_SIZE = 10
+const TICK_HEIGHT = 4
+
+export function drawColumnRuler({
+  ctx,
+  numColumns,
+  label,
+  textColor,
+  colWidth,
+  trackHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: RenderCtx
+  numColumns: number
+  label: (col: number) => string | undefined
+  textColor: string
+  colWidth: number
+  trackHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: blockSize,
+    colWidth,
+  })
+  const step = rulerStep(colWidth)
+  const end = Math.min(xEnd, numColumns)
+  setFontSize(ctx, RULER_FONT_SIZE)
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillStyle = textColor
+  ctx.strokeStyle = textColor
+  ctx.lineWidth = 1
+
+  for (let col = Math.ceil(xStart / step) * step; col < end; col += step) {
+    const text = label(col)
+    if (text === undefined) {
+      continue
+    }
+    const x = (col + 0.5) * colWidth
+    ctx.fillText(text, x, trackHeight - TICK_HEIGHT - 2)
+    ctx.beginPath()
+    ctx.moveTo(x, trackHeight - TICK_HEIGHT)
+    ctx.lineTo(x, trackHeight)
+    ctx.stroke()
+  }
+}
+
 // Cap height as a fraction of the font size. Every logo letter is scaled from
 // one reference font size to the height its frequency earns, and that scale is
 // only right if we know how tall the glyph actually draws. Measuring per letter
@@ -322,6 +384,27 @@ export function drawTrackBlock({
         colStats,
         colorScheme: modelColorScheme,
         maxBits: alphabetMaxBits,
+        textColor,
+        colWidth,
+        trackHeight,
+        offsetX,
+        blockSize: blockSizeX,
+      })
+      break
+    }
+    case 'ruler': {
+      const { relativeTo, numColumns } = model
+      drawColumnRuler({
+        ctx,
+        numColumns,
+        // numbered by the reference row's own residues when the alignment is
+        // drawn relative to one, which is what the rest of the view counts in
+        label: relativeTo
+          ? col => {
+              const pos = model.visibleColToSeqPosOneBased(relativeTo, col)
+              return pos === undefined ? undefined : `${pos}`
+            }
+          : col => `${col + 1}`,
         textColor,
         colWidth,
         trackHeight,

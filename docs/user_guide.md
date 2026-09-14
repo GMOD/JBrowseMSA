@@ -101,6 +101,11 @@ A collapsed subtree, drawn as a triangle labeled with its tip count (here 3).
 The rows beneath it are hidden and the gap-only columns they introduced are
 removed.
 
+With branch lengths on, a scale bar sits in the gutter above the tree: a round
+number of substitutions per site, drawn to the same scale as the branches. It
+disappears in cladogram mode, where the horizontal positions carry topology
+rather than length.
+
 The tree settings menu toggles branch-length rendering, right-aligned vs
 tree-adjacent labels, and clickable branch bubbles. **Advanced → Calculate
 neighbor joining tree (BLOSUM62)** builds a quick tree from an alignment that
@@ -261,6 +266,11 @@ closes it and shows its details.
   the non-gap residues, then the whole stack is scaled by the column's occupancy
   — a column that is mostly gaps stays short even when the few residues left in
   it agree.
+- **Position** — column numbers with a tick under each, at whatever spacing the
+  zoom leaves room for. Off by default. It counts alignment columns, unless the
+  view is drawn relative to a row (**Relative to** in a row's menu), in which
+  case it counts that row's residues and skips the columns where the row has a
+  gap.
 - **Secondary structure** and the other annotation rows a Stockholm file carries
   inline appear as text tracks, colored by the active scheme. Every `#=GC` line
   gets one — `SS_cons`, `seq_cons`, Rfam's `RF` and motif lines. Every `#=GR`

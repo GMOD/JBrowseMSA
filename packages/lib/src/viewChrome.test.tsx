@@ -10,6 +10,7 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, test } from 'vitest'
 
 import MSAView from './components/Loading.tsx'
+import { scaleBarLength } from './components/tree/scaleBar.ts'
 import MSAModelF from './model.ts'
 
 import type { MsaViewModel } from './model.ts'
@@ -45,7 +46,12 @@ beforeAll(() => {
 // tall and wide enough that both scrollbars are on screen
 const names = Array.from({ length: 20 }, (_, i) => `seq${i}`)
 const msa = names.map(name => `>${name}\n${'ACGT'.repeat(25)}`).join('\n')
-const tree = `(${names.map(n => `${n}:0.1`).join(',')});`
+// two clades rather than a flat rake, so the branch lengths make it a
+// phylogram (a rake carries its lengths on the tips alone, which the model
+// reads as a cladogram)
+const half = names.length / 2
+const clade = (part: string[]) => `(${part.map(n => `${n}:0.1`).join(',')}):0.2`
+const tree = `(${clade(names.slice(0, half))},${clade(names.slice(half))});`
 
 let container: HTMLDivElement
 let root: Root
@@ -150,4 +156,23 @@ test("dragging a data track's divider resizes that track alone", async () => {
     model.turnedOnTracks.find(t => t.model.id === 'dnds')!.model.height,
   ).toBe(before + 30)
   expect(model.conservationTrackHeight).toBe(conservation)
+})
+
+test('the tree gutter carries a scale bar, and the ruler track draws', async () => {
+  expect(model.pxPerBranchLength).toBeGreaterThan(0)
+  // the gutter above the tree: a path for the bar, and the round length beside
+  // it
+  const bar = container.querySelector('svg path')
+  expect(bar).toBeTruthy()
+  expect(container.textContent).toContain(
+    scaleBarLength(
+      model.pxPerBranchLength,
+      model.treeAreaWidth - model.marginLeft * 2,
+    )!.label,
+  )
+
+  act(() => {
+    model.toggleTrack('position-ruler')
+  })
+  expect(container.textContent).toContain('Position')
 })
