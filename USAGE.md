@@ -47,7 +47,7 @@ Props:
 | ------------------- | ------------------- | -------------------------------------------------------------------- |
 | `msa`               | `string`            | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                 |
 | `tree`              | `string`            | Newick tree text                                                     |
-| `gff`               | `string`            | InterProScan domain annotations (GFF3 text)                          |
+| `gff`               | `string`            | Annotations to overlay (GFF3 text)                                   |
 | `msaFilehandle`     | `FileLocation`      | Remote file location for alignment                                   |
 | `treeFilehandle`    | `FileLocation`      | Remote file location for tree                                        |
 | `gffFilehandle`     | `FileLocation`      | Remote file location for domain GFF                                  |
@@ -64,13 +64,16 @@ Props:
 | `highlightColumns`  | `number[]`          | Columns (0-based) under a persistent overlay                         |
 | `residueMappings`   | `ResidueMapping[]`  | Which residue of which structure each row's residues are             |
 
-`height`, `colorScheme`, `colWidth`, `rowHeight`, `relativeTo`, `drawTree` and
-`treeAreaWidth` stay live: change one and the viewer follows, so a host can put
-a control on it without remounting and re-fetching the alignment. Each follows
-only its own prop, so a change the reader makes inside the viewer — a scheme
-picked from the menu, a row dragged taller — is not undone by the host's next
-render. The data props are not among them: a new `msa`/`tree`/`gff` is a
-different alignment, which is a new model, which React spells `key`.
+Every prop above except `msa`, `tree`, `gff` and the three filehandles stays
+live: change one and the viewer follows, so a host can put a control on it
+without remounting and re-fetching the alignment. Each follows only its own
+prop, so a change the reader makes inside the viewer — a scheme picked from the
+menu, a row dragged taller — is not undone by the host's next render, and the
+data layers (`highlights`, `columnTracks`, `residueMappings`,
+`highlightColumns`) are compared by content, so passing a freshly computed array
+on every render costs nothing. The alignment props are the exception: a new
+`msa`/`tree`/`gff` is a different alignment, which is a new model, which React
+spells `key`.
 
 ### Data layers
 

@@ -140,15 +140,6 @@ IOptionalIType<ISimpleType<boolean>, [undefined]>
 drawMsaLetters: stripDefault(types.boolean, defaultDrawMsaLetters)
 ```
 
-#### property: featureFilters
-
-```js
-// type signature
-IOptionalIType<IMapType<ISimpleType<boolean>>, [undefined]>
-// code
-featureFilters: stripDefault(types.map(types.boolean), {})
-```
-
 #### property: gffFilehandle
 
 filehandle object for a GFF file of overlay annotations
@@ -367,6 +358,20 @@ IMaybe<any>
 treeMetadataFilehandle: types.maybe(FileLocation)
 ```
 
+#### property: turnedOffFeatures
+
+the user's explicit hide choices per annotation accession, keyed by accession
+with the value meaning "off", the same shape as `turnedOffTracks`. An accession
+the user has never touched is absent and drawn, so a file of two hundred domain
+types adds nothing to the shared URL until someone filters one out
+
+```js
+// type signature
+IOptionalIType<IMapType<ISimpleType<boolean>>, [undefined]>
+// code
+turnedOffFeatures: stripDefault(types.map(types.boolean), {})
+```
+
 #### property: turnedOffTracks
 
 the user's explicit show/hide choice per track id, keyed by id with the value
@@ -478,6 +483,20 @@ number
 highResScaleFactor: typeof window === 'undefined' ? 1 : window.devicePixelRatio
 ```
 
+#### volatile: hostCarriesData
+
+set by a host that restores the loaded documents by its own means -- a jbrowse
+session that holds them, a page that refetches them on load. `unshareableData`
+then reports nothing, since what it warns about is a link that opens empty, and
+under such a host the link does not
+
+```js
+// type signature
+false
+// code
+hostCarriesData: false
+```
+
 #### volatile: hoveredTreeNode
 
 the currently hovered tree node ID and its descendant leaf names
@@ -571,6 +590,19 @@ number
 mouseRow: undefined as number | undefined
 ```
 
+#### volatile: resetCount
+
+bumped by reset(). The React error boundary above the view keeps its caught
+error until it is remounted, so "Return to import form" did nothing after a
+render error until this became its key
+
+```js
+// type signature
+number
+// code
+resetCount: 0
+```
+
 #### volatile: resizeHandleWidth
 
 resize handle width between tree and msa area, px
@@ -628,6 +660,19 @@ number
 volatileWidth: undefined as number | undefined
 ```
 
+#### volatile: warnings
+
+load problems the view carried on through: an optional layer that did not
+arrive, an overlay that did not parse. `error` is the other kind -- it replaces
+the view, which is right for the alignment and wrong for a decorative file
+
+```js
+// type signature
+string[]
+// code
+warnings: [] as string[]
+```
+
 ### MsaView - Getters
 
 #### getter: actuallyShowDomains
@@ -667,6 +712,18 @@ y-axis ceiling of the sequence logo track.
 ```js
 // type
 number
+```
+
+#### getter: basePairTrackModels
+
+the consensus secondary structure as a track, when there is one. Its own getter
+so the object keeps its identity across a zoom: the canvas redraws on the track
+it is handed changing, and rebuilding these alongside everything else made every
+zoom frame redraw every track
+
+```js
+// type
+BasicTrack[]
 ```
 
 #### getter: blanks
@@ -770,6 +827,16 @@ Map<string, { values?: number[]; data?: string; arcs?: Arc[]; }>
 ```
 
 #### getter: columnTrackModels
+
+```js
+// type
+BasicTrack[]
+```
+
+#### getter: computedTrackModels
+
+the tracks computed from the alignment itself, which depend on their own heights
+and on the alphabet -- and on nothing zoom changes
 
 ```js
 // type
@@ -943,7 +1010,9 @@ any
 
 #### getter: maxBranchLength
 
-max branch length across the tree, used to scale phylogram x-positions
+x-position of the farthest tip in a phylogram, px. The layout scales the longest
+root-to-tip path onto treeWidth, so that is where it lands -- and 0 for a tree
+carrying no lengths at all, which draws as a cladogram instead
 
 ```js
 // type
@@ -994,7 +1063,7 @@ span each box is drawn at (so it matches the overlay across gaps)
 
 ```js
 // type
-any
+Annotation[]
 ```
 
 #### getter: mouseOverRowName
@@ -1013,7 +1082,12 @@ MSAParserType
 
 #### getter: msaAreaHeight
 
-widget width minus the tree area gives the space for the MSA
+the vertical space the alignment rows actually get: the widget height less
+everything stacked above and below them -- the header, the tracks, and the
+minimap when the columns overflow. Every consumer wants this same subtraction,
+so there is one of it: blocksY, maxScrollY, the vertical scrollbar and
+fitVertically all read it, and a second getter that forgot the tracks is what
+put the last rows out of reach.
 
 ```js
 // type
@@ -1124,7 +1198,22 @@ ResolvedHighlight[]
 HierarchyNode<any>
 ```
 
+#### getter: rootToTipLength
+
+branch-length extent of the displayed tree, root to farthest tip, in the tree's
+own units
+
+```js
+// type
+number
+```
+
 #### getter: rowMap
+
+every sequence the alignment holds, keyed by row name, whatever the tree
+currently shows. `rows` is the rows on screen; this is the rows that exist, and
+every lookup about a named row goes through it -- collapsing a clade hides rows,
+it does not delete their sequence
 
 ```js
 // type
@@ -1201,17 +1290,6 @@ Map<unknown, unknown>
 string
 ```
 
-#### getter: seqPosGlobalColIndex
-
-per-row index of the global column holding each ungapped sequence position, so
-seqPos -> column is a lookup rather than a scan of the row. The domain overlay
-resolves thousands of these per redraw.
-
-```js
-// type
-Map<unknown, unknown>
-```
-
 #### getter: sequenceType
 
 Detects sequence type based on letters present in the alignment. Returns 'dna',
@@ -1282,13 +1360,6 @@ any
 number
 ```
 
-#### getter: tracks
-
-```js
-// type
-BasicTrack[]
-```
-
 #### getter: tree
 
 ```js
@@ -1336,6 +1407,10 @@ address bar while this is non-empty. A document fetched from a URL never appears
 here whatever its size: the snapshot keeps the filehandle and refetches through
 it.
 
+Nothing is unshareable when the host says it carries the data itself
+(`setHostCarriesData`) -- inside a session that reloads these documents from
+somewhere of its own, the warning is simply wrong.
+
 ```js
 // type
 UnshareableData[]
@@ -1371,16 +1446,6 @@ categorical types ordered by sequence position
 any
 ```
 
-#### getter: visibleMsaHeight
-
-height of the alignment viewport, px. The same subtraction as msaAreaHeight,
-which is defined later in the views chain
-
-```js
-// type
-number
-```
-
 #### getter: width
 
 ```js
@@ -1389,15 +1454,6 @@ number
 ```
 
 ### MsaView - Methods
-
-#### method: extraViewMenuItems
-
-unused here, but can be used by derived classes to add extra items
-
-```js
-// type signature
-extraViewMenuItems: () => any[]
-```
 
 #### method: getRowData
 
@@ -1428,9 +1484,26 @@ lookup is ambiguous and gets nothing.
 rowResidue: (structureId: string, position: number, asymId?: string) => RowResidue
 ```
 
+#### method: seqPosIndex
+
+index of the global column holding each ungapped sequence position of a row, so
+seqPos -> column is a lookup rather than a scan. The domain overlay resolves
+thousands of these per redraw.
+
+Built per row, on the row asked for: the first lookup used to index every row in
+the alignment. The cache is keyed on the parse the rows came from, so a new
+alignment brings a new one.
+
+```js
+// type signature
+seqPosIndex: (rowName: string) => Int32Array<ArrayBufferLike>
+```
+
 #### method: seqPosToGlobalCol
 
-Convert a sequence position (ungapped) to a global column index.
+Convert a sequence position (ungapped) to a global column index. Returns
+undefined for a row the alignment does not have -- answering anyway is how a
+mistyped or stale row name came to highlight column 0.
 
 ```js
 // type signature
@@ -1466,6 +1539,17 @@ the column helpers above take 0-based ones.
 structureResidue: (rowName: string, seqPos: number, structureId?: string) => StructureResidue
 ```
 
+#### method: visibleColToGlobalCol
+
+Convert a visible column index (what a mouse handler reports) back to a column
+of the full alignment. Hidden columns shift everything to their right, so a host
+that holds per-column data of its own has to make this hop before indexing it.
+
+```js
+// type signature
+visibleColToGlobalCol: (visibleCol: number) => number
+```
+
 #### method: visibleColToRowLetter
 
 Return a row-specific letter at a visible column, or undefined if gap.
@@ -1480,10 +1564,10 @@ visibleColToRowLetter: (rowName: string, visibleCol: number) => any
 Convert a visible column to a row-specific sequence position (0-based). Returns
 undefined if the position is a gap in the sequence.
 
-CROSS-REPO CONTRACT: this and the sibling coordinate converters
-(seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) are used by
-jbrowse-plugin-protein3d to translate between alignment columns and
-structure/sequence residue positions across gaps. Keep them stable.
+PUBLIC API: this and the sibling coordinate converters (visibleColToGlobalCol,
+seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) are how a host
+translates between alignment columns and a row's residue positions across gaps.
+Keep them stable.
 
 ```js
 // type signature
@@ -1501,6 +1585,16 @@ visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => any
 ```
 
 ### MsaView - Actions
+
+#### action: addWarning
+
+report something the view survived: a layer that failed to load, a file that
+failed to parse
+
+```js
+// type signature
+addWarning: (warning: string) => void
+```
 
 #### action: applyHighlight
 
@@ -1532,6 +1626,13 @@ drop what `owner` was showing, leaving every other owner's in place
 ```js
 // type signature
 clearHighlight: (owner: string) => void
+```
+
+#### action: clearWarnings
+
+```js
+// type signature
+clearWarnings: () => void
 ```
 
 #### action: doScrollX
@@ -1586,6 +1687,18 @@ fitHorizontally: () => void
 fitVertically: () => void
 ```
 
+#### action: replaceTree
+
+swap in a different tree over the same alignment. Node ids are derived from the
+path (node-0-0-1), so a `collapsed` or `showOnly` id held over from the old tree
+matches a real node in the new one and folds whatever happens to sit there --
+the ids go with the tree they name.
+
+```js
+// type signature
+replaceTree: (newick: string) => void
+```
+
 #### action: reset
 
 Return to the import form: every property off `preservedOnReset` (data,
@@ -1615,9 +1728,13 @@ setAllowedGappyness: (arg: number) => void
 
 #### action: setAnnotations
 
-Set the overlay annotations and reveal the overlay in a single step (an empty
-list clears both). Every source funnels through here after its own adapter has
-flattened it: InterProScan, GFF, user uploads, NCBI CDD.
+Set the overlay annotations (an empty list clears them). Every source funnels
+through here after its own adapter has flattened it: InterProScan, GFF, user
+uploads, NCBI CDD.
+
+It does not touch `showDomains`. Loading used to force the overlay on, and since
+a restored snapshot loads its GFF again on the way in, a link shared with the
+overlay hidden reopened with it drawn.
 
 ```js
 // type signature
@@ -1655,6 +1772,11 @@ setConservationTrackHeight: (arg: number) => void
 ```
 
 #### action: setCurrentAlignment
+
+switch to another alignment of a multi-alignment file (Stockholm). The new
+alignment has its own rows and its own tree, so everything naming the old one's
+-- the collapsed node ids, the subtree in focus, the reference row, the scroll
+position -- goes with it
 
 ```js
 // type signature
@@ -1696,6 +1818,16 @@ set error state
 ```js
 // type signature
 setError: (error?: unknown) => void
+```
+
+#### action: setFilter
+
+draw this annotation type, or stop drawing it. Only the "stop" is recorded --
+see `turnedOffFeatures`
+
+```js
+// type signature
+setFilter: (accession: string, shown: boolean) => void
 ```
 
 #### action: setGFF
@@ -1747,9 +1879,9 @@ setHideGaps: (arg: boolean) => void
 
 set highlighted columns
 
-CROSS-REPO CONTRACT: called by jbrowse-plugin-msaview (afterCreateAutoruns.ts)
-to highlight alignment columns. It has no in-repo caller, so do not flag it as
-dead code — it is public API.
+PUBLIC API: jbrowse-plugin-msaview calls this from its afterCreateAutoruns to
+highlight alignment columns, and MSAViewer passes its `highlightColumns` prop
+through it. Not dead code.
 
 ```js
 // type signature
@@ -1771,6 +1903,16 @@ the window moves between monitors or the browser zooms
 ```js
 // type signature
 setHighResScaleFactor: (arg: number) => void
+```
+
+#### action: setHostCarriesData
+
+declare that this host restores the loaded documents itself, which takes down
+the "Not in the link" warning. See `hostCarriesData`
+
+```js
+// type signature
+setHostCarriesData: (arg: boolean) => void
 ```
 
 #### action: setHoveredTreeNode
@@ -1809,9 +1951,9 @@ setMouseClickPos: (col?: number, row?: number) => void
 
 set mouse position (row, column) in the MSA
 
-CROSS-REPO CONTRACT: jbrowse-plugin-protein3d calls this (and reads the
-`mouseCol` volatile) to sync MSA<->3D-structure hover. Keep the name and
-signature stable; see that repo's ProteinToMsaHoverSync.tsx.
+PUBLIC API: a host drives this (and reads the `mouseCol` volatile) to sync the
+alignment's hover with a view of its own -- a genome view, a 3D structure. Keep
+the name and signature stable.
 
 ```js
 // type signature
@@ -1830,6 +1972,15 @@ setMSA: (result: string) => void
 ```js
 // type signature
 setMSAFilehandle: (msaFilehandle?: FileLocationType) => void
+```
+
+#### action: setResidueMappings
+
+replace the alignment<->structure correspondence (see docs/layers.md)
+
+```js
+// type signature
+setResidueMappings: (mappings: ResidueMapping[]) => void
 ```
 
 #### action: setRowHeight
