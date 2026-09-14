@@ -1,7 +1,7 @@
 // A file opened from disk or pasted in becomes inline text, and the snapshot
 // drops an inline document past maxInlineSnapshotBytes. The view keeps working,
 // so the only way anyone learns the link is empty is if the model says so.
-import { getSnapshot } from '@jbrowse/mobx-state-tree'
+import { getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { expect, test } from 'vitest'
 
 import { maxInlineSnapshotBytes } from './constants.ts'
@@ -125,4 +125,33 @@ test('a host that restores the data itself silences the warning', () => {
 
   model.setHostCarriesData(true)
   expect(model.unshareableData).toEqual([])
+})
+
+test('a host can override the question per view, not just answer it once', () => {
+  // jbrowse-plugin-msaview has two shapes: a view opened at an indexed
+  // location refetches from a URL the session holds, while one backed by a
+  // browser-local data store really is absent from a pasted link. The answer
+  // is a getter so a composed model can decide per view.
+  const Composed = stateModelFactory()
+    .props({ refetchable: types.optional(types.boolean, false) })
+    .views(self => ({
+      get hostRestoresData() {
+        return self.refetchable
+      },
+    }))
+
+  const refetchable = Composed.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: bigMsa },
+    refetchable: true,
+  })
+  expect(refetchable.unshareableData).toEqual([])
+
+  const local = Composed.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: bigMsa },
+  })
+  expect(local.unshareableData.map(d => d.what)).toEqual(['alignment'])
 })

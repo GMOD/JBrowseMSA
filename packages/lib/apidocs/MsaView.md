@@ -932,6 +932,23 @@ mouse move while the highlight itself rarely changes.
 ;[]
 ```
 
+#### getter: hostRestoresData
+
+whether this host brings the loaded documents back by means the snapshot cannot
+see, which is what decides whether `unshareableData` has anything to warn about.
+
+A simple host flips the `hostCarriesData` volatile. A host whose answer depends
+on how the view was opened overrides this getter in a `.views` block of its own
+composed model -- jbrowse-plugin-msaview's indexed-location views refetch from a
+URL the session holds, while its data-store views really are absent from a link
+someone pastes elsewhere. `unshareableData` reads it off `self`, so an override
+wins.
+
+```js
+// type
+boolean
+```
+
 #### getter: hoveredInsertion
 
 Returns insertion info if mouse is hovering over an insertion indicator
@@ -1407,9 +1424,9 @@ address bar while this is non-empty. A document fetched from a URL never appears
 here whatever its size: the snapshot keeps the filehandle and refetches through
 it.
 
-Nothing is unshareable when the host says it carries the data itself
-(`setHostCarriesData`) -- inside a session that reloads these documents from
-somewhere of its own, the warning is simply wrong.
+Nothing is unshareable when the host restores the data by its own means (see
+`hostRestoresData`) -- inside a session that reloads these documents from
+somewhere the snapshot does not show, the warning is simply wrong.
 
 ```js
 // type
