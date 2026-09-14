@@ -1,23 +1,21 @@
 # F12 cetacean pseudogenization example (DNA + gene structure)
 
-Builds the flagship **DNA** gallery example: the coagulation factor XII
-(**F12**) coding alignment across mammals, where the gene is intact in land
-mammals — and in the **manatee**, a fully aquatic sirenian — but **disabled in
-cetaceans** (whales, dolphins, porpoises) by premature stop codons and a shared
-single-base frameshift in exon 3. It is one of the genes lost in the cetacean
-transition to fully aquatic life (Huelsmann et al. 2019, _Sci. Adv._). The
-manatee is the key control: fully aquatic yet F12-intact, so the loss tracks the
-cetacean lineage, not aquatic life in general.
+Builds the **DNA** gallery example: the coagulation factor XII (**F12**) coding
+alignment across mammals. The gene is intact in land mammals and in the
+**manatee**, a fully aquatic sirenian, and **disabled in cetaceans** (whales,
+dolphins, porpoises) by premature stop codons and a shared single-base
+frameshift in exon 3. F12 is one of the genes lost in the cetacean transition to
+fully aquatic life (Huelsmann et al. 2019, _Sci. Adv._). The manatee is the
+control: fully aquatic and F12-intact, so the loss tracks the cetacean lineage,
+not aquatic life in general.
 
-The story only exists at the nucleotide level (premature stops, a frameshift
-indel), so this is a DNA example, and its **14-exon gene structure is overlaid**
-on the alignment the same way InterProScan protein domains are — each exon the
-same color across every species (see `exon_gff.py` /
-`react-msaview-cli genestructure`).
+The premature stops and the frameshift indel are visible only at the nucleotide
+level, so this is a DNA example. Its **14-exon gene structure** is overlaid on
+the alignment the way protein domains are, with each exon the same color across
+every species (see `exon_gff.py` / `react-msaview-cli genestructure`).
 
-Everything is built **reproducibly from a single public source** (UCSC's cactus
-241-way alignment), so the provenance and method are visible rather than pasted
-in as an opaque blob — same philosophy as `scripts/examples-gen/`.
+Every file here is built from a single public source, UCSC's cactus 241-way
+alignment.
 
 ## Source
 
@@ -31,8 +29,8 @@ in as an opaque blob — same philosophy as `scripts/examples-gen/`.
 
 ## Pipeline
 
-Prerequisites: `bigBedToBed` (UCSC kent tools — note this build talks **http**
-only, no https) and `clustalw` on PATH.
+Prerequisites: `bigBedToBed` (UCSC kent tools; this build supports **http**
+only, not https) and `clustalw` on PATH.
 
 ```sh
 # 1. stitch the 14 coding-exon windows into a frame-correct CDS alignment, reverse-
@@ -55,7 +53,8 @@ clustalw -INFILE=f12_cds.afa -TREE -TYPE=DNA -OUTPUTTREE=phylip   # -> f12_cds.p
 python3 scripts/f12-cetacean/exon_gff.py f12-cetacean-cds.stock > f12-cetacean-exons.gff
 #    The general, RefSeq-fetching equivalent (any alignment + transcript) is:
 react-msaview-cli genestructure f12-cetacean-cds.stock --gene F12 --ref human -o f12-cetacean-exons.gff
-#    Both emit byte-identical features; the f12ExonsGFF constant is the latter's output.
+#    Both emit byte-identical features; the committed
+#    packages/examples/data/f12-cetacean-exons.gff is the latter's output.
 ```
 
 `stitch_maf.py CHROM START END OUT.afa` is the lower-level helper: it stitches
@@ -70,7 +69,7 @@ the reading frame is preserved across the join.
 | Lineage                                            | Premature stops in CDS | F12      |
 | -------------------------------------------------- | ---------------------- | -------- |
 | minke whale, dolphin, beluga, porpoise (cetaceans) | 3–4 each + frameshifts | disabled |
-| manatee (fully aquatic sirenian — the key control) | 0                      | intact   |
+| manatee (fully aquatic sirenian, the control)      | 0                      | intact   |
 | hippopotamus (semi-aquatic, sister to cetaceans)   | 0                      | intact   |
 | cow, dog, horse, mouse, elephant, … (terrestrial)  | 0                      | intact   |
 

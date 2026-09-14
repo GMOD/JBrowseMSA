@@ -6,8 +6,8 @@
 // file stays a few MB instead of the ~28 MB the whole genome would be at this
 // row count; the subsampled one (every 10th tip, pruned to match) carries the
 // whole genome, since the later figures scroll across it. Clade highlights are
-// read straight from the subsampled file's own headers, so a regenerated
-// dataset can't drift from what the spec draws.
+// read from the subsampled file's own headers, so a regenerated dataset changes
+// what the spec draws.
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -40,9 +40,8 @@ const L_COLDSPOT0 = 10131
 const COL_WIDTH_BASE = 14
 
 // The clade labels a tip carries are baked into its own row name (see
-// label_for in the build script): 'accession|clade|country|year'. Reading
-// them back out of the hosted file, rather than hardcoding the list here,
-// means a regenerated dataset can't quietly drift from what this draws.
+// label_for in the build script): 'accession|clade|country|year'. The spec
+// reads them from the hosted file, so the list follows a regenerated dataset.
 function topClades(n) {
   const text = fs.readFileSync(path.join(dataDir, 'rsv-sample.aln'), 'utf8')
   const byClade = new Map()
@@ -80,8 +79,7 @@ export const specs = [
   {
     name: 'scale-whole-tree',
     // Every one of the 1840 tips, one pixel of row height, the G-gene slice
-    // as the alignment. No labels draw below minLetterRowHeight (8), so this
-    // is what the dataset looks like before anything below narrows it down.
+    // as the alignment. No labels draw below minLetterRowHeight (8).
     viewportWidth: 1000,
     viewportHeight: 2000,
     url: fileSnap({
@@ -98,11 +96,11 @@ export const specs = [
   {
     name: 'scale-collapsed',
     // The same 1840-tip dataset, scrolled to the 90-row window that holds
-    // node-0-0-1 (rows 1791-1839 in the tree's own sort order -- ladderized by
-    // clade size, so this small clade sorts to the bottom, not row 0) at a row
-    // height that draws labels. Every one of its 49 tips calls itself A.1, and
-    // every one was sampled in the USA, so collapsing it is a real
-    // epidemiological unit disappearing into one row, not an arbitrary cut.
+    // node-0-0-1 (rows 1791-1839 in the tree's own sort order, which
+    // ladderizes by clade size and so sorts this small clade to the bottom) at
+    // a row height that draws labels. All 49 of its tips carry the label A.1
+    // and were sampled in the USA, so the collapsed row is a single-country,
+    // single-clade group.
     viewportWidth: 1100,
     viewportHeight: 400,
     url: fileSnap({
@@ -148,8 +146,8 @@ export const specs = [
   {
     name: 'scale-clade-groups',
     // All 184 rows at once, tinted in tree order by the clade each tip
-    // carries in its own name -- the six largest clades in the subsample,
-    // colored and labeled through `highlights`, no row reordering. The
+    // carries in its own name: the six largest clades in the subsample,
+    // colored and labeled through `highlights`, with no row reordering. The
     // alignment itself is the full 15225nt genome at a small colWidth, wider
     // than the viewport, so the minimap bar draws across the top on its own.
     viewportWidth: 1450,

@@ -13,11 +13,10 @@ const FILES = {
 
 // landmark columns, read off ABL1 in the hosted alignment: catalytic lysine
 // K271, gatekeeper T315, the DFG motif (D381-F382-G383). See "Read off the
-// pocket" in the tutorial for how these were found -- there they are 1-based
-// (col 30, 77, 141-143), matching highlights/GFF convention everywhere else
-// in this viewer; annotation anchors here are the odd one out (0-based, since
-// `col * colWidth` is a raw pixel offset), so every constant below is that
-// 1-based column minus one.
+// pocket" in the tutorial for how these were found. There they are 1-based
+// (col 30, 77, 141-143), the highlights/GFF convention used elsewhere in this
+// viewer. Annotation anchors are 0-based, since `col * colWidth` is a raw pixel
+// offset, so every constant below is that 1-based column minus one.
 const CAT_LYS = 29
 const GATEKEEPER = 76
 const DFG_START = 140
@@ -30,8 +29,7 @@ export const specs = [
     // whole family, whole domain: colWidth/rowHeight small enough that all
     // 474 rows and all 262 columns fit in one frame, so the shape of the
     // tree (kinase groups clustering into bands) and the shared Pkinase
-    // block read at a glance. No labels at this scale -- the point is the
-    // silhouette, not any one row.
+    // block are visible. No labels draw at this scale.
     viewportWidth: 1400,
     viewportHeight: 1040,
     url: fileSnap({
@@ -48,12 +46,12 @@ export const specs = [
   },
   {
     name: 'kinase-pocket-logo',
-    // same 474 rows, now with the sequence logo on (turnedOffTracks holds
-    // the user's explicit choice, so `false` switches a track that ships
-    // hidden by default back on) and the pocket's three landmark columns
+    // same 474 rows, now with the sequence logo on (a turnedOffTracks value
+    // of false turns on a track that is hidden by default) and the pocket's
+    // three landmark columns
     // plus one non-conserved control column called out. The logo and the
-    // conservation track both read across the full 474 rows regardless of
-    // how few pixels each row gets on screen.
+    // conservation track both summarize all 474 rows regardless of how few
+    // pixels each row gets on screen.
     viewportWidth: 1400,
     viewportHeight: 560,
     url: fileSnap({
@@ -66,7 +64,7 @@ export const specs = [
       turnedOffTracks: { 'sequence-logo': false },
       // persisted bands under the four called-out columns, in 1-based
       // alignment coordinates (unlike the annotation anchors below, which
-      // are 0-based pixel offsets) -- so the live link shows the same four
+      // are 0-based pixel offsets), so the live link shows the same four
       // columns the screenshot's callouts point at
       highlights: [
         {
@@ -162,13 +160,13 @@ export const specs = [
       colWidth: 34,
       rowHeight: 46,
       colorSchemeName: 'clustalx_protein_dynamic',
-      // both tracks read over all 474 rows regardless of which two are
-      // visible here, so they add height without adding information -- off
+      // both tracks summarize all 474 rows, not the two visible here, so
+      // they are off
       turnedOffTracks: { conservation: true, 'property-conservation': true },
       scrollX: -(GATEKEEPER - 8) * 34,
       // ABL1/ABL2 are rows 101/102 of the 474-leaf FastTree order (found by
-      // reading window.MSAVIEW_MODEL.leaves in a real render -- the app's
-      // tip order is not the input file's or a plain alphabetical one)
+      // reading window.MSAVIEW_MODEL.leaves in a render; the app's tip order
+      // is neither the input file's nor alphabetical)
       scrollY: -101 * 46,
       ...FILES,
     }),

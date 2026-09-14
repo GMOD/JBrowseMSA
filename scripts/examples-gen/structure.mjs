@@ -1,12 +1,8 @@
 /**
- * The structure half of the example pipeline: mmCIF coordinates from RCSB, the
- * SIFTS residue mapping from PDBe, and the checks that keep three coordinate
- * systems -- the structure's, UniProt's and the alignment row's -- from being
- * confused for each other.
- *
- * contacts.mjs (Src), hemoglobin.mjs (sickle-cell) and ace2Interface.mjs (the
- * spike contacts) all derive different things from the same three steps, so the
- * steps live here and each script keeps only what is specific to it.
+ * mmCIF coordinates from RCSB, the SIFTS residue mapping from PDBe, and the
+ * checks that the structure's, UniProt's and the alignment row's numbering
+ * agree. Shared by contacts.mjs (Src), hemoglobin.mjs (sickle-cell) and
+ * ace2Interface.mjs (the spike contacts).
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -24,14 +20,14 @@ export const THREE_TO_ONE = {
   ALA: 'A', ARG: 'R', ASN: 'N', ASP: 'D', CYS: 'C', GLN: 'Q', GLU: 'E',
   GLY: 'G', HIS: 'H', ILE: 'I', LEU: 'L', LYS: 'K', MET: 'M', PHE: 'F',
   PRO: 'P', SER: 'S', THR: 'T', TRP: 'W', TYR: 'Y', VAL: 'V',
-  // modified residues that are still the residue they were made from, which is
-  // how an alignment row spells them
+  // modified residues, spelled as the residue they were made from, as an
+  // alignment row spells them
   PTR: 'Y', SEP: 'S', TPO: 'T', MSE: 'M',
 }
 
 // mmCIF values are whitespace-separated, except that a value containing spaces
-// is single-quoted. atom_site rarely needs it, but a naive split silently
-// shifts every later column of that row when it does.
+// is single-quoted. atom_site rarely has one, but a whitespace split would shift
+// every later column of that row.
 function tokenize(line) {
   return [...line.matchAll(/'([^']*)'|"([^"]*)"|(\S+)/g)].map(
     m => m[1] ?? m[2] ?? m[3],
@@ -89,8 +85,8 @@ const usable = (atom, chain) =>
   (!atom.pdbx_PDB_model_num || atom.pdbx_PDB_model_num === '1')
 
 // One point per residue: C-beta, or C-alpha for glycine, which has none. HETATM
-// rows count when they carry a label_seq_id -- a modified residue in the chain
-// (2SRC's phospho-tyrosine 527 is exactly that).
+// rows count when they carry a label_seq_id, as a modified residue in the chain
+// does (2SRC's phospho-tyrosine 527).
 export function residuePoints(atoms, chain) {
   const points = new Map()
   for (const a of atoms) {
@@ -110,10 +106,9 @@ export function residuePoints(atoms, chain) {
   return points
 }
 
-// Every atom of every residue of a chain, which is what an interface needs: two
-// side chains touch through whichever atoms happen to face each other, and a
-// C-beta cutoff wide enough to catch that also catches residues that only pass
-// nearby.
+// Every atom of every residue of a chain. Two side chains touch through
+// whichever atoms face each other, and a C-beta cutoff wide enough to catch
+// that also catches residues that only pass nearby.
 export function residueAtoms(atoms, chain) {
   const residues = new Map()
   for (const a of atoms) {
@@ -135,9 +130,8 @@ export function residueAtoms(atoms, chain) {
 }
 
 // Every residue the structure resolved, by label_seq_id. A residue can have a
-// backbone and no side chain, so this is wider than the C-beta points -- and it
-// is the set that answers "was this observed", which a mapping has to state
-// rather than imply.
+// backbone and no side chain, so this set is wider than the C-beta points; the
+// mapping's `unobserved` ranges come from it.
 export function observedResidues(atoms, chain) {
   const observed = new Set()
   for (const a of atoms) {
@@ -169,11 +163,8 @@ export function sequenceToUniprot(mappings, chain) {
 }
 
 /**
- * The SIFTS correspondence written down as a `residueMappings` entry (see
- * docs/layers.md). It is the data every derivation here goes through; keeping
- * only the derived arcs or highlights would throw away the part the next
- * consumer needs, and re-deriving it from a live SIFTS call at view time is
- * what the layer exists to avoid.
+ * The SIFTS correspondence as a `residueMappings` entry (see docs/layers.md),
+ * so a consumer can look up structure residues without a live SIFTS call.
  */
 export function residueMapping({
   mappings,
@@ -195,9 +186,8 @@ export function residueMapping({
     }))
     .sort((a, b) => a.rowStart - b.rowStart)
 
-  // positions the entity declares and did not resolve, as ranges. Only within
-  // the mapped segments: outside them there is nothing to ask about, since a
-  // lookup that lands there is unmapped before observation is even a question.
+  // positions the entity declares and did not resolve, as ranges, within the
+  // mapped segments only; a position outside them is already unmapped
   const unobserved = []
   for (const segment of segments) {
     for (let pos = segment.structStart; pos <= segment.structEnd; pos++) {
@@ -253,13 +243,11 @@ export function readRow(file, row) {
 }
 
 /**
- * Three coordinate systems have to agree for a structure-derived layer to land
- * where it came from: the structure's, UniProt's, and the alignment row's.
- * SIFTS settles the first two. The third is an assumption -- that this row's
- * residue n IS UniProt's residue n -- which holds for a full-length sequence
- * and fails silently for a fragment row, the `/27-137` case a domain alignment
- * is full of. It fails in the direction that looks like it worked, so check it
- * against what the structure actually contains rather than trusting it.
+ * Checks that the row's residue n is UniProt's residue n, by comparing the row
+ * against the residues the structure contains. SIFTS relates structure and
+ * UniProt numbering; the row assumption holds for a full-length sequence and
+ * fails for a fragment row such as a domain alignment's `/27-137`, where every
+ * placement would still land on some residue with no error.
  */
 export function checkRowNumbering({ points, toUniprot, seq, row, pdb }) {
   let checked = 0

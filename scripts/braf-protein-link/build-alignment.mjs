@@ -2,7 +2,7 @@
 // the RAF-family sequences from UniProt by accession and aligns them with
 // ClustalW. This is the data the BRAF V600E genome-browser example aligns; the
 // link itself is built by generate.mjs, which reads braf.aln to locate the V600
-// column (so the two stay in sync — no hand-maintained column index).
+// column, so no column index is maintained by hand.
 //
 // Usage:  node scripts/braf-protein-link/build-alignment.mjs
 // Requires: clustalw on PATH, and network access to rest.uniprot.org.

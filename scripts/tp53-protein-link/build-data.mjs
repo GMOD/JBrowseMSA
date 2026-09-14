@@ -1,7 +1,7 @@
 // Regenerates the TP53 example data under packages/app/public/data/:
-//   tp53-p53-orthologs.fa  — p53 protein alignment across 13 vertebrates
-//   tp53-p53.nh            — its ClustalW guide tree
-//   tp53-clinvar-pathogenic.vcf.gz(.tbi) — ClinVar pathogenic/likely-pathogenic
+//   tp53-p53-orthologs.fa  p53 protein alignment across 13 vertebrates
+//   tp53-p53.nh            its ClustalW guide tree
+//   tp53-clinvar-pathogenic.vcf.gz(.tbi)  ClinVar pathogenic/likely-pathogenic
 //                            variants across the TP53 locus
 //
 // This is the data the BRAF/SRC-style protein<->genome link uses (built by
@@ -84,7 +84,7 @@ writeFileSync(
 
 // ClinVar: keep the VCF header + only variants whose primary germline
 // classification is Pathogenic or Likely_pathogenic (drops Benign / Uncertain /
-// Conflicting), so the genome track shows the disease-variant pileup.
+// Conflicting), so the genome track shows only the disease variants.
 const vcf = execFileSync('tabix', ['-h', CLINVAR, REGION], {
   encoding: 'utf8',
   maxBuffer: 1 << 28,

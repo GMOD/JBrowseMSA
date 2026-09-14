@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Project F12's coding-exon boundaries onto every row of the CDS alignment and
 write a gene-structure GFF that react-msaview overlays on the alignment (same
-mechanism as an InterProScan domain GFF). Every species' Nth exon is named
-`exon-N`, so the overlay colors a given exon identically across all species and
-the exon architecture reads straight down the alignment.
+mechanism as a domain GFF). Every species' Nth exon is named `exon-N`, so the
+overlay colors a given exon identically across all species.
 
 Reference-projection method (this is what `react-msaview-cli genestructure`
 generalizes to any alignment + RefSeq transcript):
@@ -21,7 +20,7 @@ import sys
 REF = "human"
 
 # F12 NM_000505.4, hg38 chr5, minus strand. Coding-exon segments (exon n CDS),
-# genomic-ascending — identical to the CDS list in cds_pipeline.py.
+# genomic-ascending, identical to the CDS list in cds_pipeline.py.
 CDS = [
     (177402291, 177402459), (177402549, 177402698), (177403253, 177403397),
     (177403480, 177403617), (177403858, 177404090), (177404195, 177404413),

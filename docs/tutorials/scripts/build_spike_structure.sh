@@ -21,8 +21,8 @@ EFETCH=https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi
 
 # One row per virus: the NCBI protein the alignment uses, the label the viewer
 # draws, and the UniProtKB entry for the same protein when there is one. The
-# third column is what InterPro's precomputed matches are keyed by; a `-` means
-# nobody has deposited this isolate's spike in UniProtKB.
+# third column keys InterPro's precomputed matches; a `-` means UniProtKB has no
+# entry for this isolate's spike.
 if [ ! -f "$ROWS" ]; then
   echo "writing $ROWS (spike glycoprotein across coronaviruses)"
   cat > "$ROWS" <<'EOF'
@@ -104,8 +104,8 @@ rm -f "$OUT/spike-wrapped.afa"
 # 4. domains, from InterPro's precomputed matches. Those are keyed by UniProtKB
 #    sequence, and the alignment rows are NCBI records, so a row only gets
 #    domains when the two records are the same protein. A length difference
-#    means an indel between them, which shifts every boundary after it, so the
-#    check is the gate rather than a warning.
+#    means an indel between them, which shifts every boundary after it, so a
+#    mismatch drops the row's domains.
 python3 - "$ROWS" "$OUT/spike.fasta" "$OUT/spike-uniprot.tsv" <<'PY'
 import sys
 import urllib.request
@@ -150,8 +150,7 @@ $CLI interpro "$OUT/spike-uniprot.tsv" -o "$OUT/spike-domains.gff"
 
 # 5. the layers: UniProt's feature table as labeled highlights, and SIFTS plus
 #    PDBe's polymer coverage as the row-to-structure correspondence. Both are
-#    lookups against one accession and one entry, and both arrive as data the
-#    viewer draws rather than as anything it computes.
+#    lookups against one accession and one entry, written as snapshot data.
 python3 - "$OUT/spike.fasta" "$PDB" "$CHAIN" "$OUT/spike-layers.json" <<'PY'
 import datetime
 import json
@@ -183,8 +182,8 @@ if entry['sequence']['value'] != row:
         f'{ROW} is not {ACC}: every position below would be off by an unknown amount'
     )
 
-# UniProt regions, in the row's own residue coordinates, which is what a
-# highlight with a `row` expects
+# UniProt regions, in the row's own residue coordinates, as a highlight with a
+# `row` expects
 wanted = {
     'Receptor-binding domain (RBD)': 'RBD',
     'Receptor-binding motif; binding to human ACE2': 'RBM',
@@ -212,7 +211,7 @@ highlights.sort(key=lambda h: h['start'])
 for h in highlights:
     print(f'  {h["label"]:16s} {h["start"]}-{h["end"]}')
 
-# SIFTS: the authority for how this entry numbers its residues against UniProt
+# SIFTS: how this entry numbers its residues against UniProt
 sifts = get(f'https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/{pdb}')
 mappings = sifts[pdb]['UniProt'][ACC]['mappings']
 segments = [
@@ -232,9 +231,8 @@ for s in segments:
         f' (offset {s["structStart"] - s["rowStart"]})'
     )
 
-# what the entity actually is, which is where the offset comes from: the
-# deposited construct is not the protein, and SIFTS reports the identity it
-# found rather than asserting the two are the same sequence
+# the deposited entity sequence, which explains the offset: the construct
+# differs from the protein, and SIFTS reports the identity it found
 molecule = get(f'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/{pdb}')[pdb][0]
 entity = molecule['sequence']
 identity = next(m['identity'] for m in mappings if m['chain_id'] == chain)

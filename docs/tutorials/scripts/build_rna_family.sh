@@ -101,8 +101,8 @@ def first_gene(ft):
             if len(q) == 2:
                 cur[q[0]] = q[1]
     for f in features:
-        # start < end: same direction as the riboswitch, which is what makes it
-        # the gene downstream of this leader rather than a neighbour behind it
+        # start < end: same direction as the riboswitch, so the gene is
+        # downstream of this leader and not a neighbour behind it
         if f['kind'] == 'CDS' and f['start'] < f['end']:
             gene = next(
                 (

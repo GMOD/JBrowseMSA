@@ -1,21 +1,20 @@
 /**
- * The sickle-cell layers for the globin example: where the variant is, what a
- * variant-effect predictor says about every position around it, and which
- * residue of the solved hemoglobin tetramer each row residue is.
+ * The sickle-cell layers for the globin example: the variant position, the
+ * AlphaMissense score at every position around it, and the residue of the
+ * solved hemoglobin tetramer each row residue maps to.
  *
- * One substitution, three numbers. HBB Glu->Val is p.Glu7Val in HGVS, which
- * counts the initiator methionine UniProt keeps; it is "E6V" in the clinical
- * literature and residue 6 of chain B in PDB 1A3N, both of which count the
- * mature chain after that methionine is cleaved. The alignment row is the
- * UniProt sequence, so the highlight goes on residue 7 -- and the SIFTS
- * mapping, written out as a `residueMappings` layer, is what turns that into
- * the structure's 6 without anyone subtracting one by hand.
+ * HBB Glu->Val is p.Glu7Val in HGVS, which counts the initiator methionine
+ * UniProt keeps. The clinical literature calls it "E6V" and PDB 1A3N puts it at
+ * residue 6 of chain B, both counting the mature chain after the methionine is
+ * cleaved. The alignment row is the UniProt sequence, so the highlight goes on
+ * residue 7, and the SIFTS mapping written as a `residueMappings` layer
+ * converts that to the structure's 6.
  *
  * Steps:
  *   1. SIFTS (PDBe) for 1A3N: HBB chain B and HBA chain A, checked residue by
  *      residue against the alignment rows.
  *   2. AlphaFold's per-substitution AlphaMissense table for P68871, read from
- *      the `amAnnotationsUrl` the API gives rather than a constructed filename,
+ *      the `amAnnotationsUrl` the API gives,
  *      averaged per residue into a bar track.
  *   3. The highlight naming the sickle position.
  *
@@ -47,9 +46,9 @@ const outFile = path.resolve(
 const PDB = '1a3n'
 const MSA = 'globin.aln'
 // 1A3N is the alpha2-beta2 tetramer, so each chain appears twice (A/C alpha,
-// B/D beta). One chain per row keeps the forward lookup unique -- two mappings
-// from one row onto one structure id is exactly the ambiguity
-// model.structureResidue refuses to answer.
+// B/D beta). One chain per row keeps the forward lookup unique, since
+// model.structureResidue returns undefined for a row with two mappings onto one
+// structure id.
 const CHAINS = [
   { row: 'Human_beta', accession: 'P68871', chain: 'B', gene: 'HBB' },
   { row: 'Human_alpha', accession: 'P69905', chain: 'A', gene: 'HBA1' },
@@ -63,8 +62,7 @@ const UA = {
     'react-msaview-examples (https://github.com/GMOD/react-msaview)',
 }
 
-// AlphaFold publishes the AlphaMissense table per entry; the URL is a field of
-// the prediction record, not a filename to build, so read it from there.
+// the AlphaMissense table URL is a field of the prediction record
 async function alphaMissense(accession, length) {
   const api = await fetch(
     `https://alphafold.ebi.ac.uk/api/prediction/${accession}`,

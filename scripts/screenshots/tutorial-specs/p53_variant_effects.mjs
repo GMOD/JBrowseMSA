@@ -2,11 +2,10 @@
 //
 // The tracks and the domain bands come out of the same p53-layers.json that
 // docs/tutorials/scripts/build_p53_variant_effects.sh writes and the app hosts,
-// so a re-run of the script moves the figures with the data instead of leaving
-// them asserting numbers nobody recomputed. Close-ups scroll to a RESIDUE of
-// the Human row resolved through the hosted alignment's own gaps, for the same
-// reason the callouts anchor on columns: the aligner decides which column a
-// residue lands in, and re-running it must not silently move the frame.
+// so re-running the script updates the figures with the data. Close-ups scroll
+// to a residue of the Human row resolved through the hosted alignment's own
+// gaps, as the callouts anchor on columns: the aligner decides which column a
+// residue lands in, and a re-run can change it.
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -75,8 +74,8 @@ const base = {
   rowHeight: 15,
   relativeTo: 'Human',
   colorSchemeName: 'clustalx_protein_dynamic',
-  // the second conservation histogram says the same thing as the first in a
-  // different palette, and these figures are about the three tracks below it
+  // the second conservation histogram repeats the first in a different
+  // palette and takes height from the three tracks below it
   turnedOffTracks: { 'property-conservation': true },
   msaFilehandle: { uri: 'data/p53/p53-vertebrates.afa' },
   treeFilehandle: { uri: 'data/p53/p53-vertebrates.nh' },
@@ -98,8 +97,8 @@ export const specs = [
   {
     name: 'p53-variant-alignment',
     // The whole protein at a glance, and the only figure drawn in plain
-    // residue colors: every one after it diffs the rows against Human, which
-    // is what makes a conserved column go blank.
+    // residue colors. Every later figure diffs the rows against Human, so a
+    // conserved column draws as dots.
     url: fileSnap({ ...base, height: 400, relativeTo: undefined }),
     viewportWidth: 1400,
     settle: 2500,
@@ -143,8 +142,7 @@ export const specs = [
   },
   {
     name: 'p53-variant-three-tracks',
-    // all three over one set of columns, which is the whole point of putting
-    // them in alignment coordinates
+    // all three over one set of columns
     url: fileSnap({
       ...base,
       highlights: layers.highlights,

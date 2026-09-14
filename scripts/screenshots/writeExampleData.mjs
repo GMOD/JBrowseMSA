@@ -6,8 +6,8 @@
  *
  * Every file in packages/examples/data is copied verbatim into
  * packages/app/public/data, which the app serves at its root and gmod.org
- * serves at /JBrowseMSA/demo/data/. The examples package is the single source:
- * the same bytes the gallery imports are the bytes a link fetches.
+ * serves at /JBrowseMSA/demo/data/, so a link fetches the same bytes the
+ * gallery imports.
  *
  * Run standalone with:  node scripts/screenshots/writeExampleData.mjs
  * (also runs automatically as the first step of `pnpm screenshots`).
@@ -18,9 +18,8 @@ import path from 'node:path'
 import { appDataDir, examplesDataDir, repoRoot } from './lib.mjs'
 
 // Unaligned FASTA -> an equal-width block, by padding every sequence on the
-// RIGHT with gaps. Right-padding is the point: it adds no internal gaps, so
-// residue N stays in column N for every row, which is what makes the block a
-// residue ruler rather than an alignment.
+// right with gaps. Right-padding adds no internal gaps, so residue N stays in
+// column N for every row.
 function rightPadToBlock(fasta) {
   const records = fasta
     .split('>')
@@ -43,13 +42,10 @@ for (const file of fs.readdirSync(examplesDataDir).sort()) {
 }
 console.log(`copied ${copied} files from packages/examples/data`)
 
-// The same twelve NLRP1 sequences NOT aligned -- the aligner's own committed
-// input, padded to a common length. With no gaps inserted, column N is residue
-// N, so loading it with the same domain GFF draws each protein's domains on its
-// own residue ruler: the standard domain-cartoon view, from the same component
-// and palette as the aligned one. That makes the pair a controlled comparison,
-// one input aligned and one not, everything else identical
-// (docs/media/column-lock.png).
+// The twelve NLRP1 sequences unaligned: the aligner's committed input, padded
+// to a common length. Column N is residue N, so the same domain GFF draws each
+// protein's domains on its own residue ruler, as a domain cartoon does, with
+// the component and palette of the aligned figure (docs/media/column-lock.png).
 const unaligned = 'nlrp1-unaligned.aln'
 fs.writeFileSync(
   path.join(appDataDir, unaligned),

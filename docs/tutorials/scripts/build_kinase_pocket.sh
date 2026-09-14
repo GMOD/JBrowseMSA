@@ -152,8 +152,8 @@ with open(f'{out}/kinase-pocket.afa', 'w') as fh:
 print('alignment width after trimming inserts:', lengths)
 EOF
 
-# 7. FastTree from the trimmed alignment -- a real phylogeny, not the
-#    viewer's built-in neighbor joining (capped at 500 rows; see the page)
+# 7. FastTree from the trimmed alignment, since the viewer's built-in
+#    neighbor joining is capped at 500 rows (see the page)
 docker run --rm -v "$OUT:/work" -w /work "$FASTTREE_IMAGE" \
   FastTree kinase-pocket.afa > "$OUT/kinase-pocket.nwk" 2> "$OUT/fasttree.log"
 tail -1 "$OUT/fasttree.log"

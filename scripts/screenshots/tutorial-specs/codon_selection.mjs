@@ -91,7 +91,7 @@ export const specs = [
   {
     name: 'codon-exon-structure',
     // same view with the 7-exon overlay turned on: each exon is one color
-    // down every row, the same mechanism as an InterProScan domain GFF
+    // down every row, the same mechanism as a domain GFF
     url: fileSnap({
       ...base,
       colWidth: 0.7,
@@ -194,8 +194,8 @@ export const specs = [
   {
     name: 'codon-final-view',
     // the whole gene again, everything turned on together: exon structure,
-    // dN/dS track and the three labeled highlights -- this is the snapshot
-    // the shareable link at the end of the page opens
+    // dN/dS track and the three labeled highlights; the shareable link at the
+    // end of the page opens this snapshot
     url: fileSnap({
       ...base,
       colWidth: 0.7,

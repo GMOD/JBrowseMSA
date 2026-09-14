@@ -1,36 +1,36 @@
 /**
  * Figures for the Apollo renewal: one JBrowse combined view that shows
  *   (top)  a LinearGenomeView of the F12 locus with the RefSeq gene annotation
- *          track (the "annotation track" the figure needs to convey)
+ *          track
  *   (below) the react-msaview MsaView: the curated F12 cetacean CDS DNA
  *          alignment + species tree + the 14-exon overlay.
  *
  * One variant is rendered: base resolution, scrolled to the shared cetacean
  * frameshift (column 205) where the four cetaceans carry a 1bp deletion the
- * others lack. A zoomed-out overview was rendered here too until nothing
- * referenced it -- the gallery links and shows the close-up.
+ * others lack.
  *
- * Deliberately NO MAF track here: a MAF track + the MsaView would show the same
- * alignment twice. One alignment representation, the on-message one.
+ * The session has no MAF track, since a MAF track beside the MsaView would show
+ * the same alignment twice.
  *
  * Session data is inlined (stockholm + exon gff) so the URL is self-contained
  * and works against the published jbrowse-web + hosted combined config.
  *
- * TWO OUTPUTS, TWO TARGETS:
+ * The script has two outputs with different targets:
  *   - the live "Open in JBrowse" URLs the gallery links (writeLinksModule) point
- *     at the PUBLISHED jbrowse-web + config + plugin — they must work for anyone.
- *   - the committed figure PNGs render against a LOCAL build when available, so
+ *     at the published jbrowse-web, config and plugin, so they work for anyone.
+ *   - the committed figure PNGs render against a local build when available, so
  *     the 14-exon overlay shows the palette fix (distinct colours) instead of the
- *     published plugin's pink-heavy 8-colour clamp. We serve, all over http on
- *     localhost (avoids https→http mixed-content blocking on the local plugin):
+ *     published plugin's pink-heavy 8-colour clamp. The script serves these over
+ *     http on localhost (avoiding https→http mixed-content blocking on the local
+ *     plugin):
  *       - the local jbrowse-web build       (JBROWSE_WEB_BUILD / --jbrowse-build)
  *       - the local MsaView plugin dist      (MSAVIEW_PLUGIN_DIST / --plugin-dist)
  *       - the committed config, rewritten so its MsaView plugin URL is the local
- *         bundle (Protein3d dropped — unused here).
- *     The plugin dist must be built against THIS branch's react-msaview for the
- *     palette fix (see agent-docs/dna-msa-comparative-genomics.md). If a local path
- *     is missing the capture falls back to the published target, so it still runs
- *     anywhere — just palette-stale.
+ *         bundle (Protein3d dropped, since this figure does not use it).
+ *     The plugin dist must be built against this branch's react-msaview for the
+ *     palette fix (see agent-docs/dna-msa-comparative-genomics.md). If a local
+ *     path is missing, the capture falls back to the published target and
+ *     renders with the old palette.
  */
 import fs from 'node:fs'
 import os from 'node:os'
@@ -65,7 +65,7 @@ const gff = fs.readFileSync(
   'utf8',
 )
 
-// published targets — these back the live, clickable gallery URLs
+// published targets for the live gallery URLs
 const PUBLISHED_JBROWSE = 'https://jbrowse.org/code/jb2/main'
 const PUBLISHED_CONFIG =
   'https://gmod.org/JBrowseMSA/demo/data/jbrowse-msa-combined-config.json'
@@ -77,8 +77,8 @@ const COMMITTED_CONFIG = path.join(
   'jbrowse-msa-combined-config.json',
 )
 
-// local build paths used only to render publication-grade figure PNGs; both
-// overridable, both fall back to the published target when absent.
+// local build paths used only to render the figure PNGs; both are overridable
+// and fall back to the published target when absent.
 const jbrowseBuild = opt(
   'jbrowse-build',
   process.env.JBROWSE_WEB_BUILD ||
@@ -179,9 +179,9 @@ async function capture(browser, jbrowseBase, configUrl, variant) {
 }
 
 // The live session URL is self-contained (data inlined), so it works against the
-// published jbrowse-web with no hosted files. Emit the two URLs as a generated
-// module the gallery imports, keeping the opaque encoded blobs out of the page.
-// These always target the PUBLISHED jbrowse + config (anyone can click them).
+// published jbrowse-web with no hosted files. The script writes the URLs as a
+// generated module the gallery imports, so the encoded session strings stay out
+// of the page source. They always target the published jbrowse and config.
 function writeLinksModule() {
   const constName = n => `f12Combined${n[0].toUpperCase()}${n.slice(1)}Url`
   const body = variants

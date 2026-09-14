@@ -1,19 +1,17 @@
 /**
- * Generate the gene-arrow-map demo: a small, illustrative gene cluster aligned
- * across several genomes, in the spirit of the gggenes R package's own
- * `example_genes` dataset (which is likewise synthetic, "for example purposes
- * only"). It exists to exercise react-msaview's strand-aware gene-arrow
- * rendering — the same overlay machinery that draws InterProScan domains and the
- * F12 exon structure, but with gene-level features that carry a strand.
+ * Generate the gene-arrow-map demo: a small synthetic gene cluster aligned
+ * across several genomes, like the gggenes R package's `example_genes` dataset
+ * ("for example purposes only"). It exercises the strand-aware gene arrows,
+ * drawn by the overlay that draws InterPro domains and the F12 exon structure,
+ * with gene-level features that carry a strand.
  *
- * What it shows, and why each piece is here:
+ * What it shows:
  *  - consistent color per gene down the columns (Name=<gene>, like F12 exons),
  *  - +/- strand drawn as a left/right arrowhead (genC, genE point left),
  *  - two inversions (genC in Genome_4, genE in Genome_6) -> the arrow flips,
  *  - one deletion (genB in Genome_5) -> the gene's columns become a gap and the
- *    gene drops out, yet the *downstream* genes stay column-aligned. That last
- *    point is the whole reason to do this aligned rather than as free-floating
- *    gggenes facets: vertical homology is exact, not a cosmetic shift.
+ *    gene drops out, and the downstream genes stay in their columns because the
+ *    arrows are anchored to the alignment.
  *
  * Deterministic (seeded PRNG), so re-running reproduces byte-identical output.
  * Run:  node scripts/gene-cluster/generate.mjs
@@ -42,8 +40,8 @@ const BASES = ['A', 'C', 'G', 'T']
 const COMPLEMENT = { A: 'T', C: 'G', G: 'C', T: 'A', '-': '-' }
 const randomBase = () => BASES[Math.floor(rng() * 4)]
 
-// reference cluster: gene order is conserved across genomes (colinear), which is
-// exactly the regime where an alignment-anchored arrow map is meaningful
+// reference cluster: gene order is conserved across genomes (colinear), so an
+// alignment-anchored arrow map applies
 const SPACER = 24
 const GENES = [
   { name: 'genA', strand: 1, len: 180 },

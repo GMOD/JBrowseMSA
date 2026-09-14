@@ -1,10 +1,10 @@
 // Builds the BRAF protein example on the "Genome browser" docs page: the
 // RAF-family kinase alignment connected to the human BRAF gene on hg38, opened
-// on the V600 site. The MsaView and the LinearGenomeView share coordinates —
+// on the V600 site. The MsaView and the LinearGenomeView share coordinates:
 // clicking a residue navigates the genome via the codon map, and hovering the
-// genome highlights the MSA column — and the link opens with V600 labeled in
-// the alignment (a `highlights` entry in the query row's own residue numbering)
-// over the V600E codon in the genome.
+// genome highlights the MSA column. The link opens with V600 labeled in the
+// alignment (a `highlights` entry in the query row's own residue numbering) and
+// the V600E codon highlighted in the genome.
 //
 // BRAF V600E (c.1799T>A) is the most common oncogenic mutation in melanoma and a
 // frequent driver across other cancers; V600 sits in the kinase activation
@@ -12,15 +12,15 @@
 //
 // Like scripts/src-protein-link/, the only piece that can't be a bare file URL
 // is `connectedFeature` (the transcript model for the protein<->genome codon
-// mapping), so we derive it reproducibly here from the same public RefSeq GFF
-// the gene track uses, rather than pasting an opaque blob.
+// mapping), which this script derives from the public RefSeq GFF the gene track
+// uses.
 //
 // Usage:  node scripts/braf-protein-link/generate.mjs
 // Requires: tabix (htslib) on PATH for the remote RefSeq fetch.
 
 import { execFileSync } from 'node:child_process'
 
-// Public RefSeq GFF (CSI-indexed) — the same source as the hg38-ncbiRefSeq track
+// Public RefSeq GFF (CSI-indexed), the same source as the hg38-ncbiRefSeq track
 const GFF = 'https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz'
 // BRAF (NM_004333.6 -> NP_004324.2, canonical 766 aa B-Raf), hg38 chr7, - strand
 const TRANSCRIPT = 'NM_004333.6'
@@ -115,13 +115,12 @@ const spec = {
       // codon-frame coloring on the reference sequence so the highlighted V600
       // codon reads in-frame beside the alignment
       colorByCDS: true,
-      // canonical (RefSeq Select / MANE) transcript only — NM_004333.6, the same
-      // one the protein<->genome map and the alignment use, so the codon labels
+      // canonical (RefSeq Select / MANE) transcript only: NM_004333.6, the one
+      // the protein<->genome map and the alignment use, so the codon labels
       // read V600 and the deep zoom isn't a stack of overlapping isoforms
       tracks: [
         'hg38-ncbiRefSeqSelect',
-        // ClinVar pathogenic-variant pileup over the V600 codon — the disease
-        // parallel to the conserved alignment column (like TP53 R248)
+        // ClinVar pathogenic-variant pileup over the V600 codon (like TP53 R248)
         'hg38-braf-clinvar-pathogenic',
       ],
     },

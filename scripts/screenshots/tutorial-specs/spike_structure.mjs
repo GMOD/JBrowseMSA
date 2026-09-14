@@ -1,12 +1,12 @@
 /**
  * Figures for docs/tutorials/spike_structure.md: eleven coronavirus spikes, the
- * PRRA insertion SARS-CoV-2 alone carries, and which of its residues 6VXX
- * actually resolved.
+ * PRRA insertion only SARS-CoV-2 carries, and which of its residues 6VXX
+ * resolved.
  *
- * Everything the figures point at is read out of the files the build script
+ * The spec reads every callout position from the files the build script
  * wrote (packages/app/public/data/spike), so a re-run that moves a column moves
  * the callouts with it: `col` comes from projecting a row residue through the
- * committed alignment, never from a measured pixel.
+ * committed alignment.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -64,8 +64,8 @@ const loopRow = mapping.unobserved
   )
   .map(pos => pos - offset)
 
-// the rows the domain GFF says nothing about, read from the GFF rather than
-// listed here, so the callout follows a re-run
+// the rows with no feature in the domain GFF, read from the GFF so the callout
+// follows a re-run
 const annotated = new Set(
   read('spike-domains.gff')
     .split('\n')
@@ -87,8 +87,8 @@ const wide = {
   colorSchemeName: 'clustalx_protein_dynamic',
   ...files,
 }
-// a close-up starts a few columns left of what it is about, so the frame
-// carries context rather than opening on the feature's own edge
+// a close-up starts a few columns left of its feature, so the frame shows some
+// context
 const closeUp = (startCol, colWidth) => ({
   height: 500,
   treeAreaWidth: 170,

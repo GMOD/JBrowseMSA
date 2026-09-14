@@ -11,7 +11,7 @@
  *                                              -> scripts/screenshots/jbrowse-figures.mjs
  *
  * Each phase writes into docs/media and self-gates: a re-render only overwrites a
- * committed PNG when its pixels actually changed (see image-pipeline.mjs), so a
+ * committed PNG when its pixels changed (see image-pipeline.mjs), so a
  * full regen leaves byte-identical figures untouched.
  *
  * Usage:

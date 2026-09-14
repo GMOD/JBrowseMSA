@@ -1,21 +1,20 @@
-// Builds the PROTEIN example used on the "Genome browser" docs page: the
+// Builds the protein example used on the "Genome browser" docs page: the
 // Src-family kinase alignment connected to the human SRC gene on hg38, so the
-// MsaView and the LinearGenomeView share coordinates — clicking a residue
+// MsaView and the LinearGenomeView share coordinates. Clicking a residue
 // navigates the genome via the codon map, and hovering the genome highlights the
 // MSA column.
 //
 // The link is a single declarative JBrowse session spec. The only piece that
 // can't be a bare file URL is `connectedFeature` (the transcript model used for
-// the protein<->genome codon mapping), so we derive it reproducibly here from
-// the same public RefSeq GFF the gene track uses, rather than pasting an opaque
-// blob. Same philosophy as scripts/examples-gen/.
+// the protein<->genome codon mapping), which this script derives from the
+// public RefSeq GFF the gene track uses.
 //
 // Usage:  node scripts/src-protein-link/generate.mjs
 // Requires: tabix (htslib) on PATH for the remote RefSeq fetch.
 
 import { execFileSync } from 'node:child_process'
 
-// Public RefSeq GFF (CSI-indexed) — the same source as the hg38-ncbiRefSeq track
+// Public RefSeq GFF (CSI-indexed), the same source as the hg38-ncbiRefSeq track
 const GFF = 'https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz'
 // SRC (NM_005417.5 -> NP_005408.1, canonical 536 aa c-Src), hg38 chr20, + strand
 const TRANSCRIPT = 'NM_005417.5'
@@ -80,7 +79,7 @@ const spec = {
       loc: 'chr20:37,344,685-37,406,050',
       // codon-frame coloring on the reference sequence
       colorByCDS: true,
-      // canonical (RefSeq Select / MANE) transcript only — one transcript per
+      // canonical (RefSeq Select / MANE) transcript only: one transcript per
       // gene, so the view isn't a stack of overlapping isoforms and its CDS
       // matches the protein<->genome map (SRC MANE NM_198291.3 is CDS-identical
       // to the connectedFeature NM_005417.5)

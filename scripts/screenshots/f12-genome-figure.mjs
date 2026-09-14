@@ -1,12 +1,11 @@
 /**
  * Capture the F12 genome-browser figure: the F12 locus in a JBrowse
  * LinearGenomeView with the canonical RefSeq transcript and the Multiz 470-way
- * mammal MAF track (which includes two cetaceans, dolphin + blue whale). This is
- * the genomic complement to the F12 gene-loss MSA figures (docs/media/
- * f12-exon-architecture.png, f12-frameshift.png) — same gene, shown in genomic
- * coordinates with introns and the raw comparative alignment, deliberately a
- * SEPARATE view from the curated CDS alignment rather than duplicating it in one
- * connected session.
+ * mammal MAF track (which includes two cetaceans, dolphin + blue whale). It
+ * shows the gene of the F12 gene-loss MSA figures (docs/media/
+ * f12-exon-architecture.png, f12-frameshift.png) in genomic coordinates, with
+ * introns and the raw comparative alignment, as a view separate from the
+ * curated CDS alignment.
  *
  * Unlike the connected genome+MSA figures (jbrowse-figures.mjs, which needs a
  * local main build), this is a plain genome view, so it captures cleanly

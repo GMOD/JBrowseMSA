@@ -1,12 +1,11 @@
 /**
- * The ACE2 residues SARS-CoV-2 spike actually touches, as highlights over the
+ * The ACE2 residues the SARS-CoV-2 spike contacts, as highlights over the
  * ortholog alignment.
  *
- * The ACE2 example says host range is decided by a handful of contact residues
- * and then leaves the reader to find them among 800 columns of dots. These are
- * those residues, taken from the structure of the complex rather than from a
- * list retyped out of a paper: every ACE2 residue in PDB 6M0J with a heavy atom
- * within 4 A of a heavy atom of the spike receptor-binding domain.
+ * Host range depends on a handful of contact residues among the ACE2 example's
+ * 800 columns. This script takes them from the structure of the complex: every
+ * ACE2 residue in PDB 6M0J with a heavy atom within 4 A of a heavy atom of the
+ * spike receptor-binding domain.
  *
  * Steps:
  *   1. mmCIF for 6M0J (spike RBD + human ACE2) from RCSB.
@@ -49,9 +48,9 @@ const RBD_CHAIN = 'E'
 const ACCESSION = 'Q9BYF1' // ACE2_HUMAN, the alignment's reference row
 const ROW = 'Human'
 const MSA = 'ace2.aln'
-// The usual interface cutoff: two heavy atoms within 4 A are in contact. C-beta
-// distance would be the wrong measure here, since two long side chains reach
-// each other from much further apart than their C-betas are.
+// The usual interface cutoff: two heavy atoms within 4 A are in contact. Not
+// C-beta distance, since two long side chains touch while their C-betas are
+// much further apart.
 const CUTOFF = 4
 
 function minDistance(a, b) {
@@ -116,10 +115,9 @@ for (const contact of contacts) {
   }
 }
 
-// Neighbouring contacts become one band. Drawing 20 single-residue bands on an
-// 800-column alignment gives 20 labels fighting over the same few pixels; the
-// runs are what the eye can actually read, and the per-residue list is still in
-// this file for anything that wants it.
+// Neighbouring contacts become one band: 20 single-residue bands on an
+// 800-column alignment put 20 labels over the same few pixels. The per-residue
+// list stays in the output file.
 const highlights = []
 for (const { seqPos } of contacts) {
   const last = highlights.at(-1)

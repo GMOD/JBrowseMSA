@@ -3,8 +3,8 @@
 Builds the **TP53** example on the _Genome browser_ docs page: the p53 ortholog
 alignment opened _inside_ JBrowse, **connected** to the human **TP53** gene on
 hg38, zoomed onto the **R248** codon, with a **ClinVar pathogenic-variant
-track** in the genome view. The wall of disease variants over the R248 codon
-sits directly above a 100%-conserved alignment column. Same connected pattern as
+track** in the genome view. The pathogenic variants at the R248 codon line up
+with a 100%-conserved alignment column. The connection works as in
 `scripts/src-protein-link/` (SRC) and `scripts/braf-protein-link/` (BRAF).
 
 R248 is the most frequently mutated residue in TP53 across human cancers: it
@@ -13,20 +13,20 @@ collects a dense stack of distinct pathogenic substitutions.
 
 ## Two scripts
 
-- **`build-data.mjs`** — regenerates the hosted data under
+- **`build-data.mjs`** regenerates the hosted data under
   `packages/app/public/data/`:
-  - `tp53-p53-orthologs.fa` / `tp53-p53.nh` — p53 protein alignment + ClustalW
+  - `tp53-p53-orthologs.fa` / `tp53-p53.nh`: p53 protein alignment + ClustalW
     neighbor-joining tree across 13 vertebrates. The `human` row is RefSeq
     `NP_000537.3` (the product of `NM_000546.6`, the transcript the link maps
     to), so residue _i_ lines up with codon _i_. Requires `clustalw` + `curl`.
-  - `tp53-clinvar-pathogenic.vcf.gz(.tbi)` — ClinVar variants across the TP53
+  - `tp53-clinvar-pathogenic.vcf.gz(.tbi)`: ClinVar variants across the TP53
     locus (`17:7668134-7687471`) filtered to germline classification Pathogenic
-    / Likely_pathogenic. Requires `tabix` + `bgzip`. **ClinVar is a live,
-    weekly-updated source**, so the variant count drifts slightly between runs
-    (it is not byte-reproducible the way the alignment is).
-- **`generate.mjs`** — prints the declarative JBrowse link. Names R248 in the
-  query row's own residue numbering and derives the `connectedFeature`
-  (BRAF/SRC-style) from the public RefSeq GFF. Requires `tabix`.
+    / Likely_pathogenic. Requires `tabix` + `bgzip`. **ClinVar updates weekly**,
+    so the variant count changes slightly between runs, unlike the alignment,
+    which is byte-reproducible.
+- **`generate.mjs`** prints the declarative JBrowse link. It names R248 in the
+  query row's own residue numbering and derives the `connectedFeature` (as the
+  BRAF and SRC scripts do) from the public RefSeq GFF. Requires `tabix`.
 
 ## How the link works
 

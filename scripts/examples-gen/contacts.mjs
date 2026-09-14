@@ -2,29 +2,26 @@
  * Residue contacts for the Src-family kinase example, derived from a solved
  * structure and written as arc-track data.
  *
- * The domain overlay already draws SH3, SH2 and the kinase domain as three
- * boxes per row. What it cannot draw is how they pack against each other, which
- * is the whole mechanism: autoinhibited Src folds its C-terminal tail back so
- * phospho-Tyr527 binds its own SH2 domain, clamping the kinase shut. That is a
- * pair of positions, so it is an arc.
+ * The domain overlay draws SH3, SH2 and the kinase domain as three boxes per
+ * row, but not how they pack. In autoinhibited Src the C-terminal tail folds
+ * back so phospho-Tyr527 binds the protein's own SH2 domain and clamps the
+ * kinase shut, and the arcs mark pairs of positions like that one.
  *
  * Steps, all against public data (the first three live in structure.mjs):
  *   1. mmCIF for 2SRC (autoinhibited human Src) from RCSB.
- *   2. The SIFTS residue mapping from PDBe, so structure numbering becomes
- *      UniProt numbering -- which is what the alignment rows and the domain
- *      GFF already use, so the arcs land without a second alignment step.
+ *   2. The SIFTS residue mapping from PDBe, converting structure numbering to
+ *      the UniProt numbering the alignment rows and the domain GFF use, so the
+ *      arcs need no second alignment step.
  *   3. The check that the row uses that numbering too.
  *   4. Cbeta-Cbeta contacts under 8 A (Calpha for glycine), keeping only pairs
- *      whose ends sit in *different* annotated regions. Every structure has
- *      thousands of contacts and nearly all of them are a residue touching its
- *      own neighbours; the inter-domain ones are the architecture.
+ *      whose ends sit in different annotated regions. A structure has thousands
+ *      of contacts, nearly all between neighbouring residues.
  *
  * Writes packages/examples/src/examples/kinaseStructure.json: the contacts, and
- * the residue mapping they were derived through (see docs/layers.md), which is
- * the same SIFTS correspondence written down instead of consumed and discarded.
- * Data, not a TS module, so the formatter has nothing to rewrite and the
- * screenshot specs read the same file the example imports. Run it when the
- * structure or the domain boundaries change:
+ * the SIFTS residue mapping they were derived through (see docs/layers.md). The
+ * output is JSON so the formatter leaves it alone and the screenshot specs read
+ * the same file the example imports. Run it when the structure or the domain
+ * boundaries change:
  *
  *   node scripts/examples-gen/contacts.mjs
  */
@@ -57,9 +54,8 @@ const ACCESSION = 'P12931' // SRC_HUMAN, the alignment's reference row
 const ROW = 'SRC_HUMAN'
 const CUTOFF = 8
 
-// The regions come from the committed domain GFF the example already draws, so
-// the arcs and the boxes can never disagree about where a domain ends. The tail
-// is what follows the last of them.
+// The regions come from the committed domain GFF the example draws, so arcs and
+// boxes use the same domain ends. The tail is everything after the last domain.
 function readRegions() {
   const gff = fs.readFileSync(path.join(dataDir, 'kinase-domains.gff'), 'utf8')
   const regions = []

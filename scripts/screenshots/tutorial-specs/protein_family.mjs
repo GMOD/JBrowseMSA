@@ -194,7 +194,7 @@ export const specs = [
   },
   {
     name: 'protein-family-domains',
-    // The payoff view: alignment, tree and Pfam overlay together. Six domains
+    // Alignment, tree and Pfam overlay together. Six domains
     // in all twelve rows, in the same columns; the PYD in five rows only.
     // Viewport is wide enough that 1666 columns end left of the legend, which
     // is absolutely positioned top-right.
@@ -325,8 +325,9 @@ export const specs = [
   },
   {
     name: 'protein-family-closeup',
-    // Base resolution at the PYD block's left edge, where the overview only
-    // asserts. Cow and Horse carry residues under the columns the human PYD
+    // Base resolution at the PYD block's left edge, to show that the rows
+    // without a PYD still have residues. Cow and Horse carry residues under
+    // the columns the human PYD
     // occupies; Hamster is mostly gap. Tall enough for all twelve rows plus the
     // minimap and conservation tracks above them.
     viewportWidth: 1600,
@@ -379,8 +380,8 @@ export const specs = [
   {
     name: 'protein-family-link',
     // What the ?data= link at the end of the page opens: the three hosted files
-    // plus a labeled highlight over the PYD columns, carried in the snapshot
-    // rather than clicked in. Highlight coordinates are 1-based inclusive.
+    // plus a labeled highlight over the PYD columns, set in the snapshot.
+    // Highlight coordinates are 1-based inclusive.
     viewportWidth: 1600,
     url: fileSnap({
       height: 370,

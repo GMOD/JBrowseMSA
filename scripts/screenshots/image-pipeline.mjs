@@ -1,6 +1,6 @@
 /**
  * PNG post-processing for the screenshot generator: optimize, diff against the
- * committed image, and commit only when the content actually changed.
+ * committed image, and commit only when the content changed.
  *
  * A regen re-renders every spec, but an unchanged spec re-renders pixel-identical
  * (rendering is deterministic), so writing them all back would churn the whole
@@ -8,9 +8,9 @@
  * committed one only when it differs by more than `diffThreshold` of its pixels.
  *
  * Uses the system ImageMagick (`compare`/`identify`) and `pngquant`, which are
- * already present on the doc-building machine. Each is best-effort: a missing
- * tool degrades gracefully (treat as changed / skip optimization) rather than
- * failing the run.
+ * already present on the doc-building machine. A missing tool does not fail the
+ * run: a missing `compare` treats the image as changed, and a missing
+ * `pngquant` skips optimization.
  */
 import { spawnSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -47,7 +47,7 @@ function moveIntoPlace(tmpPath, outputPath) {
   fs.rmSync(tmpPath, { force: true })
 }
 
-// Move a freshly captured PNG into place only when its content actually changed
+// Move a freshly captured PNG into place only when its content changed
 // (or with force / for a brand-new spec), so a regen doesn't rewrite every PNG.
 export function commitScreenshot(
   tmpPath,
@@ -77,7 +77,7 @@ export function commitScreenshot(
 
 // Lossily quantize a PNG in place with pngquant. These captures are flat-color
 // UI screenshots with small palettes, so quantization shrinks them ~50% with no
-// perceptible quality loss — worth it for a static site served over the network.
+// perceptible quality loss, which suits a static site served over the network.
 // `--nofs` disables Floyd-Steinberg dithering, whose error-diffusion noise would
 // otherwise scatter run-to-run across translucent UI chrome and defeat the
 // content-stable diff gate. Best-effort: leave the original untouched if

@@ -1,17 +1,13 @@
 /**
- * Reproducible builder for the real-data phylogeny examples.
- *
- * For each dataset in datasets/*.tsv this does, transparently and from scratch:
- *   1. fetch  — download each UniProt sequence by accession (REST API) and
- *               write a FASTA with clean row labels (datasets/<name>.tsv maps
- *               accession -> label).
- *   2. align  — run ClustalW to produce a multiple sequence alignment.
- *   3. tree   — run ClustalW again on the alignment to infer a neighbor-joining
- *               tree (Newick), so the example ships a real inferred phylogeny
- *               rather than a hand-drawn cladogram.
- * The aligned FASTA + Newick for every dataset land in
+ * Builds the real-data phylogeny examples from datasets/*.tsv:
+ *   1. fetch: download each UniProt sequence by accession and write a FASTA
+ *      with the row labels datasets/<name>.tsv maps each accession to.
+ *   2. align: run ClustalW.
+ *   3. tree: run ClustalW again on the alignment to infer a neighbor-joining
+ *      tree (Newick).
+ * The aligned FASTA and Newick for every dataset go to
  * ../../packages/examples/data as plain files, which the gallery, the figures
- * and the screenshot specs all read.
+ * and the screenshot specs read.
  *
  * Prerequisites: clustalw on PATH (Debian/Ubuntu: `apt install clustalw`;
  * macOS: `brew install clustal-w`) and network access to rest.uniprot.org.
@@ -20,14 +16,14 @@
  *   node scripts/examples-gen/generate.mjs            # all datasets
  *   node scripts/examples-gen/generate.mjs myd88 ace2 # a subset
  *
- * Intermediate files land in build/<name>/ (gitignored). Domain GFFs are NOT
- * produced here — InterProScan is a separate, slow, network step documented in
- * README.md and committed alongside the data.
+ * Intermediate files go to build/<name>/ (gitignored). This script copies the
+ * committed datasets/<name>-domains.gff but does not produce it; README.md
+ * documents the `react-msaview-cli interpro` command that does.
  *
- * RNA structural datasets (kind: 'rna-stockholm', e.g. trna) skip fetch+align:
- * a committed Rfam seed subset (datasets/<name>.stock) already carries
- * #=GC SS_cons, so it is kept verbatim and only a tree is inferred from it and
- * embedded as #=GF NH. See README.md ("RNA structural alignments").
+ * RNA structural datasets (kind: 'rna-stockholm', e.g. trna) skip fetch and
+ * align: the committed Rfam seed subset (datasets/<name>.stock) already carries
+ * #=GC SS_cons, so the script keeps it verbatim and embeds an inferred tree as
+ * #=GF NH. See README.md ("RNA structural alignments").
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -53,10 +49,8 @@ const datasets = [
   { name: 'hox' },
   { name: 'nlrp1' },
   { name: 'kinase' },
-  // RNA structural alignment: the input is a committed Rfam seed subset
-  // (datasets/trna.stock) that already carries #=GC SS_cons. It is NOT
-  // re-aligned (that would break the SS column correspondence); only a tree is
-  // inferred from it and embedded as #=GF NH. Emits one Stockholm file.
+  // Rfam seed subsets with #=GC SS_cons; re-aligning would break the SS_cons
+  // column correspondence, so only a tree is inferred and embedded as #=GF NH.
   { name: 'trna', kind: 'rna-stockholm' },
   { name: 'hammerhead', kind: 'rna-stockholm' },
   { name: 'corona_fse', kind: 'rna-stockholm' },
@@ -100,8 +94,8 @@ function clustalw(args, cwd) {
   execFileSync('clustalw', args, { cwd, stdio: 'pipe' })
 }
 
-// ClustalW outputs FASTA wrapped at 60 cols; join each record onto one line so
-// the committed string is one header + one sequence line per row.
+// ClustalW wraps FASTA at 60 columns; the committed file has one sequence line
+// per row.
 function unwrapFasta(afa) {
   const records = []
   let cur = null
@@ -118,8 +112,7 @@ function unwrapFasta(afa) {
 
 function buildOne({ name }) {
   const dir = path.join(buildDir, name)
-  // 1. fetch — handled by caller (async); written to input.fasta
-  // 2. align
+  // the caller writes input.fasta
   clustalw(
     [
       '-INFILE=input.fasta',
@@ -130,7 +123,7 @@ function buildOne({ name }) {
     ],
     dir,
   )
-  // 3. neighbor-joining tree from the alignment (writes aligned.ph, Newick)
+  // writes aligned.ph (Newick)
   clustalw(
     ['-INFILE=aligned.afa', '-TREE', '-TYPE=PROTEIN', '-OUTPUTTREE=phylip'],
     dir,
@@ -148,12 +141,9 @@ function buildOne({ name }) {
   return { msa, tree }
 }
 
-// RNA path: the committed datasets/<name>.stock is already a structural
-// alignment with #=GC SS_cons. We keep it verbatim (so SS columns stay aligned)
-// and only infer a neighbor-joining tree from its sequences with ClustalW
-// (-TYPE=DNA), inject it as #=GF NH, and return the whole Stockholm as the MSA
-// constant. U is mapped to T and Rfam insert gaps (.) to - purely for the tree
-// inference; the emitted alignment keeps its original RNA letters and SS_cons.
+// Keeps datasets/<name>.stock verbatim and adds a ClustalW (-TYPE=DNA)
+// neighbor-joining tree as #=GF NH. The tree input maps U to T and Rfam insert
+// gaps (.) to -; the written alignment keeps its RNA letters and SS_cons.
 function buildRnaStockholm({ name }) {
   const dir = path.join(buildDir, name)
   const src = fs.readFileSync(
@@ -178,8 +168,7 @@ function buildRnaStockholm({ name }) {
   const tree = fs
     .readFileSync(path.join(dir, 'input.ph'), 'utf8')
     .replace(/\s+/g, '')
-  // Inject the inferred tree as #=GF NH right after the STOCKHOLM header, the
-  // same place the parser (StockholmMSA.getTree) reads it from.
+  // StockholmMSA.getTree reads #=GF NH from right after the header
   const out = lines.flatMap((l, i) => (i === 0 ? [l, `#=GF NH ${tree}`] : [l]))
   const msa = out.join('\n')
   console.log(`  ${seqRows.length} sequences, ${seqRows[0].seq.length} columns`)
@@ -187,9 +176,8 @@ function buildRnaStockholm({ name }) {
 }
 
 // --fetch re-downloads sequences from UniProt and overwrites the committed
-// datasets/<name>.fasta snapshot. By default we align the committed snapshot, so
-// regeneration is fully deterministic and offline, and the exact sequences used
-// are visible in git rather than being whatever UniProt serves today.
+// datasets/<name>.fasta snapshot. Without it the script aligns the snapshot, so
+// regeneration is deterministic and offline.
 const doFetch = process.argv.includes('--fetch')
 const selected = process.argv.slice(2).filter(a => !a.startsWith('--'))
 const todo = selected.length
@@ -228,9 +216,8 @@ for (const d of todo) {
   const { msa, tree } = buildOne(d)
   write(`${d.name}.aln`, msa)
   write(`${d.name}.nh`, `${tree}\n`)
-  // The domain GFF is produced out of band by `react-msaview-cli interpro` and
-  // committed beside the accessions (see README.md); its seq_ids are the row
-  // labels, so it travels with the alignment it annotates.
+  // `react-msaview-cli interpro` produces the domain GFF (see README.md); its
+  // seq_ids are the row labels.
   const gffPath = path.join(here, 'datasets', `${d.name}-domains.gff`)
   if (fs.existsSync(gffPath)) {
     write(

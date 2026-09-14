@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * Install the packed packages the way a reader of the docs would -- plain npm,
- * outside this workspace, no pnpm overrides -- and check that what they get
- * actually runs:
+ * Install the packed packages the way a reader of the docs would (plain npm,
+ * outside this workspace, no pnpm overrides) and check that the result runs:
  *
  *   1. the README/USAGE quick start in a Vite app, rendered in headless Chrome
  *   2. `react-msaview-cli --help` and `export-svg` from a global-style install

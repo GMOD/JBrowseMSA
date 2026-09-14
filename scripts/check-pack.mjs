@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Pack every publishable package and assert the tarball actually contains what
- * its manifest points at -- bin, main, types and every exports target.
+ * Pack every publishable package and assert the tarball contains what its
+ * manifest points at: bin, main, types and every exports target.
  *
  * react-msaview-cli 6.3.0 through 6.5.0 went to npm with three files and no
  * dist, because the root `build` script (which publish.yml runs) built three

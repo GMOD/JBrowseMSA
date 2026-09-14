@@ -1,22 +1,20 @@
 /**
  * Per-residue pathogenic-variant counts for the p53 example, from ClinVar.
  *
- * The conservation track is computed from the alignment: it says where this
- * family has not changed. This says something the alignment cannot -- where
- * changing it is known to cause disease -- and it comes from somewhere else
- * entirely, which is the point of a data layer. The two peak in the same place,
- * and that place is the DNA-binding domain the overlay already draws.
+ * The counts record where a change is known to cause disease, which the
+ * alignment's conservation track can't show. Both tracks peak in the
+ * DNA-binding domain.
  *
  * Steps:
  *   1. esearch ClinVar for the gene's missense variants.
- *   2. esummary in batches, keeping only records the submitters actually
- *      classify as pathogenic or likely pathogenic -- an esearch term matches
- *      "pathogenic" loosely enough to pull in "Conflicting classifications",
- *      so the classification is filtered here, off the record itself.
+ *   2. esummary in batches, keeping records classified pathogenic or likely
+ *      pathogenic. The esearch term also matches "Conflicting
+ *      classifications", so the script filters on each record's own
+ *      classification.
  *   3. Parse the protein change (p.Arg248Gln) from the variant name on the
- *      reference transcript, and count how many distinct alleles hit each
- *      residue. Nonsense changes are dropped: a stop is not a substitution of
- *      one residue for another, and it disables everything downstream of it.
+ *      reference transcript, and count the distinct alleles at each residue.
+ *      The script drops nonsense changes: a stop disables everything
+ *      downstream of it, so it does not belong on a per-residue count.
  *
  * Writes packages/examples/src/examples/p53ClinVar.json.
  *
@@ -110,8 +108,7 @@ for (let i = 0; i < ids.length; i += 200) {
         continue
       }
       const change = PROTEIN_CHANGE.exec(name)
-      // a stop is not one residue swapped for another, and it takes out
-      // everything downstream, so it does not belong on a per-residue count
+      // a stop disables everything downstream, so it is not a per-residue change
       if (!change || !THREE_LETTER.has(change[3])) {
         continue
       }

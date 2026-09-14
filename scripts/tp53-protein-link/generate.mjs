@@ -1,7 +1,7 @@
 // Builds the TP53 example on the "Genome browser" docs page: the p53 ortholog
-// alignment connected to the human TP53 gene on hg38, opened on the R248 codon —
-// where a wall of ClinVar pathogenic variants piles onto a 100%-conserved
-// alignment column. The MsaView and the LinearGenomeView share coordinates
+// alignment connected to the human TP53 gene on hg38, opened on the R248 codon,
+// where ClinVar pathogenic variants line up with a 100%-conserved alignment
+// column. The MsaView and the LinearGenomeView share coordinates
 // (click a residue -> genome navigates to its codon), the LGV carries a ClinVar
 // pathogenic-variant track, and the link opens with R248 labeled in the
 // alignment (a `highlights` entry in the query row's own residue numbering).
@@ -20,7 +20,7 @@
 
 import { execFileSync } from 'node:child_process'
 
-// Public RefSeq GFF (CSI-indexed) — the same source as the hg38-ncbiRefSeq track
+// Public RefSeq GFF (CSI-indexed), the same source as the hg38-ncbiRefSeq track
 const GFF = 'https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz'
 // TP53 (NM_000546.6 -> NP_000537.3, canonical 393 aa p53), hg38 chr17, - strand
 const TRANSCRIPT = 'NM_000546.6'
@@ -110,13 +110,13 @@ const spec = {
       assembly: 'hg38',
       loc: `${refName}:${fmt(codonStart + 1 - pad)}-${fmt(codonEnd + pad)}`,
       highlight: [`${refName}:${fmt(codonStart + 1)}-${fmt(codonEnd)}`],
-      // codon-frame coloring on the reference sequence so the highlighted R248
-      // codon reads in-frame beside the alignment
+      // codon-frame coloring on the reference sequence, so the highlighted R248
+      // codon shows in frame
       colorByCDS: true,
-      // canonical (RefSeq Select / MANE) transcript only — NM_000546.6, the same
-      // one the protein<->genome map and the alignment use, so the gene-track
-      // codon labels read R248 (the longest isoform would renumber it) and the
-      // deep zoom isn't a stack of overlapping isoforms
+      // canonical (RefSeq Select / MANE) transcript only: NM_000546.6, the one
+      // the protein<->genome map and the alignment use, so the gene-track codon
+      // labels read R248 (the longest isoform would renumber it) and the deep
+      // zoom isn't a stack of overlapping isoforms
       tracks: ['hg38-ncbiRefSeqSelect', CLINVAR_TRACK],
     },
     {

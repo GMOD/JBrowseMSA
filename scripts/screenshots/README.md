@@ -11,9 +11,9 @@ pnpm screenshots:all --filter=braf   # only figures whose name/link matches
 ```
 
 `scripts/screenshots/generate-screenshots.mjs` is the orchestrator. It runs
-three phases, each writing into `docs/media` and each self-gating — a re-render
-only overwrites a committed image when its pixels actually changed (rendering is
-deterministic), so a full regen leaves unchanged figures untouched.
+three phases, each writing into `docs/media`. A re-render overwrites a committed
+image only when its pixels changed (rendering is deterministic), so a full regen
+leaves unchanged figures untouched.
 
 | Phase     | Command                    | What it makes                                                   | Browser?          |
 | --------- | -------------------------- | --------------------------------------------------------------- | ----------------- |
@@ -21,18 +21,18 @@ deterministic), so a full regen leaves unchanged figures untouched.
 | `app`     | `pnpm screenshots`         | demo-app PNGs (color schemes, dialogs, phylogeny gallery)       | yes               |
 | `jbrowse` | `pnpm screenshots:jbrowse` | the genome-browser figures, via the JBrowse plugin              | yes + jbrowse-web |
 
-The `jbrowse` phase needs a running jbrowse-web (the `main` branch). If it isn't
-reachable that phase is **skipped** (not failed), so the self-contained figures
-still regenerate without the jbrowse checkout.
+The `jbrowse` phase needs a running jbrowse-web (the `main` branch). If none is
+reachable the orchestrator skips that phase, so the other figures still
+regenerate without the jbrowse checkout.
 
 ---
 
-## `app` phase — demo-app screenshots
+## `app` phase: demo-app screenshots
 
-Driven by a real browser (`puppeteer-core` + system Chrome). The app reads a
-`?data=` URL param as a JSON model snapshot, so each spec deep-links a fully
+A browser (`puppeteer-core` with the system Chrome) drives this phase. The app
+reads a `?data=` URL param as a JSON model snapshot, so each spec deep-links a
 loaded alignment instead of clicking through the import form. Specs that capture
-menus/dialogs run a few `click`/`waitFor` actions first.
+menus or dialogs run a few `click`/`waitFor` actions first.
 
 ```sh
 node scripts/screenshots/generate.mjs --filter=colorscheme,domains   # subset
@@ -75,9 +75,9 @@ menu items / dialog text are reached with puppeteer's `::-p-text(...)` selector.
 
 ---
 
-## `jbrowse` phase — genome-browser figures
+## `jbrowse` phase: genome-browser figures
 
-These run the react-msaview JBrowse plugin _inside_ a real jbrowse-web, so they
+These figures run the react-msaview JBrowse plugin inside jbrowse-web, so they
 need one running (the `main` branch, for the `LaunchView-LinearGenomeView` id
 forwarding):
 
@@ -88,39 +88,37 @@ pnpm screenshots:jbrowse --plugin-dist=../jbrowse-plugin-msaview/dist   # previe
 ```
 
 The `genome-browser-tp53-protein3d` figure (genome + alignment + AlphaFold
-structure, with a domain lit across all three) additionally needs a local
-`jbrowse-plugin-protein3d` build until its declarative `initialSelection` prop
-is published:
+structure, with a motif highlighted in all three) also needs a local
+`jbrowse-plugin-protein3d` build until its `initialSelection` prop is published:
 
 ```sh
 pnpm screenshots:jbrowse --filter=protein3d --protein3d-dist=../jbrowse-plugin-protein3d/dist
 ```
 
-The figures are **declarative**: each is one entry in the `FIGURES` list in
+Each figure is one entry in the `FIGURES` list in
 [`jbrowse-figures.mjs`](jbrowse-figures.mjs), naming a connected-session const
-in `website/src/pages/gallery.astro` — _the same declarative URL the docs page
-ships_, so the figure and the live link can never drift. A single generic driver
-loads each link and screenshots it.
+in `website/src/pages/gallery.astro`. The driver reads the URL from that file,
+so changing the docs link changes the figure. One generic driver loads each link
+and screenshots it.
 
 ```js
 {
   out: 'genome-browser-braf-v600e', // → docs/media/genome-browser-braf-v600e.png
   link: 'brafV600',                 // const name in gallery.astro
   settle: 9000,                     // ms to let tracks paint
-  centerHighlight: true,            // scroll the MSA so the lit column is centered
+  centerHighlight: true,            // scroll the MSA to center the highlighted column
   expect: { connected: true, colChar: 'V' }, // assertions (fail = no screenshot)
 }
 ```
 
-`expect` makes the figure self-checking: the connected view must resolve and the
-pre-highlighted query column must read the named residue, or the capture fails —
-a broken link can't ship a screenshot of itself.
+With `expect`, the connected view must resolve and the highlighted query column
+must read the named residue, or the script captures no PNG and fails.
 
-To reflect the **exact repo state** rather than what's deployed, the driver
-serves `packages/app/public/data` itself and loads a locally-rewritten config
-(all gmod.org URLs → the local server), so a fresh `braf-clinvar` VCF or a
-bumped plugin shows up before deploy. `--plugin-dist=<path>` additionally serves
-a local plugin build in place of the published `latest` bundle.
+To capture the repo state instead of what gmod.org serves, the driver serves
+`packages/app/public/data` itself and loads a locally rewritten config (all
+gmod.org URLs → the local server), so a fresh `braf-clinvar` VCF or a bumped
+plugin shows up before deploy. `--plugin-dist=<path>` also serves a local plugin
+build in place of the published `latest` bundle.
 
 | Flag                 | Effect                                                               |
 | -------------------- | -------------------------------------------------------------------- |
@@ -132,25 +130,22 @@ a local plugin build in place of the published `latest` bundle.
 
 ### Standalone: the F12 genome figure
 
-`docs/media/genome-browser-f12.png` (the genomic-coordinate complement to the
-F12 gene-loss MSA figures) is a plain genome view — no connected MSA — so it
-captures against the **published** jbrowse-web, with no local build:
+`docs/media/genome-browser-f12.png` shows the F12 locus in genomic coordinates,
+beside the F12 gene-loss MSA figures. It is a plain genome view with no
+connected MSA, so it captures against the **published** jbrowse-web with no
+local build:
 
 ```sh
 node scripts/screenshots/f12-genome-figure.mjs --force
 ```
 
-It defaults to `https://jbrowse.org/code/jb2/main` and the hosted combined
-config; the session URL mirrors the `f12Genome` link in `gallery.astro`.
+The script defaults to `https://jbrowse.org/code/jb2/main` and the hosted
+combined config; its session URL matches the `f12Genome` link in
+`gallery.astro`.
 
 ---
 
 Image diffing/optimization ([`image-pipeline.mjs`](image-pipeline.mjs)) shells
-out to ImageMagick (`compare`/`identify`) and `pngquant`; each is best-effort
-and degrades gracefully if the tool is missing.
-`pnpm --filter website sync-media` copies `docs/media` into the site's
-`public/media` at build time.
-
-```
-
-```
+out to ImageMagick (`compare`/`identify`) and `pngquant`, and skips a step whose
+tool is missing. `pnpm --filter website sync-media` copies `docs/media` into the
+site's `public/media` at build time.

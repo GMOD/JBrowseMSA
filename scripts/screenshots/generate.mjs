@@ -1,6 +1,6 @@
 /**
  * Automated screenshots of the demo app for docs/user_guide.md, driven by a
- * real browser (puppeteer-core + the system Chrome — no bundled download).
+ * browser (puppeteer-core with the system Chrome, no bundled download).
  *
  * Usage:
  *   pnpm screenshots                          build the app, capture every spec
@@ -12,7 +12,7 @@
  * It serves packages/app/dist statically, navigates the app per spec
  * (scripts/screenshots/specs.mjs), runs any click/wait actions, captures each
  * spec to a temp PNG, optimizes it, then writes docs/media/<name>.png only when
- * the content actually changed (see image-pipeline.mjs). Build the app first
+ * the content changed (see image-pipeline.mjs). Build the app first
  * (the pnpm script does this).
  */
 import { execFileSync } from 'node:child_process'
@@ -74,9 +74,9 @@ async function runAction(page, action) {
   }
 }
 
-// Fail a spec whose viewer body rendered empty — the app shell always paints
-// its border box, so a header-but-no-content capture still "succeeds" and slips
-// through review. A healthy viewer (import form included) fills its body.
+// Fail a spec whose viewer body rendered empty. The app shell always paints its
+// border box, so a capture with a header and no content would otherwise pass.
+// A loaded viewer (import form included) fills its body.
 async function assertViewerRendered(page, name) {
   const empty = await page.evaluate(() => {
     const box = document.querySelector('[data-testid="msaview"]')
@@ -88,7 +88,7 @@ async function assertViewerRendered(page, name) {
 }
 
 // Freeze CSS transitions/animations so MUI menu/dialog fly-outs snap to their
-// settled state, then wait for the browser to actually rasterize the current
+// settled state, then wait for the browser to rasterize the current
 // DOM (a single rAF fires before paint; two chained rAFs guarantee a committed
 // frame, and the trailing timeout gives a freshly-composited portal layer a
 // beat to paint) before capturing.
@@ -145,7 +145,7 @@ async function renderSpecToTemp(browser, spec, suffix = '') {
     await delay(spec.settle ?? 1200)
     await assertViewerRendered(page, spec.name)
     // after the settle, so a col/row anchor resolves against the geometry the
-    // capture will actually show
+    // capture shows
     await applyAnnotations(page, spec.annotations, spec.name)
     const tmp = tmpShot(spec.name, suffix)
     await shoot(page, spec, tmp)
@@ -176,8 +176,7 @@ async function captureSpec(executablePath, spec, partFiles) {
   try {
     const tmp = await renderSpecToTemp(browser, spec)
     // A `part` spec exists only to be stacked into a compose spec, so it keeps
-    // its capture in temp and commits no PNG of its own — docs/media holds
-    // finished figures, not the halves they were built from.
+    // its capture in temp and writes no PNG to docs/media.
     if (spec.part) {
       partFiles.set(spec.name, tmp)
       return
@@ -195,7 +194,7 @@ async function captureSpec(executablePath, spec, partFiles) {
 // Stack a compose spec's already-captured parts into one figure. ImageMagick
 // pads the narrower part to the wider one's width, so parts that differ in
 // width (an unaligned block is fewer columns than the alignment built from it)
-// stack left-aligned rather than being rescaled.
+// stack left-aligned without rescaling.
 function composeSpec(spec, partFiles) {
   console.log(`→ ${spec.name} (compose)`)
   const missing = spec.parts.filter(p => !partFiles.has(p))

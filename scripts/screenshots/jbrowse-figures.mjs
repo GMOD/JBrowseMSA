@@ -1,36 +1,37 @@
 /**
- * Capture the JBrowse-integration figures for the "Genome browser" docs page,
- * declaratively. Each figure is one entry in the FIGURES list below: it names a
- * docs link (a connected-session const in gallery.astro — the same declarative URL
- * the page ships, so figure and link can never drift) plus a few capture knobs
- * (settle time, whether to center the highlighted column, what to assert, an
- * optional annotation overlay). A single generic driver loads each link in a
- * real jbrowse-web and screenshots it; there is no per-figure imperative script.
+ * Capture the JBrowse-integration figures for the "Genome browser" docs page.
+ * Each figure is one entry in the FIGURES list below: it names a docs link (a
+ * connected-session const in gallery.astro, read from the page so a changed
+ * link changes the figure) plus a few capture settings (settle time, whether to
+ * center the highlighted column, what to assert, an optional annotation
+ * overlay). One generic driver loads each link in jbrowse-web and screenshots
+ * it.
  *
  *   genome-browser-src.png, genome-browser-braf-v600e.png,
  *   genome-browser-tp53-r248.png   (the connected protein<->genome links)
  *   genome-browser-tp53-protein3d.png  (the three-view genome+alignment+3D
- *                                       structure link, with a domain lit across
- *                                       all three — needs jbrowse-plugin-protein3d)
+ *                                       structure link, with a motif highlighted
+ *                                       in all three; needs
+ *                                       jbrowse-plugin-protein3d)
  *
  * Unlike the app screenshots (scripts/screenshots/generate.mjs, which serves the
- * self-contained demo app), these run the react-msaview JBrowse plugin *inside*
- * a real jbrowse-web. That needs a running jbrowse-web built from main
+ * self-contained demo app), these run the react-msaview JBrowse plugin inside
+ * jbrowse-web. That needs a running jbrowse-web built from main
  * (LaunchView-LinearGenomeView id forwarding); the orchestrator
- * (generate-screenshots.mjs) points us at it via --jbrowse-url.
+ * (generate-screenshots.mjs) passes its address via --jbrowse-url.
  *
- * To reflect the exact repo state (not whatever is deployed to gmod.org), we
- * serve packages/app/public/data ourselves and load a *locally rewritten* copy
- * of jbrowse-msa-combined-config.json with every gmod.org data URL pointed at
- * that local server. So a fresh braf-clinvar VCF or a bumped plugin `latest`
- * shows up here before it is deployed (and --plugin-dist / --protein3d-dist swap
- * in a local msaview / protein3d build to preview a not-yet-published change —
- * the protein3d figure's declarative `initialSelection` needs the latter until
- * it is published).
+ * To capture the repo state instead of what gmod.org serves, the script serves
+ * packages/app/public/data itself and loads a locally rewritten copy of
+ * jbrowse-msa-combined-config.json with every gmod.org data URL pointed at that
+ * local server. A fresh braf-clinvar VCF or a bumped plugin `latest` therefore
+ * shows up before it is deployed. --plugin-dist and --protein3d-dist swap in a
+ * local msaview or protein3d build to preview an unpublished change; the
+ * protein3d figure's `initialSelection` needs the local protein3d build until
+ * it is published.
  *
  * The `expect` block on a figure is an assertion: the connected view must
- * resolve and the pre-highlighted column must carry the named residue, or the
- * capture fails — so a broken link can't silently ship a screenshot of itself.
+ * resolve and the highlighted column must carry the named residue, or the
+ * script captures no PNG and fails.
  *
  * Usage (normally via `pnpm screenshots:all`, but standalone too):
  *   node scripts/screenshots/jbrowse-figures.mjs --jbrowse-url=http://localhost:3000
@@ -76,7 +77,7 @@ const CONFIG_NAME = 'jbrowse-msa-combined-config.json'
 const LOCAL_CONFIG_NAME = 'jbrowse-msa-combined-config.local.json'
 const PLUGIN_BUNDLE = 'jbrowse-plugin-msaview.umd.production.min.js'
 // the published plugin URL the committed config points at; --plugin-dist swaps
-// this for a locally-served build so a not-yet-published plugin fix shows up
+// this for a locally served build so an unpublished plugin fix shows up
 const PLUGIN_PUBLISHED =
   'https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/dist/' +
   PLUGIN_BUNDLE
@@ -105,11 +106,11 @@ const protein3dPort = numOpt('protein3d-port', 9101)
 const filterTokens = listOpt('filter')
 
 // ---- the figures (declarative) --------------------------------------------
-// link:           connected-session const name in gallery.astro (the shipped
-//                 declarative URL — single source of truth for the figure)
+// link:           connected-session const name in gallery.astro, whose URL the
+//                 figure loads
 // settle:         ms to wait for tracks to paint before capturing
 // centerHighlight:scroll the alignment so the pre-highlighted column is centered
-// expect:         assertions — { connected, colChar } (colChar is the residue
+// expect:         assertions: { connected, colChar } (colChar is the residue
 //                 the highlighted query column must read)
 const FIGURES = [
   {
@@ -133,10 +134,10 @@ const FIGURES = [
     expect: { connected: true, colChar: 'R' },
   },
   {
-    // the flagship three-view figure: genome + alignment + AlphaFold structure,
-    // all connected, opened with the p53 DNA-binding domain pre-highlighted.
-    // longer settle: protein3d downloads the AlphaFold model, inits molstar, and
-    // computes the structure<->transcript alignment before the selection lights.
+    // the three-view figure: genome + alignment + AlphaFold structure, all
+    // connected, opened with the p53 nuclear export signal motif highlighted.
+    // Longer settle: protein3d downloads the AlphaFold model, inits molstar, and
+    // computes the structure<->transcript alignment before the selection draws.
     out: 'genome-browser-tp53-protein3d',
     link: 'tp53Protein3d',
     settle: 30000,
@@ -146,8 +147,8 @@ const FIGURES = [
     centerHighlight: true,
     expect: { connected: true },
     // assert the ProteinView resolved its connected genome view and the domain
-    // selection was applied declaratively (clickedStructureRange seeded from
-    // initialSelection), so a broken wiring can't ship a screenshot of itself
+    // selection was applied (clickedStructureRange seeded from
+    // initialSelection)
     expectProtein: { connected: true, selected: true },
   },
 ]
@@ -178,9 +179,9 @@ function decodeSpec(url) {
 
 // Rewrite the committed combined config so every gmod.org data URL points at the
 // local data server, and write it next to the original (served at /<name>). When
-// pluginUrl is given (--plugin-dist), the published `latest` plugin URL is also
-// swapped for it, so a not-yet-published plugin fix is exercised; otherwise the
-// figure loads the same published plugin the docs link does.
+// pluginUrl is given (--plugin-dist), it also replaces the published `latest`
+// plugin URL; otherwise the figure loads the published plugin the docs link
+// does.
 function writeLocalConfig(dataBase, pluginUrl, protein3dUrl) {
   let raw = fs.readFileSync(path.join(dataDir, CONFIG_NAME), 'utf8')
   raw = raw.replaceAll(GMOD_DATA, dataBase)
@@ -227,8 +228,8 @@ async function shootAndCommit(page, outName) {
 }
 
 // Read the MSA model state for the assertions, and (when asked) scroll the
-// alignment so the pre-highlighted column is centered — otherwise the figure
-// opens on the N-terminus with the lit column (the whole point) off-screen.
+// alignment so the highlighted column is centered; otherwise the figure opens
+// on the N-terminus with the highlighted column off-screen.
 function inspectAndCenter(page, { expectCol, centerCol, queryName, center }) {
   return page.evaluate(
     (expectCol, centerCol, queryName, center) => {
@@ -322,7 +323,7 @@ async function captureFigure(browser, fig, ctx, links) {
 
   const page = await browser.newPage()
   // a figure can override the viewport (the three-view protein3d figure is
-  // taller — it stacks a genome view, an alignment, and the 3D structure)
+  // taller, with a genome view, an alignment and the 3D structure)
   await page.setViewport({
     width: 1600,
     height: 1135,
@@ -369,7 +370,7 @@ async function main() {
     filterTokens.length === 0 ||
     filterTokens.some(t => fig.out.includes(t) || fig.link.includes(t))
 
-  // jbrowse-web must be up — these figures can't render without it
+  // these figures need a running jbrowse-web
   const reachable = await fetch(`${jbrowseBase}/`, { method: 'HEAD' })
     .then(r => r.ok || r.status < 500)
     .catch(() => false)
@@ -435,9 +436,7 @@ async function main() {
   const failures = []
   try {
     for (const fig of FIGURES.filter(wants)) {
-      // a figure whose docs link was removed from gallery.astro is
-      // skipped, not failed — the page is the source of truth for which
-      // examples exist
+      // skip a figure whose docs link is no longer in gallery.astro
       if (!links[fig.link]) {
         console.log(`↷ ${fig.out} (no '${fig.link}' link in the docs; skipped)`)
         continue

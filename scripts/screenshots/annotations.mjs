@@ -1,32 +1,31 @@
 /**
- * Callout overlay for the screenshot specs: the red arrows / boxes / labels a
- * hand-made teaching figure uses, drawn as an SVG over the page just before
- * capture so they composite into the PNG with no external image editor.
+ * Callout overlay for the screenshot specs: red arrows, boxes and labels drawn
+ * as an SVG over the page just before capture, so they composite into the PNG
+ * with no external image editor.
  *
  * Ported from jbrowse-components' packages/browser-test-utils/annotationOverlay
  * (same colors, arrow geometry and pill styling, so figures from the two repos
- * read as one set), trimmed to what these figures need and with one anchor kind
- * this repo has and that one doesn't: an ALIGNMENT COLUMN.
+ * match), trimmed to what these figures need, plus one anchor kind that one
+ * lacks: an alignment column.
  *
- * ANCHOR, DON'T MEASURE. A callout pointing at "the PYD block" wants to track
- * the PYD block. Written as a raw pixel it is correct only for the viewport
- * width, colWidth and scroll position it was measured against, and nothing tells
- * you when one of those changes — the figure just quietly develops an arrow
- * pointing at the wrong domain. Three anchor kinds resolve at capture time:
+ * Anchors resolve at capture time. A raw pixel coordinate stays correct only
+ * for the viewport width, colWidth and scroll it was measured at, and when one
+ * of those changes the arrow points at the wrong domain with no error. The
+ * three anchor kinds:
  *
- *   col/row  MODEL anchoring. Reads window.MSAVIEW_MODEL (published by
+ *   col/row  model anchoring. Reads window.MSAVIEW_MODEL (published by
  *            packages/app/src/App.tsx) for colWidth/rowHeight/scrollX/scrollY
  *            and the [data-testid="msa_canvas"] viewport rect, which is the
  *            same origin MSACanvasBlock positions its blocks against. Prefer
  *            this for anything pointing at the alignment.
  *   selector  the first matching element.
- *   text      the smallest-area element whose visible text matches — for menu
+ *   text      the smallest-area element whose visible text matches, for menu
  *             items and buttons with no testid.
  *
- * drawAnnotationOverlay runs in PAGE CONTEXT (puppeteer serializes it to
- * source), so it takes no imports and closes over nothing; it returns the
- * anchors that resolved to nothing, which the caller turns into a thrown error
- * rather than shipping a figure with a callout parked at the origin.
+ * drawAnnotationOverlay runs in page context (puppeteer serializes it to
+ * source), so it takes no imports and closes over nothing. It returns the
+ * anchors that resolved to nothing, and the caller throws on them instead of
+ * capturing a callout parked at the origin.
  */
 
 export const ANNOTATION_OVERLAY_ID = '__msa_annotation_overlay'
@@ -43,8 +42,8 @@ export function drawAnnotationOverlay(items, overlayId) {
     'position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483647;pointer-events:none',
   )
   // attached before anything is drawn into it: getComputedTextLength (used to
-  // size the label pills) returns 0 on a detached SVG, which silently collapses
-  // every pill to a 20px stub instead of failing
+  // size the label pills) returns 0 on a detached SVG, which collapses every
+  // pill to a 20px stub with no error
   document.body.append(svg)
   const defs = document.createElementNS(NS, 'defs')
   svg.append(defs)
@@ -72,25 +71,23 @@ export function drawAnnotationOverlay(items, overlayId) {
   }
 
   // The MSA viewport rect plus the model geometry, read once. Absent when a
-  // spec annotates a page with no alignment loaded (the import form), which is
-  // why every col/row anchor reports itself unresolved rather than throwing.
+  // spec annotates a page with no alignment loaded (the import form), so every
+  // col/row anchor then reports itself unresolved instead of throwing.
   function msaFrame() {
     const el = document.querySelector('[data-testid="msa_canvas"]')
     const model = window.MSAVIEW_MODEL
     return el && model ? { rect: el.getBoundingClientRect(), model } : undefined
   }
 
-  // An alignment column span (and optionally a row span, named by row LABEL) ->
+  // An alignment column span (and optionally a row span, named by row label) ->
   // viewport rect.
   //
-  // Columns use the same arithmetic MSACanvasBlock uses to place a block
+  // Columns use the arithmetic MSACanvasBlock uses to place a block
   // (left: scrollX + offsetX). Rows are named by label and resolved through
-  // model.leaves, because the rendered row order is the TREE's, not the input
-  // file's — writing a row index in a spec would encode a topology that
-  // re-running the aligner can legitimately change. The band of a leaf is
-  // [node.x - rowHeight/2, +rowHeight] in container space, which is what
-  // renderMSABlock draws to (tileY = node.x - rowHeight, under a
-  // translate(0, rowHeight/2)).
+  // model.leaves, because the rendered row order follows the tree, and
+  // re-running the aligner can change the tree. The band of a leaf is
+  // [node.x - rowHeight/2, +rowHeight] in container space, where renderMSABlock
+  // draws it (tileY = node.x - rowHeight, under a translate(0, rowHeight/2)).
   function resolveColRow(anchor) {
     const frame = msaFrame()
     if (!frame) {
@@ -103,11 +100,10 @@ export function drawAnnotationOverlay(items, overlayId) {
     const left = rect.left + col * colWidth + scrollX
     const width = (colEnd - col + 1) * colWidth
 
-    // Rows default to the full extent of the DRAWN ROWS, not the viewport: the
-    // MSA panel is as tall as `height` says, so a 12-row alignment in a 430px
-    // panel leaves whitespace below, and defaulting to the container would put
-    // a `alignY: 'bottom'` label off the bottom of the frame and draw a box
-    // around a lot of nothing.
+    // Rows default to the extent of the drawn rows. The MSA panel is as tall as
+    // `height`, so a 12-row alignment in a 430px panel leaves whitespace below,
+    // and defaulting to the container would put an `alignY: 'bottom'` label off
+    // the bottom of the frame and draw a box around empty space.
     const leaves = model.leaves
     const first =
       anchor.rowLabel === undefined
@@ -309,9 +305,8 @@ export function drawAnnotationOverlay(items, overlayId) {
   return unresolved
 }
 
-// Draw a spec's callouts, and fail the capture if any anchor found nothing —
-// an unresolved anchor means the thing the figure is about moved or went away,
-// which is exactly when a stale figure would otherwise ship.
+// Draw a spec's callouts, and fail the capture if any anchor found nothing,
+// since an unresolved anchor means the target moved or went away.
 export async function applyAnnotations(page, annotations, specName) {
   if (!annotations?.length) {
     return

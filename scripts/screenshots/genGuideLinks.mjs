@@ -4,8 +4,8 @@
  * `?data=` URL-param API. The screenshot specs are the single source of truth,
  * so the live links stay in lockstep with the figures.
  *
- * Only emits definitions for the `[live-*]` refs the guide actually uses (the
- * specs are a superset — some feed other docs), so growing specs.mjs never
+ * Only emits definitions for the `[live-*]` refs the guide uses (the
+ * specs are a superset, and some feed other docs), so growing specs.mjs never
  * bloats the guide with unused links. Errors if the guide references a figure
  * with no matching spec.
  *
@@ -36,10 +36,10 @@ if (missing.length) {
     `guide references figures with no spec: ${missing.join(', ')}`,
   )
 }
-// A compose spec has no url of its own — it stacks other specs' captures — so a
-// live link for one would silently resolve to the bare demo app instead of the
+// A compose spec has no url of its own (it stacks other specs' captures), so a
+// live link for one would resolve to the bare demo app instead of the
 // state the figure shows. Embed those figures without a [live-*] ref.
-// (url: '' is a real state — the import form is the demo app's landing page —
+// (url: '' is a real state, the import form on the demo app's landing page,
 // so this tests for the absent url of a compose spec, not a falsy one)
 const composed = unique.filter(
   n => specs.find(s => s.name === n)?.url === undefined,

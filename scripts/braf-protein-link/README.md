@@ -22,9 +22,9 @@ views:
 - an `MsaView` whose `connectedViewId` points at that id, plus a
   `connectedFeature` (the BRAF transcript model for the codon mapping),
   `querySeqName: BRAF_HUMAN`, and
-  `highlights: [{ row: "BRAF_HUMAN", start: 600, end: 600, label: "V600" }]` —
-  residue 600 in the query row's own numbering; the viewer projects it through
-  the alignment's gaps, so nothing here depends on a column index.
+  `highlights: [{ row: "BRAF_HUMAN", start: 600, end: 600, label: "V600" }]`,
+  residue 600 in the query row's own numbering. The viewer projects it through
+  the alignment's gaps, so the link needs no column index.
 
 The `LinearGenomeView` also sets `colorByCDS: true` (codon-frame colouring on
 the reference sequence) and overrides the gene-track display with
@@ -47,8 +47,8 @@ spec `id` to `LaunchView-LinearGenomeView` so `connectedViewId` resolves) and
 ## connectedFeature + codon coordinate provenance
 
 `genomeToTranscriptSeqMapping` only needs
-`{ refName, strand, subfeatures: [{ type: 'CDS', start, end, phase }] }`. We
-derive those from the **same public RefSeq GFF the gene track uses**
+`{ refName, strand, subfeatures: [{ type: 'CDS', start, end, phase }] }`. The
+script derives those from the **public RefSeq GFF the gene track uses**
 (`https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz`), converting GFF 1-based
 coordinates to JBrowse 0-based interbase (`start-1, end`). BRAF `NM_004333.6` is
 18 CDS = 2298 bp = 766 codons, matching `BRAF_HUMAN`. The script also walks the
@@ -77,5 +77,4 @@ node scripts/braf-protein-link/generate.mjs       # prints the declarative URL
 ```
 
 Requires `tabix`/`bgzip` (htslib) on PATH for the remote RefSeq + ClinVar
-fetches. The printed URL is the value pasted into
-`website/src/lib/jbrowseLinks.ts`.
+fetches. The printed URL goes in `website/src/lib/jbrowseLinks.ts`.

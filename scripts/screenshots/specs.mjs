@@ -3,22 +3,22 @@
 // either the viewer container (clip: 'viewer') or the whole viewport (for menus
 // and dialogs that render in portals outside the viewer).
 //
-// The app reads a `?data=` URL param as a JSON model snapshot, so we can
-// deep-link a fully loaded alignment instead of driving the import form.
+// The app reads a `?data=` URL param as a JSON model snapshot, so a spec can
+// deep-link a loaded alignment without driving the import form.
 
 import fs from 'node:fs'
 
 import { hasData, readJson } from './exampleConsts.mjs'
 import { fileSnap } from './snap.mjs'
 
-// The phylogeny examples (MyD88/globin/ACE2/opsins/…) are real datasets built
-// reproducibly into the examples package by scripts/examples-gen. The opsin
-// domain GFF is an out-of-band InterProScan product (see
-// scripts/examples-gen/README.md); keep the opsin spec out until it's present.
+// scripts/examples-gen builds the phylogeny example data (MyD88, globin, ACE2,
+// opsins, ...). `react-msaview-cli interpro` produces the opsin domain GFF
+// separately (see scripts/examples-gen/README.md), so the opsin spec runs only
+// when that file is present.
 const hasOpsinDomains = hasData('opsins-domains.gff')
 
-// Layers the examples import as JSON and the specs draw from the same file, so
-// a regenerated layer reaches the figure and the live example together.
+// The examples import these JSON layers too, so a regenerated layer updates the
+// figure and the live example together.
 const sickle = readJson('hemoglobinSickle.json')
 const ace2Interface = readJson('ace2Interface.json')
 const p53ClinVar = readJson('p53ClinVar.json')
@@ -69,9 +69,8 @@ export const specs = [
   },
   {
     name: 'sequence-logo',
-    // the logo track ships hidden, and `turnedOffTracks` holds the user's
-    // explicit choice with the value meaning "off" -- so `false` is how a
-    // deep-link turns it on, which is also what this exercises
+    // the logo track is hidden by default, and a `turnedOffTracks` value of
+    // false turns it on from a deep link
     url: data({
       colorSchemeName: 'maeditor',
       height: 260,
@@ -80,20 +79,15 @@ export const specs = [
     clip: 'viewer',
   },
   {
-    // Was 'settings-dialog', driving file menu -> "More settings" -> a modal
-    // with "Tree options"/"MSA options" sections. That dialog is gone: Header
-    // now renders TreeSettingsMenu and MSASettingsMenu as their own dropdowns
-    // (the combined SettingsMenu.tsx isn't mounted at all), so the old spec had
-    // been failing on a menu item that exists nowhere in the source.
     name: 'settings-menu',
     url: data({ colorSchemeName: 'maeditor' }),
     actions: [
       { click: '[data-testid="msa_settings_menu"]' },
       { waitFor: '::-p-text(Draw letters)' },
     ],
-    // clip: 'full' is required (the menu renders in a portal outside the
-    // viewer), so the viewport is sized to the content instead — a four-item
-    // dropdown in the default 720px frame is mostly empty space.
+    // clip: 'full' is required because the menu renders in a portal outside
+    // the viewer, so the viewport is sized to the content; a four-item dropdown
+    // in the default 720px frame is mostly empty space.
     viewportHeight: 380,
     clip: 'full',
   },
@@ -116,13 +110,12 @@ export const specs = [
   },
   {
     name: 'domain-loss',
-    // whole 1666-column alignment on screen (colWidth < 1) so the architecture
-    // reads as blocks: every row carries the NACHT/WH/HD2 + FIIND/UPA/CARD core
-    // in the same columns, and the N-terminal PYD block is present in only five
-    // of the twelve rows — the gap under it is the missing module.
-    // Wider viewport + colWidth chosen so 1666 columns end left of the domain
-    // legend (absolutely positioned top-right, 260px), which would otherwise
-    // cover the C-terminal CARD block that completes the shared core.
+    // whole 1666-column alignment on screen (colWidth < 1) so the domains show
+    // as blocks: every row carries the NACHT/WH/HD2 + FIIND/UPA/CARD core in the
+    // same columns, and the N-terminal PYD block is present in only five of the
+    // twelve rows. The viewport and colWidth end the 1666 columns left of the
+    // domain legend (absolutely positioned top-right, 260px), which would
+    // otherwise cover the C-terminal CARD block.
     viewportWidth: 1600,
     url: fileSnap({
       height: 340,
@@ -136,22 +129,19 @@ export const specs = [
     settle: 2000,
     clip: 'viewer',
   },
-  // The controlled pair behind docs/media/column-lock.png. Same twelve
-  // sequences, same domain GFF, same component, same palette, same tree (so the
-  // rows sit in the same order in both). The ONLY difference is whether the
-  // input was aligned — which is exactly the variable the figure is about.
+  // The controlled pair behind docs/media/column-lock.png. Both panels use the
+  // same twelve sequences, domain GFF, component, palette and tree (so the rows
+  // sit in the same order), and differ only in whether the input was aligned.
   //
   // colWidth is set per panel so both span the same ~1166px (1666 aligned
-  // columns vs 1537 unaligned), putting the two x-axes on a common scale: each
-  // panel spans the full extent of its own data, which is how the comparison
-  // would be drawn by hand.
+  // columns vs 1537 unaligned), each covering the full extent of its own data.
   {
     name: 'column-lock-residues',
     part: true,
     viewportWidth: 1600,
-    // No gaps inserted, so column N is residue N: this draws each protein's
-    // domains against its own residue ruler, anchored at residue 1 — what a
-    // domain-architecture cartoon shows.
+    // No gaps inserted, so column N is residue N and each protein's domains
+    // sit on its own residue ruler from residue 1, as in a domain-architecture
+    // cartoon.
     url: fileSnap({
       height: 390,
       treeAreaWidth: 150,
@@ -204,16 +194,14 @@ export const specs = [
   {
     name: 'domain-loss-closeup',
     // Base resolution at the PYD block's left edge (alignment column 38), to
-    // substantiate what the overview only asserts: the seven rows without a PYD
-    // are not empty there. Mouse is mostly gap but Cow and Zebrafish carry real
-    // residues — they simply have no pyrin domain called over them. An overview
-    // drawn at colWidth 0.7 cannot show that, and a figure that claimed
-    // "missing sequence" instead of "no domain annotated" would be wrong.
+    // show that the seven rows without a PYD still have residues there. Mouse
+    // is mostly gap, but Cow and Zebrafish carry residues with no pyrin domain
+    // called over them. At colWidth 0.7 the overview cannot tell "missing
+    // sequence" from "no domain annotated".
     viewportWidth: 1600,
     // tall enough for all 12 rows plus the label: zoomed in, the minimap and
-    // both conservation tracks take ~180px before the first row, and Hedgehog
-    // (the last row, and one of the five that HAS a PYD) is the one a short
-    // panel drops
+    // both conservation tracks take ~180px before the first row, and a shorter
+    // panel drops Hedgehog (the last row, and one of the five with a PYD)
     viewportHeight: 900,
     url: fileSnap({
       height: 520,
@@ -242,16 +230,15 @@ export const specs = [
   },
   {
     name: 'pfam-scale',
-    // The whole Globin family (PF00042) straight from the InterPro API: 20,705
-    // rows x 672 columns, 3 MB gzipped on the wire, 20 MB of Stockholm once
-    // decompressed. This spec and the a3m one below are the only two that fetch
-    // from the internet rather than from the served app -- the point of both is
-    // that the file is the one its source publishes, not a prepared copy.
+    // The whole Globin family (PF00042) from the InterPro API: 20,705 rows x
+    // 672 columns, 3 MB gzipped on the wire, 20 MB of Stockholm decompressed.
+    // This spec and the a3m specs below fetch from the internet instead of the
+    // served app, loading each file exactly as its source publishes it.
     // rowHeight 2 puts ~250 rows on screen at once. allowedGappyness 50 drops
-    // the 556 columns that are at least half gaps -- a Pfam full alignment
-    // gives every insertion its own columns and at this depth most belong to
-    // one sequence -- leaving the 116 columns of the fold itself, at a colWidth
-    // that fills the frame. A narrow tree gutter: there is no tree, and row
+    // the 556 columns that are at least half gaps (a Pfam full alignment gives
+    // every insertion its own columns, and at this depth most belong to one
+    // sequence), leaving the 116 columns of the fold at a colWidth that fills
+    // the frame. The tree gutter is narrow because there is no tree and row
     // labels cannot draw at a 2px row.
     viewportWidth: 1600,
     url: fileSnap({
@@ -269,16 +256,14 @@ export const specs = [
     clip: 'viewer',
   },
   // The A3M pair: the same OpenProteinSet alignment drawn twice, differing only
-  // in whether the insert columns are hidden. That is what A3M's raggedness
-  // costs -- 1,186 of the 1,207 rows carry an insertion, and expanding them
-  // into a rectangle spreads the query's 146 match columns over 2,086.
+  // in whether the insert columns are hidden. 1,186 of the 1,207 rows carry an
+  // insertion, and expanding them into a rectangle spreads the query's 146
+  // match columns over 2,086.
   {
     name: 'a3m-inserts-raw',
     part: true,
     viewportWidth: 1500,
-    // Fetched from OpenProteinSet rather than the served app, as the pfam spec
-    // is from InterPro: the point of both is the file as its source publishes
-    // it.
+    // fetched from OpenProteinSet (see the pfam spec)
     url: fileSnap({
       height: 330,
       treeAreaWidth: 130,
@@ -296,8 +281,8 @@ export const specs = [
         type: 'text',
         text: 'AS PARSED — 2,086 columns, because every insertion gets its own',
         fontSize: 16,
-        // absolute, not anchored to the rows: 1,207 rows at 1.5px reach far
-        // below a 330px panel, so a row-anchored label would land off-frame
+        // absolute positioning: 1,207 rows at 1.5px reach far below a 330px
+        // panel, so a row-anchored label would land off-frame
         maxWidth: 900,
         x: 200,
         y: 330,
@@ -309,7 +294,7 @@ export const specs = [
     part: true,
     viewportWidth: 1500,
     // allowedGappyness 50 keeps the 129 columns where at least half the rows
-    // have a residue, which is the profile the search was run against.
+    // have a residue: the profile the search was run against.
     url: fileSnap({
       height: 330,
       treeAreaWidth: 130,
@@ -380,9 +365,9 @@ export const specs = [
   },
   {
     name: 'reference-dots',
-    // relativeTo=Human: identical residues render as ".", so the lineage-
-    // specific MyD88 substitutions (and the bat clade) stand out next to the
-    // inferred tree. Readable column width so the dots/letters are legible.
+    // relativeTo=Human: identical residues render as ".", leaving the
+    // lineage-specific MyD88 substitutions (and the bat clade) as letters next
+    // to the inferred tree, at a column width wide enough to read them.
     url: fileSnap({
       height: 460,
       treeAreaWidth: 150,
@@ -396,7 +381,7 @@ export const specs = [
   },
   {
     name: 'gene-duplication',
-    // globin family: the tree groups by globin TYPE across species, the
+    // globin family: the tree groups by globin type across species, the
     // signature of gene duplication
     url: fileSnap({
       height: 420,
@@ -413,9 +398,9 @@ export const specs = [
     name: 'sickle-cell',
     // The globins with the two layers the sickle-cell example carries: the
     // AlphaMissense per-residue mean over the hemoglobin beta row, and a band
-    // on the substitution itself -- row residue 7, which is 1A3N residue 6, a
-    // conversion the shipped SIFTS mapping is what makes. Zoomed to the start
-    // of the beta chain so the band is legible rather than a hairline.
+    // on the substitution at row residue 7, which the shipped SIFTS mapping
+    // converts to 1A3N residue 6. Zoomed to the start of the beta chain so the
+    // band is wider than a hairline.
     url: fileSnap({
       height: 480,
       treeAreaWidth: 215,
@@ -448,9 +433,9 @@ export const specs = [
     }),
     settle: 2500,
     clip: 'viewer',
-    // The band is one column wide under a full-color alignment, so the callout
-    // is what makes it findable in a still. Anchored to the cell, not a pixel:
-    // 0-based column 21 of the Human_beta row is its residue 7.
+    // The band is one column wide under a full-color alignment, so the figure
+    // adds a callout box around it, anchored to the cell: 0-based column 21 of
+    // the Human_beta row is its residue 7.
     annotations: [
       {
         type: 'box',
@@ -498,8 +483,8 @@ export const specs = [
     ? [
         {
           name: 'opsin-classes',
-          // vertebrate opsins: tree sorts by opsin class, with the real
-          // InterProScan 7TM-GPCR domain overlay across each sequence
+          // vertebrate opsins: tree sorts by opsin class, with the InterPro
+          // 7TM-GPCR domain overlay across each sequence
           url: fileSnap({
             height: 420,
             treeAreaWidth: 200,
@@ -560,11 +545,10 @@ export const specs = [
   },
   {
     name: 'within-protein-conservation',
-    // p53 with its InterProScan domains overlaid (diffed against human): the
-    // overlay maps the functional architecture onto the alignment — the central
-    // DNA-binding domain dominates, flanked by the short N-terminal motifs, with
-    // the reference diff showing as dots in the unannotated linkers. Domains
-    // read better at this whole-protein zoom than the raw rainbow ever could.
+    // p53 with its InterPro domains overlaid, diffed against human: the
+    // central DNA-binding domain covers most of the protein, flanked by the
+    // short N-terminal motifs, and the unannotated linkers show the reference
+    // diff as dots.
     url: fileSnap({
       height: 480,
       treeAreaWidth: 175,
@@ -583,7 +567,7 @@ export const specs = [
     // tRNA (Rfam RF00005): the Stockholm #=GC SS_cons cloverleaf renders as a
     // dedicated Secondary-structure track above the alignment, the acceptor
     // stem + D/anticodon/T arms colored by base-pairing. Tree comes from the
-    // embedded #=GF NH. A capability no other gallery figure shows.
+    // embedded #=GF NH.
     url: fileSnap({
       height: 450,
       treeAreaWidth: 175,
@@ -595,18 +579,18 @@ export const specs = [
   },
   {
     name: 'clinvar-variants',
-    // p53 with three answers to "which part matters" stacked on one set of
-    // columns: conservation computed from the alignment, InterPro domain boxes,
-    // and ClinVar's pathogenic missense variants per residue -- which the
-    // viewer computes nothing for. 94% of them fall in the DNA-binding domain.
+    // p53 with three tracks on one set of columns: conservation computed from
+    // the alignment, InterPro domain boxes, and ClinVar's pathogenic missense
+    // variants per residue, loaded precomputed. 94% of the variants fall in the
+    // DNA-binding domain.
     url: fileSnap({
       height: 420,
       treeAreaWidth: 150,
       colWidth: 2.4,
       colorSchemeName: 'clustalx_protein_dynamic',
       relativeTo: 'Human',
-      // the domain overlay says the same thing as the two bands but paints
-      // every row of every domain, which buries the bars this figure is about
+      // the domain overlay repeats the two bands on every row of every domain
+      // and covers the bars
       turnedOffTracks: { 'property-conservation': true },
       msaFilehandle: { uri: 'data/p53.aln' },
       treeFilehandle: { uri: 'data/p53.nh' },
@@ -632,18 +616,17 @@ export const specs = [
   },
   {
     name: 'domain-contacts',
-    // The Src-family kinases with the domain overlay AND a contact map from
-    // 2SRC over it: the boxes name the domains, the arcs show how they pack.
-    // Red is the autoinhibitory clamp -- the C-terminal tail's phospho-Tyr527
-    // bound by the protein's own SH2 domain.
+    // The Src-family kinases with the domain overlay and a contact map from
+    // 2SRC over it: the boxes mark the domains and the arcs mark inter-domain
+    // contacts. Red is the autoinhibitory clamp, where the C-terminal tail's
+    // phospho-Tyr527 binds the protein's own SH2 domain.
     url: fileSnap({
       height: 320,
       treeAreaWidth: 200,
       colWidth: 1.6,
       colorSchemeName: 'clustalx_protein_dynamic',
       showDomainLegend: false,
-      // the arcs and the domain boxes are the figure; the conservation
-      // histograms would take a third of it to say nothing about either
+      // the conservation histograms would take a third of the figure height
       turnedOffTracks: { conservation: true, 'property-conservation': true },
       msaFilehandle: { uri: 'data/kinase.aln' },
       treeFilehandle: { uri: 'data/kinase.nh' },
@@ -676,10 +659,10 @@ export const specs = [
   {
     name: 'pseudoknot-arcs',
     // Coronavirus frameshift element (Rfam RF00507): the Base pairs track draws
-    // SS_cons as arcs, and the pseudoknot -- written A/a in WUSS because it
-    // crosses stem 1 instead of nesting in it -- crosses the helices it cannot
-    // nest inside. The bracket text track above draws the same annotation as
-    // characters, where the crossing is invisible.
+    // SS_cons as arcs. WUSS writes the pseudoknot as A/a because it crosses
+    // stem 1 instead of nesting in it, and its arcs cross the helix arcs. The
+    // bracket text track above shows the same annotation as characters, where
+    // the crossing is not visible.
     url: fileSnap({
       height: 462,
       treeAreaWidth: 215,
@@ -693,7 +676,7 @@ export const specs = [
   {
     name: 'tree-of-life',
     // EF-1a/EF-Tu across bacteria, archaea, eukaryotes; labels prefixed
-    // Euk_/Arc_/Bac_ so the three-domain grouping reads off the tree
+    // Euk_/Arc_/Bac_ so the tree labels show the three-domain grouping
     url: fileSnap({
       height: 420,
       treeAreaWidth: 215,
@@ -724,9 +707,9 @@ export const specs = [
     name: 'f12-exon-architecture',
     // F12 coding alignment with its 14-exon gene structure overlaid (each exon
     // a distinct color, the same color across species). Zoomed out so the whole
-    // gene's exon architecture reads straight down the alignment and the
-    // cetacean clade clusters in the tree. Loads from hosted files (large
-    // alignment + exon GFF), like real-domains/large-tree.
+    // gene's exons line up down the alignment and the cetacean clade clusters in
+    // the tree. Loads from hosted files (large alignment + exon GFF), like
+    // real-domains/large-tree.
     url: fileSnap({
       height: 470,
       treeAreaWidth: 150,
@@ -742,8 +725,8 @@ export const specs = [
   {
     name: 'f12-frameshift',
     // zoomed to exon 3 (alignment col 205, highlighted): a single-column deletion
-    // shared by exactly the four cetaceans (gap) but intact in human/manatee/land
-    // mammals — the shared inactivating frameshift, in gene-structure (exon) color.
+    // shared by exactly the four cetaceans and absent in human, manatee and the
+    // land mammals, drawn in exon color. It is the shared inactivating frameshift.
     url: fileSnap({
       height: 470,
       treeAreaWidth: 150,
@@ -763,9 +746,10 @@ export const specs = [
     // gggenes-style gene arrow map over a real alignment: each gene one color
     // down the columns, +/- strand drawn as a left/right arrowhead. genC is
     // inverted in Genome_4 and genE in Genome_6 (the arrow flips); genB is
-    // deleted in Genome_5 — its columns gap out, yet the downstream genes stay
-    // column-aligned, the payoff of anchoring arrows to the alignment. colWidth
-    // 1 fits the whole cluster; tall rows so the arrowheads read clearly.
+    // deleted in Genome_5, so its columns are gaps and the downstream genes stay
+    // in their columns because the arrows are anchored to the alignment.
+    // colWidth 1 fits the whole cluster; rows are tall enough to show the
+    // arrowheads.
     url: fileSnap({
       height: 360,
       treeAreaWidth: 170,

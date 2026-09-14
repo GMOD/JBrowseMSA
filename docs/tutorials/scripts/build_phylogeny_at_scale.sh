@@ -108,10 +108,10 @@ with open(f"{out}/rsv-full.nh", "w") as fh:
 print(f"wrote {out}/rsv-full.aln and {out}/rsv-full.nh ({len(tips)} tips)")
 
 # 3. find a clade to collapse: every descendant tip shares one clade call and
-# one country, so the triangle in the figure is a real epidemiological unit,
-# not an arbitrary cut. generateNodeIds (msa-parsers/src/util.ts) assigns
+# one country, so the triangle in the figure is a single-country, single-clade
+# group. generateNodeIds (msa-parsers/src/util.ts) assigns
 # 'node-<parent>-<childIndex>-<depth>' in the same child order the Newick
-# above preserves, so this id is what the viewer will compute too.
+# above preserves, so the viewer computes the same id.
 node_tips = {}
 
 

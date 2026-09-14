@@ -1,18 +1,15 @@
 # Gene arrow map demo (gggenes-style)
 
 Builds the **gene-arrow-map** gallery example: a colinear gene cluster across
-six genomes, with each gene drawn as a strand-directed arrow over a real
-alignment. It demonstrates react-msaview's gene-arrow rendering — the same
-overlay machinery that draws InterProScan domains and the F12 exon structure,
-but with gene-level GFF features that carry a `+`/`-` strand.
+six genomes, with each gene drawn as a strand-directed arrow over an alignment.
+The arrows use the overlay that draws InterPro domains and the F12 exon
+structure, with gene-level GFF features that carry a `+`/`-` strand.
 
-This is **synthetic, illustrative data**, in the same spirit as the
-[gggenes](https://github.com/wilkox/gggenes) R package's own bundled
-`example_genes` dataset (which is likewise synthetic — "for example purposes
-only"). It exists to exercise the rendering, not to assert any biology. A real
-colinear locus (e.g. the β-globin cluster, or a bacterial operon stitched from a
-genome alignment the way `scripts/f12-cetacean` stitches F12) is the natural
-next step.
+The data is **synthetic**, like the [gggenes](https://github.com/wilkox/gggenes)
+R package's bundled `example_genes` dataset ("for example purposes only"), and
+makes no biological claim. A real colinear locus, such as the β-globin cluster
+or a bacterial operon stitched from a genome alignment the way
+`scripts/f12-cetacean` stitches F12, would replace it.
 
 ## What it shows
 
@@ -21,13 +18,13 @@ next step.
 - **Strand as direction**: `+` genes point right, `-` genes (genC, genE) point
   left. Only gene-level GFF types get an arrowhead; exon/CDS/domain features
   stay rectangular blocks.
-- **Inversions**: genC is inverted in `Genome_4` and genE in `Genome_6` — the
+- **Inversions**: genC is inverted in `Genome_4` and genE in `Genome_6`, and the
   arrow flips.
 - **Deletion + alignment anchoring**: genB is deleted in `Genome_5` (its columns
-  gap out and the gene drops from the overlay), yet the _downstream_ genes stay
-  column-aligned. That is the whole point of anchoring arrows to a real
-  alignment rather than to each genome's own coordinate the way gggenes facets
-  do: vertical homology is exact, not a cosmetic shift.
+  are gaps and the gene drops from the overlay), and the downstream genes stay
+  in their columns. The arrows are anchored to the alignment, so homologous
+  genes share columns, which gggenes facets on per-genome coordinates don't
+  give.
 
 ## Build
 

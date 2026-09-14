@@ -2,8 +2,8 @@
 """Build a frame-correct CDS alignment for F12 from the cactus241 bigMaf:
 stitch each coding-exon window (trimmed to exact ref coords so frame is kept),
 concatenate, reverse-complement to coding (minus-strand) orientation, then
-translate in the human frame to look for premature stops / frameshifts in the
-aquatic lineages — i.e. verify the pseudogenization story."""
+translate in the human frame to check the aquatic lineages for premature stops
+and frameshifts."""
 import subprocess, sys, collections
 
 BIGMAF = "http://hgdownload.soe.ucsc.edu/goldenPath/hg38/cactus241way/cactus241way.bigMaf"

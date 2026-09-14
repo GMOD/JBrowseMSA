@@ -1,11 +1,10 @@
 // Regenerates the BRAF ClinVar track data under packages/app/public/data/:
-//   braf-clinvar-pathogenic.vcf.gz(.tbi) — ClinVar pathogenic/likely-pathogenic
+//   braf-clinvar-pathogenic.vcf.gz(.tbi): ClinVar pathogenic/likely-pathogenic
 //                            variants across the BRAF locus
 //
-// Mirrors scripts/tp53-protein-link/build-data.mjs (ClinVar portion): the BRAF
-// genome-link example (generate.mjs) shows this track in the LinearGenomeView so
-// the V600E pathogenic-variant pileup sits over the same codon the conserved
-// alignment column marks. The BRAF alignment + tree are built separately by
+// Mirrors the ClinVar part of scripts/tp53-protein-link/build-data.mjs. The BRAF
+// genome-link example (generate.mjs) shows this track in the LinearGenomeView,
+// over the codon the alignment's V600 column maps to. The BRAF alignment + tree are built separately by
 // build-alignment.mjs.
 //
 // Usage:  node scripts/braf-protein-link/build-clinvar.mjs
@@ -29,7 +28,7 @@ mkdirSync(work, { recursive: true })
 
 // Keep the VCF header + only variants whose primary germline classification is
 // Pathogenic or Likely_pathogenic (drops Benign / Uncertain / Conflicting), so
-// the genome track shows the disease-variant pileup — same filter as TP53.
+// the genome track shows only the disease variants; same filter as TP53.
 const vcf = execFileSync('tabix', ['-h', CLINVAR, REGION], {
   encoding: 'utf8',
   maxBuffer: 1 << 28,

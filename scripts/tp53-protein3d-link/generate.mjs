@@ -1,24 +1,21 @@
-// Builds the flagship three-view example on the "Genome browser" docs page: the
-// human TP53 gene on hg38, the p53 ortholog alignment, AND the AlphaFold p53
+// Builds the three-view example on the "Genome browser" docs page: the human
+// TP53 gene on hg38, the p53 ortholog alignment, and the AlphaFold p53
 // structure (jbrowse-plugin-protein3d), all connected to one genome view and
-// opened with the p53 DNA-binding domain highlighted across all three at once —
+// opened with the p53 nuclear export signal motif highlighted in all three:
 // magenta in the 3D structure, a band on the genome, and a column band in the
-// alignment. The pathogenic/conserved hotspot R248 (the TP53 R248 example) sits
-// inside this very domain, so the three figures tell one story.
+// alignment.
 //
-// The whole relationship is declarative — a single JBrowse session spec in the
-// URL, no clicks:
+// A single declarative JBrowse session spec in the URL sets up the views:
 //   - a LinearGenomeView with a pinned `id` (lgv-tp53-3d), RefSeq + ClinVar.
 //   - an MsaView `connectedViewId`-linked to it (the p53 ortholog alignment +
-//     tree), with a labeled `highlights` residue range lighting the motif.
-//   - a ProteinView `connectedViewId`-linked to the SAME genome view, carrying
+//     tree), with a labeled `highlights` residue range on the motif.
+//   - a ProteinView `connectedViewId`-linked to the same genome view, carrying
 //     the AlphaFold structure URL, the transcript `feature` (codon mapping),
-//     the translated protein sequence, and `initialSelection` — the new
-//     protein3d prop (≥ next release) that pre-lights a domain on load exactly
-//     as a domain click would.
+//     the translated protein sequence, and `initialSelection`, the protein3d
+//     prop (unreleased at the time of writing) that selects a residue range on
+//     load as a feature click would.
 //
-// Like the SRC/BRAF/TP53 scripts, every coordinate is derived reproducibly from
-// public sources rather than pasted in as an opaque blob:
+// Like the SRC/BRAF/TP53 scripts, every coordinate comes from a public source:
 //   - the transcript model (connectedFeature / ProteinView feature) from the
 //     same public RefSeq GFF the gene track uses (via tabix),
 //   - the motif residue range from the EBI UniProt features API (the same
@@ -36,7 +33,7 @@ import { fileURLToPath } from 'node:url'
 const here = dirname(fileURLToPath(import.meta.url))
 const dataLocal = join(here, '..', '..', 'packages', 'app', 'public', 'data')
 
-// Public RefSeq GFF (CSI-indexed) — the same source as the hg38-ncbiRefSeq track
+// Public RefSeq GFF (CSI-indexed), the same source as the hg38-ncbiRefSeq track
 const GFF = 'https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz'
 // TP53 (NM_000546.6 -> NP_000537.3, canonical 393 aa p53), hg38 chr17, - strand
 const TRANSCRIPT = 'NM_000546.6'
@@ -72,12 +69,11 @@ if (!queryRow) {
 const proteinSeq = queryRow.replaceAll('-', '')
 
 // --- the highlighted feature (residue range from EBI UniProt features) -------
-// A small, precise UniProt Motif rather than the whole DNA-binding domain: it
-// reads as a crisp pinpoint highlight across all three views (this is the same
-// "Motif" track the jbrowse-components protein3d example highlights). The
-// nuclear export signal overlaps the structured tetramerization helix, so the
-// magenta lands on a distinct small helix, and it's a short 12-residue band in
-// the alignment.
+// A 12-residue UniProt Motif gives a narrow band in all three views, where the
+// DNA-binding domain would cover most of the protein. It is the "Motif" track
+// the jbrowse-components protein3d example highlights. The nuclear export
+// signal overlaps the tetramerization helix, so the magenta lands on one small
+// helix.
 const FEATURE_TYPE = 'MOTIF'
 const FEATURE_DESC = 'Nuclear export signal'
 const featuresUrl = `https://www.ebi.ac.uk/proteins/api/features/${UNIPROT}?categories=DOMAINS_AND_SITES`
@@ -176,8 +172,7 @@ console.error(
   `motif genomic span -> ${refName}:${domainGenomeStart + 1}-${domainGenomeEnd}`,
 )
 
-// the motif is small, so frame fairly tight (with some flanking context) — the
-// protein3d genome band over it then reads as a clear pinpoint highlight
+// the motif is small, so frame it tightly with some flanking context
 const pad = 400
 const fmt = n => n.toLocaleString('en-US')
 const spec = {
@@ -212,14 +207,13 @@ const spec = {
     },
     {
       type: 'ProteinView',
-      // connect to the SAME genome view (full-form launch: url + feature +
+      // connect to the same genome view (full-form launch: url + feature +
       // sequence supplied, so no own LGV is created)
       connectedViewId: 'lgv-tp53-3d',
       url: `https://alphafold.ebi.ac.uk/files/AF-${UNIPROT}-F1-model_${ALPHAFOLD_VERSION}.cif`,
       feature: connectedFeature,
       userProvidedTranscriptSequence: proteinSeq,
-      // don't zoom to base level on the selection — keep the framing so the
-      // motif reads as a highlighted sub-region
+      // keep the framing instead of zooming to base level on the selection
       zoomToBaseLevel: false,
       height: 500,
       // the declarative motif pre-selection (protein3d initialSelection)
@@ -227,8 +221,8 @@ const spec = {
     },
   ],
   // side-by-side workspaces layout: genome + alignment stacked on the left, the
-  // 3D structure on the right, so the structure is prominent rather than buried
-  // below a tall vertical stack
+  // 3D structure on the right, instead of the structure below a tall vertical
+  // stack
   layout: {
     direction: 'horizontal',
     children: [
