@@ -56,3 +56,29 @@ test('a tree with no lengths draws as a cladogram', () => {
   expect(model.allBranchesLength0).toBe(true)
   expect(model.maxBranchLength).toBe(0)
 })
+
+test('a tree width that came with the snapshot is honoured', () => {
+  // a host opens a narrow tree beside wide labels; the sync used to overwrite
+  // it on the first frame
+  const model = MSAModelF().create({
+    id: 'tree-width-test',
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa, tree: '((a:1,b:2):5,(c:1,d:3):1);' },
+    treeAreaWidth: 200,
+    treeWidth: 100,
+  })
+  model.setWidth(800)
+  expect(model.treeWidth).toBe(100)
+
+  // dragging the tree area hands the width back to the layout
+  model.setTreeAreaWidth(400)
+  expect(model.treeWidth).not.toBe(100)
+})
+
+test('without one, the tree width follows the tree area', () => {
+  const model = makeModel('((a:1,b:2):5,(c:1,d:3):1);')
+  const before = model.treeWidth
+  model.setTreeAreaWidth(model.treeAreaWidth + 100)
+  expect(model.treeWidth).toBe(before + 100)
+})

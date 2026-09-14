@@ -93,3 +93,36 @@ test('a gff keeps its text, so annotations are not lost with the filehandle', ()
   expect(snapshotOf(model).data?.gff).toBe(gff)
   expect(model.unshareableData).toEqual([])
 })
+
+test('a data track too large for the snapshot is reported, not dropped in silence', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: smallMsa },
+  })
+  model.setColumnTracks([
+    {
+      id: 'big',
+      name: 'Big',
+      kind: 'bar',
+      values: Array.from({ length: maxInlineSnapshotBytes }, () => 1),
+    },
+  ])
+
+  expect(model.unshareableData.map(d => d.what)).toEqual(['data tracks'])
+  expect(
+    (getSnapshot(model) as { columnTracks?: unknown[] }).columnTracks,
+  ).toBeUndefined()
+})
+
+test('a host that restores the data itself silences the warning', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: bigMsa },
+  })
+  expect(model.unshareableData.map(d => d.what)).toEqual(['alignment'])
+
+  model.setHostCarriesData(true)
+  expect(model.unshareableData).toEqual([])
+})

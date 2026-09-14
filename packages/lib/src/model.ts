@@ -41,6 +41,7 @@ import {
   defaultShowDomainLegend,
   defaultShowDomains,
   defaultSubFeatureRows,
+  defaultTreeWidth,
   labelReferenceFontSize,
   maxCellSize,
   maxInlineSnapshotBytes,
@@ -3250,15 +3251,27 @@ function stateModelFactory() {
           }),
         )
 
-        // autorun synchronizes treeWidth with treeAreaWidth
+        // treeWidth trails the tree area, less whatever the labels take out of
+        // it. A width that arrived with the snapshot is left alone until the
+        // tree area itself moves: a host that opens a view with a narrow tree
+        // beside wide labels -- jbrowse-plugin-msaview does, at treeWidth 100
+        // in a 200px area -- had its value overwritten on the first frame, and
+        // a restored session came back re-derived rather than as it was left.
+        // A getter cannot do this: labelsWidth is measured off the leaves,
+        // which are laid out against treeWidth.
+        let pinnedAreaWidth =
+          self.treeWidth === defaultTreeWidth ? undefined : self.treeAreaWidth
         addDisposer(
           self,
           autorun(() => {
+            const areaWidth = self.treeAreaWidth
+            const labelsWidth = self.labelsWidth
+            if (pinnedAreaWidth === areaWidth) {
+              return
+            }
+            pinnedAreaWidth = undefined
             self.setTreeWidth(
-              Math.max(
-                50,
-                self.treeAreaWidth - self.labelsWidth - 10 - self.marginLeft,
-              ),
+              Math.max(50, areaWidth - labelsWidth - 10 - self.marginLeft),
             )
           }),
         )
