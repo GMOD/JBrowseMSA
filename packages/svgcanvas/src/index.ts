@@ -9,60 +9,14 @@
  * Copyright (c) 2014 Gliffy Inc.
  * Copyright (c) 2021 Zeno Zeng
  *
- * Vendored and converted to ESM/TypeScript for pure ESM compatibility.
+ * Vendored and converted to ESM/TypeScript for pure ESM compatibility, and cut
+ * down to the drawing calls the renderers make: what a multiple sequence
+ * alignment needs is rectangles, paths, arcs and a great many glyphs. Gradients,
+ * patterns, clipping, rotation, bezier curves, stroked text, shadows and image
+ * drawing are gone with the state they carried.
  */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-function toString(obj: any): string {
-  if (!obj) {
-    return obj
-  }
-  if (typeof obj === 'string') {
-    return obj
-  }
-  return obj + ''
-}
-
-function format(str: string, args: Record<string, any>): string {
-  const keys = Object.keys(args)
-  for (const key of keys) {
-    str = str.replace(new RegExp('\\{' + key + '\\}', 'gi'), args[key])
-  }
-  return str
-}
-
-function randomString(holder: Record<string, string>): string {
-  if (!holder) {
-    throw new Error(
-      'cannot create a random attribute name for an undefined object',
-    )
-  }
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz'
-  let randomstring = ''
-  do {
-    randomstring = ''
-    for (let i = 0; i < 12; i++) {
-      randomstring += chars[Math.floor(Math.random() * chars.length)]
-    }
-  } while (holder[randomstring])
-  return randomstring
-}
-
-function createNamedToNumberedLookup(
-  items: string,
-  radix: number = 10,
-): Record<string, string> {
-  const lookup: Record<string, string> = {}
-  const parts = items.split(',')
-  for (let i = 0; i < parts.length; i += 2) {
-    const entity = '&' + parts[i + 1] + ';'
-    const base10 = parseInt(parts[i]!, radix)
-    lookup[entity] = '&#' + base10 + ';'
-  }
-  lookup['\\xa0'] = '&#160;'
-  return lookup
-}
 
 function getTextAnchor(textAlign: string): string {
   const mapping: Record<string, string> = {
@@ -94,7 +48,6 @@ function getDominantBaseline(textBaseline: string): string {
 const TEXT_ATTR_DEFAULTS: Record<string, string> = {
   'font-style': 'normal',
   'font-weight': 'normal',
-  'font-variant': 'normal',
   // the initial value is `auto`, which resolves to the alphabetic baseline
   'dominant-baseline': 'alphabetic',
 }
@@ -102,35 +55,6 @@ const TEXT_ATTR_DEFAULTS: Record<string, string> = {
 function omitDefault(attr: string, value: string | undefined) {
   return value === TEXT_ATTR_DEFAULTS[attr] ? undefined : value
 }
-
-const namedEntities = createNamedToNumberedLookup(
-  '50,nbsp,51,iexcl,52,cent,53,pound,54,curren,55,yen,56,brvbar,57,sect,58,uml,59,copy,' +
-    '5a,ordf,5b,laquo,5c,not,5d,shy,5e,reg,5f,macr,5g,deg,5h,plusmn,5i,sup2,5j,sup3,5k,acute,' +
-    '5l,micro,5m,para,5n,middot,5o,cedil,5p,sup1,5q,ordm,5r,raquo,5s,frac14,5t,frac12,5u,frac34,' +
-    '5v,iquest,60,Agrave,61,Aacute,62,Acirc,63,Atilde,64,Auml,65,Aring,66,AElig,67,Ccedil,' +
-    '68,Egrave,69,Eacute,6a,Ecirc,6b,Euml,6c,Igrave,6d,Iacute,6e,Icirc,6f,Iuml,6g,ETH,6h,Ntilde,' +
-    '6i,Ograve,6j,Oacute,6k,Ocirc,6l,Otilde,6m,Ouml,6n,times,6o,Oslash,6p,Ugrave,6q,Uacute,' +
-    '6r,Ucirc,6s,Uuml,6t,Yacute,6u,THORN,6v,szlig,70,agrave,71,aacute,72,acirc,73,atilde,74,auml,' +
-    '75,aring,76,aelig,77,ccedil,78,egrave,79,eacute,7a,ecirc,7b,euml,7c,igrave,7d,iacute,7e,icirc,' +
-    '7f,iuml,7g,eth,7h,ntilde,7i,ograve,7j,oacute,7k,ocirc,7l,otilde,7m,ouml,7n,divide,7o,oslash,' +
-    '7p,ugrave,7q,uacute,7r,ucirc,7s,uuml,7t,yacute,7u,thorn,7v,yuml,ci,fnof,sh,Alpha,si,Beta,' +
-    'sj,Gamma,sk,Delta,sl,Epsilon,sm,Zeta,sn,Eta,so,Theta,sp,Iota,sq,Kappa,sr,Lambda,ss,Mu,' +
-    'st,Nu,su,Xi,sv,Omicron,t0,Pi,t1,Rho,t3,Sigma,t4,Tau,t5,Upsilon,t6,Phi,t7,Chi,t8,Psi,' +
-    't9,Omega,th,alpha,ti,beta,tj,gamma,tk,delta,tl,epsilon,tm,zeta,tn,eta,to,theta,tp,iota,' +
-    'tq,kappa,tr,lambda,ts,mu,tt,nu,tu,xi,tv,omicron,u0,pi,u1,rho,u2,sigmaf,u3,sigma,u4,tau,' +
-    'u5,upsilon,u6,phi,u7,chi,u8,psi,u9,omega,uh,thetasym,ui,upsih,um,piv,812,bull,816,hellip,' +
-    '81i,prime,81j,Prime,81u,oline,824,frasl,88o,weierp,88h,image,88s,real,892,trade,89l,alefsym,' +
-    '8cg,larr,8ch,uarr,8ci,rarr,8cj,darr,8ck,harr,8dl,crarr,8eg,lArr,8eh,uArr,8ei,rArr,8ej,dArr,' +
-    '8ek,hArr,8g0,forall,8g2,part,8g3,exist,8g5,empty,8g7,nabla,8g8,isin,8g9,notin,8gb,ni,8gf,prod,' +
-    '8gh,sum,8gi,minus,8gn,lowast,8gq,radic,8gt,prop,8gu,infin,8h0,ang,8h7,and,8h8,or,8h9,cap,8ha,cup,' +
-    '8hb,int,8hk,there4,8hs,sim,8i5,cong,8i8,asymp,8j0,ne,8j1,equiv,8j4,le,8j5,ge,8k2,sub,8k3,sup,8k4,' +
-    'nsub,8k6,sube,8k7,supe,8kl,oplus,8kn,otimes,8l5,perp,8m5,sdot,8o8,lceil,8o9,rceil,8oa,lfloor,8ob,' +
-    'rfloor,8p9,lang,8pa,rang,9ea,loz,9j0,spades,9j3,clubs,9j5,hearts,9j6,diams,ai,OElig,aj,oelig,b0,' +
-    'Scaron,b1,scaron,bo,Yuml,m6,circ,ms,tilde,802,ensp,803,emsp,809,thinsp,80c,zwnj,80d,zwj,80e,lrm,' +
-    '80f,rlm,80j,ndash,80k,mdash,80o,lsquo,80p,rsquo,80q,sbquo,80s,ldquo,80t,rdquo,80u,bdquo,810,dagger,' +
-    '811,Dagger,81g,permil,81p,lsaquo,81q,rsaquo,85c,euro',
-  32,
-)
 
 const STYLES: Record<string, any> = {
   strokeStyle: {
@@ -145,50 +69,14 @@ const STYLES: Record<string, any> = {
     svg: null,
     apply: 'fill',
   },
-  lineCap: {
-    svgAttr: 'stroke-linecap',
-    canvas: 'butt',
-    svg: 'butt',
-    apply: 'stroke',
-  },
-  lineJoin: {
-    svgAttr: 'stroke-linejoin',
-    canvas: 'miter',
-    svg: 'miter',
-    apply: 'stroke',
-  },
-  miterLimit: {
-    svgAttr: 'stroke-miterlimit',
-    canvas: 10,
-    svg: 4,
-    apply: 'stroke',
-  },
   lineWidth: {
     svgAttr: 'stroke-width',
     canvas: 1,
     svg: 1,
     apply: 'stroke',
   },
-  globalAlpha: {
-    svgAttr: 'opacity',
-    canvas: 1,
-    svg: 1,
-    apply: 'fill stroke',
-  },
   font: {
     canvas: '10px sans-serif',
-  },
-  shadowColor: {
-    canvas: '#000000',
-  },
-  shadowOffsetX: {
-    canvas: 0,
-  },
-  shadowOffsetY: {
-    canvas: 0,
-  },
-  shadowBlur: {
-    canvas: 0,
   },
   textAlign: {
     canvas: 'start',
@@ -196,79 +84,34 @@ const STYLES: Record<string, any> = {
   textBaseline: {
     canvas: 'alphabetic',
   },
+  // null rather than an empty array: the canvas default is "no dashes", which is
+  // also the svg default, and the two have to compare equal or every stroke
+  // carries an empty stroke-dasharray
   lineDash: {
     svgAttr: 'stroke-dasharray',
-    canvas: [],
+    canvas: null,
     svg: null,
     apply: 'stroke',
   },
 }
 
-class CanvasGradient {
-  __root: SVGElement
-  __ctx: Context
-
-  constructor(gradientNode: SVGElement, ctx: Context) {
-    this.__root = gradientNode
-    this.__ctx = ctx
-  }
-
-  addColorStop(offset: number, color: string) {
-    const stop = this.__ctx.__createElement('stop')
-    stop.setAttribute('offset', String(offset))
-    if (toString(color).includes('rgba')) {
-      const regex =
-        /rgba\(\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d?\.?\d*)\s*\)/gi
-      const matches = regex.exec(color)
-      if (matches) {
-        stop.setAttribute(
-          'stop-color',
-          format('rgb({r},{g},{b})', {
-            r: matches[1],
-            g: matches[2],
-            b: matches[3],
-          }),
-        )
-        stop.setAttribute('stop-opacity', matches[4]!)
-      }
-    } else {
-      stop.setAttribute('stop-color', toString(color))
-    }
-    this.__root.appendChild(stop)
-  }
-}
-
-class CanvasPattern {
-  __root: SVGElement
-  __ctx: Context
-
-  constructor(pattern: SVGElement, ctx: Context) {
-    this.__root = pattern
-    this.__ctx = ctx
-  }
-}
+const rgbaRegex =
+  /rgba\(\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d?\.?\d*)\s*\)/i
 
 interface ContextOptions {
-  width?: number
-  height?: number
-  enableMirroring?: boolean
   document?: Document
   ctx?: CanvasRenderingContext2D
-  debug?: boolean
 }
 
 export class Context {
   width: number
   height: number
-  enableMirroring: boolean
   canvas: Context
 
   __document: Document
   __ctx: CanvasRenderingContext2D
   __canvas?: HTMLCanvasElement
   __root: SVGSVGElement
-  __ids: Record<string, string>
-  __defs: SVGDefsElement
   __currentElement: SVGElement
   __styleStack: any[]
   __groupStack: SVGElement[]
@@ -276,50 +119,22 @@ export class Context {
   __currentPosition: { x?: number; y?: number }
   __transformMatrix: DOMMatrix
   __transformMatrixStack?: DOMMatrix[]
-  __currentElementsToStyle?: { element: SVGElement; children: SVGElement[] }
-  __options: ContextOptions
-  __id: string
-  __fontUnderline?: string
-  __fontHref?: string
+  // the parsed font, keyed by the `font` string that produced it: parsing costs
+  // a DOM element and a CSS parse, and a text-heavy export asks per glyph
+  __fontCache = new Map<string, CSSStyleDeclaration>()
 
   // Style properties
   strokeStyle: any
   fillStyle: any
-  lineCap: any
-  lineJoin: any
-  miterLimit: any
   lineWidth: any
-  globalAlpha: any
   font: any
-  shadowColor: any
-  shadowOffsetX: any
-  shadowOffsetY: any
-  shadowBlur: any
   textAlign: any
   textBaseline: any
   lineDash: any
 
-  constructor(o?: ContextOptions | number, height?: number) {
-    const defaultOptions = { width: 500, height: 500, enableMirroring: false }
-    let options: ContextOptions
-
-    if (typeof o === 'number' && height !== undefined) {
-      options = { ...defaultOptions, width: o, height }
-    } else if (!o) {
-      options = defaultOptions
-    } else if (typeof o === 'object') {
-      options = o
-    } else {
-      options = defaultOptions
-    }
-
-    this.width = options.width || defaultOptions.width
-    this.height = options.height || defaultOptions.height
-    this.enableMirroring =
-      options.enableMirroring !== undefined
-        ? options.enableMirroring
-        : defaultOptions.enableMirroring
-
+  constructor(width: number, height: number, options: ContextOptions = {}) {
+    this.width = width
+    this.height = height
     this.canvas = this
     this.__document = options.document || document
 
@@ -340,21 +155,8 @@ export class Context {
     )
     this.__root.setAttribute('version', '1.1')
     this.__root.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-    this.__root.setAttributeNS(
-      'http://www.w3.org/2000/xmlns/',
-      'xmlns:xlink',
-      'http://www.w3.org/1999/xlink',
-    )
-    this.__root.setAttribute('width', String(this.width))
-    this.__root.setAttribute('height', String(this.height))
-
-    this.__ids = {}
-
-    this.__defs = this.__document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'defs',
-    )
-    this.__root.appendChild(this.__defs)
+    this.__root.setAttribute('width', String(width))
+    this.__root.setAttribute('height', String(height))
 
     this.__currentElement = this.__document.createElementNS(
       'http://www.w3.org/2000/svg',
@@ -367,9 +169,6 @@ export class Context {
     this.__transformMatrix = new DOMMatrix()
 
     this.resetTransform()
-
-    this.__options = options
-    this.__id = Math.random().toString(16).substring(2, 8)
   }
 
   __createElement(
@@ -382,13 +181,16 @@ export class Context {
       elementName,
     )
     if (resetFill) {
+      // a placeholder: whichever of fill()/stroke() paints this element
+      // overwrites its own, and __applyStyleToCurrentElement drops the other
+      // when it is the svg default anyway
       element.setAttribute('fill', 'none')
       element.setAttribute('stroke', 'none')
     }
     for (const key of Object.keys(properties)) {
       // an unset property means "no such attribute", not the string
-      // "undefined". __applyText passes text-decoration through unconditionally,
-      // so without this every glyph in an export carries
+      // "undefined". __applyText passes optional attributes through
+      // unconditionally, so without this every glyph in an export carries
       // text-decoration="undefined" -- invalid, and ~28 wasted bytes per letter
       const value = properties[key]
       if (value !== undefined && value !== null) {
@@ -418,90 +220,70 @@ export class Context {
     return styleState
   }
 
+  /**
+   * A translation is what an element's own x/y already say, and repeating it as
+   * a matrix costs ~35 bytes on every glyph of an alignment. Anything else --
+   * the scale a sequence-logo letter is stretched by -- still needs the matrix.
+   */
   __applyTransformation(element: SVGElement, matrix?: DOMMatrix) {
     const { a, b, c, d, e, f } = matrix || this.getTransform()
+    if (
+      a === 1 &&
+      b === 0 &&
+      c === 0 &&
+      d === 1 &&
+      element.hasAttribute('x') &&
+      element.hasAttribute('y')
+    ) {
+      if (e !== 0) {
+        element.setAttribute('x', String(Number(element.getAttribute('x')) + e))
+      }
+      if (f !== 0) {
+        element.setAttribute('y', String(Number(element.getAttribute('y')) + f))
+      }
+      return
+    }
     element.setAttribute('transform', `matrix(${a} ${b} ${c} ${d} ${e} ${f})`)
   }
 
   __applyStyleToCurrentElement(type: string) {
-    let currentElement = this.__currentElement
-    const currentStyleGroup = this.__currentElementsToStyle
-    if (currentStyleGroup) {
-      currentElement.setAttribute(type, '')
-      currentElement = currentStyleGroup.element
-      for (const node of currentStyleGroup.children) {
-        node.setAttribute(type, '')
+    const currentElement = this.__currentElement
+
+    for (const key of Object.keys(STYLES)) {
+      const style = STYLES[key]
+      const value = (this as any)[key]
+      if (!style.apply?.includes(type) || style.svg === value) {
+        continue
+      }
+      const matches =
+        (style.svgAttr === 'stroke' || style.svgAttr === 'fill') &&
+        typeof value === 'string' &&
+        value.includes('rgba')
+          ? rgbaRegex.exec(value)
+          : null
+      if (matches) {
+        // SVG has no rgba(): the alpha belongs in its own -opacity attribute
+        currentElement.setAttribute(
+          style.svgAttr,
+          `rgb(${matches[1]},${matches[2]},${matches[3]})`,
+        )
+        currentElement.setAttribute(`${style.svgAttr}-opacity`, matches[4]!)
+      } else if (key === 'lineWidth') {
+        const scale = this.__getTransformScale()
+        currentElement.setAttribute(
+          style.svgAttr,
+          String(value * Math.max(scale.x, scale.y)),
+        )
+      } else {
+        currentElement.setAttribute(style.svgAttr, value)
       }
     }
 
-    const keys = Object.keys(STYLES)
-    for (const key of keys) {
-      const style = STYLES[key]
-      const value = (this as any)[key]
-      if (style.apply) {
-        if (value instanceof CanvasPattern) {
-          if (value.__ctx) {
-            for (const node of Array.from(value.__ctx.__defs.childNodes)) {
-              const id = (node as Element).getAttribute('id')
-              if (id) {
-                this.__ids[id] = id
-                this.__defs.appendChild(node)
-              }
-            }
-          }
-          currentElement.setAttribute(
-            style.apply,
-            format('url(#{id})', { id: value.__root.getAttribute('id') }),
-          )
-        } else if (value instanceof CanvasGradient) {
-          currentElement.setAttribute(
-            style.apply,
-            format('url(#{id})', { id: value.__root.getAttribute('id') }),
-          )
-        } else if (style.apply.includes(type) && style.svg !== value) {
-          if (
-            (style.svgAttr === 'stroke' || style.svgAttr === 'fill') &&
-            value &&
-            value.includes('rgba')
-          ) {
-            const regex =
-              /rgba\(\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d?\.?\d*)\s*\)/gi
-            const matches = regex.exec(value)
-            if (matches) {
-              currentElement.setAttribute(
-                style.svgAttr,
-                format('rgb({r},{g},{b})', {
-                  r: matches[1],
-                  g: matches[2],
-                  b: matches[3],
-                }),
-              )
-              let opacity = Number(matches[4])
-              const globalAlpha = this.globalAlpha
-              if (globalAlpha != null) {
-                opacity *= globalAlpha
-              }
-              currentElement.setAttribute(
-                style.svgAttr + '-opacity',
-                String(opacity),
-              )
-            }
-          } else {
-            let attr = style.svgAttr
-            let val = value
-            if (key === 'globalAlpha') {
-              attr = type + '-' + style.svgAttr
-              if (currentElement.getAttribute(attr)) {
-                continue
-              }
-            } else if (key === 'lineWidth') {
-              const scale = this.__getTransformScale()
-              val = value * Math.max(scale.x, scale.y)
-            }
-            currentElement.setAttribute(attr, val)
-          }
-        }
-      }
+    // a filled element with no stroke does not have to say so: `none` is what
+    // svg assumes. The reverse is not true -- an unstroked fill defaults to
+    // black -- so a stroked element keeps its fill="none"
+    if (type === 'fill' && currentElement.getAttribute('stroke') === 'none') {
+      currentElement.removeAttribute('stroke')
     }
   }
 
@@ -511,29 +293,6 @@ export class Context {
       return node
     }
     return this.__closestGroupOrSvg(node.parentNode as SVGElement)
-  }
-
-  getSerializedSvg(fixNamedEntities?: boolean): string {
-    let serialized = new XMLSerializer().serializeToString(this.__root)
-    const xmlns =
-      /xmlns="http:\/\/www\.w3\.org\/2000\/svg".+xmlns="http:\/\/www\.w3\.org\/2000\/svg/gi
-    if (xmlns.test(serialized)) {
-      serialized = serialized.replace(
-        'xmlns="http://www.w3.org/2000/svg',
-        'xmlns:xlink="http://www.w3.org/1999/xlink',
-      )
-    }
-
-    if (fixNamedEntities) {
-      for (const key of Object.keys(namedEntities)) {
-        const regexp = new RegExp(key, 'gi')
-        if (regexp.test(serialized)) {
-          serialized = serialized.replace(regexp, namedEntities[key]!)
-        }
-      }
-    }
-
-    return serialized
   }
 
   getSvg(): SVGSVGElement {
@@ -546,8 +305,7 @@ export class Context {
     this.__groupStack.push(parent)
     parent.appendChild(group)
     this.__currentElement = group
-    const style = this.__getStyleState()
-    this.__styleStack.push(style)
+    this.__styleStack.push(this.__getStyleState())
     if (!this.__transformMatrixStack) {
       this.__transformMatrixStack = []
     }
@@ -556,12 +314,10 @@ export class Context {
 
   restore() {
     this.__currentElement = this.__groupStack.pop()!
-    this.__currentElementsToStyle = undefined
     if (!this.__currentElement) {
-      this.__currentElement = this.__root.childNodes[1] as SVGElement
+      this.__currentElement = this.__root.childNodes[0] as SVGElement
     }
-    const state = this.__styleStack.pop()
-    this.__applyStyleState(state)
+    this.__applyStyleState(this.__styleStack.pop())
     if (this.__transformMatrixStack && this.__transformMatrixStack.length > 0) {
       this.setTransform(this.__transformMatrixStack.pop()!)
     }
@@ -571,15 +327,13 @@ export class Context {
     this.__currentDefaultPath = ''
     this.__currentPosition = {}
     const path = this.__createElement('path', {}, true)
-    const parent = this.__closestGroupOrSvg()
-    parent.appendChild(path)
+    this.__closestGroupOrSvg().appendChild(path)
     this.__currentElement = path
   }
 
   __applyCurrentDefaultPath() {
-    const currentElement = this.__currentElement
-    if (currentElement.nodeName === 'path') {
-      currentElement.setAttribute('d', this.__currentDefaultPath)
+    if (this.__currentElement.nodeName === 'path') {
+      this.__currentElement.setAttribute('d', this.__currentDefaultPath)
     }
   }
 
@@ -593,12 +347,8 @@ export class Context {
       this.beginPath()
     }
     this.__currentPosition = { x, y }
-    this.__addPathCommand(
-      format('M {x} {y}', {
-        x: this.__matrixTransform(x, y).x,
-        y: this.__matrixTransform(x, y).y,
-      }),
-    )
+    const p = this.__matrixTransform(x, y)
+    this.__addPathCommand(`M ${p.x} ${p.y}`)
   }
 
   closePath() {
@@ -609,93 +359,44 @@ export class Context {
 
   lineTo(x: number, y: number) {
     this.__currentPosition = { x, y }
-    if (this.__currentDefaultPath.includes('M')) {
-      this.__addPathCommand(
-        format('L {x} {y}', {
-          x: this.__matrixTransform(x, y).x,
-          y: this.__matrixTransform(x, y).y,
-        }),
-      )
-    } else {
-      this.__addPathCommand(
-        format('M {x} {y}', {
-          x: this.__matrixTransform(x, y).x,
-          y: this.__matrixTransform(x, y).y,
-        }),
-      )
-    }
-  }
-
-  bezierCurveTo(
-    cp1x: number,
-    cp1y: number,
-    cp2x: number,
-    cp2y: number,
-    x: number,
-    y: number,
-  ) {
-    this.__currentPosition = { x, y }
+    const p = this.__matrixTransform(x, y)
     this.__addPathCommand(
-      format('C {cp1x} {cp1y} {cp2x} {cp2y} {x} {y}', {
-        cp1x: this.__matrixTransform(cp1x, cp1y).x,
-        cp1y: this.__matrixTransform(cp1x, cp1y).y,
-        cp2x: this.__matrixTransform(cp2x, cp2y).x,
-        cp2y: this.__matrixTransform(cp2x, cp2y).y,
-        x: this.__matrixTransform(x, y).x,
-        y: this.__matrixTransform(x, y).y,
-      }),
+      this.__currentDefaultPath.includes('M')
+        ? `L ${p.x} ${p.y}`
+        : `M ${p.x} ${p.y}`,
     )
   }
 
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number) {
     this.__currentPosition = { x, y }
-    this.__addPathCommand(
-      format('Q {cpx} {cpy} {x} {y}', {
-        cpx: this.__matrixTransform(cpx, cpy).x,
-        cpy: this.__matrixTransform(cpx, cpy).y,
-        x: this.__matrixTransform(x, y).x,
-        y: this.__matrixTransform(x, y).y,
-      }),
-    )
+    const cp = this.__matrixTransform(cpx, cpy)
+    const p = this.__matrixTransform(x, y)
+    this.__addPathCommand(`Q ${cp.x} ${cp.y} ${p.x} ${p.y}`)
+  }
+
+  // paint-order only says something when the element carries both a fill and a
+  // stroke, which is the collapsed-clade triangle and nothing else
+  __applyPaintOrder(order: string, other: string) {
+    const current = this.__currentElement
+    if (
+      current.nodeName === 'path' &&
+      current.hasAttribute(other) &&
+      current.getAttribute(other) !== 'none'
+    ) {
+      current.setAttribute('paint-order', order)
+    }
   }
 
   stroke() {
-    if (this.__currentElement.nodeName === 'path') {
-      this.__currentElement.setAttribute('paint-order', 'fill stroke markers')
-    }
+    this.__applyPaintOrder('fill stroke markers', 'fill')
     this.__applyCurrentDefaultPath()
     this.__applyStyleToCurrentElement('stroke')
   }
 
   fill() {
-    if (this.__currentElement.nodeName === 'path') {
-      this.__currentElement.setAttribute('paint-order', 'stroke fill markers')
-    }
+    this.__applyPaintOrder('stroke fill markers', 'stroke')
     this.__applyCurrentDefaultPath()
     this.__applyStyleToCurrentElement('fill')
-  }
-
-  rect(x: number, y: number, width: number, height: number) {
-    if (this.__currentElement.nodeName !== 'path') {
-      this.beginPath()
-    }
-    this.moveTo(x, y)
-    this.lineTo(x + width, y)
-    this.lineTo(x + width, y + height)
-    this.lineTo(x, y + height)
-    this.lineTo(x, y)
-    this.closePath()
-  }
-
-  __clearCanvas() {
-    const rootGroup = this.__root.childNodes[1]!
-    this.__root.removeChild(rootGroup)
-    this.__currentElement = this.__document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'g',
-    )
-    this.__root.appendChild(this.__currentElement)
-    this.__groupStack = []
   }
 
   // A fill that happens to cover the context is still a fill: it paints over
@@ -704,8 +405,7 @@ export class Context {
   // took the export from 124 letters to 4.
   fillRect(x: number, y: number, width: number, height: number) {
     const rect = this.__createElement('rect', { x, y, width, height }, true)
-    const parent = this.__closestGroupOrSvg()
-    parent.appendChild(rect)
+    this.__closestGroupOrSvg().appendChild(rect)
     this.__currentElement = rect
     this.__applyTransformation(rect)
     this.__applyStyleToCurrentElement('fill')
@@ -713,8 +413,7 @@ export class Context {
 
   strokeRect(x: number, y: number, width: number, height: number) {
     const rect = this.__createElement('rect', { x, y, width, height }, true)
-    const parent = this.__closestGroupOrSvg()
-    parent.appendChild(rect)
+    this.__closestGroupOrSvg().appendChild(rect)
     this.__currentElement = rect
     this.__applyTransformation(rect)
     this.__applyStyleToCurrentElement('stroke')
@@ -723,17 +422,19 @@ export class Context {
   clearRect(x: number, y: number, width: number, height: number) {
     const { a, b, c, d, e, f } = this.getTransform()
     if (
-      JSON.stringify([a, b, c, d, e, f]) === JSON.stringify([1, 0, 0, 1, 0, 0])
+      a === 1 &&
+      b === 0 &&
+      c === 0 &&
+      d === 1 &&
+      e === 0 &&
+      f === 0 &&
+      x === 0 &&
+      y === 0 &&
+      width === this.width &&
+      height === this.height
     ) {
-      if (
-        x === 0 &&
-        y === 0 &&
-        width === this.width &&
-        height === this.height
-      ) {
-        this.__clearCanvas()
-        return
-      }
+      this.__clearCanvas()
+      return
     }
     const rect = this.__createElement(
       'rect',
@@ -741,54 +442,32 @@ export class Context {
       true,
     )
     this.__applyTransformation(rect)
-    const parent = this.__closestGroupOrSvg()
-    parent.appendChild(rect)
+    this.__closestGroupOrSvg().appendChild(rect)
   }
 
-  createLinearGradient(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-  ): CanvasGradient {
-    const grad = this.__createElement('linearGradient', {
-      id: randomString(this.__ids),
-      x1: x1 + 'px',
-      x2: x2 + 'px',
-      y1: y1 + 'px',
-      y2: y2 + 'px',
-      gradientUnits: 'userSpaceOnUse',
-    })
-    this.__defs.appendChild(grad)
-    return new CanvasGradient(grad, this)
+  __clearCanvas() {
+    this.__root.removeChild(this.__root.childNodes[0]!)
+    this.__currentElement = this.__document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'g',
+    )
+    this.__root.appendChild(this.__currentElement)
+    this.__groupStack = []
   }
 
-  createRadialGradient(
-    x0: number,
-    y0: number,
-    r0: number,
-    x1: number,
-    y1: number,
-    r1: number,
-  ): CanvasGradient {
-    const grad = this.__createElement('radialGradient', {
-      id: randomString(this.__ids),
-      cx: x1 + 'px',
-      cy: y1 + 'px',
-      r: r1 + 'px',
-      fx: x0 + 'px',
-      fy: y0 + 'px',
-      gradientUnits: 'userSpaceOnUse',
-    })
-    this.__defs.appendChild(grad)
-    return new CanvasGradient(grad, this)
-  }
-
-  __applyText(text: string, x: number, y: number, action: string) {
+  __parsedFont() {
+    const hit = this.__fontCache.get(this.font)
+    if (hit) {
+      return hit
+    }
     const el = document.createElement('span')
-    el.setAttribute('style', 'font:' + this.font)
+    el.setAttribute('style', `font:${this.font}`)
+    this.__fontCache.set(this.font, el.style)
+    return el.style
+  }
 
-    const style = el.style
+  fillText(text: string, x: number, y: number) {
+    const style = this.__parsedFont()
     const parent = this.__closestGroupOrSvg()
     const textElement = this.__createElement(
       'text',
@@ -797,9 +476,8 @@ export class Context {
         'font-size': style.fontSize,
         'font-style': omitDefault('font-style', style.fontStyle),
         'font-weight': omitDefault('font-weight', style.fontWeight),
-        'text-decoration': this.__fontUnderline,
-        x: x,
-        y: y,
+        x,
+        y,
         'text-anchor': getTextAnchor(this.textAlign),
         'dominant-baseline': omitDefault(
           'dominant-baseline',
@@ -812,29 +490,8 @@ export class Context {
     textElement.appendChild(this.__document.createTextNode(text))
     this.__currentElement = textElement
     this.__applyTransformation(textElement)
-    this.__applyStyleToCurrentElement(action)
-
-    let finalElement: SVGElement = textElement
-    if (this.__fontHref) {
-      const a = this.__createElement('a')
-      a.setAttributeNS(
-        'http://www.w3.org/1999/xlink',
-        'xlink:href',
-        this.__fontHref,
-      )
-      a.appendChild(textElement)
-      finalElement = a
-    }
-
-    parent.appendChild(finalElement)
-  }
-
-  fillText(text: string, x: number, y: number) {
-    this.__applyText(text, x, y, 'fill')
-  }
-
-  strokeText(text: string, x: number, y: number) {
-    this.__applyText(text, x, y, 'stroke')
+    this.__applyStyleToCurrentElement('fill')
+    parent.appendChild(textElement)
   }
 
   measureText(text: string): TextMetrics {
@@ -865,71 +522,30 @@ export class Context {
     const startX = x + radius * Math.cos(startAngle)
     const startY = y + radius * Math.sin(startAngle)
     const sweepFlag = counterClockwise ? 0 : 1
-    let largeArcFlag = 0
     let diff = endAngle - startAngle
-
     if (diff < 0) {
       diff += 2 * Math.PI
     }
+    const largeArcFlag = counterClockwise
+      ? diff > Math.PI
+        ? 0
+        : 1
+      : diff > Math.PI
+        ? 1
+        : 0
 
-    if (counterClockwise) {
-      largeArcFlag = diff > Math.PI ? 0 : 1
-    } else {
-      largeArcFlag = diff > Math.PI ? 1 : 0
-    }
-
-    const scaleX = Math.hypot(
-      this.__transformMatrix.a,
-      this.__transformMatrix.b,
-    )
-    const scaleY = Math.hypot(
-      this.__transformMatrix.c,
-      this.__transformMatrix.d,
-    )
+    const { x: scaleX, y: scaleY } = this.__getTransformScale()
+    const end = this.__matrixTransform(endX, endY)
 
     this.lineTo(startX, startY)
     this.__addPathCommand(
-      format(
-        'A {rx} {ry} {xAxisRotation} {largeArcFlag} {sweepFlag} {endX} {endY}',
-        {
-          rx: radius * scaleX,
-          ry: radius * scaleY,
-          xAxisRotation: 0,
-          largeArcFlag,
-          sweepFlag,
-          endX: this.__matrixTransform(endX, endY).x,
-          endY: this.__matrixTransform(endX, endY).y,
-        },
-      ),
+      `A ${radius * scaleX} ${radius * scaleY} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`,
     )
-
     this.__currentPosition = { x: endX, y: endY }
   }
 
-  clip() {
-    const group = this.__closestGroupOrSvg()
-    const clipPath = this.__createElement('clipPath')
-    const id = randomString(this.__ids)
-    const newGroup = this.__createElement('g')
-
-    this.__applyCurrentDefaultPath()
-    group.removeChild(this.__currentElement)
-    clipPath.setAttribute('id', id)
-    clipPath.appendChild(this.__currentElement)
-
-    this.__defs.appendChild(clipPath)
-    group.setAttribute('clip-path', format('url(#{id})', { id }))
-    group.appendChild(newGroup)
-
-    this.__currentElement = newGroup
-  }
-
   setLineDash(dashArray: number[]) {
-    if (dashArray && dashArray.length > 0) {
-      this.lineDash = dashArray.join(',')
-    } else {
-      this.lineDash = null
-    }
+    this.lineDash = dashArray.length > 0 ? dashArray.join(',') : null
   }
 
   setTransform(
@@ -940,11 +556,10 @@ export class Context {
     e?: number,
     f?: number,
   ) {
-    if (a instanceof DOMMatrix) {
-      this.__transformMatrix = new DOMMatrix([a.a, a.b, a.c, a.d, a.e, a.f])
-    } else {
-      this.__transformMatrix = new DOMMatrix([a, b!, c!, d!, e!, f!])
-    }
+    this.__transformMatrix =
+      a instanceof DOMMatrix
+        ? new DOMMatrix([a.a, a.b, a.c, a.d, a.e, a.f])
+        : new DOMMatrix([a, b!, c!, d!, e!, f!])
   }
 
   getTransform(): DOMMatrix {
@@ -963,34 +578,11 @@ export class Context {
     if (isNaN(x) || isNaN(y) || !isFinite(x) || !isFinite(y)) {
       return
     }
-    const matrix = this.getTransform().scale(x, y)
-    this.setTransform(matrix)
-  }
-
-  rotate(angle: number) {
-    const matrix = this.getTransform().multiply(
-      new DOMMatrix([
-        Math.cos(angle),
-        Math.sin(angle),
-        -Math.sin(angle),
-        Math.cos(angle),
-        0,
-        0,
-      ]),
-    )
-    this.setTransform(matrix)
+    this.setTransform(this.getTransform().scale(x, y))
   }
 
   translate(x: number, y: number) {
-    const matrix = this.getTransform().translate(x, y)
-    this.setTransform(matrix)
-  }
-
-  transform(a: number, b: number, c: number, d: number, e: number, f: number) {
-    const matrix = this.getTransform().multiply(
-      new DOMMatrix([a, b, c, d, e, f]),
-    )
-    this.setTransform(matrix)
+    this.setTransform(this.getTransform().translate(x, y))
   }
 
   __matrixTransform(x: number, y: number): DOMPoint {
@@ -1002,73 +594,5 @@ export class Context {
       x: Math.hypot(this.__transformMatrix.a, this.__transformMatrix.b),
       y: Math.hypot(this.__transformMatrix.c, this.__transformMatrix.d),
     }
-  }
-
-  __getTransformRotation(): number {
-    return Math.atan2(this.__transformMatrix.b, this.__transformMatrix.a)
-  }
-
-  /**
-   * An <image> of the source, cropped and scaled the way the canvas call asks:
-   * a nested <svg> whose viewBox is the source rectangle maps it onto the
-   * destination rectangle exactly. Throws rather than dropping the image, so a
-   * renderer that draws one into an export finds out.
-   */
-  drawImage(image: unknown, ...args: number[]) {
-    const source = image as {
-      width: number
-      height: number
-      toDataURL?: (type?: string) => string
-    }
-    if (typeof source.toDataURL !== 'function') {
-      throw new TypeError(
-        'svgcanvas drawImage needs a source with toDataURL (a canvas); an OffscreenCanvas has to be copied onto one first',
-      )
-    }
-    const [sx, sy, sw, sh, dx, dy, dw, dh] =
-      args.length >= 8
-        ? args
-        : [
-            0,
-            0,
-            source.width,
-            source.height,
-            args[0],
-            args[1],
-            args[2] ?? source.width,
-            args[3] ?? source.height,
-          ]
-    const group = this.__createElement('g')
-    const viewport = this.__createElement('svg', {
-      x: dx,
-      y: dy,
-      width: dw,
-      height: dh,
-      viewBox: `${sx} ${sy} ${sw} ${sh}`,
-      preserveAspectRatio: 'none',
-    })
-    const img = this.__createElement('image', {
-      href: source.toDataURL('image/png'),
-      width: source.width,
-      height: source.height,
-      preserveAspectRatio: 'none',
-      'image-rendering': this.imageSmoothingEnabled ? undefined : 'pixelated',
-    })
-    viewport.appendChild(img)
-    group.appendChild(viewport)
-    this.__closestGroupOrSvg().appendChild(group)
-    this.__currentElement = group
-    this.__applyTransformation(group)
-  }
-
-  imageSmoothingEnabled = true
-
-  // Stubs for unimplemented methods
-  drawFocusRing() {}
-  createImageData() {}
-  putImageData() {}
-  globalCompositeOperation() {}
-  createPattern() {
-    return null
   }
 }

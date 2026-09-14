@@ -12,7 +12,7 @@ import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
-import { renderToStaticMarkup } from './renderToStaticMarkup.ts'
+import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
 
 import type { MsaViewModel } from './model.ts'
 import type { Context as ContextType } from '@jbrowse/svgcanvas'
@@ -130,13 +130,25 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
     throw model.error
   }
   const { Context } = await import('@jbrowse/svgcanvas')
-  return renderToStaticMarkup(
+  // Each svgcanvas layer is already serialized SVG, and React would have to
+  // parse it into a second DOM only for the export to serialize it back out.
+  // The layers register themselves here instead, and their markup is spliced
+  // into the page as strings.
+  const layers = new Map<string, ContextType>()
+  const markup = renderToStaticMarkup(
     <MsaSvg
       model={model}
       theme={opts.theme}
       Context={Context}
       layout={getLayout(model, opts)}
+      layers={layers}
     />,
+  )
+  return svgSafeColors(
+    markup.replaceAll(/<g data-layer="([^"]+)"><\/g>/g, (match, id: string) => {
+      const ctx = layers.get(id)
+      return ctx ? `<g>${ctx.getSvg().innerHTML}</g>` : match
+    }),
   )
 }
 
@@ -145,11 +157,13 @@ function MsaSvg({
   theme,
   Context,
   layout,
+  layers,
 }: {
   model: MsaViewModel
   theme: Theme
   Context: typeof ContextType
   layout: Layout
+  layers: LayerMap
 }) {
   const { width, trackHeight, includeMinimap, legendWidth } = layout
   const { treeAreaWidth, minimapHeight, visibleDomainTypes } = model
@@ -161,7 +175,7 @@ function MsaSvg({
     legendWidth > 0
       ? Math.max(layout.height, legendTop + legendHeight(visibleDomainTypes))
       : layout.height
-  const props = { Context, model, theme, layout }
+  const props = { Context, model, theme, layout, layers }
 
   const body = (
     <>
@@ -267,14 +281,17 @@ function LegendSVG({
   )
 }
 
+type LayerMap = Map<string, ContextType>
+
 interface LayerProps {
   model: MsaViewModel
   theme: Theme
   layout: Layout
   Context: typeof ContextType
+  layers: LayerMap
 }
 
-function CoreRendering({ model, theme, layout, Context }: LayerProps) {
+function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const { contentHeight, offsetX, offsetY, msaAreaWidth } = layout
   const { treeAreaWidth, id } = model
 
@@ -331,6 +348,7 @@ function CoreRendering({ model, theme, layout, Context }: LayerProps) {
         width={treeAreaWidth}
         height={contentHeight}
         ctx={treeCtx}
+        layers={layers}
       />
       <ClipGroup
         clipId={`msa-${id}`}
@@ -338,6 +356,7 @@ function CoreRendering({ model, theme, layout, Context }: LayerProps) {
         height={contentHeight}
         transform={`translate(${treeAreaWidth} 0)`}
         ctx={msaCtx}
+        layers={layers}
         underlay={raster}
       />
     </>
@@ -402,7 +421,7 @@ function rasterBackground({
   ) : undefined
 }
 
-function TrackRendering({ model, theme, layout, Context }: LayerProps) {
+function TrackRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const { trackHeight, offsetX, msaAreaWidth } = layout
   const { treeAreaWidth, id } = model
 
@@ -425,6 +444,7 @@ function TrackRendering({ model, theme, layout, Context }: LayerProps) {
           width={msaAreaWidth}
           height={trackHeight}
           ctx={ctx}
+          layers={layers}
         />
       </g>
     </>
@@ -470,8 +490,8 @@ function TrackLabelsSVG({
   )
 }
 
-// Clips a svgcanvas Context to its box and injects its markup verbatim (it is
-// already serialized SVG, not React). `underlay` draws beneath that markup,
+// Clips a svgcanvas Context to its box and leaves a placeholder for renderToSvg
+// to splice the layer's own markup into. `underlay` draws beneath that markup,
 // inside the same clip, for the parts of a layer React emits directly.
 function ClipGroup({
   clipId,
@@ -479,6 +499,7 @@ function ClipGroup({
   height,
   transform,
   ctx,
+  layers,
   underlay,
 }: {
   clipId: string
@@ -486,8 +507,10 @@ function ClipGroup({
   height: number
   transform?: string
   ctx: ContextType
+  layers: LayerMap
   underlay?: React.ReactNode
 }) {
+  layers.set(clipId, ctx)
   return (
     <>
       <defs>
@@ -497,7 +520,7 @@ function ClipGroup({
       </defs>
       <g clipPath={`url(#${clipId})`} transform={transform}>
         {underlay}
-        <g dangerouslySetInnerHTML={{ __html: ctx.getSvg().innerHTML }} />
+        <g data-layer={clipId} />
       </g>
     </>
   )

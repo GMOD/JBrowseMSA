@@ -38,7 +38,7 @@ export function renderToStaticMarkup(node: React.ReactElement) {
     // export ever taken. The markup is a string by here and needs no DOM.
     root.unmount()
   }
-  return svgSafeColors(html)
+  return html
 }
 
 const tag = /<[a-zA-Z][^>]*>/g
@@ -54,7 +54,7 @@ const colorAttr = /\b(fill|stroke|stop-color)="([^"]+)"/g
  * came out opaque and the identity coloring came out missing. Alpha moves to
  * the matching -opacity attribute, unless the element already carries one.
  */
-function svgSafeColors(html: string) {
+export function svgSafeColors(html: string) {
   return html.replaceAll(tag, el =>
     el.replaceAll(colorAttr, (match, attr: string, value: string) => {
       if (!/^(rgba|hsl)/i.test(value)) {
