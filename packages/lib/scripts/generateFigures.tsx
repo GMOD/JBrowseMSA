@@ -15,13 +15,7 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { enableStaticRendering } from 'mobx-react'
 import { test } from 'vitest'
 
-import {
-  domainsGFF,
-  domainsMSA,
-  nucleotideMSA,
-  proteinMSA,
-  proteinTree,
-} from '../../examples/src/examples/exampleData.ts'
+import { proteinMSA, proteinTree } from '../../examples/src/examples/data.ts'
 import { installHeadlessRenderEnv } from '../src/headlessRenderEnv.ts'
 import MSAModelF from '../src/model.ts'
 import { renderToSvg } from '../src/renderToSvg.tsx'
@@ -52,6 +46,36 @@ ATGCGTTCGATCGATCAATCGATCG
 ATGCGATCGATCGATCGATCTATCG
 `
 const dnaTree = '((seqA:0.1,seqB:0.15):0.1,(seqC:0.2,seqD:0.05):0.1);'
+
+// Figure-sized illustrations of the two overlays: a nucleotide alignment, and
+// rhodopsin N-termini with an InterProScan-shaped GFF over them, ungapped so a
+// domain's residue coordinates are its columns.
+const nucleotideMSA = `>seq1
+ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT
+>seq2
+ACGTACGAACGTACGTAGGTACGTACATACGTACGTACGT
+>seq3
+ACGTTCGTACGTACCTACGTACGTACGTACGAACGTACGT
+>seq4
+ACGTACGTACGTACGTACGTACATACGTTCGTACGTACGT
+`
+
+const domainsMSA = `>GPCR_human
+MNGTEGPNFYVPFSNATGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIVLGFPINFLTLYVTVQHKKLR
+>GPCR_mouse
+MNGTEGPNFYVPFSNKTGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIMLGFPINFLTLYVTVQHKKLR
+>GPCR_bovine
+MNGTEGPNFYVPFSNATGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIVLGFPINFLTLYVTVQHKKLR
+>GPCR_chicken
+MNGTEGPNFYVPFSNKSGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLILLGFPINFLTLYVTIQHKKLR
+`
+
+const domainsGFF = `##gff-version 3
+GPCR_human\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+GPCR_mouse\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+GPCR_bovine\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+GPCR_chicken\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;description=7 transmembrane receptor (rhodopsin family)
+`
 
 const figures = [
   {

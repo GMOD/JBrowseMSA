@@ -1,49 +1,23 @@
 /**
- * Single place to read the demo-app example data. The example alignments/trees/
- * GFFs live as TS string constants in the examples package
- * (exampleData.ts is hand-authored, generatedData.ts is built by
- * scripts/examples-gen). The screenshot scripts run under plain node with no TS
- * loader, so we read those files as text and pull constants out by name rather
- * than importing or duplicating the (multi-KB) data.
+ * Read the example data the screenshot specs draw. The alignments, trees, GFFs
+ * and layer JSON live as files in packages/examples/data (see
+ * scripts/examples-gen/README.md), so a spec reads exactly what the gallery
+ * imports and what writeExampleData.mjs publishes through the app.
  */
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const examplesDir = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../packages/examples/src/examples',
-)
-const read = name => fs.readFileSync(path.join(examplesDir, name), 'utf8')
-const sources = ['exampleData.ts', 'generatedData.ts'].map(read)
+import { examplesDataDir, repoRoot } from './lib.mjs'
 
-// Match either `export const NAME = \`…\`` (backtick) or `export const NAME =
-// '…'` (single-quote) across both source files.
-export function readConst(name) {
-  for (const src of sources) {
-    const backtick = src.match(
-      new RegExp(`export const ${name} = \`([\\s\\S]*?)\``),
-    )
-    if (backtick) {
-      return backtick[1]
-    }
-    const quoted = src.match(new RegExp(`export const ${name} =\\s*'([^']*)'`))
-    if (quoted) {
-      return quoted[1]
-    }
-  }
-  throw new Error(
-    `example constant '${name}' not found in exampleData.ts/generatedData.ts`,
-  )
-}
+const examplesSrc = path.join(repoRoot, 'packages/examples/src/examples')
 
-export function hasConst(name) {
-  return sources.some(src => new RegExp(`export const ${name} = `).test(src))
-}
+export const readData = file =>
+  fs.readFileSync(path.join(examplesDataDir, file), 'utf8')
 
-// Generated data that is data rather than a string constant: the arc tracks'
-// pair lists, which the examples import as JSON and the specs read from the
-// same file so a regenerated contact map reaches both.
-export function readJson(file) {
-  return JSON.parse(read(file))
-}
+export const hasData = file => fs.existsSync(path.join(examplesDataDir, file))
+
+// Layer data the examples import as JSON -- arc pairs, per-residue counts, the
+// residue mappings they were derived through. The specs read the same file, so
+// a regenerated layer reaches the figure and the live example together.
+export const readJson = file =>
+  JSON.parse(fs.readFileSync(path.join(examplesSrc, file), 'utf8'))

@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { nlrp1DomainsGFF, nlrp1MSA, nlrp1Tree } from './generatedData'
+import { nlrp1DomainsGFF, nlrp1MSA, nlrp1Tree } from './data'
 
 // NLRP1 (an inflammasome sensor) across twelve vertebrates — a true ortholog
 // set whose members do not share the same domain architecture.

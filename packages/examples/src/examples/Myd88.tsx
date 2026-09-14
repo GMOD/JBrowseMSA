@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { myd88DomainsGFF, myd88MSA, myd88Tree } from './generatedData'
+import { myd88DomainsGFF, myd88MSA, myd88Tree } from './data'
 
 // MyD88 (a TLR/IL-1R signalling adaptor) across mammals, including three bats.
 // The InterProScan overlay shows its two-domain architecture — an N-terminal

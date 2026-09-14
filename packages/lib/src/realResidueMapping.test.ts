@@ -13,7 +13,7 @@
 // the published package.
 import { expect, test } from 'vitest'
 
-import { kinaseMSA } from '../../examples/src/examples/exampleData.ts'
+import kinaseMSA from '../../examples/data/kinase.fa?raw'
 import structure from '../../examples/src/examples/kinaseStructure.json'
 import MSAModelF from './model.ts'
 
@@ -24,7 +24,7 @@ const residueMappings = structure.residueMappings as ResidueMapping[]
 function makeModel(mappings = residueMappings) {
   const model = MSAModelF().create({
     type: 'MsaView',
-    msaFormat: 'clustal',
+    msaFormat: 'fasta',
     data: { msa: kinaseMSA },
     residueMappings: mappings,
   })

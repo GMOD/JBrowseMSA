@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { opsinDomainsGFF, opsinMSA, opsinTree } from './generatedData'
+import { opsinDomainsGFF, opsinMSA, opsinTree } from './data'
 
 // Visual pigments (opsins) across vertebrates. The inferred tree sorts them
 // into the classic opsin classes — dim-light rhodopsins (RH1) in one clade, the

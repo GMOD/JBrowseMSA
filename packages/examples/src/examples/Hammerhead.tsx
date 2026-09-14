@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { hammerheadMSA } from './generatedData'
+import { hammerheadMSA } from './data'
 
 // Hammerhead ribozyme (Rfam RF00008), a 20-sequence subset of the seed
 // alignment — a small self-cleaving catalytic RNA. Its Stockholm SS_cons

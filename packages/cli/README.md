@@ -61,7 +61,7 @@ space. The key on the right is generated from the domains actually present.
 
 Every figure on this page is `export-svg` output, drawn from the Src-kinase and
 GPCR examples in
-[packages/examples](https://github.com/GMOD/JBrowseMSA/tree/main/packages/examples/src/examples/exampleData.ts).
+[packages/examples](https://github.com/GMOD/JBrowseMSA/tree/main/packages/examples/data).
 
 ## Rendering figures
 

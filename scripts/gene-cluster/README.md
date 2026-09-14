@@ -38,7 +38,5 @@ node scripts/gene-cluster/generate.mjs
 ```
 
 Writes `gene-cluster.stock` (Stockholm alignment + embedded NJ-style tree) and
-`gene-cluster.gff` (one gene-level, stranded feature per gene per genome). Those
-two files are inlined as the `geneClusterMSA` / `geneClusterGFF` constants in
-`packages/examples/src/examples/exampleData.ts`, which back the
-`GeneCluster.tsx` gallery example.
+`gene-cluster.gff` (one gene-level, stranded feature per gene per genome), which
+go in `packages/examples/data/` and back the `GeneCluster.tsx` example.

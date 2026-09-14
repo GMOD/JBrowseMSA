@@ -6,11 +6,10 @@ root in local dev). They let a `?data=` deep-link point a `msaFilehandle` /
 whole alignment in the URL — the user-guide figures link to live views this
 way, keeping those links small (the lysine Stockholm alone is ~26 KB inline).
 
-They are **generated**, not hand-maintained — each is written verbatim from a
-constant in `packages/examples/src/examples/exampleData.ts` (hand-authored) or
-`generatedData.ts` (built by `scripts/examples-gen`), which carry the
-authoritative provenance comment for every dataset. Regenerate after changing a
-source constant:
+They are **copies**, not hand-maintained. Every dataset lives in
+`packages/examples/data`, where `scripts/examples-gen/generate.mjs` writes it
+and the examples import it; this directory is where the demo app serves it from.
+Refresh it after regenerating a dataset:
 
 ```sh
 node scripts/screenshots/writeExampleData.mjs
@@ -18,21 +17,18 @@ node scripts/screenshots/writeExampleData.mjs
 
 (`pnpm screenshots` runs this automatically before building the app.)
 
-| File                 | Source constant    | Format              | Provenance                                                                                                 |
-| -------------------- | ------------------ | ------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `il2ra.aln`          | `proteinMSA`       | CLUSTAL             | IL2RA/IL2RB/IL2RG across mammals, the small protein alignment the Getting started examples and the homepage viewer show |
-| `il2ra.nh`           | `proteinTree`      | Newick              | Tree for `il2ra.aln`                                                                                       |
-| `nucleotide.fa`      | `nucleotideMSA`    | FASTA               | Four toy DNA sequences, for the nucleotide color schemes                                                   |
-| `kinase.aln`         | `kinaseMSA`        | CLUSTAL             | Src-family kinases (SRC/YES/FYN/FGR/HCK/LYN/LCK/BLK, human + SRC mouse/chick), full-length UniProt sequences aligned with Clustal Omega |
-| `kinase.nh`          | `kinaseTree`       | Newick              | Clustal Omega guide tree for the alignment above                                                           |
-| `kinase-domains.gff` | `kinaseDomainsGFF` | InterProScan GFF3   | `react-msaview-cli interproscan kinase.aln` against the EBI InterProScan API (PfamA, CDD)                  |
-| `lysine.stock`       | `lysineMSA`        | Stockholm (tree+SS) | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded |
-| `f12-cetacean-cds.stock` | `f12CdsMSA`    | Stockholm (tree)    | Coagulation factor XII coding alignment across mammals (UCSC cactus 241-way), tree embedded; F12 disabled in cetaceans, intact in the manatee — see `scripts/f12-cetacean` |
-| `f12-cetacean-exons.gff` | `f12ExonsGFF`  | GFF3 (gene structure) | F12 14-exon structure projected onto every alignment row (`react-msaview-cli genestructure --gene F12 --ref human`); each exon `Name=exon-N` so it is one color across species |
-| `nlrp1.aln`          | `nlrp1MSA`         | FASTA (aligned)     | NLRP1 across 12 vertebrates, UniProt via `scripts/examples-gen/datasets/nlrp1.tsv`, ClustalW, 1666 columns — the PYD domain is present in primates, dog and hedgehog and absent in rodents, artiodactyls, horse and fish; the alignment `docs/tutorials/protein_family.md` builds |
-| `nlrp1.nh`           | `nlrp1Tree`        | Newick              | Neighbor-joining tree for `nlrp1.aln`                                                                      |
-| `nlrp1-domains.gff`  | `nlrp1DomainsGFF`  | GFF3 (InterPro)     | Pfam matches for the same twelve accessions from InterPro's precomputed set, release 110.0 (`react-msaview-cli interpro`) |
-| `nlrp1-unaligned.aln` | (the aligner's input) | FASTA (padded)  | The same twelve sequences unaligned, right-padded to one width so column N is residue N — the control panel in the column-lock figure (`docs/media/column-lock.png`) and the first figure of the tutorial |
+`scripts/examples-gen/README.md` carries the provenance of each dataset — which
+accessions, how they were aligned, where its domain GFF came from. The files it
+does not cover:
+
+| File                      | Provenance                                                                                                                                    |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `il2ra.aln` / `il2ra.nh`  | IL2RA/IL2RB/IL2RG across mammals, the small protein alignment the Getting started examples and the homepage viewer show                        |
+| `nlrp1-unaligned.aln`     | The aligner's own input, right-padded to a common width, so the unaligned half of `docs/media/column-lock.png` is the same sequences unaligned |
+| `lysine.stock`            | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment — 60 bacterial sequences, tree (`#=GF NH`) and SS embedded    |
+| `f12-cetacean-cds.stock`  | Coagulation factor XII coding alignment across mammals (UCSC cactus 241-way), tree embedded — `scripts/f12-cetacean`                           |
+| `f12-cetacean-exons.gff`  | F12's 14 coding exons projected onto every row (`react-msaview-cli genestructure`), each `Name=exon-N` so one exon is one color across species |
+| `gene-cluster.stock/.gff` | A synthetic colinear gene cluster for the arrow-map overlay — `scripts/gene-cluster`                                                           |
 
 The files below back the JBrowse links on the
 [gallery](https://gmod.org/JBrowseMSA/gallery) page, built by

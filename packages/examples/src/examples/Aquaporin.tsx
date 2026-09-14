@@ -1,10 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import {
-  aquaporinDomainsGFF,
-  aquaporinMSA,
-  aquaporinTree,
-} from './generatedData'
+import { aquaporinDomainsGFF, aquaporinMSA, aquaporinTree } from './data'
 
 // The aquaporin (MIP) family of membrane channels. Every member shares the same
 // six-transmembrane MIP fold — shown by the InterProScan overlay — yet the

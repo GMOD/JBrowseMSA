@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { hoxDomainsGFF, hoxMSA, hoxTree } from './generatedData'
+import { hoxDomainsGFF, hoxMSA, hoxTree } from './data'
 
 // Hox transcription factors — the body-plan master regulators. Across paralog
 // groups (PG1 anterior to PG13 posterior) and clusters (A/B/C/D) these proteins

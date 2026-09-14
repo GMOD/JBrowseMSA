@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { histoneH4MSA, histoneH4Tree } from './generatedData'
+import { histoneH4MSA, histoneH4Tree } from './data'
 
 // Histone H4 across eukaryotes (human → chicken → fly → worm → plant → yeast →
 // ciliate). H4 is among the most conserved proteins known: with

@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { trnaMSA } from './generatedData'
+import { trnaMSA } from './data'
 
 // Transfer RNA (Rfam RF00005), a 24-sequence subset of the seed alignment. The
 // Stockholm file carries the canonical cloverleaf secondary structure

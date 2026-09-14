@@ -1,0 +1,16 @@
+##gff-version 3
+# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+HOXA1	InterProScan	protein_match	233	286	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXB1	InterProScan	protein_match	207	260	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXB4	InterProScan	protein_match	163	219	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXA5	InterProScan	protein_match	196	252	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXC5	InterProScan	protein_match	156	212	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXA7	InterProScan	protein_match	131	187	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXB8	InterProScan	protein_match	147	203	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXA9	InterProScan	protein_match	207	263	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXA9	InterProScan	protein_match	1	193	.	.	.	Name=IPR006711;signature_desc=Hox9%20activation%20region;description=Hox9%20activation%20region
+HOXD10	InterProScan	protein_match	267	323	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXA13	InterProScan	protein_match	323	379	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXA13	InterProScan	protein_match	145	224	.	.	.	Name=IPR022067;signature_desc=Hox%20protein%20A13%20N%20terminal;description=Hox%20protein%20A13%20N%20terminal
+HOXD13	InterProScan	protein_match	277	333	.	.	.	Name=IPR001356;signature_desc=Homeodomain;description=Homeodomain
+HOXD13	InterProScan	protein_match	84	173	.	.	.	Name=IPR022067;signature_desc=Hox%20protein%20A13%20N%20terminal;description=Hox%20protein%20A13%20N%20terminal

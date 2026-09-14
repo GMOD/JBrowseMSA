@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { prestinDomainsGFF, prestinMSA, prestinTree } from './generatedData'
+import { prestinDomainsGFF, prestinMSA, prestinTree } from './data'
 
 // Prestin (SLC26A5), the outer-hair-cell motor protein. Echolocating bats and
 // toothed whales independently evolved many of the same prestin substitutions

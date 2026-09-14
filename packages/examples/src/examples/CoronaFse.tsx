@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { coronaFseMSA } from './generatedData'
+import { coronaFseMSA } from './data'
 
 // The coronavirus frameshifting stimulation element (Rfam RF00507), an
 // 18-sequence subset of the seed spanning the four genera. The ribosome reads

@@ -1,27 +1,21 @@
 /**
- * Write the larger real-data examples out as standalone files the demo app can
- * fetch, instead of inlining them into a `?data=` URL. A loaded-state deep-link
- * otherwise has to carry the whole alignment in the query string (the lysine
- * Stockholm alone is ~26 KB); pointing a *Filehandle prop at a hosted file keeps
- * those links a few hundred bytes.
+ * Publish the examples package's data files through the demo app, so a
+ * `?data=` deep link can point a `msaFilehandle` / `treeFilehandle` /
+ * `gffFilehandle` at a hosted file instead of carrying the whole alignment in
+ * the query string (the lysine Stockholm alone is ~26 KB).
  *
- * Single source of truth is the examples package's TS constants — this reads the
- * file and pulls the constants out by name (no TS loader needed), so the hosted
- * files never drift from the in-app examples. Output is served from the app
- * (packages/app/public -> dist root -> gmod.org/JBrowseMSA/demo/data/...).
+ * Every file in packages/examples/data is copied verbatim into
+ * packages/app/public/data, which the app serves at its root and gmod.org
+ * serves at /JBrowseMSA/demo/data/. The examples package is the single source:
+ * the same bytes the gallery imports are the bytes a link fetches.
  *
  * Run standalone with:  node scripts/screenshots/writeExampleData.mjs
  * (also runs automatically as the first step of `pnpm screenshots`).
  */
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-import { readConst } from './exampleConsts.mjs'
-
-const here = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(here, '..', '..')
-const outDir = path.join(repoRoot, 'packages/app/public/data')
+import { appDataDir, examplesDataDir, repoRoot } from './lib.mjs'
 
 // Unaligned FASTA -> an equal-width block, by padding every sequence on the
 // RIGHT with gaps. Right-padding is the point: it adds no internal gaps, so
@@ -41,45 +35,29 @@ function rightPadToBlock(fasta) {
     .join('\n')}\n`
 }
 
-// format is detected from content (CLUSTAL/# STOCKHOLM/>/##gff headers), so the
-// extensions here are only for human readability
-const files = {
-  // the Getting started examples load these over HTTP rather than importing a
-  // constant, so their source runs unchanged when someone copies it out
-  'il2ra.aln': readConst('proteinMSA'),
-  'il2ra.nh': readConst('proteinTree'),
-  'nucleotide.fa': readConst('nucleotideMSA'),
-  'kinase.aln': readConst('kinaseMSA'),
-  'kinase.nh': readConst('kinaseTree'),
-  'kinase-domains.gff': readConst('kinaseDomainsGFF'),
-  'nlrp1.aln': readConst('nlrp1MSA'),
-  'nlrp1.nh': readConst('nlrp1Tree'),
-  'nlrp1-domains.gff': readConst('nlrp1DomainsGFF'),
-  // The same twelve sequences NOT aligned — each one padded on the right to a
-  // common length so the viewer accepts it as a block. With no gaps inserted,
-  // column N *is* residue N, so loading it with the same domain GFF draws each
-  // protein's domains on its own residue ruler: the standard domain-cartoon
-  // view, produced by the same component and palette as the aligned one.
-  // That makes the pair a controlled comparison — one input aligned, one not,
-  // everything else identical (docs/media/column-lock.png).
-  //
-  // Read from the examples-gen dataset rather than a generated constant: this
-  // is the aligner's own committed INPUT, so the unaligned panel is guaranteed
-  // to be the same sequences the aligned panel was built from, and the examples
-  // package doesn't carry a constant that only a screenshot uses.
-  'nlrp1-unaligned.aln': rightPadToBlock(
+fs.mkdirSync(appDataDir, { recursive: true })
+let copied = 0
+for (const file of fs.readdirSync(examplesDataDir).sort()) {
+  fs.copyFileSync(path.join(examplesDataDir, file), path.join(appDataDir, file))
+  copied++
+}
+console.log(`copied ${copied} files from packages/examples/data`)
+
+// The same twelve NLRP1 sequences NOT aligned -- the aligner's own committed
+// input, padded to a common length. With no gaps inserted, column N is residue
+// N, so loading it with the same domain GFF draws each protein's domains on its
+// own residue ruler: the standard domain-cartoon view, from the same component
+// and palette as the aligned one. That makes the pair a controlled comparison,
+// one input aligned and one not, everything else identical
+// (docs/media/column-lock.png).
+const unaligned = 'nlrp1-unaligned.aln'
+fs.writeFileSync(
+  path.join(appDataDir, unaligned),
+  rightPadToBlock(
     fs.readFileSync(
       path.join(repoRoot, 'scripts/examples-gen/datasets/nlrp1.fasta'),
       'utf8',
     ),
   ),
-  'lysine.stock': readConst('lysineMSA'),
-  'f12-cetacean-cds.stock': readConst('f12CdsMSA'),
-  'f12-cetacean-exons.gff': readConst('f12ExonsGFF'),
-}
-
-fs.mkdirSync(outDir, { recursive: true })
-for (const [file, content] of Object.entries(files)) {
-  fs.writeFileSync(path.join(outDir, file), content)
-  console.log(`wrote data/${file} (${content.length} bytes)`)
-}
+)
+console.log(`wrote data/${unaligned}`)

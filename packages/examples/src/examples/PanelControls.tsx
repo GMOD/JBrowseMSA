@@ -4,7 +4,7 @@ import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import { MSAViewer } from 'react-msaview'
 
-import { insulinMSA } from './generatedData'
+import { insulinMSA } from './data'
 
 // A purpose-built page usually wants less than the standalone app shows, and
 // wants its own controls on what is left. Every toggle here is a prop: the

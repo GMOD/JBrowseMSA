@@ -1,0 +1,223 @@
+{
+  "generatedBy": "scripts/examples-gen/ace2Interface.mjs",
+  "description": "ACE2 residues that contact the SARS-CoV-2 spike receptor-binding domain: every residue of chain A in 6M0J with a heavy atom within 4 A of a heavy atom of chain E. Positions are residues of the Human row, which is Q9BYF1 numbering, so the viewer projects them through the alignment's gaps onto every ortholog.",
+  "source": "https://www.rcsb.org/structure/6M0J",
+  "retrieved": "2026-09-13",
+  "pdb": "6M0J",
+  "chains": {
+    "ace2": "A",
+    "spikeRbd": "E"
+  },
+  "accession": "Q9BYF1",
+  "row": "Human",
+  "cutoffAngstroms": 4,
+  "contacts": [
+    {
+      "seqPos": 24,
+      "residue": "Q",
+      "minDistance": 2.69,
+      "rbdResidues": 2
+    },
+    {
+      "seqPos": 27,
+      "residue": "T",
+      "minDistance": 3.49,
+      "rbdResidues": 3
+    },
+    {
+      "seqPos": 28,
+      "residue": "F",
+      "minDistance": 3.39,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 30,
+      "residue": "D",
+      "minDistance": 2.9,
+      "rbdResidues": 2
+    },
+    {
+      "seqPos": 31,
+      "residue": "K",
+      "minDistance": 2.93,
+      "rbdResidues": 2
+    },
+    {
+      "seqPos": 34,
+      "residue": "H",
+      "minDistance": 2.86,
+      "rbdResidues": 2
+    },
+    {
+      "seqPos": 35,
+      "residue": "E",
+      "minDistance": 3.5,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 37,
+      "residue": "E",
+      "minDistance": 3.46,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 38,
+      "residue": "D",
+      "minDistance": 2.7,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 41,
+      "residue": "Y",
+      "minDistance": 2.71,
+      "rbdResidues": 3
+    },
+    {
+      "seqPos": 42,
+      "residue": "Q",
+      "minDistance": 2.79,
+      "rbdResidues": 3
+    },
+    {
+      "seqPos": 79,
+      "residue": "L",
+      "minDistance": 3.77,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 82,
+      "residue": "M",
+      "minDistance": 3.58,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 83,
+      "residue": "Y",
+      "minDistance": 2.79,
+      "rbdResidues": 3
+    },
+    {
+      "seqPos": 330,
+      "residue": "N",
+      "minDistance": 3.64,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 353,
+      "residue": "K",
+      "minDistance": 2.78,
+      "rbdResidues": 4
+    },
+    {
+      "seqPos": 354,
+      "residue": "G",
+      "minDistance": 3.43,
+      "rbdResidues": 2
+    },
+    {
+      "seqPos": 355,
+      "residue": "D",
+      "minDistance": 3.34,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 357,
+      "residue": "R",
+      "minDistance": 3.51,
+      "rbdResidues": 1
+    },
+    {
+      "seqPos": 393,
+      "residue": "R",
+      "minDistance": 3.73,
+      "rbdResidues": 1
+    }
+  ],
+  "highlights": [
+    {
+      "row": "Human",
+      "start": 24,
+      "end": 24
+    },
+    {
+      "row": "Human",
+      "start": 27,
+      "end": 28
+    },
+    {
+      "row": "Human",
+      "start": 30,
+      "end": 31
+    },
+    {
+      "row": "Human",
+      "start": 34,
+      "end": 35
+    },
+    {
+      "row": "Human",
+      "start": 37,
+      "end": 38
+    },
+    {
+      "row": "Human",
+      "start": 41,
+      "end": 42
+    },
+    {
+      "row": "Human",
+      "start": 79,
+      "end": 79
+    },
+    {
+      "row": "Human",
+      "start": 82,
+      "end": 83
+    },
+    {
+      "row": "Human",
+      "start": 330,
+      "end": 330
+    },
+    {
+      "row": "Human",
+      "start": 353,
+      "end": 355
+    },
+    {
+      "row": "Human",
+      "start": 357,
+      "end": 357
+    },
+    {
+      "row": "Human",
+      "start": 393,
+      "end": 393
+    }
+  ],
+  "residueMappings": [
+    {
+      "row": "Human",
+      "accession": "Q9BYF1",
+      "structure": {
+        "id": "6M0J",
+        "kind": "experimental",
+        "asymId": "A",
+        "url": "https://files.rcsb.org/download/6M0J.cif"
+      },
+      "segments": [
+        {
+          "rowStart": 19,
+          "rowEnd": 615,
+          "structStart": 1,
+          "structEnd": 597
+        }
+      ],
+      "rowLength": 805,
+      "generated": {
+        "by": "sifts",
+        "date": "2026-09-13"
+      }
+    }
+  ]
+}

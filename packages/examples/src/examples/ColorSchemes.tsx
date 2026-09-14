@@ -5,7 +5,7 @@ import Select from '@mui/material/Select'
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
 
-import { proteinMSA, proteinTree } from './exampleData'
+import { proteinMSA, proteinTree } from './data'
 import useWidthSetter from './useWidthSetter'
 
 const colorSchemes = [

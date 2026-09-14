@@ -26,6 +26,12 @@ interface MSAViewerProps {
   colWidth?: number
   /** initial per-row pixel height */
   rowHeight?: number
+  /**
+   * hide columns at least this percent gaps (default 100, i.e. hide nothing).
+   * A deep family's alignment is mostly insertions carried by a few members;
+   * dropping those columns is what makes the rest readable
+   */
+  allowedGappyness?: number
   /** alignment columns (0-based) to highlight with a persistent overlay */
   highlightColumns?: number[]
   /**
@@ -59,6 +65,7 @@ export default function MSAViewer({
   height,
   colWidth,
   rowHeight,
+  allowedGappyness,
   highlightColumns,
   highlights,
   relativeTo,
@@ -83,6 +90,7 @@ export default function MSAViewer({
       ...(height ? { height } : {}),
       ...(colWidth ? { colWidth } : {}),
       ...(rowHeight ? { rowHeight } : {}),
+      ...(allowedGappyness !== undefined ? { allowedGappyness } : {}),
       ...(highlightColumns ? { highlightColumns } : {}),
       ...(highlights ? { highlights } : {}),
       ...(relativeTo ? { relativeTo } : {}),
@@ -133,6 +141,11 @@ export default function MSAViewer({
       model.setRowHeight(rowHeight)
     }
   }, [model, rowHeight])
+  useEffect(() => {
+    if (allowedGappyness !== undefined) {
+      model.setAllowedGappyness(allowedGappyness)
+    }
+  }, [model, allowedGappyness])
   useEffect(() => {
     if (drawTree !== undefined) {
       model.setDrawTree(drawTree)

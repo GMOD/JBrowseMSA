@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { insulinMSA, insulinTree } from './generatedData'
+import { insulinMSA, insulinTree } from './data'
 
 // Insulin (preproinsulin) across vertebrates. The precursor is signal - B chain
 // - C-peptide - A chain; the B and A chains fold into mature insulin and are

@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { ef1aDomainsGFF, ef1aMSA, ef1aTree } from './generatedData'
+import { ef1aDomainsGFF, ef1aMSA, ef1aTree } from './data'
 
 // Translation elongation factor EF-1-alpha / EF-Tu across the three domains of
 // life — bacteria (EF-Tu), archaea and eukaryotes (EF-1-alpha) in one

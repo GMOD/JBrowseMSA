@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack'
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
 
-import { proteinMSA, proteinTree } from './exampleData'
+import { proteinMSA, proteinTree } from './data'
 import useWidthSetter from './useWidthSetter'
 
 // The model exposes actions for programmatic control. Because MSAView is an

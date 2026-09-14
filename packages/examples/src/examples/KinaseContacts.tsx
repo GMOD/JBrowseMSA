@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { kinaseDomainsGFF, kinaseMSA, kinaseTree } from './exampleData'
+import { kinaseDomainsGFF, kinaseMSA, kinaseTree } from './data'
 import structure from './kinaseStructure.json'
 
 import type { ResidueMapping } from 'react-msaview'

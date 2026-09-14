@@ -6,7 +6,7 @@ import Switch from '@mui/material/Switch'
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
 
-import { proteinMSA, proteinTree } from './exampleData'
+import { proteinMSA, proteinTree } from './data'
 import useWidthSetter from './useWidthSetter'
 
 // The tree panel has several display toggles, each backed by a model action.

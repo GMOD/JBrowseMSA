@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { f12CdsMSA, f12ExonsGFF } from './exampleData'
+import { f12CdsMSA, f12ExonsGFF } from './data'
 
 // Coagulation factor XII (F12) coding sequence across mammals, with its 14-exon
 // gene structure overlaid the same way InterProScan protein domains are — here

@@ -1,0 +1,100 @@
+{
+  "generatedBy": "scripts/examples-gen/hemoglobin.mjs",
+  "description": "Sickle-cell layers for the globin alignment. The highlight is the HBB substitution that causes sickle-cell disease, on the row's own (UniProt) numbering; the bar track is the mean AlphaMissense pathogenicity of the 19 substitutions at each residue of HBB; the residue mappings are SIFTS, and are what turns row residue 7 into 1A3N residue 6.",
+  "sources": {
+    "sifts": "https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/1a3n",
+    "alphaMissense": "https://alphafold.ebi.ac.uk/files/AF-P68871-F1-aa-substitutions.csv",
+    "alphaFoldApi": "https://alphafold.ebi.ac.uk/api/prediction/P68871"
+  },
+  "retrieved": "2026-09-13",
+  "sickle": {
+    "row": "Human_beta",
+    "seqPos": 7,
+    "hgvs": "p.Glu7Val",
+    "legacy": "E6V",
+    "structure": {
+      "id": "1A3N",
+      "asymId": "B",
+      "position": 6
+    },
+    "alphaMissense": {
+      "score": 0.2229,
+      "class": "LBen"
+    },
+    "label": "HBB E6V (p.Glu7Val) · sickle cell"
+  },
+  "alphaMissense": {
+    "row": "Human_beta",
+    "accession": "P68871",
+    "name": "AlphaMissense (mean per residue)",
+    "max": 1,
+    "values": [
+      0.6026, 0.7158, 0.2541, 0.7605, 0.4522, 0.2175, 0.3925, 0.9283, 0.6858,
+      0.2444, 0.2784, 0.8302, 0.2211, 0.276, 0.5827, 0.9372, 0.4012, 0.5205,
+      0.7682, 0.2976, 0.3902, 0.3794, 0.2686, 0.5901, 0.9809, 0.68, 0.7284,
+      0.7668, 0.9017, 0.8787, 0.8811, 0.8692, 0.9134, 0.7296, 0.8446, 0.9009,
+      0.9641, 0.9659, 0.9376, 0.7199, 0.9424, 0.9322, 0.9853, 0.4724, 0.3549,
+      0.9602, 0.9473, 0.714, 0.8219, 0.5609, 0.3709, 0.4212, 0.2608, 0.5649,
+      0.8756, 0.4941, 0.3561, 0.8793, 0.2935, 0.5227, 0.9294, 0.5182, 0.4026,
+      0.9782, 0.9931, 0.5662, 0.8207, 0.9437, 0.8032, 0.3194, 0.7428, 0.9225,
+      0.4735, 0.3727, 0.9336, 0.7774, 0.2213, 0.6049, 0.7341, 0.7288, 0.5761,
+      0.8632, 0.8433, 0.5186, 0.4108, 0.9415, 0.542, 0.2004, 0.9736, 0.9575,
+      0.6367, 0.7492, 0.9883, 0.9632, 0.784, 0.6804, 0.9612, 0.9017, 0.9611,
+      0.9913, 0.9847, 0.8204, 0.9789, 0.9882, 0.6975, 0.8317, 0.9311, 0.9705,
+      0.643, 0.7259, 0.8105, 0.7451, 0.6099, 0.7483, 0.8251, 0.8296, 0.2349,
+      0.4578, 0.6847, 0.6018, 0.2869, 0.4468, 0.9278, 0.3949, 0.6486, 0.1381,
+      0.4266, 0.7375, 0.5504, 0.6688, 0.7452, 0.7025, 0.9289, 0.8095, 0.7567,
+      0.39, 0.8373, 0.877, 0.8491, 0.3605, 0.8971, 0.9428, 0.8239, 0.5624,
+      0.792, 0.9804, 0.88
+    ]
+  },
+  "residueMappings": [
+    {
+      "row": "Human_beta",
+      "accession": "P68871",
+      "structure": {
+        "id": "1A3N",
+        "kind": "experimental",
+        "asymId": "B",
+        "url": "https://files.rcsb.org/download/1A3N.cif"
+      },
+      "segments": [
+        {
+          "rowStart": 2,
+          "rowEnd": 147,
+          "structStart": 1,
+          "structEnd": 146
+        }
+      ],
+      "unobserved": [[1, 1]],
+      "rowLength": 147,
+      "generated": {
+        "by": "sifts",
+        "date": "2026-09-13"
+      }
+    },
+    {
+      "row": "Human_alpha",
+      "accession": "P69905",
+      "structure": {
+        "id": "1A3N",
+        "kind": "experimental",
+        "asymId": "A",
+        "url": "https://files.rcsb.org/download/1A3N.cif"
+      },
+      "segments": [
+        {
+          "rowStart": 2,
+          "rowEnd": 142,
+          "structStart": 1,
+          "structEnd": 141
+        }
+      ],
+      "rowLength": 142,
+      "generated": {
+        "by": "sifts",
+        "date": "2026-09-13"
+      }
+    }
+  ]
+}

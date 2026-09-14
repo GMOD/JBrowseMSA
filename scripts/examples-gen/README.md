@@ -17,7 +17,7 @@ sudo apt-get install clustalw        # Debian/Ubuntu
 # brew install clustal-w             # macOS
 
 # rebuild constants from the committed sequence snapshots (deterministic,
-# offline): align -> tree -> write TS constants
+# offline): align -> tree -> write the data files
 node scripts/examples-gen/generate.mjs        # or: pnpm examples:gen
 
 # re-download the sequences from UniProt first (refreshes datasets/<name>.fasta)
@@ -27,10 +27,12 @@ node scripts/examples-gen/generate.mjs --fetch
 node scripts/examples-gen/generate.mjs myd88 ace2
 ```
 
-Output is written to `packages/examples/src/examples/generatedData.ts` as plain
-string constants (`myd88MSA`, `myd88Tree`, `globinMSA`, …) that the gallery, the
-SVG figures and the screenshot specs all import. That file is **generated — do
-not edit it by hand**; edit the inputs here and re-run.
+Output goes to `packages/examples/data/` as plain files — `<name>.fa` for the
+alignment, `<name>.nh` for the tree, `<name>-domains.gff` for the domain overlay
+— which the gallery imports with Vite's `?raw`, the screenshot specs read, and
+`scripts/screenshots/writeExampleData.mjs` copies into the demo app so a
+`?data=` link can fetch one. They are **generated**; edit the inputs here and
+re-run rather than editing them.
 
 ## What a dataset is
 
@@ -74,6 +76,7 @@ overlay (`<name>-domains.gff`).
 | `insulin.tsv`      | Insulin / IGF preprohormone                               | signal + B + C + A peptide segments across vertebrates                                                                              |                                           |     |
 | `aquaporin.tsv`    | Aquaporin (MIP) channel family                            | shared 6-TM MIP fold; tree splits water channels from aquaglyceroporins — groups by function                                        | —                                         | ✦   |
 | `hox.tsv`          | Hox transcription factors (human, PG1→PG13)               | divergent proteins sharing one conserved homeodomain; overlay marks that single block                                               | Gehring et al. 1994, Annu. Rev. Biochem.  | ✦   |
+| `kinase.tsv`       | Src-family kinases (8 human + SRC mouse/chicken)          | one architecture, SH3 + SH2 + kinase, in every row; the structure layers (`contacts.mjs`) say how the three pack                    | Xu et al. 1999, Mol. Cell                 | ✦   |
 | `nlrp1.tsv`        | NLRP1 inflammasome sensor across 12 vertebrates           | orthologs that differ in architecture: shared NACHT/WH/HD2 + FIIND/UPA/CARD core, N-terminal PYD only in primates, dog, hedgehog    | Broz & Dixit 2016, Nat. Rev. Immunol.     | ✦   |
 | `trna.stock`       | Transfer RNA cloverleaf (Rfam RF00005 seed subset)        | RNA secondary structure: `SS_cons` renders as a base-paired track over the alignment                                                | Sprinzl & Vassilenko 2005, NAR            |     |
 | `hammerhead.stock` | Hammerhead ribozyme type III (Rfam RF00008 seed subset)   | catalytic RNA: `SS_cons` shows the three-way helix junction; counterpoint to tRNA                                                   | Pley et al. 1994, Nature                  |     |
@@ -175,15 +178,14 @@ node packages/cli/dist/index.js interproscan \
 ## Adding a new example
 
 1. Create `datasets/mygene.tsv` (accession `<TAB>` label; reference row first).
-2. Add `{ name: 'mygene', varName: 'mygene', relativeToFirstRow: <bool> }` to
-   the `datasets` array in `generate.mjs`.
-3. `node scripts/examples-gen/generate.mjs mygene` → constants `mygeneMSA` /
-   `mygeneTree` appear in `generatedData.ts`.
+2. Add `{ name: 'mygene' }` to the `datasets` array in `generate.mjs`.
+3. `node scripts/examples-gen/generate.mjs mygene` → `packages/examples/data/`
+   gets `mygene.fa` and `mygene.nh`.
 4. (optional)
    `node packages/cli/dist/index.js interpro datasets/mygene.tsv -o datasets/mygene-domains.gff`
-   to add `mygeneDomainsGFF` (precomputed InterPro).
-5. Add a gallery component in `packages/examples/src/examples/` that imports the
-   constants, and register it in `index.ts`.
+   for a `mygene-domains.gff` overlay (precomputed InterPro).
+5. Import the files in `packages/examples/src/examples/data.ts`, write a
+   component that draws them, and register both in `catalog.ts` and `index.ts`.
 
 ## RNA structural alignments (`.stock` datasets)
 
@@ -237,10 +239,11 @@ which is what `row` on the track expects, so nothing has to be recomputed
 against the alignment.
 
 A contact map is the same shape of data with a longer derivation, so it gets a
-script: `contacts.mjs` fetches the mmCIF for a PDB entry and the SIFTS residue
-mapping, computes C-beta pairs under 8 Å, and keeps the ones whose two ends sit
-in different domains of the committed domain GFF — the pairs that say how the
-domains pack, rather than the thousands saying a residue touches its neighbours.
+script: `contacts.mjs` computes C-beta pairs under 8 Å in a PDB entry and keeps
+the ones whose two ends sit in different domains of the committed domain GFF —
+the pairs that say how the domains pack, rather than the thousands saying a
+residue touches its neighbours. The mmCIF parsing, the SIFTS lookup and the
+numbering check live in `structure.mjs`, shared with the two scripts below.
 
 ```sh
 node scripts/examples-gen/contacts.mjs
@@ -261,6 +264,34 @@ residue an alignment column is has exactly the question this already answered.
 ones that actually have coordinates; `rowLength` is the row it was computed
 against, so the viewer can refuse the mapping if it is later loaded beside a
 different alignment.
+
+`hemoglobin.mjs` writes `hemoglobinSickle.json` for the globin example: the
+SIFTS mapping of the human alpha and beta rows onto PDB 1A3N, the AlphaMissense
+mean per residue of HBB, and the sickle-cell position. The position is the point
+of the example — row residue 7, `p.Glu7Val` in HGVS, residue 6 of chain B in the
+structure — and the mapping is what converts between the last two rather than a
+reader subtracting one. 1A3N is an α2β2 tetramer, so each sequence has two
+chains in it; the script emits one chain per row, because two mappings from one
+row onto one structure id is exactly the ambiguity `model.structureResidue`
+refuses to answer. The AlphaMissense table is read from the `amAnnotationsUrl`
+field of AlphaFold's prediction record rather than from a filename built by
+hand, and the API returns 403 to a request with no `User-Agent`.
+
+```sh
+node scripts/examples-gen/hemoglobin.mjs
+```
+
+`ace2Interface.mjs` writes `ace2Interface.json`: the 20 residues of human ACE2
+with a heavy atom within 4 Å of the SARS-CoV-2 spike receptor-binding domain in
+PDB 6M0J, as `highlights` on the `Human` row. All-atom distance, not C-beta —
+two side chains touch through whichever atoms face each other, and a C-beta
+cutoff wide enough to catch that also catches residues that merely pass nearby.
+The list comes out as Q24 T27 F28 D30 K31 H34 E35 E37 D38 Y41 Q42 L79 M82 Y83
+N330 K353 G354 D355 R357 R393, which is the set the structure papers report.
+
+```sh
+node scripts/examples-gen/ace2Interface.mjs
+```
 
 `clinvar.mjs` is the same idea for a per-column layer rather than a pairing: it
 counts, per residue, how many distinct missense alleles ClinVar classifies as
@@ -297,14 +328,18 @@ mismatches abort with the count and the first few. For Src all 450 checked
 residues agree, and an offset of one anywhere in the chain breaks 425 of them —
 a check that fails loudly on the failure that otherwise looks like success.
 
-## The other real examples
+## The other example data
 
-Two real examples predate this pipeline and are documented here for provenance:
+Four files in `packages/examples/data` are not built here:
 
-- **Src-family kinases** (`kinaseMSA`/`kinaseTree`/`kinaseDomainsGFF` in
-  `exampleData.ts`) — 10 SFKs aligned with ClustalW, domains from
-  `react-msaview-cli interproscan`; same method as above, just hand-run earlier.
-- **Lysine riboswitch** (`lysineMSA` in `exampleData.ts`) — not built here: it
-  is the Rfam RF00168 seed alignment downloaded as Stockholm, which already
-  embeds its own tree (`#=GF NH`) and secondary structure, extracted by the
-  parser.
+- **`lysine.stock`** — the Rfam RF00168 seed alignment downloaded as Stockholm,
+  which already embeds its own tree (`#=GF NH`) and secondary structure for the
+  parser to extract.
+- **`f12-cetacean-cds.stock` / `f12-cetacean-exons.gff`** — the DNA alignment
+  and exon overlay built by `scripts/f12-cetacean`.
+- **`gene-cluster.stock` / `gene-cluster.gff`** — synthetic, built by
+  `scripts/gene-cluster`.
+
+Two examples load nothing from here at all, on purpose: the Pfam PF00042
+alignment comes from the InterPro API and the A3M from OpenProteinSet, both at
+view time, because what those two show is a file as its source publishes it.

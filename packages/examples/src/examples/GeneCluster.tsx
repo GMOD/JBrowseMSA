@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { geneClusterGFF, geneClusterMSA } from './exampleData'
+import { geneClusterGFF, geneClusterMSA } from './data'
 
 // Gene arrow map (gggenes-style) rendered over a real alignment. Each gene is
 // one color down the columns; the +/- strand draws as a left/right arrowhead.

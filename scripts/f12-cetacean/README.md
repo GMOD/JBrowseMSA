@@ -45,9 +45,9 @@ python3 scripts/f12-cetacean/cds_pipeline.py            # writes f12_cds.afa
 # 2. infer a neighbor-joining tree from the alignment
 clustalw -INFILE=f12_cds.afa -TREE -TYPE=DNA -OUTPUTTREE=phylip   # -> f12_cds.ph (Newick)
 
-# 3. wrap as Stockholm with the tree embedded (#=GF NH) -> f12CdsMSA constant in
-#    packages/examples/src/examples/exampleData.ts (served as
-#    data/f12-cetacean-cds.stock by scripts/screenshots/writeExampleData.mjs).
+# 3. wrap as Stockholm with the tree embedded (#=GF NH) ->
+#    packages/examples/data/f12-cetacean-cds.stock (served by the demo app once
+#    scripts/screenshots/writeExampleData.mjs copies it there).
 
 # 4. project the 14-exon gene structure onto every row of the alignment as a GFF
 #    overlay (each species's Nth exon -> Name=exon-N, so an exon is one color
@@ -81,10 +81,10 @@ reflects this.)
 
 ## Outputs
 
-| Where                                                          | What                                                                                 |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `f12CdsMSA` (exampleData.ts → `data/f12-cetacean-cds.stock`)   | full F12 CDS alignment + embedded NJ tree                                            |
-| `f12ExonsGFF` (exampleData.ts → `data/f12-cetacean-exons.gff`) | 14-exon gene-structure overlay, projected per species                                |
-| `packages/examples/src/examples/F12.tsx`                       | the gallery example (DNA + nucleotide coloring + exon overlay)                       |
-| `docs/media/f12-exon-architecture.png`, `f12-frameshift.png`   | gallery figures (scripts/screenshots/specs.mjs)                                      |
-| `docs/media/genome-browser-f12.png`                            | the genomic-coordinate view + Multiz MAF (scripts/screenshots/f12-genome-figure.mjs) |
+| Where                                                        | What                                                                                 |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `packages/examples/data/f12-cetacean-cds.stock`              | full F12 CDS alignment + embedded NJ tree                                            |
+| `packages/examples/data/f12-cetacean-exons.gff`              | 14-exon gene-structure overlay, projected per species                                |
+| `packages/examples/src/examples/F12.tsx`                     | the gallery example (DNA + nucleotide coloring + exon overlay)                       |
+| `docs/media/f12-exon-architecture.png`, `f12-frameshift.png` | gallery figures (scripts/screenshots/specs.mjs)                                      |
+| `docs/media/genome-browser-f12.png`                          | the genomic-coordinate view + Multiz MAF (scripts/screenshots/f12-genome-figure.mjs) |

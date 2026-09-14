@@ -8,14 +8,21 @@
 
 import fs from 'node:fs'
 
-import { hasConst, readConst, readJson } from './exampleConsts.mjs'
+import { hasData, readJson } from './exampleConsts.mjs'
 import { fileSnap } from './snap.mjs'
 
 // The phylogeny examples (MyD88/globin/ACE2/opsins/…) are real datasets built
 // reproducibly into the examples package by scripts/examples-gen. The opsin
 // domain GFF is an out-of-band InterProScan product (see
 // scripts/examples-gen/README.md); keep the opsin spec out until it's present.
-const hasOpsinDomains = hasConst('opsinDomainsGFF')
+const hasOpsinDomains = hasData('opsins-domains.gff')
+
+// Layers the examples import as JSON and the specs draw from the same file, so
+// a regenerated layer reaches the figure and the live example together.
+const sickle = readJson('hemoglobinSickle.json')
+const ace2Interface = readJson('ace2Interface.json')
+const p53ClinVar = readJson('p53ClinVar.json')
+const kinaseStructure = readJson('kinaseStructure.json')
 
 // Small IL2RA protein alignment + matching tree (same data as the examples).
 const proteinMSA = `CLUSTAL O(1.2.3) multiple sequence alignment
@@ -100,7 +107,7 @@ export const specs = [
       treeAreaWidth: 175,
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/kinase.aln' },
+      msaFilehandle: { uri: 'data/kinase.fa' },
       treeFilehandle: { uri: 'data/kinase.nh' },
       gffFilehandle: { uri: 'data/kinase-domains.gff' },
     }),
@@ -122,7 +129,7 @@ export const specs = [
       treeAreaWidth: 150,
       colWidth: 0.7,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/nlrp1.aln' },
+      msaFilehandle: { uri: 'data/nlrp1.fa' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
     }),
@@ -174,7 +181,7 @@ export const specs = [
       treeAreaWidth: 150,
       colWidth: 0.7,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/nlrp1.aln' },
+      msaFilehandle: { uri: 'data/nlrp1.fa' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
     }),
@@ -217,7 +224,7 @@ export const specs = [
       // PYD block (col 38) starts just inside the frame
       scrollX: -34 * 14,
       colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/nlrp1.aln' },
+      msaFilehandle: { uri: 'data/nlrp1.fa' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
     }),
@@ -234,15 +241,103 @@ export const specs = [
     ],
   },
   {
-    name: 'large-tree',
+    name: 'pfam-scale',
+    // The whole Globin family (PF00042) straight from the InterPro API: 20,705
+    // rows x 672 columns, 3 MB gzipped on the wire, 20 MB of Stockholm once
+    // decompressed. This spec and the a3m one below are the only two that fetch
+    // from the internet rather than from the served app -- the point of both is
+    // that the file is the one its source publishes, not a prepared copy.
+    // rowHeight 2 puts ~250 rows on screen at once. allowedGappyness 50 drops
+    // the 556 columns that are at least half gaps -- a Pfam full alignment
+    // gives every insertion its own columns and at this depth most belong to
+    // one sequence -- leaving the 116 columns of the fold itself, at a colWidth
+    // that fills the frame. A narrow tree gutter: there is no tree, and row
+    // labels cannot draw at a 2px row.
+    viewportWidth: 1600,
     url: fileSnap({
-      height: 480,
-      treeAreaWidth: 300,
-      colorSchemeName: 'nucleotide',
-      msaFilehandle: { uri: 'data/lysine.stock' },
+      height: 620,
+      treeAreaWidth: 120,
+      colWidth: 9,
+      rowHeight: 2,
+      allowedGappyness: 50,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: {
+        uri: 'https://www.ebi.ac.uk/interpro/api/entry/pfam/PF00042/?annotation=alignment:full',
+      },
     }),
-    settle: 3500,
+    settle: 12000,
     clip: 'viewer',
+  },
+  // The A3M pair: the same OpenProteinSet alignment drawn twice, differing only
+  // in whether the insert columns are hidden. That is what A3M's raggedness
+  // costs -- 1,186 of the 1,207 rows carry an insertion, and expanding them
+  // into a rectangle spreads the query's 146 match columns over 2,086.
+  {
+    name: 'a3m-inserts-raw',
+    part: true,
+    viewportWidth: 1500,
+    // Fetched from OpenProteinSet rather than the served app, as the pfam spec
+    // is from InterPro: the point of both is the file as its source publishes
+    // it.
+    url: fileSnap({
+      height: 330,
+      treeAreaWidth: 130,
+      colWidth: 0.62,
+      rowHeight: 1.5,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: {
+        uri: 'https://openfold.s3.amazonaws.com/pdb/1a3n_B/a3m/bfd_uniclust_hits.a3m',
+      },
+    }),
+    settle: 8000,
+    clip: 'viewer',
+    annotations: [
+      {
+        type: 'text',
+        text: 'AS PARSED — 2,086 columns, because every insertion gets its own',
+        fontSize: 16,
+        // absolute, not anchored to the rows: 1,207 rows at 1.5px reach far
+        // below a 330px panel, so a row-anchored label would land off-frame
+        maxWidth: 900,
+        x: 200,
+        y: 330,
+      },
+    ],
+  },
+  {
+    name: 'a3m-inserts-match',
+    part: true,
+    viewportWidth: 1500,
+    // allowedGappyness 50 keeps the 129 columns where at least half the rows
+    // have a residue, which is the profile the search was run against.
+    url: fileSnap({
+      height: 330,
+      treeAreaWidth: 130,
+      colWidth: 9,
+      rowHeight: 1.5,
+      allowedGappyness: 50,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: {
+        uri: 'https://openfold.s3.amazonaws.com/pdb/1a3n_B/a3m/bfd_uniclust_hits.a3m',
+      },
+    }),
+    settle: 8000,
+    clip: 'viewer',
+    annotations: [
+      {
+        type: 'text',
+        text: 'INSERT COLUMNS HIDDEN — the 129 columns half the hits agree on',
+        fontSize: 16,
+        color: '#1565c0',
+        maxWidth: 900,
+        x: 200,
+        y: 330,
+      },
+    ],
+  },
+  {
+    name: 'a3m-inserts',
+    parts: ['a3m-inserts-raw', 'a3m-inserts-match'],
   },
   {
     name: 'color-scheme-menu',
@@ -288,15 +383,13 @@ export const specs = [
     // relativeTo=Human: identical residues render as ".", so the lineage-
     // specific MyD88 substitutions (and the bat clade) stand out next to the
     // inferred tree. Readable column width so the dots/letters are legible.
-    url: data({
+    url: fileSnap({
       height: 460,
       treeAreaWidth: 150,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('myd88MSA'),
-        tree: readConst('myd88Tree'),
-      },
+      msaFilehandle: { uri: 'data/myd88.fa' },
+      treeFilehandle: { uri: 'data/myd88.nh' },
     }),
     settle: 2000,
     clip: 'viewer',
@@ -305,32 +398,76 @@ export const specs = [
     name: 'gene-duplication',
     // globin family: the tree groups by globin TYPE across species, the
     // signature of gene duplication
-    url: data({
+    url: fileSnap({
       height: 420,
       treeAreaWidth: 215,
       colWidth: 7,
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('globinMSA'),
-        tree: readConst('globinTree'),
-      },
+      msaFilehandle: { uri: 'data/globin.fa' },
+      treeFilehandle: { uri: 'data/globin.nh' },
     }),
     settle: 2000,
     clip: 'viewer',
   },
   {
+    name: 'sickle-cell',
+    // The globins with the two layers the sickle-cell example carries: the
+    // AlphaMissense per-residue mean over the hemoglobin beta row, and a band
+    // on the substitution itself -- row residue 7, which is 1A3N residue 6, a
+    // conversion the shipped SIFTS mapping is what makes. Zoomed to the start
+    // of the beta chain so the band is legible rather than a hairline.
+    url: fileSnap({
+      height: 480,
+      treeAreaWidth: 215,
+      colWidth: 14,
+      rowHeight: 20,
+      colorSchemeName: 'clustalx_protein_dynamic',
+      msaFilehandle: { uri: 'data/globin.fa' },
+      treeFilehandle: { uri: 'data/globin.nh' },
+      highlights: [
+        {
+          row: sickle.sickle.row,
+          start: sickle.sickle.seqPos,
+          end: sickle.sickle.seqPos,
+          color: 'rgba(214,39,40,0.35)',
+          label: sickle.sickle.label,
+        },
+      ],
+      columnTracks: [
+        {
+          id: 'alphamissense',
+          name: sickle.alphaMissense.name,
+          kind: 'bar',
+          row: sickle.alphaMissense.row,
+          color: '#8e44ad',
+          height: 70,
+          values: sickle.alphaMissense.values,
+          max: sickle.alphaMissense.max,
+        },
+      ],
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
     name: 'host-range',
-    // ACE2 diffed against human; the few divergent spike-contact residues in
-    // the N-terminal peptidase domain pop out of the otherwise-conserved protein
-    url: data({
+    // ACE2 diffed against human, with the spike-contact residues marked: the 20
+    // residues of human ACE2 within 4 A of the receptor-binding domain in PDB
+    // 6M0J (scripts/examples-gen/ace2Interface.mjs). Dots inside a band are
+    // species that keep the contact; letters are the substitutions that change
+    // how well the virus binds.
+    url: fileSnap({
       height: 460,
       treeAreaWidth: 250,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('ace2MSA'),
-        tree: readConst('ace2Tree'),
-      },
+      msaFilehandle: { uri: 'data/ace2.fa' },
+      treeFilehandle: { uri: 'data/ace2.nh' },
+      highlights: ace2Interface.highlights.map((h, i) => ({
+        ...h,
+        color: 'rgba(214,39,40,0.35)',
+        ...(i === 0 ? { label: 'spike contacts (6M0J)' } : {}),
+      })),
     }),
     settle: 2500,
     clip: 'viewer',
@@ -341,16 +478,14 @@ export const specs = [
           name: 'opsin-classes',
           // vertebrate opsins: tree sorts by opsin class, with the real
           // InterProScan 7TM-GPCR domain overlay across each sequence
-          url: data({
+          url: fileSnap({
             height: 420,
             treeAreaWidth: 200,
             colWidth: 4,
             colorSchemeName: 'clustalx_protein_dynamic',
-            data: {
-              msa: readConst('opsinMSA'),
-              tree: readConst('opsinTree'),
-              gff: readConst('opsinDomainsGFF'),
-            },
+            msaFilehandle: { uri: 'data/opsins.fa' },
+            treeFilehandle: { uri: 'data/opsins.nh' },
+            gffFilehandle: { uri: 'data/opsins-domains.gff' },
           }),
           settle: 2500,
           clip: 'viewer',
@@ -361,15 +496,13 @@ export const specs = [
     name: 'extreme-conservation',
     // histone H4 vs human: one of the most conserved proteins known renders
     // almost entirely as dots, with only the distant lineages showing letters
-    url: data({
+    url: fileSnap({
       height: 300,
       treeAreaWidth: 150,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('histoneH4MSA'),
-        tree: readConst('histoneH4Tree'),
-      },
+      msaFilehandle: { uri: 'data/histone_h4.fa' },
+      treeFilehandle: { uri: 'data/histone_h4.nh' },
     }),
     settle: 2000,
     clip: 'viewer',
@@ -377,15 +510,13 @@ export const specs = [
   {
     name: 'deep-phylogeny',
     // cytochrome c from mammals to plants/fungi: the tree spans >1 billion years
-    url: data({
+    url: fileSnap({
       height: 320,
       treeAreaWidth: 160,
       colWidth: 9,
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('cytochromeCMSA'),
-        tree: readConst('cytochromeCTree'),
-      },
+      msaFilehandle: { uri: 'data/cytochrome_c.fa' },
+      treeFilehandle: { uri: 'data/cytochrome_c.nh' },
     }),
     settle: 2000,
     clip: 'viewer',
@@ -394,15 +525,13 @@ export const specs = [
     name: 'convergent-evolution',
     // prestin: the echolocating bat + toothed whales ("_echo") group together,
     // pulled off the species tree by convergent selection
-    url: data({
+    url: fileSnap({
       height: 440,
       treeAreaWidth: 230,
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('prestinMSA'),
-        tree: readConst('prestinTree'),
-      },
+      msaFilehandle: { uri: 'data/prestin.fa' },
+      treeFilehandle: { uri: 'data/prestin.nh' },
     }),
     settle: 2500,
     clip: 'viewer',
@@ -414,17 +543,15 @@ export const specs = [
     // DNA-binding domain dominates, flanked by the short N-terminal motifs, with
     // the reference diff showing as dots in the unannotated linkers. Domains
     // read better at this whole-protein zoom than the raw rainbow ever could.
-    url: data({
+    url: fileSnap({
       height: 480,
       treeAreaWidth: 175,
       colWidth: 3,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('p53MSA'),
-        tree: readConst('p53Tree'),
-        gff: readConst('p53DomainsGFF'),
-      },
+      msaFilehandle: { uri: 'data/p53.fa' },
+      treeFilehandle: { uri: 'data/p53.nh' },
+      gffFilehandle: { uri: 'data/p53-domains.gff' },
     }),
     settle: 2500,
     clip: 'viewer',
@@ -435,13 +562,11 @@ export const specs = [
     // dedicated Secondary-structure track above the alignment, the acceptor
     // stem + D/anticodon/T arms colored by base-pairing. Tree comes from the
     // embedded #=GF NH. A capability no other gallery figure shows.
-    url: data({
+    url: fileSnap({
       height: 450,
       treeAreaWidth: 175,
       colorSchemeName: 'nucleotide',
-      data: {
-        msa: readConst('trnaMSA'),
-      },
+      msaFilehandle: { uri: 'data/trna.stock' },
     }),
     settle: 2500,
     clip: 'viewer',
@@ -452,7 +577,7 @@ export const specs = [
     // columns: conservation computed from the alignment, InterPro domain boxes,
     // and ClinVar's pathogenic missense variants per residue -- which the
     // viewer computes nothing for. 94% of them fall in the DNA-binding domain.
-    url: data({
+    url: fileSnap({
       height: 420,
       treeAreaWidth: 150,
       colWidth: 2.4,
@@ -461,10 +586,8 @@ export const specs = [
       // the domain overlay says the same thing as the two bands but paints
       // every row of every domain, which buries the bars this figure is about
       turnedOffTracks: { 'property-conservation': true },
-      data: {
-        msa: readConst('p53MSA'),
-        tree: readConst('p53Tree'),
-      },
+      msaFilehandle: { uri: 'data/p53.fa' },
+      treeFilehandle: { uri: 'data/p53.nh' },
       highlights: [
         { row: 'Human', start: 100, end: 288, label: 'DNA-binding domain' },
         { row: 'Human', start: 319, end: 357, label: 'Tetramerization' },
@@ -477,8 +600,8 @@ export const specs = [
           row: 'Human',
           color: '#c0392b',
           height: 90,
-          values: readJson('p53ClinVar.json').counts,
-          max: readJson('p53ClinVar.json').max,
+          values: p53ClinVar.counts,
+          max: p53ClinVar.max,
         },
       ],
     }),
@@ -491,7 +614,7 @@ export const specs = [
     // 2SRC over it: the boxes name the domains, the arcs show how they pack.
     // Red is the autoinhibitory clamp -- the C-terminal tail's phospho-Tyr527
     // bound by the protein's own SH2 domain.
-    url: data({
+    url: fileSnap({
       height: 320,
       treeAreaWidth: 200,
       colWidth: 1.6,
@@ -500,11 +623,9 @@ export const specs = [
       // the arcs and the domain boxes are the figure; the conservation
       // histograms would take a third of it to say nothing about either
       turnedOffTracks: { conservation: true, 'property-conservation': true },
-      data: {
-        msa: readConst('kinaseMSA'),
-        tree: readConst('kinaseTree'),
-        gff: readConst('kinaseDomainsGFF'),
-      },
+      msaFilehandle: { uri: 'data/kinase.fa' },
+      treeFilehandle: { uri: 'data/kinase.nh' },
+      gffFilehandle: { uri: 'data/kinase-domains.gff' },
       columnTracks: [
         {
           id: 'contacts',
@@ -512,20 +633,18 @@ export const specs = [
           kind: 'arc',
           row: 'SRC_HUMAN',
           height: 110,
-          arcs: readJson('kinaseStructure.json').contacts.map(
-            ({ start, end, pair }) => ({
-              start,
-              end,
-              color:
-                pair.includes('SH2') && pair.includes('tail')
-                  ? '#e15759'
-                  : pair.includes('tail')
-                    ? '#f28e2b'
-                    : pair.includes('SH3')
-                      ? '#59a14f'
-                      : '#4e79a7',
-            }),
-          ),
+          arcs: kinaseStructure.contacts.map(({ start, end, pair }) => ({
+            start,
+            end,
+            color:
+              pair.includes('SH2') && pair.includes('tail')
+                ? '#e15759'
+                : pair.includes('tail')
+                  ? '#f28e2b'
+                  : pair.includes('SH3')
+                    ? '#59a14f'
+                    : '#4e79a7',
+          })),
         },
       ],
     }),
@@ -539,14 +658,12 @@ export const specs = [
     // crosses stem 1 instead of nesting in it -- crosses the helices it cannot
     // nest inside. The bracket text track above draws the same annotation as
     // characters, where the crossing is invisible.
-    url: data({
+    url: fileSnap({
       height: 462,
       treeAreaWidth: 215,
       colWidth: 11,
       colorSchemeName: 'nucleotide',
-      data: {
-        msa: readConst('coronaFseMSA'),
-      },
+      msaFilehandle: { uri: 'data/corona_fse.stock' },
     }),
     settle: 2500,
     clip: 'viewer',
@@ -555,15 +672,13 @@ export const specs = [
     name: 'tree-of-life',
     // EF-1a/EF-Tu across bacteria, archaea, eukaryotes; labels prefixed
     // Euk_/Arc_/Bac_ so the three-domain grouping reads off the tree
-    url: data({
+    url: fileSnap({
       height: 420,
       treeAreaWidth: 215,
       colWidth: 2,
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('ef1aMSA'),
-        tree: readConst('ef1aTree'),
-      },
+      msaFilehandle: { uri: 'data/ef1a.fa' },
+      treeFilehandle: { uri: 'data/ef1a.nh' },
     }),
     settle: 2500,
     clip: 'viewer',
@@ -572,15 +687,13 @@ export const specs = [
     name: 'processing-conservation',
     // insulin vs human: conserved B/A chains (dots) vs the variable cleaved-out
     // C-peptide (letters)
-    url: data({
+    url: fileSnap({
       height: 320,
       treeAreaWidth: 150,
       relativeTo: 'Human',
       colorSchemeName: 'clustalx_protein_dynamic',
-      data: {
-        msa: readConst('insulinMSA'),
-        tree: readConst('insulinTree'),
-      },
+      msaFilehandle: { uri: 'data/insulin.fa' },
+      treeFilehandle: { uri: 'data/insulin.nh' },
     }),
     settle: 2000,
     clip: 'viewer',
@@ -631,16 +744,14 @@ export const specs = [
     // deleted in Genome_5 — its columns gap out, yet the downstream genes stay
     // column-aligned, the payoff of anchoring arrows to the alignment. colWidth
     // 1 fits the whole cluster; tall rows so the arrowheads read clearly.
-    url: data({
+    url: fileSnap({
       height: 360,
       treeAreaWidth: 170,
       colWidth: 1,
       rowHeight: 44,
       colorSchemeName: 'nucleotide',
-      data: {
-        msa: readConst('geneClusterMSA'),
-        gff: readConst('geneClusterGFF'),
-      },
+      msaFilehandle: { uri: 'data/gene-cluster.stock' },
+      gffFilehandle: { uri: 'data/gene-cluster.gff' },
     }),
     viewportWidth: 1200,
     settle: 2000,

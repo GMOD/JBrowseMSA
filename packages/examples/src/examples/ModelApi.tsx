@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
 
-import { proteinMSA, proteinTree } from './exampleData'
+import { proteinMSA, proteinTree } from './data'
 import useWidthSetter from './useWidthSetter'
 
 // For full control over viewer state, create the model yourself with MSAModelF

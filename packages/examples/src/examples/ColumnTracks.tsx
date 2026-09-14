@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { proteinMSA, proteinTree } from './exampleData'
+import { proteinMSA, proteinTree } from './data'
 
 // The viewer computes nothing here. The host scores each residue of one row
 // (Kyte-Doolittle hydropathy of the human sequence), and the columnTracks prop

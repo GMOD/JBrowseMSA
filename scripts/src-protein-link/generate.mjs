@@ -20,7 +20,7 @@ const GFF = 'https://jbrowse.org/ucsc/hg38/ncbiRefSeq.gff.gz'
 // SRC (NM_005417.5 -> NP_005408.1, canonical 536 aa c-Src), hg38 chr20, + strand
 const TRANSCRIPT = 'NM_005417.5'
 const REGION = 'chr20:37340000-37410000'
-const QUERY_SEQ = 'SRC_HUMAN' // the matching row in kinase.aln (UniProt P12931, 536 aa)
+const QUERY_SEQ = 'SRC_HUMAN' // the matching row in kinase.fa (UniProt P12931, 536 aa)
 const DATA = 'https://gmod.org/JBrowseMSA/demo/data'
 const CONFIG = `${DATA}/jbrowse-msa-combined-config.json`
 const JBROWSE = 'https://jbrowse.org/code/jb2/main/'
@@ -91,7 +91,7 @@ const spec = {
       connectedViewId: 'lgv-src',
       connectedFeature,
       querySeqName: QUERY_SEQ,
-      msaFileLocation: { uri: `${DATA}/kinase.aln` },
+      msaFileLocation: { uri: `${DATA}/kinase.fa` },
       treeFileLocation: { uri: `${DATA}/kinase.nh` },
       colorSchemeName: 'clustalx_protein_dynamic',
       labelsAlignRight: true,

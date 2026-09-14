@@ -1,0 +1,23 @@
+# Src-family kinases (SFKs) — the family whose three-domain architecture the
+# domain overlay draws, and whose autoinhibited structure the contact map
+# (contacts.mjs, PDB 2SRC) is taken from.
+#
+# Eight human SFKs plus the mouse and chicken SRC orthologs. Every member is
+# SH3 + SH2 + tyrosine-kinase catalytic domain followed by the regulatory
+# C-terminal tail, so the overlay lines the same three boxes up down the
+# alignment and the arcs show how they pack against each other.
+#
+# Row labels are UniProt entry names, which is what the JBrowse links and
+# contacts.mjs name (querySeqName SRC_HUMAN). Human SRC first (reference).
+#
+# Columns: UniProt accession <TAB> row label
+P12931	SRC_HUMAN
+P05480	SRC_MOUSE
+P00523	SRC_CHICK
+P07947	YES_HUMAN
+P06241	FYN_HUMAN
+P09769	FGR_HUMAN
+P08631	HCK_HUMAN
+P07948	LYN_HUMAN
+P06239	LCK_HUMAN
+P51451	BLK_HUMAN

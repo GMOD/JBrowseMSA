@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { p53DomainsGFF, p53MSA, p53Tree } from './generatedData'
+import { p53DomainsGFF, p53MSA, p53Tree } from './data'
 import clinvar from './p53ClinVar.json'
 
 // Three answers to "which part of this protein matters", from three different

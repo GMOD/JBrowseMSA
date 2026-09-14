@@ -1,6 +1,6 @@
 import { MSAViewer } from 'react-msaview'
 
-import { cytochromeCMSA, cytochromeCTree } from './generatedData'
+import { cytochromeCMSA, cytochromeCTree } from './data'
 
 // Cytochrome c — the classic molecular-clock protein — across the breadth of
 // eukaryotic life: mammals, reptile, fish, insect, plant and fungus all in one

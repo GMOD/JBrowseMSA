@@ -1,0 +1,34 @@
+##gff-version 3
+# precomputed InterPro 109.0 pfam matches by UniProtKB accession (react-msaview-cli interpro --database pfam)
+Human	InterProScan	protein_match	21	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Human	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Macaque	InterProScan	protein_match	21	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Macaque	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Mouse	InterProScan	protein_match	21	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Mouse	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Rat	InterProScan	protein_match	22	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Rat	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Hamster	InterProScan	protein_match	22	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Hamster	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Civet	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Civet	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Cat	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Cat	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Dog	InterProScan	protein_match	20	605	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Dog	InterProScan	protein_match	616	769	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Ferret	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Ferret	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Raccoon_dog	InterProScan	protein_match	20	605	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Raccoon_dog	InterProScan	protein_match	616	769	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Pig	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Pig	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Cattle	InterProScan	protein_match	20	605	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Cattle	InterProScan	protein_match	616	769	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Pangolin	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Pangolin	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Bat_Rhinolophus	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Bat_Rhinolophus	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Bat_Rhinolophus_macrotis	InterProScan	protein_match	20	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Bat_Rhinolophus_macrotis	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
+Bat_Rousettus	InterProScan	protein_match	21	606	.	.	.	Name=IPR001548;signature_desc=Angiotensin-converting%20enzyme;description=Angiotensin-converting%20enzyme
+Bat_Rousettus	InterProScan	protein_match	617	770	.	.	.	Name=IPR031588;signature_desc=Renal%20amino%20acid%20transporter;description=Renal%20amino%20acid%20transporter
