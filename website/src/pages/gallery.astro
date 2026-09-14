@@ -23,6 +23,10 @@ const base = import.meta.env.BASE_URL
 // is the live link under the image -- the figure and the link therefore open the
 // same state by construction. A compose spec stacks other captures and has no
 // state of its own, so it gets no link.
+//
+// The deployed app, not `${base}/demo/`, for the same reason the user guide's
+// live links use it: a query string on an internal link is a shape the
+// deploy's link checker has no reason to understand.
 const figures = catalog.flatMap(entry =>
   (entry.figures ?? []).map(figure => {
     const spec = specs.find(s => s.name === figure.src)
@@ -32,7 +36,10 @@ const figures = catalog.flatMap(entry =>
     return {
       ...figure,
       example: entry,
-      href: spec.url === undefined ? undefined : `${base}/demo/${spec.url}`,
+      href:
+        spec.url === undefined
+          ? undefined
+          : `https://gmod.org/JBrowseMSA/demo/${spec.url}`,
     }
   }),
 )
