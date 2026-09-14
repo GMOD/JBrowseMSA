@@ -47,7 +47,7 @@ cysteine biosynthesis genes in Firmicutes and binds S-adenosylmethionine, the
 product those genes lead to. Rfam publishes two files for it: a seed alignment
 of 457 curated sequences carrying a consensus secondary structure, and a
 covariance model built from that seed. A covariance model scores a candidate on
-sequence and on fold at once, which is what lets it recognise a copy that shares
+sequence and on fold at once, which is what lets it recognize a copy that shares
 the shape and little of the sequence.
 
 ```bash
@@ -131,8 +131,9 @@ cmalign --noprob -o cmalign.sto RF00162.cm hits.fa
 ```
 
 The model has 108 consensus positions and the alignment 187 columns. The other
-79 are insertions, and most of them fall in one place, the variable stem loop
-where a handful of rows carry an extra 30 to 50 nucleotides.
+79 are insertions, and most of them fall in one place: the hits run from 92 to
+157 nt, and the rows at the long end put their extra sequence in the variable
+stem loop.
 
 ## 4. Put the pseudoknot back
 
@@ -186,8 +187,8 @@ else needs configuring.
 37 riboswitches, 187 columns. The tree on the left comes from the `#=GF NH`
 line, the Secondary-structure track from `#=GC SS_cons`, and the Base pairs arcs
 from that same string: blue for the nested helices, red for the pseudoknot. The
-blank band across the middle is the variable stem loop, the 62 columns that are
-gaps in 90% or more of the rows.
+blank band across the middle is that variable stem loop, most of the 62 columns
+that are gaps in 90% or more of the rows.
 
 ## 7. The arc that crosses the others
 
