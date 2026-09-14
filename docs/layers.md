@@ -1,16 +1,16 @@
 # Data layers
 
-The snapshot is the API. Every field below is a property of the `MsaView` model,
-so it can be written into the standalone app's `?data=` URL, passed to
-`MSAModelF().create`, set through `MSAViewer` props, or given to the R widget,
-and the viewer draws it without computing anything. It travels in a shared URL
-and the SVG export draws it. Wherever a row is named, positions are that row's
-residues, 1-based and inclusive, as in GFF; the viewer projects them through the
-alignment's gaps. Without a row they are alignment columns.
+Every field below is a property of the `MsaView` model, so a host can write it
+into the standalone app's `?data=` URL, pass it to `MSAModelF().create`, set it
+through `MSAViewer` props, or give it to the R widget. The viewer draws each
+layer as given, keeps it in a shared URL, and includes it in the SVG export.
+Wherever a layer names a row, positions are that row's residues, 1-based and
+inclusive, as in GFF, and the viewer projects them through the alignment's gaps.
+Without a row, positions are alignment columns.
 
 Every example below is an `MsaView` snapshot. To open one in the standalone app,
 URL-encode the JSON and put it in `?data=`, either bare or wrapped as
-`{"msaview": {...}}`, which is the form the app writes back to the address bar:
+`{"msaview": {...}}`, the form the app writes back to the address bar:
 
 ```js
 const snapshot = {
@@ -28,11 +28,12 @@ else a link needs: file URIs, CORS, and the size limit on inline data.
 A track above the alignment, supplied as data. `kind: "bar"` draws one bar per
 column from `values`, scaled by `max` (default 1) and clamped to that range.
 `kind: "text"` draws one character per column from `data`, colored by `colors`.
-`kind: "arc"` joins pairs of positions from `arcs`, each `{start, end}` drawn as
-a curve whose height grows with how far it reaches. `row` makes `values`, `data`
-or the ends of an arc index that row's residues instead of columns, so the first
-value is residue 1 and gaps in the alignment are filled in. A data track appears
-in the Tracks menu, toggles like any other, and exports to SVG.
+`kind: "arc"` joins pairs of positions from `arcs`, drawing each `{start, end}`
+as a curve whose height grows with the distance between its ends. `row` makes
+`values`, `data` or the ends of an arc index that row's residues instead of
+columns, so the first value is residue 1 and the viewer fills in the row's gaps.
+A data track appears in the Tracks menu, toggles like any other, and exports to
+SVG.
 
 ```json
 {
@@ -83,37 +84,35 @@ in the Tracks menu, toggles like any other, and exports to SVG.
 | `row`    | both | Row name whose residues the values or characters index              |
 | `height` | both | Pixel height (default: the conservation track's, or the row height) |
 
-An arc is a relationship between two positions, which is what the other kinds
-cannot express: a base pair, a disulfide bond, a residue contact. Its two ends
-follow the same rule as everything else here — alignment columns, or residues of
-`row` — so a contact map computed in a protein's own numbering lands on the
-alignment without being recomputed. Arcs are drawn on one baseline in the order
-given, and `color` on an individual arc overrides the track's, which is how one
-track distinguishes classes of pair (nested helices from a pseudoknot, say).
+An arc joins two positions, such as a base pair, a disulfide bond or a residue
+contact; bar and text tracks hold one value per position. Both ends of an arc
+are alignment columns, or residues of `row`, so a contact map computed in a
+protein's own numbering lands on the alignment without conversion. The viewer
+draws arcs on one baseline in the order given. A `color` on an individual arc
+overrides the track's, so one track can separate classes of pair, such as
+nested helices and a pseudoknot.
 
-An RNA Stockholm needs none of this: `#=GC SS_cons` already pairs the columns,
-so the viewer draws a **Base pairs** track from it, coloring a pseudoknot — a
-pair WUSS writes as `A`/`a` because it crosses a helix instead of nesting in it
-— differently from the nested pairs it crosses.
+An RNA Stockholm file needs no arc track, because `#=GC SS_cons` already pairs
+the columns. The viewer draws a **Base pairs** track from it and gives
+pseudoknot pairs their own color. WUSS writes a pseudoknot pair as `A`/`a`
+because it crosses a helix, and brackets can only nest.
 
-The numbers do not have to come from the alignment, and the interesting ones
-usually don't: the p53 example carries a count per residue of the missense
-variants ClinVar classifies as pathogenic, which is a fact about human disease
-that no alignment contains. Computing it belongs wherever the data lives; the
-viewer's part is to put it on the right columns.
+Track values can come from outside the alignment. The p53 example carries a
+per-residue count of the missense variants ClinVar classifies as pathogenic. The
+producer computes that count wherever the ClinVar data lives, and the viewer
+places it on the matching columns.
 
 A track over 50 kB serialized stays in the live model but leaves the snapshot,
-the same rule that keeps a large inline alignment out of a shared URL. Point a
-large alignment at a URL and keep the track under that size, or host the values
-and set them at runtime with `model.setColumnTracks(...)`.
+under the same [size rule](https://gmod.org/JBrowseMSA/guide#link-to-a-view)
+that applies to inline alignments. Keep a track under that size, or host the
+values and set them at runtime with `model.setColumnTracks(...)`.
 
-A `?data=` link is the tighter limit of the two, and it is not ours: the server
-in front of gmod.org answers a request line over 8,192 characters with 414
-rather than the page. That is the whole `GET /JBrowseMSA/demo/?data=… HTTP/1.1`,
-the URL-encoded snapshot included, so three tracks of a few hundred values fit
-and much more than that does not. Rounding is what buys the room, since `87,`
-costs three characters where `0.87,` costs five: scale the values to integers
-and say so in `max`.
+A `?data=` link has a tighter limit, set by the server in front of gmod.org: it
+answers a request line over 8,192 characters with a 414 error instead of the
+page. The request line is the whole `GET /JBrowseMSA/demo/?data=… HTTP/1.1`,
+URL-encoded snapshot included, so three tracks of a few hundred values fit and
+much more does not. Scale the values to integers and record the scale in `max`:
+`87,` takes three characters and `0.87,` takes five.
 
 ## highlights
 
@@ -133,28 +132,27 @@ band, its border, or the row tint.
 is alignment columns, also 1-based. `rows` marks whole rows across the tree
 labels and the alignment, with the label in the tree gutter. A range that lands
 entirely on hidden gappy columns draws nothing; one that straddles them shrinks
-to what is visible. Row names that match no row are ignored.
+to the visible part. The viewer ignores row names that match no row.
 
 React: the `highlights` prop on `MSAViewer`, or `model.setHighlights(list)`. R:
 `msaview(highlights = list(list(row = "human", start = 248, end = 248)))`.
 
-A host highlighting something transiently — following a hover in a structure
-viewer or a genome browser — wants `model.applyHighlight(owner, list)` and
-`model.clearHighlight(owner)` instead. Those take the same shape, draw over the
-persisted ones, and stay out of the snapshot, which is right for a hover: it is
-not part of the document. The owner key is what lets two sources highlight at
-once without either clearing the other's.
+For a transient highlight, such as one following a hover in a structure viewer
+or a genome browser, call `model.applyHighlight(owner, list)` and
+`model.clearHighlight(owner)`. They take the same shape, draw over the persisted
+highlights, and stay out of the snapshot. `clearHighlight(owner)` removes only
+that owner's highlights, so two sources can highlight at once.
 
 ## residueMappings
 
-Which residue of which structure a row's residues are. Unlike the layers above,
-this one draws nothing — it answers a question, and the reason it is data is
-that the viewer cannot work the answer out. Matching a row to a structure by
-sequence equality fails for a construct with an expression tag, a truncation, an
-engineered residue, or a row that is a subsequence of the entry, and it fails in
-the direction that looks like it worked: the highlight lands on a residue, just
-not the right one. So the correspondence arrives computed, by whatever knows how
-— SIFTS, an AlphaFold model, a curator.
+A residue mapping records which residue of which structure each residue of a row
+corresponds to. Unlike the layers above, `residueMappings` draws nothing; the
+model reads it to answer lookups. The host has to supply it, because matching a
+row to a structure by sequence equality fails for a construct with an expression
+tag, a truncation, an engineered residue, or a row that is a subsequence of the
+entry. That failure is hard to spot: the highlight lands on a real residue, just
+the wrong one. A producer such as SIFTS, an AlphaFold model or a curator
+computes the correspondence.
 
 ```json
 "residueMappings": [
@@ -184,23 +182,26 @@ not the right one. So the correspondence arrives computed, by whatever knows how
 | `structure`  | `id`, plus optional `kind`, `asymId` (the chain) and `url`           |
 | `segments`   | Contiguous runs where the two sides line up 1:1                      |
 | `unobserved` | Structure positions declared but not resolved, as `[start, end]`     |
-| `rowLength`  | Ungapped length of the row it was computed against — set this        |
+| `rowLength`  | Ungapped length of the row it was computed against; always set it    |
 | `generated`  | Who computed it, when, and from what                                 |
 
-Positions are 1-based and inclusive on both sides, as everything else here is.
-Structure positions are `label_seq_id`, the index into the entity's SEQRES;
-author numbering carries insertion codes, which break integer arithmetic, so it
-stays out.
+Positions are 1-based and inclusive on both sides, as everywhere else in this
+document. Structure positions are `label_seq_id`, the index into the entity's
+SEQRES. Author numbering carries insertion codes, which break integer
+arithmetic, so the layer does not use it.
 
-**Segments, not a per-residue array**, because the underlying correspondence is
-segment-shaped: a dozen numbers cover what a dense array spends kilobytes on.
-That shape also makes the refusal rule structural rather than a vocabulary — **a
-position no segment covers is unmapped** — so there is no status field for the
-data to disagree with itself about. Three states fall out of it: covered is
-mapped and observed, covered but listed in `unobserved` is mapped and not
-observed, anything else is unmapped. The middle one is worth having, because
-"the crystallographer could not see it" and "this protein has no such residue"
-mean different things to a reader.
+**Segments, not a per-residue array**: a mapping is a few contiguous runs, and a
+dozen numbers describe what a dense array spends kilobytes on. The segments also
+define what is unmapped: **a position no segment covers is unmapped**, so the
+layer needs no status field that could contradict them. A position is in one of
+three states:
+
+- covered by a segment and not in `unobserved`: mapped and observed
+- covered and listed in `unobserved`: mapped, not observed
+- anything else: unmapped
+
+The middle state separates "the crystallographer could not see this residue"
+from "this protein has no such residue".
 
 Two model methods read it:
 
@@ -209,47 +210,44 @@ model.structureResidue(rowName, seqPos, structureId?) // -> {structure, position
 model.rowResidue(structureId, position, asymId?) // -> {rowName, seqPos} | undefined
 ```
 
-Both return `undefined` rather than guessing, which is the whole point, and
-**both refuse when the answer is not unique**. A row commonly maps onto several
-structures — an experimental entry and a couple of predicted models — and a
-homodimer is two rows onto two chains of one id, so returning whichever mapping
-came first would be the same class of wrong answer this layer exists to stop,
-only quieter. Name one with the optional argument, or read `mappedStructures` to
-see what there is.
+Both return `undefined` when no mapping covers the position, **and also when
+more than one does**. A row commonly maps onto several structures,
+such as an experimental entry and a couple of predicted models, and a homodimer
+maps two rows onto two chains of one id. Returning the first mapping found would
+give a wrong residue with no sign of the error. Name one structure or chain with
+the optional argument, or read `mappedStructures` to see what is available.
 
 ### Staleness
 
-A mapping outlives the alignment it was computed for. Point it at a re-aligned,
-revised or simply different sequence and every lookup still returns a residue —
-the wrong one, silently, which is the failure mode the whole layer exists to
-avoid. So the viewer checks before it answers, and takes a mapping out of use
-when the two no longer agree:
+A host can load a saved mapping against a re-aligned, revised or different
+sequence, and every lookup would then return a wrong residue with no error.
+Before answering, the viewer checks each mapping and stops using it when any of
+these holds:
 
 - The row it names is not in the alignment.
-- `rowLength` is declared and does not match the row's ungapped length. Nothing
-  else catches a same-length substitution, so a producer should always set it.
-- A segment claims residues past the end of the row, which is the same evidence
-  arriving without being declared.
+- `rowLength` is declared and does not match the row's ungapped length. No other
+  check catches a same-length substitution, so a producer should always set it.
+- A segment covers residues past the end of the row, which shows the same
+  mismatch when `rowLength` is missing.
 
-A malformed segment — two sides of different lengths, which cannot be a 1:1 run
-— takes only itself out, since the rest of the mapping still describes residues
-that exist.
+When a segment is malformed, its two sides differing in length so it cannot be
+a 1:1 run, the viewer drops only that segment and keeps using the rest of the
+mapping.
 
-`packages/examples/src/examples/kinaseStructure.json` is a real one, generated
-by `scripts/examples-gen/contacts.mjs` from SIFTS: the SRC_HUMAN row against
-chain A of 2SRC, one segment putting row residue 86 at structure residue 2, one
-unobserved range, and `rowLength: 536`. The
+`packages/examples/src/examples/kinaseStructure.json` is a real mapping,
+generated by `scripts/examples-gen/contacts.mjs` from SIFTS: the SRC_HUMAN row
+against chain A of 2SRC, one segment putting row residue 86 at structure residue
+2, one unobserved range, and `rowLength: 536`. The
 [spike_structure tutorial](https://gmod.org/JBrowseMSA/tutorials/spike_structure)
 builds another from scratch, against a construct whose numbering is offset by 19
 and whose furin loop has no coordinates at all. `hemoglobinSickle.json` is the
-smallest reason to have the layer at all: the sickle-cell substitution is
-residue 7 of the row and residue 6 of PDB 1A3N chain B, and the mapping is what
-converts the one into the other rather than a reader subtracting one.
+smallest example: the sickle-cell substitution is residue 7 of the row and
+residue 6 of PDB 1A3N chain B, and the mapping converts between the two.
 
-`model.residueMappingProblems` lists every one of those with a `scope`
-(`mapping` or `segment`) and a reason, because refusing invisibly leaves a host
-unable to tell "there is no structure for this row" from "this data no longer
-matches what is loaded". `model.usableResidueMappings` is what survived.
+`model.residueMappingProblems` lists each mapping or segment the viewer dropped,
+with a `scope` (`mapping` or `segment`) and a reason, so a host can tell "there
+is no structure for this row" from "this data no longer matches what is loaded".
+`model.usableResidueMappings` holds the mappings that passed.
 
 `seqPos` is 1-based, like the rest of this document, and composes directly with
 `applyHighlight`. The column helpers on the model (`seqPosToVisibleCol`) take

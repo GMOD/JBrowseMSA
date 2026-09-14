@@ -10,8 +10,9 @@ many color schemes, and SVG export.
 
 The viewer shares mobx, mobx-state-tree and MUI with `@jbrowse/core` and needs
 one copy of each, so the install line pins those majors to what your
-`@jbrowse/core` depends on. It lives in the
-[usage & embedding guide](../../USAGE.md#zero-config-component-recommended).
+`@jbrowse/core` depends on. The
+[usage & embedding guide](../../USAGE.md#zero-config-component-recommended) has
+the install line.
 
 ## Quick start
 
@@ -31,16 +32,16 @@ export default function App() {
 ```
 
 `MSAViewer` creates the model, measures width, and applies the theme for you.
-For full control use the `MSAModelF` / `MSAView` model-based API — see the
-[usage & embedding guide](../../USAGE.md).
+For full control, use the `MSAModelF` / `MSAView` model-based API described in
+the [usage & embedding guide](../../USAGE.md).
 
 ## Docs & links
 
-- [Usage & embedding guide](../../USAGE.md) — props, model API, UMD bundle, R
-- [Live examples](https://gmod.org/JBrowseMSA/examples) — runnable snippets
+- [Usage & embedding guide](../../USAGE.md): props, model API, UMD bundle, R
+- [Live examples](https://gmod.org/JBrowseMSA/examples): runnable snippets
 - [Model API reference](apidocs/MsaView.md)
 - [Main repository](https://github.com/GMOD/JBrowseMSA)
-- [CLI](../cli/) — domain and exon GFFs, plus headless SVG export
-- [msa-parsers](../msa-parsers/) — standalone parsing library
-- [ProteinBrowser](https://github.com/GMOD/proteinbrowser) — full protein
-  analysis suite built on this viewer
+- [CLI](../cli/): domain and exon GFFs, plus headless SVG export
+- [msa-parsers](../msa-parsers/): standalone parsing library
+- [ProteinBrowser](https://github.com/GMOD/proteinbrowser): protein analysis
+  suite built on this viewer

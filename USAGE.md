@@ -11,19 +11,19 @@ npm install react-msaview @jbrowse/core@4 mobx@6 mobx-react@9 \
   @emotion/react @emotion/styled react react-dom
 ```
 
-The majors are pinned because the viewer shares mobx, mobx-state-tree and MUI
-with `@jbrowse/core`, and there has to be exactly one copy of each. Two copies
-of mobx-state-tree and the first render throws "Identifier types can only be
-instantiated as direct child of a model type"; two copies of MUI and a theme
-built by one reaches components from the other, which throws too. The versions
-above are the ones `@jbrowse/core` 4 depends on. Core 5 moves the set together
-to mobx 7, `@jbrowse/mobx-state-tree` 6 and MUI 9; install those majors together
-and the same rule holds. Left unpinned, npm resolves each peer to its own latest
-and hands you the two-copy tree.
+The line pins the majors because the viewer shares mobx, mobx-state-tree and
+MUI with `@jbrowse/core`, and the app needs exactly one copy of each. With two
+copies of mobx-state-tree, the first render throws "Identifier types can only be
+instantiated as direct child of a model type". With two copies of MUI, a theme
+built by one copy reaches components from the other, which also throws. The
+versions above are the ones `@jbrowse/core` 4 depends on. Core 5 moves the set
+together to mobx 7, `@jbrowse/mobx-state-tree` 6 and MUI 9, so install those
+majors together instead. Without the pins, npm resolves each peer to its own
+latest major and installs a second copy.
 
 CI installs exactly this line outside the workspace with plain npm and renders
-the snippet below in a headless browser (`scripts/npm-smoke.mjs`), so it is
-tested rather than remembered.
+the snippet below in a headless browser (`scripts/npm-smoke.mjs`), so a broken
+install line fails CI.
 
 ```tsx
 import { MSAViewer } from 'react-msaview'
@@ -59,30 +59,29 @@ Props:
 | `relativeTo`        | `string`            | Row name to diff every other row against; matches draw as `.`        |
 | `drawTree`          | `boolean`           | Draw the phylogeny (default true); false leaves a label gutter       |
 | `treeAreaWidth`     | `number`            | Fixed width of the tree/label gutter                                 |
-| `autoTreeAreaWidth` | `boolean`           | Size that gutter to the labels instead — pair with `drawTree: false` |
+| `autoTreeAreaWidth` | `boolean`           | Size that gutter to the labels; pair with `drawTree: false`          |
 | `columnTracks`      | `ColumnTrackSpec[]` | Tracks supplied as data (see below)                                  |
 | `highlights`        | `Highlight[]`       | Labeled highlights (see below)                                       |
 | `highlightColumns`  | `number[]`          | Columns (0-based) under a persistent overlay                         |
-| `residueMappings`   | `ResidueMapping[]`  | Which residue of which structure each row's residues are             |
+| `residueMappings`   | `ResidueMapping[]`  | Structure residue for each residue of a row                          |
 
-Every prop above except `msa`, `tree`, `gff` and the three filehandles stays
-live: change one and the viewer follows, so a host can put a control on it
-without remounting and re-fetching the alignment. Each follows only its own
-prop, so a change the reader makes inside the viewer — a scheme picked from the
-menu, a row dragged taller — is not undone by the host's next render, and the
-data layers (`highlights`, `columnTracks`, `residueMappings`,
-`highlightColumns`) are compared by content, so passing a freshly computed array
-on every render costs nothing. The alignment props are the exception: a new
-`msa`/`tree`/`gff` is a different alignment, which is a new model, which React
-spells `key`.
+The viewer applies changes to every prop above except `msa`, `tree`, `gff` and
+the three filehandles, so a host can put a control on one without remounting
+and re-fetching the alignment. Each prop updates only its own setting when it
+changes, so the host's next render keeps a change made inside the viewer, such
+as a scheme picked from the menu or a row dragged taller. The viewer compares
+the data layers (`highlights`, `columnTracks`, `residueMappings`,
+`highlightColumns`) by content, so passing a freshly computed array on every
+render costs nothing. A new `msa`, `tree` or `gff` needs a new model, so change
+the component's React `key` to remount it.
 
 ### Data layers
 
-`highlights`, `columnTracks` and `residueMappings` take data the host computed
-and the viewer only draws: a labeled band over a residue or column range, a bar,
-text or arc track above the alignment, the residue-by-residue correspondence
-between a row and a structure. Each one is also a model property, so it travels
-in a shared URL and the SVG export draws it.
+`highlights`, `columnTracks` and `residueMappings` take data the host computed:
+a labeled band over a residue or column range, a bar, text or arc track above
+the alignment, and the residue-by-residue correspondence between a row and a
+structure. Each is also a model property, so it travels in a shared URL and the
+SVG export draws it.
 
 ```tsx
 <MSAViewer
@@ -106,15 +105,15 @@ in a shared URL and the SVG export draws it.
 />
 ```
 
-Every field of every layer, and the coordinate rules they share, are in the
-[layers reference](https://gmod.org/JBrowseMSA/layers). At runtime
+The [layers reference](https://gmod.org/JBrowseMSA/layers) lists every field of
+every layer and the coordinate rules they share. At runtime
 `model.setHighlights(list)` and `model.setColumnTracks(tracks)` replace what the
 props set.
 
 ### One panel in your own page
 
-A purpose-built page usually wants less than the standalone app shows. Turn the
-phylogeny off and the gutter holds just the row labels, sized to them:
+A purpose-built page usually shows less than the standalone app. With the
+phylogeny off, the gutter holds only the row labels and sizes itself to them:
 
 ```tsx
 const [expanded, setExpanded] = useState(false)
@@ -139,20 +138,20 @@ return (
 )
 ```
 
-Both toggles drive the mounted viewer, so flipping one does not re-fetch the
-alignment. `drawTree={false}` with `autoTreeAreaWidth` is the pairing to reach
-for whenever there is no tree to draw — a reference-projected reconstruction has
-no meaningful guide tree, and without it the gutter would otherwise reserve its
-full default width for a tree that never appears.
+Both toggles update the mounted viewer, so flipping one does not re-fetch the
+alignment. Use `drawTree={false}` with `autoTreeAreaWidth` whenever there is no
+tree to draw, such as for a reference-projected reconstruction with no
+meaningful guide tree. Without `autoTreeAreaWidth` the gutter keeps its full
+default width.
 
 The component pulls in `@jbrowse/core`, MUI and mobx and renders to canvas, so
-in a server-rendered app (Next.js, Astro, Remix) load it client-side only —
-`React.lazy` inside a `Suspense`, or the framework's equivalent.
+in a server-rendered app (Next.js, Astro, Remix) load it on the client only,
+with `React.lazy` inside a `Suspense` or the framework's equivalent.
 
 ## Advanced: model-based API
 
-For state the props do not cover — hiding gappy columns, collapsing clades,
-reading what the user selected — use `MSAModelF` directly.
+For state the props do not cover, such as hiding gappy columns, collapsing
+clades or reading what the user selected, use `MSAModelF` directly.
 
 ```tsx
 import { MSAView, MSAModelF } from 'react-msaview'
@@ -185,10 +184,9 @@ model.setColWidth(16)
 model.toggleCollapsed('node-id')
 model.fit() // fit both axes
 
-// transient highlights, keyed by whoever is asking. Two sources -- a structure
-// viewer's hover, a genome view's -- each add and remove only their own, so
-// neither erases the other. Not persisted; the `highlights` prop is the
-// persisted list.
+// transient highlights, keyed by owner, so a structure viewer's hover and a
+// genome view's each clear only their own. Not persisted, unlike the
+// `highlights` prop.
 model.applyHighlight('protein3d', [{ row: 'human', start: 58, end: 58 }])
 model.clearHighlight('protein3d')
 ```
@@ -248,7 +246,7 @@ automatically re-render when observed model properties change.
 
 ## See also
 
-- [Interactive examples](https://gmod.org/JBrowseMSA/examples) — copyable source
+- [Interactive examples](https://gmod.org/JBrowseMSA/examples): copyable source
   for each usage pattern shown above.
-- [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the app, file
+- [User guide](https://gmod.org/JBrowseMSA/guide): a tour of the app, file
   formats, and features.
