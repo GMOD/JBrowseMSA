@@ -12,14 +12,14 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
-    "@jbrowse/mobx-state-tree": "^6.0.0",
-    "@mui/icons-material": "^9.2.0",
-    "@mui/material": "^9.2.0",
-    "@mui/system": "^9.2.0",
-    "mobx": "^7.0.0",
-    "mobx-react": "^10.0.0",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "@jbrowse/mobx-state-tree": "^6.5.1",
+    "@mui/icons-material": "^9.4.0",
+    "@mui/material": "^9.4.0",
+    "@mui/system": "^9.4.0",
+    "mobx": "^7.0.3",
+    "mobx-react": "^10.0.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "react-msaview": "workspace:*"
   }
 }

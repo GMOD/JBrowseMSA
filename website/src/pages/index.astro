@@ -109,41 +109,39 @@ const steps = [
     <Viewer client:only="react" base={base} />
   </section>
 
-  {
-    steps.map(step => (
-      <section class="step">
-        <h2>
-          <span class="step-n">{step.n}</span>
-          {step.title}
-        </h2>
-        <p class="step-body">{step.body}</p>
-        <div class="cards">
-          {step.cards.map(card => (
-            <a class:list={['card', { primary: card.cta }]} href={card.href}>
-              <h3>{card.title}</h3>
-              <p>{card.body}</p>
-            </a>
-          ))}
-        </div>
-        {step.n === '1' && (
-          <table class="formats">
-            <thead>
+  {steps.map(step => (
+    <section class="step">
+      <h2>
+        <span class="step-n">{step.n}</span>
+        {step.title}
+      </h2>
+      <p class="step-body">{step.body}</p>
+      <div class="cards">
+        {step.cards.map(card => (
+          <a class:list={['card', { primary: card.cta }]} href={card.href}>
+            <h3>{card.title}</h3>
+            <p>{card.body}</p>
+          </a>
+        ))}
+      </div>
+      {step.n === '1' && (
+        <table class="formats">
+          <thead>
+            <tr>
+              <th>Input</th>
+              <th>Formats it reads</th>
+            </tr>
+          </thead>
+          <tbody>
+            {formats.map(row => (
               <tr>
-                <th>Input</th>
-                <th>Formats it reads</th>
+                <th scope="row">{row.what}</th>
+                <td>{row.formats}</td>
               </tr>
-            </thead>
-            <tbody>
-              {formats.map(row => (
-                <tr>
-                  <th scope="row">{row.what}</th>
-                  <td>{row.formats}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-    ))
-  }
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  ))}
 </Base>

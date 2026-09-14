@@ -18,22 +18,12 @@ const external = href?.startsWith('http')
 ---
 
 <figure>
-  {
-    href ? (
-      <a
-        href={href}
-        target={external ? '_blank' : undefined}
-        rel={external ? 'noopener' : undefined}
-      >
-        <img
-          src={`${base}/media/${src}`}
-          alt={alt}
-          width={width}
-          height={height}
-          loading="lazy"
-        />
-      </a>
-    ) : (
+  {href ? (
+    <a
+      href={href}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noopener' : undefined}
+    >
       <img
         src={`${base}/media/${src}`}
         alt={alt}
@@ -41,7 +31,17 @@ const external = href?.startsWith('http')
         height={height}
         loading="lazy"
       />
-    )
-  }
-  <figcaption><slot /></figcaption>
+    </a>
+  ) : (
+    <img
+      src={`${base}/media/${src}`}
+      alt={alt}
+      width={width}
+      height={height}
+      loading="lazy"
+    />
+  )}
+  <figcaption>
+    <slot />
+  </figcaption>
 </figure>

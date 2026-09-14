@@ -69,7 +69,9 @@ const socialImage = new URL(
   </head>
   <body class:list={{ 'app-layout': fullBleed }}>
     <header class="site-header">
-      <a class="brand" href={base}>JBrowseMSA</a>
+      <a class="brand" href={base}>
+        JBrowseMSA
+      </a>
       <nav aria-label="Primary">
         <a
           href={home.href}
@@ -78,38 +80,36 @@ const socialImage = new URL(
         >
           {home.label}
         </a>
-        {
-          groups.map(group => {
-            const menuId = `nav-menu-${group.label.toLowerCase()}`
-            return (
-              <div
-                class:list={['nav-group', { active: groupActive(group.items) }]}
+        {groups.map(group => {
+          const menuId = `nav-menu-${group.label.toLowerCase()}`
+          return (
+            <div
+              class:list={['nav-group', { active: groupActive(group.items) }]}
+            >
+              <button
+                type="button"
+                class="nav-group-btn"
+                aria-expanded="false"
+                aria-controls={menuId}
               >
-                <button
-                  type="button"
-                  class="nav-group-btn"
-                  aria-expanded="false"
-                  aria-controls={menuId}
-                >
-                  {group.label}
-                </button>
-                <ul class="nav-menu" id={menuId}>
-                  {group.items.map(item => (
-                    <li>
-                      <a
-                        href={item.href}
-                        class:list={{ active: isActive(item.href) }}
-                        aria-current={isActive(item.href) ? 'page' : undefined}
-                      >
-                        {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          })
-        }
+                {group.label}
+              </button>
+              <ul class="nav-menu" id={menuId}>
+                {group.items.map(item => (
+                  <li>
+                    <a
+                      href={item.href}
+                      class:list={{ active: isActive(item.href) }}
+                      aria-current={isActive(item.href) ? 'page' : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        })}
         <a
           href={demo.href}
           class:list={{ active: isActive(demo.href) }}
@@ -123,7 +123,8 @@ const socialImage = new URL(
         href="https://github.com/GMOD/JBrowseMSA"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="GitHub"></a>
+        aria-label="GitHub"
+      ></a>
     </header>
     <main class:list={{ wide, 'full-bleed': fullBleed }}>
       <slot />
@@ -131,9 +132,8 @@ const socialImage = new URL(
     <footer class="site-footer">
       <span>
         react-msaview (JBrowseMSA) ·
-        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> · part of <a
-          href="https://jbrowse.org">JBrowse</a
-        >
+        <a href="https://github.com/GMOD/JBrowseMSA">GitHub</a> · part of{' '}
+        <a href="https://jbrowse.org">JBrowse</a>
       </span>
     </footer>
     <script>

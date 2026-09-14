@@ -71,24 +71,24 @@ const figures = catalog.flatMap(entry =>
       <a href={`${base}/examples`}>examples</a> page.
     </p>
 
-    {
-      figures.map(f => (
-        <Figure src={`${f.src}.png`} alt={f.caption} href={f.href}>
-          <strong>{f.title}</strong> — {f.caption}
-        </Figure>
-      ))
-    }
+    {figures.map(f => (
+      <Figure src={`${f.src}.png`} alt={f.caption} href={f.href}>
+        <strong>{f.title}</strong> — {f.caption}
+      </Figure>
+    ))}
 
     <h2 id="jbrowse">Inside JBrowse</h2>
     <p>
       react-msaview also runs as a
-      <a href="https://github.com/GMOD/jbrowse-plugin-msaview"
-        >JBrowse 2 plugin</a
-      >: the alignment and tree open <em>inside</em> JBrowse, connected to a genome
-      view and — with
-      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a> — the
-      AlphaFold structure. Selecting a region in any view lights the matching columns,
-      codons, and residues in the others. Each example below is one declarative URL.
+      <a href="https://github.com/GMOD/jbrowse-plugin-msaview">
+        JBrowse 2 plugin
+      </a>
+      : the alignment and tree open <em>inside</em> JBrowse, connected to a
+      genome view and — with
+      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a> —
+      the AlphaFold structure. Selecting a region in any view lights the
+      matching columns, codons, and residues in the others. Each example below
+      is one declarative URL.
     </p>
 
     <JBrowseFigure
@@ -108,52 +108,56 @@ const figures = catalog.flatMap(entry =>
     <p>The same connected pattern without the structure view:</p>
     <ul>
       <li>
-        <a href={proteinLinked} target="_blank" rel="noopener">SRC ↗</a> — the Src-family
-        kinase alignment beside the SRC gene.
+        <a href={proteinLinked} target="_blank" rel="noopener">
+          SRC ↗
+        </a>{' '}
+        — the Src-family kinase alignment beside the SRC gene.
       </li>
       <li>
-        <a href={brafV600} target="_blank" rel="noopener">BRAF V600E ↗</a> — the RAF
-        family on the invariant V600 codon, with a ClinVar pathogenic-variant track.
+        <a href={brafV600} target="_blank" rel="noopener">
+          BRAF V600E ↗
+        </a>{' '}
+        — the RAF family on the invariant V600 codon, with a ClinVar
+        pathogenic-variant track.
       </li>
       <li>
-        <a href={tp53R248} target="_blank" rel="noopener">TP53 R248 ↗</a> — p53 across
-        vertebrates on the R248 hotspot, with ClinVar.
+        <a href={tp53R248} target="_blank" rel="noopener">
+          TP53 R248 ↗
+        </a>{' '}
+        — p53 across vertebrates on the R248 hotspot, with ClinVar.
       </li>
     </ul>
 
-    {
-      buildOnOpen.live && (
-        <>
-          <p>
-            The links above carry their alignments as files. The two below carry
-            a request instead, and the view builds the alignment when it opens:
-            the spec names the transcript in <code>connectedTranscript</code>{' '}
-            and the plugin looks its exon model up in the genome view's gene
-            track, so the whole session is a URL short enough to type.
-          </p>
-          <ul>
-            <li>
-              <a href={tp53UnirefBrowser} target="_blank" rel="noopener">
-                TP53 UniRef cluster ↗
-              </a>{' '}
-              — every reference-proteome protein in UniProtKB within 50%
-              identity of p53, looked up from UniProt and aligned to the
-              transcript in the browser. No job at any service, so it opens in
-              seconds.
-            </li>
-            <li>
-              <a href={tp53PhmmerRp15} target="_blank" rel="noopener">
-                TP53 phmmer search ↗
-              </a>{' '}
-              — the same gene through a phmmer search of UniProt's
-              representative proteomes at 15% similarity, the widest net EBI
-              offers: p53's relatives across the tree of life. The wait is EBI's
-              queue, from seconds to many minutes.
-            </li>
-          </ul>
-        </>
-      )
-    }
+    {buildOnOpen.live && (
+      <>
+        <p>
+          The links above carry their alignments as files. The two below carry a
+          request instead, and the view builds the alignment when it opens: the
+          spec names the transcript in <code>connectedTranscript</code> and the
+          plugin looks its exon model up in the genome view's gene track, so the
+          whole session is a URL short enough to type.
+        </p>
+        <ul>
+          <li>
+            <a href={tp53UnirefBrowser} target="_blank" rel="noopener">
+              TP53 UniRef cluster ↗
+            </a>{' '}
+            — every reference-proteome protein in UniProtKB within 50% identity
+            of p53, looked up from UniProt and aligned to the transcript in the
+            browser. No job at any service, so it opens in seconds.
+          </li>
+          <li>
+            <a href={tp53PhmmerRp15} target="_blank" rel="noopener">
+              TP53 phmmer search ↗
+            </a>{' '}
+            — the same gene through a phmmer search of UniProt's representative
+            proteomes at 15% similarity, the widest net EBI offers: p53's
+            relatives across the tree of life. The wait is EBI's queue, from
+            seconds to many minutes.
+          </li>
+        </ul>
+      </>
+    )}
 
     <h2 id="embedded">Or one panel, in a page you write</h2>
     <p>
@@ -165,17 +169,15 @@ const figures = catalog.flatMap(entry =>
       turned off when there is no meaningful tree, a diff toggle and an expand
       button beside it.
     </p>
-    {
-      /* No `#controls-from-props` fragment here: ExampleBrowser reads the hash
+    {/* No `#controls-from-props` fragment here: ExampleBrowser reads the hash
       as a route rather than scrolling to an element, so the examples page is
       client:only and carries no such id. hyperlink --check-anchors is right to
-      call that a broken anchor, and it fails the build. */
-    }
+      call that a broken anchor, and it fails the build. */}
     <p>
       That is a react-msaview component in your own page rather than a JBrowse
       session, and the props drive it live, so a toggle costs no remount and no
-      refetch. The <a href={`${base}/embedding`}>embedding guide</a> has the recipe,
-      and the <strong>Controls from props</strong> entry on the
+      refetch. The <a href={`${base}/embedding`}>embedding guide</a> has the
+      recipe, and the <strong>Controls from props</strong> entry on the
       <a href={`${base}/examples`}>examples</a> page is it running.
     </p>
   </article>

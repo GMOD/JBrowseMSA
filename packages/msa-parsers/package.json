@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@gmod/newick": "^1.0.3",
-    "clustal-js": "^2.0.17",
+    "clustal-js": "^2.0.18",
     "emf-js": "^2.0.0"
   },
   "publishConfig": {
@@ -39,6 +39,6 @@
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.0"
   }
 }

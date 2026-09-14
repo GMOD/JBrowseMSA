@@ -22,10 +22,10 @@
   },
   "devDependencies": {
     "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
-    "@types/jsdom": "^28.0.3",
-    "@types/node": "^26.1.2",
-    "esbuild": "^0.28.1",
-    "mobx-react": "^10.0.0",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.5.1",
+    "esbuild": "^0.28.2",
+    "mobx-react": "^10.0.2",
     "msa-parsers": "workspace:*",
     "react-msaview": "workspace:*"
   },
@@ -33,6 +33,6 @@
     "jsdom": "^30.0.1"
   },
   "optionalDependencies": {
-    "@napi-rs/canvas": "^1.0.8"
+    "@napi-rs/canvas": "^1.0.9"
   }
 }

@@ -60,13 +60,13 @@
   },
   "devDependencies": {
     "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
-    "@types/node": "^26.1.2",
-    "esbuild": "^0.28.1"
+    "@types/node": "^26.5.1",
+    "esbuild": "^0.28.2"
   },
   "dependencies": {
     "@gmod/newick": "^1.0.3",
     "@jbrowse/svgcanvas": "workspace:*",
-    "colord": "^2.9.3",
+    "colord": "^2.10.0",
     "flatbush": "^4.6.2",
     "msa-parsers": "workspace:*"
   }
