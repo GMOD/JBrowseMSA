@@ -2,10 +2,41 @@
 
 Write plain technical English in ordinary declarative sentences. This checklist
 names the habits this repo has had to rewrite, each with a pair taken from the
-repo, so the fix is a shape to copy. It covers code comments, the captions in
+repo, so the fix is a pattern to copy. It covers code comments, the captions in
 `packages/examples/src/examples/catalog.ts`, tutorials, READMEs, agent-docs and
 `CLAUDE.md`. The habits compound: one of them reads as a choice, and a page of
 them reads as generated.
+
+## Contrastive framing
+
+This is the strictest rule here. State what a thing is or does, and leave out
+what it is not, what it replaces, and what someone might have assumed. The
+forms:
+
+- "X, not Y"
+- "rather than", "instead of"
+- "not just X but Y", "X doesn't just Y, it Z"
+- "not because X but because Y"
+- a negation followed by the real claim: "It's not a cache. It's a log."
+- "is not X's job" before saying whose job it is
+- a heading that says what a thing is not
+
+The default fix is to delete the negative half.
+
+> so it is tested rather than remembered → so a broken install line fails CI
+>
+> The overlay is column-locked instead of drawn per protein. → The overlay is
+> column-locked.
+>
+> taken off the structure rather than retyped from a paper → computed from PDB
+> 6M0J
+
+The test: would a reader who never saw the negative half make a wrong choice or
+hold a wrong belief? If not, delete it. Only three cases pass: an option the
+reader would otherwise pick ("Use `Pfam`, not `PfamA`"), a fault that resembles
+another ("missing sequence" against "no domain annotated"), and a design record
+naming the option it declined. Even then, prefer a plain sentence: "Contacts use
+all-atom distance, because C-beta distance misses side-chain contacts."
 
 ## A value given knowledge or a stance
 
@@ -103,17 +134,6 @@ A short balanced sentence that sounds like a conclusion and carries no fact.
 >
 > Synthetic sequences, real overlay. → The sequences are synthetic, and the
 > overlay is the one real data uses.
-
-## Contrastive framing where the positive half says it
-
-"X, not Y", "rather than", "instead of". Keep one only where the reader needs
-the distinction to choose correctly: an option a reader would otherwise pick, a
-fault that resembles another, a design record naming the option it declined.
-
-> so it is tested rather than remembered → so a broken install line fails CI
-
-Keep: "sniffs the format from the file's content, not its name", "all-atom
-distance, not C-beta", "missing sequence" against "no domain annotated".
 
 ## A which-ladder
 
