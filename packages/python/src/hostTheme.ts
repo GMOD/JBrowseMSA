@@ -24,10 +24,7 @@ export function hostTheme(doc: Document = document): Mode {
 }
 
 /** call `onChange` whenever the host switches theme; returns a disposer */
-export function watchHostTheme(
-  onChange: () => void,
-  doc: Document = document,
-) {
+export function watchHostTheme(onChange: () => void, doc: Document = document) {
   const observer = new MutationObserver(onChange)
   observer.observe(doc.body, {
     attributes: true,
