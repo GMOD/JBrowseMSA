@@ -27,6 +27,10 @@ them, and follow it in this file too: agents copy the prose here as house voice.
 - `packages/svgcanvas`: vendored ESM fork of svgcanvas for SVG export
 - `packages/r-msaview`: R htmlwidget package with ggtree/Biostrings/treeio
   interop
+- `packages/python`: the `msaview-widget` anywidget (import `msaview`). Its
+  traits are the `MSAViewer` props in snake case, and `src/render.ts` maps them
+  onto `mount()`. The built `msaview/static/widget.js` is gitignored and shipped
+  in the wheel
 
 ## Tutorials
 
