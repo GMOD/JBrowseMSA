@@ -1620,13 +1620,14 @@ visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => any
 #### method: visibleSpan
 
 the visible columns a span covers, in highlight coordinates: `start` and `end`
-are 1-based residues of `row`, or columns of the file without it. A span
-entirely on hidden columns, or naming a row the alignment lacks, gives
-undefined.
+are 1-based residues of `row`, or columns of the file without it. A fractional
+position, as a zoom gesture reports one, widens to the whole residue or column
+it falls in. A span entirely on hidden columns, or naming a row the alignment
+lacks, gives undefined.
 
 ```js
 // type signature
-visibleSpan: ({ row, start, end }: Region) => { startCol: any; endCol: any; }
+visibleSpan: ({ row, start: rawStart, end: rawEnd }: Region) => { startCol: any; endCol: any; }
 ```
 
 ### MsaView - Actions

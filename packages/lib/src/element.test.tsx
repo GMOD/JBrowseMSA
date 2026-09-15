@@ -113,3 +113,29 @@ test('hover reports the reference row residue and highlight follows the manager'
   })
   expect(model.transientHighlights.nightingale).toBeUndefined()
 })
+
+test('the range the element reported, written back by the manager, leaves the zoom alone', async () => {
+  const { element, model } = await setup()
+  act(() => {
+    model.setScrollX(-100)
+    model.setColWidth(9.5)
+  })
+  const reported = changes.at(-1) as Record<string, number>
+  const colWidth = model.colWidth
+  await act(async () => {
+    element.setAttribute('display-start', `${reported['display-start']}`)
+    element.setAttribute('display-end', `${reported['display-end']}`)
+    await Promise.resolve()
+  })
+  expect(model.colWidth).toBe(colWidth)
+})
+
+test('a fractional range from a Nightingale zoom widens to whole residues', async () => {
+  const { element, model } = await setup()
+  await act(async () => {
+    element.setAttribute('display-start', '10.6')
+    element.setAttribute('display-end', '19.2')
+    await Promise.resolve()
+  })
+  expect(model.viewport).toEqual({ startColumn: 12, endColumn: 22 })
+})

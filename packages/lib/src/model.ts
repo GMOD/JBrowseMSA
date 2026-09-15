@@ -1960,11 +1960,14 @@ function stateModelFactory() {
        * #method
        * the visible columns a span covers, in highlight coordinates: `start`
        * and `end` are 1-based residues of `row`, or columns of the file
-       * without it. A span entirely on hidden columns, or naming a row the
-       * alignment lacks, gives undefined.
+       * without it. A fractional position, as a zoom gesture reports one,
+       * widens to the whole residue or column it falls in. A span entirely on
+       * hidden columns, or naming a row the alignment lacks, gives undefined.
        */
-      visibleSpan({ row, start, end }: Region) {
+      visibleSpan({ row, start: rawStart, end: rawEnd }: Region) {
         const { blanks } = self
+        const start = Math.max(1, Math.floor(rawStart))
+        const end = Math.ceil(rawEnd)
         let startGlobal = start - 1
         let endGlobal = end - 1
         if (row !== undefined) {

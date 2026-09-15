@@ -101,6 +101,7 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
     #manager?: NightingaleManager
     #cancelRange?: () => void
     #rangePending = false
+    #reported?: { start: number; end: number }
     #data: ElementData = {}
 
     get msa() {
@@ -229,6 +230,7 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
         Math.abs(range.start - shownStart) <= 1 &&
         Math.abs(range.end - shownEnd) <= 1
       if (range && !echo) {
+        this.#reported = range
         this.#nightingaleChange({
           'display-start': range.start,
           'display-end': range.end,
@@ -240,6 +242,12 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
       const model = this.#model
       const start = numberAttribute(this.getAttribute('display-start'))
       const end = numberAttribute(this.getAttribute('display-end'))
+      const reported = this.#reported
+      // the manager writes the range this element reported back onto it, and
+      // zooming to it again would snap the reader's own zoom to whole residues
+      if (reported && reported.start === start && reported.end === end) {
+        return
+      }
       this.#cancelRange?.()
       if (model && start !== undefined && end !== undefined) {
         const row = this.#referenceRow

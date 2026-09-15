@@ -1,7 +1,6 @@
-import '@nightingale-elements/nightingale-manager'
-import '@nightingale-elements/nightingale-navigation'
-import '@nightingale-elements/nightingale-sequence'
-
+import NightingaleManager from '@nightingale-elements/nightingale-manager'
+import NightingaleNavigation from '@nightingale-elements/nightingale-navigation'
+import NightingaleSequence from '@nightingale-elements/nightingale-sequence'
 import { defineMsaElement } from 'react-msaview'
 
 import { globinMSA, globinTree } from './data'
@@ -18,6 +17,19 @@ import type { DetailedHTMLProps, HTMLAttributes } from 'react'
 // The alignment has gaps, so position 60 of Human_beta is not column 60; the
 // element converts between the two in both directions.
 defineMsaElement()
+
+// Each Nightingale module registers its element when it loads, but the
+// packages declare "sideEffects": false, so a production build drops a bare
+// `import '@nightingale-elements/...'`. Defining the classes here keeps them.
+for (const [tag, element] of [
+  ['nightingale-manager', NightingaleManager],
+  ['nightingale-navigation', NightingaleNavigation],
+  ['nightingale-sequence', NightingaleSequence],
+] as const) {
+  if (!customElements.get(tag)) {
+    customElements.define(tag, element)
+  }
+}
 
 const reference = 'Human_beta'
 // the alignment's columns start after the tree gutter and its 5px resize

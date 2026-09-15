@@ -55,3 +55,9 @@ test('zoomToRegion projects a residue span through the row', () => {
   model.zoomToRegion({ row: 'a', start: 1, end: 10 })
   expect(model.viewport).toEqual({ startColumn: 3, endColumn: 12 })
 })
+
+test('zoomToRegion widens a fractional span to whole columns', () => {
+  const model = makeModel()
+  model.zoomToRegion({ start: 20.4, end: 29.6 })
+  expect(model.viewport).toEqual({ startColumn: 20, endColumn: 30 })
+})
