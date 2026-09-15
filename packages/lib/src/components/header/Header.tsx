@@ -27,6 +27,12 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
   useEffect(() => {
     model.setHeaderHeight(height ?? 0)
   }, [model, height])
+  useEffect(
+    () => () => {
+      model.setHeaderHeight(0)
+    },
+    [model],
+  )
   return (
     <div ref={ref} style={{ display: 'flex' }}>
       <FileMenu model={model} />

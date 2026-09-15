@@ -120,14 +120,15 @@ const View = observer(function ({ model }: { model: MsaViewModel }) {
 })
 
 const MSAView = observer(function ({ model }: { model: MsaViewModel }) {
-  const { height, viewInitialized, DialogComponent, DialogProps } = model
+  const { height, hideHeader, viewInitialized, DialogComponent, DialogProps } =
+    model
 
   return (
     <div>
       {viewInitialized ? (
         <>
           <div style={{ height, overflow: 'hidden' }}>
-            <Header model={model} />
+            {hideHeader ? null : <Header model={model} />}
             <View model={model} />
           </div>
           <HorizontalResizeHandle model={model} />

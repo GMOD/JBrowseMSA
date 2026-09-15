@@ -20,6 +20,9 @@ export {
 export { maxNeighborJoiningRows } from './constants.ts'
 export { default as MSAView } from './components/Loading.tsx'
 export { default as MSAViewer } from './components/MSAViewer.tsx'
+export type { MSAViewerProps } from './components/MSAViewer.tsx'
+export { mount } from './mount.tsx'
+export type { MountedViewer } from './mount.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
 export type { HierarchyNode } from './hierarchy.ts'
@@ -39,6 +42,7 @@ export type {
   ArcTrackModel,
   BasicTrack,
   BasicTrackModel,
+  Cell,
   ColumnTrackSpec,
   DomainBand,
   Highlight,
@@ -55,4 +59,5 @@ export type {
   TextTrackModel,
   TidyDomainAnnotation,
   UnshareableData,
+  Viewport,
 } from './types.ts'

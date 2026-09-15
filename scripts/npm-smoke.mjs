@@ -12,11 +12,10 @@
  * different tree, and this is the only job that installs it.
  *
  * The quick start pins the majors @jbrowse/core depends on. That pinning is the
- * point of the test: install `@mui/material` (9) next to core 4 and the viewer
- * throws on a theme from the other copy, and let npm auto-install the mobx peer
- * and it picks 7 against core's 6 and the model dies with "Identifier types can
- * only be instantiated as direct child of a model type". Keep this list and the
- * one in USAGE.md identical.
+ * point of the test: a second copy of MUI makes the viewer throw on a theme from
+ * the other copy, and a second copy of mobx-state-tree kills the model with
+ * "Identifier types can only be instantiated as direct child of a model type".
+ * Keep this list and the one in USAGE.md identical.
  *
  * Run it after a build: `pnpm build && node scripts/npm-smoke.mjs`.
  */
@@ -35,14 +34,14 @@ import {
   startStaticServer,
 } from './screenshots/lib.mjs'
 
-// the versions @jbrowse/core 4.x depends on; see USAGE.md
+// the versions @jbrowse/core 5 depends on; see USAGE.md
 const QUICK_START_DEPS = [
-  '@jbrowse/core@4',
-  'mobx@6',
-  'mobx-react@9',
-  '@jbrowse/mobx-state-tree@5',
-  '@mui/material@7',
-  '@mui/icons-material@7',
+  '@jbrowse/core@next',
+  'mobx@7',
+  'mobx-react@10',
+  '@jbrowse/mobx-state-tree@6',
+  '@mui/material@9',
+  '@mui/icons-material@9',
   '@emotion/react',
   '@emotion/styled',
   'react',

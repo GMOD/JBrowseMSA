@@ -25,6 +25,7 @@ import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
 import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
+import { visibleColRange } from './components/msa/visibleColRange.ts'
 import TrackBlocks from './components/tracks/TrackBlocks.tsx'
 import {
   defaultAllowedGappyness,
@@ -104,6 +105,7 @@ import type {
   Annotation,
   Arc,
   BasicTrack,
+  Cell,
   ResidueMappingProblem,
   ColumnTrackSpec,
   DomainBand,
@@ -116,6 +118,7 @@ import type {
   RowResidue,
   StructureResidue,
   UnshareableData,
+  Viewport,
 } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
@@ -448,6 +451,12 @@ function stateModelFactory() {
        * #volatile
        */
       headerHeight: 0,
+      /**
+       * #volatile
+       * leaves the toolbar out, for a host drawing its own controls. Kept out
+       * of the snapshot so a link opened in the full app shows the toolbar.
+       */
+      hideHeader: false,
       /**
        * #volatile
        */
@@ -2500,6 +2509,66 @@ function stateModelFactory() {
         return self.msaAreaWidth - this.verticalScrollbarWidth
       },
       /**
+       * #method
+       * the cell at a visible column and row index, in the coordinates a host
+       * writes highlights in
+       */
+      cellAt(visibleCol: number, rowIndex?: number): Cell {
+        const column = self.visibleColToGlobalCol(visibleCol)
+        const row =
+          rowIndex === undefined ? undefined : self.leaves[rowIndex]?.data.name
+        return row === undefined
+          ? { column: column + 1 }
+          : {
+              column: column + 1,
+              row,
+              residue: self.visibleColToSeqPosOneBased(row, visibleCol),
+              letter: self.rowMap.get(row)?.[column],
+            }
+      },
+      /**
+       * #getter
+       * the cell under the pointer. Public API: MSAViewer's onCellHover
+       * reports it.
+       */
+      get hoveredCell() {
+        const { mouseCol, mouseRow } = self
+        return mouseCol === undefined
+          ? undefined
+          : this.cellAt(mouseCol, mouseRow)
+      },
+      /**
+       * #getter
+       * the cell a click pinned. Public API: MSAViewer's onCellClick reports it.
+       */
+      get clickedCell() {
+        const { mouseClickCol, mouseClickRow } = self
+        return mouseClickCol === undefined
+          ? undefined
+          : this.cellAt(mouseClickCol, mouseClickRow)
+      },
+      /**
+       * #getter
+       * the columns on screen. Public API: MSAViewer's onViewportChange reports
+       * it.
+       */
+      get viewport(): Viewport | undefined {
+        const { scrollX, colWidth, numColumns, viewInitialized } = self
+        if (numColumns === 0 || !viewInitialized) {
+          return undefined
+        }
+        const { xStart, xEnd } = visibleColRange({
+          offsetX: -scrollX,
+          blockWidth: this.msaCanvasWidth,
+          colWidth,
+        })
+        const last = Math.max(0, Math.min(xEnd, numColumns) - 1)
+        return {
+          startColumn: self.visibleColToGlobalCol(Math.min(xStart, last)) + 1,
+          endColumn: self.visibleColToGlobalCol(last) + 1,
+        }
+      },
+      /**
        * #getter
        * ordinal segment types (exons etc.), ordered by sequence position so
        * exon-1..exon-14 run left-to-right; colored by alternating shade and
@@ -2794,6 +2863,12 @@ function stateModelFactory() {
        */
       setHeaderHeight(arg: number) {
         self.headerHeight = arg
+      },
+      /**
+       * #action
+       */
+      setHideHeader(arg: boolean) {
+        self.hideHeader = arg
       },
       /**
        * #action

@@ -4,16 +4,24 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import useMeasure from '@jbrowse/core/util/useMeasure'
 import { destroy, isAlive } from '@jbrowse/mobx-state-tree'
 import { ThemeProvider } from '@mui/material/styles'
+import { compareStructural, reaction } from 'mobx'
 
 import MSAModelF from '../model.ts'
 import Loading from './Loading.tsx'
 
-import type { ColumnTrackSpec, Highlight, ResidueMapping } from '../types.ts'
+import type { MsaViewModel } from '../model.ts'
+import type {
+  Cell,
+  ColumnTrackSpec,
+  Highlight,
+  ResidueMapping,
+  Viewport,
+} from '../types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 
 const theme = createJBrowseTheme()
 
-interface MSAViewerProps {
+export interface MSAViewerProps {
   msa?: string
   tree?: string
   gff?: string
@@ -50,9 +58,79 @@ interface MSAViewerProps {
   treeAreaWidth?: number
   /** auto-size the tree/label area to the labels (used when drawTree is false) */
   autoTreeAreaWidth?: boolean
+  /** leave out the toolbar, for a page drawing its own controls */
+  hideHeader?: boolean
+  /** the cell under the pointer, or undefined when it leaves the alignment */
+  onCellHover?: (cell: Cell | undefined) => void
+  /** the cell a click pinned, or undefined when a click clears it */
+  onCellClick?: (cell: Cell | undefined) => void
+  /** the alignment columns on screen, after every scroll, zoom and resize */
+  onViewportChange?: (viewport: Viewport | undefined) => void
 }
 
-export default function MSAViewer({
+type DataSource = Pick<
+  MSAViewerProps,
+  'msa' | 'tree' | 'gff' | 'msaFilehandle' | 'treeFilehandle' | 'gffFilehandle'
+>
+
+function sameSource(a: DataSource, b: DataSource) {
+  return (
+    a.msa === b.msa &&
+    a.tree === b.tree &&
+    a.gff === b.gff &&
+    JSON.stringify([a.msaFilehandle, a.treeFilehandle, a.gffFilehandle]) ===
+      JSON.stringify([b.msaFilehandle, b.treeFilehandle, b.gffFilehandle])
+  )
+}
+
+/**
+ * A new alignment, tree or annotation file needs a new model, so the viewer
+ * remounts when one of those props changes and keeps its model across every
+ * other change.
+ */
+export default function MSAViewer(props: MSAViewerProps) {
+  const { msa, tree, gff, msaFilehandle, treeFilehandle, gffFilehandle } = props
+  const source = {
+    msa,
+    tree,
+    gff,
+    msaFilehandle,
+    treeFilehandle,
+    gffFilehandle,
+  }
+  const [shown, setShown] = useState({ source, generation: 0 })
+  if (!sameSource(shown.source, source)) {
+    setShown({ source, generation: shown.generation + 1 })
+  }
+  return <Viewer key={shown.generation} {...props} />
+}
+
+function useModelReaction<K extends 'hoveredCell' | 'clickedCell' | 'viewport'>(
+  model: MsaViewModel,
+  key: K,
+  handler: ((value: MsaViewModel[K]) => void) | undefined,
+) {
+  const latest = useRef(handler)
+  useEffect(() => {
+    latest.current = handler
+  })
+  const listening = !!handler
+  useEffect(
+    () =>
+      listening
+        ? reaction(
+            () => model[key],
+            value => {
+              latest.current?.(value)
+            },
+            { equals: compareStructural },
+          )
+        : undefined,
+    [model, key, listening],
+  )
+}
+
+function Viewer({
   msa,
   tree,
   gff,
@@ -72,8 +150,11 @@ export default function MSAViewer({
   drawTree,
   treeAreaWidth,
   autoTreeAreaWidth,
+  hideHeader,
+  onCellHover,
+  onCellClick,
+  onViewportChange,
 }: MSAViewerProps) {
-  // useState, not useMemo: the MST instance must be created exactly once
   const [model] = useState(() =>
     MSAModelF().create({
       type: 'MsaView',
@@ -110,10 +191,8 @@ export default function MSAViewer({
     }
   }, [model, width])
 
-  // These props stay live after mount, so a host control can drive the model
-  // without a remount. Each effect depends only on its own prop, so a change
-  // made inside the viewer survives the host's next render. A new msa, tree or
-  // gff needs a new model: change the component's `key`.
+  // Each effect depends only on its own prop, so a change made inside the
+  // viewer survives the host's next render.
   useEffect(() => {
     if (height !== undefined) {
       model.setHeight(height)
@@ -149,6 +228,9 @@ export default function MSAViewer({
       model.setTreeAreaWidth(treeAreaWidth)
     }
   }, [model, treeAreaWidth])
+  useEffect(() => {
+    model.setHideHeader(!!hideHeader)
+  }, [model, hideHeader])
   // unguarded, so removing the prop turns the reference diff off
   useEffect(() => {
     model.drawRelativeTo(relativeTo)
@@ -172,6 +254,10 @@ export default function MSAViewer({
   useEffect(() => {
     model.setHighlightedColumns(JSON.parse(highlightColumnsKey) ?? undefined)
   }, [model, highlightColumnsKey])
+
+  useModelReaction(model, 'hoveredCell', onCellHover)
+  useModelReaction(model, 'clickedCell', onCellClick)
+  useModelReaction(model, 'viewport', onViewportChange)
 
   // destroy releases the model's matchMedia listener and fetches. It waits a
   // tick because StrictMode remounts with the same state, and the remount's

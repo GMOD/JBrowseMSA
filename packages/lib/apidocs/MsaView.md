@@ -465,6 +465,18 @@ number
 headerHeight: 0
 ```
 
+#### volatile: hideHeader
+
+leaves the toolbar out, for a host drawing its own controls. Kept out of the
+snapshot so a link opened in the full app shows the toolbar.
+
+```js
+// type signature
+false
+// code
+hideHeader: false
+```
+
 #### volatile: highlightedColumns
 
 array of column indices to highlight
@@ -758,6 +770,15 @@ own color and a legend entry
 any[]
 ```
 
+#### getter: clickedCell
+
+the cell a click pinned. Public API: MSAViewer's onCellClick reports it.
+
+```js
+// type
+any
+```
+
 #### getter: colClustalX
 
 Pre-computed ClustalX colors per column. Returns a map of letter -> color for
@@ -938,6 +959,15 @@ so an override takes effect.
 ```js
 // type
 boolean
+```
+
+#### getter: hoveredCell
+
+the cell under the pointer. Public API: MSAViewer's onCellHover reports it.
+
+```js
+// type
+any
 ```
 
 #### getter: hoveredInsertion
@@ -1431,6 +1461,15 @@ ResidueMapping[]
 0 | 20
 ```
 
+#### getter: viewport
+
+the columns on screen. Public API: MSAViewer's onViewportChange reports it.
+
+```js
+// type
+Viewport
+```
+
 #### getter: visibleDomainTypes
 
 the domain types currently drawn on the alignment (filtered-on), shared by the
@@ -1450,6 +1489,16 @@ number
 ```
 
 ### MsaView - Methods
+
+#### method: cellAt
+
+the cell at a visible column and row index, in the coordinates a host writes
+highlights in
+
+```js
+// type signature
+cellAt: (visibleCol: number, rowIndex?: number) => Cell
+```
 
 #### method: getRowData
 
@@ -1855,6 +1904,13 @@ hide columns that are entirely (or mostly, see allowedGappyness) gaps
 ```js
 // type signature
 setHideGaps: (arg: boolean) => void
+```
+
+#### action: setHideHeader
+
+```js
+// type signature
+setHideHeader: (arg: boolean) => void
 ```
 
 #### action: setHighlightedColumns

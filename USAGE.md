@@ -6,8 +6,8 @@ The simplest way to use react-msaview in a React app. Handles model creation,
 width measurement, and theming automatically.
 
 ```sh
-npm install react-msaview @jbrowse/core@4 mobx@6 mobx-react@9 \
-  @jbrowse/mobx-state-tree@5 @mui/material@7 @mui/icons-material@7 \
+npm install react-msaview @jbrowse/core@next mobx@7 mobx-react@10 \
+  @jbrowse/mobx-state-tree@6 @mui/material@9 @mui/icons-material@9 \
   @emotion/react @emotion/styled react react-dom
 ```
 
@@ -16,10 +16,10 @@ with `@jbrowse/core`, and the app needs exactly one copy of each. With two
 copies of mobx-state-tree, the first render throws "Identifier types can only be
 instantiated as direct child of a model type". With two copies of MUI, a theme
 built by one copy reaches components from the other, which also throws. The
-versions above are the ones `@jbrowse/core` 4 depends on. Core 5 moves the set
-together to mobx 7, `@jbrowse/mobx-state-tree` 6 and MUI 9, so install those
-majors together instead. Without the pins, npm resolves each peer to its own
-latest major and installs a second copy.
+versions above are the ones `@jbrowse/core` 5 depends on, and react-msaview
+needs mobx 7. Core 5 is published under the `next` tag until its release, after
+which `@jbrowse/core@5` replaces `@next`. Without the pins, npm resolves each
+peer to its own latest major and installs a second copy.
 
 CI installs exactly this line outside the workspace with plain npm and renders
 the snippet below in a headless browser (`scripts/npm-smoke.mjs`), so a broken
@@ -43,37 +43,65 @@ export default function App() {
 
 Props:
 
-| Prop                | Type                | Description                                                         |
-| ------------------- | ------------------- | ------------------------------------------------------------------- |
-| `msa`               | `string`            | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                |
-| `tree`              | `string`            | Newick tree text                                                    |
-| `gff`               | `string`            | Annotations to overlay (GFF3 text)                                  |
-| `msaFilehandle`     | `FileLocation`      | Remote file location for alignment                                  |
-| `treeFilehandle`    | `FileLocation`      | Remote file location for tree                                       |
-| `gffFilehandle`     | `FileLocation`      | Remote file location for domain GFF                                 |
-| `colorScheme`       | `string`            | Color scheme name (see below)                                       |
-| `height`            | `number`            | Widget height in pixels                                             |
-| `colWidth`          | `number`            | Per-column width in pixels (horizontal zoom)                        |
-| `rowHeight`         | `number`            | Per-row height in pixels (vertical zoom)                            |
-| `allowedGappyness`  | `number`            | Hide columns at least this percent gaps (default 100, hide nothing) |
-| `relativeTo`        | `string`            | Row name to diff every other row against; matches draw as `.`       |
-| `drawTree`          | `boolean`           | Draw the phylogeny (default true); false leaves a label gutter      |
-| `treeAreaWidth`     | `number`            | Fixed width of the tree/label gutter                                |
-| `autoTreeAreaWidth` | `boolean`           | Size that gutter to the labels; pair with `drawTree: false`         |
-| `columnTracks`      | `ColumnTrackSpec[]` | Tracks supplied as data (see below)                                 |
-| `highlights`        | `Highlight[]`       | Labeled highlights (see below)                                      |
-| `highlightColumns`  | `number[]`          | Columns (0-based) under a persistent overlay                        |
-| `residueMappings`   | `ResidueMapping[]`  | Structure residue for each residue of a row                         |
+| Prop                | Type                 | Description                                                         |
+| ------------------- | -------------------- | ------------------------------------------------------------------- |
+| `msa`               | `string`             | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                |
+| `tree`              | `string`             | Newick tree text                                                    |
+| `gff`               | `string`             | Annotations to overlay (GFF3 text)                                  |
+| `msaFilehandle`     | `FileLocation`       | Remote file location for alignment                                  |
+| `treeFilehandle`    | `FileLocation`       | Remote file location for tree                                       |
+| `gffFilehandle`     | `FileLocation`       | Remote file location for domain GFF                                 |
+| `colorScheme`       | `string`             | Color scheme name (see below)                                       |
+| `height`            | `number`             | Widget height in pixels                                             |
+| `colWidth`          | `number`             | Per-column width in pixels (horizontal zoom)                        |
+| `rowHeight`         | `number`             | Per-row height in pixels (vertical zoom)                            |
+| `allowedGappyness`  | `number`             | Hide columns at least this percent gaps (default 100, hide nothing) |
+| `relativeTo`        | `string`             | Row name to diff every other row against; matches draw as `.`       |
+| `drawTree`          | `boolean`            | Draw the phylogeny (default true); false leaves a label gutter      |
+| `treeAreaWidth`     | `number`             | Fixed width of the tree/label gutter                                |
+| `autoTreeAreaWidth` | `boolean`            | Size that gutter to the labels; pair with `drawTree: false`         |
+| `columnTracks`      | `ColumnTrackSpec[]`  | Tracks supplied as data (see below)                                 |
+| `highlights`        | `Highlight[]`        | Labeled highlights (see below)                                      |
+| `highlightColumns`  | `number[]`           | Columns (0-based) under a persistent overlay                        |
+| `residueMappings`   | `ResidueMapping[]`   | Structure residue for each residue of a row                         |
+| `hideHeader`        | `boolean`            | Leave out the toolbar, for a page drawing its own controls          |
+| `onCellHover`       | `(cell) => void`     | The cell under the pointer (see below)                              |
+| `onCellClick`       | `(cell) => void`     | The cell a click pinned, or `undefined` when a click clears it      |
+| `onViewportChange`  | `(viewport) => void` | The alignment columns on screen                                     |
 
-The viewer applies changes to every prop above except `msa`, `tree`, `gff` and
-the three filehandles, so a host can put a control on one without remounting and
-re-fetching the alignment. Each prop updates only its own setting when it
-changes, so the host's next render keeps a change made inside the viewer, such
+The viewer applies a changed prop to the mounted model, so a host can put a
+control on one without re-fetching the alignment. Each prop updates only its own
+setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `columnTracks`, `residueMappings`,
-`highlightColumns`) by content, so passing a freshly computed array on every
-render costs nothing. A new `msa`, `tree` or `gff` needs a new model, so change
-the component's React `key` to remount it.
+`highlightColumns`) and the filehandles by content, so passing a freshly
+computed array or location object on every render costs nothing. A new `msa`,
+`tree` or `gff` string, or a filehandle pointing somewhere else, builds a new
+model and resets the view.
+
+### Events
+
+`onCellHover` and `onCellClick` receive a `Cell` in the coordinates highlights
+use: `column` is the 1-based column of the file, counting hidden gappy columns,
+and `residue` is the 1-based position in that row's own sequence, absent on a
+gap. A pointer over a track gives a column and no row. `onViewportChange`
+receives `{startColumn, endColumn}`, 1-based and inclusive, after each scroll,
+zoom and resize that changes them.
+
+```tsx
+const [clicked, setClicked] = useState<Cell>()
+
+return (
+  <>
+    <MSAViewer msa={msa} tree={tree} hideHeader onCellClick={setClicked} />
+    {clicked?.residue ? (
+      <p>
+        {clicked.row} residue {clicked.residue} ({clicked.letter})
+      </p>
+    ) : null}
+  </>
+)
+```
 
 ### Data layers
 
@@ -193,6 +221,9 @@ model.clearHighlight('protein3d')
 
 ## Using react-msaview in a plain HTML file with UMD bundle
 
+`mount` renders `MSAViewer` into an element and takes the same props. `update`
+merges new props over the current ones, and `destroy` unmounts the viewer.
+
 ```html
 <html>
   <head>
@@ -202,22 +233,28 @@ model.clearHighlight('protein3d')
     ></script>
   </head>
   <body>
-    <div id="root" />
+    <div id="viewer"></div>
+    <p id="clicked"></p>
     <script>
-      const { React, createRoot, MSAView, MSAModelF } = window.ReactMSAView
-      const model = MSAModelF().create({
-        type: 'MsaView',
+      const { mount } = window.ReactMSAView
+      const viewer = mount(document.getElementById('viewer'), {
         msaFilehandle: { uri: 'http://path/to/msa.stock' },
         treeFilehandle: { uri: 'http://path/to/tree.nh' },
+        height: 400,
+        onCellClick: cell => {
+          document.getElementById('clicked').textContent = cell
+            ? `${cell.row} residue ${cell.residue}`
+            : ''
+        },
       })
-
-      model.setWidth(1800)
-      const root = createRoot(document.getElementById('root'))
-      root.render(React.createElement(MSAView, { model }))
+      viewer.update({ colorScheme: 'clustal' })
     </script>
   </body>
 </html>
 ```
+
+The bundle also exports `MSAModelF`, `MSAView`, `React` and `createRoot` for a
+page that builds the model itself, as in the model-based API above.
 
 ## R package (msaviewr)
 

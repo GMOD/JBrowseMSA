@@ -165,3 +165,72 @@ test('a StrictMode double mount keeps its model alive', async () => {
   })
   expect(isAlive(captured2!)).toBe(true)
 })
+
+test('hideHeader follows its prop', () => {
+  const model = show({ hideHeader: true })
+  expect(model.hideHeader).toBe(true)
+  show({})
+  expect(model.hideHeader).toBe(false)
+})
+
+test('a new alignment builds a new model', () => {
+  const model = show({ height: 300 })
+  act(() => {
+    root.render(<MSAViewer msa={'>a\nMK\n>b\nMR\n'} height={300} />)
+  })
+  expect(captured).not.toBe(model)
+  expect(captured!.rowNames).toEqual(['a', 'b'])
+})
+
+test('an inline filehandle equal to the last one keeps the model', () => {
+  const location = () => ({
+    uri: 'https://example.com/a.fa',
+    locationType: 'UriLocation' as const,
+  })
+  act(() => {
+    root.render(<MSAViewer msaFilehandle={location()} height={300} />)
+  })
+  const model = captured
+  act(() => {
+    root.render(<MSAViewer msaFilehandle={location()} height={301} />)
+  })
+  expect(captured).toBe(model)
+})
+
+test('hover and click report cells in 1-based host coordinates', () => {
+  const hovers: unknown[] = []
+  const clicks: unknown[] = []
+  const model = show({
+    onCellHover: (cell: unknown) => hovers.push(cell),
+    onCellClick: (cell: unknown) => clicks.push(cell),
+  })
+  const mouse = model.rowNames.indexOf('mouse')
+  act(() => {
+    model.setMousePos(4, mouse)
+    model.setMouseClickPos(4, mouse)
+  })
+  act(() => {
+    model.setMousePos(3, mouse)
+  })
+  act(() => {
+    model.setMousePos()
+  })
+  expect(hovers).toEqual([
+    { column: 5, row: 'mouse', residue: 4, letter: 'N' },
+    { column: 4, row: 'mouse', residue: undefined, letter: '-' },
+    undefined,
+  ])
+  expect(clicks).toEqual([{ column: 5, row: 'mouse', residue: 4, letter: 'N' }])
+})
+
+test('the latest handler receives events without resubscribing', () => {
+  const first: unknown[] = []
+  const second: unknown[] = []
+  const model = show({ onCellHover: (c: unknown) => first.push(c) })
+  show({ onCellHover: (c: unknown) => second.push(c) })
+  act(() => {
+    model.setMousePos(0, 0)
+  })
+  expect(first).toEqual([])
+  expect(second).toHaveLength(1)
+})
