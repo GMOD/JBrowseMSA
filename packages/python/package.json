@@ -1,0 +1,16 @@
+{
+  "name": "msaview-widget",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@anywidget/types": "^0.4.0",
+    "esbuild": "^0.28.2",
+    "react-msaview": "workspace:*"
+  }
+}

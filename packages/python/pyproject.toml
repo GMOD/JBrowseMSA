@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "msaview-widget"
+version = "0.1.0"
+description = "Interactive multiple sequence alignment and tree viewer for notebooks, from react-msaview"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = ["msa", "alignment", "phylogenetics", "jupyter", "anywidget"]
+classifiers = [
+  "Framework :: Jupyter",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = ["anywidget>=0.9"]
+
+[project.urls]
+Homepage = "https://gmod.org/JBrowseMSA"
+Repository = "https://github.com/GMOD/JBrowseMSA"
+Issues = "https://github.com/GMOD/JBrowseMSA/issues"
+
+[project.optional-dependencies]
+dev = ["pytest", "numpy", "pandas", "biopython"]
+# what scripts/run_examples.py runs the notebooks with, plus what they import
+examples = ["nbclient", "nbformat", "ipykernel", "ipywidgets", "numpy"]
+
+[tool.hatch.build]
+# widget.js is gitignored, so it ships as an artifact
+artifacts = ["msaview/static/widget.js"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["msaview"]
+
+[tool.hatch.build.targets.sdist]
+include = ["msaview", "tests", "README.md", "hatch_build.py"]
+
+[tool.hatch.build.hooks.custom]

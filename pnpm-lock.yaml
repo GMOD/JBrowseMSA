@@ -297,6 +297,18 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.5.1)(jsdom@30.0.1)(vite@8.3.0(@types/node@26.5.1)(esbuild@0.28.2))
 
+  packages/python:
+    devDependencies:
+      '@anywidget/types':
+        specifier: ^0.4.0
+        version: 0.4.0
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
+      react-msaview:
+        specifier: workspace:*
+        version: link:../lib
+
   packages/svgcanvas: {}
 
   website:
@@ -360,6 +372,9 @@ packages:
 
   '@andrewbranch/untar.js@1.0.3':
     resolution: {integrity: sha512-Jh15/qVmrLGhkKJBdXlK1+9tY4lZruYjsgkDFj08ZmDiWVBLJcqkok7Z0/R0In+i1rScBpJlSvrTS2Lm41Pbnw==}
+
+  '@anywidget/types@0.4.0':
+    resolution: {integrity: sha512-Qno/7V0lKHCMq3DJuSKKHMwilFKPSe8wFftL5xWmgaMCc938mNTtv+i19UrvDfpj9cQTnlPqyXy8t3JOgQ8laA==}
 
   '@arethetypeswrong/cli@0.18.5':
     resolution: {integrity: sha512-gM+8vRsQOD/Uc7EnBedUhkG5OCsDWE4uoak5QvomGpMpaky0Eh41p04nIMgrWb8EOmqZUJGc6zz9hsP6E56R7g==}
@@ -4320,6 +4335,8 @@ packages:
 snapshots:
 
   '@andrewbranch/untar.js@1.0.3': {}
+
+  '@anywidget/types@0.4.0': {}
 
   '@arethetypeswrong/cli@0.18.5':
     dependencies:
