@@ -30,3 +30,31 @@ jobs:
       # how react-msaview-cli reached npm with no dist at all
       - run: pnpm check:pack
       - run: pnpm publish -r --access public --no-git-checks --provenance
+
+  pypi:
+    name: Publish msaview-widget to PyPI
+    runs-on: ubuntu-latest
+    # PyPI trusted publishing: pypi.org lists this repository, this workflow
+    # file and the `pypi` environment as the project's publisher, and the job
+    # exchanges its OIDC token for an upload credential, so no API token lives
+    # in the repository's secrets
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Build the widget bundle
+        run: pnpm --filter msaview-widget build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build the sdist and wheel
+        run: |
+          pip install build
+          python -m build --outdir dist packages/python
+          unzip -l dist/*.whl | grep msaview/static/widget.js
+      - uses: pypa/gh-action-pypi-publish@release/v1

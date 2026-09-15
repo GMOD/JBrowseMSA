@@ -90,9 +90,29 @@ const versionTsPath = path.join(rootDir, 'packages/lib/src/version.ts')
 fs.writeFileSync(versionTsPath, `export const version = '${newVersion}'\n`)
 console.log('Updated packages/lib/src/version.ts')
 
+// msaview-widget releases with everything else, at the same version, as the R
+// package does. publish.yml builds its wheel from the pushed tag.
+const pyprojectPath = path.join(rootDir, 'packages/python/pyproject.toml')
+const pyproject = fs.readFileSync(pyprojectPath, 'utf8')
+const bumpedPyproject = pyproject.replace(
+  /^version = "[^"]*"$/m,
+  `version = "${newVersion}"`,
+)
+if (bumpedPyproject === pyproject) {
+  console.error('Found no version line in packages/python/pyproject.toml')
+  process.exit(1)
+}
+fs.writeFileSync(pyprojectPath, bumpedPyproject)
+const pyPkgPath = path.join(rootDir, 'packages/python/package.json')
+const pyPkg = JSON.parse(fs.readFileSync(pyPkgPath, 'utf8'))
+pyPkg.version = newVersion
+fs.writeFileSync(pyPkgPath, JSON.stringify(pyPkg, null, 2) + '\n')
+console.log('Updated packages/python/pyproject.toml and package.json')
+
 // Build before tagging so a broken build never gets a release tag pushed
 console.log('\nBuilding all packages...')
 run('pnpm build')
+run('pnpm --filter msaview-widget build')
 
 // The R package vendors the UMD bundle (R installs run no node), so refresh it
 // from the build we just made -- otherwise msaviewr ships whatever JavaScript
@@ -101,7 +121,7 @@ console.log('\nSyncing the R package bundle...')
 run('node scripts/sync-r-bundle.mjs')
 
 // Commit the version bump, tag, and push. The pushed tag triggers publish.yml
-// (npm), and the push to main triggers deploy-docs.yml (GitHub Pages).
+// (npm and PyPI), and the push to main triggers deploy-docs.yml (GitHub Pages).
 const tag = `v${newVersion}`
 
 // Write this release's section from the commits it contains, so the changelog
@@ -117,10 +137,14 @@ const changed = [
   'packages/r-msaview/inst/htmlwidgets/lib/react-msaview.umd.js',
   'packages/r-msaview/inst/htmlwidgets/msaview.yaml',
   'packages/r-msaview/DESCRIPTION',
+  'packages/python/pyproject.toml',
+  'packages/python/package.json',
 ].join(' ')
 run(`git add ${changed}`)
 run(`git commit -m "${tag}"`)
 run(`git tag -a "${tag}" -m "${tag}"`)
 run('git push && git push --tags')
 
-console.log(`\n✓ Released ${tag} — CI will publish to npm and deploy the site`)
+console.log(
+  `\n✓ Released ${tag} — CI will publish to npm and PyPI and deploy the site`,
+)

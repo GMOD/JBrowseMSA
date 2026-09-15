@@ -72,6 +72,40 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
+  python:
+    name: Python widget (${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # the floor pyproject.toml declares, and the newest release
+        python: ['3.9', '3.13']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup
+
+      # the package installs only with the bundle built, since the wheel ships it
+      - name: Build the widget bundle
+        run: pnpm --filter msaview-widget build
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install the package
+        run: pip install -e "packages/python[dev,examples]" build
+
+      - name: Test
+        run: pytest packages/python/tests
+
+      # the notebooks read packages/examples/data and touch no network
+      - name: Run the example notebooks
+        run: python packages/python/scripts/run_examples.py --no-render
+
+      - name: Build the wheel and check it carries the bundle
+        run: |
+          python -m build --wheel --outdir dist packages/python
+          unzip -l dist/*.whl | grep msaview/static/widget.js
+
   spellcheck:
     name: Spell check
     runs-on: ubuntu-latest
