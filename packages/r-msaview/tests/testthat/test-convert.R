@@ -68,14 +68,14 @@ test_that("msaview creates htmlwidget", {
   expect_s3_class(w, "htmlwidget")
 })
 
-test_that("msaview passes color_scheme to config", {
+test_that("msaview passes color_scheme to the props", {
   w <- msaview(msa = ">s1\nACGT", color_scheme = "clustal")
-  expect_equal(w$x$config$colorSchemeName, "clustal")
+  expect_equal(w$x$props$colorScheme, "clustal")
 })
 
-test_that("msaview passes show_branch_len to config", {
+test_that("msaview passes show_branch_len to the props", {
   w <- msaview(msa = ">s1\nACGT", show_branch_len = FALSE)
-  expect_false(w$x$config$showBranchLen)
+  expect_false(w$x$props$showBranchLen)
 })
 
 test_that("msaview with named vector + ape tree", {
@@ -84,8 +84,8 @@ test_that("msaview with named vector + ape tree", {
   seqs <- setNames(c("ACGT", "ACGA", "ACGC"), tree$tip.label)
   w <- msaview(msa = seqs, tree = tree)
   expect_s3_class(w, "htmlwidget")
-  expect_match(w$x$config$data$msa, tree$tip.label[1], fixed = TRUE)
-  expect_match(w$x$config$data$tree, ";$")
+  expect_match(w$x$props$msa, tree$tip.label[1], fixed = TRUE)
+  expect_match(w$x$props$tree, ";$")
 })
 
 test_that("convert_gff handles NULL", {
@@ -130,20 +130,26 @@ test_that("df_to_gff3 requires the columns it reads", {
   expect_error(msaviewr:::df_to_gff3(data.frame(seqname = "s1")), "start")
 })
 
-test_that("msaview passes gff through to the config", {
+test_that("msaview passes gff through to the props", {
   df <- data.frame(seqname = "s1", start = 1, end = 4, name = "Dom",
                    stringsAsFactors = FALSE)
   w <- msaview(msa = ">s1\nACGT", gff = df)
-  expect_match(w$x$config$data$gff, "Name=Dom")
+  expect_match(w$x$props$gff, "Name=Dom")
 })
 
-test_that("an absent gff is absent from the config, not null", {
+test_that("an absent gff is absent from the props, not null", {
   # a NULL list element serializes as JSON null, which the viewer's model
   # rejects as a value for an optional string
   w <- msaview(msa = ">s1\nACGT")
-  expect_false("gff" %in% names(w$x$config$data))
-  expect_false("colorSchemeName" %in% names(w$x$config))
-  expect_false("showBranchLen" %in% names(w$x$config))
+  expect_false("gff" %in% names(w$x$props))
+  expect_false("colorScheme" %in% names(w$x$props))
+  expect_false("showBranchLen" %in% names(w$x$props))
+  expect_false("hideHeader" %in% names(w$x$props))
+})
+
+test_that("msaview passes hide_header to the props", {
+  w <- msaview(msa = ">s1\nACGT", hide_header = TRUE)
+  expect_true(w$x$props$hideHeader)
 })
 
 test_that("convert_msa joins the lines of a document", {

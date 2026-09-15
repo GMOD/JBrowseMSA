@@ -64,6 +64,7 @@ Props:
 | `highlights`        | `Highlight[]`        | Labeled highlights (see below)                                      |
 | `highlightColumns`  | `number[]`           | Columns (0-based) under a persistent overlay                        |
 | `residueMappings`   | `ResidueMapping[]`   | Structure residue for each residue of a row                         |
+| `showBranchLen`     | `boolean`            | Draw branch lengths (default true); false draws a cladogram         |
 | `hideHeader`        | `boolean`            | Leave out the toolbar, for a page drawing its own controls          |
 | `onCellHover`       | `(cell) => void`     | The cell under the pointer (see below)                              |
 | `onCellClick`       | `(cell) => void`     | The cell a click pinned, or `undefined` when a click clears it      |

@@ -3,8 +3,20 @@ HTMLWidgets.widget({
   type: 'output',
 
   factory: function (el, width, height) {
-    var root = null
-    var model = null
+    var viewer = null
+
+    // input$<id>_click and input$<id>_viewport; hover stays in the page, since
+    // a Shiny input per pointer move floods the websocket
+    function sendToShiny(name) {
+      return function (value) {
+        if (HTMLWidgets.shinyMode && el.id) {
+          Shiny.setInputValue(
+            el.id + '_' + name,
+            value === undefined ? null : value,
+          )
+        }
+      }
+    }
 
     return {
       renderValue: function (x) {
@@ -13,32 +25,23 @@ HTMLWidgets.widget({
           el.innerText = 'react-msaview bundle not loaded'
           return
         }
-
-        var config = x.config
-        if (height && !config.height) {
-          config.height = height
+        var props = Object.assign({ height: height }, x.props, {
+          onCellClick: sendToShiny('click'),
+          onViewportChange: sendToShiny('viewport'),
+        })
+        // a Shiny re-render with the same alignment keeps the model, and the
+        // reader's scroll and zoom with it
+        if (viewer) {
+          viewer.update(props)
+        } else {
+          viewer = RMV.mount(el, props)
         }
-
-        // a Shiny re-render replaces the model; destroying the old one runs
-        // the disposers its autoruns registered, which nothing else would
-        if (model && RMV.destroy) {
-          RMV.destroy(model)
-        }
-        model = RMV.MSAModelF().create(config)
-        model.setWidth(width)
-
-        if (!root) {
-          root = RMV.createRoot(el)
-        }
-        root.render(RMV.React.createElement(RMV.MSAView, { model: model }))
       },
 
       resize: function (newWidth, newHeight) {
-        if (model) {
-          model.setWidth(newWidth)
-          if (newHeight) {
-            model.setHeight(newHeight)
-          }
+        height = newHeight
+        if (viewer && newHeight) {
+          viewer.update({ height: newHeight })
         }
       },
     }

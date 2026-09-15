@@ -58,6 +58,8 @@ export interface MSAViewerProps {
   treeAreaWidth?: number
   /** auto-size the tree/label area to the labels (used when drawTree is false) */
   autoTreeAreaWidth?: boolean
+  /** draw branch lengths (default true); false draws a cladogram */
+  showBranchLen?: boolean
   /** leave out the toolbar, for a page drawing its own controls */
   hideHeader?: boolean
   /** the cell under the pointer, or undefined when it leaves the alignment */
@@ -150,6 +152,7 @@ function Viewer({
   drawTree,
   treeAreaWidth,
   autoTreeAreaWidth,
+  showBranchLen,
   hideHeader,
   onCellHover,
   onCellClick,
@@ -177,6 +180,7 @@ function Viewer({
       ...(drawTree !== undefined ? { drawTree } : {}),
       ...(treeAreaWidth ? { treeAreaWidth } : {}),
       ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),
+      ...(showBranchLen !== undefined ? { showBranchLen } : {}),
     }),
   )
 
@@ -228,6 +232,11 @@ function Viewer({
       model.setTreeAreaWidth(treeAreaWidth)
     }
   }, [model, treeAreaWidth])
+  useEffect(() => {
+    if (showBranchLen !== undefined) {
+      model.setShowBranchLen(showBranchLen)
+    }
+  }, [model, showBranchLen])
   useEffect(() => {
     model.setHideHeader(!!hideHeader)
   }, [model, hideHeader])

@@ -64,7 +64,9 @@
 #'   \code{list(row, start, end)} for residues of the named row, or
 #'   \code{list(rows = c(...))} for whole rows, plus an optional
 #'   \code{label} and \code{color}. Drawn as a bordered band (or row tint)
-#'   with the label beside it, and carried in the widget config.
+#'   with the label beside it.
+#' @param hide_header Logical. If \code{TRUE}, leave out the viewer's toolbar,
+#'   for a page or Shiny app drawing its own controls.
 #' @param height Widget height (CSS units or pixels).
 #' @param width Widget width (CSS units or pixels).
 #' @param element_id HTML element ID.
@@ -155,12 +157,15 @@
 #' msaview(msa = "alignment.fa", color_scheme = "percent_identity_dynamic")
 #'
 #' # --- In Shiny ---
+#' # input$<output id>_click holds the clicked cell, and
+#' # input$<output id>_viewport the columns on screen
 #' library(shiny)
-#' ui <- fluidPage(msaviewOutput("msa", height = "600px"))
+#' ui <- fluidPage(msaviewOutput("msa", height = "600px"), verbatimTextOutput("cell"))
 #' server <- function(input, output) {
 #'   output$msa <- renderMsaview({
 #'     msaview(msa = "alignment.stock")
 #'   })
+#'   output$cell <- renderPrint(input$msa_click)
 #' }
 #' shinyApp(ui, server)
 #' }
@@ -168,7 +173,7 @@
 #' @export
 msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     column_tracks = NULL, show_branch_len = NULL,
-                    highlights = NULL,
+                    highlights = NULL, hide_header = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
   # the viewer fetches a URL itself; passed on as document text, a URL draws a
   # one-row alignment named after it
@@ -176,24 +181,24 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   tree_text <- if (is_url(tree)) NULL else convert_tree(tree)
   gff_text <- if (is_url(gff)) NULL else convert_gff(gff)
 
-  config <- list(type = "MsaView")
-  if (!is.null(msa_text) || !is.null(tree_text) || !is.null(gff_text)) {
-    # a NULL element survives list() and serializes as JSON null, which the
-    # viewer's model rejects; assigning gff with $<- drops a NULL instead
-    config$data <- list(msa = msa_text %||% "", tree = tree_text %||% "")
-    config$data$gff <- gff_text
-  }
-  config$msaFilehandle <- uri_location(msa)
-  config$treeFilehandle <- uri_location(tree)
-  config$gffFilehandle <- uri_location(gff)
-  config$colorSchemeName <- color_scheme
-  config$columnTracks <- convert_column_tracks(column_tracks)
-  config$showBranchLen <- show_branch_len
-  config$highlights <- convert_highlights(highlights)
+  # MSAViewer props; a NULL assigned with $<- drops the field, where a NULL in
+  # list() would serialize as JSON null
+  props <- list()
+  props$msa <- msa_text
+  props$tree <- tree_text
+  props$gff <- gff_text
+  props$msaFilehandle <- uri_location(msa)
+  props$treeFilehandle <- uri_location(tree)
+  props$gffFilehandle <- uri_location(gff)
+  props$colorScheme <- color_scheme
+  props$columnTracks <- convert_column_tracks(column_tracks)
+  props$showBranchLen <- show_branch_len
+  props$highlights <- convert_highlights(highlights)
+  props$hideHeader <- hide_header
 
   htmlwidgets::createWidget(
     name = "msaview",
-    x = list(config = config),
+    x = list(props = props),
     width = width,
     height = height,
     package = "msaviewr",

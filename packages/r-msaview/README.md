@@ -259,6 +259,14 @@ msaview(msa = seqs, tree = td)
 
 ### In Shiny
 
+The widget sets two inputs named after its output id. `input$<id>_click` holds
+the cell a click pinned: `column` is the 1-based column of the file, `row` the
+row name, `residue` the 1-based position in that row's sequence (absent on a
+gap), and `letter` the character. It is `NULL` after a click clears it.
+`input$<id>_viewport` holds the columns on screen as `startColumn` and
+`endColumn`. A re-render that keeps the same alignment keeps the reader's scroll
+and zoom, so changing `color_scheme` below restyles the view in place.
+
 ```r
 library(shiny)
 library(msaviewr)
@@ -280,7 +288,8 @@ ui <- fluidPage(
       actionButton("example_btn", "Load example data")
     ),
     mainPanel(
-      msaviewOutput("msa_viewer", height = "600px")
+      msaviewOutput("msa_viewer", height = "600px"),
+      verbatimTextOutput("clicked")
     )
   )
 )
@@ -314,6 +323,8 @@ server <- function(input, output, session) {
       color_scheme = input$color_scheme
     )
   })
+
+  output$clicked <- renderPrint(input$msa_viewer_click)
 }
 
 shinyApp(ui, server)

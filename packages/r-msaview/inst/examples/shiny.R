@@ -1,5 +1,5 @@
 # msaviewr Shiny example
-# Demonstrates reactive MSA viewing with file upload
+# Reactive MSA viewing with file upload, and the clicked cell read back
 
 library(shiny)
 library(msaviewr)
@@ -21,7 +21,8 @@ ui <- fluidPage(
       actionButton("example_btn", "Load example data")
     ),
     mainPanel(
-      msaviewOutput("msa_viewer", height = "600px")
+      msaviewOutput("msa_viewer", height = "600px"),
+      verbatimTextOutput("clicked")
     )
   )
 )
@@ -55,6 +56,8 @@ server <- function(input, output, session) {
       color_scheme = input$color_scheme
     )
   })
+
+  output$clicked <- renderPrint(input$msa_viewer_click)
 }
 
 shinyApp(ui, server)

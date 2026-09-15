@@ -47,11 +47,12 @@ test_that("a URL is passed to the viewer as a filehandle, not as text", {
     msa = "https://example.org/aln.fa",
     tree = "https://example.org/tree.nwk"
   )
-  config <- widget$x$config
-  expect_equal(config$msaFilehandle$uri, "https://example.org/aln.fa")
-  expect_equal(config$msaFilehandle$locationType, "UriLocation")
-  expect_equal(config$treeFilehandle$uri, "https://example.org/tree.nwk")
-  expect_null(config$data)
+  props <- widget$x$props
+  expect_equal(props$msaFilehandle$uri, "https://example.org/aln.fa")
+  expect_equal(props$msaFilehandle$locationType, "UriLocation")
+  expect_equal(props$treeFilehandle$uri, "https://example.org/tree.nwk")
+  expect_false("msa" %in% names(props))
+  expect_false("tree" %in% names(props))
 })
 
 test_that("a URL alignment still carries an inline tree", {
@@ -59,7 +60,7 @@ test_that("a URL alignment still carries an inline tree", {
     msa = "https://example.org/aln.fa",
     tree = "((A:0.1,B:0.2):0.3,C:0.4);"
   )
-  config <- widget$x$config
-  expect_equal(config$msaFilehandle$uri, "https://example.org/aln.fa")
-  expect_equal(config$data$tree, "((A:0.1,B:0.2):0.3,C:0.4);")
+  props <- widget$x$props
+  expect_equal(props$msaFilehandle$uri, "https://example.org/aln.fa")
+  expect_equal(props$tree, "((A:0.1,B:0.2):0.3,C:0.4);")
 })

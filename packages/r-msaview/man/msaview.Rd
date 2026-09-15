@@ -12,6 +12,7 @@ msaview(
   column_tracks = NULL,
   show_branch_len = NULL,
   highlights = NULL,
+  hide_header = NULL,
   height = NULL,
   width = NULL,
   element_id = NULL
@@ -77,7 +78,10 @@ inclusive coordinates: \code{list(start, end)} for alignment columns,
 \code{list(row, start, end)} for residues of the named row, or
 \code{list(rows = c(...))} for whole rows, plus an optional
 \code{label} and \code{color}. Drawn as a bordered band (or row tint)
-with the label beside it, and carried in the widget config.}
+with the label beside it.}
+
+\item{hide_header}{Logical. If \code{TRUE}, leave out the viewer's toolbar,
+for a page or Shiny app drawing its own controls.}
 
 \item{height}{Widget height (CSS units or pixels).}
 
@@ -186,12 +190,15 @@ msaview(msa = "alignment.fa", color_scheme = "clustalx_protein_dynamic")
 msaview(msa = "alignment.fa", color_scheme = "percent_identity_dynamic")
 
 # --- In Shiny ---
+# input$<output id>_click holds the clicked cell, and
+# input$<output id>_viewport the columns on screen
 library(shiny)
-ui <- fluidPage(msaviewOutput("msa", height = "600px"))
+ui <- fluidPage(msaviewOutput("msa", height = "600px"), verbatimTextOutput("cell"))
 server <- function(input, output) {
   output$msa <- renderMsaview({
     msaview(msa = "alignment.stock")
   })
+  output$cell <- renderPrint(input$msa_click)
 }
 shinyApp(ui, server)
 }
