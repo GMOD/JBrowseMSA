@@ -1617,6 +1617,18 @@ undefined if the position is a gap in the sequence.
 visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => any
 ```
 
+#### method: visibleSpan
+
+the visible columns a span covers, in highlight coordinates: `start` and `end`
+are 1-based residues of `row`, or columns of the file without it. A span
+entirely on hidden columns, or naming a row the alignment lacks, gives
+undefined.
+
+```js
+// type signature
+visibleSpan: ({ row, start, end }: Region) => { startCol: any; endCol: any; }
+```
+
 ### MsaView - Actions
 
 #### action: addWarning
@@ -2204,4 +2216,15 @@ viewport. Drives wheel/trackpad-pinch zoom.
 ```js
 // type signature
 zoomToPos: (scaleFactor: number, offsetX: number, offsetY: number) => void
+```
+
+#### action: zoomToRegion
+
+zoom and scroll so a span fills the alignment's width, in highlight coordinates
+(see visibleSpan). Does nothing before the viewer knows its width, or for a span
+that resolves to no visible column.
+
+```js
+// type signature
+zoomToRegion: (region: Region) => void
 ```

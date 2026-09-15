@@ -88,6 +88,16 @@ export const catalog: CatalogEntry[] = [
       'report the clicked residue and the columns on screen back to the page.',
   },
   {
+    id: 'SvgFigure',
+    name: 'An SVG figure in the page',
+    category: 'API & control',
+    description:
+      'The live viewer above an SVG figure of what it shows. useMsaSvgFigure ' +
+      'runs the SVG export after each scroll or zoom settles. The figure’s row ' +
+      'names and residues are text, so the browser’s find locates them and a ' +
+      'reader can select and copy them.',
+  },
+  {
     id: 'ProgrammaticControl',
     name: 'Programmatic control',
     category: 'API & control',

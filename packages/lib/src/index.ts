@@ -22,6 +22,8 @@ export { default as MSAView } from './components/Loading.tsx'
 export { default as MSAViewer } from './components/MSAViewer.tsx'
 export type { MSAViewerProps } from './components/MSAViewer.tsx'
 export { mount } from './mount.tsx'
+export { useMsaSvgFigure } from './useMsaSvgFigure.ts'
+export type { MsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MountedViewer } from './mount.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
@@ -50,6 +52,7 @@ export type {
   MappedStructure,
   NodeWithIds,
   NodeWithIdsAndLength,
+  Region,
   ResidueMapping,
   ResidueMappingProblem,
   ResidueSegment,

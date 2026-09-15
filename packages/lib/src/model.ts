@@ -112,6 +112,7 @@ import type {
   Highlight,
   NodeWithIds,
   NodeWithIdsAndLength,
+  Region,
   ResidueMapping,
   ResidueSegment,
   ResolvedHighlight,
@@ -1956,6 +1957,35 @@ function stateModelFactory() {
       },
 
       /**
+       * #method
+       * the visible columns a span covers, in highlight coordinates: `start`
+       * and `end` are 1-based residues of `row`, or columns of the file
+       * without it. A span entirely on hidden columns, or naming a row the
+       * alignment lacks, gives undefined.
+       */
+      visibleSpan({ row, start, end }: Region) {
+        const { blanks } = self
+        let startGlobal = start - 1
+        let endGlobal = end - 1
+        if (row !== undefined) {
+          const rowStart = this.seqPosToGlobalCol(row, start - 1)
+          const rowEnd = this.seqPosToGlobalCol(row, end - 1)
+          if (rowStart === undefined || rowEnd === undefined) {
+            return undefined
+          }
+          startGlobal = rowStart
+          endGlobal = rowEnd
+        }
+        const startCol =
+          this.globalColToVisibleCol(startGlobal) ??
+          visibleColsBefore(blanks, startGlobal)
+        const endCol =
+          this.globalColToVisibleCol(endGlobal) ??
+          visibleColsBefore(blanks, endGlobal) - 1
+        return startCol <= endCol ? { startCol, endCol } : undefined
+      },
+
+      /**
        * #getter
        * why each ignored residue mapping is ignored, so a host can tell a
        * missing structure from a mapping made against a different alignment.
@@ -2768,11 +2798,7 @@ function stateModelFactory() {
        * is dropped. Row names that match no row are ignored.
        */
       get resolvedHighlights(): ResolvedHighlight[] {
-        const { blanks, rowNamesSet, transientHighlights } = self
-        const toVisible = (globalCol: number) => {
-          const visible = self.globalColToVisibleCol(globalCol)
-          return visible ?? visibleColsBefore(blanks, globalCol)
-        }
+        const { rowNamesSet, transientHighlights } = self
         // persisted highlights first, so transient ones draw on top
         const all = [
           ...self.highlights,
@@ -2789,23 +2815,8 @@ function stateModelFactory() {
           if (start === undefined || end === undefined) {
             return []
           }
-          let startGlobal = start - 1
-          let endGlobal = end - 1
-          if (row !== undefined) {
-            const rowStart = self.seqPosToGlobalCol(row, start - 1)
-            const rowEnd = self.seqPosToGlobalCol(row, end - 1)
-            if (rowStart === undefined || rowEnd === undefined) {
-              return []
-            }
-            startGlobal = rowStart
-            endGlobal = rowEnd
-          }
-          const startCol = toVisible(startGlobal)
-          const endVisible = self.globalColToVisibleCol(endGlobal)
-          const endCol = endVisible ?? visibleColsBefore(blanks, endGlobal) - 1
-          return startCol <= endCol
-            ? [{ ...base, startCol, endCol, rowIndices: [] }]
-            : []
+          const span = self.visibleSpan({ row, start, end })
+          return span ? [{ ...base, ...span, rowIndices: [] }] : []
         })
       },
 
@@ -2967,6 +2978,30 @@ function stateModelFactory() {
           )
         }
         self.scrollY = 0
+      },
+      /**
+       * #action
+       * zoom and scroll so a span fills the alignment's width, in highlight
+       * coordinates (see visibleSpan). Does nothing before the viewer knows
+       * its width, or for a span that resolves to no visible column.
+       */
+      zoomToRegion(region: Region) {
+        const span = self.visibleSpan(region)
+        if (!span || !self.viewInitialized) {
+          return
+        }
+        transaction(() => {
+          self.colWidth = clamp(
+            self.msaCanvasWidth / (span.endCol - span.startCol + 1),
+            minColWidth,
+            maxCellSize,
+          )
+          self.scrollX = clamp(
+            -span.startCol * self.colWidth,
+            self.maxScrollX,
+            0,
+          )
+        })
       },
       /**
        * #action

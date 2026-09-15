@@ -191,6 +191,16 @@ export interface Highlight {
 }
 
 /**
+ * A span in Highlight coordinates: 1-based inclusive residues of `row`, or
+ * columns of the file without it
+ */
+export interface Region {
+  row?: string
+  start: number
+  end: number
+}
+
+/**
  * A cell of the alignment in the host's coordinates, 1-based like Highlight:
  * `column` counts every column of the file, hidden gappy ones included, and
  * `residue` counts the row's own letters, absent on a gap. A pointer over a

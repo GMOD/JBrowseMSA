@@ -4,7 +4,7 @@ import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import useMeasure from '@jbrowse/core/util/useMeasure'
 import { destroy, isAlive } from '@jbrowse/mobx-state-tree'
 import { ThemeProvider } from '@mui/material/styles'
-import { compareStructural, reaction } from 'mobx'
+import { compareStructural, reaction, when } from 'mobx'
 
 import MSAModelF from '../model.ts'
 import Loading from './Loading.tsx'
@@ -14,6 +14,7 @@ import type {
   Cell,
   ColumnTrackSpec,
   Highlight,
+  Region,
   ResidueMapping,
   Viewport,
 } from '../types.ts'
@@ -69,6 +70,12 @@ export interface MSAViewerProps {
   autoTreeAreaWidth?: boolean
   /** draw branch lengths (default true); false draws a cladogram */
   showBranchLen?: boolean
+  /**
+   * a span to zoom and scroll to once the alignment loads, and again whenever
+   * it changes: `{row, start, end}` in residues of that row, or `{start, end}`
+   * in columns, 1-based and inclusive
+   */
+  region?: Region
   /** leave out the toolbar, for a page drawing its own controls */
   hideHeader?: boolean
   /**
@@ -167,6 +174,7 @@ function Viewer({
   treeAreaWidth,
   autoTreeAreaWidth,
   showBranchLen,
+  region,
   hideHeader,
   theme,
   onCellHover,
@@ -278,6 +286,19 @@ function Viewer({
   useEffect(() => {
     model.setHighlightedColumns(JSON.parse(highlightColumnsKey) ?? undefined)
   }, [model, highlightColumnsKey])
+
+  const regionKey = JSON.stringify(region ?? null)
+  useEffect(() => {
+    const target = JSON.parse(regionKey) as Region | null
+    return target
+      ? when(
+          () => model.viewInitialized && model.numColumns > 0,
+          () => {
+            model.zoomToRegion(target)
+          },
+        )
+      : undefined
+  }, [model, regionKey])
 
   useModelReaction(model, 'hoveredCell', onCellHover)
   useModelReaction(model, 'clickedCell', onCellClick)

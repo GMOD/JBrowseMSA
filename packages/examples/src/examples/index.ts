@@ -54,6 +54,8 @@ import Prestin from './Prestin'
 import PrestinSrc from './Prestin.tsx?raw'
 import ProgrammaticControl from './ProgrammaticControl'
 import ProgrammaticControlSrc from './ProgrammaticControl.tsx?raw'
+import SvgFigure from './SvgFigure'
+import SvgFigureSrc from './SvgFigure.tsx?raw'
 import TreeOptions from './TreeOptions'
 import TreeOptionsSrc from './TreeOptions.tsx?raw'
 import Trna from './Trna'
@@ -102,6 +104,7 @@ const components: Record<string, [ComponentType, string]> = {
   PfamGlobin: [PfamGlobin, PfamGlobinSrc],
   Prestin: [Prestin, PrestinSrc],
   ProgrammaticControl: [ProgrammaticControl, ProgrammaticControlSrc],
+  SvgFigure: [SvgFigure, SvgFigureSrc],
   TreeOptions: [TreeOptions, TreeOptionsSrc],
   Trna: [Trna, TrnaSrc],
   YourOwnControls: [YourOwnControls, YourOwnControlsSrc],
