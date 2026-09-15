@@ -1,5 +1,5 @@
 dependencies:
   - name: react-msaview
     version: 7.0.0
-    src: lib
+    src: htmlwidgets/lib
     script: react-msaview.umd.js
