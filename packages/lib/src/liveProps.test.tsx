@@ -12,6 +12,7 @@ import { afterEach, beforeAll, beforeEach, expect, test, vi } from 'vitest'
 import MSAViewer from './components/MSAViewer.tsx'
 
 import type { MsaViewModel } from './model.ts'
+import type { Theme } from '@mui/material/styles'
 import type { Root } from 'react-dom/client'
 
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true)
@@ -19,7 +20,7 @@ Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true)
 // stub Loading, which draws to canvas, and capture the model MSAViewer built
 // and the theme it provided
 let captured: MsaViewModel | undefined
-let capturedTheme: ReturnType<typeof useTheme> | undefined
+let capturedTheme: Theme | undefined
 vi.mock('./components/Loading.tsx', () => ({
   default: function Loading({ model }: { model: MsaViewModel }) {
     captured = model
