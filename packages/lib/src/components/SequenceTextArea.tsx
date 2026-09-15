@@ -7,17 +7,17 @@ import { getUngappedSequence } from 'msa-parsers'
 import Checkbox2 from './Checkbox2.tsx'
 import CopyButton from './CopyButton.tsx'
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()(theme => ({
   textAreaFont: {
     fontFamily: 'Courier New',
     wordWrap: 'break-word',
   },
   dialogContent: {
-    background: 'lightgrey',
+    background: theme.palette.action.selected,
     margin: 4,
     minWidth: '80em',
   },
-})
+}))
 
 export default function SequenceTextArea({ str }: { str: [string, string][] }) {
   const { classes } = useStyles()

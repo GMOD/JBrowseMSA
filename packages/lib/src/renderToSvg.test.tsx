@@ -23,7 +23,7 @@ function makeModel({ rows = 60, cols = 400 } = {}) {
 const rootRect = (svg: string) => /<rect[^>]*height="100%"[^>]*>/.exec(svg)?.[0]
 
 test('the page takes the theme background, not a hardcoded white', async () => {
-  const model = makeModel()
+  const model = makeModel({ rows: 4, cols: 20 })
   const dark = createJBrowseTheme({ palette: { mode: 'dark' } })
   expect(dark.palette.background.default).not.toBe('white')
 

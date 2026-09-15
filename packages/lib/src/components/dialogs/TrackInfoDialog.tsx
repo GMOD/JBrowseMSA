@@ -13,7 +13,7 @@ const useStyles = makeStyles()(theme => ({
   textArea: {
     padding: theme.spacing(2),
     overflow: 'auto',
-    background: '#ddd',
+    background: theme.palette.action.selected,
     wordBreak: 'break-word',
   },
 }))

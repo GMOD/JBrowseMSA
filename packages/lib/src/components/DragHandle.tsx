@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
 
+import { useTheme } from '@mui/material'
+
 import { useDragScroll } from '../useDragScroll.ts'
+
+import type { Theme } from '@mui/material'
 
 export const scrollbarThumbFill = 'rgba(66,119,127,0.3)'
 
@@ -11,23 +15,29 @@ export const scrollbarThumbFill = 'rgba(66,119,127,0.3)'
 const variants: Record<
   'thumb' | 'resizer',
   {
-    fill: string
-    fillHovered: string
+    fill: (theme: Theme) => string
+    fillHovered: (theme: Theme) => string
     cursor: (axis: 'x' | 'y') => string
     position: React.CSSProperties['position']
     zIndex?: number
   }
 > = {
   thumb: {
-    fill: scrollbarThumbFill,
-    fillHovered: 'rgba(66,119,127,0.6)',
+    fill: () => scrollbarThumbFill,
+    fillHovered: () => 'rgba(66,119,127,0.6)',
     cursor: () => 'pointer',
     position: 'absolute',
     zIndex: 100,
   },
   resizer: {
-    fill: 'rgba(200,200,200)',
-    fillHovered: 'rgba(150,150,150)',
+    fill: theme =>
+      theme.palette.mode === 'dark'
+        ? theme.palette.grey[800]
+        : 'rgba(200,200,200)',
+    fillHovered: theme =>
+      theme.palette.mode === 'dark'
+        ? theme.palette.grey[600]
+        : 'rgba(150,150,150)',
     cursor: axis => (axis === 'x' ? 'ew-resize' : 'ns-resize'),
     position: 'relative',
   },
@@ -54,6 +64,7 @@ export default function DragHandle({
   onDrag: (delta: number, startValue: number) => void
   style: React.CSSProperties
 }) {
+  const theme = useTheme()
   const [hovered, setHovered] = useState(false)
   const { startDrag } = useDragScroll(axis, onDrag)
   const { fill, fillHovered, cursor, position, zIndex } = variants[variant]
@@ -73,7 +84,7 @@ export default function DragHandle({
         position,
         zIndex,
         cursor: cursor(axis),
-        background: hovered ? fillHovered : fill,
+        background: hovered ? fillHovered(theme) : fill(theme),
         ...style,
       }}
     />

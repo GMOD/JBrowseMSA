@@ -79,6 +79,15 @@ export const catalog: CatalogEntry[] = [
       'autoTreeAreaWidth sizes the gutter to the labels alone.',
   },
   {
+    id: 'YourOwnControls',
+    name: 'Your own controls',
+    category: 'API & control',
+    description:
+      'The viewer with its toolbar left out (hideHeader), in the dark theme, ' +
+      'driven by the page’s own controls. onCellClick and onViewportChange ' +
+      'report the clicked residue and the columns on screen back to the page.',
+  },
+  {
     id: 'ProgrammaticControl',
     name: 'Programmatic control',
     category: 'API & control',

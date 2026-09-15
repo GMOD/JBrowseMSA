@@ -18,8 +18,17 @@ import type {
   Viewport,
 } from '../types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
+import type { ThemeOptions } from '@mui/material/styles'
 
-const theme = createJBrowseTheme()
+function resolveTheme(theme: MSAViewerProps['theme']) {
+  return createJBrowseTheme(
+    theme === 'dark'
+      ? { palette: { mode: 'dark' } }
+      : typeof theme === 'object'
+        ? theme
+        : undefined,
+  )
+}
 
 export interface MSAViewerProps {
   msa?: string
@@ -62,6 +71,11 @@ export interface MSAViewerProps {
   showBranchLen?: boolean
   /** leave out the toolbar, for a page drawing its own controls */
   hideHeader?: boolean
+  /**
+   * 'light' (default), 'dark', or MUI theme options (palette, typography)
+   * merged over the JBrowse theme
+   */
+  theme?: 'light' | 'dark' | ThemeOptions
   /** the cell under the pointer, or undefined when it leaves the alignment */
   onCellHover?: (cell: Cell | undefined) => void
   /** the cell a click pinned, or undefined when a click clears it */
@@ -154,6 +168,7 @@ function Viewer({
   autoTreeAreaWidth,
   showBranchLen,
   hideHeader,
+  theme,
   onCellHover,
   onCellClick,
   onViewportChange,
@@ -287,7 +302,7 @@ function Viewer({
   }, [model])
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={resolveTheme(theme)}>
       <div ref={ref}>
         <Loading model={model} />
       </div>

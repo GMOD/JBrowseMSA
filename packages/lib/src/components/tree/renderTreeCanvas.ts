@@ -218,6 +218,7 @@ function renderCollapsedTriangles({
 // always runs and `draw` only decides whether it also strokes the circles
 function renderNodeBubbles({
   ctx,
+  theme,
   clickMap,
   offsetY,
   model,
@@ -236,6 +237,7 @@ function renderNodeBubbles({
   blockSizeYOverride?: number
   collapsedSet: Set<string>
   draw: boolean
+  theme: Theme
 }) {
   const {
     hierarchy,
@@ -255,8 +257,10 @@ function renderNodeBubbles({
     if (node.height >= 1 && inYBlock(y, offsetY, by, blockPad(model))) {
       const isCollapsed = collapsedSet.has(id)
       if (draw) {
-        ctx.strokeStyle = 'black'
-        ctx.fillStyle = isCollapsed ? 'black' : 'white'
+        ctx.strokeStyle = theme.palette.text.primary
+        ctx.fillStyle = isCollapsed
+          ? theme.palette.text.primary
+          : theme.palette.background.default
         ctx.beginPath()
         ctx.arc(x, y, radius, 0, 2 * Math.PI)
         ctx.fill()
@@ -528,6 +532,7 @@ export function renderTreeCanvas({
 
     renderNodeBubbles({
       ctx,
+      theme,
       offsetY,
       clickMap,
       model,

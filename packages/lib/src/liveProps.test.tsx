@@ -5,6 +5,7 @@
 import React, { act } from 'react'
 
 import { isAlive } from '@jbrowse/mobx-state-tree'
+import { useTheme } from '@mui/material/styles'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeAll, beforeEach, expect, test, vi } from 'vitest'
 
@@ -16,10 +17,13 @@ import type { Root } from 'react-dom/client'
 Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true)
 
 // stub Loading, which draws to canvas, and capture the model MSAViewer built
+// and the theme it provided
 let captured: MsaViewModel | undefined
+let capturedTheme: ReturnType<typeof useTheme> | undefined
 vi.mock('./components/Loading.tsx', () => ({
-  default: ({ model }: { model: MsaViewModel }) => {
+  default: function Loading({ model }: { model: MsaViewModel }) {
     captured = model
+    capturedTheme = useTheme()
     return null
   },
 }))
@@ -233,4 +237,14 @@ test('the latest handler receives events without resubscribing', () => {
   })
   expect(first).toEqual([])
   expect(second).toHaveLength(1)
+})
+
+test('theme selects dark mode or merges host options', () => {
+  show({})
+  expect(capturedTheme!.palette.mode).toBe('light')
+  show({ theme: 'dark' })
+  expect(capturedTheme!.palette.mode).toBe('dark')
+  show({ theme: { palette: { primary: { main: '#8e24aa' } } } })
+  expect(capturedTheme!.palette.primary.main).toBe('#8e24aa')
+  expect(capturedTheme!.palette.tertiary).toBeDefined()
 })

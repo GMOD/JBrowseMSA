@@ -43,32 +43,33 @@ export default function App() {
 
 Props:
 
-| Prop                | Type                 | Description                                                         |
-| ------------------- | -------------------- | ------------------------------------------------------------------- |
-| `msa`               | `string`             | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                |
-| `tree`              | `string`             | Newick tree text                                                    |
-| `gff`               | `string`             | Annotations to overlay (GFF3 text)                                  |
-| `msaFilehandle`     | `FileLocation`       | Remote file location for alignment                                  |
-| `treeFilehandle`    | `FileLocation`       | Remote file location for tree                                       |
-| `gffFilehandle`     | `FileLocation`       | Remote file location for domain GFF                                 |
-| `colorScheme`       | `string`             | Color scheme name (see below)                                       |
-| `height`            | `number`             | Widget height in pixels                                             |
-| `colWidth`          | `number`             | Per-column width in pixels (horizontal zoom)                        |
-| `rowHeight`         | `number`             | Per-row height in pixels (vertical zoom)                            |
-| `allowedGappyness`  | `number`             | Hide columns at least this percent gaps (default 100, hide nothing) |
-| `relativeTo`        | `string`             | Row name to diff every other row against; matches draw as `.`       |
-| `drawTree`          | `boolean`            | Draw the phylogeny (default true); false leaves a label gutter      |
-| `treeAreaWidth`     | `number`             | Fixed width of the tree/label gutter                                |
-| `autoTreeAreaWidth` | `boolean`            | Size that gutter to the labels; pair with `drawTree: false`         |
-| `columnTracks`      | `ColumnTrackSpec[]`  | Tracks supplied as data (see below)                                 |
-| `highlights`        | `Highlight[]`        | Labeled highlights (see below)                                      |
-| `highlightColumns`  | `number[]`           | Columns (0-based) under a persistent overlay                        |
-| `residueMappings`   | `ResidueMapping[]`   | Structure residue for each residue of a row                         |
-| `showBranchLen`     | `boolean`            | Draw branch lengths (default true); false draws a cladogram         |
-| `hideHeader`        | `boolean`            | Leave out the toolbar, for a page drawing its own controls          |
-| `onCellHover`       | `(cell) => void`     | The cell under the pointer (see below)                              |
-| `onCellClick`       | `(cell) => void`     | The cell a click pinned, or `undefined` when a click clears it      |
-| `onViewportChange`  | `(viewport) => void` | The alignment columns on screen                                     |
+| Prop                | Type                     | Description                                                               |
+| ------------------- | ------------------------ | ------------------------------------------------------------------------- |
+| `msa`               | `string`                 | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                      |
+| `tree`              | `string`                 | Newick tree text                                                          |
+| `gff`               | `string`                 | Annotations to overlay (GFF3 text)                                        |
+| `msaFilehandle`     | `FileLocation`           | Remote file location for alignment                                        |
+| `treeFilehandle`    | `FileLocation`           | Remote file location for tree                                             |
+| `gffFilehandle`     | `FileLocation`           | Remote file location for domain GFF                                       |
+| `colorScheme`       | `string`                 | Color scheme name (see below)                                             |
+| `height`            | `number`                 | Widget height in pixels                                                   |
+| `colWidth`          | `number`                 | Per-column width in pixels (horizontal zoom)                              |
+| `rowHeight`         | `number`                 | Per-row height in pixels (vertical zoom)                                  |
+| `allowedGappyness`  | `number`                 | Hide columns at least this percent gaps (default 100, hide nothing)       |
+| `relativeTo`        | `string`                 | Row name to diff every other row against; matches draw as `.`             |
+| `drawTree`          | `boolean`                | Draw the phylogeny (default true); false leaves a label gutter            |
+| `treeAreaWidth`     | `number`                 | Fixed width of the tree/label gutter                                      |
+| `autoTreeAreaWidth` | `boolean`                | Size that gutter to the labels; pair with `drawTree: false`               |
+| `columnTracks`      | `ColumnTrackSpec[]`      | Tracks supplied as data (see below)                                       |
+| `highlights`        | `Highlight[]`            | Labeled highlights (see below)                                            |
+| `highlightColumns`  | `number[]`               | Columns (0-based) under a persistent overlay                              |
+| `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                               |
+| `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram               |
+| `hideHeader`        | `boolean`                | Leave out the toolbar, for a page drawing its own controls                |
+| `theme`             | `string \| ThemeOptions` | `'light'` (default), `'dark'`, or MUI theme options merged over JBrowse's |
+| `onCellHover`       | `(cell) => void`         | The cell under the pointer (see below)                                    |
+| `onCellClick`       | `(cell) => void`         | The cell a click pinned, or `undefined` when a click clears it            |
+| `onViewportChange`  | `(viewport) => void`     | The alignment columns on screen                                           |
 
 The viewer applies a changed prop to the mounted model, so a host can put a
 control on one without re-fetching the alignment. Each prop updates only its own

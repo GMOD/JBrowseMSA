@@ -58,6 +58,8 @@ import TreeOptions from './TreeOptions'
 import TreeOptionsSrc from './TreeOptions.tsx?raw'
 import Trna from './Trna'
 import TrnaSrc from './Trna.tsx?raw'
+import YourOwnControls from './YourOwnControls'
+import YourOwnControlsSrc from './YourOwnControls.tsx?raw'
 import ZeroConfig from './ZeroConfig'
 import ZeroConfigSrc from './ZeroConfig.tsx?raw'
 import { catalog } from './catalog'
@@ -102,6 +104,7 @@ const components: Record<string, [ComponentType, string]> = {
   ProgrammaticControl: [ProgrammaticControl, ProgrammaticControlSrc],
   TreeOptions: [TreeOptions, TreeOptionsSrc],
   Trna: [Trna, TrnaSrc],
+  YourOwnControls: [YourOwnControls, YourOwnControlsSrc],
   ZeroConfig: [ZeroConfig, ZeroConfigSrc],
 }
 

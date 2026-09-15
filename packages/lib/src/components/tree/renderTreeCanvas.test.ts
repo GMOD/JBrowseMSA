@@ -134,7 +134,9 @@ function drawnTree(newick: string) {
     model,
     ctx,
     offsetY: 0,
-    theme: { palette: { text: { primary: '#000' } } } as Theme,
+    theme: {
+      palette: { text: { primary: '#000' }, background: { default: '#fff' } },
+    } as Theme,
   })
   return { xs, model }
 }
@@ -196,7 +198,9 @@ describe('node bubble click targets', () => {
       ctx,
       clickMap,
       offsetY: 0,
-      theme: { palette: { text: { primary: '#000' } } } as Theme,
+      theme: {
+        palette: { text: { primary: '#000' }, background: { default: '#fff' } },
+      } as Theme,
     })
     return { arcs, hits: clickMap.search(bounds) }
   }
@@ -256,7 +260,9 @@ describe('leaf label click targets', () => {
       ctx,
       clickMap,
       offsetY: 0,
-      theme: { palette: { text: { primary: '#000' } } } as Theme,
+      theme: {
+        palette: { text: { primary: '#000' }, background: { default: '#fff' } },
+      } as Theme,
     })
     return { drawn, hits: clickMap.search(bounds).filter(h => !h.branch) }
   }
@@ -369,7 +375,9 @@ describe('block culling', () => {
       ctx,
       offsetY,
       blockSizeYOverride: by,
-      theme: { palette: { text: { primary: '#000' } } } as Theme,
+      theme: {
+        palette: { text: { primary: '#000' }, background: { default: '#fff' } },
+      } as Theme,
     })
 
     const expected = links(model.hierarchy).filter(({ source, target }) => {
