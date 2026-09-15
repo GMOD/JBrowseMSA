@@ -98,6 +98,17 @@ export const catalog: CatalogEntry[] = [
       'reader can select and copy them.',
   },
   {
+    id: 'Nightingale',
+    name: 'Inside a Nightingale page',
+    category: 'API & control',
+    description:
+      'The viewer as a custom element (<jbrowse-msa>) inside a ' +
+      '<nightingale-manager>, beside Nightingale’s navigation bar and sequence ' +
+      'track. The manager keeps the three on one range of human beta globin: ' +
+      'brushing the bar zooms the alignment, and hovering a residue in the ' +
+      'alignment highlights it in the sequence track.',
+  },
+  {
     id: 'ProgrammaticControl',
     name: 'Programmatic control',
     category: 'API & control',

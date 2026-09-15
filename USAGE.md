@@ -71,6 +71,7 @@ Props:
 | `onCellHover`       | `(cell) => void`         | The cell under the pointer (see below)                                    |
 | `onCellClick`       | `(cell) => void`         | The cell a click pinned, or `undefined` when a click clears it            |
 | `onViewportChange`  | `(viewport) => void`     | The alignment columns on screen                                           |
+| `onModel`           | `(model) => void`        | The model the viewer built, for the model API below                       |
 
 The viewer applies a changed prop to the mounted model, so a host can put a
 control on one without re-fetching the alignment. Each prop updates only its own
@@ -182,7 +183,10 @@ with `React.lazy` inside a `Suspense` or the framework's equivalent.
 ## Advanced: model-based API
 
 For state the props do not cover, such as hiding gappy columns, collapsing
-clades or reading what the user selected, use `MSAModelF` directly.
+clades or reading what the user selected, use the model. `onModel` hands over
+the model `MSAViewer` built, which keeps the width measurement and theme the
+component provides. To build the model yourself, use `MSAModelF` and render it
+with `MSAView`, which leaves setting the width to you:
 
 ```tsx
 import { MSAView, MSAModelF } from 'react-msaview'
@@ -258,6 +262,45 @@ merges new props over the current ones, and `destroy` unmounts the viewer.
 
 The bundle also exports `MSAModelF`, `MSAView`, `React` and `createRoot` for a
 page that builds the model itself, as in the model-based API above.
+
+## As a custom element
+
+`defineMsaElement()` registers `<jbrowse-msa>`, which renders `MSAViewer` from
+attributes and properties, for a page that writes HTML instead of JavaScript
+components.
+
+```html
+<script src="https://unpkg.com/react-msaview/bundle/index.js"></script>
+<script>
+  window.ReactMSAView.defineMsaElement()
+</script>
+
+<jbrowse-msa
+  msa-url="https://example.org/family.stock"
+  tree-url="https://example.org/family.nh"
+  color-scheme="clustalx_protein_dynamic"
+  height="400"
+  hide-header
+></jbrowse-msa>
+```
+
+Attributes: `msa-url`, `tree-url`, `gff-url`, `color-scheme`, `height`,
+`hide-header`, `theme`, `tree-area-width` and `reference-row`. Properties:
+`msa`, `tree` and `gff` text, `highlights`, `columnTracks` and
+`residueMappings`. The element dispatches `cell-hover`, `cell-click` and
+`viewport-change` events whose `detail` is the value the matching `MSAViewer`
+callback receives.
+
+Inside a [Nightingale](https://github.com/ebi-webcomponents/nightingale)
+`<nightingale-manager>`, the element registers with the manager like a
+Nightingale component. It follows the `display-start`, `display-end` and
+`highlight` attributes the manager writes, and reports its own range and hovered
+residue back as `change` events. Nightingale positions count the residues of one
+protein, so `reference-row` names the alignment row that protein is, and the
+element converts between its residues and the alignment's columns. Give the
+manager `reflected-attributes="display-start,display-end,highlight"`. The
+examples page has a live one beside Nightingale's navigation and sequence
+tracks.
 
 ## R package (msaviewr)
 

@@ -89,6 +89,11 @@ export interface MSAViewerProps {
   onCellClick?: (cell: Cell | undefined) => void
   /** the alignment columns on screen, after every scroll, zoom and resize */
   onViewportChange?: (viewport: Viewport | undefined) => void
+  /**
+   * the model the viewer built, for the model API; called again with the new
+   * model when msa, tree, gff or a filehandle changes
+   */
+  onModel?: (model: MsaViewModel) => void
 }
 
 type DataSource = Pick<
@@ -180,6 +185,7 @@ function Viewer({
   onCellHover,
   onCellClick,
   onViewportChange,
+  onModel,
 }: MSAViewerProps) {
   const [model] = useState(() =>
     MSAModelF().create({
@@ -303,6 +309,14 @@ function Viewer({
   useModelReaction(model, 'hoveredCell', onCellHover)
   useModelReaction(model, 'clickedCell', onCellClick)
   useModelReaction(model, 'viewport', onViewportChange)
+
+  const latestOnModel = useRef(onModel)
+  useEffect(() => {
+    latestOnModel.current = onModel
+  })
+  useEffect(() => {
+    latestOnModel.current?.(model)
+  }, [model])
 
   // destroy releases the model's matchMedia listener and fetches. It waits a
   // tick because StrictMode remounts with the same state, and the remount's

@@ -40,6 +40,8 @@ import Myd88 from './Myd88'
 import Myd88Src from './Myd88.tsx?raw'
 import Nextstrain from './Nextstrain'
 import NextstrainSrc from './Nextstrain.tsx?raw'
+import Nightingale from './Nightingale'
+import NightingaleSrc from './Nightingale.tsx?raw'
 import Nlrp1 from './Nlrp1'
 import Nlrp1Src from './Nlrp1.tsx?raw'
 import Opsins from './Opsins'
@@ -97,6 +99,7 @@ const components: Record<string, [ComponentType, string]> = {
   ModelApi: [ModelApi, ModelApiSrc],
   Myd88: [Myd88, Myd88Src],
   Nextstrain: [Nextstrain, NextstrainSrc],
+  Nightingale: [Nightingale, NightingaleSrc],
   Nlrp1: [Nlrp1, Nlrp1Src],
   Opsins: [Opsins, OpsinsSrc],
   P53ClinVar: [P53ClinVar, P53ClinVarSrc],
