@@ -45,6 +45,11 @@ test_that("an unknown channel is refused", {
   expect_error(scale_row_color("clade", channel = "tipColor"), "tipLabel")
 })
 
+test_that("the branch channel reaches the props", {
+  w <- msaview(msa = msa) + scale_row_color("clade", channel = "branch")
+  expect_equal(w$x$props$encodings[[1]]$channel, "branch")
+})
+
 test_that("the diff layer names the row to compare against", {
   w <- msaview(msa = msa) + stat_msa_diff("Homo sapiens")
   expect_equal(w$x$props$relativeTo, "Homo_sapiens")

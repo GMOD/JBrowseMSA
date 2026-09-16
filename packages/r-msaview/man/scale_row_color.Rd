@@ -9,7 +9,8 @@ scale_row_color(field, channel = "tipLabel", palette = NULL, map = NULL)
 \arguments{
 \item{field}{The field of the row table to read.}
 
-\item{channel}{\code{"tipLabel"} (default) or \code{"rowTint"}.}
+\item{channel}{\code{"tipLabel"} (default), \code{"rowTint"} or
+\code{"branch"}.}
 
 \item{palette}{A palette name.}
 
@@ -22,7 +23,9 @@ A layer to add to a viewer with \code{+}.
 Colors one of the marks the viewer always draws by a field of
 \code{\link{geom_msa_rowdata}}'s table. \code{"tipLabel"} colors each tip
 label in the tree, \code{"rowTint"} washes the row across the tree gutter and
-the alignment.
+the alignment, and \code{"branch"} colors a tree edge whose tips all share
+one value, which is ggtree's \code{groupClade} with the group read from the
+table.
 }
 \details{
 The scale is a named palette (\code{"ggplot"}, \code{"set1"},

@@ -759,6 +759,22 @@ any[]
 any[]
 ```
 
+#### getter: branchColors
+
+the color the `branch` channel gives each tree edge, by the node id at the
+edge's far end, or undefined when no encoding names the channel. A node takes
+the field value its tips agree on, so a clade of one value colors down from
+where it splits off, and a node whose tips disagree or whose value has no color
+is absent and draws in the default color.
+
+The pass runs over the whole tree, never `root`, so a collapsed or focused clade
+keeps the color the full tree gives it.
+
+```js
+// type
+Map<string, string>
+```
+
 #### getter: categoricalDomainTypes
 
 categorical feature types (InterPro domains and the like) that each get their

@@ -256,9 +256,10 @@ export interface Viewport {
 /**
  * A channel of a mark the viewer always draws. `tipLabel` colors each tip label
  * in the tree, `rowTint` washes the row across the tree gutter and the
- * alignment. Both read a field of `rowData`.
+ * alignment, and `branch` colors a tree edge whose tips all share one value.
+ * All three read a field of `rowData`.
  */
-export type EncodingChannel = 'tipLabel' | 'rowTint'
+export type EncodingChannel = 'tipLabel' | 'rowTint' | 'branch'
 
 /**
  * A channel, the `rowData` field feeding it, and the scale it reads that field

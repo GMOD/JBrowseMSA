@@ -264,6 +264,29 @@ function inRanges(ranges: [number, number][] | undefined, position: number) {
   return !!ranges?.some(([start, end]) => position >= start && position <= end)
 }
 
+// the value every one of a node's children reports, or undefined where one of
+// them has no value or they disagree
+function sharedValue(values: (string | undefined)[]) {
+  const [first] = values
+  return first !== undefined && values.every(v => v === first)
+    ? first
+    : undefined
+}
+
+// preorder, so reversing the list puts every node after its descendants
+function preorder(tree: NodeWithIds) {
+  const order: NodeWithIds[] = []
+  const stack = [tree]
+  while (stack.length > 0) {
+    const node = stack.pop()!
+    order.push(node)
+    for (const child of node.children) {
+      stack.push(child)
+    }
+  }
+  return order
+}
+
 /**
  * #stateModel MsaView
  *
@@ -3108,6 +3131,43 @@ function stateModelFactory() {
             ? parsed.alpha(rowTintAlpha).toRgbString()
             : color
         })
+      },
+
+      /**
+       * #getter
+       * the color the `branch` channel gives each tree edge, by the node id at
+       * the edge's far end, or undefined when no encoding names the channel. A
+       * node takes the field value its tips agree on, so a clade of one value
+       * colors down from where it splits off, and a node whose tips disagree or
+       * whose value has no color is absent and draws in the default color.
+       *
+       * The pass runs over the whole tree, never `root`, so a collapsed or
+       * focused clade keeps the color the full tree gives it.
+       */
+      get branchColors(): Map<string, string> | undefined {
+        const encoding = this.resolvedEncodings.find(
+          e => e.channel === 'branch',
+        )
+        if (!encoding) {
+          return undefined
+        }
+        const order = preorder(self.tree)
+        const values = new Map<NodeWithIds, string | undefined>()
+        const colors = new Map<string, string>()
+        for (let i = order.length - 1; i >= 0; i--) {
+          const node = order[i]!
+          const value =
+            node.children.length > 0
+              ? sharedValue(node.children.map(child => values.get(child)))
+              : self.rowDataOf(node.name)?.[encoding.field]
+          values.set(node, value)
+          const color =
+            value === undefined ? undefined : encoding.colorOf(value)
+          if (color) {
+            colors.set(node.id, color)
+          }
+        }
+        return colors
       },
     }))
     .actions(self => ({

@@ -189,7 +189,7 @@ startup:
 What the viewer's own marks read from `rowData`. Each entry names a `channel`,
 the `field` feeding it, and the `scale` that turns a field value into a color.
 The `tipLabel` channel colors each tip label in the tree; `rowTint` washes the
-whole row across the tree gutter and the alignment.
+whole row across the tree gutter and the alignment; `branch` colors a tree edge.
 
 ```json
 {
@@ -208,7 +208,7 @@ whole row across the tree gutter and the alignment.
 
 | Field     | Meaning                                                            |
 | --------- | ------------------------------------------------------------------ |
-| `channel` | `tipLabel` or `rowTint`                                            |
+| `channel` | `tipLabel`, `rowTint` or `branch`                                  |
 | `field`   | the `rowData` field the channel reads                              |
 | `scale`   | `{palette}` or `{map}`; the ggplot palette when the entry omits it |
 
@@ -222,6 +222,17 @@ draws in the theme's text color and an uncolored row takes no tint.
 
 A tint draws at 25% opacity so the residues under it stay readable. A color
 carrying its own alpha, such as `rgba(228,26,28,0.5)`, draws at that alpha.
+
+The `branch` channel gives an internal node the field's value when every tip
+below it shares that value, and the edge from that node to its parent draws in
+the scale's color for the value, as does every edge inside the clade. An edge
+whose tips disagree draws in the default color, and a collapsed clade's triangle
+takes the color of the value its tips agree on. This is ggtree's `groupClade`
+followed by `aes(color = group)`, with the group read from the table.
+
+Every field an encoding reads carries a legend of its scale, titled by the field
+name, drawn by the overlay on screen and reserved as a column in the SVG export.
+Two channels over one field list that field once.
 
 The scales resolve once per change of the table or the encodings, and the tint
 draws in the overlay the `highlights` row sets use, which keeps it out of the

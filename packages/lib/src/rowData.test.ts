@@ -159,6 +159,61 @@ test('a tint color that carries its own alpha keeps it', () => {
   expect(model.rowTints?.[0]).toBe('rgba(0,0,255,0.6)')
 })
 
+test('the branch channel colors each clade whose tips agree', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    data: {
+      msa: '>a\nACGT\n>b\nACGT\n>c\nACGT\n>d\nACGT\n',
+      tree: '((a:0.1,b:0.1):0.2,(c:0.1,d:0.1):0.2);',
+    },
+  })
+  model.setWidth(800)
+  model.setRowData({
+    a: { clade: 'left' },
+    b: { clade: 'left' },
+    c: { clade: 'right' },
+    d: { clade: 'right' },
+  })
+
+  expect(model.branchColors).toBeUndefined()
+
+  model.setEncodings([
+    {
+      channel: 'branch',
+      field: 'clade',
+      scale: { map: { left: '#ff0000', right: '#0000ff' } },
+    },
+  ])
+
+  const { tree, branchColors } = model
+  const [left, right] = tree.children
+  expect(branchColors?.get(left!.id)).toBe('#ff0000')
+  expect(branchColors?.get(left!.children[0]!.id)).toBe('#ff0000')
+  expect(branchColors?.get(right!.id)).toBe('#0000ff')
+  // the two clades disagree at the root, which leaves its edge the default
+  expect(branchColors?.get(tree.id)).toBeUndefined()
+})
+
+test('a branch value the scale gives no color takes none', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    data: { msa, tree: '(seq1:0.1,seq2:0.2);' },
+  })
+  model.setWidth(800)
+  model.setRowData({ seq1: { clade: '19B' }, seq2: { clade: '20A' } })
+  model.setEncodings([
+    {
+      channel: 'branch',
+      field: 'clade',
+      scale: { map: { '19B': '#ff0000' } },
+    },
+  ])
+
+  const { tree, branchColors } = model
+  expect(branchColors?.get(tree.children[0]!.id)).toBe('#ff0000')
+  expect(branchColors?.get(tree.children[1]!.id)).toBeUndefined()
+})
+
 test('reset drops the row table and the encodings', () => {
   const model = MsaView.create({ type: 'MsaView', data: { msa } })
   model.setRowData({ seq1: { clade: '19B' } })

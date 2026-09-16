@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 //
-// The two channels the viewer's own marks carry: `tipLabel` colors each tip
-// label in the tree, and `rowTint` washes the row across the tree gutter and
-// the alignment. Both read a field of the row table, and both export.
+// The three channels the viewer's own marks carry: `tipLabel` colors each tip
+// label in the tree, `rowTint` washes the row across the tree gutter and the
+// alignment, and `branch` colors a tree edge. All read a field of the row
+// table, and all export.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { expect, test } from 'vitest'
 
@@ -92,6 +93,23 @@ test('a rowTint encoding washes the row in the tree and the alignment', async ()
     expect.arrayContaining([`${treeAreaWidth}`, `${totalWidth}`]),
   )
   expect(washes).toHaveLength(2)
+})
+
+test('a branch encoding strokes the clade edge in the scale color', async () => {
+  const { svg } = await exportWith([
+    {
+      channel: 'branch',
+      field: 'clade',
+      scale: { map: { mammal: '#ff0000' } },
+    },
+  ])
+
+  // human and mouse are the mammal clade, so its stem and both tip edges take
+  // the color; the bird tip and the root's children of two values do not
+  const strokes = [...svg.matchAll(/<path[^>]*stroke="([^"]+)"/g)].map(
+    m => m[1]!,
+  )
+  expect(strokes.filter(s => s === '#ff0000')).toHaveLength(3)
 })
 
 test('a row with no value for the field takes no tint', async () => {

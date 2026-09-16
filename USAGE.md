@@ -65,7 +65,7 @@ Props:
 | `highlightColumns`  | `number[]`               | Columns (0-based) under a persistent overlay                              |
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                               |
 | `rowData`           | `Record<string, ...>`    | Extra fields per row name, such as a lineage or a host                    |
-| `encodings`         | `Encoding[]`             | What the marks read from `rowData`: `tipLabel`, `rowTint`                 |
+| `encodings`         | `Encoding[]`             | What the marks read from `rowData`: `tipLabel`, `rowTint`, `branch`       |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram               |
 | `residueEncoding`   | `'fill' \| 'color'`      | Which channel `colorScheme` paints: the cell (default) or the letter      |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns           |
@@ -142,9 +142,9 @@ SVG export draws it.
 
 `rowData` is a field table keyed by row name, and `encodings` says which mark
 reads which field: `tipLabel` colors the tip labels in the tree, `rowTint`
-washes the row across the tree gutter and the alignment. The scale is a named
-palette or a color per value, and a value the table gives no color keeps the
-plain mark.
+washes the row across the tree gutter and the alignment, and `branch` colors a
+tree edge whose tips all share one value. The scale is a named palette or a
+color per value, and a value the table gives no color keeps the plain mark.
 
 ```tsx
 <MSAViewer

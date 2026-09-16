@@ -101,9 +101,15 @@ function renderTree({
   maxDepthToLeaf: number
   blockSizeYOverride?: number
 }) {
-  const { hierarchy, showBranchLenEffective: showBranchLen, blockSize } = model
+  const {
+    hierarchy,
+    showBranchLenEffective: showBranchLen,
+    blockSize,
+    branchColors,
+  } = model
   const by = blockSizeYOverride ?? blockSize
-  ctx.strokeStyle = theme.palette.text.primary
+  const defaultStroke = theme.palette.text.primary
+  ctx.strokeStyle = defaultStroke
   forEachNodeInBlock(hierarchy, offsetY, by, blockPad(model), source => {
     const sy = source.x!
     const sx = getNodeX(source, showBranchLen, tipX, maxDepthToLeaf)
@@ -122,6 +128,10 @@ function renderTree({
       // optimization that allows us to skip drawing most tree links outside the
       // block
       if (offsetY + by >= y1 && y2 >= offsetY) {
+        // the edge belongs to the child, whose id the branch channel colors
+        if (branchColors) {
+          ctx.strokeStyle = branchColors.get(target.data.id) ?? defaultStroke
+        }
         ctx.beginPath()
         ctx.moveTo(sx, sy)
         ctx.lineTo(sx, ty)
@@ -130,6 +140,7 @@ function renderTree({
       }
     }
   })
+  ctx.strokeStyle = defaultStroke
 }
 
 function renderCollapsedTriangles({
@@ -160,6 +171,7 @@ function renderCollapsedTriangles({
     rowHeight,
     fontSize,
     marginLeft: ml,
+    branchColors,
   } = model
   // nothing collapsed is the common case, and the traversal below visits every
   // node in the tree on every block of every redraw
@@ -183,7 +195,7 @@ function renderCollapsedTriangles({
         ctx.lineTo(baseX, y - halfHeight)
         ctx.lineTo(baseX, y + halfHeight)
         ctx.closePath()
-        ctx.fillStyle = theme.palette.action.disabled
+        ctx.fillStyle = branchColors?.get(id) ?? theme.palette.action.disabled
         ctx.fill()
         ctx.strokeStyle = theme.palette.text.primary
         ctx.stroke()

@@ -366,14 +366,17 @@ geom_msa_rowdata <- function(data, key = NULL) {
 #' Colors one of the marks the viewer always draws by a field of
 #' \code{\link{geom_msa_rowdata}}'s table. \code{"tipLabel"} colors each tip
 #' label in the tree, \code{"rowTint"} washes the row across the tree gutter and
-#' the alignment.
+#' the alignment, and \code{"branch"} colors a tree edge whose tips all share
+#' one value, which is ggtree's \code{groupClade} with the group read from the
+#' table.
 #'
 #' The scale is a named palette (\code{"ggplot"}, \code{"set1"},
 #' \code{"dark2"}, \code{"okabeito"}, \code{"tableau"}) or a color per value.
 #' A value the \code{map} leaves out keeps the plain mark.
 #'
 #' @param field The field of the row table to read.
-#' @param channel \code{"tipLabel"} (default) or \code{"rowTint"}.
+#' @param channel \code{"tipLabel"} (default), \code{"rowTint"} or
+#'   \code{"branch"}.
 #' @param palette A palette name.
 #' @param map A named list or vector of colors, keyed by field value.
 #' @return A layer to add to a viewer with \code{+}.

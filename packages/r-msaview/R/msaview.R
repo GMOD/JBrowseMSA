@@ -80,7 +80,8 @@
 #'   named list of fields per row works too.
 #' @param encodings What the viewer's own marks read from \code{row_data}, as a
 #'   list of lists with \code{channel} (\code{"tipLabel"} colors each tip label,
-#'   \code{"rowTint"} washes the row across the tree gutter and the alignment),
+#'   \code{"rowTint"} washes the row across the tree gutter and the alignment,
+#'   \code{"branch"} colors a tree edge whose tips all share one value),
 #'   \code{field}, and an optional \code{scale}, either
 #'   \code{list(palette = "set1")} or
 #'   \code{list(map = list(value = "#e41a1c"))}.
@@ -413,8 +414,8 @@ convert_encodings <- function(encodings) {
     for (field in c("channel", "field")) {
       if (is.null(e[[field]])) stop("encoding is missing '", field, "'")
     }
-    if (!e$channel %in% c("tipLabel", "rowTint")) {
-      stop("encoding channel must be 'tipLabel' or 'rowTint', got '",
+    if (!e$channel %in% c("tipLabel", "rowTint", "branch")) {
+      stop("encoding channel must be 'tipLabel', 'rowTint' or 'branch', got '",
            e$channel, "'")
     }
     if (!is.null(e$scale)) {
