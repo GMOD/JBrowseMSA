@@ -346,6 +346,20 @@ IOptionalIType<ISimpleType<boolean>, [undefined]>
 subFeatureRows: stripDefault(types.boolean, defaultSubFeatureRows)
 ```
 
+#### property: trackHeights
+
+the height of every track one divider resizes, keyed by `heightKey`: the `kind`
+for the computed tracks, `own:<id>` for a data track. A key is absent until the
+user drags that divider, and `defaultTrackHeights` answers for it until then, so
+an untouched viewer adds nothing to the shared URL.
+
+```js
+// type signature
+IOptionalIType<IMapType<ISimpleType<number>>, [undefined]>
+// code
+trackHeights: stripDefault(types.map(types.number), {})
+```
+
 #### property: treeFilehandle
 
 filehandle object for the tree
@@ -618,19 +632,6 @@ resizeHandleWidth: 5
 { msg: string; onCancel?: () => void; }
 // code
 status: undefined as { msg: string; onCancel?: () => void } | undefined
-```
-
-#### volatile: trackHeights
-
-the height of every track one divider resizes, keyed by `heightKey`: the `kind`
-for the computed tracks, `own:<id>` for a data track. A key is absent until the
-user drags, and `defaultTrackHeights` answers for it until then.
-
-```js
-// type signature
-Record<string, number>
-// code
-trackHeights: {} as Record<string, number>
 ```
 
 #### volatile: transientHighlights

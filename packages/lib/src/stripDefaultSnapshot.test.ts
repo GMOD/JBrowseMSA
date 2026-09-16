@@ -1,7 +1,7 @@
 import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { expect, test } from 'vitest'
 
-import stateModelFactory from './model.ts'
+import stateModelFactory, { defaultTrackHeights } from './model.ts'
 
 const MsaView = stateModelFactory()
 
@@ -17,7 +17,18 @@ test('default view produces a minimal snapshot (defaults stripped)', () => {
   expect(snap.treeAreaWidth).toBeUndefined()
   expect(snap.collapsed).toBeUndefined()
   expect(snap.turnedOffTracks).toBeUndefined()
+  expect(snap.trackHeights).toBeUndefined()
   expect(snap.type).toBe('MsaView')
+})
+
+test('a resized track travels in the snapshot, under the key it shares', () => {
+  const model = MsaView.create({ type: 'MsaView' })
+  model.setTrackHeight('bar', 90)
+  expect(getSnapshot(model).trackHeights).toEqual({ bar: 90 })
+
+  const reopened = MsaView.create(getSnapshot(model))
+  expect(reopened.trackHeight('bar')).toBe(90)
+  expect(reopened.trackHeight('logo')).toBe(defaultTrackHeights.logo)
 })
 
 test('non-default values are retained in the snapshot', () => {

@@ -207,6 +207,7 @@ export const preservedOnReset = new Set([
   'drawNodeBubbles',
   'autoTreeAreaWidth',
   'turnedOffTracks',
+  'trackHeights',
   'hideGaps',
   'allowedGappyness',
   'subFeatureRows',
@@ -416,6 +417,16 @@ function stateModelFactory() {
          * hidden-by-default track adds nothing to the shared URL.
          */
         turnedOffTracks: stripDefault(types.map(types.boolean), {}),
+
+        /**
+         * #property
+         * the height of every track one divider resizes, keyed by `heightKey`:
+         * the `kind` for the computed tracks, `own:<id>` for a data track. A
+         * key is absent until the user drags that divider, and
+         * `defaultTrackHeights` answers for it until then, so an untouched
+         * viewer adds nothing to the shared URL.
+         */
+        trackHeights: stripDefault(types.map(types.number), {}),
         /**
          * #property
          * tracks supplied as data: per-column values drawn as bars, or a
@@ -575,15 +586,6 @@ function stateModelFactory() {
        * #volatile
        */
       minimapHeight: 56,
-
-      /**
-       * #volatile
-       * the height of every track one divider resizes, keyed by `heightKey`:
-       * the `kind` for the computed tracks, `own:<id>` for a data track. A key
-       * is absent until the user drags, and `defaultTrackHeights` answers for
-       * it until then.
-       */
-      trackHeights: {} as Record<string, number>,
 
       /**
        * #volatile
@@ -1742,7 +1744,7 @@ function stateModelFactory() {
        */
       trackHeight(kind: TrackKind, heightKey = kind as string, given?: number) {
         return (
-          self.trackHeights[heightKey] ??
+          self.trackHeights.get(heightKey) ??
           given ??
           defaultTrackHeights[kind] ??
           self.rowHeight
@@ -2968,7 +2970,7 @@ function stateModelFactory() {
        * resize every track sharing a `heightKey`; see `trackHeights`
        */
       setTrackHeight(heightKey: string, height: number) {
-        self.trackHeights = { ...self.trackHeights, [heightKey]: height }
+        self.trackHeights.set(heightKey, height)
       },
       /**
        * #action
