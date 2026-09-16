@@ -3,9 +3,9 @@ import { promisify } from 'util'
 
 // TypeScript 7 is the native compiler and exposes no JS API -- no
 // createProgram, no checker, no scanner -- so the generator reads the AST with
-// an aliased TypeScript 5. The repo still typechecks with 7; this is only the
+// an aliased TypeScript 6. The repo still typechecks with 7; this is only the
 // docgen's parser.
-import * as ts from 'typescript5'
+import * as ts from 'typescript6'
 
 const exec2 = promisify(exec)
 

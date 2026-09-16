@@ -173,7 +173,7 @@ filehandle object for a GFF file of overlay annotations
 
 ```js
 // type signature
-IMaybe<any>
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
 // code
 gffFilehandle: types.maybe(FileLocation)
 ```
@@ -207,7 +207,7 @@ columns highlighted. Applied once in afterCreate.
 
 ```js
 // type signature
-IType<number[], number[], number[]>
+IType<number[] | undefined, number[] | undefined, number[] | undefined>
 // code
 highlightColumns: types.frozen<number[] | undefined>()
 ```
@@ -232,7 +232,7 @@ id of view, randomly generated if not provided
 
 ```js
 // type signature
-any
+IOptionalIType<ISimpleType<string>, [undefined]>
 // code
 id: ElementId
 ```
@@ -244,7 +244,7 @@ files)
 
 ```js
 // type signature
-IMaybe<any>
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
 // code
 msaFilehandle: types.maybe(FileLocation)
 ```
@@ -409,7 +409,7 @@ filehandle object for the tree
 
 ```js
 // type signature
-IMaybe<any>
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
 // code
 treeFilehandle: types.maybe(FileLocation)
 ```
@@ -420,7 +420,7 @@ filehandle object for tree metadata
 
 ```js
 // type signature
-IMaybe<any>
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
 // code
 treeMetadataFilehandle: types.maybe(FileLocation)
 ```
@@ -524,7 +524,7 @@ array of column indices to highlight
 
 ```js
 // type signature
-number[]
+number[] | undefined
 // code
 highlightedColumns: undefined as number[] | undefined
 ```
@@ -558,7 +558,7 @@ the currently hovered tree node ID and its descendant leaf names
 
 ```js
 // type signature
-{ nodeId: string; descendantNames: string[]; }
+{ nodeId: string; descendantNames: string[]; } | undefined
 // code
 hoveredTreeNode: undefined as
         | { nodeId: string; descendantNames: string[] }
@@ -607,7 +607,7 @@ the currently mouse-click column
 
 ```js
 // type signature
-number
+number | undefined
 // code
 mouseClickCol: undefined as number | undefined
 ```
@@ -618,7 +618,7 @@ the currently mouse-click row
 
 ```js
 // type signature
-number
+number | undefined
 // code
 mouseClickRow: undefined as number | undefined
 ```
@@ -629,7 +629,7 @@ the currently mouse-hovered column
 
 ```js
 // type signature
-number
+number | undefined
 // code
 mouseCol: undefined as number | undefined
 ```
@@ -640,7 +640,7 @@ the currently mouse-hovered row
 
 ```js
 // type signature
-number
+number | undefined
 // code
 mouseRow: undefined as number | undefined
 ```
@@ -672,7 +672,7 @@ resizeHandleWidth: 5
 
 ```js
 // type signature
-{ msg: string; onCancel?: () => void; }
+{ msg: string; onCancel?: (() => void) | undefined; } | undefined
 // code
 status: undefined as { msg: string; onCancel?: () => void } | undefined
 ```
@@ -693,7 +693,7 @@ transientHighlights: {} as Record<string, Highlight[]>
 
 ```js
 // type signature
-number
+number | undefined
 // code
 volatileWidth: undefined as number | undefined
 ```
@@ -730,7 +730,7 @@ BasicTrack[]
 
 ```js
 // type
-any
+string[]
 ```
 
 #### getter: allBranchesLength0
@@ -765,28 +765,28 @@ BasicTrack[]
 
 ```js
 // type
-any[]
+number[]
 ```
 
 #### getter: blocks2d
 
 ```js
 // type
-(readonly [any, any])[]
+(readonly [number, number])[]
 ```
 
 #### getter: blocksX
 
 ```js
 // type
-any[]
+number[]
 ```
 
 #### getter: blocksY
 
 ```js
 // type
-any[]
+number[]
 ```
 
 #### getter: branchColors
@@ -802,7 +802,7 @@ keeps the color the full tree gives it.
 
 ```js
 // type
-Map<string, string>
+Map<string, string> | undefined
 ```
 
 #### getter: categoricalDomainTypes
@@ -812,7 +812,7 @@ own color and a legend entry
 
 ```js
 // type
-any[]
+Annotation[]
 ```
 
 #### getter: cladeGutterWidth
@@ -832,7 +832,7 @@ the cell a click pinned. Public API: MSAViewer's onCellClick reports it.
 
 ```js
 // type
-any
+Cell | undefined
 ```
 
 #### getter: colClustalX
@@ -854,7 +854,7 @@ percent_identity_dynamic color scheme.
 // type
 {
   letter: string
-  color: string
+  color: string | undefined
 }
 ;[]
 ```
@@ -877,14 +877,14 @@ ColumnCounts
 
 ```js
 // type
-Map<unknown, unknown>
+Map<string, string>
 ```
 
 #### getter: columns2d
 
 ```js
 // type
-any
+string[]
 ```
 
 #### getter: columnTrackContent
@@ -894,7 +894,7 @@ alignment columns when it names a row
 
 ```js
 // type
-Map<string, { values?: number[]; data?: string; arcs?: Arc[]; }>
+Map<string, { values?: number[] | undefined; data?: string | undefined; arcs?: Arc[] | undefined; }>
 ```
 
 #### getter: columnTrackModels
@@ -952,7 +952,7 @@ renderer walks columns and needs the band covering each one)
 
 ```js
 // type
-Map<any, any>
+Map<string, DomainBand[]>
 ```
 
 #### getter: domainUnderline
@@ -998,7 +998,7 @@ leaves each span the color its accession takes in `fillPalette`
 
 ```js
 // type
-ResolvedEncoding
+ResolvedEncoding | undefined
 ```
 
 #### getter: featureLabels
@@ -1009,7 +1009,7 @@ residue letters do
 
 ```js
 // type
-Map<Annotation, string>
+Map<Annotation, string> | undefined
 ```
 
 #### getter: fontSize
@@ -1023,7 +1023,7 @@ number
 
 ```js
 // type
-any
+{ info: string; version: string | undefined; } | Record<string, unknown> | { General: Record<string, string[]>; Accessions: { [k: string]: string; }; Dbxref: { [k: string]: string; }; }
 ```
 
 #### getter: hideGapsEffective
@@ -1081,7 +1081,7 @@ the cell under the pointer. Public API: MSAViewer's onCellHover reports it.
 
 ```js
 // type
-any
+Cell | undefined
 ```
 
 #### getter: hoveredInsertion
@@ -1090,11 +1090,7 @@ Returns insertion info if mouse is hovering over an insertion indicator
 
 ```js
 // type
-{
-  rowName: any
-  col: number
-  letters: any
-}
+{ rowName: string; col: number; letters: string; } | undefined
 ```
 
 #### getter: hoveredRowIndices
@@ -1105,7 +1101,7 @@ the memoized name->index map.
 
 ```js
 // type
-unknown[]
+number[]
 ```
 
 #### getter: insertionPositions
@@ -1129,7 +1125,7 @@ boolean
 
 ```js
 // type
-Map<any, number>
+Map<string, number>
 ```
 
 #### getter: labelWidthScale
@@ -1145,7 +1141,7 @@ number
 
 ```js
 // type
-any[]
+HierarchyNode < NodeWithIdsAndLength > []
 ```
 
 #### getter: legends
@@ -1170,7 +1166,11 @@ experimental entry and a predicted model.
 
 ```js
 // type
-any
+{
+  row: string
+  structure: MappedStructure
+}
+;[]
 ```
 
 #### getter: maxBranchLength
@@ -1214,7 +1214,7 @@ number
 
 ```js
 // type
-ColumnStats
+ColumnStats | undefined
 ```
 
 #### getter: mouseOverDomains
@@ -1231,14 +1231,14 @@ Annotation[]
 
 ```js
 // type
-any
+string | undefined
 ```
 
 #### getter: MSA
 
 ```js
 // type
-MSAParserType
+MSAParserType | null
 ```
 
 #### getter: msaAreaHeight
@@ -1293,7 +1293,7 @@ matching MSA row (drawn blank), unlike `rows.length`.
 
 ```js
 // type
-any
+number
 ```
 
 #### getter: propertyConservation
@@ -1330,7 +1330,7 @@ row index of the reference row (`relativeTo`), undefined when unset
 
 ```js
 // type
-unknown
+number | undefined
 ```
 
 #### getter: residueMappingProblems
@@ -1418,7 +1418,7 @@ malformed user-supplied file returns {} instead of throwing out of rendering.
 
 ```js
 // type
-Record<string, Record<string, string>>
+Record<string, Record<string, string> | undefined>
 ```
 
 #### getter: rowFields
@@ -1438,7 +1438,7 @@ clade hides. `rows` holds only the rows on screen; lookups by row name use this
 
 ```js
 // type
-Map<unknown, unknown>
+Map<string, string>
 ```
 
 #### getter: rowNames
@@ -1455,7 +1455,7 @@ string[]
 
 ```js
 // type
-Map<unknown, unknown>
+Map<string, number>
 ```
 
 #### getter: rowPanelsHeaderHeight
@@ -1475,14 +1475,14 @@ sum of each record's width
 
 ```js
 // type
-any
+number
 ```
 
 #### getter: rows
 
 ```js
 // type
-any
+[string, string][]
 ```
 
 #### getter: rowTints
@@ -1493,7 +1493,7 @@ of the raster tile cache and its keys.
 
 ```js
 // type
-string[]
+(string | undefined)[] | undefined
 ```
 
 #### getter: secondaryStructureArcs
@@ -1503,14 +1503,14 @@ space (hidden columns are removed before parsing)
 
 ```js
 // type
-Arc[]
+Arc[] | undefined
 ```
 
 #### getter: secondaryStructureConsensus
 
 ```js
 // type
-string
+string | undefined
 ```
 
 #### getter: segmentDomainTypes
@@ -1521,7 +1521,7 @@ number, with no legend row
 
 ```js
 // type
-any
+Annotation[]
 ```
 
 #### getter: segmentLabels
@@ -1531,14 +1531,14 @@ feature name ("exon-3" -> "3"), else its 1-based position
 
 ```js
 // type
-Map<unknown, unknown>
+Map<string, string>
 ```
 
 #### getter: seqConsensus
 
 ```js
 // type
-string
+string | undefined
 ```
 
 #### getter: sequenceType
@@ -1595,7 +1595,7 @@ encoding names the channel, which leaves the labels the theme's text color.
 
 ```js
 // type
-Map<string, string>
+Map<string, string> | undefined
 ```
 
 #### getter: topBandHeight
@@ -1622,7 +1622,7 @@ total height of track area (px)
 
 ```js
 // type
-any
+number
 ```
 
 #### getter: totalWidth
@@ -1666,7 +1666,7 @@ box drawn on it. undefined with no focus
 
 ```js
 // type
-;[number, number]
+;[number, number] | undefined
 ```
 
 #### getter: treeOverviewHeight
@@ -1688,7 +1688,7 @@ one layout serves any band size.
 
 ```js
 // type
-{ root: HierarchyNode<NodeWithIds>; numTips: number; maxDepthToLeaf: number; showBranchLen: boolean; }
+{ root: HierarchyNode<NodeWithIds>; numTips: number; maxDepthToLeaf: number; showBranchLen: boolean; } | undefined
 ```
 
 #### getter: treeScaleBar
@@ -1698,18 +1698,14 @@ the tree area is too narrow for one
 
 ```js
 // type
-{
-  step: number
-  px: number
-  label: string
-}
+{ step: number; px: number; label: string; } | undefined
 ```
 
 #### getter: turnedOnTracks
 
 ```js
 // type
-any
+BasicTrack[]
 ```
 
 #### getter: unshareableData
@@ -1753,7 +1749,7 @@ the columns on screen. Public API: MSAViewer's onViewportChange reports it.
 
 ```js
 // type
-Viewport
+Viewport | undefined
 ```
 
 #### getter: visibleDomainTypes
@@ -1764,7 +1760,7 @@ sequence position. Ordinal segments (exons) are numbered on the band instead
 
 ```js
 // type
-any
+Annotation[]
 ```
 
 #### getter: wheelZoomAxis
@@ -1793,7 +1789,7 @@ highlights in
 
 ```js
 // type signature
-cellAt: (visibleCol: number, rowIndex?: number) => Cell
+cellAt: (visibleCol: number, rowIndex?: number | undefined) => Cell
 ```
 
 #### method: columnStatsAt
@@ -1804,14 +1800,14 @@ undefined past the end of the alignment or for an all-gap column.
 
 ```js
 // type signature
-columnStatsAt: (col: number) => ColumnStats
+columnStatsAt: (col: number) => ColumnStats | undefined
 ```
 
 #### method: getRowData
 
 ```js
 // type signature
-getRowData: (name: string) => { data: { name?: string; accession?: string; dbxref?: string; }; rowData: any; }
+getRowData: (name: string) => { data: { name?: string | undefined; accession?: string | undefined; dbxref?: string | undefined; } | undefined; rowData: Record<string, string> | undefined; }
 ```
 
 #### method: globalColToVisibleCol
@@ -1821,7 +1817,7 @@ the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 
 ```js
 // type signature
-globalColToVisibleCol: (globalCol: number) => number
+globalColToVisibleCol: (globalCol: number) => number | undefined
 ```
 
 #### method: rowDataOf
@@ -1830,7 +1826,7 @@ one row's fields, the single reader of the row table
 
 ```js
 // type signature
-rowDataOf: (name: string) => any
+rowDataOf: (name: string) => Record<string, string> | undefined
 ```
 
 #### method: rowResidue
@@ -1841,7 +1837,7 @@ mappings share an entry id, as in a homodimer.
 
 ```js
 // type signature
-rowResidue: (structureId: string, position: number, asymId?: string) => RowResidue
+rowResidue: (structureId: string, position: number, asymId?: string | undefined) => RowResidue | undefined
 ```
 
 #### method: seqPosIndex
@@ -1852,7 +1848,7 @@ cached on the parse.
 
 ```js
 // type signature
-seqPosIndex: (rowName: string) => Int32Array<ArrayBufferLike>
+seqPosIndex: (rowName: string) => Int32Array<ArrayBufferLike> | undefined
 ```
 
 #### method: seqPosToGlobalCol
@@ -1862,7 +1858,7 @@ undefined for a row name the alignment does not have.
 
 ```js
 // type signature
-seqPosToGlobalCol: (rowName: string, seqPos: number) => any
+seqPosToGlobalCol: (rowName: string, seqPos: number) => number | undefined
 ```
 
 #### method: seqPosToVisibleCol
@@ -1872,7 +1868,7 @@ combines seqPosToGlobalCol and globalColToVisibleCol.
 
 ```js
 // type signature
-seqPosToVisibleCol: (rowName: string, seqPos: number) => any
+seqPosToVisibleCol: (rowName: string, seqPos: number) => number | undefined
 ```
 
 #### method: structureResidue
@@ -1886,7 +1882,7 @@ helpers above are 0-based.
 
 ```js
 // type signature
-structureResidue: (rowName: string, seqPos: number, structureId?: string) => StructureResidue
+structureResidue: (rowName: string, seqPos: number, structureId?: string | undefined) => StructureResidue | undefined
 ```
 
 #### method: trackHeight
@@ -1898,7 +1894,7 @@ zoom does not rebuild the other tracks
 
 ```js
 // type signature
-trackHeight: (kind: TrackKind, heightKey?: string, given?: number) => number
+trackHeight: (kind: TrackKind, heightKey?: string, given?: number | undefined) => number
 ```
 
 #### method: treeOverviewHit
@@ -1911,7 +1907,7 @@ whole tree.
 
 ```js
 // type signature
-treeOverviewHit: (y: number) => { id: any; rows: [number, number]; }
+treeOverviewHit: (y: number) => { id: string; rows: [number, number]; } | undefined
 ```
 
 #### method: visibleColToGlobalCol
@@ -1931,7 +1927,7 @@ Return a row-specific letter at a visible column, or undefined if gap.
 
 ```js
 // type signature
-visibleColToRowLetter: (rowName: string, visibleCol: number) => any
+visibleColToRowLetter: (rowName: string, visibleCol: number) => string | undefined
 ```
 
 #### method: visibleColToSeqPos
@@ -1945,7 +1941,7 @@ translate between columns and residue positions. Keep them stable.
 
 ```js
 // type signature
-visibleColToSeqPos: (rowName: string, visibleCol: number) => number
+visibleColToSeqPos: (rowName: string, visibleCol: number) => number | undefined
 ```
 
 #### method: visibleColToSeqPosOneBased
@@ -1955,7 +1951,7 @@ undefined if the position is a gap in the sequence.
 
 ```js
 // type signature
-visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => any
+visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => number | undefined
 ```
 
 #### method: visibleSpan
@@ -1968,7 +1964,7 @@ lacks, gives undefined.
 
 ```js
 // type signature
-visibleSpan: ({ row, start: rawStart, end: rawEnd }: Region) => { startCol: any; endCol: any; }
+visibleSpan: ({ row, start: rawStart, end: rawEnd }: Region) => { startCol: number; endCol: number; } | undefined
 ```
 
 ### MsaView - Actions
@@ -2041,7 +2037,7 @@ draw the alignment with positions numbered relative to the given row's sequence
 
 ```js
 // type signature
-drawRelativeTo: (id: string) => void
+drawRelativeTo: (id: string | undefined) => void
 ```
 
 #### action: exportSVG
@@ -2165,7 +2161,7 @@ filehandle loaders
 
 ```js
 // type signature
-setData: (data: { msa?: string; tree?: string; treeMetadata?: string; gff?: string; }) => void
+setData: (data: { msa?: string | undefined; tree?: string | undefined; treeMetadata?: string | undefined; gff?: string | undefined; }) => void
 ```
 
 #### action: setDomains
@@ -2176,7 +2172,7 @@ Annotation[] and call setAnnotations.
 
 ```js
 // type signature
-setDomains: (data?: Record<string, InterProScanResults>) => void
+setDomains: (data?: Record<string, InterProScanResults> | undefined) => void
 ```
 
 #### action: setDrawMsaLetters
@@ -2229,7 +2225,7 @@ setGFF: (result: string) => void
 
 ```js
 // type signature
-setGFFFilehandle: (gffFilehandle?: FileLocationType) => void
+setGFFFilehandle: (gffFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setHeaderHeight
@@ -2273,7 +2269,7 @@ MSAViewer passes its `highlightColumns` prop through it.
 
 ```js
 // type signature
-setHighlightedColumns: (columns?: number[]) => void
+setHighlightedColumns: (columns?: number[] | undefined) => void
 ```
 
 #### action: setHighlights
@@ -2309,7 +2305,7 @@ set hovered tree node and its descendants
 
 ```js
 // type signature
-setHoveredTreeNode: (nodeId?: string) => void
+setHoveredTreeNode: (nodeId?: string | undefined) => void
 ```
 
 #### action: setLoadingMSA
@@ -2332,7 +2328,7 @@ set mouse click position (row, column) in the MSA
 
 ```js
 // type signature
-setMouseClickPos: (col?: number, row?: number) => void
+setMouseClickPos: (col?: number | undefined, row?: number | undefined) => void
 ```
 
 #### action: setMousePos
@@ -2344,7 +2340,7 @@ view, such as a genome view or 3D structure. Keep the name and signature stable.
 
 ```js
 // type signature
-setMousePos: (col?: number, row?: number) => void
+setMousePos: (col?: number | undefined, row?: number | undefined) => void
 ```
 
 #### action: setMSA
@@ -2358,7 +2354,7 @@ setMSA: (result: string) => void
 
 ```js
 // type signature
-setMSAFilehandle: (msaFilehandle?: FileLocationType) => void
+setMSAFilehandle: (msaFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setResidueMappings
@@ -2453,14 +2449,14 @@ whole tree again)
 
 ```js
 // type signature
-setShowOnly: (node?: string) => void
+setShowOnly: (node?: string | undefined) => void
 ```
 
 #### action: setStatus
 
 ```js
 // type signature
-setStatus: (status?: { msg: string; onCancel?: () => void; }) => void
+setStatus: (status?: { msg: string; onCancel?: (() => void) | undefined; } | undefined) => void
 ```
 
 #### action: setSubFeatureRows
@@ -2490,7 +2486,7 @@ setTree: (result: string) => void
 
 ```js
 // type signature
-setTreeFilehandle: (treeFilehandle?: FileLocationType) => void
+setTreeFilehandle: (treeFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setTreeMetadata
@@ -2504,7 +2500,7 @@ setTreeMetadata: (result: string) => void
 
 ```js
 // type signature
-setTreeMetadataFilehandle: (treeMetadataFilehandle?: FileLocationType) => void
+setTreeMetadataFilehandle: (treeMetadataFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setWidth

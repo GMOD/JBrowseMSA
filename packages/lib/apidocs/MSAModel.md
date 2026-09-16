@@ -89,7 +89,7 @@ force a specific MSA parser, or pass undefined to auto-detect
 
 ```js
 // type signature
-setMSAFormat: (arg?: MSAFormat) => void
+setMSAFormat: (arg?: MSAFormat | undefined) => void
 ```
 
 #### action: setShowColumnStats
