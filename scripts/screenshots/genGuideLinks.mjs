@@ -9,7 +9,18 @@
  * bloats the guide with unused links. Errors if the guide references a figure
  * with no matching spec.
  *
- * Run with:  node scripts/screenshots/genGuideLinks.mjs   (rewrites the file)
+ *   node scripts/screenshots/genGuideLinks.mjs            rewrites the file
+ *   node scripts/screenshots/genGuideLinks.mjs --check    fails if it is stale
+ *
+ * `--check` (CI runs it as `pnpm check:guide-links`) exists because the drift is
+ * invisible: editing a spec changes the figure on the next capture but leaves
+ * the guide's link pointing at the state the figure used to show, so a reader
+ * clicks a screenshot and lands somewhere that does not match it. `pfam-scale`
+ * sat that way through three parameter changes.
+ *
+ * The comparison ignores line wrapping, since oxfmt wraps a definition past 80
+ * columns and this script writes each on one line. Run the generator and then
+ * `pnpm format`; that round trip is a no-op on an up-to-date guide.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -59,5 +70,34 @@ const block = [
 const body = guide.includes(MARKER)
   ? guide.slice(0, guide.indexOf(MARKER))
   : `${guide.replace(/\s*$/, '')}\n\n`
-fs.writeFileSync(guidePath, `${body}${block}\n`)
-console.log(`wrote ${unique.length} live-demo links to docs/user_guide.md`)
+
+// each [live-*]: url pair, with the wrapping oxfmt may have applied collapsed
+// away, so --check compares link targets rather than line breaks
+const pairs = text =>
+  Object.fromEntries(
+    [
+      ...text.replaceAll(/\n\s+/g, ' ').matchAll(/\[(live-[\w-]+)\]:\s*(\S+)/g),
+    ].map(m => [m[1], m[2]]),
+  )
+
+if (process.argv.includes('--check')) {
+  const want = pairs(block)
+  const have = pairs(guide.slice(guide.indexOf(MARKER)))
+  const stale = [...new Set([...Object.keys(want), ...Object.keys(have)])]
+    .filter(name => want[name] !== have[name])
+    .map(
+      name =>
+        `  [${name}] ${have[name] ? 'points at a stale state' : 'is missing'}`,
+    )
+  if (stale.length > 0) {
+    console.error(
+      `docs/user_guide.md live links are out of date with the screenshot specs:\n${stale.join('\n')}\n\n` +
+        'Run: node scripts/screenshots/genGuideLinks.mjs && pnpm format',
+    )
+    process.exit(1)
+  }
+  console.log(`${Object.keys(want).length} live-demo links match their specs`)
+} else {
+  fs.writeFileSync(guidePath, `${body}${block}\n`)
+  console.log(`wrote ${unique.length} live-demo links to docs/user_guide.md`)
+}

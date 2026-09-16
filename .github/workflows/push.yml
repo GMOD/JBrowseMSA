@@ -33,6 +33,17 @@ jobs:
       - name: Check the model API docs are current
         run: node scripts/check-apidocs.mjs
 
+      # a figure whose page stopped showing it stays in docs/media and keeps
+      # being regenerated, with nothing to notice; the deploy's link check only
+      # catches the other direction
+      - name: Check every figure is shown by a page
+        run: pnpm check:media
+
+      # editing a spec moves the figure on the next capture but leaves the
+      # guide's "click the screenshot" link on the state it used to show
+      - name: Check the guide's live links match their specs
+        run: pnpm check:guide-links
+
       # what npm would receive: every manifest's bin/main/types/exports has to
       # exist in the tarball
       - name: Check the packs

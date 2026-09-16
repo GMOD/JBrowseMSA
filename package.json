@@ -13,6 +13,8 @@
     "watch": "pnpm -r --parallel --filter svgcanvas --filter msa-parsers --filter react-msaview --filter app run '/^(watch|dev)$/'",
     "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build && pnpm --filter react-msaview-cli build",
     "check:pack": "node scripts/check-pack.mjs",
+    "check:media": "node scripts/check-media-refs.mjs",
+    "check:guide-links": "node scripts/screenshots/genGuideLinks.mjs --check",
     "smoke:npm": "node scripts/npm-smoke.mjs",
     "sync:r-bundle": "node scripts/sync-r-bundle.mjs",
     "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",

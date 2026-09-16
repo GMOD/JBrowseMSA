@@ -47,18 +47,8 @@ ATGCGATCGATCGATCGATCTATCG
 `
 const dnaTree = '((seqA:0.1,seqB:0.15):0.1,(seqC:0.2,seqD:0.05):0.1);'
 
-// Figure-sized illustrations of the two overlays: a nucleotide alignment, and
-// rhodopsin N-termini with an InterProScan-shaped GFF over them, ungapped so a
+// Rhodopsin N-termini with an InterProScan-shaped GFF over them, ungapped so a
 // domain's residue coordinates are its columns.
-const nucleotideMSA = `>seq1
-ACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT
->seq2
-ACGTACGAACGTACGTAGGTACGTACATACGTACGTACGT
->seq3
-ACGTTCGTACGTACCTACGTACGTACGTACGAACGTACGT
->seq4
-ACGTACGTACGTACGTACGTACATACGTTCGTACGTACGT
-`
 
 const domainsMSA = `>GPCR_human
 MNGTEGPNFYVPFSNATGVVRSPFEYPQYYLAEPWQFSMLAAYMFLLIVLGFPINFLTLYVTVQHKKLR
@@ -94,12 +84,6 @@ const figures = [
     colorScheme: 'nucleotide',
     treeAreaWidth: 160,
     data: { msa: dnaMSA, tree: dnaTree },
-  },
-  {
-    name: 'example-nucleotide',
-    colorScheme: 'nucleotide',
-    treeAreaWidth: 120,
-    data: { msa: nucleotideMSA, tree: '' },
   },
   {
     name: 'example-domains',

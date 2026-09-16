@@ -15,6 +15,11 @@ three phases, each writing into `docs/media`. A re-render overwrites a committed
 image only when its pixels changed (rendering is deterministic), so a full regen
 leaves unchanged figures untouched.
 
+`docs/media` holds only what a rendered page shows, and `pnpm check:media` (CI
+runs it) fails on a file no page does. Dropping a figure from a page therefore
+means deleting the file and the spec that makes it, in the same commit; a spec
+left behind regenerates its figure on the next run with nothing to notice.
+
 | Phase     | Command                    | What it makes                                                   | Browser?          |
 | --------- | -------------------------- | --------------------------------------------------------------- | ----------------- |
 | `figures` | `pnpm figures`             | the SVG README figures, via the viewer's own SVG export (jsdom) | no                |
