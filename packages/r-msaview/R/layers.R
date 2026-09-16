@@ -7,7 +7,8 @@
 #' @param e1 An \code{msaview} htmlwidget.
 #' @param e2 A layer from \code{\link{geom_msa_highlight}},
 #'   \code{\link{geom_msa_track}}, \code{\link{geom_msa_domains}},
-#'   \code{\link{scale_residue_color}}, \code{\link{theme_msa}} or
+#'   \code{\link{geom_msa_rowdata}}, \code{\link{scale_residue_color}},
+#'   \code{\link{scale_row_color}}, \code{\link{theme_msa}} or
 #'   \code{\link{coord_msa}}.
 #' @return The viewer, carrying the layer.
 #'
@@ -331,6 +332,69 @@ coord_msa <- function(start, end, row = NULL) {
 #' @export
 geom_msa_structure <- function(data) {
   msa_layer(append = list(residueMappings = convert_residue_mappings(data)))
+}
+
+#' Extra fields per row
+#'
+#' Carries a table of fields per alignment row, which the channels in
+#' \code{\link{scale_row_color}} read. A data frame gives one row per alignment
+#' row, named by its \code{label} or \code{row} column, which is the shape a
+#' ggtree \code{tibble(label = , trait = )} already has.
+#'
+#' @param data A data frame of fields per row, or a named list of them.
+#' @param key The column naming each row. Taken from \code{label}, \code{row} or
+#'   \code{name} when absent.
+#' @return A layer to add to a viewer with \code{+}.
+#'
+#' @examples
+#' \dontrun{
+#' lineages <- data.frame(
+#'   label = c("A/duck/Anhui/1/2013", "A/chicken/Taiwan/a174/2015"),
+#'   clade = c("2.3.4.4b", "2.3.2.1c")
+#' )
+#' msaview(msa = "h5.aln", tree = "h5.nh") +
+#'   geom_msa_rowdata(lineages) +
+#'   scale_row_color("clade")
+#' }
+#' @export
+geom_msa_rowdata <- function(data, key = NULL) {
+  msa_layer(set = list(rowData = convert_row_data(data, key)))
+}
+
+#' Color a mark by a field of the row table
+#'
+#' Colors one of the marks the viewer always draws by a field of
+#' \code{\link{geom_msa_rowdata}}'s table. \code{"tipLabel"} colors each tip
+#' label in the tree, \code{"rowTint"} washes the row across the tree gutter and
+#' the alignment.
+#'
+#' The scale is a named palette (\code{"ggplot"}, \code{"set1"},
+#' \code{"dark2"}, \code{"okabeito"}, \code{"tableau"}) or a color per value.
+#' A value the \code{map} leaves out keeps the plain mark.
+#'
+#' @param field The field of the row table to read.
+#' @param channel \code{"tipLabel"} (default) or \code{"rowTint"}.
+#' @param palette A palette name.
+#' @param map A named list or vector of colors, keyed by field value.
+#' @return A layer to add to a viewer with \code{+}.
+#'
+#' @examples
+#' \dontrun{
+#' msaview(msa = "h5.aln", tree = "h5.nh") +
+#'   geom_msa_rowdata(lineages) +
+#'   scale_row_color("clade", palette = "set1") +
+#'   scale_row_color("clade", channel = "rowTint",
+#'                   map = list("2.3.4.4b" = "#e41a1c"))
+#' }
+#' @export
+scale_row_color <- function(field, channel = "tipLabel", palette = NULL,
+                            map = NULL) {
+  scale <- drop_null(list(palette = palette, map = if (!is.null(map)) as.list(map)))
+  encoding <- drop_null(list(
+    channel = channel, field = field,
+    scale = if (length(scale) > 0) scale
+  ))
+  msa_layer(append = list(encodings = convert_encodings(list(encoding))))
 }
 
 #' Draw each row as its differences from one row

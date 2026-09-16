@@ -74,6 +74,16 @@
 #'   lists with \code{rowStart}, \code{rowEnd}, \code{structStart} and
 #'   \code{structEnd}), plus optional \code{accession}, \code{unobserved} and
 #'   \code{rowLength}.
+#' @param row_data Extra fields per alignment row, as a data frame with a
+#'   \code{label} (or \code{row}) column naming the row and one column per
+#'   field, the shape a ggtree \code{tibble(label = , trait = )} already has. A
+#'   named list of fields per row works too.
+#' @param encodings What the viewer's own marks read from \code{row_data}, as a
+#'   list of lists with \code{channel} (\code{"tipLabel"} colors each tip label,
+#'   \code{"rowTint"} washes the row across the tree gutter and the alignment),
+#'   \code{field}, and an optional \code{scale}, either
+#'   \code{list(palette = "set1")} or
+#'   \code{list(map = list(value = "#e41a1c"))}.
 #' @param relative_to A row name. Every other row draws as its differences from
 #'   that row, with matching residues as \code{.}.
 #' @param region A span to zoom and scroll to once the alignment loads, as
@@ -203,7 +213,8 @@
 msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     column_tracks = NULL, show_branch_len = NULL,
                     highlights = NULL, highlight_columns = NULL,
-                    residue_mappings = NULL, relative_to = NULL,
+                    residue_mappings = NULL, row_data = NULL,
+                    encodings = NULL, relative_to = NULL,
                     region = NULL, col_width = NULL, row_height = NULL,
                     allowed_gappyness = NULL, draw_tree = NULL,
                     tree_area_width = NULL, auto_tree_area_width = NULL,
@@ -232,6 +243,8 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$highlights <- convert_highlights(highlights)
   props$highlightColumns <- convert_highlight_columns(highlight_columns)
   props$residueMappings <- convert_residue_mappings(residue_mappings)
+  props$rowData <- convert_row_data(row_data)
+  props$encodings <- convert_encodings(encodings)
   props$relativeTo <- sanitize_names_or_null(relative_to)
   props$region <- convert_region(region)
   props$colWidth <- col_width
@@ -357,6 +370,58 @@ convert_highlights <- function(highlights) {
     if (!is.null(h$rows)) h$rows <- I(sanitize_names(h$rows))
     if (!is.null(h$row)) h$row <- sanitize_names(h$row)
     h
+  }))
+}
+
+# The row table as the viewer stores it: an object keyed by row name whose
+# values are that row's fields. A data frame names its rows in `key`, or in
+# whichever of label/row/name it carries. The keys are row names, so they take
+# the substitution the alignment and the tree take.
+convert_row_data <- function(data, key = NULL) {
+  if (is.null(data)) return(NULL)
+  if (is.data.frame(data)) {
+    key <- key %||% intersect(c("label", "row", "name"), names(data))[1]
+    if (is.na(key)) {
+      stop("row_data needs a 'label' or 'row' column naming each row, got ",
+           paste(names(data), collapse = ", "))
+    }
+    fields <- setdiff(names(data), key)
+    if (length(fields) == 0) {
+      stop("row_data needs a field column beside '", key, "'")
+    }
+    table <- lapply(seq_len(nrow(data)), function(i) {
+      as.list(vapply(fields, function(f) as.character(data[[f]][[i]]),
+                     character(1)))
+    })
+    names(table) <- sanitize_names(data[[key]])
+    return(table)
+  }
+  if (!is.list(data) || is.null(names(data))) {
+    stop("row_data must be a data frame or a named list of fields per row")
+  }
+  stats::setNames(lapply(data, as.list), sanitize_names(names(data)))
+}
+
+# Each encoding serializes as one JSON object, with its scale an object of its
+# own rather than an array.
+convert_encodings <- function(encodings) {
+  if (is.null(encodings)) return(NULL)
+  if (!is.list(encodings)) {
+    stop("encodings must be a list of encodings, each a list with channel and field")
+  }
+  unname(lapply(encodings, function(e) {
+    for (field in c("channel", "field")) {
+      if (is.null(e[[field]])) stop("encoding is missing '", field, "'")
+    }
+    if (!e$channel %in% c("tipLabel", "rowTint")) {
+      stop("encoding channel must be 'tipLabel' or 'rowTint', got '",
+           e$channel, "'")
+    }
+    if (!is.null(e$scale)) {
+      e$scale <- as.list(e$scale)
+      if (!is.null(e$scale$map)) e$scale$map <- as.list(e$scale$map)
+    }
+    e
   }))
 }
 

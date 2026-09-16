@@ -4,6 +4,7 @@ import type { AnyModel, Render } from '@anywidget/types'
 import type {
   Cell,
   ColumnTrackSpec,
+  Encoding,
   Highlight,
   MSAViewerProps,
   MountedViewer,
@@ -30,6 +31,8 @@ export interface Traits {
   highlight_columns: number[]
   column_tracks: ColumnTrackSpec[]
   residue_mappings: ResidueMapping[]
+  row_data: Record<string, Record<string, string>>
+  encodings: Encoding[]
   relative_to: string | null
   region: Region | null
   draw_tree: boolean
@@ -61,6 +64,8 @@ export const INPUT_TRAITS = [
   'highlight_columns',
   'column_tracks',
   'residue_mappings',
+  'row_data',
+  'encodings',
   'relative_to',
   'region',
   'draw_tree',
@@ -100,6 +105,8 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     highlightColumns: model.get('highlight_columns'),
     columnTracks: model.get('column_tracks'),
     residueMappings: model.get('residue_mappings'),
+    rowData: model.get('row_data'),
+    encodings: model.get('encodings'),
     relativeTo: optional(model.get('relative_to')),
     region: optional(model.get('region')),
     drawTree: model.get('draw_tree'),

@@ -37,6 +37,20 @@ test_that("a GFF data frame, a highlight and a track name the same row", {
   expect_equal(tracks[[1]]$row, "Homo_sapiens")
 })
 
+test_that("a row table is keyed by the name the alignment uses", {
+  from_frame <- msaviewr:::convert_row_data(
+    data.frame(label = c("Homo sapiens", "chr1:1-100"),
+               clade = c("primate", "contig"))
+  )
+  expect_equal(names(from_frame), c("Homo_sapiens", "chr1_1-100"))
+  expect_equal(from_frame$Homo_sapiens$clade, "primate")
+
+  from_list <- msaviewr:::convert_row_data(
+    list("Homo sapiens" = list(clade = "primate"))
+  )
+  expect_equal(names(from_list), "Homo_sapiens")
+})
+
 test_that("a name that needs no rewriting is left alone", {
   expect_equal(msaviewr:::sanitize_names(c("seq1", "UniProt|P1|X")),
                c("seq1", "UniProt|P1|X"))

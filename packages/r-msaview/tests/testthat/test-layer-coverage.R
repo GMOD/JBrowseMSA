@@ -18,6 +18,33 @@ test_that("a structure mapping lands under residueMappings", {
   expect_equal(w$x$props$residueMappings[[1]]$row, "Homo_sapiens")
 })
 
+test_that("a row table and a scale over it compose", {
+  lineages <- data.frame(
+    label = c("Homo sapiens", "Mouse"),
+    clade = c("primate", "rodent")
+  )
+  w <- msaview(msa = msa) +
+    geom_msa_rowdata(lineages) +
+    scale_row_color("clade", palette = "set1") +
+    scale_row_color("clade", channel = "rowTint",
+                    map = list(primate = "#e41a1c"))
+
+  expect_equal(w$x$props$rowData$Homo_sapiens$clade, "primate")
+  expect_length(w$x$props$encodings, 2)
+  expect_equal(w$x$props$encodings[[1]]$channel, "tipLabel")
+  expect_equal(w$x$props$encodings[[1]]$scale$palette, "set1")
+  expect_equal(w$x$props$encodings[[2]]$scale$map$primate, "#e41a1c")
+})
+
+test_that("a scale with no palette or map carries no scale at all", {
+  w <- msaview(msa = msa) + scale_row_color("clade")
+  expect_null(w$x$props$encodings[[1]]$scale)
+})
+
+test_that("an unknown channel is refused", {
+  expect_error(scale_row_color("clade", channel = "tipColor"), "tipLabel")
+})
+
 test_that("the diff layer names the row to compare against", {
   w <- msaview(msa = msa) + stat_msa_diff("Homo sapiens")
   expect_equal(w$x$props$relativeTo, "Homo_sapiens")
@@ -36,6 +63,8 @@ test_that("every prop-carrying msaview argument has a layer", {
       row = "a", structure = list(id = "1ABC"),
       segments = list(list(rowStart = 1, rowEnd = 2))
     ))),
+    geom_msa_rowdata(data.frame(label = "Homo sapiens", clade = "primate")),
+    scale_row_color("clade", palette = "set1"),
     scale_residue_color("clustal", encoding = "color"),
     coord_msa(1, 2),
     stat_msa_diff("a"),
@@ -57,6 +86,8 @@ test_that("every prop-carrying msaview argument has a layer", {
       row = "a", structure = list(id = "1ABC"),
       segments = list(list(rowStart = 1, rowEnd = 2))
     )),
+    row_data = data.frame(label = "a", clade = "x"),
+    encodings = list(list(channel = "tipLabel", field = "clade")),
     relative_to = "a", region = list(start = 1, end = 2), col_width = 1,
     row_height = 1, allowed_gappyness = 1, draw_tree = TRUE,
     tree_area_width = 1, auto_tree_area_width = TRUE,

@@ -64,6 +64,8 @@ Props:
 | `highlights`        | `Highlight[]`            | Labeled highlights (see below)                                            |
 | `highlightColumns`  | `number[]`               | Columns (0-based) under a persistent overlay                              |
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                               |
+| `rowData`           | `Record<string, ...>`    | Extra fields per row name, such as a lineage or a host                    |
+| `encodings`         | `Encoding[]`             | What the marks read from `rowData`: `tipLabel`, `rowTint`                 |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram               |
 | `residueEncoding`   | `'fill' \| 'color'`      | Which channel `colorScheme` paints: the cell (default) or the letter      |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns           |
@@ -78,9 +80,9 @@ The viewer applies a changed prop to the mounted model, so a host can put a
 control on one without re-fetching the alignment. Each prop updates only its own
 setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
-the data layers (`highlights`, `columnTracks`, `residueMappings`,
-`highlightColumns`) and the filehandles by content, so passing a freshly
-computed array or location object on every render costs nothing. A new `msa`,
+the data layers (`highlights`, `columnTracks`, `residueMappings`, `rowData`,
+`encodings`, `highlightColumns`) and the filehandles by content, so passing a
+freshly computed array or location object on every render costs nothing. A new `msa`,
 `tree` or `gff` string, or a filehandle pointing somewhere else, builds a new
 model and resets the view.
 
@@ -138,10 +140,31 @@ SVG export draws it.
 />
 ```
 
+`rowData` is a field table keyed by row name, and `encodings` says which mark
+reads which field: `tipLabel` colors the tip labels in the tree, `rowTint`
+washes the row across the tree gutter and the alignment. The scale is a named
+palette or a color per value, and a value the table gives no color keeps the
+plain mark.
+
+```tsx
+<MSAViewer
+  msa={msa}
+  tree={tree}
+  rowData={{
+    'A/duck/Anhui/1/2013': { clade: '2.3.4.4b' },
+    'A/chicken/Taiwan/a174/2015': { clade: '2.3.2.1c' },
+  }}
+  encodings={[
+    { channel: 'tipLabel', field: 'clade', scale: { palette: 'set1' } },
+    { channel: 'rowTint', field: 'clade' },
+  ]}
+/>
+```
+
 The [layers reference](https://gmod.org/JBrowseMSA/layers) lists every field of
 every layer and the coordinate rules they share. At runtime
-`model.setHighlights(list)` and `model.setColumnTracks(tracks)` replace what the
-props set.
+`model.setHighlights(list)`, `model.setColumnTracks(tracks)` and
+`model.setRowData(table)` replace what the props set.
 
 ### One panel in your own page
 

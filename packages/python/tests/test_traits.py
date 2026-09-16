@@ -32,6 +32,8 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "highlight_columns": [],
         "column_tracks": [],
         "residue_mappings": [],
+        "row_data": {},
+        "encodings": [],
         "relative_to": None,
         "region": None,
         "draw_tree": True,

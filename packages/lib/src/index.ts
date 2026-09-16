@@ -39,6 +39,8 @@ export type { InterProScanResults } from 'msa-parsers'
 // reason.
 export type { ColumnCounts } from './columnCounts.ts'
 export type { ColumnStats } from './columnStats.ts'
+// the scale an encoding reads its field through, and what resolving one gives
+export type { LegendEntry, ResolvedScale, ScaleSpec } from './scales.ts'
 export type {
   Accession,
   Annotation,
@@ -50,6 +52,8 @@ export type {
   Cell,
   ColumnTrackSpec,
   DomainBand,
+  Encoding,
+  EncodingChannel,
   Highlight,
   Legend,
   LegendEntry,
@@ -62,6 +66,7 @@ export type {
   ResidueMapping,
   ResidueMappingProblem,
   ResidueSegment,
+  ResolvedEncoding,
   ResolvedHighlight,
   RowResidue,
   StructureResidue,

@@ -14,6 +14,8 @@ msaview(
   highlights = NULL,
   highlight_columns = NULL,
   residue_mappings = NULL,
+  row_data = NULL,
+  encodings = NULL,
   relative_to = NULL,
   region = NULL,
   col_width = NULL,
@@ -102,6 +104,18 @@ mappings, each a list with \code{row}, \code{structure} (a list with
 lists with \code{rowStart}, \code{rowEnd}, \code{structStart} and
 \code{structEnd}), plus optional \code{accession}, \code{unobserved} and
 \code{rowLength}.}
+
+\item{row_data}{Extra fields per alignment row, as a data frame with a
+\code{label} (or \code{row}) column naming the row and one column per
+field, the shape a ggtree \code{tibble(label = , trait = )} already has. A
+named list of fields per row works too.}
+
+\item{encodings}{What the viewer's own marks read from \code{row_data}, as a
+list of lists with \code{channel} (\code{"tipLabel"} colors each tip label,
+\code{"rowTint"} washes the row across the tree gutter and the alignment),
+\code{field}, and an optional \code{scale}, either
+\code{list(palette = "set1")} or
+\code{list(map = list(value = "#e41a1c"))}.}
 
 \item{relative_to}{A row name. Every other row draws as its differences from
 that row, with matching residues as \code{.}.}

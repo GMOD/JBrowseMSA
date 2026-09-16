@@ -11,7 +11,8 @@
 
 \item{e2}{A layer from \code{\link{geom_msa_highlight}},
 \code{\link{geom_msa_track}}, \code{\link{geom_msa_domains}},
-\code{\link{scale_residue_color}}, \code{\link{theme_msa}} or
+\code{\link{geom_msa_rowdata}}, \code{\link{scale_residue_color}},
+\code{\link{scale_row_color}}, \code{\link{theme_msa}} or
 \code{\link{coord_msa}}.}
 }
 \value{

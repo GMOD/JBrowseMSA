@@ -13,6 +13,7 @@ import type { MsaViewModel } from '../model.ts'
 import type {
   Cell,
   ColumnTrackSpec,
+  Encoding,
   Highlight,
   Region,
   ResidueEncoding,
@@ -63,6 +64,13 @@ export interface MSAViewerProps {
   columnTracks?: ColumnTrackSpec[]
   /** which residue of which structure each row's residues are (see docs/layers.md) */
   residueMappings?: ResidueMapping[]
+  /** extra fields per row name, such as a lineage or a host (see docs/layers.md) */
+  rowData?: Record<string, Record<string, string>>
+  /**
+   * what the viewer's marks read from `rowData`: `{channel, field, scale?}`,
+   * where `channel` is `tipLabel` or `rowTint` (see docs/layers.md)
+   */
+  encodings?: Encoding[]
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
   drawTree?: boolean
   /** fixed width (px) of the tree/label area */
@@ -183,6 +191,8 @@ function Viewer({
   relativeTo,
   columnTracks,
   residueMappings,
+  rowData,
+  encodings,
   drawTree,
   residueEncoding,
   treeAreaWidth,
@@ -199,8 +209,17 @@ function Viewer({
   const [model] = useState(() =>
     MSAModelF().create({
       type: 'MsaView',
-      ...(msa || tree || gff
-        ? { data: { msa: msa ?? '', tree: tree ?? '', gff } }
+      ...(msa || tree || gff || rowData
+        ? {
+            data: {
+              msa: msa ?? '',
+              tree: tree ?? '',
+              gff,
+              // the row table is stored as this JSON string, which is what a
+              // shared URL and the size limit already cover
+              ...(rowData ? { treeMetadata: JSON.stringify(rowData) } : {}),
+            },
+          }
         : {}),
       ...(msaFilehandle ? { msaFilehandle } : {}),
       ...(treeFilehandle ? { treeFilehandle } : {}),
@@ -215,6 +234,7 @@ function Viewer({
       ...(relativeTo ? { relativeTo } : {}),
       ...(columnTracks ? { columnTracks } : {}),
       ...(residueMappings ? { residueMappings } : {}),
+      ...(encodings ? { encodings } : {}),
       ...(drawTree !== undefined ? { drawTree } : {}),
       ...(treeAreaWidth ? { treeAreaWidth } : {}),
       ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),
@@ -305,6 +325,18 @@ function Viewer({
   useEffect(() => {
     model.setResidueMappings(JSON.parse(residueMappingsKey))
   }, [model, residueMappingsKey])
+  const rowDataKey = JSON.stringify(rowData ?? {})
+  useEffect(() => {
+    const table = JSON.parse(rowDataKey)
+    // an empty table leaves whatever the snapshot or a filehandle loaded
+    if (Object.keys(table).length) {
+      model.setRowData(table)
+    }
+  }, [model, rowDataKey])
+  const encodingsKey = JSON.stringify(encodings ?? [])
+  useEffect(() => {
+    model.setEncodings(JSON.parse(encodingsKey))
+  }, [model, encodingsKey])
   const highlightColumnsKey = JSON.stringify(highlightColumns ?? null)
   useEffect(() => {
     model.setHighlightedColumns(JSON.parse(highlightColumnsKey) ?? undefined)
