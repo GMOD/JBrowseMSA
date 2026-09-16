@@ -47,11 +47,12 @@ and docs.
 ### Available via [Tree](../tree)
 
 **Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth,
-showBranchLen, drawTree, drawNodeBubbles, drawNodeLabels, autoTreeAreaWidth
+showBranchLen, drawTree, drawNodeBubbles, drawNodeLabels, showTreeOverview,
+overviewHeight, autoTreeAreaWidth
 
 **Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree,
 setAutoTreeAreaWidth, setShowBranchLen, setDrawNodeBubbles, setDrawNodeLabels,
-setDrawLabels
+setShowTreeOverview, setOverviewHeight, setDrawLabels
 
 ### Available via [MSAModel](../msamodel)
 
@@ -1366,7 +1367,7 @@ ResolvedRowPanel[]
 
 ```js
 // type
-HierarchyNode<any>
+HierarchyNode<NodeWithIds>
 ```
 
 #### getter: rootToTipLength
@@ -1606,6 +1607,48 @@ NodeWithIds
 number
 ```
 
+#### getter: treeOverviewClades
+
+the `clades` highlights in the overview's own row space, which the focus does
+not narrow
+
+```js
+// type
+ResolvedClade[]
+```
+
+#### getter: treeOverviewFocusRows
+
+the inclusive tip rows the focused subtree covers in the overview, which is the
+box drawn on it. undefined with no focus
+
+```js
+// type
+;[number, number]
+```
+
+#### getter: treeOverviewHeight
+
+height of the band the tree overview draws in, zero when it is off
+
+```js
+// type
+number
+```
+
+#### getter: treeOverviewLayout
+
+the whole tree laid out for the overview, or undefined when the overview is off.
+The focus is left out, so the focused subtree draws inside the whole tree, and
+the collapsed clades are folded, since those are rows the view no longer has.
+`x` is in tip-index space and `len` is a fraction of the root-to-tip length, so
+one layout serves any band size.
+
+```js
+// type
+{ root: HierarchyNode<NodeWithIds>; numTips: number; maxDepthToLeaf: number; showBranchLen: boolean; }
+```
+
 #### getter: turnedOnTracks
 
 ```js
@@ -1800,6 +1843,19 @@ zoom does not rebuild the other tracks
 ```js
 // type signature
 trackHeight: (kind: TrackKind, heightKey?: string, given?: number) => number
+```
+
+#### method: treeOverviewHit
+
+the subtree a point `y` pixels down the tree overview picks: the deepest one
+whose tip range covers every row under that pixel, with the rows it covers. A
+pixel stands for several tips on a large tree, which is what keeps the pick off
+the individual tips. undefined when the overview is off or the point picks the
+whole tree.
+
+```js
+// type signature
+treeOverviewHit: (y: number) => { id: any; rows: [number, number]; }
 ```
 
 #### method: visibleColToGlobalCol
@@ -2416,6 +2472,17 @@ toggleCollapsed: (node: string) => void
 ```js
 // type signature
 toggleTrack: (id: string) => void
+```
+
+#### action: treeOverviewClick
+
+focus the subtree a click `y` pixels down the tree overview lands on. A click
+inside the box already drawn there clears the focus, the way clicking the
+focused branch again does.
+
+```js
+// type signature
+treeOverviewClick: (y: number) => void
 ```
 
 #### action: zoomIn

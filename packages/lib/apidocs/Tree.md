@@ -84,6 +84,17 @@ IOptionalIType<ISimpleType<boolean>, [undefined]>
 labelsAlignRight: stripDefault(types.boolean, defaultLabelsAlignRight)
 ```
 
+#### property: overviewHeight
+
+height of the tree overview band, px
+
+```js
+// type signature
+IOptionalIType<ISimpleType<number>, [undefined]>
+// code
+overviewHeight: stripDefault(types.number, defaultOverviewHeight)
+```
+
 #### property: showBranchLen
 
 use "branch length" e.g. evolutionary distance to draw tree branch lengths. if
@@ -95,6 +106,18 @@ distances
 IOptionalIType<ISimpleType<boolean>, [undefined]>
 // code
 showBranchLen: stripDefault(types.boolean, defaultShowBranchLen)
+```
+
+#### property: showTreeOverview
+
+draw the whole tree small above the tree panel, with the focused subtree boxed.
+A click on it focuses the subtree under the pointer
+
+```js
+// type signature
+IOptionalIType<ISimpleType<boolean>, [undefined]>
+// code
+showTreeOverview: stripDefault(types.boolean, defaultShowTreeOverview)
 ```
 
 #### property: treeAreaWidth
@@ -164,11 +187,27 @@ setDrawTree: (arg: boolean) => void
 setLabelsAlignRight: (arg: boolean) => void
 ```
 
+#### action: setOverviewHeight
+
+set the height of the tree overview band (px)
+
+```js
+// type signature
+setOverviewHeight: (n: number) => void
+```
+
 #### action: setShowBranchLen
 
 ```js
 // type signature
 setShowBranchLen: (arg: boolean) => void
+```
+
+#### action: setShowTreeOverview
+
+```js
+// type signature
+setShowTreeOverview: (arg: boolean) => void
 ```
 
 #### action: setTreeAreaWidth

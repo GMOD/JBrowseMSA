@@ -1479,7 +1479,11 @@ function stateModelFactory() {
         const { root, numTips } = layout
         const perPixel = numTips / self.overviewHeight
         const first = clamp(Math.floor(y * perPixel), 0, numTips - 1)
-        const last = clamp(Math.floor((y + 1) * perPixel), first, numTips - 1)
+        const last = clamp(
+          Math.ceil((y + 1) * perPixel) - 1,
+          first,
+          numTips - 1,
+        )
         let node = nodeCoveringRows(root, first + 0.5, last + 0.5)
         // focusing one tip leaves a single row on screen, so the pick lifts to
         // the subtree that tip sits in
