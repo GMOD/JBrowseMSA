@@ -45,7 +45,8 @@ def fields_for(node_attrs):
 
 A row table is keyed by row name, so the key each record goes under is the tip
 label the phylogeny-at-scale build script wrote, `accession|clade|country|year`.
-Building both from the same function keeps the two in step:
+Both scripts build that label with the same `label_for` function, so every key
+matches a row of the hosted alignment:
 
 ```bash
 python3 build_phylogeny_metadata.py .
@@ -66,9 +67,9 @@ wrote ./rsv-sample-rowdata.json: 184 rows, 21 kB
 ```
 
 The 184 rows of the subsample carry 23 distinct clade calls and 28 countries,
-and the file holding them is 21 kB. Percent-encoded into a link that runs to
-more than 20,000 characters, past the 8,192-character request line a `?data=`
-URL fits in, so the snapshot names the file and the viewer fetches it at
+and the file holding them is 21 kB. Percent-encoded into a `?data=` link the
+table runs past 20,000 characters, well beyond the 8,192-character request line
+a link fits in, so the snapshot names the file and the viewer fetches it at
 startup:
 
 ```json
