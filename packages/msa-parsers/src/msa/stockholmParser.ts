@@ -71,6 +71,9 @@ export function parseAll(
     let match: RegExpExecArray | null
 
     if (formatStartRegex.test(line)) {
+      if (stock) {
+        db.push(stock)
+      }
       stock = createStockholm()
       treeContinues = false
     } else if (formatEndRegex.test(line)) {

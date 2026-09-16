@@ -133,6 +133,17 @@ seq2  GHIKL
     })
   })
 
+  test('a header ends the open alignment when its // is missing', () => {
+    const db = parseAll(`# STOCKHOLM 1.0
+seq1  ACDEF
+# STOCKHOLM 1.0
+seq2  GHIKL
+//`)
+    expect(db).toHaveLength(2)
+    expect(db[0]?.seqdata).toEqual({ seq1: 'ACDEF' })
+    expect(db[1]?.seqdata).toEqual({ seq2: 'GHIKL' })
+  })
+
   test('joins a tree split across #=GF NH lines, starting a new one at TN', () => {
     const [aln] = parseAll(`# STOCKHOLM 1.0
 #=GF TN first
