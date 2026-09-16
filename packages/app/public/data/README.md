@@ -60,6 +60,7 @@ files and the step that writes each:
 | `mitogenome/` | [mitogenome_genes](../../../../docs/tutorials/mitogenome_genes.md)                             | `docs/tutorials/scripts/build_mitogenome_genes.sh`              |
 | `neighborhoods/` | [gene_neighborhoods](../../../../docs/tutorials/gene_neighborhoods.md)                         | `docs/tutorials/scripts/build_gene_neighborhoods.sh`            |
 | `rna/`       | [rna_family](../../../../docs/tutorials/rna_family.md)                                         | `docs/tutorials/scripts/build_rna_family.sh`                    |
+| `tdp43/`     | [alphafold_confidence](../../../../docs/tutorials/alphafold_confidence.md)                     | `docs/tutorials/scripts/build_alphafold_confidence.sh`          |
 | `spike/`     | [spike_structure](../../../../docs/tutorials/spike_structure.md)                               | `docs/tutorials/scripts/build_spike_structure.sh`               |
 | `trim5/`     | [codon_selection](../../../../docs/tutorials/codon_selection.md)                               | `docs/tutorials/scripts/build_codon_selection.sh`               |
 

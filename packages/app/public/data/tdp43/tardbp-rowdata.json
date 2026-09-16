@@ -1,0 +1,86 @@
+{
+ "Human": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Mouse": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Cow": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Elephant": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Opossum": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Platypus": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Chicken": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Turtle": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Lizard": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Frog": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Coelacanth": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Zebrafish": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Seabream": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ },
+ "Ghostshark": {
+  "TDP43_N": "confident",
+  "RRM1": "confident",
+  "RRM2": "confident",
+  "TDP43_C": "very low"
+ }
+}

@@ -16,6 +16,7 @@
 // holds the tree and row labels; a tall one loses height, and 'center' skips the
 // toolbar and the pale first rows for the body of the alignment.
 
+import plddtThumb from '../../../docs/media/alphafold_confidence-8.png'
 import codonThumb from '../../../docs/media/codon-spry-patch.png'
 import fluThumb from '../../../docs/media/flu-drift-siteb.png'
 import neighborhoodThumb from '../../../docs/media/gene_neighborhoods-3.png'
@@ -74,6 +75,16 @@ export const tutorials: Tutorial[] = [
     thumb: p53Thumb,
     thumbAlt:
       'ClinVar, AlphaMissense and MaveDB bar tracks over a p53 ortholog alignment, all three peaking on the DNA-binding domain',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'alphafold_confidence',
+    title: 'AlphaFold confidence across a protein family',
+    blurb:
+      'Fourteen vertebrate TDP-43 orthologs, each with the per-residue pLDDT of its own AlphaFold model. The mean per column runs 84 to 86 over the three Pfam folded domains and 38 over the C-terminal region, and the runs under 50 fill that region in all fourteen rows.',
+    thumb: plddtThumb,
+    thumbAlt:
+      "Fourteen TDP-43 rows with a mean pLDDT bar track above and each row's low-confidence runs drawn in orange over its C-terminal half",
     thumbPosition: 'left',
   },
   {
