@@ -22,8 +22,7 @@ const files = {
 }
 
 // Every accession in nlrp1-domains.gff except the pyrin domain, so a snapshot
-// can open with the overlay reduced to the one domain the page is about
-// (initFilter only fills in accessions the snapshot has not already set).
+// can open with the overlay reduced to the one domain the page is about.
 const NON_PYD = [
   'IPR001315',
   'IPR001611',
@@ -278,7 +277,7 @@ export const specs = [
       treeAreaWidth: 150,
       colWidth: 0.7,
       colorSchemeName: 'clustalx_protein_dynamic',
-      featureFilters: Object.fromEntries(NON_PYD.map(a => [a, false])),
+      turnedOffFeatures: Object.fromEntries(NON_PYD.map(a => [a, true])),
       ...files,
     }),
     settle: 2000,

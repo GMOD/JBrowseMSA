@@ -28,6 +28,8 @@ release 110.0.
   https://rest.uniprot.org/uniprotkb/Q9C000.fasta
 - precomputed Pfam matches for that accession:
   https://www.ebi.ac.uk/interpro/api/entry/pfam/protein/uniprot/Q9C000/
+- the twelve sequences before alignment, right-padded to one width so the viewer
+  opens them: https://gmod.org/JBrowseMSA/demo/data/nlrp1-unaligned.aln
 - the alignment the commands below write, hosted so the figures can link to it:
   https://gmod.org/JBrowseMSA/demo/data/nlrp1.aln
 - its tree: https://gmod.org/JBrowseMSA/demo/data/nlrp1.nh
@@ -77,8 +79,8 @@ it.
 ## 2. Fetch the sequences
 
 ```bash
-# read each accession, write one FASTA record named by the label rather than
-# the accession -- the label is what the viewer draws
+# read each accession and write one FASTA record named by its label, which is
+# what the viewer draws down the side
 while IFS=$'\t' read -r accession label; do
   printf '>%s\n' "$label" >> family.fasta
   curl -sf "https://rest.uniprot.org/uniprotkb/$accession.fasta" |
@@ -257,7 +259,7 @@ once as the UPA-FIIND block beside it.
 
 Unchecking everything except IPR004020 leaves only the pyrin domain on screen.
 
-[![](../media/protein-family-pyd-only.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A370%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A0.7%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22featureFilters%22%3A%7B%22IPR001315%22%3Afalse%2C%22IPR001611%22%3Afalse%2C%22IPR007111%22%3Afalse%2C%22IPR025307%22%3Afalse%2C%22IPR041075%22%3Afalse%2C%22IPR041267%22%3Afalse%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D)
+[![](../media/protein-family-pyd-only.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A370%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A0.7%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffFeatures%22%3A%7B%22IPR001315%22%3Atrue%2C%22IPR001611%22%3Atrue%2C%22IPR007111%22%3Atrue%2C%22IPR025307%22%3Atrue%2C%22IPR041075%22%3Atrue%2C%22IPR041267%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D)
 
 The overlay reduced to the pyrin domain. The three primates carry it as one
 block of rows, Dog carries it in the row right under them, and Hedgehog carries
