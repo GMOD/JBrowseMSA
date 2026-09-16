@@ -3,17 +3,21 @@ import { colord } from 'colord'
 import palettes from './ggplotPalettes.ts'
 
 /**
- * Creates a map from keys to colors. Up to the largest ggplot palette (8 keys)
- * we use the hand-picked ggplot colors; beyond that — e.g. a gene-structure
- * overlay with one feature per exon — we generate evenly spaced HSL hues so
- * every key still gets a distinct, stable color instead of running off the end
- * of the palette.
+ * Creates a map from keys to colors. `palette` names the colors to take in
+ * order, such as the list a scale asked for by name; without it the keys take
+ * the ggplot palette of their own size. Beyond the colors available — a
+ * gene-structure overlay with one feature per exon, or nine keys on an
+ * eight-color palette — every key gets an evenly spaced HSL hue instead, so no
+ * two keys share a color.
  */
-export function createPaletteMap(keys: string[]) {
+export function createPaletteMap(
+  keys: string[],
+  palette?: readonly string[] | undefined,
+) {
   const n = keys.length
-  if (n <= palettes.length) {
-    const palette = palettes[n - 1]!
-    return Object.fromEntries(keys.map((key, i) => [key, palette[i]!]))
+  const colors = palette ?? palettes[n - 1]
+  if (colors && n <= colors.length) {
+    return Object.fromEntries(keys.map((key, i) => [key, colors[i]!]))
   }
   return Object.fromEntries(
     keys.map((key, i) => [
