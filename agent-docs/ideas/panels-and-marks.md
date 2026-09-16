@@ -84,7 +84,7 @@ What the layout gives the API:
 | Tip labels                       | `geom_tiplab`                    | `renderTreeLabels` (`renderTreeCanvas.ts:287`)                       |
 | Tip labels colored by a field    | `aes(color=)`                    | missing; `treeMetadata` holds the data and no channel reads it       |
 | Support values on internal nodes | `geom_nodelab`                   | missing; parsed and never drawn                                      |
-| Clade highlight rectangle        | `geom_hilight`                   | missing                                                              |
+| Clade highlight rectangle        | `geom_hilight`                   | `clades` with `mark: "highlight"` (`renderTreeCanvas.ts`)            |
 | Clade bracket + label            | `geom_cladelab`                  | missing                                                              |
 | Bracket over a run of tips       | `geom_strip`                     | missing                                                              |
 | Branches colored by a group      | `groupClade`, `aes(color=group)` | missing                                                              |
@@ -460,6 +460,13 @@ tree area edge across `[node.xMin!, node.xMax!]`, the span `clusterLayout` sets
 (`hierarchy.ts:78-95`). A clade spanning 500 rows crosses many `blocksY`, so the
 rectangle draws in every block whose range intersects it, clipped by the block.
 One day.
+
+Shipped 2026-09-16 as the `clades` property with the `highlight` mark, reaching
+all four wrappers. `resolvedClades` gives each clade the rows it covers, and
+`nodeCoveringRows` (`hierarchy.ts`) descends to the node the rectangle starts
+at, so a block places it in the tree's depth rather than a traversal. The
+alignment band comes through `renderHighlights`, the path the row sets take.
+`bracket`, `collapse` and `focus` stay in step 11.
 
 ### 8. The `rowPanels` container and the `strip` kind
 
