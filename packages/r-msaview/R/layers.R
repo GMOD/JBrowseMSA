@@ -363,39 +363,26 @@ geom_msa_rowdata <- function(data, key = NULL) {
 
 #' Color a mark by a field of the row or feature table
 #'
-<<<<<<< HEAD
-#' Colors one of the marks the viewer always draws by a field of
-#' \code{\link{geom_msa_rowdata}}'s table. \code{"tipLabel"} colors each tip
-#' label in the tree, \code{"rowTint"} washes the row across the tree gutter and
-#' the alignment, and \code{"branch"} colors a tree edge whose tips all share
-#' one value, which is ggtree's \code{groupClade} with the group read from the
-#' table.
-=======
 #' Colors one of the marks the viewer always draws by a field of a table.
-#' \code{"tipLabel"} colors each tip label in the tree and \code{"rowTint"}
-#' washes the row across the tree gutter and the alignment, both from
-#' \code{\link{geom_msa_rowdata}}'s table. \code{"featureFill"} colors each
-#' span of the annotation overlay and \code{"featureLabel"} names the field
-#' drawn inside a span, both from the features the GFF carries, where a field
-#' is an annotation property (\code{accession}, \code{name},
+#' \code{"tipLabel"} colors each tip label in the tree, \code{"rowTint"}
+#' washes the row across the tree gutter and the alignment, and
+#' \code{"branch"} colors a tree edge whose tips all share one value, which is
+#' ggtree's \code{groupClade} with the group read from the table; all three
+#' read \code{\link{geom_msa_rowdata}}'s table. \code{"featureFill"} colors
+#' each span of the annotation overlay and \code{"featureLabel"} names the
+#' field drawn inside a span, both from the features the GFF carries, where a
+#' field is an annotation property (\code{accession}, \code{name},
 #' \code{featureType}) or a GFF attribute such as \code{Name} or
 #' \code{gene}. A feature carrying a GFF \code{color=} attribute keeps that
 #' color.
->>>>>>> a72b46bd (docs: the feature channels across the layers reference and the wrappers)
 #'
 #' The scale is a named palette (\code{"ggplot"}, \code{"set1"},
 #' \code{"dark2"}, \code{"okabeito"}, \code{"tableau"}) or a color per value.
 #' A value the \code{map} leaves out keeps the plain mark.
 #'
-<<<<<<< HEAD
-#' @param field The field of the row table to read.
-#' @param channel \code{"tipLabel"} (default), \code{"rowTint"} or
-#'   \code{"branch"}.
-=======
 #' @param field The field to read.
 #' @param channel \code{"tipLabel"} (default), \code{"rowTint"},
-#'   \code{"featureFill"} or \code{"featureLabel"}.
->>>>>>> a72b46bd (docs: the feature channels across the layers reference and the wrappers)
+#'   \code{"branch"}, \code{"featureFill"} or \code{"featureLabel"}.
 #' @param palette A palette name.
 #' @param map A named list or vector of colors, keyed by field value.
 #' @return A layer to add to a viewer with \code{+}.
