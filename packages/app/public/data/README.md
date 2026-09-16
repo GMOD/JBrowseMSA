@@ -24,6 +24,9 @@ it does not cover:
 | File                      | Provenance                                                                                                                                    |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `il2ra.aln` / `il2ra.nh`  | IL2RA/IL2RB/IL2RG across mammals, the small protein alignment the Getting started examples and the homepage viewer show                        |
+| `nlrp1.aln`               | Twelve NLRP1 orthologs from UniProt, ClustalW, 1666 columns, which step 3 of [protein_family](../../../../docs/tutorials/protein_family.md) writes |
+| `nlrp1.nh`                | ClustalW neighbor-joining tree of `nlrp1.aln`, step 4 of the same page                                                                         |
+| `nlrp1-domains.gff`       | InterPro 110.0 precomputed Pfam matches for the twelve accessions (`react-msaview-cli interpro`), step 5 of the same page                      |
 | `nlrp1-unaligned.aln`     | The aligner's own input, right-padded to a common width, so the unaligned half of `docs/media/column-lock.png` is the same sequences unaligned |
 | `lysine.stock`            | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment: 60 bacterial sequences, tree (`#=GF NH`) and SS embedded     |
 | `f12-cetacean-cds.stock`  | Coagulation factor XII coding alignment across mammals (UCSC cactus 241-way), tree embedded; built by `scripts/f12-cetacean`                   |
@@ -45,76 +48,20 @@ page, built by `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
 | `tp53-p53.nh`                     | Newick            | ClustalW neighbor-joining tree for `tp53-p53-orthologs.fa`                                           |
 | `tp53-clinvar-pathogenic.vcf.gz`  | VCF (bgzip+tabix) | ClinVar (GRCh38) variants over the TP53 locus filtered to Pathogenic/Likely_pathogenic; ClinVar updates weekly, so the count changes |
 
-The `spike/` folder backs the
-[spike_structure tutorial](../../../../docs/tutorials/spike_structure.md) and is
-built by `docs/tutorials/scripts/build_spike_structure.sh`, which prints every
-number that page quotes:
-
-| File                 | Format                | Provenance                                                                                                             |
-| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `spike-rows.tsv`     | TSV                   | The tutorial's row table: NCBI protein accession, row label, UniProtKB entry where one exists                          |
-| `spike.afa`          | FASTA (aligned)       | Eleven coronavirus spike glycoproteins from NCBI efetch, aligned with `mafft --auto` (L-INS-i), 1660 columns            |
-| `spike.nwk`          | Newick                | `FastTree -lg` on the alignment above                                                                                  |
-| `spike-domains.gff`  | GFF3 (domains)        | InterPro 110.0 precomputed Pfam matches (`react-msaview-cli interpro`) for the 8 rows whose UniProt entry is the same sequence as the row |
-| `spike-layers.json`  | JSON (snapshot layers) | `highlights` from the P0DTC2 feature table, `residueMappings` from SIFTS plus PDBe polymer coverage for 6VXX chain A, and the coverage text track derived from it |
-
-No filehandle loads `spike-layers.json`. The figures' `?data=` links carry its
-three layers inline, and the file is hosted so the page can cite it and
-`scripts/screenshots/tutorial-specs/spike_structure.mjs` can read it.
-
-The files below back the **Kinase pocket** tutorial
-(`docs/tutorials/kinase_pocket.md`), built by
-`docs/tutorials/scripts/build_kinase_pocket.sh`, not by `writeExampleData.mjs`:
-
-| File | Format | Provenance |
-| ---- | ------ | ---------- |
-| `kinase-pocket/kinase-pocket.afa` | FASTA (aligned) | 474 of the 512 UniProt `pkinfam.txt` human kinases, the ones whose Pkinase domain (PF00069) clears Pfam's gathering threshold, aligned to that HMM with `hmmalign --trim` (262 columns) |
-| `kinase-pocket/kinase-pocket.nwk` | Newick | FastTree from the alignment above |
-| `kinase-pocket/kinase-pocket-metadata.json` | JSON (`treeMetadata`) | Each row's kinase group (AGC/CAMK/CK1/CMGC/NEK/RGC/STE/TKL/TK/Other) and UniProt accession, read by the tree's node-info dialog |
-
-The `rna/` folder backs the
-[rna_family tutorial](../../../../docs/tutorials/rna_family.md) and is built by
-`docs/tutorials/scripts/build_rna_family.sh`, which prints every number that
-page quotes:
-
-| File                     | Format              | Provenance                                                                                                                                                                                            |
-| ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `rna/sam-riboswitch.sto` | Stockholm (tree+SS) | 37 SAM-I riboswitches found by `cmsearch` with the Rfam [RF00162](https://rfam.org/family/RF00162) model in six Firmicute genomes, aligned to it with `cmalign`, consensus structure and SAM contacts copied from the Rfam seed, FastTree tree embedded as `#=GF NH` |
-
-The `mitogenome/` folder backs the
-[mitogenome_genes tutorial](../../../../docs/tutorials/mitogenome_genes.md) and
-is built by `docs/tutorials/scripts/build_mitogenome_genes.sh`, which prints
-every number that page quotes:
-
-| File                          | Format          | Provenance                                                                                                                                                       |
-| ----------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mitogenome/mito-rows.tsv`    | TSV             | The tutorial's row table: RefSeq accession and the row label it becomes                                                                                          |
-| `mitogenome/mito-unaligned.afa` | FASTA (padded)  | The same eight genomes as fetched, right-padded to 17,019 columns, so the viewer opens them before the aligner runs                                             |
-| `mitogenome/mito.afa`         | FASTA (aligned) | Eight mammal mitochondrial genomes from NCBI efetch, aligned with ClustalW, 17,966 columns                                                                        |
-| `mitogenome/mito.nwk`         | Newick          | ClustalW neighbor-joining tree from the alignment above                                                                                                          |
-| `mitogenome/mito-genes.gff`   | GFF3 (genes)    | RefSeq's own GFF3 per accession, reduced to 37 genes per genome with `Name=` and `complex=`, plus a control region per genome carrying `color=255,205,0`          |
-
-The `neighborhoods/` folder backs the
-[gene_neighborhoods tutorial](../../../../docs/tutorials/gene_neighborhoods.md)
-and is built by `docs/tutorials/scripts/build_gene_neighborhoods.sh`, which
-prints every number that page quotes:
-
-| File                                  | Format          | Provenance                                                                                                                                       |
-| ------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `neighborhoods/trp-rows.tsv`          | TSV             | The tutorial's row list: twelve RefSeq genome accessions and the row label each becomes                                                          |
-| `neighborhoods/trp-neighborhoods.gff` | GFF3 (genes)    | 176 genes from RefSeq's own GFF3 per genome, cut to 8 kb either side of trpB and turned so trpB points right, each with `Name=`, `role=` and `locus_tag=` |
-| `neighborhoods/trpB.afa`              | FASTA (aligned) | The twelve TrpB proteins from NCBI efetch, aligned with ClustalW, 423 columns                                                                    |
-| `neighborhoods/trpB.nwk`              | Newick          | ClustalW neighbor-joining tree from the alignment above                                                                                          |
-
-The `proteases/`, `h3n2/` and `h5n1/` folders back the tutorials whose pipeline
-runs inside a language rather than a shell, and each folder's own README names
-its files:
+Each folder below backs one tutorial, and the folder's own README names its
+files and the step that writes each:
 
 | Folder       | Tutorial                                                                                       | Built by                                                        |
 | ------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | `proteases/` | [r_protease_triad](../../../../docs/tutorials/r_protease_triad.md)                             | `docs/tutorials/scripts/build_r_protease_triad.R`               |
 | `h3n2/`      | [notebook_flu_drift](../../../../docs/tutorials/notebook_flu_drift.md)                         | `docs/tutorials/scripts/build_flu_drift.py`                     |
 | `h5n1/`      | [influenza_surveillance_figure](../../../../docs/tutorials/influenza_surveillance_figure.md)   | `docs/tutorials/scripts/build_influenza_surveillance_figure.py` |
+| `kinase-pocket/` | [kinase_pocket](../../../../docs/tutorials/kinase_pocket.md)                                   | `docs/tutorials/scripts/build_kinase_pocket.sh`                 |
+| `mitogenome/` | [mitogenome_genes](../../../../docs/tutorials/mitogenome_genes.md)                             | `docs/tutorials/scripts/build_mitogenome_genes.sh`              |
+| `neighborhoods/` | [gene_neighborhoods](../../../../docs/tutorials/gene_neighborhoods.md)                         | `docs/tutorials/scripts/build_gene_neighborhoods.sh`            |
+| `rna/`       | [rna_family](../../../../docs/tutorials/rna_family.md)                                         | `docs/tutorials/scripts/build_rna_family.sh`                    |
+| `spike/`     | [spike_structure](../../../../docs/tutorials/spike_structure.md)                               | `docs/tutorials/scripts/build_spike_structure.sh`               |
+| `trim5/`     | [codon_selection](../../../../docs/tutorials/codon_selection.md)                               | `docs/tutorials/scripts/build_codon_selection.sh`               |
 
 The parsers detect the format from file content (the `CLUSTAL` / `# STOCKHOLM` /
 `>` / `##gff` header), so the extensions above are only for readability.
