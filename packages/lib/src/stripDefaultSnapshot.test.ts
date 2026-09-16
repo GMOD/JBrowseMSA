@@ -19,6 +19,8 @@ test('default view produces a minimal snapshot (defaults stripped)', () => {
   expect(snap.turnedOffTracks).toBeUndefined()
   expect(snap.trackHeights).toBeUndefined()
   expect(snap.type).toBe('MsaView')
+  // no empty document strings either, which every shared URL used to carry
+  expect(JSON.stringify(snap.data)).toBe('{}')
 })
 
 test('a resized track travels in the snapshot, under the key it shares', () => {

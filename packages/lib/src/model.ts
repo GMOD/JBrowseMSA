@@ -799,11 +799,7 @@ function stateModelFactory() {
          * data from the loaded tree/msa/treeMetadata, generally loaded by
          * autorun
          */
-        data: types.optional(DataModelF(), {
-          tree: '',
-          msa: '',
-          treeMetadata: '',
-        }),
+        data: types.optional(DataModelF(), {}),
 
         /**
          * #property
