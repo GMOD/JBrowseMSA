@@ -39,7 +39,6 @@ const COX1_END = 7678
 // ATP6 ends at column 9449, the right edge of the step-5 window
 const ND6_START = 14408
 const CYTB_END = 16160
-const CONTROL_START = 16308
 
 // 17,966 columns across the alignment panel a 1600px viewport leaves beside a
 // 190px tree area, stopping short of the legend the overlay draws top right
