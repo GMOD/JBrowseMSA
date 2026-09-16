@@ -134,12 +134,14 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   `components/tracks/TrackBlocks.tsx`, the canvas host for every kind, and the
   SVG export calls it through `renderAllTracks`. Adding a track kind means a new
   `kind`, a draw function in that module, and a case in `drawTrackBlock`, with
-  no second rendering path or component. `TrackResizeHandle` writes a kind's
-  shared volatile height, except for a `columnTracks` track, which carries its
-  own. Tracks writing the same volatile resize together, so only the last
-  turned-on one of them carries a handle -- conservation and property
-  conservation share the handle below the pair -- and the drag divides across
-  the group so the bottom edge follows the cursor.
+  no second rendering path or component. A track model carries a `heightKey`
+  naming the height its divider writes: the `kind` for a computed track, so
+  conservation and property conservation resize together, and `own:<id>` for a
+  `columnTracks` track, which resizes alone. `trackHeights` holds one number per
+  key, absent until the user drags, and `defaultTrackHeights` answers until
+  then. A track without a key -- the ruler, a text track -- has no divider. Only
+  the last turned-on track of a key carries the handle, and the drag divides
+  across the group, so the group's bottom edge follows the cursor.
 - `turnedOffTracks` records only the user's explicit show/hide choices. An id is
   absent until they touch that track, and the value then means "off", so a
   hidden-by-default track (see `defaultOffTracks` in `model.ts`) adds nothing to

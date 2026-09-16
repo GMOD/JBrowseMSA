@@ -62,6 +62,7 @@ export type {
   StructureResidue,
   TextTrackModel,
   TidyDomainAnnotation,
+  TrackKind,
   UnshareableData,
   Viewport,
 } from './types.ts'

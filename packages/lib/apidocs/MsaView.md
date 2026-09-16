@@ -420,15 +420,6 @@ Annotation[]
 annotations: [] as Annotation[]
 ```
 
-#### volatile: arcTrackHeight
-
-```js
-// type signature
-number
-// code
-arcTrackHeight: 50
-```
-
 #### volatile: blockSize
 
 size of blocks of content to be drawn, px
@@ -438,27 +429,6 @@ size of blocks of content to be drawn, px
 number
 // code
 blockSize: 500
-```
-
-#### volatile: columnTrackHeights
-
-heights of individual `columnTracks`, by track id. The shared per-kind heights
-below apply only to computed tracks.
-
-```js
-// type signature
-Record<string, number>
-// code
-columnTrackHeights: {} as Record<string, number>
-```
-
-#### volatile: conservationTrackHeight
-
-```js
-// type signature
-number
-// code
-conservationTrackHeight: 40
 ```
 
 #### volatile: error
@@ -641,18 +611,6 @@ number
 resizeHandleWidth: 5
 ```
 
-#### volatile: sequenceLogoTrackHeight
-
-taller than the conservation track: in a 40px stack of four residues each glyph
-is too short to identify
-
-```js
-// type signature
-number
-// code
-sequenceLogoTrackHeight: 80
-```
-
 #### volatile: status
 
 ```js
@@ -660,6 +618,19 @@ sequenceLogoTrackHeight: 80
 { msg: string; onCancel?: () => void; }
 // code
 status: undefined as { msg: string; onCancel?: () => void } | undefined
+```
+
+#### volatile: trackHeights
+
+the height of every track one divider resizes, keyed by `heightKey`: the `kind`
+for the computed tracks, `own:<id>` for a data track. A key is absent until the
+user drags, and `defaultTrackHeights` answers for it until then.
+
+```js
+// type signature
+Record<string, number>
+// code
+trackHeights: {} as Record<string, number>
 ```
 
 #### volatile: transientHighlights
@@ -1597,6 +1568,18 @@ helpers above are 0-based.
 structureResidue: (rowName: string, seqPos: number, structureId?: string) => StructureResidue
 ```
 
+#### method: trackHeight
+
+the height a track draws at: what the user dragged its divider to, then the
+height its snapshot asked for, then its kind's default. Only a text track falls
+through to rowHeight, and `??` short-circuits before reading it, so vertical
+zoom does not rebuild the other tracks
+
+```js
+// type signature
+trackHeight: (kind: TrackKind, heightKey?: string, given?: number) => number
+```
+
 #### method: visibleColToGlobalCol
 
 Convert a visible column index (what a mouse handler reports) to a column of the
@@ -1805,20 +1788,6 @@ keep a hidden overlay hidden.
 setAnnotations: (annotations: Annotation[]) => void
 ```
 
-#### action: setArcTrackHeight
-
-```js
-// type signature
-setArcTrackHeight: (arg: number) => void
-```
-
-#### action: setColumnTrackHeight
-
-```js
-// type signature
-setColumnTrackHeight: (id: string, height: number) => void
-```
-
 #### action: setColumnTracks
 
 ```js
@@ -1833,13 +1802,6 @@ set col width (px)
 ```js
 // type signature
 setColWidth: (n: number) => void
-```
-
-#### action: setConservationTrackHeight
-
-```js
-// type signature
-setConservationTrackHeight: (arg: number) => void
 ```
 
 #### action: setCurrentAlignment
@@ -2095,13 +2057,6 @@ setScrollZoom: (arg: boolean) => void
 setScrollZoomAxis: (arg: "both" | "horizontal" | "vertical") => void
 ```
 
-#### action: setSequenceLogoTrackHeight
-
-```js
-// type signature
-setSequenceLogoTrackHeight: (arg: number) => void
-```
-
 #### action: setShowDomainLegend
 
 expand or collapse the domain legend that floats over the alignment
@@ -2142,6 +2097,15 @@ setStatus: (status?: { msg: string; onCancel?: () => void; }) => void
 ```js
 // type signature
 setSubFeatureRows: (arg: boolean) => void
+```
+
+#### action: setTrackHeight
+
+resize every track sharing a `heightKey`; see `trackHeights`
+
+```js
+// type signature
+setTrackHeight: (heightKey: string, height: number) => void
 ```
 
 #### action: setTree

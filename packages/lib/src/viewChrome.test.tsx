@@ -145,17 +145,23 @@ test("dragging a data track's divider resizes that track alone", async () => {
       { id: 'dnds', name: 'dN/dS', kind: 'bar', values: [1, 0.5, 0.25] },
     ])
   })
-  const conservation = model.conservationTrackHeight
+  const conservation = model.trackHeight('bar')
   const before = model.turnedOnTracks.find(t => t.model.id === 'dnds')!.model
     .height
 
   // the data track sits above the computed ones, so its handle is the first
   await drag(byCursor('ns-resize')[0]!, { y: 30 })
 
-  expect(
-    model.turnedOnTracks.find(t => t.model.id === 'dnds')!.model.height,
-  ).toBe(before + 30)
-  expect(model.conservationTrackHeight).toBe(conservation)
+  const dnds = () =>
+    model.turnedOnTracks.find(t => t.model.id === 'dnds')!.model.height
+  expect(dnds()).toBe(before + 30)
+  expect(model.trackHeight('bar')).toBe(conservation)
+
+  // and the conservation divider leaves the data track where it is: sharing
+  // the default no longer means sharing the height
+  await drag(byCursor('ns-resize')[1]!, { y: 25 })
+  expect(model.trackHeight('bar')).toBe(conservation + 25)
+  expect(dnds()).toBe(before + 30)
 })
 
 test('one divider resizes conservation and property conservation together', async () => {
@@ -169,11 +175,11 @@ test('one divider resizes conservation and property conservation together', asyn
   // still the data-track-free count: the pair shares the one handle below it
   expect(byCursor('ns-resize')).toHaveLength(2)
 
-  const before = model.conservationTrackHeight
+  const before = model.trackHeight('bar')
   await drag(byCursor('ns-resize')[0]!, { y: 40 })
 
   // the drag splits across the pair, so the bottom edge follows the cursor
-  expect(model.conservationTrackHeight).toBe(before + 20)
+  expect(model.trackHeight('bar')).toBe(before + 20)
 })
 
 test('the tree gutter carries a scale bar, and the ruler track draws', async () => {

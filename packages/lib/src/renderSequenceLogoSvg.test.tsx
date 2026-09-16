@@ -51,7 +51,7 @@ function logoGlyphs(svg: string, fontSize: number) {
 }
 
 async function glyphsOf(model: ReturnType<typeof makeModel>) {
-  return logoGlyphs(await exportSvg(model), model.sequenceLogoTrackHeight)
+  return logoGlyphs(await exportSvg(model), model.trackHeight('logo'))
 }
 
 test('the logo track is hidden until it is asked for', () => {
@@ -133,7 +133,7 @@ test('every glyph stays inside the track band', async () => {
     )
     .reduce((a, t) => a + t.model.height, 0)
   const bandTop = above
-  const bandBottom = above + model.sequenceLogoTrackHeight
+  const bandBottom = above + model.trackHeight('logo')
 
   const glyphs = await glyphsOf(model)
   expect(glyphs.length).toBeGreaterThan(0)
@@ -149,7 +149,7 @@ test('letters are stretched to fill their column', async () => {
   model.toggleTrack('sequence-logo')
   const glyphs = await glyphsOf(model)
 
-  const expected = colWidth / (model.sequenceLogoTrackHeight * CHAR_WIDTH_RATIO)
+  const expected = colWidth / (model.trackHeight('logo') * CHAR_WIDTH_RATIO)
   for (const glyph of glyphs) {
     expect(glyph.sx).toBeCloseTo(expected, 5)
   }

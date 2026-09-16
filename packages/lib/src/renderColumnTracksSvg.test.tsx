@@ -64,7 +64,7 @@ test('a bar track from values exports one bar per column in its color', async ()
   const bars = rectsFilled(await exportSvg(model), barColor).sort(
     (a, b) => a.x - b.x,
   )
-  const trackHeight = model.conservationTrackHeight
+  const trackHeight = model.trackHeight('bar')
   expect(bars.map(b => b.x)).toEqual([0, colWidth, colWidth * 2, colWidth * 3])
   expect(bars.map(b => b.height)).toEqual([
     trackHeight,

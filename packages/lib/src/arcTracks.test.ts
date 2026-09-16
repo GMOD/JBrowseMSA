@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import stateModelFactory from './model.ts'
+import stateModelFactory, { defaultTrackHeights } from './model.ts'
 
 import type { ColumnTrackSpec } from './types.ts'
 
@@ -96,7 +96,7 @@ test('an arc track joins the track list with its own height and color', () => {
   ])
   const track = model.tracks.find(t => t.model.id === 'a')!.model
   expect(track.arcColor).toBe('red')
-  expect(track.height).toBe(model.arcTrackHeight)
+  expect(track.height).toBe(defaultTrackHeights.arc)
   expect(track.arcs).toHaveLength(1)
 })
 

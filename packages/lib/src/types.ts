@@ -15,6 +15,9 @@ export interface BasicTrackModel {
   associatedRowName?: string
   height: number
   kind: TrackKind
+  // the model height this track's divider writes, shared with every track
+  // carrying the same key. Absent on a track no divider resizes.
+  heightKey?: string
   // hidden until the user asks for it, unless they have already chosen
   defaultOff?: boolean
 }

@@ -1,7 +1,7 @@
 import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { expect, test } from 'vitest'
 
-import stateModelFactory from './model.ts'
+import stateModelFactory, { defaultTrackHeights } from './model.ts'
 
 import type { ColumnTrackSpec } from './types.ts'
 
@@ -67,7 +67,7 @@ test('data tracks join the track list with their own color and height', () => {
   expect(ids).toContain('f')
   const bar = model.tracks.find(t => t.model.id === 't')!.model
   expect(bar.barColor).toBe('red')
-  expect(bar.height).toBe(model.conservationTrackHeight)
+  expect(bar.height).toBe(defaultTrackHeights.bar)
   const text = model.tracks.find(t => t.model.id === 'f')!.model
   expect(text.customColorScheme).toEqual({ 1: 'blue' })
   expect(text.height).toBe(model.rowHeight)

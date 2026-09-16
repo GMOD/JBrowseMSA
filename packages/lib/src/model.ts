@@ -121,6 +121,7 @@ import type {
   ResolvedHighlight,
   RowResidue,
   StructureResidue,
+  TrackKind,
   UnshareableData,
   Viewport,
 } from './types.ts'
@@ -135,9 +136,28 @@ function parseTreeText(text: string) {
   return parseNewick(text.startsWith('SEQ') ? parseEmfTree(text).tree : text)
 }
 
-// The sequence logo is three times the conservation track's height, so it
-// starts hidden.
+// The height each kind draws at before the user drags a divider. A text track
+// is absent: it is one alignment row tall and follows rowHeight, so the zoom
+// controls already size it.
+export const defaultTrackHeights: Partial<Record<TrackKind, number>> = {
+  bar: 40,
+  // taller than a bar track: in a 40px stack of four residues each glyph is
+  // too short to identify. Twice the height of the tracks above it, so it
+  // starts hidden
+  logo: 80,
+  arc: 50,
+  ruler: 20,
+}
+
+// the kinds a divider resizes. The ruler is a fixed scale, and a text track
+// follows the vertical zoom.
+const resizableKinds = new Set<TrackKind>(['bar', 'logo', 'arc'])
+
 const defaultOffTracks = new Set(['sequence-logo', 'position-ruler'])
+
+// a data track carries its own height rather than its kind's, so its divider
+// resizes it alone
+const ownHeightKey = (id: string) => `own:${id}`
 
 // base-pair arcs: one color for nested helices, one for pseudoknots, which cross
 // them
@@ -558,27 +578,12 @@ function stateModelFactory() {
 
       /**
        * #volatile
+       * the height of every track one divider resizes, keyed by `heightKey`:
+       * the `kind` for the computed tracks, `own:<id>` for a data track. A key
+       * is absent until the user drags, and `defaultTrackHeights` answers for
+       * it until then.
        */
-      conservationTrackHeight: 40,
-
-      /**
-       * #volatile
-       * heights of individual `columnTracks`, by track id. The shared per-kind
-       * heights below apply only to computed tracks.
-       */
-      columnTrackHeights: {} as Record<string, number>,
-
-      /**
-       * #volatile
-       * taller than the conservation track: in a 40px stack of four residues
-       * each glyph is too short to identify
-       */
-      sequenceLogoTrackHeight: 80,
-
-      /**
-       * #volatile
-       */
-      arcTrackHeight: 50,
+      trackHeights: {} as Record<string, number>,
 
       /**
        * #volatile
@@ -1729,34 +1734,44 @@ function stateModelFactory() {
         )
       },
       /**
+       * #method
+       * the height a track draws at: what the user dragged its divider to,
+       * then the height its snapshot asked for, then its kind's default. Only
+       * a text track falls through to rowHeight, and `??` short-circuits
+       * before reading it, so vertical zoom does not rebuild the other tracks
+       */
+      trackHeight(kind: TrackKind, heightKey = kind as string, given?: number) {
+        return (
+          self.trackHeights[heightKey] ??
+          given ??
+          defaultTrackHeights[kind] ??
+          self.rowHeight
+        )
+      },
+      /**
        * #getter
        */
       get columnTrackModels(): BasicTrack[] {
-        // read rowHeight only for text tracks, so vertical zoom does not
-        // rebuild the other data tracks
-        const defaultHeight = (kind: ColumnTrackSpec['kind']) =>
-          kind === 'bar'
-            ? self.conservationTrackHeight
-            : kind === 'arc'
-              ? self.arcTrackHeight
-              : self.rowHeight
-        return self.columnTracks.map(track => ({
-          model: {
-            id: track.id,
-            name: track.name,
-            kind: track.kind,
-            height:
-              self.columnTrackHeights[track.id] ??
-              track.height ??
-              defaultHeight(track.kind),
-            barColor: track.color,
-            arcColor: track.color,
-            customColorScheme: track.colors,
-            data: this.columnTrackContent.get(track.id)?.data,
-            arcs: this.columnTrackContent.get(track.id)?.arcs,
-          },
-          ReactComponent: TrackBlocks,
-        }))
+        return self.columnTracks.map(track => {
+          const heightKey = resizableKinds.has(track.kind)
+            ? ownHeightKey(track.id)
+            : undefined
+          return {
+            model: {
+              id: track.id,
+              name: track.name,
+              kind: track.kind,
+              heightKey,
+              height: this.trackHeight(track.kind, heightKey, track.height),
+              barColor: track.color,
+              arcColor: track.color,
+              customColorScheme: track.colors,
+              data: this.columnTrackContent.get(track.id)?.data,
+              arcs: this.columnTrackContent.get(track.id)?.arcs,
+            },
+            ReactComponent: TrackBlocks,
+          }
+        })
       },
       /**
        * #getter
@@ -1773,7 +1788,8 @@ function stateModelFactory() {
                   id: 'base-pairs',
                   name: 'Base pairs',
                   kind: 'arc' as const,
-                  height: self.arcTrackHeight,
+                  heightKey: 'arc',
+                  height: this.trackHeight('arc'),
                   arcs,
                 },
                 ReactComponent: TrackBlocks,
@@ -1793,7 +1809,6 @@ function stateModelFactory() {
             id: 'conservation',
             name: 'Conservation',
             kind: 'bar' as const,
-            height: self.conservationTrackHeight,
             barColor: 'gray',
           },
           ...(self.sequenceType === 'amino'
@@ -1802,7 +1817,6 @@ function stateModelFactory() {
                   id: 'property-conservation',
                   name: 'Property conservation',
                   kind: 'bar' as const,
-                  height: self.conservationTrackHeight,
                   barColor: '#6a51a3',
                 },
               ]
@@ -1811,16 +1825,23 @@ function stateModelFactory() {
             id: 'sequence-logo',
             name: 'Sequence logo',
             kind: 'logo' as const,
-            height: self.sequenceLogoTrackHeight,
           },
           // last, so it sits against the alignment it numbers
           {
             id: 'position-ruler',
             name: 'Position',
             kind: 'ruler' as const,
-            height: 20,
           },
-        ].map(model => ({ model, ReactComponent: TrackBlocks }))
+        ].map(model => ({
+          // every computed track of a kind shares that kind's height, so the
+          // kind is its key
+          model: {
+            ...model,
+            heightKey: resizableKinds.has(model.kind) ? model.kind : undefined,
+            height: this.trackHeight(model.kind),
+          },
+          ReactComponent: TrackBlocks,
+        }))
       },
 
       get tracks(): BasicTrack[] {
@@ -2944,27 +2965,10 @@ function stateModelFactory() {
       },
       /**
        * #action
+       * resize every track sharing a `heightKey`; see `trackHeights`
        */
-      setConservationTrackHeight(arg: number) {
-        self.conservationTrackHeight = arg
-      },
-      /**
-       * #action
-       */
-      setColumnTrackHeight(id: string, height: number) {
-        self.columnTrackHeights = { ...self.columnTrackHeights, [id]: height }
-      },
-      /**
-       * #action
-       */
-      setSequenceLogoTrackHeight(arg: number) {
-        self.sequenceLogoTrackHeight = arg
-      },
-      /**
-       * #action
-       */
-      setArcTrackHeight(arg: number) {
-        self.arcTrackHeight = arg
+      setTrackHeight(heightKey: string, height: number) {
+        self.trackHeights = { ...self.trackHeights, [heightKey]: height }
       },
       /**
        * #action
