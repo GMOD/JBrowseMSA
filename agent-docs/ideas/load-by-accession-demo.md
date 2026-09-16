@@ -10,5 +10,5 @@ supports but its demos rarely show.
 Since 2026-09-05 the protein case partly exists, inside JBrowse rather than on
 this site: jbrowse-plugin-msaview takes a UniProt accession as the query of a
 `searchParams` launch or as a `geneCandidates` entry of a UniRef
-`orthologParams` launch, and the gallery links one. A Pfam/Rfam family box on
-this site is still open.
+`orthologParams` launch, and the tutorial index links one. A Pfam/Rfam family
+box on this site is still open.

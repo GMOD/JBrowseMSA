@@ -20,10 +20,9 @@ them, and follow it in this file too: agents copy the prose here as house voice.
 - `packages/msa-parsers`: parsers for Stockholm, FASTA, Clustal, Newick, EMF,
   A3M, GFF
 - `packages/examples`: the live examples the website's /examples page mounts.
-  `src/examples/catalog.ts` holds each example's name, description and figure
-  captions (the gallery page reads them from there), and `data/` holds the
-  alignments, trees and GFFs as files, which `writeExampleData.mjs` copies into
-  the app
+  `src/examples/catalog.ts` holds each example's name, category and description,
+  and `data/` holds the alignments, trees and GFFs as files, which
+  `writeExampleData.mjs` copies into the app
 - `packages/svgcanvas`: vendored ESM fork of svgcanvas for SVG export
 - `packages/r-msaview`: R htmlwidget package with ggtree/Biostrings/treeio
   interop
@@ -46,6 +45,15 @@ Adding one means a file there plus an entry in `website/src/lib/tutorials.ts`;
 reads the list. Write a tutorial instead of a viewer feature whenever the work
 is data preparation. See `viewer-not-analysis-tool` in the memory and
 `agent-docs/ideas/data-layers.md`.
+
+The index is the site's gallery. Each entry names a `thumb`, one of that
+tutorial's own figures, which astro:assets crops to 5:3 and re-encodes at build
+time, so a card cannot drift from its page and no thumbnail file lands in
+`docs/media`. There is no second showcase page: the standalone figure wall at
+`/gallery` was a static copy of what `/examples` runs live and the tutorials
+build, so it is gone and `/gallery` redirects here. `docs/media` holds only what
+a rendered page shows; a figure that stops being shown loses its screenshot spec
+too.
 
 ## Architecture decisions
 

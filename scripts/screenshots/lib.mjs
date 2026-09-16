@@ -14,32 +14,15 @@ import serveHandler from 'serve-handler'
 const args = process.argv.slice(2)
 
 // Repo layout, resolved once from this file's location (scripts/screenshots/).
-// The website's gallery page imports specs.mjs at build time to get each
-// figure's live link, and a bundler rewrites import.meta.url to wherever it put
-// the chunk -- so when this file's own location is not the repo, find the root
-// by walking up from the working directory instead.
-function findRepoRoot() {
-  const isRoot = dir => fs.existsSync(path.join(dir, 'pnpm-workspace.yaml'))
-  const here = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    '..',
-    '..',
-  )
-  if (isRoot(here)) {
-    return here
-  }
-  let dir = process.cwd()
-  while (!isRoot(dir)) {
-    const up = path.dirname(dir)
-    if (up === dir) {
-      throw new Error(`no repo root above ${process.cwd()}`)
-    }
-    dir = up
-  }
-  return dir
-}
-
-export const repoRoot = findRepoRoot()
+// Every consumer is a node script run from the checkout, so import.meta.url is
+// the real path. It used to need a walk-up fallback because the website bundled
+// specs.mjs into the gallery page for its live links, and a bundler rewrites
+// import.meta.url to wherever it put the chunk.
+export const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+)
 export const mediaDir = path.join(repoRoot, 'docs', 'media')
 export const appDataDir = path.join(
   repoRoot,
@@ -49,7 +32,7 @@ export const appDataDir = path.join(
   'data',
 )
 // Where that data comes from: the examples package's files, which
-// writeExampleData.mjs copies into the app and the gallery imports directly.
+// writeExampleData.mjs copies into the app and the live examples import directly.
 export const examplesDataDir = path.join(
   repoRoot,
   'packages',

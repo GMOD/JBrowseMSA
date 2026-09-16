@@ -1,13 +1,7 @@
-// Data only, with no React and no alignment strings, so the website's gallery
-// page can import it at build time without pulling in the viewer.
+// Data only, with no React and no alignment strings, so a build-time consumer
+// can import it without pulling in the viewer.
 //
-// `description` is the blurb over the live example on the examples page. Each
-// entry in `figures` is a figure on the gallery page: `src` names the PNG in
-// docs/media and the screenshot spec that renders it
-// (scripts/screenshots/specs.mjs), and the gallery takes the figure's live link
-// from that spec. Most examples carry no figure, since the gallery has one
-// figure per viewer capability.
-//
+// `description` is the blurb over the live example on the examples page.
 // index.ts joins this list to the components.
 
 export const categoryOrder = [
@@ -22,19 +16,11 @@ export const categoryOrder = [
 
 export type Category = (typeof categoryOrder)[number]
 
-export interface Figure {
-  /** docs/media/<src>.png, and the spec of the same name that renders it */
-  src: string
-  title: string
-  caption: string
-}
-
 export interface CatalogEntry {
   id: string
   name: string
   category: Category
   description: string
-  figures?: Figure[]
 }
 
 // Stable URL/anchor slug derived from an example name, shared by the examples
@@ -147,20 +133,6 @@ export const catalog: CatalogEntry[] = [
       'binds the protein’s own SH2 domain and clamps the kinase shut. The arcs ' +
       'are C-beta pairs under 8 Å in PDB 2SRC, mapped to UniProt numbering ' +
       'through SIFTS and filtered to pairs joining two different domains.',
-    figures: [
-      {
-        src: 'real-domains',
-        title: 'Domain architecture',
-        caption:
-          'The Src-family kinases with their InterPro domains. The SH3, SH2 and kinase blocks line up in the same columns in every member.',
-      },
-      {
-        src: 'domain-contacts',
-        title: 'How the domains pack',
-        caption:
-          'The same kinases with a contact map from PDB 2SRC over the domain boxes. The boxes mark the domains, and the arcs mark residue pairs in contact between them. The red arcs are the autoinhibitory clamp, where the C-terminal tail doubles back so its phospho-Tyr527 binds the protein’s own SH2 domain. The pairs are placed on the human row’s residues, and the viewer projects them onto the alignment’s columns.',
-      },
-    ],
   },
   {
     id: 'P53ClinVar',
@@ -173,20 +145,6 @@ export const catalog: CatalogEntry[] = [
       'missense variants ClinVar has on record per residue. 94% of those ' +
       'variants land inside the DNA-binding domain, with a second small ' +
       'cluster on the tetramerization domain.',
-    figures: [
-      {
-        src: 'within-protein-conservation',
-        title: 'p53 domain architecture',
-        caption:
-          'p53’s InterPro domains overlaid. The central DNA-binding domain (red), where most cancer mutations cluster, makes up the bulk of the protein, flanked by the short N-terminal transactivation motifs.',
-      },
-      {
-        src: 'clinvar-variants',
-        title: 'ClinVar pathogenic variants per residue',
-        caption:
-          'The same p53 orthologs, diffed against human, with two labeled bands and a columnTracks layer of the missense variants ClinVar classifies as pathogenic, counted per residue. 94% of them fall inside the DNA-binding domain, and the small second cluster sits on the tetramerization motif. The conservation track shows where the family has not changed, and the ClinVar track shows where a change causes disease.',
-      },
-    ],
   },
   {
     id: 'Nlrp1',
@@ -199,20 +157,6 @@ export const catalog: CatalogEntry[] = [
       'residues apart between rows yet land within 2 alignment columns, ' +
       'because the overlay places domains by alignment column instead of by ' +
       'each protein’s own residue numbers.',
-    figures: [
-      {
-        src: 'domain-loss',
-        title: 'Domain loss across orthologs',
-        caption:
-          'Twelve NLRP1 orthologs. Every row carries the same core (NACHT, winged helix, HD2, then FIIND/UPA and the CARD), and each of those blocks lines up in the same columns. The N-terminal PYD (cyan) appears in only five rows; the other seven lack it and show blank space there. The core domains sit up to 391 residues apart between rows in their own coordinates, and the column-locked overlay stacks them.',
-      },
-      {
-        src: 'column-lock',
-        title: 'Why the domain overlay is column-locked',
-        caption:
-          'Both panels hold the same twelve orthologs, domain GFF, palette and tree, and differ only in whether the input was aligned. Unaligned (top), column N is residue N and the shared domains scatter into a staircase. Aligned (bottom), they land in the same columns: NACHT starts at residue 328 in human and 93 in hamster, and the viewer draws both within one column of each other.',
-      },
-    ],
   },
   {
     id: 'Hox',
@@ -261,14 +205,6 @@ export const catalog: CatalogEntry[] = [
       'the SARS-CoV-2 spike in PDB 6M0J, computed from the structure. A ' +
       'species whose contact residues differ from human shows letters inside ' +
       'the marked columns.',
-    figures: [
-      {
-        src: 'host-range',
-        title: 'Where a receptor is contacted',
-        caption:
-          'ACE2 orthologs diffed against human, with the spike-contact residues marked. The bands are the 20 residues of human ACE2 with an atom within 4 Å of the SARS-CoV-2 receptor-binding domain in PDB 6M0J, placed on the human row and projected through each ortholog’s gaps. A dot inside a band is a species keeping the human residue; a letter is a substitution that changes how well the virus binds.',
-      },
-    ],
   },
   {
     id: 'HistoneH4',
@@ -277,14 +213,6 @@ export const catalog: CatalogEntry[] = [
     description:
       'Histone H4 across eukaryotes diffed against human. One of the most ' +
       'conserved proteins known, it renders almost entirely as dots.',
-    figures: [
-      {
-        src: 'extreme-conservation',
-        title: 'Reference comparison (dots)',
-        caption:
-          'Diffing against a reference (relativeTo) draws residues identical to it as dots, so only the changes show as letters. Histone H4, one of the most conserved proteins known, is almost entirely dots relative to human; only the most distant lineages differ.',
-      },
-    ],
   },
   {
     id: 'Insulin',
@@ -296,14 +224,6 @@ export const catalog: CatalogEntry[] = [
       'C-peptide drifts (letters). The arc track carries the three disulfide ' +
       'bonds from UniProt, and two of them span the C-peptide, holding the ' +
       'hormone together after that piece is cut out.',
-    figures: [
-      {
-        src: 'processing-conservation',
-        title: 'Post-translational processing',
-        caption:
-          'Insulin relative to human: the mature B and A chains stay conserved (dots) while the cleaved-out C-peptide drifts (letters).',
-      },
-    ],
   },
   {
     id: 'Globin',
@@ -320,20 +240,6 @@ export const catalog: CatalogEntry[] = [
       'sickle variant 0.22, likely benign, because the mutant protein folds ' +
       'and carries oxygen. The disease comes from the polymerization that ' +
       'follows.',
-    figures: [
-      {
-        src: 'gene-duplication',
-        title: 'Gene duplication',
-        caption:
-          'The globin family groups by globin type across species, alpha beside alpha and beta beside beta, as ancient gene duplication predicts.',
-      },
-      {
-        src: 'sickle-cell',
-        title: 'One residue, three numbering systems',
-        caption:
-          'The same globins with two layers on the hemoglobin beta row: AlphaMissense’s mean predicted pathogenicity per residue, and a band on the sickle-cell substitution. The band is at row residue 7, which is p.Glu7Val in HGVS and residue 6 of PDB 1A3N chain B, and the SIFTS mapping shipped beside it converts between the two. AlphaMissense scores this variant likely benign: sickle hemoglobin folds and carries oxygen, and the disease comes from the polymerization that follows.',
-      },
-    ],
   },
   {
     id: 'CytochromeC',
@@ -362,14 +268,6 @@ export const catalog: CatalogEntry[] = [
       'The same elongation factor in bacteria, archaea and eukaryotes, about ' +
       'as far apart as two sequences get while staying alignable. The tree ' +
       'splits the three domains of life.',
-    figures: [
-      {
-        src: 'tree-of-life',
-        title: 'Tree of life',
-        caption:
-          'Elongation factor EF-1α/EF-Tu across bacteria, archaea, and eukaryotes. The label prefixes name each domain of life, and a single inferred tree separates the three.',
-      },
-    ],
   },
   {
     id: 'PfamGlobin',
@@ -382,14 +280,6 @@ export const catalog: CatalogEntry[] = [
       'Only 116 of those columns carry more than half the sequences; the rest ' +
       'are insertions belonging to one member each, and the gappy-column ' +
       'slider hides them.',
-    figures: [
-      {
-        src: 'pfam-scale',
-        title: 'Scale',
-        caption:
-          'The whole Globin family from Pfam (PF00042) as the InterPro API serves it: 20,705 sequences, 672 columns, 20 MB of Stockholm behind a 3 MB gzipped response. The first column paints about three seconds after the page opens. After that the tiled canvas draws only the tiles on screen, so scrolling and zooming stay interactive. The figure hides the 556 columns that are at least half gaps, leaving the 116 the globin fold occupies. A Pfam full alignment gives every insertion its own columns, and at this depth most insertions belong to one sequence.',
-      },
-    ],
   },
   {
     id: 'A3m',
@@ -402,14 +292,6 @@ export const catalog: CatalogEntry[] = [
       'insertions into the rectangle the viewer draws, which spreads the ' +
       'query’s 146 match columns across 2,086. Hiding the columns at least ' +
       'half the rows leave empty puts the profile back together.',
-    figures: [
-      {
-        src: 'a3m-inserts',
-        title: 'A3M insertions',
-        caption:
-          'The AlphaFold2 input MSA for hemoglobin beta (OpenProteinSet, 1,211 BFD/UniClust hits), drawn twice. A3M leaves rows ragged: uppercase is a match column and lowercase an insertion outside the profile. The parser widens each insertion slot to the longest insertion any row puts there, so the top panel has 2,086 mostly-empty columns. The bottom panel hides the columns that are at least half gaps, leaving the 129 columns half the hits agree on, the profile the search ran against.',
-      },
-    ],
   },
   {
     id: 'LargeTree',
@@ -438,14 +320,6 @@ export const catalog: CatalogEntry[] = [
       'Transfer RNA (Rfam RF00005): the Stockholm SS_cons cloverleaf renders ' +
       'as a secondary-structure track, coloring the acceptor stem and D/' +
       'anticodon/T arms by base-pairing above the alignment.',
-    figures: [
-      {
-        src: 'rna-secondary-structure',
-        title: 'RNA secondary structure',
-        caption:
-          'A tRNA alignment (Rfam RF00005): the Stockholm SS_cons cloverleaf renders as a secondary-structure track above the columns, with the acceptor stem and D-/anticodon-/T-arms colored by base-pairing.',
-      },
-    ],
   },
   {
     id: 'CoronaFse',
@@ -457,14 +331,6 @@ export const catalog: CatalogEntry[] = [
       'stem 1 instead of nesting inside it, so the seed writes it as the WUSS ' +
       'letter pair A/a. The arc track draws the crossing, which the bracket ' +
       'track cannot show.',
-    figures: [
-      {
-        src: 'pseudoknot-arcs',
-        title: 'Base pairs, including a pseudoknot',
-        caption:
-          'The coronavirus frameshifting stimulation element (Rfam RF00507) across all four genera. The Base pairs track draws the Stockholm SS_cons as arcs between the columns that pair: blue for the nested helices, red for the pseudoknot. A pseudoknot pairs across a helix instead of nesting inside it, so WUSS writes it as the letter pair A/a, and the bracket track directly above shows two runs of letters with no visible relationship. The red arcs cross the blue ones.',
-      },
-    ],
   },
   {
     id: 'Hammerhead',
@@ -485,20 +351,6 @@ export const catalog: CatalogEntry[] = [
       'intact in land mammals and the manatee but disabled in cetaceans by a ' +
       'shared frameshift in exon 3 and premature stops. The frameshift and ' +
       'stops show only in a nucleotide alignment.',
-    figures: [
-      {
-        src: 'f12-exon-architecture',
-        title: 'Gene structure overlay (DNA)',
-        caption:
-          'Coagulation factor XII coding alignment with its 14 exons overlaid, each exon the same color across species. The exons use the same overlay path as InterPro domains, and react-msaview-cli genestructure builds the GFF.',
-      },
-      {
-        src: 'f12-frameshift',
-        title: 'Pseudogenization (base resolution)',
-        caption:
-          'Zoomed to single nucleotides. F12 is intact in land mammals and the manatee, and a single-base deletion shared by exactly the four cetaceans, together with premature stops elsewhere, disables it. A protein alignment cannot show a single-base deletion.',
-      },
-    ],
   },
   {
     id: 'GeneCluster',
@@ -513,13 +365,5 @@ export const catalog: CatalogEntry[] = [
       'of each genome’s own coordinates. scripts/gene-cluster builds the ' +
       'sequences synthetically, since a real cluster with exactly one ' +
       'inversion and one deletion is unlikely to exist.',
-    figures: [
-      {
-        src: 'gene-arrow-map',
-        title: 'Gene-arrow map',
-        caption:
-          'A gggenes-style gene cluster across genomes, each gene a strand-directed arrow anchored to alignment columns. Two genes are inverted (the arrow flips) and one is deleted (its columns gap out), and every gene stays column-aligned. The sequences are synthetic, and the overlay is the one real data uses.',
-      },
-    ],
   },
 ]

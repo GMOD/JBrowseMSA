@@ -48,4 +48,4 @@ node scripts/src-protein-link/generate.mjs   # prints the declarative URL
 ```
 
 Requires `tabix` (htslib) on PATH for the remote RefSeq fetch. The printed URL
-goes in `website/src/pages/gallery.astro`.
+goes in `website/src/lib/jbrowseLinks.ts`.

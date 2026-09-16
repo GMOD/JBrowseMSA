@@ -18,8 +18,8 @@ leaves unchanged figures untouched.
 | Phase     | Command                    | What it makes                                                   | Browser?          |
 | --------- | -------------------------- | --------------------------------------------------------------- | ----------------- |
 | `figures` | `pnpm figures`             | the SVG README figures, via the viewer's own SVG export (jsdom) | no                |
-| `app`     | `pnpm screenshots`         | demo-app PNGs (color schemes, dialogs, phylogeny gallery)       | yes               |
-| `jbrowse` | `pnpm screenshots:jbrowse` | the genome-browser figures, via the JBrowse plugin              | yes + jbrowse-web |
+| `app`     | `pnpm screenshots`         | demo-app PNGs (color schemes, dialogs, domain overlays)         | yes               |
+| `jbrowse` | `pnpm screenshots:jbrowse` | the genome-browser figure, via the JBrowse plugin               | yes + jbrowse-web |
 
 The `jbrowse` phase needs a running jbrowse-web (the `main` branch). If none is
 reachable the orchestrator skips that phase, so the other figures still
@@ -97,19 +97,23 @@ pnpm screenshots:jbrowse --filter=protein3d --protein3d-dist=../jbrowse-plugin-p
 
 Each figure is one entry in the `FIGURES` list in
 [`jbrowse-figures.mjs`](jbrowse-figures.mjs), naming a connected-session const
-in `website/src/pages/gallery.astro`. The driver reads the URL from that file,
+in `website/src/lib/jbrowseLinks.ts`. The driver reads the URL from that module,
 so changing the docs link changes the figure. One generic driver loads each link
 and screenshots it.
 
 ```js
 {
-  out: 'genome-browser-braf-v600e', // → docs/media/genome-browser-braf-v600e.png
-  link: 'brafV600',                 // const name in gallery.astro
-  settle: 9000,                     // ms to let tracks paint
-  centerHighlight: true,            // scroll the MSA to center the highlighted column
-  expect: { connected: true, colChar: 'V' }, // assertions (fail = no screenshot)
+  out: 'genome-browser-tp53-protein3d', // → docs/media/genome-browser-tp53-protein3d.png
+  link: 'tp53Protein3d',                // const name in jbrowseLinks.ts
+  settle: 30000,                        // ms to let tracks paint
+  centerHighlight: true,                // scroll the MSA to center the highlighted column
+  expect: { connected: true },          // assertions (fail = no screenshot)
 }
 ```
+
+The list holds only the figure the tutorial index shows. The SRC, BRAF V600E and
+TP53 R248 sessions that page links as text are not captured, since no page shows
+a figure for them.
 
 With `expect`, the connected view must resolve and the highlighted query column
 must read the named residue, or the script captures no PNG and fails.
@@ -127,21 +131,6 @@ build in place of the published `latest` bundle.
 | `--plugin-dist=P`    | Serve a local msaview plugin `dist/` instead of the published bundle |
 | `--protein3d-dist=P` | Serve a local protein3d plugin `dist/` (the three-view figure)       |
 | `--force`            | Rewrite every PNG, bypassing the diff gate                           |
-
-### Standalone: the F12 genome figure
-
-`docs/media/genome-browser-f12.png` shows the F12 locus in genomic coordinates,
-beside the F12 gene-loss MSA figures. It is a plain genome view with no
-connected MSA, so it captures against the **published** jbrowse-web with no
-local build:
-
-```sh
-node scripts/screenshots/f12-genome-figure.mjs --force
-```
-
-The script defaults to `https://jbrowse.org/code/jb2/main` and the hosted
-combined config; its session URL matches the `f12Genome` link in
-`gallery.astro`.
 
 ---
 

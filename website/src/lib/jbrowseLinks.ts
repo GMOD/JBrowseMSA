@@ -1,4 +1,4 @@
-// Self-contained JBrowse session URLs for the gallery's "Inside JBrowse"
+// Self-contained JBrowse session URLs for the tutorial index's "Inside JBrowse"
 // section.
 //
 // The short-form links below are written by hand: since jbrowse-plugin-msaview

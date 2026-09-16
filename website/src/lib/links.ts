@@ -21,11 +21,6 @@ export const docs: SiteLink[] = [
     body: 'Navigation, color schemes, tracks, exporting, and sharing a link to a view.',
   },
   {
-    label: 'Tutorials',
-    href: `${base}/tutorials`,
-    body: 'Data preparation outside the viewer, from sequences to an alignment, a tree and annotations, each walkthrough ending on a link that opens the result.',
-  },
-  {
     label: 'CLI',
     href: `${base}/cli`,
     body: 'react-msaview-cli builds domain and exon GFFs from InterPro, InterProScan or RefSeq, and exports an SVG with no browser.',
@@ -49,9 +44,9 @@ export const docs: SiteLink[] = [
 
 export const showcase: SiteLink[] = [
   {
-    label: 'Gallery',
-    href: `${base}/gallery`,
-    body: 'Alignments that carry a finding, each one a link that opens it.',
+    label: 'Tutorials',
+    href: `${base}/tutorials`,
+    body: 'Data preparation outside the viewer, from sequences to an alignment, a tree and annotations, each walkthrough ending on a link that opens the result. The index doubles as the gallery.',
   },
   {
     label: 'Examples',

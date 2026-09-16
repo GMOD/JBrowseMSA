@@ -367,6 +367,10 @@ importers:
       react-msaview:
         specifier: workspace:*
         version: link:../packages/lib
+    devDependencies:
+      sharp:
+        specifier: ^0.35.4
+        version: 0.35.4(@types/node@26.5.1)
 
 packages:
 
@@ -4976,8 +4980,7 @@ snapshots:
       '@jbrowse/quick-lru': 7.3.5
       generic-filehandle2: 2.4.0
 
-  '@img/colour@1.1.0':
-    optional: true
+  '@img/colour@1.1.0': {}
 
   '@img/sharp-darwin-arm64@0.35.4':
     optionalDependencies:
@@ -8043,7 +8046,6 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.4
       '@img/sharp-win32-x64': 0.35.4
       '@types/node': 26.5.1
-    optional: true
 
   shebang-command@2.0.0:
     dependencies:

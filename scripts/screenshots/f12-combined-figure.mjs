@@ -16,8 +16,9 @@
  * and works against the published jbrowse-web + hosted combined config.
  *
  * The script has two outputs with different targets:
- *   - the live "Open in JBrowse" URLs the gallery links (writeLinksModule) point
- *     at the published jbrowse-web, config and plugin, so they work for anyone.
+ *   - the live "Open in JBrowse" URLs the tutorial index links
+ *     (writeLinksModule) point at the published jbrowse-web, config and plugin,
+ *     so they work for anyone.
  *   - the committed figure PNGs render against a local build when available, so
  *     the 14-exon overlay shows the palette fix (distinct colours) instead of the
  *     published plugin's pink-heavy 8-colour clamp. The script serves these over
@@ -65,7 +66,7 @@ const gff = fs.readFileSync(
   'utf8',
 )
 
-// published targets for the live gallery URLs
+// published targets for the live "Inside JBrowse" URLs
 const PUBLISHED_JBROWSE = 'https://jbrowse.org/code/jb2/main'
 const PUBLISHED_CONFIG =
   'https://gmod.org/JBrowseMSA/demo/data/jbrowse-msa-combined-config.json'
@@ -180,7 +181,7 @@ async function capture(browser, jbrowseBase, configUrl, variant) {
 
 // The live session URL is self-contained (data inlined), so it works against the
 // published jbrowse-web with no hosted files. The script writes the URLs as a
-// generated module the gallery imports, so the encoded session strings stay out
+// generated module the page imports, so the encoded session strings stay out
 // of the page source. They always target the published jbrowse and config.
 function writeLinksModule() {
   const constName = n => `f12Combined${n[0].toUpperCase()}${n.slice(1)}Url`

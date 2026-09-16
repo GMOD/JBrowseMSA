@@ -7,7 +7,7 @@
  * Every file in packages/examples/data is copied verbatim into
  * packages/app/public/data, which the app serves at its root and gmod.org
  * serves at /JBrowseMSA/demo/data/, so a link fetches the same bytes the
- * gallery imports.
+ * live examples import.
  *
  * Run standalone with:  node scripts/screenshots/writeExampleData.mjs
  * (also runs automatically as the first step of `pnpm screenshots`).

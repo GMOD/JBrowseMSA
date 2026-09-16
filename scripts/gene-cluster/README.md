@@ -1,9 +1,9 @@
 # Gene arrow map demo (gggenes-style)
 
-Builds the **gene-arrow-map** gallery example: a colinear gene cluster across
-six genomes, with each gene drawn as a strand-directed arrow over an alignment.
-The arrows use the overlay that draws InterPro domains and the F12 exon
-structure, with gene-level GFF features that carry a `+`/`-` strand.
+Builds the **gene-arrow-map** example: a colinear gene cluster across six
+genomes, with each gene drawn as a strand-directed arrow over an alignment. The
+arrows use the overlay that draws InterPro domains and the F12 exon structure,
+with gene-level GFF features that carry a `+`/`-` strand.
 
 The data is **synthetic**, like the [gggenes](https://github.com/wilkox/gggenes)
 R package's bundled `example_genes` dataset ("for example purposes only"), and

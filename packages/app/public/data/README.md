@@ -31,7 +31,7 @@ it does not cover:
 | `gene-cluster.stock/.gff` | A synthetic colinear gene cluster for the arrow-map overlay; built by `scripts/gene-cluster`                                                   |
 
 The files below back the JBrowse links on the
-[gallery](https://gmod.org/JBrowseMSA/gallery) page, built by
+[tutorials](https://gmod.org/JBrowseMSA/tutorials#inside-jbrowse) page, built by
 `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
 (see their READMEs), not by `writeExampleData.mjs`:
 

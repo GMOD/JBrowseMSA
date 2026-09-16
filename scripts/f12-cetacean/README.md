@@ -1,6 +1,6 @@
 # F12 cetacean pseudogenization example (DNA + gene structure)
 
-Builds the **DNA** gallery example: the coagulation factor XII (**F12**) coding
+Builds the **DNA** example: the coagulation factor XII (**F12**) coding
 alignment across mammals. The gene is intact in land mammals and in the
 **manatee**, a fully aquatic sirenian, and **disabled in cetaceans** (whales,
 dolphins, porpoises) by premature stop codons and a shared single-base
@@ -80,10 +80,8 @@ reflects this.)
 
 ## Outputs
 
-| Where                                                        | What                                                                                 |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `packages/examples/data/f12-cetacean-cds.stock`              | full F12 CDS alignment + embedded NJ tree                                            |
-| `packages/examples/data/f12-cetacean-exons.gff`              | 14-exon gene-structure overlay, projected per species                                |
-| `packages/examples/src/examples/F12.tsx`                     | the gallery example (DNA + nucleotide coloring + exon overlay)                       |
-| `docs/media/f12-exon-architecture.png`, `f12-frameshift.png` | gallery figures (scripts/screenshots/specs.mjs)                                      |
-| `docs/media/genome-browser-f12.png`                          | the genomic-coordinate view + Multiz MAF (scripts/screenshots/f12-genome-figure.mjs) |
+| Where                                           | What                                                        |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| `packages/examples/data/f12-cetacean-cds.stock` | full F12 CDS alignment + embedded NJ tree                   |
+| `packages/examples/data/f12-cetacean-exons.gff` | 14-exon gene-structure overlay, projected per species       |
+| `packages/examples/src/examples/F12.tsx`        | the live example (DNA + nucleotide coloring + exon overlay) |

@@ -21,17 +21,17 @@ pnpm --filter website preview   # preview the build
 | `embedding.astro`        | `USAGE.md`                                                                                  |
 | `cli.astro`              | `packages/cli/README.md`                                                                    |
 | `r-package.astro`        | `packages/r-msaview/README.md`                                                              |
-| `tutorials/index.astro`  | Cards from `src/lib/tutorials.ts`                                                           |
+| `tutorials/index.astro`  | The gallery: a card per walkthrough from `src/lib/tutorials.ts`, plus the JBrowse figures   |
 | `tutorials/[slug].astro` | One page per `docs/tutorials/*.md`                                                          |
-| `gallery.astro`          | Alignments that carry a finding, each a link into the app or JBrowse                        |
 | `examples.astro`         | `packages/examples` as a React island (`ExamplesApp`)                                       |
 
-Rendering the repo's markdown keeps the docs in one place. A small rehype plugin
-in `astro.config.mjs` rewrites every markdown `<img>` to `/{base}/media/<file>`,
-wraps a screenshot and the paragraph under it into a `<figure>`, and gives every
-heading an id. `scripts/sync-media.mjs` copies `docs/media/*` into
-`public/media/` (run automatically by `dev`/`build`); `public/media` is
-git-ignored.
+Rendering the repo's markdown keeps the docs in one place. Small plugins in
+`astro.config.mjs` do the rest: a remark plugin rewrites every markdown image to
+`/{base}/media/<file>` (early enough that Astro does not also emit an optimized
+copy nothing asks for), and rehype plugins wrap a screenshot and the paragraph
+under it into a `<figure>` and give every heading an id.
+`scripts/sync-assets.mjs` copies `docs/media/*` into `public/media/` (run
+automatically by `dev`/`build`); `public/media` is git-ignored.
 
 ## Adding a page
 

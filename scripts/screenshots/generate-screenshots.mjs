@@ -4,7 +4,7 @@
  *   figures  — the README/SVG figures, via the viewer's own SVG export under
  *              jsdom (no browser).            -> packages/lib/scripts/generateFigures.tsx
  *   app      — the demo-app PNG screenshots (color schemes, dialogs, the curated
- *              phylogeny gallery), via puppeteer against a built app.
+ *              domain overlays), via puppeteer against a built app.
  *                                              -> scripts/screenshots/generate.mjs
  *   jbrowse  — the genome-browser figures, via the react-msaview plugin
  *              running inside a real jbrowse-web (needs the main build).

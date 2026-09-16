@@ -4,21 +4,21 @@ import { defineConfig } from 'astro/config'
 
 const BASE = '/JBrowseMSA'
 
-// Rewrite every markdown <img src> to the site's /media/ folder (populated by
-// scripts/sync-media.mjs from docs/media), so the existing docs render here
+// Rewrite every relative markdown image to the site's /media/ folder (populated
+// by scripts/sync-assets.mjs from docs/media), so the existing docs render here
 // regardless of the relative path they were authored with.
+//
+// This is a remark plugin, not a rehype one, because Astro turns a relative
+// markdown image into an ESM import of the file and emits an optimized copy of
+// it under _astro/. Rewriting after that point left every figure in the build
+// twice — once under /media/, which the pages ask for, and once under _astro/,
+// which nothing does, 4.9MB of it. A path that is already absolute when Astro
+// looks is left alone.
 function rewriteMarkdownImages() {
   return tree => {
     const visit = node => {
-      if (
-        node.type === 'element' &&
-        node.tagName === 'img' &&
-        node.properties?.src
-      ) {
-        const src = String(node.properties.src)
-        if (!src.startsWith('http')) {
-          node.properties.src = `${BASE}/media/${src.split('/').pop()}`
-        }
+      if (node.type === 'image' && !/^(https?:)?\/\//.test(node.url)) {
+        node.url = `${BASE}/media/${node.url.split('/').pop()}`
       }
       for (const child of node.children ?? []) {
         visit(child)
@@ -140,6 +140,12 @@ export default defineConfig({
   site: 'https://gmod.org',
   base: BASE,
   trailingSlash: 'ignore',
+  // /gallery was a wall of screenshots of the examples the live /examples page
+  // runs and the tutorials build. The tutorial index is the gallery now; this
+  // keeps the published links working.
+  redirects: {
+    '/gallery': `${BASE}/tutorials`,
+  },
   // Astro's default HTML minifier strips whitespace-only text nodes between
   // elements, so `<strong>a</strong>\n<strong>b</strong>` renders as "ab" and
   // authoring needs ugly {' '} spacers. Turning it off keeps normal HTML
@@ -149,7 +155,8 @@ export default defineConfig({
   integrations: [react()],
   markdown: {
     processor: unified({
-      rehypePlugins: [rewriteMarkdownImages, wrapFigures, headingAnchors],
+      remarkPlugins: [rewriteMarkdownImages],
+      rehypePlugins: [wrapFigures, headingAnchors],
     }),
   },
   vite: {

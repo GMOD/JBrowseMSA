@@ -1,6 +1,6 @@
 # Building the real-data phylogeny examples
 
-This directory builds the real-data examples in the gallery
+This directory builds the real-data examples on the examples page
 (`packages/examples`) and the docs from scratch, so every file records where its
 data came from and which commands produced it.
 
@@ -24,7 +24,7 @@ node scripts/examples-gen/generate.mjs myd88 ace2
 
 Output goes to `packages/examples/data/` as plain files: `<name>.aln` for the
 alignment, `<name>.nh` for the tree and `<name>-domains.gff` for the domain
-overlay. The gallery imports them with Vite's `?raw`, the screenshot specs read
+overlay. The examples import them with Vite's `?raw`, the screenshot specs read
 them, and `scripts/screenshots/writeExampleData.mjs` copies them into the demo
 app so a `?data=` link can fetch one. The script generates these files, so edit
 the inputs here and re-run.
@@ -121,7 +121,7 @@ network access at build time.
 
 ## The `relativeTo` reference row
 
-For MyD88 and ACE2 the first dataset row is `Human`. The gallery components pass
+For MyD88 and ACE2 the first dataset row is `Human`. The example components pass
 `relativeTo="Human"` to `MSAViewer`, which renders a `.` in every other row
 wherever it matches the reference and the letter only where it differs. On a
 highly conserved protein this leaves only the lineage- or host-specific

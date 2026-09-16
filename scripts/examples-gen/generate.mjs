@@ -6,7 +6,7 @@
  *   3. tree: run ClustalW again on the alignment to infer a neighbor-joining
  *      tree (Newick).
  * The aligned FASTA and Newick for every dataset go to
- * ../../packages/examples/data as plain files, which the gallery, the figures
+ * ../../packages/examples/data as plain files, which the examples, the figures
  * and the screenshot specs read.
  *
  * Prerequisites: clustalw on PATH (Debian/Ubuntu: `apt install clustalw`;

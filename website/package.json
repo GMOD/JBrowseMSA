@@ -28,5 +28,8 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-msaview": "workspace:*"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.4"
   }
 }

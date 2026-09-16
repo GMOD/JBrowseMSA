@@ -1,18 +1,20 @@
 /**
- * Capture the JBrowse-integration figures for the "Genome browser" docs page.
- * Each figure is one entry in the FIGURES list below: it names a docs link (a
- * connected-session const in gallery.astro, read from the page so a changed
- * link changes the figure) plus a few capture settings (settle time, whether to
- * center the highlighted column, what to assert, an optional annotation
- * overlay). One generic driver loads each link in jbrowse-web and screenshots
- * it.
+ * Capture the JBrowse-integration figure the tutorial index's "Inside JBrowse"
+ * section shows. It is one entry in the FIGURES list below: it names a docs link
+ * (a connected-session const in website/src/lib/jbrowseLinks.ts, read from the
+ * module so a changed link changes the figure) plus a few capture settings
+ * (settle time, whether to center the highlighted column, what to assert, an
+ * optional annotation overlay). One generic driver loads each link in
+ * jbrowse-web and screenshots it.
  *
- *   genome-browser-src.png, genome-browser-braf-v600e.png,
- *   genome-browser-tp53-r248.png   (the connected protein<->genome links)
  *   genome-browser-tp53-protein3d.png  (the three-view genome+alignment+3D
  *                                       structure link, with a motif highlighted
  *                                       in all three; needs
  *                                       jbrowse-plugin-protein3d)
+ *
+ * The SRC, BRAF V600E and TP53 R248 sessions that section links as text are not
+ * captured: no page shows a figure for them, and a PNG nothing renders goes
+ * stale unseen.
  *
  * Unlike the app screenshots (scripts/screenshots/generate.mjs, which serves the
  * self-contained demo app), these run the react-msaview JBrowse plugin inside
@@ -64,12 +66,12 @@ import {
 
 const dataDir = appDataDir
 const outDir = mediaDir
-const astroPage = path.join(
+const linksModule = path.join(
   repoRoot,
   'website',
   'src',
-  'pages',
-  'gallery.astro',
+  'lib',
+  'jbrowseLinks.ts',
 )
 
 const GMOD_DATA = 'https://gmod.org/JBrowseMSA/demo/data'
@@ -106,33 +108,13 @@ const protein3dPort = numOpt('protein3d-port', 9101)
 const filterTokens = listOpt('filter')
 
 // ---- the figures (declarative) --------------------------------------------
-// link:           connected-session const name in gallery.astro, whose URL the
-//                 figure loads
+// link:           connected-session const name in lib/jbrowseLinks.ts, whose
+//                 URL the figure loads
 // settle:         ms to wait for tracks to paint before capturing
 // centerHighlight:scroll the alignment so the pre-highlighted column is centered
 // expect:         assertions: { connected, colChar } (colChar is the residue
 //                 the highlighted query column must read)
 const FIGURES = [
-  {
-    out: 'genome-browser-src',
-    link: 'proteinLinked',
-    settle: 9000,
-    expect: { connected: true },
-  },
-  {
-    out: 'genome-browser-braf-v600e',
-    link: 'brafV600',
-    settle: 9000,
-    centerHighlight: true,
-    expect: { connected: true, colChar: 'V' },
-  },
-  {
-    out: 'genome-browser-tp53-r248',
-    link: 'tp53R248',
-    settle: 9000,
-    centerHighlight: true,
-    expect: { connected: true, colChar: 'R' },
-  },
   {
     // the three-view figure: genome + alignment + AlphaFold structure, all
     // connected, opened with the p53 nuclear export signal motif highlighted.
@@ -154,16 +136,17 @@ const FIGURES = [
 ]
 
 // ---- helpers --------------------------------------------------------------
-// the connected-session links in gallery.astro, declared as
-// `const NAME =\n  'url'`, parsed into { NAME: url }. Other const declarations
-// without a single-quoted string value (e.g. `const base = ...`) don't match,
-// and the URLs are percent-encoded so they never contain a single quote.
+// the connected-session links in lib/jbrowseLinks.ts, declared as
+// `export const NAME =\n  'url'`, parsed into { NAME: url }. The consts built by
+// specUrl() don't match and aren't captured; the other single-quoted consts that
+// do match are simply never asked for. The URLs are percent-encoded, so they
+// never contain a single quote.
 function readLinks() {
-  const astro = fs.readFileSync(astroPage, 'utf8')
+  const source = fs.readFileSync(linksModule, 'utf8')
   const links = {}
   const re = /const (\w+) =\s*'([^']*)'/g
   let m
-  while ((m = re.exec(astro)) !== null) {
+  while ((m = re.exec(source)) !== null) {
     links[m[1]] = m[2]
   }
   return links
@@ -312,7 +295,7 @@ function checkExpectations(fig, result, expectCol) {
 async function captureFigure(browser, fig, ctx, links) {
   const realUrl = links[fig.link]
   if (!realUrl) {
-    throw new Error(`docs link '${fig.link}' not found in gallery.astro`)
+    throw new Error(`docs link '${fig.link}' not found in jbrowseLinks.ts`)
   }
   const msaView = decodeSpec(realUrl).views.find(v => v.type === 'MsaView')
   const highlightCols = msaView?.highlightColumns ?? []
@@ -436,7 +419,7 @@ async function main() {
   const failures = []
   try {
     for (const fig of FIGURES.filter(wants)) {
-      // skip a figure whose docs link is no longer in gallery.astro
+      // skip a figure whose docs link is no longer in jbrowseLinks.ts
       if (!links[fig.link]) {
         console.log(`↷ ${fig.out} (no '${fig.link}' link in the docs; skipped)`)
         continue

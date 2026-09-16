@@ -1,7 +1,7 @@
 /**
  * Read the example data the screenshot specs draw. The alignments, trees, GFFs
  * and layer JSON live as files in packages/examples/data (see
- * scripts/examples-gen/README.md), so a spec reads exactly what the gallery
+ * scripts/examples-gen/README.md), so a spec reads exactly what the examples
  * imports and what writeExampleData.mjs publishes through the app.
  */
 import fs from 'node:fs'
