@@ -112,9 +112,11 @@ wrote ./h5n1.nwk: 204 tips, 149 internal nodes, 352 edges
 The alignment is the HA coding sequence cut out of each reconstructed genome at
 the coordinates the build annotates. The tree is the build's own topology pruned
 to the 204 tips, with each surviving branch's length taken from the difference
-in cumulative divergence. A 53 kB table runs past the 8,192-character request
-line a link fits in, so the snapshot names the three files and the viewer
-fetches them at startup:
+in cumulative divergence. Nextstrain infers that topology with IQ-TREE and
+publishes a divergence and an inferred date per node, so the Newick written here
+carries no support values on its internal nodes. A 53 kB table runs past the
+8,192-character request line a link fits in, so the snapshot names the three
+files and the viewer fetches them at startup:
 
 ```json
 {
