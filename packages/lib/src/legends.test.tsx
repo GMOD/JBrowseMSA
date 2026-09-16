@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 //
 // model.legends drives two renderings: the on-screen overlay and the column the
-// SVG export reserves on the right. The domain overlay is the only producer, so
-// a second legend comes from a view that overrides the getter here.
+// SVG export reserves on the right. The stacking tests take their legends from
+// a view that overrides the getter; the tests at the bottom use the encoding
+// producer.
 import React from 'react'
 
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
@@ -12,10 +13,10 @@ import AnnotationLegend from './components/msa/AnnotationLegend.tsx'
 import MSAModelF from './model.ts'
 import { renderToStaticMarkup } from './renderToStaticMarkup.ts'
 import { renderToSvg } from './renderToSvg.tsx'
-import { installSvgTestEnv } from './svgTestUtil.ts'
+import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
 import type { MsaViewModel } from './model.ts'
-import type { Legend } from './types.ts'
+import type { Encoding, Legend } from './types.ts'
 
 beforeAll(() => {
   installSvgTestEnv()
@@ -131,4 +132,50 @@ test('the overlay draws nothing for an empty list', () => {
   expect(
     renderToStaticMarkup(<AnnotationLegend model={modelWithLegends([])} />),
   ).toBe('')
+})
+
+const encodingModel = (encodings: Encoding[]) =>
+  createTestModel({
+    id: 'legend-encoding-test',
+    data: {
+      msa: '>duck\nACDEFGHIKL\n>chicken\nACDE-GHIKL',
+      tree: '(duck:0.1,chicken:0.2);',
+      treeMetadata: JSON.stringify({
+        duck: { clade: '2.3.4.4b' },
+        chicken: { clade: '2.3.2.1c' },
+      }),
+    },
+    encodings,
+  })
+
+test('an encoding legend draws in both renderings', async () => {
+  const model = encodingModel([
+    { channel: 'tipLabel', field: 'clade', scale: { palette: 'set1' } },
+  ])
+  expect(model.legends).toEqual([
+    {
+      id: 'rowData-clade',
+      title: 'clade',
+      entries: [
+        { id: '2.3.2.1c', label: '2.3.2.1c', color: '#e41a1c' },
+        { id: '2.3.4.4b', label: '2.3.4.4b', color: '#377eb8' },
+      ],
+    },
+  ])
+
+  const svg = await exportEntire(model)
+  expect(svg).toContain('>2.3.4.4b</text>')
+  expect(svg).toContain('fill="#377eb8"')
+
+  const html = renderToStaticMarkup(<AnnotationLegend model={model} />)
+  expect(html).toContain('>2.3.2.1c</span>')
+})
+
+test('two channels over one field produce one legend', () => {
+  const model = encodingModel([
+    { channel: 'tipLabel', field: 'clade' },
+    { channel: 'rowTint', field: 'clade' },
+  ])
+
+  expect(model.legends.map(l => l.title)).toEqual(['clade'])
 })

@@ -2791,23 +2791,36 @@ function stateModelFactory() {
        * #getter
        * the categorical color keys drawn for this view, shared by the on-screen
        * legend overlay and the SVG export's reserved column. The domain overlay
-       * is the only producer today
+       * produces the first, and each categorical encoding one per field, so two
+       * channels over one field list that field once
        */
       get legends(): Legend[] {
         const { fillPalette, visibleDomainTypes } = this
-        return self.actuallyShowDomains && visibleDomainTypes.length > 0
-          ? [
-              {
-                id: 'domains',
-                title: 'Domains',
-                entries: visibleDomainTypes.map(d => ({
-                  id: d.accession,
-                  label: d.name,
-                  color: fillPalette[d.accession]!,
-                })),
-              },
-            ]
-          : []
+        const domainLegends =
+          self.actuallyShowDomains && visibleDomainTypes.length > 0
+            ? [
+                {
+                  id: 'domains',
+                  title: 'Domains',
+                  entries: visibleDomainTypes.map(d => ({
+                    id: d.accession,
+                    label: d.name,
+                    color: fillPalette[d.accession]!,
+                  })),
+                },
+              ]
+            : []
+        const byField = new Map<string, Legend>()
+        for (const { field, legend } of this.resolvedEncodings) {
+          if (legend.length > 0 && !byField.has(field)) {
+            byField.set(field, {
+              id: `rowData-${field}`,
+              title: field,
+              entries: legend,
+            })
+          }
+        }
+        return [...domainLegends, ...byField.values()]
       },
 
       /**

@@ -1051,8 +1051,9 @@ any[]
 #### getter: legends
 
 the categorical color keys drawn for this view, shared by the on-screen legend
-overlay and the SVG export's reserved column. The domain overlay is the only
-producer today
+overlay and the SVG export's reserved column. The domain overlay produces the
+first, and each categorical encoding one per field, so two channels over one
+field list that field once
 
 ```js
 // type
