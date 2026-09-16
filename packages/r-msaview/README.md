@@ -46,6 +46,11 @@ widget
 
 ## Examples
 
+[A protease family in R](https://gmod.org/JBrowseMSA/tutorials/r_protease_triad)
+is the long version: fourteen UniProt accessions cut to their peptidase S1
+domain, aligned with DECIPHER, and drawn with a BLOSUM62 track, disulfide arcs
+and a band on each catalytic residue.
+
 ### Named character vector
 
 ```r
