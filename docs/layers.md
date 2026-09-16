@@ -8,9 +8,10 @@ Wherever a layer names a row, positions are that row's residues, 1-based and
 inclusive, as in GFF, and the viewer projects them through the alignment's gaps.
 Without a row, positions are alignment columns.
 
-Every example below is an `MsaView` snapshot. To open one in the standalone app,
-URL-encode the JSON and put it in `?data=`, either bare or wrapped as
-`{"msaview": {...}}`, the form the app writes back to the address bar:
+**Every figure below links to the app in the state it shows.** Each one is an
+`MsaView` snapshot; to open one, URL-encode the JSON and put it in `?data=`,
+either bare or wrapped as `{"msaview": {...}}`, the form the app writes back to
+the address bar:
 
 ```js
 const snapshot = {
@@ -25,15 +26,18 @@ else a link needs: file URIs, CORS, and the size limit on inline data.
 
 ## columnTracks
 
-A track above the alignment, supplied as data. `kind: "bar"` draws one bar per
-column from `values`, scaled by `max` (default 1) and clamped to that range.
-`kind: "text"` draws one character per column from `data`, colored by `colors`,
-which it looks up by the upper-case character. `kind: "arc"` joins pairs of
-positions from `arcs`, drawing each `{start, end}` as a curve whose height grows
-with the distance between its ends. `row` makes `values`, `data` or the ends of
-an arc index that row's residues instead of columns, so the first value is
+A track above the alignment, supplied as data. `kind` picks what it draws: `bar`
+reads `values`, `text` reads `data`, `arc` reads `arcs`. `row` makes any of them
+index that row's residues instead of alignment columns, so the first one is
 residue 1 and the viewer fills in the row's gaps. A data track appears in the
 Tracks menu, toggles like any other, and exports to SVG.
+
+[![](media/layers-columntracks.png)][live-layers-columntracks]
+
+Preproinsulin across nine vertebrates, with all three kinds over the Human row:
+Kyte-Doolittle hydropathy as bars, the chain each residue belongs to as
+characters, and the three disulfide bonds of UniProt P01308 as arcs. B7-A7 and
+B19-A20 reach across the C peptide that processing cuts out.
 
 ```json
 {
@@ -84,41 +88,40 @@ Tracks menu, toggles like any other, and exports to SVG.
 | `row`    | both | Row name whose residues the values or characters index                      |
 | `height` | both | Pixel height (default 40 for a bar, 50 for an arc, the row height for text) |
 
-An arc joins two positions, such as a base pair, a disulfide bond or a residue
-contact; bar and text tracks hold one value per position. Both ends of an arc
-are alignment columns, or residues of `row`, so a contact map computed in a
-protein's own numbering lands on the alignment without conversion. The viewer
-draws arcs on one baseline in the order given. A `color` on an individual arc
-overrides the track's, so one track can separate classes of pair, such as nested
-helices and a pseudoknot.
+A `row` on an arc track carries both ends of every arc, so a contact map
+computed in a protein's own numbering lands on the alignment without conversion.
+The viewer draws arcs on one baseline in the order given, and a `color` on an
+individual arc overrides the track's, so one track can separate nested helices
+from a pseudoknot.
 
 An RNA Stockholm file needs no arc track, because `#=GC SS_cons` already pairs
 the columns. The viewer draws a **Base pairs** track from it and gives
 pseudoknot pairs their own color. WUSS writes a pseudoknot pair as `A`/`a`
 because it crosses a helix, and brackets can only nest.
 
-Track values can come from outside the alignment. The p53 example carries a
-per-residue count of the missense variants ClinVar classifies as pathogenic. The
-producer computes that count wherever the ClinVar data lives, and the viewer
-places it on the matching columns.
-
 A track over 50 kB serialized stays in the live model but leaves the snapshot,
 under the same [size rule](https://gmod.org/JBrowseMSA/guide#link-to-a-view)
-that applies to inline alignments. Keep a track under that size, or host the
-values and set them at runtime with `model.setColumnTracks(...)`.
+that applies to inline alignments. To go past it, host the values and set them
+at runtime with `model.setColumnTracks(...)`.
 
-A `?data=` link has a tighter limit, set by the server in front of gmod.org: it
-answers a request line over 8,192 characters with a 414 error instead of the
-page. The request line is the whole `GET /JBrowseMSA/demo/?data=… HTTP/1.1`,
-URL-encoded snapshot included, so three tracks of a few hundred values fit and
-much more does not. Scale the values to integers and record the scale in `max`:
-`87,` takes three characters and `0.87,` takes five.
+A `?data=` link has a tighter limit: the server in front of gmod.org answers a
+request line over 8,192 characters with a 414 error instead of the page. That
+line holds the whole URL-encoded snapshot, so three tracks of a few hundred
+values fit and much more does not. Scale the values to integers and record the
+scale in `max`: `87,` takes three characters and `0.87,` takes five.
 
 ## highlights
 
 A labeled band over a column range or a residue range, or a tint over a set of
 rows. `label` and `color` are optional; `color` is any CSS color and paints the
 band, its border, or the row tint.
+
+[![](media/layers-highlights.png)][live-layers-highlights]
+
+p53 across fifteen vertebrates, read as a diff against Human. The two wide bands
+are UniProt domains given as residue ranges of the Human row, the six narrow
+ones are the IARC hotspot residues, and the blue wash is a `rows` entry over the
+five non-mammals, labeled in the tree gutter.
 
 ```json
 "highlights": [
@@ -128,11 +131,11 @@ band, its border, or the row tint.
 ]
 ```
 
-`row` plus `start`/`end` is a residue range of that row. Without `row` the range
-is alignment columns, also 1-based. `rows` marks whole rows across the tree
-labels and the alignment, with the label in the tree gutter. A range that lands
-entirely on hidden gappy columns draws nothing; one that straddles them shrinks
-to the visible part. The viewer ignores row names that match no row.
+`row` plus `start`/`end` is a residue range of that row, `start`/`end` alone is
+a column range, and `rows` marks whole rows across the tree labels and the
+alignment. A range that lands entirely on hidden gappy columns draws nothing;
+one that straddles them shrinks to the visible part. The viewer ignores row
+names that match no row.
 
 React: the `highlights` prop on `MSAViewer`, or `model.setHighlights(list)`. R:
 `msaview(highlights = list(list(row = "human", start = 248, end = 248)))`.
@@ -157,6 +160,13 @@ A clade of the tree with a mark over it. `mark` takes one of four values:
 - `focus` opens the viewer on the clade alone, the way "Show only this node"
   does.
 
+[![](media/layers-clades.png)][live-layers-clades]
+
+46 TEM beta-lactamase alleles. The seven-tip clade at the top carries a
+`highlight` and a `bracket` over the same `mrca`; the clade under it carries a
+`collapse` and draws as a triangle labeled with its six tips. Tip labels take
+their color from an `encodings` entry over the phenotype field.
+
 ```json
 "clades": [
   {
@@ -166,48 +176,6 @@ A clade of the tree with a mark over it. `mark` takes one of four values:
     "color": "#fff3c4",
     "label": "2.3.4.4 H5Nx"
   },
-  { "range": ["Dk/VN/1/2012", "Ck/VN/14/2012"], "tips": 6, "mark": "highlight" }
-]
-```
-
-`mrca` names tips whose most recent common ancestor is the clade, and the mark
-covers every tip under that ancestor. Two names are enough for a clade of any
-size, and a name the tree does not have, or has twice, drops the record: a
-duplicated tip name cannot say which tip it means.
-
-`tips` is the leaf count the producer measured. The viewer resolves the ancestor
-and counts the leaves under it, and a count that differs drops the clade. A
-re-rooted or re-estimated tree therefore loses the rectangle instead of drawing
-it over a different clade, the way `residueMappings.rowLength` guards a mapping
-against a re-aligned row.
-
-`range` takes the two ends of a run of tips in display order, in either order,
-and covers every tip between them, monophyletic or not. Its `tips` is checked
-the same way, against the length of the run.
-
-`color` is any CSS color, defaulting to a light yellow. A highlight's color
-carrying no alpha of its own draws at 60% opacity, so the branches and the
-residues under it stay readable. A bracket draws its bar and its label in that
-color at full strength, and takes the theme's text color without one.
-
-The bracket mark takes a gutter at the right of the tree area, between the tip
-labels and the first row panel or the alignment. The gutter is as wide as the
-bar plus the widest label at the tree font, to a limit of 140px, past which a
-label is cut with an ellipsis. A label reads across the rows where they are
-taller than the font, and runs up the bar where they are not. A `highlight`
-record carrying a `label` draws the label the same way, with no bar.
-
-`collapse` and `focus` seed the viewer's own `collapsed` list and `showOnly`
-once, when the tree resolves. A collapsed clade therefore draws as a triangle
-with its tip count, and `hideGaps` counts the rows that remain, exactly as when
-the user collapses it by hand. Both marks name a node, so they need `mrca`: a
-`range` record carrying one of them drops, along with the records the checks
-above drop. Expanding a seeded clade or clearing the focus holds for the rest of
-the session, and the record collapses or focuses again the next time the link is
-opened.
-
-```json
-"clades": [
   {
     "mrca": ["Gs/TW/TNC1/2015", "Ck/TW/a174/2015"],
     "tips": 47,
@@ -219,8 +187,45 @@ opened.
 ]
 ```
 
-The tips resolve against the tree as loaded, so collapsing a clade's ancestor or
-focusing on part of the tree keeps the mark on the rows that remain on screen.
+`mrca` names tips whose most recent common ancestor is the clade, and the mark
+covers every tip under that ancestor. Two names are enough for a clade of any
+size, and a name the tree does not have, or has twice, drops the record.
+
+`tips` is the leaf count the producer measured. The viewer counts the leaves
+under the ancestor it resolved, and a count that differs drops the clade, so a
+re-rooted or re-estimated tree loses the mark instead of drawing it over a
+different clade.
+
+`range` takes the two ends of a run of tips in display order, in either order,
+and covers every tip between them, monophyletic or not. Its `tips` is checked
+against the length of the run:
+
+```json
+{ "range": ["Dk/VN/1/2012", "Ck/VN/14/2012"], "tips": 6, "mark": "highlight" }
+```
+
+`color` is any CSS color, defaulting to a light yellow. A highlight's color
+carrying no alpha of its own draws at 60% opacity, so the branches and the
+residues under it stay readable. A bracket draws its bar and its label in that
+color at full strength, and takes the theme's text color without one.
+
+The bracket gutter is at the right of the tree area, between the tip labels and
+the first row panel or the alignment, as wide as the bar plus the widest label
+at the tree font, to a limit of 140px, past which a label is cut with an
+ellipsis. A label reads across the rows where they are taller than the font, and
+runs up the bar where they are not. A `highlight` record carrying a `label`
+draws it the same way, with no bar.
+
+`collapse` and `focus` seed the viewer's own `collapsed` list and `showOnly`
+once, when the tree resolves, so `hideGaps` counts the rows that remain exactly
+as when the user collapses a clade by hand. Both marks name a node, so they need
+`mrca`: a `range` record carrying one of them drops. Expanding a seeded clade or
+clearing the focus holds for the rest of the session, and the record applies
+again the next time the link is opened.
+
+Every mark resolves against the tree as loaded, so collapsing a clade's ancestor
+or focusing on part of the tree keeps the mark on the rows that remain on
+screen.
 
 React: the `clades` prop on `MSAViewer`, or `model.setClades(list)`. R:
 `geom_msa_clade(c("Gs/TW/TNC1/2015", "Ck/TW/a174/2015"), tips = 47)`.
@@ -252,9 +257,9 @@ whose other columns are the fields, the shape a ggtree
 `tibble(label = , trait = )` has.
 
 A real metadata table needs the filehandle. Five thousand rows with eight fields
-run to roughly 700 kB, fourteen times the 50 kB inline limit and far past the
-8,192-character request line a `?data=` link fits in, so the snapshot drops it
-and `unshareableData` reports the drop. Host the JSON and set
+run to roughly 700 kB, far past both the 50 kB inline limit and the
+8,192-character request line, so the snapshot drops the table and
+`unshareableData` reports the drop. Host the JSON and set
 `treeMetadataFilehandle` to its URL, and the viewer fetches the table at
 startup:
 
@@ -269,13 +274,14 @@ startup:
 ## encodings
 
 What the viewer's own marks read from a table. Each entry names a `channel`, the
-`field` feeding it, and the `scale` that turns a field value into a color. The
-`tipLabel` channel colors each tip label in the tree, `rowTint` washes the whole
-row across the tree gutter and the alignment, and `branch` colors a tree edge
-whose tips all share one value, each from a field of `rowData`. The
-`featureFill` channel colors each span of the annotation overlay and
-`featureLabel` names the field drawn inside a span, both from a field of the
-features `gff` carries.
+`field` feeding it, and the `scale` that turns a field value into a color.
+
+[![](media/layers-encodings.png)][live-layers-encodings]
+
+The same 46 alleles with three channels over the row table: `tipLabel` and
+`branch` over the phenotype field, and `rowTint` over the subclass field through
+a `{map}` that names one of its two values, so the alleles it leaves out take no
+tint. Each field lists its own legend.
 
 ```json
 {
@@ -294,9 +300,17 @@ features `gff` carries.
 
 | Field     | Meaning                                                            |
 | --------- | ------------------------------------------------------------------ |
-| `channel` | `tipLabel`, `rowTint`, `branch`, `featureFill` or `featureLabel`   |
+| `channel` | one of the five below                                              |
 | `field`   | the field the channel reads                                        |
 | `scale`   | `{palette}` or `{map}`; the ggplot palette when the entry omits it |
+
+| Channel        | What it sets                                                  | Reads a field of |
+| -------------- | ------------------------------------------------------------- | ---------------- |
+| `tipLabel`     | the color of each tip label in the tree                       | `rowData`        |
+| `rowTint`      | a wash over the row, across the tree gutter and the alignment | `rowData`        |
+| `branch`       | the color of a tree edge whose tips all share one value       | `rowData`        |
+| `featureFill`  | the fill of each span of the annotation overlay               | the `gff`        |
+| `featureLabel` | the text drawn inside a span                                  | the `gff`        |
 
 A `{palette}` names one of `ggplot` (the default), `set1`, `dark2`, `okabeito`
 and `tableau`, and the scale hands its colors to the field's distinct values in
@@ -311,29 +325,26 @@ A tint draws at 25% opacity so the residues under it stay readable. A color
 carrying its own alpha, such as `rgba(228,26,28,0.5)`, draws at that alpha.
 
 The `branch` channel gives an internal node the field's value when every tip
-below it shares that value, and the edge from that node to its parent draws in
-the scale's color for the value, as does every edge inside the clade. An edge
-whose tips disagree draws in the default color, and a collapsed clade's triangle
-takes the color of the value its tips agree on. This is ggtree's `groupClade`
-followed by `aes(color = group)`, with the group read from the table.
+below it shares that value, and that node's edge and every edge inside the clade
+draw in the scale's color for it. An edge whose tips disagree draws in the
+default color, and a collapsed clade's triangle takes the color of the value its
+tips agree on. This is ggtree's `groupClade` followed by `aes(color = group)`,
+with the group read from the table.
 
 Every field an encoding reads carries a legend of its scale, titled by the field
 name, drawn by the overlay on screen and reserved as a column in the SVG export.
 Two channels over one field list that field once.
 
-The scales resolve once per change of the table or the encodings, and the tint
-draws in the overlay the `highlights` row sets use, which keeps it out of the
-alignment's raster tile cache.
+### The feature channels
 
 A feature channel reads any field of the feature table: `accession`, `name`,
-`featureType`, or any GFF attribute of column 9, such as `Name` or `gene`. The
-`featureFill` scale replaces the accession palette the overlay colors spans by,
-so a span whose value the scale gives no color draws grey, and the domain legend
-lists that scale's values under the field's name. A feature carrying a GFF3
-`color=` attribute keeps that color whatever the scale says, and `255,0,0` reads
-as `rgb(255,0,0)`, the convention JBrowse and IGV honor. A `featureLabel` draws
-inside its span wherever the text fits, and it is a data channel, so it draws
-whether or not the residue letters do.
+`featureType`, or any GFF attribute of column 9, such as `Name` or `gene`.
+
+[![](media/layers-featurechannels.png)][live-layers-featurechannels]
+
+Ten Src-family kinases with their InterPro Pfam matches, both feature channels
+reading the GFF's `description` attribute: `featureFill` colors each span from a
+`set1` scale and `featureLabel` draws the same value inside it.
 
 ```json
 {
@@ -353,6 +364,14 @@ whether or not the residue letters do.
 }
 ```
 
+The `featureFill` scale replaces the accession palette the overlay colors spans
+by, so a span whose value the scale gives no color draws grey, and the domain
+legend lists that scale's values under the field's name. A feature carrying a
+GFF3 `color=` attribute keeps that color whatever the scale says, and `255,0,0`
+reads as `rgb(255,0,0)`, the convention JBrowse and IGV honor. A `featureLabel`
+draws inside its span wherever the text fits, and it is a data channel, so it
+draws whether or not the residue letters do.
+
 ## rowPanels
 
 A panel beside the tree on the row scale, the counterpart of `columnTracks` on
@@ -360,6 +379,13 @@ the column scale. Each record names a `kind`. A `strip` reads a field of
 `rowData` and colors each row's cell through `scale`, and eight strips make the
 tip-aligned matrix ggtree draws with `gheatmap`. A `features` panel draws the
 spans `gff` carries, one row per alignment row, which is gggenes.
+
+[![](media/layers-rowpanels.png)][live-layers-rowpanels]
+
+Nine strips between the tree and the alignment: the phenotype of each allele,
+then the residue it carries at each of eight Ambler positions. The eight
+position strips share one `legend`, so the matrix carries a single key for its
+residue colors.
 
 ```json
 {
@@ -389,22 +415,34 @@ spans `gff` carries, one row per alignment row, which is gggenes.
 | `header` | the name drawn above the column, defaulting to a strip's field       |
 | `legend` | the title a strip's values list under, defaulting to its field       |
 
-The panels sit between the tree and the alignment, and they take their width out
-of the alignment's: the alignment scrolls and fits within what is left. A strip
-scrolls with the tree and the alignment, and a row the table gives no value
-leaves its cell empty.
+The panels take their width out of the alignment's, so the alignment scrolls and
+fits within what is left. A strip scrolls with the tree and the alignment, and a
+row the table gives no value leaves its cell empty.
 
-Each header draws above its column in the band the tree's scale bar and the
-minimap share, turned on its side, and it exports with the figure. The band is
-as tall as the minimap, so a header longer than that is clipped to it on screen
-and in the export, and the full name is the column's tooltip.
+Each header draws in the band the tree's scale bar and the minimap share, turned
+on its side, and it exports with the figure. The band is as tall as the minimap,
+so a longer header is clipped to it and the full name is the column's tooltip.
 
 A panel's scale carries a legend of its own, titled by the field, and every
-panel and encoding over one field lists that field once. So two strips over `HA`
-and a `tipLabel` encoding over `HA` produce one legend, and a strip over `NA`
-adds a second. A `features` panel taking the overlay's colors lists them under
-the same key the overlay draws, and with no alignment behind it the panel's own
-entries are that key.
+panel and encoding over one field lists that field once. Eight columns over one
+set of colors read eight fields, so give them one `legend` and the figure
+carries one key for the matrix:
+
+```json
+"rowPanels": [
+  { "kind": "strip", "field": "PB2", "scale": { "map": { "am2.2": "#4e79a7" } }, "legend": "segment lineage" },
+  { "kind": "strip", "field": "PB1", "scale": { "map": { "am4": "#f28e2b" } }, "legend": "segment lineage" }
+]
+```
+
+A `features` panel taking the overlay's colors lists them under the same key the
+overlay draws, and with no alignment behind it the panel's own entries are that
+key.
+
+React: the `rowPanels` prop on `MSAViewer`, or `model.setRowPanels(list)`. R:
+`geom_msa_strip("HA", palette = "set1", width = 12, legend = "amino acid")` and
+`geom_msa_features(color = "Name", label = "Name", align = "genE")`. Python: the
+`row_panels` trait.
 
 ### The features panel
 
@@ -412,6 +450,13 @@ A `features` record draws the same spans the alignment's overlay draws, in a
 column of its own: an arrow where the GFF gives a gene a strand, a box
 otherwise, labeled where the text fits. Features that overlap within a row stack
 into lanes, which divide the row's height between them.
+
+[![](media/layers-featurespanel.png)][live-layers-featurespanel]
+
+Twelve bacterial genomes around `trpB`, with no alignment at all: a tree, a GFF
+and one `features` panel under `x: "position"`. The `align` transform starts
+`trpB` at one x down the panel, and `encoding.color` reads the GFF's `role`
+attribute while `encoding.label` reads `Name`.
 
 | Field       | Meaning                                                                                   |
 | ----------- | ----------------------------------------------------------------------------------------- |
@@ -421,29 +466,29 @@ into lanes, which divide the row's height between them.
 | `position`  | `identity` stacks overlapping features; `strandpile` splits the row by strand             |
 
 `x: "position"` maps every row's features onto one linear scale across the
-extent they cover, so a genome with no alignment has an x. A tree, a GFF and a
-`features` panel therefore draw a figure with no `msa` at all: the alignment
-panel is zero columns wide and the tree and the panel fill the view.
-
-`position: "strandpile"` is gggenomes' `position_strandpile`: the forward
-features stack above a line and the reverse below it, each strand packing on its
-own. It is what shows a divergently transcribed neighbour, which reads as one
-more arrow in a row under `identity`. The deepest row on each side sets the grid
-every row lays out on, so the line sits at one height down the panel and a
-reader can scan it, and a row using only one side leaves the other empty. A
-feature with no strand piles with the forward ones.
+extent they cover, so a genome with no alignment has an x. With no `msa` the
+alignment panel is zero columns wide, and the tree and the panel fill the view.
 
 `{type: "align", on: "genE"}` shifts each row so that the first feature whose
 `Name` is `genE` starts at zero, which is gggenes' `make_alignment_dummies`. A
 row carrying no such feature keeps its own origin. An `align` under
 `x: "column"` draws nothing different, since the columns are the alignment's.
 
-`encoding.color` reads any field of the feature table: `accession`, `name`,
-`featureType`, or a GFF attribute of column 9. A record naming none takes the
-colors the overlay gives the same features, which is a `featureFill` encoding
-where one is set and the accession palette otherwise, and `encoding.label` falls
-back to the `featureLabel` encoding the same way. A feature's own GFF `color=`
-wins over either.
+`encoding.color` reads any field of the feature table, the same fields a
+`featureFill` encoding reads. A record naming none takes the colors the overlay
+gives the same features, and `encoding.label` falls back to the `featureLabel`
+encoding the same way. A feature's own GFF `color=` wins over either.
+
+[![](media/layers-strandpile.png)][live-layers-strandpile]
+
+The same panel under `position: "strandpile"`, which separates the divergently
+transcribed neighbours that read as one more arrow in a row under `identity`.
+
+`position: "strandpile"` is gggenomes' `position_strandpile`. Each strand packs
+on its own, and the deepest row on each side sets the grid every row lays out
+on, so the line between the strands sits at one height down the panel. A row
+using only one side leaves the other empty, and a feature with no strand piles
+with the forward ones.
 
 ```json
 {
@@ -468,22 +513,6 @@ wins over either.
 }
 ```
 
-`legend` names the title a strip lists under. Eight segment columns over one set
-of lineage colors read eight fields, so give them one `legend` and the figure
-carries one key for the matrix:
-
-```json
-"rowPanels": [
-  { "kind": "strip", "field": "PB2", "scale": { "map": { "am2.2": "#4e79a7" } }, "legend": "segment lineage" },
-  { "kind": "strip", "field": "PB1", "scale": { "map": { "am4": "#f28e2b" } }, "legend": "segment lineage" }
-]
-```
-
-React: the `rowPanels` prop on `MSAViewer`, or `model.setRowPanels(list)`. R:
-`geom_msa_strip("HA", palette = "set1", width = 12, legend = "amino acid")` and
-`geom_msa_features(color = "Name", label = "Name", align = "genE")`. Python: the
-`row_panels` trait.
-
 ## residueMappings
 
 A residue mapping records which residue of which structure each residue of a row
@@ -491,9 +520,9 @@ corresponds to. Unlike the layers above, `residueMappings` draws nothing; the
 model reads it to answer lookups. The host has to supply it, because matching a
 row to a structure by sequence equality fails for a construct with an expression
 tag, a truncation, an engineered residue, or a row that is a subsequence of the
-entry. That failure is hard to spot: the highlight lands on a real residue, just
-the wrong one. A producer such as SIFTS, an AlphaFold model or a curator
-computes the correspondence.
+entry. The highlight then lands on a real residue, just the wrong one. A
+producer such as SIFTS, an AlphaFold model or a curator computes the
+correspondence.
 
 ```json
 "residueMappings": [
@@ -531,11 +560,9 @@ document. Structure positions are `label_seq_id`, the index into the entity's
 SEQRES. Author numbering carries insertion codes, which break integer
 arithmetic, so the layer does not use it.
 
-**Segments, not a per-residue array**: a mapping is a few contiguous runs, and a
-dozen numbers describe what a dense array spends kilobytes on. The segments also
-define what is unmapped: **a position no segment covers is unmapped**, so the
-layer needs no status field that could contradict them. A position is in one of
-three states:
+A mapping is a few contiguous runs, and the segments define what is unmapped, so
+the layer needs no status field that could contradict them. A position is in one
+of three states:
 
 - covered by a segment and not in `unobserved`: mapped and observed
 - covered and listed in `unobserved`: mapped, not observed
@@ -554,9 +581,9 @@ model.rowResidue(structureId, position, asymId?) // -> {rowName, seqPos} | undef
 Both return `undefined` when no mapping covers the position, **and also when
 more than one does**. A row commonly maps onto several structures, such as an
 experimental entry and a couple of predicted models, and a homodimer maps two
-rows onto two chains of one id. Returning the first mapping found would give a
-wrong residue with no sign of the error. Name one structure or chain with the
-optional argument, or read `mappedStructures` to see what is available.
+rows onto two chains of one id. Returning the first mapping found would place
+the answer on a wrong residue with no error. Name one structure or chain with
+the optional argument, or read `mappedStructures` to see what is available.
 
 ### Staleness
 
@@ -575,22 +602,39 @@ When a segment is malformed, its two sides differing in length so it cannot be a
 1:1 run, the viewer drops only that segment and keeps using the rest of the
 mapping.
 
+`model.residueMappingProblems` lists each mapping or segment the viewer dropped,
+with a `scope` (`mapping` or `segment`) and a reason, so a host can tell "there
+is no structure for this row" from "this data no longer matches what is loaded".
+`model.usableResidueMappings` holds the mappings that passed.
+
 `packages/examples/src/examples/kinaseStructure.json` is a real mapping,
 generated by `scripts/examples-gen/contacts.mjs` from SIFTS: the SRC_HUMAN row
 against chain A of 2SRC, one segment putting row residue 86 at structure residue
 2, one unobserved range, and `rowLength: 536`. The
 [spike_structure tutorial](https://gmod.org/JBrowseMSA/tutorials/spike_structure)
 builds another from scratch, against a construct whose numbering is offset by 19
-and whose furin loop has no coordinates at all. `hemoglobinSickle.json` is the
-smallest example: the sickle-cell substitution is residue 7 of the row and
-residue 6 of PDB 1A3N chain B, and the mapping converts between the two.
-
-`model.residueMappingProblems` lists each mapping or segment the viewer dropped,
-with a `scope` (`mapping` or `segment`) and a reason, so a host can tell "there
-is no structure for this row" from "this data no longer matches what is loaded".
-`model.usableResidueMappings` holds the mappings that passed.
+and whose furin loop has no coordinates at all.
 
 `seqPos` is 1-based, like the rest of this document, and composes directly with
 `applyHighlight`. The column helpers on the model (`seqPosToVisibleCol`) take
 0-based positions, so a structure hover reaches a column as
 `model.seqPosToVisibleCol(rowName, seqPos - 1)`.
+
+<!-- live-demo links (generated by genGuideLinks.mjs) -->
+
+[live-layers-columntracks]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A12%2C%22rowHeight%22%3A18%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22conservation%22%3Atrue%2C%22property-conservation%22%3Atrue%7D%2C%22columnTracks%22%3A%5B%7B%22id%22%3A%22hydropathy%22%2C%22name%22%3A%22Hydropathy%22%2C%22kind%22%3A%22bar%22%2C%22values%22%3A%5B6.4%2C6.3%2C8.3%2C3.6%2C6.4%2C0%2C8.3%2C8.3%2C2.9%2C8.3%2C8.3%2C6.3%2C8.3%2C8.3%2C6.3%2C8.3%2C3.6%2C4.1%2C2.9%2C1%2C2.9%2C6.3%2C6.3%2C6.3%2C7.3%2C8.7%2C1%2C1%2C1.2999999999999998%2C8.3%2C7%2C4.1%2C3.7%2C1.2999999999999998%2C8.3%2C8.7%2C1%2C6.3%2C8.3%2C3.2%2C8.3%2C8.7%2C7%2C4.1%2C1%2C0%2C4.1%2C7.3%2C7.3%2C3.2%2C3.8%2C2.9%2C0.6000000000000001%2C3.8%2C0%2C0%2C1%2C6.3%2C1%2C1%2C8.3%2C1%2C8.7%2C4.1%2C1%2C8.7%2C1%2C8.3%2C4.1%2C4.1%2C4.1%2C2.9%2C4.1%2C6.3%2C4.1%2C3.7%2C8.3%2C1%2C2.9%2C8.3%2C6.3%2C8.3%2C1%2C4.1%2C3.7%2C8.3%2C1%2C0.6000000000000001%2C0%2C4.1%2C9%2C8.7%2C1%2C1%2C7%2C7%2C3.8%2C3.7%2C9%2C7%2C3.7%2C8.3%2C3.2%2C1%2C8.3%2C1%2C1%2C3.2%2C7%2C1%5D%2C%22max%22%3A9%2C%22color%22%3A%22%236a51a3%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A55%7D%2C%7B%22id%22%3A%22chain%22%2C%22name%22%3A%22Chain%22%2C%22kind%22%3A%22text%22%2C%22data%22%3A%22SSSSSSSSSSSSSSSSSSSSSSSSBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB..CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC..AAAAAAAAAAAAAAAAAAAAA%22%2C%22colors%22%3A%7B%22S%22%3A%22%23bdbdbd%22%2C%22B%22%3A%22%234e79a7%22%2C%22C%22%3A%22%23e8e8e8%22%2C%22A%22%3A%22%23e15759%22%2C%22.%22%3A%22%23fafafa%22%7D%2C%22row%22%3A%22Human%22%7D%2C%7B%22id%22%3A%22disulfides%22%2C%22name%22%3A%22Disulfide%20bonds%22%2C%22kind%22%3A%22arc%22%2C%22arcs%22%3A%5B%7B%22start%22%3A31%2C%22end%22%3A96%7D%2C%7B%22start%22%3A43%2C%22end%22%3A109%7D%2C%7B%22start%22%3A95%2C%22end%22%3A100%7D%5D%2C%22color%22%3A%22%23b8860b%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A70%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.nh%22%7D%7D%7D
+[live-layers-highlights]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A140%2C%22colWidth%22%3A2.4%2C%22rowHeight%22%3A18%2C%22relativeTo%22%3A%22Human%22%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22highlights%22%3A%5B%7B%22row%22%3A%22Human%22%2C%22start%22%3A102%2C%22end%22%3A292%2C%22label%22%3A%22DNA-binding%22%2C%22color%22%3A%22rgba(255%2C140%2C0%2C0.15)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A325%2C%22end%22%3A356%2C%22label%22%3A%22Oligomerization%22%2C%22color%22%3A%22rgba(255%2C140%2C0%2C0.15)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A175%2C%22end%22%3A175%2C%22label%22%3A%22175%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A245%2C%22end%22%3A245%2C%22label%22%3A%22245%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A248%2C%22end%22%3A248%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A249%2C%22end%22%3A249%2C%22label%22%3A%22248%2F249%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A273%2C%22end%22%3A273%2C%22label%22%3A%22273%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A282%2C%22end%22%3A282%2C%22label%22%3A%22282%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22rows%22%3A%5B%22Chicken%22%2C%22Turtle%22%2C%22Anole%22%2C%22Frog%22%2C%22Zebrafish%22%5D%2C%22label%22%3A%22non-mammals%22%2C%22color%22%3A%22rgba(78%2C121%2C167%2C0.22)%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fp53%2Fp53-vertebrates.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fp53%2Fp53-vertebrates.nh%22%7D%7D%7D
+[live-layers-clades]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A700%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%5D%2C%22clades%22%3A%5B%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22highlight%22%2C%22color%22%3A%22%23fff3c4%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22bracket%22%2C%22color%22%3A%22%23b45309%22%2C%22label%22%3A%22cephalosporin%2C%207%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-3%22%2C%22TEM-7%22%5D%2C%22tips%22%3A6%2C%22mark%22%3A%22collapse%22%7D%5D%7D%7D
+[live-layers-encodings]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A760%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%2C%7B%22channel%22%3A%22branch%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%2C%7B%22channel%22%3A%22rowTint%22%2C%22field%22%3A%22subclass%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22CEPHALOSPORIN%22%3A%22%23e15759%22%7D%7D%7D%5D%7D%7D
+[live-layers-featurechannels]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A215%2C%22colWidth%22%3A1.8%2C%22rowHeight%22%3A24%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22description%22%2C%22scale%22%3A%7B%22palette%22%3A%22set1%22%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22description%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-domains.gff%22%7D%7D%7D
+[live-layers-rowpanels]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A830%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%2C%22width%22%3A14%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%20104%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22104%22%2C%22legend%22%3A%22residue%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%20164%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22164%22%2C%22legend%22%3A%22residue%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%20238%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22238%22%2C%22legend%22%3A%22residue%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%20240%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22240%22%2C%22legend%22%3A%22residue%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%2069%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%2269%22%2C%22legend%22%3A%22residue%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%20244%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22244%22%2C%22legend%22%3A%22residue%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%20276%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22276%22%2C%22legend%22%3A%22residue%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22Ambler%20265%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22C%22%3A%22%234e79a7%22%2C%22D%22%3A%22%23f28e2b%22%2C%22E%22%3A%22%23e15759%22%2C%22G%22%3A%22%2376b7b2%22%2C%22H%22%3A%22%2359a14f%22%2C%22I%22%3A%22%23edc948%22%2C%22K%22%3A%22%23b07aa1%22%2C%22L%22%3A%22%23ff9da7%22%2C%22M%22%3A%22%239c755f%22%2C%22N%22%3A%22%23bab0ac%22%2C%22R%22%3A%22%2386bcb6%22%2C%22S%22%3A%22%23d37295%22%2C%22T%22%3A%22%23a0cbe8%22%2C%22V%22%3A%22%238cd17d%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22265%22%2C%22legend%22%3A%22residue%22%7D%5D%7D%7D
+[live-layers-featurespanel]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A430%2C%22rowHeight%22%3A26%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22field%22%3A%22role%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22trp%22%3A%22%234e79a7%22%2C%22regulator%22%3A%22%23e15759%22%2C%22pseudogene%22%3A%22%23f28e2b%22%2C%22other%22%3A%22%23d9d9d9%22%7D%7D%7D%2C%22label%22%3A%22Name%22%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%7D%5D%7D%7D
+[live-layers-strandpile]:
+  https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A530%2C%22rowHeight%22%3A34%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22field%22%3A%22role%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22trp%22%3A%22%234e79a7%22%2C%22regulator%22%3A%22%23e15759%22%2C%22pseudogene%22%3A%22%23f28e2b%22%2C%22other%22%3A%22%23d9d9d9%22%7D%7D%7D%2C%22label%22%3A%22Name%22%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%2C%22position%22%3A%22strandpile%22%7D%5D%7D%7D

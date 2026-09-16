@@ -8,6 +8,7 @@
 
 import fs from 'node:fs'
 
+import { specs as layerSpecs } from './layers-specs.mjs'
 import { fileSnap } from './snap.mjs'
 
 // Small IL2RA protein alignment + matching tree (same data as the examples).
@@ -302,6 +303,7 @@ export const specs = [
     settle: 2500,
     clip: 'viewer',
   },
+  ...layerSpecs,
   ...(await tutorialSpecs()),
 ]
 
