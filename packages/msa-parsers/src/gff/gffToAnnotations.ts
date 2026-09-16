@@ -26,6 +26,43 @@ function geneStrand({ type, strand }: GFFRecord): number | undefined {
   return GENE_LEVEL_TYPES.has(type) ? directional : undefined
 }
 
+// The nine columns a feature line holds; every other key of a record came from
+// column 9
+const GFF_COLUMNS = new Set([
+  'seq_id',
+  'source',
+  'type',
+  'start',
+  'end',
+  'score',
+  'strand',
+  'phase',
+])
+
+function attributesOf(record: GFFRecord) {
+  const entries = Object.entries(record).filter(
+    ([key, value]) => !GFF_COLUMNS.has(key) && typeof value === 'string',
+  ) as [string, string][]
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined
+}
+
+// JBrowse and IGV read an RGB triple as well as a named or hex color, and the
+// attribute parser has already turned `255,0,0` into `255 0 0` by splitting on
+// the GFF3 multi-value comma
+const RGB_TRIPLE = /^(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})$/
+
+function cssColor(record: GFFRecord) {
+  const value = (record.color ??
+    record.colour ??
+    record.Color ??
+    record.Colour) as string | undefined
+  if (!value) {
+    return undefined
+  }
+  const triple = RGB_TRIPLE.exec(value.trim())
+  return triple ? `rgb(${triple[1]},${triple[2]},${triple[3]})` : value.trim()
+}
+
 // InterProScan describes the sequence it scanned before listing the matches
 // against it. Those lines span the whole row and carry no signature, so they
 // would draw a full-width block labelled by an md5.
@@ -66,6 +103,8 @@ export function gffToAnnotations(gffRecords: GFFRecord[]): Annotation[] {
         start: record.start,
         end: record.end,
         strand: geneStrand(record),
+        color: cssColor(record),
+        attributes: attributesOf(record),
       }
     })
 }

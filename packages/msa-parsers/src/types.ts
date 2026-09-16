@@ -64,6 +64,13 @@ export interface Annotation {
   start: number
   end: number
   strand?: number
+  /**
+   * CSS color the feature carries itself, from a GFF3 `color=` attribute. It
+   * overrides the palette and any scale a channel resolves.
+   */
+  color?: string
+  /** the GFF attributes of column 9, for a channel encoding one of them */
+  attributes?: Record<string, string>
 }
 
 /**

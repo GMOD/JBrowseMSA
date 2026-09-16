@@ -41,6 +41,12 @@ test('maps a record onto the annotation fields', () => {
       start: 10,
       end: 50,
       strand: undefined,
+      color: undefined,
+      attributes: {
+        Name: 'PF00001',
+        signature_desc: '7tm_1',
+        description: 'GPCR family',
+      },
     },
   ])
 })
@@ -103,4 +109,32 @@ test('falls back from Name to ID to source and positions', () => {
       record({ source: 'CustomSource' }),
     ]).map(a => a.accession),
   ).toEqual(['domain_123', 'CustomSource_10_50'])
+})
+
+test('keeps the column 9 attributes, so a channel can encode one of them', () => {
+  expect(
+    gffToAnnotations([record({ type: 'gene', Name: 'trpB', gene: 'trpB' })])[0]
+      ?.attributes,
+  ).toEqual({ Name: 'trpB', gene: 'trpB' })
+})
+
+test('reads a color attribute under any of its spellings', () => {
+  expect(
+    gffToAnnotations([
+      record({ color: '#ff0000' }),
+      record({ colour: 'rebeccapurple' }),
+      record({ Color: '#00ff00' }),
+      record({ Colour: 'blue' }),
+      record({}),
+    ]).map(a => a.color),
+  ).toEqual(['#ff0000', 'rebeccapurple', '#00ff00', 'blue', undefined])
+})
+
+test('normalizes an RGB triple, which the attribute parser hands over space-separated', () => {
+  expect(
+    gffToAnnotations([
+      record({ color: '255 0 0' }),
+      record({ color: '0,128,255' }),
+    ]).map(a => a.color),
+  ).toEqual(['rgb(255,0,0)', 'rgb(0,128,255)'])
 })
