@@ -38,6 +38,10 @@ should call conserved.
   and the full B30.2/SPRY domain from the wider PROSITE profile call,
   https://www.ebi.ac.uk/interpro/api/entry/profile/protein/uniprot/Q9C035/
   (Pfam's own SPRY entry stops short of the domain's N-terminal variable loops)
+- the codon alignment the commands below write, hosted so the figures can link
+  to it: https://gmod.org/JBrowseMSA/demo/data/trim5/trim5-cds.stock
+- its exon structure:
+  https://gmod.org/JBrowseMSA/demo/data/trim5/trim5-exons.gff
 
 ## 1. Every ortholog NCBI knows about
 

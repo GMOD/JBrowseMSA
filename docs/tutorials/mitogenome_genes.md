@@ -26,6 +26,9 @@ annotation of each.
   https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_012920.1&rettype=fasta&retmode=text
 - its annotation as GFF3:
   https://www.ncbi.nlm.nih.gov/sviewer/viewer.fcgi?id=NC_012920.1&report=gff3&retmode=text
+- the eight genomes before alignment, right-padded to one width so the viewer
+  opens them:
+  https://gmod.org/JBrowseMSA/demo/data/mitogenome/mito-unaligned.afa
 - the alignment the commands below write, hosted so the figures can link to it:
   https://gmod.org/JBrowseMSA/demo/data/mitogenome/mito.afa
 - its tree: https://gmod.org/JBrowseMSA/demo/data/mitogenome/mito.nwk
