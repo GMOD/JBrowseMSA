@@ -24,6 +24,7 @@ import jbrowseThumb from '../../../docs/media/genome-browser-tp53-protein3d.png'
 import h5n1Thumb from '../../../docs/media/influenza_surveillance_figure-overview.png'
 import kinaseThumb from '../../../docs/media/kinase-pocket-family.png'
 import mitoThumb from '../../../docs/media/mitogenome_genes-4.png'
+import norovirusThumb from '../../../docs/media/norovirus_recombination-4.png'
 import p53Thumb from '../../../docs/media/p53-variant-three-tracks.png'
 import metadataThumb from '../../../docs/media/phylogeny_metadata-tip-labels.png'
 import proteinThumb from '../../../docs/media/protein-family-domains.png'
@@ -116,6 +117,16 @@ export const tutorials: Tutorial[] = [
     thumb: recombinantThumb,
     thumbAlt:
       'Five SARS-CoV-2 genome rows under two bar tracks counting the differences between the recombinant row and each parent, one falling to zero where the other rises',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'norovirus_recombination',
+    title: 'Recombination at the norovirus ORF1/ORF2 junction',
+    blurb:
+      'Twelve norovirus GII genomes aligned whole, with a tree from the ORF1 columns and another from the ORF2 columns. The three GII.P16-GII.4 rows read one parent for 25 windows and the other for 13, and the two identity curves change rank 14 columns before the first base of ORF2. A GII.Pe-GII.4 control never crosses.',
+    thumb: norovirusThumb,
+    thumbAlt:
+      'Twelve norovirus rows of 200-base windows colored by closer parent, three of them turning from blue to red at the ORF1/ORF2 junction',
     thumbPosition: 'left',
   },
   {

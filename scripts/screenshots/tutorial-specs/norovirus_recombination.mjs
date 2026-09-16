@@ -51,11 +51,12 @@ const parentFill = {
 }
 
 // 7,778 columns across the alignment panel a 1600px viewport leaves beside a
-// 230px tree area
-const WHOLE = 0.172
+// 300px tree area. The height leaves a band under the twelve rows for the
+// callouts, which anchor on the bottom of the drawn rows
+const WHOLE = 0.162
 const whole = {
-  height: 400,
-  treeAreaWidth: 230,
+  height: 500,
+  treeAreaWidth: 300,
   rowHeight: 24,
   colWidth: WHOLE,
   ...files,
@@ -67,13 +68,13 @@ const junctionFiles = {
   msaFilehandle: { uri: 'data/norovirus/noro-junction.afa' },
   treeFilehandle: { uri: 'data/norovirus/noro-orf2.nwk' },
 }
-const CUT = 2.3
+const CUT = 2.1
 // the first base of ORF2 and the crossing, in the cut's own columns
 const cutOrf2 = columns.orf2[0] - columns.junction[0] + 1
 const cutCross = crossColumn - columns.junction[0] + 1
 const junction = {
-  height: 520,
-  treeAreaWidth: 230,
+  height: 620,
+  treeAreaWidth: 300,
   rowHeight: 24,
   colWidth: CUT,
   ...junctionFiles,
@@ -84,8 +85,8 @@ const junction = {
 // recombinant: a dot is the same base
 const CLOSE = 15
 const closeUp = {
-  height: 520,
-  treeAreaWidth: 230,
+  height: 560,
+  treeAreaWidth: 300,
   rowHeight: 26,
   colWidth: CLOSE,
   relativeTo: query,
@@ -154,7 +155,6 @@ export const specs = [
     viewportWidth: 1600,
     url: fileSnap({
       ...whole,
-      height: 440,
       ...parents,
       encodings: [parentFill],
       highlights: [
@@ -266,7 +266,6 @@ export const specs = [
     viewportWidth: 1600,
     url: fileSnap({
       ...whole,
-      height: 440,
       ...parents,
       encodings: [parentFill],
       highlights: [
@@ -274,6 +273,7 @@ export const specs = [
           start: columns.orf2[0],
           end: columns.orf2[1],
           label: 'ORF2',
+          color: 'rgba(0,0,0,0.07)',
         },
         { start: crossColumn, end: crossColumn, label: 'breakpoint' },
       ],

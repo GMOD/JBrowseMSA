@@ -23,7 +23,7 @@
   "columnTracks": [
     {
       "id": "query-a",
-      "name": "GII.P16-GII.4/US/2016 to GII.P16-GII.2/CN/2016",
+      "name": "to GII.P16-GII.2/CN/2016",
       "kind": "bar",
       "values": [
         99,
@@ -633,7 +633,7 @@
     },
     {
       "id": "query-b",
-      "name": "GII.P16-GII.4/US/2016 to GII.Pe-GII.4/JP/2012",
+      "name": "to GII.Pe-GII.4/JP/2012",
       "kind": "bar",
       "values": [
         85,
@@ -1243,7 +1243,7 @@
     },
     {
       "id": "control-a",
-      "name": "GII.Pe-GII.4/US/2013 to GII.P16-GII.2/CN/2016",
+      "name": "to GII.P16-GII.2/CN/2016",
       "kind": "bar",
       "values": [
         82,
@@ -1853,7 +1853,7 @@
     },
     {
       "id": "control-b",
-      "name": "GII.Pe-GII.4/US/2013 to GII.Pe-GII.4/JP/2012",
+      "name": "to GII.Pe-GII.4/JP/2012",
       "kind": "bar",
       "values": [
         98,

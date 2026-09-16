@@ -109,8 +109,9 @@ with open(out_fasta, 'w') as fh, open(out_gff, 'w') as g:
                     f'Name={name};signature_desc={desc};'
                     f'color=%23{color[1:]}\n')
 
-overlaps = {cds[acc][0][1] - cds[acc][1][0] + 1 for _, acc, _ in rows}
-print(f'ORF1 and ORF2 overlap by {sorted(overlaps)} bases')
+overlaps = sorted({cds[acc][0][1] - cds[acc][1][0] + 1 for _, acc, _ in rows})
+print('ORF1 and ORF2 overlap by '
+      + ', '.join(str(n) for n in overlaps) + ' bases')
 PY
 
 # 2. align the twelve genomes. MAFFT --auto picks FFT-NS-2 for a set this size
@@ -342,7 +343,7 @@ for row, tag in ((QUERY, 'query'), (CONTROL, 'control')):
     ):
         tracks.append({
             'id': f'{tag}-{"a" if subject == PARENT_A else "b"}',
-            'name': f'{row} to {subject}',
+            'name': f'to {subject}',
             'kind': 'bar',
             'values': track_values(row, subject),
             'max': 100,
