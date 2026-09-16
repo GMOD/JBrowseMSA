@@ -82,6 +82,42 @@ test_that("a strip needs a field", {
   expect_error(geom_msa_strip(NULL), "field")
 })
 
+test_that("a features panel carries its channels and its align transform", {
+  w <- msaview(msa = msa) +
+    geom_msa_features(color = "Name", label = "Name", palette = "set1",
+                      align = "genE", width = 320, header = "neighborhood")
+
+  panel <- w$x$props$rowPanels[[1]]
+  expect_equal(panel$kind, "features")
+  expect_equal(panel$x, "position")
+  expect_equal(panel$encoding$color$field, "Name")
+  expect_equal(panel$encoding$color$scale$palette, "set1")
+  expect_equal(panel$encoding$label, "Name")
+  expect_equal(panel$transform[[1]]$type, "align")
+  expect_equal(panel$transform[[1]]$on, "genE")
+  expect_equal(panel$width, 320)
+  expect_equal(panel$header, "neighborhood")
+})
+
+test_that("a features panel with no channels carries none", {
+  w <- msaview(msa = msa) + geom_msa_features(x = "column")
+  panel <- w$x$props$rowPanels[[1]]
+  expect_equal(panel$x, "column")
+  expect_null(panel$encoding)
+  expect_null(panel$transform)
+})
+
+test_that("an unknown x is refused", {
+  expect_error(geom_msa_features(x = "residue"), "column")
+})
+
+test_that("an unknown row panel kind is refused", {
+  expect_error(
+    msaview(msa = msa, row_panels = list(list(kind = "arc", field = "HA"))),
+    "features"
+  )
+})
+
 test_that("an unknown channel is refused", {
   expect_error(scale_row_color("clade", channel = "tipColor"), "tipLabel")
 })

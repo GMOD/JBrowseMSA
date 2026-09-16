@@ -9,6 +9,7 @@
 #'   \code{\link{geom_msa_clade}}, \code{\link{geom_msa_track}},
 #'   \code{\link{geom_msa_domains}},
 #'   \code{\link{geom_msa_rowdata}}, \code{\link{geom_msa_strip}},
+#'   \code{\link{geom_msa_features}},
 #'   \code{\link{scale_residue_color}},
 #'   \code{\link{scale_row_color}}, \code{\link{theme_msa}} or
 #'   \code{\link{coord_msa}}.
@@ -490,6 +491,58 @@ geom_msa_strip <- function(field, palette = NULL, map = NULL, width = NULL,
   scale <- drop_null(list(palette = palette, map = if (!is.null(map)) as.list(map)))
   panel <- drop_null(list(
     kind = "strip", field = field, scale = if (length(scale) > 0) scale,
+    width = width, header = header
+  ))
+  msa_layer(append = list(rowPanels = convert_row_panels(list(panel))))
+}
+
+#' A column of gene arrows beside the tree
+#'
+#' Draws the spans a GFF carries in a panel of their own, one row per
+#' alignment row, as arrows where a feature has a strand. \code{x = "column"}
+#' draws them in the alignment's columns; \code{x = "position"} draws each row
+#' in its own residue positions on one linear scale, so a genome with no
+#' alignment has an x. With \code{align} the rows shift so that the named gene
+#' starts at one x, which is gggenes' \code{make_alignment_dummies}, and a row
+#' carrying no such gene keeps its own origin.
+#'
+#' \code{color} and \code{label} name fields of the features: an
+#' \code{Annotation} field (\code{name}, \code{accession},
+#' \code{featureType}) or a GFF attribute of column 9, such as \code{Name}.
+#' Without \code{color} the spans take the colors the alignment's overlay
+#' gives them.
+#'
+#' @param x \code{"position"} (default) or \code{"column"}.
+#' @param color The feature field to color the spans by.
+#' @param label The feature field drawn inside each span.
+#' @param palette A palette name for \code{color}.
+#' @param map A named list or vector of colors, keyed by field value.
+#' @param align A gene name to line the rows up on.
+#' @param width The column's width in pixels. Default: 200.
+#' @param header The name drawn above the column.
+#' @return A layer to add to a viewer with \code{+}.
+#'
+#' @examples
+#' \dontrun{
+#' msaview(tree = "marker.nh", gff = "neighborhoods.gff") +
+#'   geom_msa_features(color = "Name", label = "Name", align = "genE",
+#'                     width = 320, header = "neighborhood")
+#' }
+#' @export
+geom_msa_features <- function(x = "position", color = NULL, label = NULL,
+                              palette = NULL, map = NULL, align = NULL,
+                              width = NULL, header = NULL) {
+  scale <- drop_null(list(palette = palette, map = if (!is.null(map)) as.list(map)))
+  encoding <- drop_null(list(
+    color = if (!is.null(color)) {
+      drop_null(list(field = color, scale = if (length(scale) > 0) scale))
+    },
+    label = label
+  ))
+  panel <- drop_null(list(
+    kind = "features", x = x,
+    encoding = if (length(encoding) > 0) encoding,
+    transform = if (!is.null(align)) list(list(type = "align", on = align)),
     width = width, header = header
   ))
   msa_layer(append = list(rowPanels = convert_row_panels(list(panel))))

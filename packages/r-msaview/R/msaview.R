@@ -94,13 +94,17 @@
 #'   a span, both from the features \code{gff} carries), \code{field}, and an
 #'   optional \code{scale}, either \code{list(palette = "set1")} or
 #'   \code{list(map = list(value = "#e41a1c"))}.
-#' @param row_panels Panels drawn between the tree and the alignment, one cell
-#'   per row, which is ggtree's \code{gheatmap}. A list of panels, each a list
-#'   with \code{kind = "strip"}, the \code{field} of \code{row_data} it colors
-#'   by, and optionally \code{scale} (\code{list(palette = "set1")} or
-#'   \code{list(map = list(value = "#e41a1c"))}), \code{width} in pixels
-#'   (default: the row height) and \code{header}, the name drawn above the
-#'   column (default: the field).
+#' @param row_panels Panels drawn between the tree and the alignment. A list of
+#'   panels, each a list with a \code{kind}. \code{kind = "strip"} colors one
+#'   cell per row by a \code{field} of \code{row_data}, which is ggtree's
+#'   \code{gheatmap}. \code{kind = "features"} draws the spans the \code{gff}
+#'   carries, over the alignment's columns (\code{x = "column"}) or over each
+#'   row's own residue positions (\code{x = "position"}), with
+#'   \code{encoding = list(color = list(field =, scale =), label =)} and
+#'   \code{transform = list(list(type = "align", on = "genE"))}. Both take
+#'   \code{scale} (\code{list(palette = "set1")} or
+#'   \code{list(map = list(value = "#e41a1c"))}), \code{width} in pixels and
+#'   \code{header}, the name drawn above the column.
 #' @param relative_to A row name. Every other row draws as its differences from
 #'   that row, with matching residues as \code{.}.
 #' @param region A span to zoom and scroll to once the alignment loads, as
@@ -448,7 +452,8 @@ convert_encodings <- function(encodings) {
 }
 
 # Each panel serializes as one JSON object, with its scale an object of its own
-# rather than an array, and its width and header scalars.
+# rather than an array, and its width and header scalars. A features panel
+# carries its channels under `encoding` and its transforms as an array.
 convert_row_panels <- function(panels) {
   if (is.null(panels)) return(NULL)
   if (!is.list(panels)) {
@@ -456,15 +461,42 @@ convert_row_panels <- function(panels) {
   }
   unname(lapply(panels, function(panel) {
     panel$kind <- panel$kind %||% "strip"
-    if (panel$kind != "strip") {
-      stop("row panel kind must be 'strip', got '", panel$kind, "'")
+    if (!panel$kind %in% c("strip", "features")) {
+      stop("row panel kind must be 'strip' or 'features', got '",
+           panel$kind, "'")
+    }
+    if (!is.null(panel$width)) panel$width <- as.numeric(panel$width)
+    if (panel$kind == "features") {
+      panel$x <- panel$x %||% "position"
+      if (!panel$x %in% c("column", "position")) {
+        stop("features panel x must be 'column' or 'position', got '",
+             panel$x, "'")
+      }
+      if (!is.null(panel$encoding)) {
+        panel$encoding <- as.list(panel$encoding)
+        color <- panel$encoding$color
+        if (!is.null(color)) {
+          color <- as.list(color)
+          if (is.null(color$field)) stop("features color is missing 'field'")
+          if (!is.null(color$scale)) {
+            color$scale <- as.list(color$scale)
+            if (!is.null(color$scale$map)) {
+              color$scale$map <- as.list(color$scale$map)
+            }
+          }
+          panel$encoding$color <- color
+        }
+      }
+      if (!is.null(panel$transform)) {
+        panel$transform <- unname(lapply(panel$transform, as.list))
+      }
+      return(panel)
     }
     if (is.null(panel$field)) stop("row panel is missing 'field'")
     if (!is.null(panel$scale)) {
       panel$scale <- as.list(panel$scale)
       if (!is.null(panel$scale$map)) panel$scale$map <- as.list(panel$scale$map)
     }
-    if (!is.null(panel$width)) panel$width <- as.numeric(panel$width)
     panel
   }))
 }
