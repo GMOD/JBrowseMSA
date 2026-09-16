@@ -9,7 +9,8 @@ geom_msa_clade(
   tips = NULL,
   range = NULL,
   color = NULL,
-  label = NULL
+  label = NULL,
+  mark = "highlight"
 )
 }
 \arguments{
@@ -19,29 +20,41 @@ geom_msa_clade(
 
 \item{range}{The first and last tip of a run, in display order.}
 
-\item{color}{A CSS color for the rectangle.}
+\item{color}{A CSS color for the rectangle, or for a bracket's bar and
+label.}
 
-\item{label}{Text naming the clade, drawn by the bracket mark.}
+\item{label}{Text naming the clade, drawn by the bracket mark and by a
+highlight carrying one.}
+
+\item{mark}{What to draw over the clade: \code{"highlight"},
+\code{"bracket"}, \code{"collapse"} or \code{"focus"}.}
 }
 \value{
 A layer to add to a viewer with \code{+}.
 }
 \description{
-Fills the rows of a clade with a translucent rectangle, from the clade's
-common ancestor across the tree and the alignment, which is ggtree's
-\code{geom_hilight}.
+\code{mark = "highlight"} fills the rows of a clade with a translucent
+rectangle, from the clade's common ancestor across the tree and the
+alignment, which is ggtree's \code{geom_hilight}.
+\code{mark = "bracket"} draws a bar beside the rows carrying
+\code{label}, which is \code{geom_cladelab}, or \code{geom_strip} over a
+\code{range}. \code{mark = "collapse"} and \code{mark = "focus"} open the
+viewer with the clade collapsed, or with the rest of the tree hidden, and
+both need \code{mrca}.
 }
 \details{
 \code{mrca} names tips whose most recent common ancestor is the clade, and
 \code{range} names the first and last tip of a run in display order, which
 need not be monophyletic. \code{tips} is the number of tips the clade
 covers: a clade that resolves to a different number is dropped, so a
-re-rooted tree loses the rectangle rather than putting it on another clade.
+re-rooted tree loses the mark rather than putting it on another clade.
 }
 \examples{
 \dontrun{
 msaview(msa = "h5.aln", tree = "h5.nh") +
   geom_msa_clade(c("Gs/TW/TNC1/2015", "Ck/TW/a174/2015"), tips = 47,
-                 color = "#fff3c4", label = "2.3.4.4 H5Nx")
+                 color = "#fff3c4", label = "2.3.4.4 H5Nx") +
+  geom_msa_clade(c("Gs/TW/TNC1/2015", "Ck/TW/a174/2015"), tips = 47,
+                 mark = "bracket", label = "2.3.4.4 H5Nx")
 }
 }

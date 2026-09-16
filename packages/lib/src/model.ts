@@ -683,7 +683,8 @@ function stateModelFactory() {
          * clades of the tree with a mark drawn over them. `mrca` names tips
          * whose common ancestor is the clade, or `range` its first and last
          * tip in display order, and `tips` is the leaf count the producer
-         * measured. See docs/layers.md
+         * measured. `mark` is `highlight`, `bracket`, `collapse` or `focus`.
+         * See docs/layers.md
          */
         clades: stripDefault(types.array(types.frozen<Clade>()), []),
         /**

@@ -70,7 +70,8 @@
 #' @param clades Clades of the tree to mark, each a list with \code{mrca} (tip
 #'   names whose most recent common ancestor is the clade) or \code{range}
 #'   (the first and last tip of a run, in display order), \code{tips} (the
-#'   number of tips the clade covers), \code{mark = "highlight"}, and an
+#'   number of tips the clade covers), \code{mark} (\code{"highlight"},
+#'   \code{"bracket"}, \code{"collapse"} or \code{"focus"}), and an
 #'   optional \code{color} and \code{label}. A clade that resolves to a
 #'   different number of tips is dropped.
 #' @param residue_mappings Which residue of which structure each residue of a

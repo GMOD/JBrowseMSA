@@ -145,10 +145,17 @@ that owner's highlights, so two sources can highlight at once.
 
 ## clades
 
-A clade of the tree with a mark over it. `mark: "highlight"` fills the rows
-behind the clade with a translucent rectangle, running from the clade's common
-ancestor to the right edge of the tree area and on across the alignment, which
-is ggtree's `geom_hilight`.
+A clade of the tree with a mark over it. `mark` takes one of four values:
+
+- `highlight` fills the rows behind the clade with a translucent rectangle,
+  running from the clade's common ancestor to the right edge of the tree area
+  and on across the alignment, which is ggtree's `geom_hilight`.
+- `bracket` draws a vertical bar beside the clade's rows carrying the record's
+  `label`, which is ggtree's `geom_cladelab` and, over a `range`, `geom_strip`.
+- `collapse` collapses the clade at load, the way the branch menu's "Collapse
+  this node" does.
+- `focus` opens the viewer on the clade alone, the way "Show only this node"
+  does.
 
 ```json
 "clades": [
@@ -178,10 +185,39 @@ against a re-aligned row.
 and covers every tip between them, monophyletic or not. Its `tips` is checked
 the same way, against the length of the run.
 
-`color` is any CSS color, defaulting to a light yellow. A color carrying no
-alpha of its own draws at 60% opacity, so the branches and the residues under it
-stay readable. `label` is reserved for the bracket mark, and the highlight mark
-draws nothing from it.
+`color` is any CSS color, defaulting to a light yellow. A highlight's color
+carrying no alpha of its own draws at 60% opacity, so the branches and the
+residues under it stay readable. A bracket draws its bar and its label in that
+color at full strength, and takes the theme's text color without one.
+
+The bracket mark takes a gutter at the right of the tree area, between the tip
+labels and the first row panel or the alignment. The gutter is as wide as the
+bar plus the widest label at the tree font, to a limit of 140px, past which a
+label is cut with an ellipsis. A label reads across the rows where they are
+taller than the font, and runs up the bar where they are not. A `highlight`
+record carrying a `label` draws the label the same way, with no bar.
+
+`collapse` and `focus` seed the viewer's own `collapsed` list and `showOnly`
+once, when the tree resolves. A collapsed clade therefore draws as a triangle
+with its tip count, and `hideGaps` counts the rows that remain, exactly as when
+the user collapses it by hand. Both marks name a node, so they need `mrca`: a
+`range` record carrying one of them drops, along with the records the checks
+above drop. Expanding a seeded clade or clearing the focus holds for the rest of
+the session, and the record collapses or focuses again the next time the link is
+opened.
+
+```json
+"clades": [
+  {
+    "mrca": ["Gs/TW/TNC1/2015", "Ck/TW/a174/2015"],
+    "tips": 47,
+    "mark": "bracket",
+    "color": "#b45309",
+    "label": "2.3.4.4 H5Nx"
+  },
+  { "mrca": ["Dk/VN/1/2012", "Ck/VN/14/2012"], "tips": 6, "mark": "collapse" }
+]
+```
 
 The tips resolve against the tree as loaded, so collapsing a clade's ancestor or
 focusing on part of the tree keeps the mark on the rows that remain on screen.

@@ -143,10 +143,13 @@ SVG export draws it.
 ```
 
 `clades` marks a clade of the tree: `mrca` names tips whose common ancestor is
-the clade, `tips` is the leaf count the producer measured, and the `highlight`
-mark fills the rows behind the clade across the tree and the alignment. A clade
-that resolves to a different leaf count is dropped, so a re-rooted tree loses
-the rectangle rather than putting it on the wrong clade.
+the clade, and `tips` is the leaf count the producer measured. A clade that
+resolves to a different leaf count is dropped, so a re-rooted tree loses the
+mark rather than putting it on the wrong clade. `mark` says what to draw:
+`highlight` fills the rows behind the clade across the tree and the alignment,
+`bracket` draws a bar and the record's `label` in a gutter at the right of the
+tree, and `collapse` and `focus` open the viewer with the clade collapsed or
+with the rest of the tree hidden.
 
 ```tsx
 <MSAViewer
@@ -156,8 +159,8 @@ the rectangle rather than putting it on the wrong clade.
     {
       mrca: ['Gs/TW/TNC1/2015', 'Ck/TW/a174/2015'],
       tips: 47,
-      mark: 'highlight',
-      color: '#fff3c4',
+      mark: 'bracket',
+      label: '2.3.4.4 H5Nx',
     },
   ]}
 />

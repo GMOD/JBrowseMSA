@@ -80,13 +80,13 @@ What the layout gives the API:
 | Mark                             | ggtree / gggenes                 | react-msaview today                                                  |
 | -------------------------------- | -------------------------------- | -------------------------------------------------------------------- |
 | Phylogram, scale bar             | `ggtree`                         | `renderTree`, `TreeRuler`                                            |
-| Collapsed clade + tip count      | `collapse`                       | `renderCollapsedTriangles` (`renderTreeCanvas.ts:135`)               |
+| Collapsed clade + tip count      | `collapse`                       | `renderCollapsedTriangles`, seeded by `clades` `mark: "collapse"`    |
 | Tip labels                       | `geom_tiplab`                    | `renderTreeLabels` (`renderTreeCanvas.ts:287`)                       |
 | Tip labels colored by a field    | `aes(color=)`                    | missing; `treeMetadata` holds the data and no channel reads it       |
 | Support values on internal nodes | `geom_nodelab`                   | missing; parsed and never drawn                                      |
 | Clade highlight rectangle        | `geom_hilight`                   | `clades` with `mark: "highlight"` (`renderTreeCanvas.ts`)            |
-| Clade bracket + label            | `geom_cladelab`                  | missing                                                              |
-| Bracket over a run of tips       | `geom_strip`                     | missing                                                              |
+| Clade bracket + label            | `geom_cladelab`                  | `clades` with `mark: "bracket"` (`cladeBrackets.ts`)                 |
+| Bracket over a run of tips       | `geom_strip`                     | a `bracket` record over `range`                                      |
 | Branches colored by a group      | `groupClade`, `aes(color=group)` | missing                                                              |
 | Tree overview inset              | `viewClade`, `geom_zoom_clade`   | `showTreeOverview` (`renderTreeOverview.ts`)                         |
 | Tip-aligned categorical matrix   | `gheatmap`                       | missing                                                              |
@@ -552,6 +552,15 @@ decision above. Seeding a collapse rebuilds the raster tile cache at load, since
 (`msaRaster.ts:298`).
 
 One day, and the H5 figure is complete.
+
+Shipped 2026-09-16 as the `bracket`, `collapse` and `focus` marks.
+`cladeGutterWidth` carves the gutter out of the right of the tree area, so the
+tip labels and `treeWidth` both give way to it and the bar lands clear of the
+row panels. `renderCladeBrackets` draws the bar on the tree canvas, which the
+export shares, and the label is DOM text in `CladeLabels.tsx` on screen and a
+`<text>` from `CladeLabelsSVG` in the export, turned on its side for a clade
+shorter than the font. The seeding runs once in `afterCreate`, so an expand
+sticks for the session.
 
 ## Sequence
 

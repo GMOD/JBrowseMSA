@@ -62,8 +62,8 @@ export interface MSAViewerProps {
   highlights?: Highlight[]
   /**
    * clades of the tree with a mark drawn over them: `{mrca, tips, mark}` or
-   * `{range, tips, mark}`, with `mark: 'highlight'` filling the rows behind
-   * the clade (see docs/layers.md)
+   * `{range, tips, mark}`, where `mark` is `highlight`, `bracket`, `collapse`
+   * or `focus` (see docs/layers.md)
    */
   clades?: Clade[]
   /** row name to diff every other row against (matches render as ".") */
