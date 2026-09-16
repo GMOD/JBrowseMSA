@@ -236,6 +236,22 @@ function readFormat(format?: string) {
   return format as MSAFormat | undefined
 }
 
+function readNumber(name: string, value: string, integer = false) {
+  const n = integer ? Number.parseInt(value, 10) : Number.parseFloat(value)
+  if (Number.isNaN(n)) {
+    throw new Error(`--${name} must be a number, got "${value}"`)
+  }
+  return n
+}
+
+function readInt(name: string, value: string) {
+  return readNumber(name, value, true)
+}
+
+function readList(value: string) {
+  return value.split(',').map(s => s.trim())
+}
+
 async function main() {
   // inside main, so a mistyped flag reaches the handler below as a message
   // rather than as a stack trace out of module evaluation
@@ -262,22 +278,22 @@ async function main() {
       gffFile: values.gff,
       outputFile,
       colorScheme: values['color-scheme'],
-      width: parseInt(values.width, 10),
-      height: parseInt(values.height, 10),
+      width: readInt('width', values.width),
+      height: readInt('height', values.height),
       treeAreaWidth:
         values['tree-area-width'] !== undefined
-          ? parseInt(values['tree-area-width'], 10)
+          ? readInt('tree-area-width', values['tree-area-width'])
           : undefined,
       colWidth:
         values['col-width'] !== undefined
-          ? parseFloat(values['col-width'])
+          ? readNumber('col-width', values['col-width'])
           : undefined,
       rowHeight:
         values['row-height'] !== undefined
-          ? parseFloat(values['row-height'])
+          ? readNumber('row-height', values['row-height'])
           : undefined,
       format,
-      tracks: values.tracks?.split(',').map(s => s.trim()),
+      tracks: values.tracks !== undefined ? readList(values.tracks) : undefined,
       viewport: values.viewport,
       minimap: values.minimap,
     })
@@ -299,7 +315,7 @@ async function main() {
       dockerImage: values['docker-image'],
       interproscanPath: values['interproscan-path'],
       dataDir: values['interproscan-data'],
-      programs: values.programs.split(','),
+      programs: readList(values.programs),
       email: values.email,
       format,
     })
