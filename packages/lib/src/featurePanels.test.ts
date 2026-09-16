@@ -53,6 +53,8 @@ test('a tree and a GFF with no alignment give the panel its x', () => {
   ])
   expect(model.numColumns).toBe(0)
   expect(model.dataInitialized).toBe(true)
+  // the conservation, logo and ruler tracks all read columns, so none draws
+  expect(model.tracks).toEqual([])
   expect([...panel.spans.keys()]).toEqual(['g1', 'g2', 'g3'])
 
   // the extent runs 0..1000 over 200 drawable pixels, one row height short of
@@ -199,5 +201,26 @@ g2\tncbi\tgene\t1\t500\t.\t+\t.\tName=genA`,
   ])
   expect(panel.spans.get('g2')!.map(s => [s.lane, s.laneCount])).toEqual([
     [0, 1],
+  ])
+})
+
+test('genes sharing a few bases stay in one lane', () => {
+  // trpE and trpD of E. coli share one base, and genD covers 200 bases of
+  // genC, a fifth of it
+  const { panel } = featurePanel([{ kind: 'features', x: 'position' }], {
+    tree,
+    gff: `##gff-version 3
+g1\tncbi\tgene\t1\t1563\t.\t+\t.\tName=trpE
+g1\tncbi\tgene\t1563\t3158\t.\t+\t.\tName=trpD
+g2\tncbi\tgene\t1\t1000\t.\t+\t.\tName=genC
+g2\tncbi\tgene\t801\t2000\t.\t+\t.\tName=genD`,
+  })
+  expect(panel.spans.get('g1')!.map(s => [s.lane, s.laneCount])).toEqual([
+    [0, 1],
+    [0, 1],
+  ])
+  expect(panel.spans.get('g2')!.map(s => [s.lane, s.laneCount])).toEqual([
+    [0, 2],
+    [1, 2],
   ])
 })

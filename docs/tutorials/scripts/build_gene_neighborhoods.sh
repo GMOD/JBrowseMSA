@@ -149,6 +149,10 @@ with open(outpath, 'w') as out, open(idspath, 'w') as ids:
             return g['start'] - lo + 1, g['end'] - lo + 1, g['strand']
 
         rows = sorted((local(g) + (g,) for g in inside), key=lambda r: r[0])
+        # position 1 of the window is the first base of its first whole gene,
+        # so no row is placed by where the cut fell
+        base = rows[0][0] - 1
+        rows = [(s - base, e - base, strand, g) for s, e, strand, g in rows]
         for start, end, strand, g in rows:
             name = g['symbol'] or g['a']['locus_tag']
             if g['symbol'] and not g['a'].get('gene'):
@@ -160,7 +164,7 @@ with open(outpath, 'w') as out, open(idspath, 'w') as ids:
                   file=out)
         order = ' '.join(g['symbol'] + ('*' if g['type'] == 'pseudogene' else '')
                          for _, _, _, g in rows if g['symbol'] in TRP)
-        print(f"  {label:19s} {len(genes):>10d} {len(rows):>5d} {hi - lo + 1:>6d}  {order}")
+        print(f"  {label:19s} {len(genes):>10d} {len(rows):>5d} {rows[-1][1]:>6d}  {order}")
 
 print(f"  {sum(tally.values())} genes: " +
       ', '.join(f'{k} {tally[k]}' for k in ('trp', 'regulator', 'pseudogene', 'other')))

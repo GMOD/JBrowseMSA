@@ -63,6 +63,19 @@ test('the accession palette fills a span no encoding colors', () => {
   expect(fillOf(model, 'kinase')).toBe(model.fillPalette.kinase)
 })
 
+test('a value the map leaves out draws grey, not off the accession palette', () => {
+  const model = makeModel([
+    {
+      channel: 'featureFill',
+      field: 'group',
+      scale: { map: { enzyme: '#e41a1c' } },
+    },
+  ])
+
+  expect(fillOf(model, 'kinase')).toBe('#e41a1c')
+  expect(fillOf(model, 'myb')).toBe('#d9d9d9')
+})
+
 test('the domain legend lists the values of the field featureFill reads', () => {
   const model = makeModel([
     {

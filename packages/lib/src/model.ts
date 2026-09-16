@@ -193,6 +193,14 @@ const ownHeightKey = (id: string) => `own:${id}`
 const HELIX_ARC = '#4e79a7'
 const PSEUDOKNOT_ARC = '#e15759'
 
+// the fill of a span under a scale that gives its value no color, such as a
+// gene a `map` over gene names leaves out
+const UNSCALED_FEATURE = '#d9d9d9'
+
+// the fraction of a span a following one may cover before it takes a lane of
+// its own in a `features` panel
+const laneOverlap = 0.1
+
 // a row panel's own width, or a default: the row height, which makes a strip
 // cell square, and a gene neighborhood's width for a features panel
 function rowPanelWidth(panel: RowPanelSpec, rowHeight: number) {
@@ -230,7 +238,7 @@ function featureColorMap(
       const fill =
         annotation.color ??
         (value === undefined ? undefined : encoding!.colorOf(value)) ??
-        fillPalette[annotation.accession]!
+        (encoding ? UNSCALED_FEATURE : fillPalette[annotation.accession]!)
       return [annotation, { fill, stroke: strokeOf(fill) }]
     }),
   )
@@ -286,39 +294,47 @@ function featurePanelSpans({
       ]),
     )
   }
-  const packed = Object.entries(annotationsByRow).map(([name, annotations]) => {
-    const shift = shifts?.get(name) ?? 0
-    return [
-      name,
-      packDomainLanes(
+  const shifted = Object.entries(annotationsByRow).map(
+    ([name, annotations]) => {
+      const shift = shifts?.get(name) ?? 0
+      return [
+        name,
         annotations.map(annotation => ({
           annotation,
-          startCol: annotation.start - 1 + shift,
-          endCol: annotation.end + shift,
+          start: annotation.start - 1 + shift,
+          end: annotation.end + shift,
         })),
-      ),
-    ] as const
-  })
+      ] as const
+    },
+  )
   let min = Infinity
   let max = -Infinity
-  for (const [, bands] of packed) {
-    for (const { startCol, endCol } of bands) {
-      min = Math.min(min, startCol)
-      max = Math.max(max, endCol)
+  for (const [, features] of shifted) {
+    for (const { start, end } of features) {
+      min = Math.min(min, start)
+      max = Math.max(max, end)
     }
   }
   // the arrowhead on the rightmost feature reaches a row height past its end,
   // so the extent maps onto the panel less that much
   const drawable = Math.max(1, width - rowHeight)
   const scale = max > min ? drawable / (max - min) : 0
+  // a lane opens where a span covers more than a tenth of the one before it,
+  // which keeps the genes of an operon on one lane: adjacent genes commonly
+  // share a few bases, and a stop codon overlapping the next start reads as a
+  // second lane over the whole row
   return new Map(
-    packed.map(([name, bands]) => [
+    shifted.map(([name, features]) => [
       name,
-      bands.map(band => ({
-        ...band,
-        xStart: (band.startCol - min) * scale,
-        xEnd: (band.endCol - min) * scale,
-      })),
+      packDomainLanes(
+        features.map(({ annotation, start, end }) => ({
+          annotation,
+          xStart: (start - min) * scale,
+          xEnd: (end - min) * scale,
+          startCol: start,
+          endCol: end - (end - start) * laneOverlap,
+        })),
+      ),
     ]),
   )
 }
@@ -2364,7 +2380,9 @@ function stateModelFactory() {
           ...this.adapterTrackModels,
           ...this.basePairTrackModels,
           ...this.columnTrackModels,
-          ...this.computedTrackModels,
+          // every computed track reads the alignment's columns, and a tree, a
+          // GFF and a features panel draw a figure with none
+          ...(self.numColumns > 0 ? this.computedTrackModels : []),
         ]
       },
 

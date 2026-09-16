@@ -304,7 +304,8 @@ sorted order, so a value keeps its color as rows are collapsed, filtered or
 re-ordered. Past the end of a palette every value takes an evenly spaced hue
 instead, which keeps a forty-clade field readable. A `{map}` names a color per
 value, and a value it leaves out keeps the plain mark: an uncolored tip label
-draws in the theme's text color and an uncolored row takes no tint.
+draws in the theme's text color, an uncolored row takes no tint, and an
+uncolored span draws grey.
 
 A tint draws at 25% opacity so the residues under it stay readable. A color
 carrying its own alpha, such as `rgba(228,26,28,0.5)`, draws at that alpha.
@@ -327,11 +328,12 @@ alignment's raster tile cache.
 A feature channel reads any field of the feature table: `accession`, `name`,
 `featureType`, or any GFF attribute of column 9, such as `Name` or `gene`. The
 `featureFill` scale replaces the accession palette the overlay colors spans by,
-and the domain legend lists that scale's values under the field's name. A
-feature carrying a GFF3 `color=` attribute keeps that color whatever the scale
-says, and `255,0,0` reads as `rgb(255,0,0)`, the convention JBrowse and IGV
-honor. A `featureLabel` draws inside its span wherever the text fits, and it is
-a data channel, so it draws whether or not the residue letters do.
+so a span whose value the scale gives no color draws grey, and the domain legend
+lists that scale's values under the field's name. A feature carrying a GFF3
+`color=` attribute keeps that color whatever the scale says, and `255,0,0` reads
+as `rgb(255,0,0)`, the convention JBrowse and IGV honor. A `featureLabel` draws
+inside its span wherever the text fits, and it is a data channel, so it draws
+whether or not the residue letters do.
 
 ```json
 {
