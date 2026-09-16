@@ -159,8 +159,8 @@ XBB.1.
 
 [![](../media/recombination_breakpoint-1.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A230%2C%22colWidth%22%3A0.04347389893990569%2C%22rowHeight%22%3A34%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frecombinant%2Frecombinant.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Frecombinant%2Frecombinant.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Frecombinant%2Frecombinant-genes.gff%22%7D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22showDomainLegend%22%3Afalse%7D%7D)
 
-Five rows of 29,903 columns, each carrying the 11 genes as boxes. ORF1ab fills
-the first two thirds, S is the blue box after it, and inside S sit the red
+Five rows of 29,903 columns, each carrying the 11 genes as arrows. ORF1ab fills
+the first two thirds, S is the blue arrow after it, and inside S sit the red
 receptor-binding domain and the purple receptor-binding motif.
 
 ## 5. Count the differences to each parent
