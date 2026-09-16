@@ -46,7 +46,9 @@ export const hashBuffer = buf => createHash('sha256').update(buf).digest('hex')
 // the integrity check: the manifest carries the full sha256, and pull
 // verifies against that, not against the key.
 export function storeKey(entry) {
-  const ext = entry.path.match(extRe)?.[0] ?? ''
+  // lower-cased so one figure renamed FOO.PNG cannot get a second key, and a
+  // served content-type is keyed on something the table actually holds
+  const ext = entry.path.match(extRe)?.[0].toLowerCase() ?? ''
   return `${storePrefix}/${name(entry.path)}.${entry.sha256.slice(0, 12)}${ext}`
 }
 

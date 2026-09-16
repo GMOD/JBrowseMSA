@@ -15,6 +15,7 @@
  */
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -33,6 +34,7 @@ import {
   parseManifest,
   storeBucket,
   storeKey,
+  storePrefix,
   storeUrl,
 } from './blob-store.mjs'
 
@@ -49,8 +51,13 @@ const LOCK_HEADER = `# The bytes for docs/media figures live in S3; this file is
 # <path> <WxH, or - when unknown> <bytes> <sha256>
 `
 
+// Tolerates a missing docs/media, which is what a fresh clone has once the
+// directory is gitignored and before the first pull.
 function scanLocal() {
   const entries = new Map()
+  if (!fs.existsSync(mediaDir)) {
+    return entries
+  }
   for (const file of fs.readdirSync(mediaDir).filter(f => extRe.test(f))) {
     const relPath = `docs/media/${file}`
     const buf = fs.readFileSync(path.join(mediaDir, file))
@@ -115,7 +122,9 @@ async function pullOne(entry) {
       `hash mismatch for ${entry.path}: manifest has ${entry.sha256}, downloaded ${sha256}`,
     )
   }
-  fs.writeFileSync(path.join(repoRoot, entry.path), buf)
+  const dest = path.join(repoRoot, entry.path)
+  fs.mkdirSync(path.dirname(dest), { recursive: true })
+  fs.writeFileSync(dest, buf)
 }
 
 // Plain queue + worker pool at concurrency 8, the same shape
@@ -153,8 +162,54 @@ async function cmdPull() {
   }
 }
 
+// One `aws s3 cp --recursive` per extension over a staging directory, rather
+// than one invocation per file: 150 figures is 150 process spawns and round
+// trips the other way. The staged basename IS the store key, so the upload is a
+// plain directory copy and the key scheme stays in one place.
+function upload(entries) {
+  const staging = fs.mkdtempSync(path.join(os.tmpdir(), 'msaview-media-'))
+  try {
+    const exts = new Set()
+    for (const entry of entries) {
+      const key = storeKey(entry)
+      exts.add(path.extname(key))
+      fs.copyFileSync(
+        path.join(repoRoot, entry.path),
+        path.join(staging, path.basename(key)),
+      )
+    }
+    for (const ext of [...exts].sort(cmpStr)) {
+      execFileSync(
+        'aws',
+        [
+          's3',
+          'cp',
+          staging,
+          `${storeBucket}/${storePrefix}/`,
+          '--recursive',
+          '--exclude',
+          '*',
+          '--include',
+          `*${ext}`,
+          // Named rather than left to the CLI's mime guess, which reads the
+          // local platform's database and so differs by machine.
+          '--content-type',
+          contentTypes[ext] ?? 'application/octet-stream',
+          '--cache-control',
+          CACHE_CONTROL,
+          '--only-show-errors',
+        ],
+        { stdio: 'inherit' },
+      )
+    }
+  } finally {
+    fs.rmSync(staging, { recursive: true, force: true })
+  }
+}
+
 async function cmdPush() {
   const filters = listOpt('filter')
+  const dryRun = flag('dry-run')
   const local = scanLocal()
   const lock = readLock()
   const knownKeys = new Set([...lock.values()].map(storeKey))
@@ -168,22 +223,23 @@ async function cmdPush() {
     .filter(e => !knownKeys.has(storeKey(e)))
     .sort((a, b) => cmpStr(a.path, b.path))
 
-  if (toPush.length === 0) {
-    console.log('nothing to push: every candidate already has a matching key')
-  } else {
-    console.log(`push would run ${toPush.length} upload(s):`)
+  if (dryRun) {
+    console.log(`${toPush.length} blob(s) would upload, and media.lock would`)
+    console.log('be rewritten afterwards. Nothing was written.')
     for (const entry of toPush) {
-      const ext = entry.path.match(extRe)?.[0] ?? ''
-      const contentType = contentTypes[ext] ?? 'application/octet-stream'
-      console.log(
-        `  aws s3 cp ${entry.path} ${storeBucket}/${storeKey(entry)} --content-type ${contentType} --cache-control "${CACHE_CONTROL}"`,
-      )
-      // TODO: execute once the bucket policy is confirmed.
+      console.log(`  ${entry.path} -> ${storeBucket}/${storeKey(entry)}`)
     }
+    return
   }
 
-  // The uploads above happen before this rewrite: a media.lock line naming a
-  // blob nobody pushed yet breaks pull for everyone else who reads it first.
+  // Bytes first, manifest second, and the order is the whole contract: a
+  // media.lock line naming a blob nobody uploaded breaks pull for everyone who
+  // reads that line before the bytes land. Throwing here leaves orphan blobs,
+  // which cost nothing and nobody sees; the reverse loses figures.
+  if (toPush.length > 0) {
+    upload(toPush)
+    console.log(`${toPush.length} blob(s) uploaded`)
+  }
   writeLock(mergeManifest(lock, local))
   console.log(
     `media.lock rewritten (${local.size} entr${local.size === 1 ? 'y' : 'ies'})`,
@@ -243,14 +299,15 @@ const USAGE = `Usage: node scripts/media-store/media.mjs <command>
   pull [--force]           fetch every file the manifest names that's missing
                            or stale locally; --force refetches even a match
   push [--dry-run] [--filter a,b]
-                           print the s3 cp commands a push would run, then
-                           rewrite media.lock; always a dry run for now (see
-                           the TODO inside cmdPush) regardless of --dry-run
+                           upload every blob the manifest does not name yet,
+                           then rewrite media.lock. --dry-run lists them and
+                           writes nothing
   check                    exit non-zero when docs/media and media.lock disagree
   report [--base <ref>]    markdown table of what the manifest changed since
                            <ref> (default HEAD), with links to both images
 
-No command needs credentials except push, and push does not call aws yet.
+Only push needs AWS credentials; the bucket serves public reads, so pull works
+from a fork's CI and a cold clone with none.
 `
 
 async function main() {
