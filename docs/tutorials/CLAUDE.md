@@ -59,7 +59,7 @@ The link opens the exact view the figure captured. Every figure is generated:
 - `node scripts/screenshots/generate.mjs --filter=<topic> --port=<free port>`
   after `pnpm --filter app build`
 
-Three traps the existing pages hit:
+Traps the existing pages hit:
 
 - **A callout anchor counts from 0**, where `highlights` and GFF count from 1.
   The same residue is two different numbers in the two files.
@@ -77,6 +77,14 @@ Three traps the existing pages hit:
 - **The aligner decides the row order of its output.** ClustalW writes the rows
   in guide-tree order, so a series a reader should read in file order (by year,
   by accession) needs the file rewritten in that order after the aligner runs.
+- **A tip label elides by tree depth, not label length.** `treeAreaWidth` has to
+  clear the deepest row's indent plus its label, so a set of long names elides
+  the rows furthest from the root while the shallow ones fit. Nothing reports
+  it, and a half-drawn label reads as a whole one until you compare two rows.
+- **A callout anchored `alignY: 'bottom'` draws below the drawn rows**, which is
+  off the bottom of `clip: 'viewer'` whenever the rows fill the panel. The
+  anchor resolves, so the unresolved-anchor guard stays quiet and the PNG comes
+  out with no callout. Give `height` a band under the last row.
 
 Hosted files the links load go under `packages/app/public/data/<topic>/`, served
 at `gmod.org/JBrowseMSA/demo/data/<topic>/`, with a row in that directory's
