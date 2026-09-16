@@ -812,6 +812,17 @@ own color and a legend entry
 any[]
 ```
 
+#### getter: cladeGutterWidth
+
+the pixel column reserved at the right of the tree area for the bracket mark,
+which the tip labels and the tree itself stay clear of. Zero where no clade
+draws a bar or a label.
+
+```js
+// type
+number
+```
+
 #### getter: clickedCell
 
 the cell a click pinned. Public API: MSAViewer's onCellClick reports it.
@@ -1320,7 +1331,8 @@ ResidueMappingProblem[]
 
 `clades` resolved to the rows each one covers. The tip names resolve against
 `tree` rather than `root`, so a clade whose ancestor the user collapsed keeps
-its rows. One leaf pass over the tree serves every clade.
+its rows. One leaf pass over the tree serves every clade. A `range` record names
+no node, so `collapse` and `focus`, which need one, drop it.
 
 ```js
 // type
@@ -1601,6 +1613,9 @@ NodeWithIds
 ```
 
 #### getter: treeAreaWidthMinusMargin
+
+the right edge the tip labels end at, which is the tree area less the margin and
+the bracket gutter
 
 ```js
 // type

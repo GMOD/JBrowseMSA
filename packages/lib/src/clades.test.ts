@@ -1,6 +1,11 @@
 // @vitest-environment jsdom
 import { expect, test } from 'vitest'
 
+import {
+  bracketBarWidth,
+  bracketGap,
+  maxCladeGutterWidth,
+} from './components/tree/cladeBrackets.ts'
 import MSAModelF from './model.ts'
 
 import type { Clade } from './types.ts'
@@ -98,4 +103,86 @@ test('setClades replaces the layer', () => {
   expect(model.resolvedClades).toEqual([])
   model.setClades([{ mrca: ['C', 'D'], tips: 2, mark: 'highlight' }])
   expect(model.resolvedClades[0]!.rows).toEqual([2, 3])
+})
+
+test('no bracket mark leaves no gutter', () => {
+  const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'highlight' }])
+  expect(model.cladeGutterWidth).toBe(0)
+  expect(model.treeAreaWidthMinusMargin).toBe(
+    model.treeAreaWidth - model.marginLeft,
+  )
+})
+
+test('a bracket reserves a gutter the tip labels stay clear of', () => {
+  const bar = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'bracket' }])
+  const labelled = makeModel([
+    { mrca: ['A', 'B'], tips: 2, mark: 'bracket', label: 'clade I' },
+  ])
+  expect(bar.cladeGutterWidth).toBeGreaterThan(0)
+  expect(labelled.cladeGutterWidth).toBeGreaterThan(bar.cladeGutterWidth)
+  expect(labelled.treeAreaWidthMinusMargin).toBe(
+    labelled.treeAreaWidth - labelled.marginLeft - labelled.cladeGutterWidth,
+  )
+})
+
+test('a highlight carrying a label takes the gutter for the label alone', () => {
+  const highlight = makeModel([
+    { mrca: ['A', 'B'], tips: 2, mark: 'highlight', label: 'clade I' },
+  ])
+  const bracket = makeModel([
+    { mrca: ['A', 'B'], tips: 2, mark: 'bracket', label: 'clade I' },
+  ])
+  expect(highlight.cladeGutterWidth).toBeCloseTo(
+    bracket.cladeGutterWidth - bracketBarWidth - bracketGap,
+  )
+})
+
+test('a label too long for the gutter is capped', () => {
+  const model = makeModel([
+    {
+      mrca: ['A', 'B'],
+      tips: 2,
+      mark: 'bracket',
+      label: 'a clade name nobody would fit beside a tree',
+    },
+  ])
+  expect(model.cladeGutterWidth).toBe(maxCladeGutterWidth)
+})
+
+test('a collapse mark collapses the clade at load', () => {
+  const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  expect(model.collapsed).toEqual(['node-0-0-1'])
+  expect(model.rowNames).toEqual(['node-0-0-1', 'C', 'D'])
+})
+
+test('a collapse seeded at load rebuilds the raster tile cache', () => {
+  // `leaves` is one of the rasterKeys (msaRaster.ts), so the tiles built for
+  // four rows are dropped for the three the collapse leaves
+  const plain = makeModel([])
+  const collapsed = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  expect(plain.leaves).toHaveLength(4)
+  expect(collapsed.leaves).toHaveLength(3)
+})
+
+test('expanding a seeded clade sticks until the next load', () => {
+  const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  model.toggleCollapsed('node-0-0-1')
+  expect(model.collapsed).toEqual([])
+  expect(model.rowNames).toEqual(['A', 'B', 'C', 'D'])
+})
+
+test('a focus mark opens on the clade', () => {
+  const model = makeModel([{ mrca: ['C', 'D'], tips: 2, mark: 'focus' }])
+  expect(model.showOnly).toBe('node-0-1-1')
+  expect(model.rowNames).toEqual(['C', 'D'])
+})
+
+test('a range record cannot collapse or focus, so it is dropped', () => {
+  const model = makeModel([
+    { range: ['A', 'B'], tips: 2, mark: 'collapse' },
+    { range: ['C', 'D'], tips: 2, mark: 'focus' },
+  ])
+  expect(model.resolvedClades).toEqual([])
+  expect(model.collapsed).toEqual([])
+  expect(model.showOnly).toBeUndefined()
 })

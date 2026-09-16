@@ -67,5 +67,7 @@ export function cladeGutterWidth({
       : 0
     widest = Math.max(widest, cladeLabelOffset(clade) + text + bracketGap)
   }
-  return Math.min(maxCladeGutterWidth, widest)
+  // a whole pixel, so the room the renderers measure against covers the label
+  // the measurement here sized the gutter for
+  return Math.min(maxCladeGutterWidth, Math.ceil(widest))
 }

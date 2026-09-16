@@ -22,6 +22,7 @@ import {
 } from './components/tree/cladeBrackets.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { renderTreeOverview } from './components/tree/renderTreeOverview.ts'
+import { measureTextCanvas } from './measureTextCanvas.ts'
 import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
 import { outlineColor } from './util.ts'
 
@@ -345,6 +346,18 @@ function RowPanelHeadersSVG({
   )
 }
 
+// A label past the room it has, cut to what fits with an ellipsis. The measure
+// is the one cladeGutterWidth sizes the gutter with, so a label the gutter
+// holds keeps every character.
+function clipCladeLabel(label: string, room: number, fontSize: number) {
+  const width = measureTextCanvas(label, fontSize)
+  if (width <= room) {
+    return label
+  }
+  const fits = Math.floor((label.length * room) / width)
+  return `${label.slice(0, Math.max(1, fits - 1))}…`
+}
+
 // Each bracket's label in the gutter beside its bar, where the live view puts
 // it (see CladeLabels). The canvas layer draws the bar; a label longer than the
 // gutter or the clade is clipped, since text that overruns runs off the figure.
@@ -380,7 +393,6 @@ function CladeLabelsSVG({
         const height = cladeHeight(clade, rowHeight)
         const horizontal = cladeLabelHorizontal(clade, rowHeight, fontSize)
         const room = horizontal ? treeAreaWidth - left - bracketGap : height
-        const maxChars = Math.floor(room / (fontSize * CHAR_WIDTH))
         const x = horizontal ? left : left + fontSize
         const y = horizontal ? top + height / 2 + fontSize / 3 : top + height
         return (
@@ -392,9 +404,7 @@ function CladeLabelsSVG({
             fontSize={fontSize}
             fill={markColor ?? theme.palette.text.primary}
           >
-            {label.length > maxChars
-              ? `${label.slice(0, Math.max(1, maxChars - 1))}\u2026`
-              : label}
+            {clipCladeLabel(label, room, fontSize)}
           </text>
         )
       })}
