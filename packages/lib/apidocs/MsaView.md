@@ -884,6 +884,20 @@ renderer walks columns and needs the band covering each one)
 Map<any, any>
 ```
 
+#### getter: domainUnderline
+
+whether the overlay marks each domain with a bar under its row instead of
+filling the row behind the letters. Letter-color mode hands the background to
+the color scheme, so a filled box would paint over it and leave the setting with
+nothing to show. Sub-row layout already stacks the boxes clear of the letters,
+and with the letters too small to draw the filled box is the only thing left to
+read.
+
+```js
+// type
+boolean
+```
+
 #### getter: fontSize
 
 ```js
