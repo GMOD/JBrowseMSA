@@ -5,7 +5,6 @@ import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { msaOverlayZIndex } from '../../constants.ts'
-
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { renderMouseover } from './renderMSAMouseover.ts'
 
