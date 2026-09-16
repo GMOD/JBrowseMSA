@@ -111,7 +111,10 @@ is data preparation. See `viewer-not-analysis-tool` in the memory and
   `kind`, a draw function in that module, and a case in `drawTrackBlock`, with
   no second rendering path or component. `TrackResizeHandle` writes a kind's
   shared volatile height, except for a `columnTracks` track, which carries its
-  own.
+  own. Tracks writing the same volatile resize together, so only the last
+  turned-on one of them carries a handle -- conservation and property
+  conservation share the handle below the pair -- and the drag divides across
+  the group so the bottom edge follows the cursor.
 - `turnedOffTracks` records only the user's explicit show/hide choices. An id is
   absent until they touch that track, and the value then means "off", so a
   hidden-by-default track (see `defaultOffTracks` in `model.ts`) adds nothing to

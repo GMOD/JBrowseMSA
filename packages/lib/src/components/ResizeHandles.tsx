@@ -70,6 +70,13 @@ const setTrackHeight: Partial<
   },
 }
 
+// The tracks one handle moves together. A column track carries its own height,
+// so it is a group of one; the rest share the volatile their kind writes.
+function heightGroup(model: MsaViewModel, track: BasicTrack) {
+  const { id, kind } = track.model
+  return model.columnTracks.some(t => t.id === id) ? `own:${id}` : kind
+}
+
 export const TrackResizeHandle = observer(function ({
   model,
   track,
@@ -79,20 +86,28 @@ export const TrackResizeHandle = observer(function ({
 }) {
   const { id, kind, height } = track.model
   const setHeight = setTrackHeight[kind]
-  // a data track carries its own height, so its handle resizes only that track
   const ownHeight = model.columnTracks.some(t => t.id === id)
+  // conservation and property conservation share a height, so a handle between
+  // them would resize the pair the one below them already resizes. Only the
+  // last turned-on track of a group carries it, and the drag spreads across
+  // the group so the bottom edge follows the cursor rather than half of it
+  const group = heightGroup(model, track)
+  const siblings = model.turnedOnTracks.filter(
+    t => heightGroup(model, t) === group,
+  )
+  const count = siblings.length
   const onDrag = useCallback(
     (delta: number, startHeight: number) => {
-      const next = Math.max(10, startHeight + delta)
+      const next = Math.max(10, startHeight + delta / count)
       if (ownHeight) {
         model.setColumnTrackHeight(id, next)
       } else {
         setTrackHeight[kind]?.(model, next)
       }
     },
-    [model, id, kind, ownHeight],
+    [model, id, kind, ownHeight, count],
   )
-  return setHeight ? (
+  return setHeight && siblings.at(-1)?.model.id === id ? (
     <DragHandle
       axis="y"
       variant="resizer"

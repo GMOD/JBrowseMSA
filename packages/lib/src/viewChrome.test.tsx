@@ -158,6 +158,24 @@ test("dragging a data track's divider resizes that track alone", async () => {
   expect(model.conservationTrackHeight).toBe(conservation)
 })
 
+test('one divider resizes conservation and property conservation together', async () => {
+  const protein = names.map(n => `>${n}\n${'ACDEFGHIKLMNPQRSTVWY'.repeat(5)}`)
+  act(() => {
+    model.setMSA(protein.join('\n'))
+  })
+  expect(model.turnedOnTracks.map(t => t.model.id)).toContain(
+    'property-conservation',
+  )
+  // still the data-track-free count: the pair shares the one handle below it
+  expect(byCursor('ns-resize')).toHaveLength(2)
+
+  const before = model.conservationTrackHeight
+  await drag(byCursor('ns-resize')[0]!, { y: 40 })
+
+  // the drag splits across the pair, so the bottom edge follows the cursor
+  expect(model.conservationTrackHeight).toBe(before + 20)
+})
+
 test('the tree gutter carries a scale bar, and the ruler track draws', async () => {
   expect(model.pxPerBranchLength).toBeGreaterThan(0)
   // the gutter above the tree: a path for the bar, and the round length beside
