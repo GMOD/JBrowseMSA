@@ -14,23 +14,18 @@ function retryAfterMs(response: Response) {
 }
 
 /**
- * fetch with exponential backoff on the statuses that mean "ask again later".
- * `init` is the request as fetch takes it, so a POST retries the same body.
+ * fetch with exponential backoff on the statuses that mean "ask again later"
  */
 export async function fetchWithRetry(
   url: string,
-  {
-    attempts = 4,
-    baseDelayMs = 1000,
-    init,
-  }: { attempts?: number; baseDelayMs?: number; init?: RequestInit } = {},
+  { attempts = 4, baseDelayMs = 1000 } = {},
 ) {
   let lastError: unknown
   for (let attempt = 0; attempt < attempts; attempt++) {
     // one wait per failed attempt: Retry-After when present, else exponential
     let wait = baseDelayMs * 2 ** attempt
     try {
-      const response = await fetch(url, init)
+      const response = await fetch(url)
       if (!RETRYABLE.has(response.status)) {
         return response
       }

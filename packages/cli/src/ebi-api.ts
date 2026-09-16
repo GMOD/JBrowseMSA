@@ -9,18 +9,18 @@ async function submitJob(
   programs: string[],
   email: string,
 ): Promise<string> {
-  const response = await fetchWithRetry(`${BASE_URL}/run`, {
-    init: {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        email,
-        sequence: `>${sequence.id}\n${sequence.seq}`,
-        appl: programs.join(','),
-      }),
+  // a submit that answers with a gateway error may still have queued the job,
+  // so it is not retried; the status and result reads below are
+  const response = await fetch(`${BASE_URL}/run`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
+    body: new URLSearchParams({
+      email,
+      sequence: `>${sequence.id}\n${sequence.seq}`,
+      appl: programs.join(','),
+    }),
   })
 
   if (!response.ok) {

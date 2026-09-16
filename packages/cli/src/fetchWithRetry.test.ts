@@ -58,20 +58,3 @@ test('a network-level throw is retried like a retryable status', async () => {
   ).toBe(200)
   expect(fetchMock).toHaveBeenCalledTimes(2)
 })
-
-test('a POST retries with the same request', async () => {
-  const fetchMock = vi
-    .fn()
-    .mockResolvedValueOnce(new Response('', { status: 502 }))
-    .mockResolvedValueOnce(new Response('job-1', { status: 200 }))
-  vi.stubGlobal('fetch', fetchMock)
-  const init = { method: 'POST', body: 'email=a@b.c' }
-
-  const res = await fetchWithRetry('https://example.org/run', {
-    baseDelayMs: 0,
-    init,
-  })
-  expect(await res.text()).toBe('job-1')
-  expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.org/run', init)
-  expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://example.org/run', init)
-})
