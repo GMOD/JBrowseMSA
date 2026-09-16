@@ -26,8 +26,14 @@ function drawBlock(
   { offsetY, height }: { offsetY: number; height: number },
 ) {
   const rects: Rect[] = []
+  let fillStyle = ''
   const ctx = {
-    fillStyle: '',
+    get fillStyle() {
+      return fillStyle
+    },
+    set fillStyle(color: string) {
+      fillStyle = color
+    },
     lineWidth: 0,
     strokeStyle: '',
     textAlign: 'start',
@@ -37,7 +43,7 @@ function drawBlock(
     fillText() {},
     strokeRect() {},
     fillRect(x: number, y: number, width: number, height: number) {
-      rects.push({ x, y, width, height, fill: this.fillStyle })
+      rects.push({ x, y, width, height, fill: fillStyle })
     },
   } as unknown as RenderCtx
 

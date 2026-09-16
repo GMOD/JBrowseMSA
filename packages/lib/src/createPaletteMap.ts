@@ -10,10 +10,7 @@ import palettes from './ggplotPalettes.ts'
  * eight-color palette — every key gets an evenly spaced HSL hue instead, so no
  * two keys share a color.
  */
-export function createPaletteMap(
-  keys: string[],
-  palette?: readonly string[] | undefined,
-) {
+export function createPaletteMap(keys: string[], palette?: readonly string[]) {
   const n = keys.length
   const colors = palette ?? palettes[n - 1]
   if (colors && n <= colors.length) {

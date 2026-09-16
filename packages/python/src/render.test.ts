@@ -39,6 +39,8 @@ const defaults: Traits = {
   highlight_columns: [],
   column_tracks: [],
   residue_mappings: [],
+  row_data: {},
+  encodings: [],
   relative_to: null,
   region: null,
   draw_tree: true,

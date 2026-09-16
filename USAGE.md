@@ -82,9 +82,9 @@ setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `columnTracks`, `residueMappings`, `rowData`,
 `encodings`, `highlightColumns`) and the filehandles by content, so passing a
-freshly computed array or location object on every render costs nothing. A new `msa`,
-`tree` or `gff` string, or a filehandle pointing somewhere else, builds a new
-model and resets the view.
+freshly computed array or location object on every render costs nothing. A new
+`msa`, `tree` or `gff` string, or a filehandle pointing somewhere else, builds a
+new model and resets the view.
 
 ### Events
 

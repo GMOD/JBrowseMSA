@@ -140,6 +140,18 @@ IOptionalIType<ISimpleType<boolean>, [undefined]>
 drawMsaLetters: stripDefault(types.boolean, defaultDrawMsaLetters)
 ```
 
+#### property: encodings
+
+what the viewer's own marks read from `rowData`: `{channel, field, scale?}` per
+channel, where `channel` is `tipLabel` or `rowTint`. See docs/layers.md
+
+```js
+// type signature
+IOptionalIType<IArrayType<IType<Encoding, Encoding, Encoding>>, [undefined]>
+// code
+encodings: stripDefault(types.array(types.frozen<Encoding>()), [])
+```
+
 #### property: gffFilehandle
 
 filehandle object for a GFF file of overlay annotations
@@ -1227,6 +1239,17 @@ structure from a mapping made against a different alignment.
 ResidueMappingProblem[]
 ```
 
+#### getter: resolvedEncodings
+
+each encoding with its scale resolved against the values its field takes across
+the row table. Resolved once per change of the table or the encodings, never per
+row per frame.
+
+```js
+// type
+ResolvedEncoding[]
+```
+
 #### getter: resolvedHighlights
 
 `highlights` projected onto what is on screen: residue spans go through the
@@ -1254,6 +1277,29 @@ own units
 ```js
 // type
 number
+```
+
+#### getter: rowData
+
+the row table: extra fields per row, keyed by row name, which the `encodings`
+channels read. It is stored as the JSON string `data.treeMetadata`, the name
+that travels in existing links, so the inline size limit and
+`treeMetadataFilehandle` cover it. labelWidthMap reads it on every layout, so a
+malformed user-supplied file returns {} instead of throwing out of rendering.
+
+```js
+// type
+Record<string, Record<string, string>>
+```
+
+#### getter: rowFields
+
+the field names the row table carries, sorted, for a producer or a UI choosing
+one to encode
+
+```js
+// type
+string[]
 ```
 
 #### getter: rowMap
@@ -1288,6 +1334,17 @@ Map<unknown, unknown>
 ```js
 // type
 any
+```
+
+#### getter: rowTints
+
+the wash the `rowTint` channel draws over each row, indexed by row, or undefined
+when no encoding names the channel. The overlay draws these, so a tint stays out
+of the raster tile cache and its keys.
+
+```js
+// type
+string[]
 ```
 
 #### getter: secondaryStructureArcs
@@ -1382,6 +1439,16 @@ boolean
 boolean
 ```
 
+#### getter: tipLabelColors
+
+the color the `tipLabel` channel gives each row, by row name. Undefined when no
+encoding names the channel, which leaves the labels the theme's text color.
+
+```js
+// type
+Map<string, string>
+```
+
 #### getter: totalHeight
 
 ```js
@@ -1417,17 +1484,6 @@ NodeWithIds
 ```js
 // type
 number
-```
-
-#### getter: treeMetadata
-
-extra per-row attributes, keyed by row name. labelWidthMap reads this on every
-layout, so a malformed user-supplied file returns {} instead of throwing out of
-rendering.
-
-```js
-// type
-Record<string, Record<string, string>>
 ```
 
 #### getter: turnedOnTracks
@@ -1536,7 +1592,7 @@ columnStatsAt: (col: number) => ColumnStats
 
 ```js
 // type signature
-getRowData: (name: string) => { data: { name?: string; accession?: string; dbxref?: string; }; treeMetadata: Record<string, string>; }
+getRowData: (name: string) => { data: { name?: string; accession?: string; dbxref?: string; }; rowData: any; }
 ```
 
 #### method: globalColToVisibleCol
@@ -1547,6 +1603,15 @@ the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 ```js
 // type signature
 globalColToVisibleCol: (globalCol: number) => number
+```
+
+#### method: rowDataOf
+
+one row's fields, the single reader of the row table
+
+```js
+// type signature
+rowDataOf: (name: string) => any
 ```
 
 #### method: rowResidue
@@ -1880,6 +1945,15 @@ setDomains: (data?: Record<string, InterProScanResults>) => void
 setDrawMsaLetters: (arg: boolean) => void
 ```
 
+#### action: setEncodings
+
+replace what the viewer's marks read from the row table
+
+```js
+// type signature
+setEncodings: (encodings: Encoding[]) => void
+```
+
 #### action: setError
 
 set error state
@@ -2053,6 +2127,16 @@ replace the alignment<->structure correspondence (see docs/layers.md)
 ```js
 // type signature
 setResidueMappings: (mappings: ResidueMapping[]) => void
+```
+
+#### action: setRowData
+
+replace the row table, which the model keeps as the JSON string
+`data.treeMetadata` (see docs/layers.md)
+
+```js
+// type signature
+setRowData: (rowData: Record<string, Record<string, string>>) => void
 ```
 
 #### action: setRowHeight

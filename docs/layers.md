@@ -143,6 +143,90 @@ or a genome browser, call `model.applyHighlight(owner, list)` and
 highlights, and stay out of the snapshot. `clearHighlight(owner)` removes only
 that owner's highlights, so two sources can highlight at once.
 
+## rowData
+
+A table of fields per row, keyed by row name: a lineage, a host, a collection
+date, a kinase group. The `encodings` below color the viewer's marks by one of
+these fields, the tree's node-info dialog lists a row's fields, and a `genome`
+field replaces the row name in the tree labels.
+
+The model keeps the table as the JSON string `data.treeMetadata`, the field name
+that travels in existing links, so a snapshot carries it there:
+
+```json
+{
+  "type": "MsaView",
+  "data": {
+    "msa": ">duck\nMKAANSE\n>chicken\nMKA-NSE",
+    "treeMetadata": "{\"duck\":{\"clade\":\"2.3.4.4b\"},\"chicken\":{\"clade\":\"2.3.2.1c\"}}"
+  }
+}
+```
+
+Everywhere else the table is an object: the `rowData` prop on `MSAViewer`,
+`model.setRowData(table)`, `geom_msa_rowdata(df)` in R, and the `row_data` trait
+in Python. R takes a data frame whose `label` or `row` column names each row and
+whose other columns are the fields, the shape a ggtree
+`tibble(label = , trait = )` has.
+
+A real metadata table needs the filehandle. Five thousand rows with eight fields
+run to roughly 700 kB, fourteen times the 50 kB inline limit and far past the
+8,192-character request line a `?data=` link fits in, so the snapshot drops it
+and `unshareableData` reports the drop. Host the JSON and set
+`treeMetadataFilehandle` to its URL, and the viewer fetches the table at
+startup:
+
+```json
+{
+  "type": "MsaView",
+  "msaFilehandle": { "uri": "https://example.org/h5.fa" },
+  "treeMetadataFilehandle": { "uri": "https://example.org/h5-lineages.json" }
+}
+```
+
+## encodings
+
+What the viewer's own marks read from `rowData`. Each entry names a `channel`,
+the `field` feeding it, and the `scale` that turns a field value into a color.
+The `tipLabel` channel colors each tip label in the tree; `rowTint` washes the
+whole row across the tree gutter and the alignment.
+
+```json
+{
+  "type": "MsaView",
+  "data": { "msa": ">duck\nMKAANSE\n>chicken\nMKA-NSE" },
+  "encodings": [
+    { "channel": "tipLabel", "field": "clade", "scale": { "palette": "set1" } },
+    {
+      "channel": "rowTint",
+      "field": "clade",
+      "scale": { "map": { "2.3.4.4b": "#e41a1c" } }
+    }
+  ]
+}
+```
+
+| Field     | Meaning                                                            |
+| --------- | ------------------------------------------------------------------ |
+| `channel` | `tipLabel` or `rowTint`                                            |
+| `field`   | the `rowData` field the channel reads                              |
+| `scale`   | `{palette}` or `{map}`; the ggplot palette when the entry omits it |
+
+A `{palette}` names one of `ggplot` (the default), `set1`, `dark2`, `okabeito`
+and `tableau`, and the scale hands its colors to the field's distinct values in
+sorted order, so a value keeps its color as rows are collapsed, filtered or
+re-ordered. Past the end of a palette every value takes an evenly spaced hue
+instead, which keeps a forty-clade field readable. A `{map}` names a color per
+value, and a value it leaves out keeps the plain mark: an uncolored tip label
+draws in the theme's text color and an uncolored row takes no tint.
+
+A tint draws at 25% opacity so the residues under it stay readable. A color
+carrying its own alpha, such as `rgba(228,26,28,0.5)`, draws at that alpha.
+
+The scales resolve once per change of the table or the encodings, and the tint
+draws in the overlay the `highlights` row sets use, which keeps it out of the
+alignment's raster tile cache.
+
 ## residueMappings
 
 A residue mapping records which residue of which structure each residue of a row
