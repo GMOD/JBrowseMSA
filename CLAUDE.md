@@ -123,7 +123,10 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   spans to panel pixels: `x: "column"` scales `domainBands` by `colWidth`, and
   `x: "position"` packs each row's features in residue positions through
   `packDomainLanes`, which is generic over `{startCol, endCol}`, and maps their
-  extent onto the panel width. The `align` transform's per-row shift comes from
+  extent onto the panel width. The packing runs on the pixel spans and shrinks
+  each one by a tenth before testing overlap, because adjacent bacterial genes
+  commonly share a few bases and a stop codon over the next start put a whole
+  operon on two lanes. The `align` transform's per-row shift comes from
   `featureAlignShifts`. A record's own `encoding` resolves through
   `resolveScale` and `featureFields.ts` the way the top-level `featureFill` and
   `featureLabel` do, and falls back to them. A tree, a `gff` and a `features`
@@ -155,9 +158,10 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   `{ id, title, entries }`, and `legendRows` flattens the list into the rows
   both renderings stack top to bottom, giving each legend a title row once there
   is more than one. The domain overlay, the row-table encodings and the row
-  panels are its producers, each keyed by the field its scale reads. The
-  property behind the overlay's collapse toggle stays `showDomainLegend`,
-  because that name travels in the shared URL.
+  panels are its producers, each keyed by the field its scale reads. A strip's
+  `legend` overrides that key, so a matrix of columns over one set of colors
+  lists one legend. The property behind the overlay's collapse toggle stays
+  `showDomainLegend`, because that name travels in the shared URL.
 - The viewer calls no remote compute queue and runs no analysis long enough to
   freeze the tab. The one exception is neighbor joining, capped at
   `maxNeighborJoiningRows`, because on a small alignment it is faster than
