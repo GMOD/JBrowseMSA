@@ -13,7 +13,7 @@ export default function ExamplesApp() {
         sidebarHeader={
           <Box sx={{ p: 2 }}>
             <Typography variant="subtitle2" color="text.secondary">
-              Live examples
+              Usage patterns
             </Typography>
           </Box>
         }

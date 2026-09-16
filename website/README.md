@@ -37,11 +37,16 @@ automatically by `dev`/`build`); `public/media` is git-ignored.
 ## Adding a page
 
 Drop a `.astro` file in `src/pages/`, wrap it in `../layouts/Base.astro`, and
-add it to the `groups` array in that layout. To surface another existing
-markdown doc, `import { Content } from '../../../<path>.md'` (three `../` reach
-the repo root from `src/pages/`) and render `<Content />`. A tutorial needs no
-page: add the markdown to `docs/tutorials/` and an entry to
-`src/lib/tutorials.ts`.
+add it to the `docs` array in `src/lib/links.ts`, which the header's Docs menu
+and the home page's link list both read. To surface another existing markdown
+doc, `import { Content } from '../../../<path>.md'` (three `../` reach the repo
+root from `src/pages/`) and render `<Content />`. A tutorial needs no page: add
+the markdown to `docs/tutorials/` and an entry to `src/lib/tutorials.ts`.
+
+The header bar carries Home, Tutorials and the standalone app directly, and
+everything else sits under the one Docs menu. A new top-level bar link is a
+deliberate change to `Base.astro`, not something an entry in `links.ts` can do
+on its own.
 
 ## Deployment
 

@@ -2,7 +2,7 @@
 import HomeDemo from '../components/HomeDemo.astro'
 import LinkList from '../components/LinkList.astro'
 import Base from '../layouts/Base.astro'
-import { app, docs, showcase } from '../lib/links.ts'
+import { app, docs, tutorials } from '../lib/links.ts'
 ---
 
 <Base
@@ -20,6 +20,6 @@ import { app, docs, showcase } from '../lib/links.ts'
 
     <HomeDemo />
 
-    <LinkList items={[app, ...showcase, ...docs]} />
+    <LinkList items={[app, tutorials, ...docs]} />
   </article>
 </Base>

@@ -1,5 +1,5 @@
 ---
-import { app, docs, showcase } from '../lib/links.ts'
+import { app, docs, tutorials } from '../lib/links.ts'
 import '../styles/global.css'
 
 interface Props {
@@ -11,14 +11,16 @@ interface Props {
 const { title, description, wide, fullBleed } = Astro.props
 const base = import.meta.env.BASE_URL
 const home = { href: base, label: 'Home' }
-const groups = [
-  { label: 'Docs', items: docs },
-  { label: 'Showcase', items: showcase },
-]
+// Docs is the only menu. The bar itself carries what someone arrives to do.
+const groups = [{ label: 'Docs', items: docs }]
 
 const strip = (s: string) => s.replace(/\/$/, '')
 const current = strip(Astro.url.pathname)
 const isActive = (href: string) => strip(href) === current
+// Tutorials stays current on its own sub-pages, so reading a walkthrough still
+// shows where in the site you are.
+const inSection = (href: string) =>
+  isActive(href) || current.startsWith(`${strip(href)}/`)
 const groupActive = (items: { href: string }[]) =>
   items.some(item => isActive(item.href))
 const canonical = new URL(Astro.url.pathname, Astro.site).href
@@ -60,6 +62,13 @@ const socialImage = new URL(
           aria-current={isActive(home.href) ? 'page' : undefined}
         >
           {home.label}
+        </a>
+        <a
+          href={tutorials.href}
+          class:list={{ active: inSection(tutorials.href) }}
+          aria-current={isActive(tutorials.href) ? 'page' : undefined}
+        >
+          {tutorials.label}
         </a>
         {groups.map(group => {
           const menuId = `nav-menu-${group.label.toLowerCase()}`

@@ -136,19 +136,19 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   `kind`, a draw function in that module, a case in `drawTrackBlock`, and a case
   in `components/tracks/TrackTooltipContent.tsx` for that track's reading at the
   hovered column, with no second rendering path or component.
-  `components/Track.tsx` hosts every kind's hover: `useTrackHover` there sets the
-  model's mouse column and anchors the tooltip, so the column statistics live on
-  the tracks that draw them and the alignment's own tooltip stays about the cell
-  under the cursor. A track model carries a `heightKey`
-  naming the height its divider writes: the `kind` for a computed track, so
-  conservation and property conservation resize together, and `own:<id>` for a
-  `columnTracks` track, which resizes alone. `trackHeights` holds one number per
-  key, absent until the user drags, and `defaultTrackHeights` answers until
-  then. A track without a key -- the ruler, a text track -- has no divider. Only
-  the last turned-on track of a key carries the handle, and the drag divides
-  across the group, so the group's bottom edge follows the cursor. That handle
-  covers only the alignment, so `Track` draws a hairline under every track but
-  the last, which reaches across the labels too.
+  `components/Track.tsx` hosts every kind's hover: `useTrackHover` there sets
+  the model's mouse column and anchors the tooltip, so the column statistics
+  live on the tracks that draw them and the alignment's own tooltip stays about
+  the cell under the cursor. A track model carries a `heightKey` naming the
+  height its divider writes: the `kind` for a computed track, so conservation
+  and property conservation resize together, and `own:<id>` for a `columnTracks`
+  track, which resizes alone. `trackHeights` holds one number per key, absent
+  until the user drags, and `defaultTrackHeights` answers until then. A track
+  without a key -- the ruler, a text track -- has no divider. Only the last
+  turned-on track of a key carries the handle, and the drag divides across the
+  group, so the group's bottom edge follows the cursor. That handle covers only
+  the alignment, so `Track` draws a hairline under every track but the last,
+  which reaches across the labels too.
 - `turnedOffTracks` records only the user's explicit show/hide choices. An id is
   absent until they touch that track, and the value then means "off", so a
   hidden-by-default track (see `defaultOffTracks` in `model.ts`) adds nothing to
