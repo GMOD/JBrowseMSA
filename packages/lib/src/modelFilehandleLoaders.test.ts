@@ -132,7 +132,7 @@ test('tree, treeMetadata and gff filehandles each load into their own field', as
   await flush()
 
   expect(model.data.tree).toBe('(a,b);')
-  expect(model.treeMetadata.a?.genome).toBe('human')
+  expect(model.rowDataOf('a')?.genome).toBe('human')
   expect(model.data.gff).toContain('PF00069')
   expect(model.actuallyShowDomains).toBe(true)
   expect(model.loadingTree).toBe(false)

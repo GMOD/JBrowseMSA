@@ -80,6 +80,11 @@ export const defaultDrawNodeLabels = false
 // seventy. See agent-docs/ideas/neighbor-joining-scaling.md.
 export const maxNeighborJoiningRows = 500
 
+// The opacity a `rowTint` encoding draws its scale's color at, so the residues
+// under the wash stay readable. A color the producer already gave an alpha
+// keeps it.
+export const rowTintAlpha = 0.25
+
 // The largest inline document the snapshot carries. A larger pasted or
 // locally-opened file stays in the live model and out of the snapshot, keeping
 // shared URLs sendable. `unshareableData` warns using the same number.

@@ -21,8 +21,8 @@ const TreeNodeInfoDialog = observer(function ({
   nodeName: string
   onClose: () => void
 }) {
-  const { treeMetadata, rows } = model
-  const metadata = treeMetadata[nodeName]
+  const { rows } = model
+  const metadata = model.rowDataOf(nodeName)
   const res = rows.find(f => f[0] === nodeName)
   return (
     <Dialog

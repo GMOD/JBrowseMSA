@@ -53,6 +53,7 @@ import {
   minLetterColWidth,
   minLetterRowHeight,
   minRowHeight,
+  rowTintAlpha,
   scrollZoomAxes,
   segmentFeatureTypes,
   segmentShades,
@@ -89,6 +90,7 @@ import {
   visibleColToGlobalCol,
   visibleColsBefore,
 } from './rowCoordinateCalculations.ts'
+import { resolveScale } from './scales.ts'
 import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import { stripDefault } from './stripDefault.ts'
@@ -115,6 +117,7 @@ import type {
   ResidueMappingProblem,
   ColumnTrackSpec,
   DomainBand,
+  Encoding,
   Highlight,
   Legend,
   NodeWithIds,
@@ -122,6 +125,7 @@ import type {
   Region,
   ResidueMapping,
   ResidueSegment,
+  ResolvedEncoding,
   ResolvedHighlight,
   RowResidue,
   StructureResidue,
@@ -494,6 +498,13 @@ function stateModelFactory() {
          * Persists in the snapshot and the URL.
          */
         highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
+        /**
+         * #property
+         * what the viewer's own marks read from `rowData`:
+         * `{channel, field, scale?}` per channel, where `channel` is
+         * `tipLabel` or `rowTint`. See docs/layers.md
+         */
+        encodings: stripDefault(types.array(types.frozen<Encoding>()), []),
       }),
     )
     .volatile(() => ({
@@ -1065,11 +1076,14 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * extra per-row attributes, keyed by row name. labelWidthMap reads this
-       * on every layout, so a malformed user-supplied file returns {} instead
-       * of throwing out of rendering.
+       * the row table: extra fields per row, keyed by row name, which the
+       * `encodings` channels read. It is stored as the JSON string
+       * `data.treeMetadata`, the name that travels in existing links, so the
+       * inline size limit and `treeMetadataFilehandle` cover it. labelWidthMap
+       * reads it on every layout, so a malformed user-supplied file returns {}
+       * instead of throwing out of rendering.
        */
-      get treeMetadata(): Record<string, Record<string, string> | undefined> {
+      get rowData(): Record<string, Record<string, string> | undefined> {
         const text = self.data.treeMetadata
         if (!text) {
           return {}
@@ -1080,9 +1094,30 @@ function stateModelFactory() {
             ? (parsed as Record<string, Record<string, string> | undefined>)
             : {}
         } catch (e) {
-          console.error('failed to parse treeMetadata', e)
+          console.error('failed to parse rowData', e)
           return {}
         }
+      },
+      /**
+       * #method
+       * one row's fields, the single reader of the row table
+       */
+      rowDataOf(name: string) {
+        return this.rowData[name]
+      },
+      /**
+       * #getter
+       * the field names the row table carries, sorted, for a producer or a UI
+       * choosing one to encode
+       */
+      get rowFields(): string[] {
+        const fields = new Set<string>()
+        for (const row of Object.values(this.rowData)) {
+          for (const field of Object.keys(row ?? {})) {
+            fields.add(field)
+          }
+        }
+        return [...fields].sort((a, b) => a.localeCompare(b))
       },
       /**
        * #getter
@@ -1575,7 +1610,7 @@ function stateModelFactory() {
        * #getter
        */
       get labelWidthMap() {
-        const { showTreeText, leaves, treeMetadata } = self
+        const { showTreeText, leaves } = self
         // gated on the renderer's label condition, so hidden labels reserve no
         // gutter. Measured once at a reference size and scaled by
         // labelWidthScale: re-measuring per vertical-zoom frame cost ~200ms on a
@@ -1586,7 +1621,7 @@ function stateModelFactory() {
                 const { name } = node.data
                 // `||`, matching renderTreeLabels: an empty genome falls back
                 // to the row name
-                const displayName = treeMetadata[name]?.genome || name
+                const displayName = self.rowDataOf(name)?.genome || name
                 return [
                   name,
                   measureTextCanvas(displayName, labelReferenceFontSize),
@@ -2571,6 +2606,21 @@ function stateModelFactory() {
       },
       /**
        * #action
+       * replace the row table, which the model keeps as the JSON string
+       * `data.treeMetadata` (see docs/layers.md)
+       */
+      setRowData(rowData: Record<string, Record<string, string>>) {
+        self.data.setTreeMetadata(JSON.stringify(rowData))
+      },
+      /**
+       * #action
+       * replace what the viewer's marks read from the row table
+       */
+      setEncodings(encodings: Encoding[]) {
+        self.encodings.replace(encodings)
+      },
+      /**
+       * #action
        * replace the alignment<->structure correspondence (see docs/layers.md)
        */
       setResidueMappings(mappings: ResidueMapping[]) {
@@ -2973,8 +3023,75 @@ function stateModelFactory() {
       getRowData(name: string) {
         return {
           data: self.MSA?.getRowData(name),
-          treeMetadata: self.treeMetadata[name],
+          rowData: self.rowDataOf(name),
         }
+      },
+
+      /**
+       * #getter
+       * each encoding with its scale resolved against the values its field
+       * takes across the row table. Resolved once per change of the table or
+       * the encodings, never per row per frame.
+       */
+      get resolvedEncodings(): ResolvedEncoding[] {
+        const rows = Object.values(self.rowData)
+        return self.encodings.map(encoding => ({
+          ...encoding,
+          ...resolveScale(
+            encoding.scale,
+            rows.map(row => row?.[encoding.field]).filter(notEmpty),
+          ),
+        }))
+      },
+
+      /**
+       * #getter
+       * the color the `tipLabel` channel gives each row, by row name. Undefined
+       * when no encoding names the channel, which leaves the labels the theme's
+       * text color.
+       */
+      get tipLabelColors(): Map<string, string> | undefined {
+        const encoding = this.resolvedEncodings.find(
+          e => e.channel === 'tipLabel',
+        )
+        if (!encoding) {
+          return undefined
+        }
+        const colors = new Map<string, string>()
+        for (const [name, row] of Object.entries(self.rowData)) {
+          const value = row?.[encoding.field]
+          const color = value === undefined ? undefined : encoding.colorOf(value)
+          if (color) {
+            colors.set(name, color)
+          }
+        }
+        return colors
+      },
+
+      /**
+       * #getter
+       * the wash the `rowTint` channel draws over each row, indexed by row, or
+       * undefined when no encoding names the channel. The overlay draws these,
+       * so a tint stays out of the raster tile cache and its keys.
+       */
+      get rowTints(): (string | undefined)[] | undefined {
+        const encoding = this.resolvedEncodings.find(
+          e => e.channel === 'rowTint',
+        )
+        if (!encoding) {
+          return undefined
+        }
+        return self.rowNames.map(name => {
+          const value = self.rowDataOf(name)?.[encoding.field]
+          const color = value === undefined ? undefined : encoding.colorOf(value)
+          if (!color) {
+            return undefined
+          }
+          const parsed = colord(color)
+          return parsed.alpha() === 1
+            ? parsed.alpha(rowTintAlpha).toRgbString()
+            : color
+        })
       },
     }))
     .actions(self => ({

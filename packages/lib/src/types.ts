@@ -1,3 +1,4 @@
+import type { ResolvedScale, ScaleSpec } from './scales.ts'
 import type { Annotation } from 'msa-parsers'
 
 export interface Accession {
@@ -251,6 +252,26 @@ export interface Viewport {
   startColumn: number
   endColumn: number
 }
+
+/**
+ * A channel of a mark the viewer always draws. `tipLabel` colors each tip label
+ * in the tree, `rowTint` washes the row across the tree gutter and the
+ * alignment. Both read a field of `rowData`.
+ */
+export type EncodingChannel = 'tipLabel' | 'rowTint'
+
+/**
+ * A channel, the `rowData` field feeding it, and the scale it reads that field
+ * through. See docs/layers.md
+ */
+export interface Encoding {
+  channel: EncodingChannel
+  field: string
+  scale?: ScaleSpec
+}
+
+/** an Encoding with its scale resolved against the values in the table */
+export type ResolvedEncoding = Encoding & ResolvedScale
 
 /** a Highlight resolved to visible column indices and row indices */
 export interface ResolvedHighlight {

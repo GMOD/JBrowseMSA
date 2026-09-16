@@ -355,7 +355,7 @@ function renderTreeLabels({
   const {
     fontSize,
     showBranchLenEffective: showBranchLen,
-    treeMetadata,
+    tipLabelColors,
     blockSize,
     labelsAlignRight,
     drawTree,
@@ -384,7 +384,7 @@ function renderTreeLabels({
     } = node
     const y = node.x!
 
-    const displayName = treeMetadata[name]?.genome || name
+    const displayName = model.rowDataOf(name)?.genome || name
     // a collapsed clade is drawn as a triangle + tip count; suppress its leaf
     // label when the "name" is just the auto-generated internal-node id
     const isAnonymousCollapsed = collapsedSet.has(id) && name === id
@@ -402,7 +402,7 @@ function renderTreeLabels({
           ? ctx.measureText(displayName).width
           : measured * labelWidthScale
 
-      ctx.fillStyle = theme.palette.text.primary
+      ctx.fillStyle = tipLabelColors?.get(name) ?? theme.palette.text.primary
       if (labelsAlignRight) {
         const smallPadding = 2
         const offset = treeAreaWidthMinusMargin - smallPadding
@@ -444,8 +444,22 @@ function renderTreeLabels({
   ctx.setLineDash([])
 }
 
-// the row sets of `highlights`, tinted across the tree area under the labels
-// with the label in the gutter at the first row of each set
+// the first row of a set, as a loop: spreading into Math.min passes one
+// argument per row, and the ~125k argument limit throws RangeError on a set
+// covering the 230k-tip COVID tree
+function firstRow(rowIndices: number[]) {
+  let min = Infinity
+  for (const index of rowIndices) {
+    if (index < min) {
+      min = index
+    }
+  }
+  return min
+}
+
+// the `rowTint` encoding and the row sets of `highlights`, washed across the
+// tree area under the labels, with each set's label in the gutter at its first
+// row
 function renderRowHighlights({
   ctx,
   model,
@@ -461,6 +475,7 @@ function renderRowHighlights({
 }) {
   const {
     resolvedHighlights,
+    rowTints,
     rowHeight,
     treeAreaWidth,
     marginLeft,
@@ -469,15 +484,31 @@ function renderRowHighlights({
   const by = blockSizeYOverride ?? blockSize
   const pad = blockPad(model)
   const placed: LabelBox[] = []
+  const fillRow = (index: number) => {
+    ctx.fillRect(-marginLeft, index * rowHeight, treeAreaWidth, rowHeight)
+  }
+  if (rowTints) {
+    const top = Math.max(0, Math.floor((offsetY - pad) / rowHeight))
+    const bottom = Math.min(
+      rowTints.length - 1,
+      Math.ceil((offsetY + by + pad) / rowHeight),
+    )
+    for (let index = top; index <= bottom; index++) {
+      const color = rowTints[index]
+      if (color) {
+        ctx.fillStyle = color
+        fillRow(index)
+      }
+    }
+  }
   for (const { rowIndices, label, color } of resolvedHighlights) {
     ctx.fillStyle = color ?? highlightRowFill
     for (const index of rowIndices) {
-      const y = index * rowHeight
-      if (inYBlock(y + rowHeight / 2, offsetY, by, pad)) {
-        ctx.fillRect(-marginLeft, y, treeAreaWidth, rowHeight)
+      if (inYBlock(index * rowHeight + rowHeight / 2, offsetY, by, pad)) {
+        fillRow(index)
       }
     }
-    const first = Math.min(...rowIndices)
+    const first = firstRow(rowIndices)
     if (
       label &&
       rowIndices.length &&

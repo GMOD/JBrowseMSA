@@ -78,11 +78,15 @@ export function drawHighlightLabel({
 }
 
 /**
- * The persistent `highlights` overlay on the alignment: row tints, bordered
- * column bands, and a label above each band. `offsetX`/`offsetY` are the
- * content coordinates at the canvas origin, the convention renderMSABlock
- * uses, so the live overlay passes -scrollX/-scrollY and the export passes its
- * layout offsets.
+ * The persistent overlay on the alignment: the `rowTint` encoding's wash, the
+ * row tints and bordered column bands of `highlights`, and a label above each
+ * band. `offsetX`/`offsetY` are the content coordinates at the canvas origin,
+ * the convention renderMSABlock uses, so the live overlay passes
+ * -scrollX/-scrollY and the export passes its layout offsets.
+ *
+ * Rows are culled to the ones this block covers. A tint over every row of a
+ * large alignment would otherwise draw the whole column of rects in each block,
+ * and again on every pointer move through renderMouseover.
  */
 export function renderHighlights({
   ctx,
@@ -101,13 +105,33 @@ export function renderHighlights({
   width: number
   height: number
 }) {
-  const { resolvedHighlights, colWidth, rowHeight } = model
+  const { resolvedHighlights, rowTints, colWidth, rowHeight } = model
   const placed: LabelBox[] = []
   ctx.lineWidth = 2
+  const firstRow = Math.max(0, Math.floor(offsetY / rowHeight))
+  const lastRow = Math.ceil((offsetY + height) / rowHeight)
+  const fillRow = (index: number) => {
+    ctx.fillRect(0, index * rowHeight - offsetY, width, rowHeight)
+  }
+  if (rowTints) {
+    for (
+      let index = firstRow;
+      index <= Math.min(lastRow, rowTints.length - 1);
+      index++
+    ) {
+      const color = rowTints[index]
+      if (color) {
+        ctx.fillStyle = color
+        fillRow(index)
+      }
+    }
+  }
   for (const { rowIndices, color } of resolvedHighlights) {
     ctx.fillStyle = color ?? highlightRowFill
     for (const index of rowIndices) {
-      ctx.fillRect(0, index * rowHeight - offsetY, width, rowHeight)
+      if (index >= firstRow && index <= lastRow) {
+        fillRow(index)
+      }
     }
   }
   for (const { startCol, endCol, label, color } of resolvedHighlights) {
