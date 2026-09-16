@@ -12,11 +12,22 @@ import type { BasicTrack } from '../types.ts'
 
 const TrackInfoDialog = lazy(() => import('./dialogs/TrackInfoDialog.tsx'))
 
-const useStyles = makeStyles()({
+const useStyles = makeStyles()(theme => ({
   button: {
     padding: 0,
   },
-})
+  // a hairline under every track but the last, across the labels as well as
+  // the alignment. The divider a track's resize handle draws covers only the
+  // alignment, and tracks sharing a height have no handle between them. Inset,
+  // so the line costs no layout height: totalTrackAreaHeight sums the model's
+  // heights, and the column indicator is drawn against that sum
+  row: {
+    display: 'flex',
+    '&:not(:last-child)': {
+      boxShadow: `inset 0 -1px 0 ${theme.palette.divider}`,
+    },
+  },
+}))
 
 const TrackLabel = observer(function TrackLabel({
   model,
@@ -130,9 +141,10 @@ const Track = observer(function ({
     [model],
   )
   useWheelScroll({ ref, onScrollX })
+  const { classes } = useStyles()
 
   return (
-    <div style={{ display: 'flex', height }}>
+    <div className={classes.row} style={{ height }}>
       <TrackLabel model={model} track={track} />
       <div style={{ width: resizeHandleWidth, flexShrink: 0 }} />
       <div

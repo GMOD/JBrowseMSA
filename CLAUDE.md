@@ -141,7 +141,9 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   key, absent until the user drags, and `defaultTrackHeights` answers until
   then. A track without a key -- the ruler, a text track -- has no divider. Only
   the last turned-on track of a key carries the handle, and the drag divides
-  across the group, so the group's bottom edge follows the cursor.
+  across the group, so the group's bottom edge follows the cursor. That handle
+  covers only the alignment, so `Track` draws a hairline under every track but
+  the last, which reaches across the labels too.
 - `turnedOffTracks` records only the user's explicit show/hide choices. An id is
   absent until they touch that track, and the value then means "off", so a
   hidden-by-default track (see `defaultOffTracks` in `model.ts`) adds nothing to
