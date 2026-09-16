@@ -84,11 +84,26 @@ export function drawFeatureSpans<T extends SpanBand>({
   xMin: number
   xMax: number
 }) {
+  // one row's spans are drawn before any of its labels. Bands are ordered
+  // longest-first so a nested one lands on top, and drawing each label with its
+  // own span put the child's box over the parent's text: `S` covered `RBD`, and
+  // `RBD` read as `RB`. Reused across rows rather than allocated per row.
+  const placed: {
+    band: T
+    xStart: number
+    w: number
+    t: number
+    head: number
+    fill: string
+  }[] = []
+
   for (const { y, bands } of rows) {
     const h = layout.height(bands[0]!.laneCount)
     const headLen = layout.headLength(h)
     const rise = layout.headRise?.(h) ?? 0
-    const labelled = h >= minFeatureLabelHeight
+    const labelled = labelOf !== undefined && h >= minFeatureLabelHeight
+    placed.length = 0
+
     for (const band of bands) {
       const [xStart, xEnd] = xOf(band)
       const w = xEnd - xStart
@@ -107,16 +122,26 @@ export function drawFeatureSpans<T extends SpanBand>({
       } else {
         drawGeneArrow({ ctx, x: xStart, t, w, h, head, rise, strand })
       }
-      const label = labelled ? labelOf?.(band) : undefined
-      if (label !== undefined) {
-        const fontSize = Math.min(h - 2, 11)
-        ctx.font = `${fontSize}px sans-serif`
+      if (labelled) {
+        placed.push({ band, xStart, w, t, head, fill })
+      }
+    }
+
+    if (placed.length > 0) {
+      ctx.font = `${Math.min(h - 2, 11)}px sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      for (const { band, xStart, w, t, head, fill } of placed) {
+        // asking for the label here rather than in the pass above keeps the
+        // once-per-block segment numbering in drawing order
+        const label = labelOf!(band)
         // the head narrows to a point, so only about half of it holds text
-        if (ctx.measureText(label).width + 2 <= w - head / 2) {
+        if (
+          label !== undefined &&
+          ctx.measureText(label).width + 2 <= w - head / 2
+        ) {
           labelDrawn?.(band)
           ctx.fillStyle = contrastText(fill)
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
           ctx.fillText(label, xStart + w / 2, t + h / 2)
         }
       }

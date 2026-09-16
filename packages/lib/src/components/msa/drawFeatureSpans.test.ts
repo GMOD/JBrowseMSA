@@ -120,3 +120,56 @@ test('a feature with no strand draws as a box', () => {
     [200, 20],
   ])
 })
+
+// what the canvas was asked to do, in order, for one row of nested features
+function traceOf(bands: SpanBand[], labels: Map<Annotation, string>) {
+  const trace: string[] = []
+  const ctx = {
+    beginPath() {},
+    closePath() {},
+    fill() {},
+    stroke() {},
+    moveTo() {},
+    lineTo() {},
+    strokeRect() {},
+    fillRect: (x: number) => trace.push(`box@${x}`),
+    measureText: (text: string) => ({ width: text.length * 5 }),
+    fillText: (text: string) => trace.push(`text:${text}`),
+  } as unknown as RenderCtx
+
+  drawFeatureSpans({
+    ctx,
+    rows: [{ y: 0, bands }],
+    layout,
+    xOf: b => [b.annotation.start, b.annotation.end],
+    colors: new Map(
+      bands.map(b => [b.annotation, { fill: '#fff', stroke: '#000' }]),
+    ),
+    labelOf: b => labels.get(b.annotation),
+    contrastText: () => '#000',
+    xMin: -1000,
+    xMax: 1000,
+  })
+  return trace
+}
+
+test('a nested feature is drawn before the label of the one it sits in', () => {
+  // S carries RBD inside it, which carries RBM. Bands arrive longest-first so
+  // each nested box paints over the wider one, and drawing a label with its own
+  // box left `RBD` reading as `RB`.
+  const outer = annotation(0, 400)
+  const middle = annotation(100, 260)
+  const inner = annotation(150, 220)
+  const band = (a: Annotation) => ({ annotation: a, lane: 0, laneCount: 1 })
+
+  expect(
+    traceOf(
+      [band(outer), band(middle), band(inner)],
+      new Map([
+        [outer, 'S'],
+        [middle, 'RBD'],
+        [inner, 'RBM'],
+      ]),
+    ),
+  ).toEqual(['box@0', 'box@100', 'box@150', 'text:S', 'text:RBD', 'text:RBM'])
+})
