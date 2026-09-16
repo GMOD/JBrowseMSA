@@ -108,3 +108,9 @@ export const treeScaleBarHeight = 22
 // Width of a `features` row panel that names none, wide enough for a gene
 // neighborhood of a few arrows to read.
 export const defaultFeaturePanelWidth = 200
+
+// The alignment's overlay canvas draws the mouseover, the persisted highlights
+// and the row tints over the residues, and the legend key floats above that,
+// so a tint reaching the top right corner leaves the key readable.
+export const msaOverlayZIndex = 1000
+export const legendZIndex = msaOverlayZIndex + 1

@@ -4,6 +4,8 @@ import { isAlive } from '@jbrowse/mobx-state-tree'
 import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import { msaOverlayZIndex } from '../../constants.ts'
+
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { renderMouseover } from './renderMSAMouseover.ts'
 
@@ -41,7 +43,7 @@ const MSAMouseoverCanvas = observer(function ({
         left: 0,
         width,
         height,
-        zIndex: 1000,
+        zIndex: msaOverlayZIndex,
         pointerEvents: 'none',
       }}
     />

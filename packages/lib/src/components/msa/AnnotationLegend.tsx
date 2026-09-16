@@ -5,6 +5,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import { IconButton, Paper, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import { legendZIndex } from '../../constants.ts'
 import { legendRows } from './legendRows.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -25,7 +26,7 @@ const AnnotationLegend = observer(function ({
         position: 'absolute',
         top: 4,
         right: 4,
-        zIndex: 100,
+        zIndex: legendZIndex,
         maxWidth: 220,
         maxHeight: '60%',
         display: 'flex',
