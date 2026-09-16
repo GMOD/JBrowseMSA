@@ -78,6 +78,7 @@ const TreeOverview = observer(function ({ model }: { model: MsaViewModel }) {
 
   return (
     <canvas
+      data-testid="tree_overview"
       ref={ref}
       width={width}
       height={height}

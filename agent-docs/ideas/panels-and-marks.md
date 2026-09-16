@@ -88,7 +88,7 @@ What the layout gives the API:
 | Clade bracket + label            | `geom_cladelab`                  | missing                                                              |
 | Bracket over a run of tips       | `geom_strip`                     | missing                                                              |
 | Branches colored by a group      | `groupClade`, `aes(color=group)` | missing                                                              |
-| Tree overview inset              | `viewClade`, `geom_zoom_clade`   | missing; `showOnly` is the focus, with no overview to pick it on     |
+| Tree overview inset              | `viewClade`, `geom_zoom_clade`   | `showTreeOverview` (`renderTreeOverview.ts`)                         |
 | Tip-aligned categorical matrix   | `gheatmap`                       | missing                                                              |
 | Legend for a categorical scale   | `scale_*_manual`                 | `AnnotationLegend`, keyed to domain accessions only                  |
 | Strand arrow spans per row       | `geom_gene_arrow`                | `drawGeneArrow` (`renderBoxFeatureCanvasBlock.ts:135`), columns only |
@@ -529,6 +529,18 @@ offscreen cache described above. A `showTreeOverview` property, off by default,
 and an `overviewHeight`. Click sets `showOnly`; a second click on the same box
 clears it, matching the existing focus toggle. Export as
 `<g id="tree-overview">` above the tree panel. One day.
+
+Shipped 2026-09-16 as `showTreeOverview` and `overviewHeight`, with a checkbox
+in the tree settings menu. `treeOverviewLayout` lays the whole tree out in
+tip-index space from `tree` with the collapses applied and the focus left out,
+so one layout serves any band size, and `treeOverviewHit(y)` reads the tip rows
+under a pixel and returns the deepest subtree covering them, lifting off a tip
+so a click never leaves one row on screen. `treeOverviewImage` holds the tree
+and the clade rectangles on an offscreen canvas keyed on the values behind the
+layout, and each frame blits it and strokes the focus box and the hovered
+candidate on top. `drawTreeOverview` drops a branch that moves less than a pixel
+on both axes: of the 524286 branches in a 262k-tip tree, about 510 are drawn
+into a 400x120 band.
 
 ### 11. Clade brackets, collapse and focus
 

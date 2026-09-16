@@ -113,6 +113,14 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   the minimap and the tracks right by the strips; the headers take their own
   band in `TopArea` and export as a `rotate(-90)` text each. Row panels stay out
   of the track machinery, which is column space.
+- The tree overview (`components/tree/TreeOverview.tsx`,
+  `renderTreeOverview.ts`) is the brush on the row scale, behind
+  `showTreeOverview`. It draws `get tree()` rather than `root`, so the whole
+  tree stays on screen while the view shows one subtree, and its height joins
+  the `Math.max` of the top band in `msaAreaHeight`. `treeOverviewImage` caches
+  the tree and the clade rectangles on an offscreen canvas, since a 230k-branch
+  tree cannot be redrawn as the focus box follows the pointer, and the SVG
+  export runs the same `renderTreeOverview` onto a svgcanvas Context.
 - `model.legends` is the one list both legend renderings read:
   `components/msa/AnnotationLegend.tsx` on screen and `LegendSVG` in
   `renderToSvg.tsx` for the export. A producer contributes

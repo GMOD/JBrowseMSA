@@ -107,6 +107,19 @@ A collapsed subtree, drawn as a triangle labeled with its tip count (here 3).
 The rows beneath it are hidden and the gap-only columns they introduced are
 removed.
 
+A branch node's menu also has **Show only this node**, which narrows the view to
+that subtree: the rows below it are the whole alignment until **Disable show
+only this node** puts the rest back.
+
+**Tree settings → Show tree overview** puts the whole tree in a band above the
+tree panel, small enough that a few hundred tips fit in 120 pixels, with the
+focused subtree drawn as a box on it and the `clades` highlights in place. A
+click on the band focuses the deepest subtree covering the rows under the
+pointer, and a click inside the box clears the focus, so the band reaches a
+clade of a tree far taller than the screen in one click. The overview keeps
+drawing every tip while the view shows a subtree, so it shows where the focused
+clade sits in the whole tree. The SVG export draws the band too.
+
 With branch lengths on, a scale bar sits in the gutter above the tree: a round
 number of substitutions per site, drawn to the same scale as the branches. The
 scale bar is hidden in cladogram mode, where horizontal position shows topology
