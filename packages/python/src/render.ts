@@ -28,6 +28,7 @@ export interface Traits {
   relative_to: string | null
   draw_tree: boolean
   show_branch_len: boolean
+  bg_color: boolean
   hide_header: boolean
   theme: 'auto' | 'light' | 'dark' | Exclude<MSAViewerProps['theme'], string>
   clicked: Cell | null
@@ -52,6 +53,7 @@ export const INPUT_TRAITS = [
   'relative_to',
   'draw_tree',
   'show_branch_len',
+  'bg_color',
   'hide_header',
   'theme',
 ] as const
@@ -84,6 +86,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     relativeTo: optional(model.get('relative_to')),
     drawTree: model.get('draw_tree'),
     showBranchLen: model.get('show_branch_len'),
+    bgColor: model.get('bg_color'),
     hideHeader: model.get('hide_header'),
     theme: theme === 'auto' ? hostTheme(doc) : theme,
   }

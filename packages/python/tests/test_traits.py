@@ -32,6 +32,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "relative_to": None,
         "draw_tree": True,
         "show_branch_len": True,
+        "bg_color": True,
         "hide_header": False,
         "theme": "auto",
         "clicked": None,

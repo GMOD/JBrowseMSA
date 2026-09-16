@@ -52,6 +52,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `column_tracks`                  | list of bar, text or arc tracks                              |
 | `relative_to`                    | a row name; other rows draw as their differences from it     |
 | `draw_tree`, `show_branch_len`   | booleans, default `True`                                     |
+| `bg_color`                       | boolean, default `True`; `False` colors the letters instead  |
 | `hide_header`                    | boolean, default `False`                                     |
 | `theme`                          | `"auto"` (default), `"light"`, `"dark"` or MUI theme options |
 

@@ -39,6 +39,7 @@ const defaults: Traits = {
   relative_to: null,
   draw_tree: true,
   show_branch_len: true,
+  bg_color: true,
   hide_header: false,
   theme: 'auto',
   clicked: null,
