@@ -91,9 +91,9 @@ What the layout gives the API:
 | Tree overview inset              | `viewClade`, `geom_zoom_clade`   | `showTreeOverview` (`renderTreeOverview.ts`)                         |
 | Tip-aligned categorical matrix   | `gheatmap`                       | missing                                                              |
 | Legend for a categorical scale   | `scale_*_manual`                 | `AnnotationLegend`, keyed to domain accessions only                  |
-| Strand arrow spans per row       | `geom_gene_arrow`                | `drawGeneArrow` (`renderBoxFeatureCanvasBlock.ts:135`), columns only |
-| Arrow filled by a field, labeled | `aes(fill=)`                     | missing; `fillPalette` assigns by accession, and nothing labels      |
-| Rows aligned on one gene         | `make_alignment_dummies`         | missing                                                              |
+| Strand arrow spans per row       | `geom_gene_arrow`                | `drawFeatureSpans.ts`, over columns or over residue positions        |
+| Arrow filled by a field, labeled | `aes(fill=)`                     | `featureFill` and `featureLabel`, or a `features` panel's `encoding` |
+| Rows aligned on one gene         | `make_alignment_dummies`         | the `align` transform on a `features` panel                          |
 
 ## Decisions
 
@@ -514,6 +514,17 @@ width. Lane packing reuses `packDomainLanes`
 `Omit<DomainBand, 'lane' | 'laneCount'>[]` to
 `<T extends { startCol: number; endCol: number }>`; a second packer is not
 needed. The fill and the label come from step 6.
+
+Shipped 2026-09-16 as the `features` kind and the `align` transform, reaching
+all four wrappers. `drawFeatureSpans.ts` is the one span mark: the overlay and
+the panel each give it an x mapping, the colors, the labels and a row geometry.
+`resolvedRowPanels` resolves a panel's spans to panel pixels, `x: "position"`
+mapping the extent every row covers, after the shift `featureAlignShifts` gives
+it, onto the panel width less an arrowhead. A record's own `encoding` resolves
+the way `featureFill` and `featureLabel` do and falls back to them, and its
+legend merges by field. The domain key lists nothing at zero columns, so a tree,
+a GFF and a `features` panel draw the gene figure with one legend and no
+alignment.
 
 A tree with no alignment already boots: `dataInitialized` is
 `!!(self.data.msa || self.data.tree)` (`model.ts:2254`), and `numColumns` of 0
