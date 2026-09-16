@@ -264,8 +264,7 @@ function RowPanelHeadersSVG({
     <g id="rowpanel-headers">
       {resolvedRowPanels.map(panel => {
         const size = Math.min(fontSize, panel.width)
-        const x =
-          treeAreaWidth + panel.offsetX + panel.width / 2 + size / 3
+        const x = treeAreaWidth + panel.offsetX + panel.width / 2 + size / 3
         return size < 5 ? null : (
           <text
             key={panel.id}

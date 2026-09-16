@@ -283,6 +283,19 @@ IOptionalIType<ISimpleType<number>, [undefined]>
 rowHeight: stripDefault(types.number, defaultRowHeight)
 ```
 
+#### property: rowPanels
+
+panels drawn between the tree and the alignment, one cell per row:
+`{kind: "strip", field, scale?, width?, header?}` colors each row from a
+`rowData` field. See docs/layers.md
+
+```js
+// type signature
+IOptionalIType<IArrayType<IType<RowPanelSpec, RowPanelSpec, RowPanelSpec>>, [undefined]>
+// code
+rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), [])
+```
+
 #### property: scrollX
 
 scroll position, X-offset, px
@@ -1113,9 +1126,9 @@ any[]
 
 the categorical color keys drawn for this view, shared by the on-screen legend
 overlay and the SVG export's reserved column. The domain overlay produces the
-first, listing the `featureFill` scale where an encoding names one, and each
-row-table encoding produces one per field, so two channels over one field list
-that field once
+first, listing the `featureFill` scale where an encoding names one. Every field
+a row-table encoding or a row panel reads produces one more, so two channels
+over one field, or two strips over it, list that field once
 
 ```js
 // type
@@ -1213,7 +1226,7 @@ number
 
 #### getter: msaAreaWidth
 
-widget width minus the tree area gives the space for the MSA
+widget width minus the tree area and the row panels gives the space for the MSA
 
 ```js
 // type
@@ -1337,6 +1350,18 @@ row are ignored.
 ResolvedHighlight[]
 ```
 
+#### getter: resolvedRowPanels
+
+each row panel with its scale resolved against the values its field takes across
+the row table, giving the color per row name, the pixel column it draws in, and
+the entries its legend lists. Resolved once per change of that table or the
+panels, never per block per frame.
+
+```js
+// type
+ResolvedRowPanel[]
+```
+
 #### getter: root
 
 ```js
@@ -1402,6 +1427,26 @@ string[]
 ```js
 // type
 Map<unknown, unknown>
+```
+
+#### getter: rowPanelsHeaderHeight
+
+height of the band the row panel headers draw in, which is zero with no row
+panels and leaves the top area as it was
+
+```js
+// type
+0 | 56
+```
+
+#### getter: rowPanelsWidth
+
+the pixel column the row panels occupy between the tree and the alignment, the
+sum of each record's width
+
+```js
+// type
+any
 ```
 
 #### getter: rows
@@ -2230,6 +2275,15 @@ set row height (px)
 ```js
 // type signature
 setRowHeight: (n: number) => void
+```
+
+#### action: setRowPanels
+
+replace the panels drawn between the tree and the alignment
+
+```js
+// type signature
+setRowPanels: (panels: RowPanelSpec[]) => void
 ```
 
 #### action: setScrollX

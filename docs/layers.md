@@ -315,6 +315,57 @@ a data channel, so it draws whether or not the residue letters do.
 }
 ```
 
+## rowPanels
+
+A column of colored cells beside the tree, one cell per alignment row. Each
+record names a `kind`, and `strip` is the one kind today: it reads a field of
+`rowData` and colors each row's cell through `scale`. Eight strips make the
+tip-aligned matrix ggtree draws with `gheatmap`.
+
+```json
+{
+  "type": "MsaView",
+  "data": {
+    "msa": ">duck\nMKAANSE\n>chicken\nMKA-NSE",
+    "treeMetadata": "{\"duck\":{\"HA\":\"H5\",\"NA\":\"N1\"},\"chicken\":{\"HA\":\"H5\",\"NA\":\"N8\"}}"
+  },
+  "rowPanels": [
+    {
+      "kind": "strip",
+      "field": "HA",
+      "scale": { "palette": "set1" },
+      "width": 12
+    },
+    { "kind": "strip", "field": "NA", "header": "NA segment" }
+  ]
+}
+```
+
+| Field    | Meaning                                                             |
+| -------- | ------------------------------------------------------------------- |
+| `kind`   | `strip`                                                             |
+| `field`  | the `rowData` field the cells read                                  |
+| `scale`  | `{palette}` or `{map}`; the ggplot palette when the record omits it |
+| `width`  | the column's pixel width, defaulting to the row height              |
+| `header` | the name drawn above the column, defaulting to the field            |
+
+The panels sit between the tree and the alignment, and they take their width out
+of the alignment's: the alignment scrolls and fits within what is left. A strip
+scrolls with the tree and the alignment, and a row the table gives no value
+leaves its cell empty.
+
+Each header draws above its column in the band the tree's scale bar and the
+minimap share, turned on its side, and it exports with the figure.
+
+A strip's scale carries a legend of its own, titled by the field, and every
+strip and encoding over one field lists that field once. So two strips over `HA`
+and a `tipLabel` encoding over `HA` produce one legend, and a strip over `NA`
+adds a second.
+
+React: the `rowPanels` prop on `MSAViewer`, or `model.setRowPanels(list)`. R:
+`geom_msa_strip("HA", palette = "set1", width = 12)`. Python: the `row_panels`
+trait.
+
 ## residueMappings
 
 A residue mapping records which residue of which structure each residue of a row

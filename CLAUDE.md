@@ -105,6 +105,14 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   wins the row back wherever the letters cannot carry the scale: sub-row layout,
   which stacks its boxes clear of the letters anyway, and zoomed out past
   `minLetterRowHeight`, where the box is the only thing left to read.
+- `rowPanels` is the row-scale counterpart of `columnTracks`:
+  `components/rowpanels/RowPanels.tsx` mounts one canvas column per record
+  between the tree and the alignment, tiled by `blocksY`, and `renderStrip.ts`
+  is the draw path the live view and the SVG export share. `rowPanelsWidth`
+  comes out of `msaAreaWidth` in `model.ts`, which is what moves the alignment,
+  the minimap and the tracks right by the strips; the headers take their own
+  band in `TopArea` and export as a `rotate(-90)` text each. Row panels stay out
+  of the track machinery, which is column space.
 - `model.legends` is the one list both legend renderings read:
   `components/msa/AnnotationLegend.tsx` on screen and `LegendSVG` in
   `renderToSvg.tsx` for the export. A producer contributes

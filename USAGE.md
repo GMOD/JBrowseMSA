@@ -67,7 +67,7 @@ Props:
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                                         |
 | `rowData`           | `Record<string, ...>`    | Extra fields per row name, such as a lineage or a host                              |
 | `encodings`         | `Encoding[]`             | What the marks read: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
-| `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row (see below)              |
+| `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row (see below)             |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram                         |
 | `residueEncoding`   | `'fill' \| 'color'`      | Which channel `colorScheme` paints: the cell (default) or the letter                |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns                     |
@@ -84,10 +84,9 @@ setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `clades`, `columnTracks`, `residueMappings`,
 `rowData`, `encodings`, `rowPanels`, `highlightColumns`) and the filehandles by
-content, so
-passing a freshly computed array or location object on every render costs
-nothing. A new `msa`, `tree` or `gff` string, or a filehandle pointing somewhere
-else, builds a new model and resets the view.
+content, so passing a freshly computed array or location object on every render
+costs nothing. A new `msa`, `tree` or `gff` string, or a filehandle pointing
+somewhere else, builds a new model and resets the view.
 
 ### Events
 

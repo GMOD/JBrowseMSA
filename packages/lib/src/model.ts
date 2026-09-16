@@ -615,10 +615,7 @@ function stateModelFactory() {
          * `{kind: "strip", field, scale?, width?, header?}` colors each row
          * from a `rowData` field. See docs/layers.md
          */
-        rowPanels: stripDefault(
-          types.array(types.frozen<RowPanelSpec>()),
-          [],
-        ),
+        rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), []),
       }),
     )
     .volatile(() => ({

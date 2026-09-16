@@ -42,6 +42,7 @@ const defaults: Traits = {
   residue_mappings: [],
   row_data: {},
   encodings: [],
+  row_panels: [],
   relative_to: null,
   region: null,
   draw_tree: true,
