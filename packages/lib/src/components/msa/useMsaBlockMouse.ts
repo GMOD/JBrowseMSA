@@ -29,9 +29,11 @@ function eventToColRow({
  * Translates pointer events over one MSA block into model column/row hover and
  * click state, and reports where a tooltip should be anchored.
  *
- * The anchor is only tracked when there is something to show (an insertion, a
- * domain under the cursor, or column stats), so plain mouse movement over the
- * alignment updates the canvas overlay without re-rendering this component.
+ * The anchor is only tracked when there is something to show (an insertion or a
+ * domain under the cursor), so plain mouse movement over the alignment updates
+ * the canvas overlay without re-rendering this component. Each track tooltips
+ * its own column statistics, and the header reads out the hovered row, residue
+ * and position.
  */
 export function useMsaBlockMouse({
   model,
@@ -62,9 +64,7 @@ export function useMsaBlockMouse({
     model.setMousePos(hit ? pos.col : undefined, hit ? pos.row : undefined)
 
     const hasTooltip =
-      !!model.hoveredInsertion ||
-      model.mouseOverDomains.length > 0 ||
-      (model.showColumnStats && !!model.mouseOverColumnStats)
+      !!model.hoveredInsertion || model.mouseOverDomains.length > 0
     setTooltipPoint(
       hasTooltip ? { x: event.clientX, y: event.clientY } : undefined,
     )

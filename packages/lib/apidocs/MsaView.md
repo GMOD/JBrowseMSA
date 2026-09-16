@@ -1081,13 +1081,11 @@ number
 
 #### getter: mouseOverColumnStats
 
-per-column summary statistics for the hovered column: consensus residue and its
-identity fraction, conservation score, gap fraction, and the sorted non-gap
-residue distribution. undefined when nothing is hovered.
+`columnStatsAt` for the hovered column, undefined when nothing is hovered
 
 ```js
 // type
-{ col: number; total: number; gaps: number; gapFraction: number; conservation: number; propertyConservation: number; consensusLetter: string; consensusCount: number; consensusFraction: number; distribution: [...][]; }
+ColumnStats
 ```
 
 #### getter: mouseOverDomains
@@ -1508,6 +1506,17 @@ highlights in
 ```js
 // type signature
 cellAt: (visibleCol: number, rowIndex?: number) => Cell
+```
+
+#### method: columnStatsAt
+
+per-column summary statistics: consensus residue and its identity fraction, both
+conservation scores, gap fraction, and the sorted non-gap residue distribution.
+undefined past the end of the alignment or for an all-gap column.
+
+```js
+// type signature
+columnStatsAt: (col: number) => ColumnStats
 ```
 
 #### method: getRowData

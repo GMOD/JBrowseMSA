@@ -31,8 +31,9 @@ export function MSAModelF() {
 
       /**
        * #property
-       * show a per-column statistics tooltip (consensus, conservation, gaps,
-       * residue distribution) while hovering the alignment
+       * show a tooltip with the hovered column's value for a track while
+       * hovering that track: the conservation scores, the logo's composition,
+       * an arc's partner columns
        */
       showColumnStats: stripDefault(types.boolean, defaultShowColumnStats),
 

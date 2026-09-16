@@ -5,7 +5,6 @@ import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
-import ColumnStats from './ColumnStats.tsx'
 import { drawMsaRaster, rasterSupported } from './msaRaster.ts'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
@@ -65,7 +64,7 @@ const MSACanvasBlock = observer(function ({
     deps: [model, offsetX, offsetY, theme],
   })
 
-  const { hoveredInsertion, mouseOverDomains, showColumnStats } = model
+  const { hoveredInsertion, mouseOverDomains } = model
 
   return (
     <>
@@ -107,20 +106,17 @@ const MSACanvasBlock = observer(function ({
                 : hoveredInsertion.letters}
             </>
           ) : (
-            <>
-              {mouseOverDomains.map(d => (
-                <div key={`${d.accession}-${d.start}-${d.end}`}>
-                  <b>{d.name}</b> ({d.accession}) {d.start}-{d.end}
-                  {d.description ? (
-                    <>
-                      <br />
-                      {d.description}
-                    </>
-                  ) : null}
-                </div>
-              ))}
-              {showColumnStats ? <ColumnStats model={model} /> : null}
-            </>
+            mouseOverDomains.map(d => (
+              <div key={`${d.accession}-${d.start}-${d.end}`}>
+                <b>{d.name}</b> ({d.accession}) {d.start}-{d.end}
+                {d.description ? (
+                  <>
+                    <br />
+                    {d.description}
+                  </>
+                ) : null}
+              </div>
+            ))
           )}
         </BaseTooltip>
       ) : null}

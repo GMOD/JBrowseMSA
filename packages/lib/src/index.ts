@@ -32,11 +32,13 @@ export type { HierarchyNode } from './hierarchy.ts'
 // InterProScanResults is the EBI wire format that setDomains still accepts;
 // Annotation is the source-agnostic shape everything else is written against
 export type { InterProScanResults } from 'msa-parsers'
-// ColumnCounts, DomainBand and TidyDomainAnnotation surface in the inferred type
-// of the composed state model, so a downstream plugin cannot emit declarations
-// for its own stateModelFactory without being able to name them (TS2883).
-// jbrowse-plugin-msaview already re-exports MSAFormat for exactly this reason.
+// ColumnCounts, ColumnStats, DomainBand and TidyDomainAnnotation surface in the
+// inferred type of the composed state model, so a downstream plugin cannot emit
+// declarations for its own stateModelFactory without being able to name them
+// (TS2883). jbrowse-plugin-msaview already re-exports MSAFormat for exactly this
+// reason.
 export type { ColumnCounts } from './columnCounts.ts'
+export type { ColumnStats } from './columnStats.ts'
 export type {
   Accession,
   Annotation,

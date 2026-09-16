@@ -31,7 +31,7 @@ export function msaSettingsMenuItems(model: MsaViewModel): MenuItem[] {
       subMenu: tracksSubMenu(model),
     },
     { type: 'divider' as const },
-    toggle('Show column statistics on hover', showColumnStats, arg => {
+    toggle('Show track values on hover', showColumnStats, arg => {
       model.setShowColumnStats(arg)
     }),
     toggle('Draw letters', drawMsaLetters, arg => {

@@ -133,8 +133,13 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   transform and dispatches on `kind`. The live view calls it from
   `components/tracks/TrackBlocks.tsx`, the canvas host for every kind, and the
   SVG export calls it through `renderAllTracks`. Adding a track kind means a new
-  `kind`, a draw function in that module, and a case in `drawTrackBlock`, with
-  no second rendering path or component. A track model carries a `heightKey`
+  `kind`, a draw function in that module, a case in `drawTrackBlock`, and a case
+  in `components/tracks/TrackTooltipContent.tsx` for that track's reading at the
+  hovered column, with no second rendering path or component.
+  `components/Track.tsx` hosts every kind's hover: `useTrackHover` there sets the
+  model's mouse column and anchors the tooltip, so the column statistics live on
+  the tracks that draw them and the alignment's own tooltip stays about the cell
+  under the cursor. A track model carries a `heightKey`
   naming the height its divider writes: the `kind` for a computed track, so
   conservation and property conservation resize together, and `own:<id>` for a
   `columnTracks` track, which resizes alone. `trackHeights` holds one number per

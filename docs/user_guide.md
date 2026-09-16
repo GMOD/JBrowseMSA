@@ -252,6 +252,13 @@ horizontal scroll. The **Tracks** submenu at the top of the MSA settings menu
 lists every track and turns each on or off. The dropdown arrow on a track's
 label, at the left, also closes it and shows its details.
 
+Hovering a track reads out what it draws at that column: the two conservation
+scores, the sequence logo's information content and residue composition, the
+columns an arc joins, the letter on a text track. **Show track values on hover**
+in the MSA settings menu turns the readout off. Over the alignment itself, the
+tooltip carries the domains and insertions under the cursor, and the header
+reads out the hovered row, residue and position.
+
 - **Conservation**: a per-column histogram of how conserved the column is, from
   Shannon entropy, scaled down by the column's gap fraction. On by default.
 - **Property conservation**: the same measure over physicochemical property
@@ -307,8 +314,8 @@ settings**, beside the color-scheme palette.
 [![](media/settings-menu.png)][live-settings-menu]
 
 The MSA settings menu holds the Tracks submenu and toggles for drawing letters,
-coloring letters instead of tile backgrounds, showing per-column statistics on
-hover, and hiding gappy columns. The tree settings menu beside it holds the
+coloring letters instead of tile backgrounds, showing a track's value on hover,
+and hiding gappy columns. The tree settings menu beside it holds the
 branch-length, label and clickable-bubble toggles.
 
 ## Scaling to large data

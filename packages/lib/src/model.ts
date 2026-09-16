@@ -25,6 +25,7 @@ import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
 import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
+import { columnStats } from './columnStats.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import TrackBlocks from './components/tracks/TrackBlocks.tsx'
 import {
@@ -101,6 +102,7 @@ import {
 import { saveAs } from './vendor/fileSaver.ts'
 import { parseWuss } from './wuss.ts'
 
+import type { ColumnStats } from './columnStats.ts'
 import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
@@ -2905,41 +2907,37 @@ function stateModelFactory() {
       },
 
       /**
-       * #getter
-       * per-column summary statistics for the hovered column: consensus residue
-       * and its identity fraction, conservation score, gap fraction, and the
-       * sorted non-gap residue distribution. undefined when nothing is hovered.
+       * #method
+       * per-column summary statistics: consensus residue and its identity
+       * fraction, both conservation scores, gap fraction, and the sorted non-gap
+       * residue distribution. undefined past the end of the alignment or for an
+       * all-gap column.
        */
-      get mouseOverColumnStats() {
-        const { mouseCol } = self
-        if (mouseCol === undefined) {
-          return undefined
-        }
-        const { colStats } = self
-        if (mouseCol >= colStats.numColumns) {
-          return undefined
-        }
-        const total = colStats.total(mouseCol)
-        if (!total) {
-          return undefined
-        }
-        const gaps = colStats.gapCount(mouseCol)
-        const distribution = colStats
-          .residueEntries(mouseCol)
-          .sort((a, b) => b[1] - a[1])
-        const consensus = distribution[0]
-        return {
-          col: mouseCol,
-          total,
-          gaps,
-          gapFraction: gaps / total,
-          conservation: self.conservation[mouseCol] ?? 0,
-          propertyConservation: self.propertyConservation[mouseCol],
-          consensusLetter: consensus?.[0] ?? '',
-          consensusCount: consensus?.[1] ?? 0,
-          consensusFraction: consensus ? consensus[1] / total : 0,
-          distribution,
-        }
+      columnStatsAt(col: number): ColumnStats | undefined {
+        const { colStats, conservation, propertyConservation } = self
+        return columnStats({
+          col,
+          colStats,
+          conservation,
+          propertyConservation,
+        })
+      },
+
+      /**
+       * #getter
+       * `columnStatsAt` for the hovered column, undefined when nothing is
+       * hovered
+       */
+      get mouseOverColumnStats(): ColumnStats | undefined {
+        const { mouseCol, colStats, conservation, propertyConservation } = self
+        return mouseCol === undefined
+          ? undefined
+          : columnStats({
+              col: mouseCol,
+              colStats,
+              conservation,
+              propertyConservation,
+            })
       },
 
       /**

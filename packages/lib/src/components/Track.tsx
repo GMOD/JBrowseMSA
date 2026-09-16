@@ -1,11 +1,14 @@
 import React, { lazy, useCallback, useRef, useState } from 'react'
 
+import BaseTooltip from '@jbrowse/core/ui/BaseTooltip'
 import { makeStyles } from '@jbrowse/core/util/tss-react'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { IconButton, Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useWheelScroll } from '../useWheelScroll.ts'
+import TrackTooltipContent from './tracks/TrackTooltipContent.tsx'
+import { useTrackHover } from './tracks/useTrackHover.ts'
 
 import type { MsaViewModel } from '../model.ts'
 import type { BasicTrack } from '../types.ts'
@@ -129,7 +132,7 @@ const Track = observer(function ({
   model: MsaViewModel
   track: BasicTrack
 }) {
-  const { resizeHandleWidth, colWidth, scrollX, numColumns } = model
+  const { resizeHandleWidth, showColumnStats } = model
   const {
     model: { height },
   } = track
@@ -142,6 +145,10 @@ const Track = observer(function ({
   )
   useWheelScroll({ ref, onScrollX })
   const { classes } = useStyles()
+  const { hover, onMouseMove, onMouseLeave } = useTrackHover({
+    model,
+    tooltip: showColumnStats,
+  })
 
   return (
     <div className={classes.row} style={{ height }}>
@@ -149,24 +156,22 @@ const Track = observer(function ({
       <div style={{ width: resizeHandleWidth, flexShrink: 0 }} />
       <div
         ref={ref}
+        data-testid={`track_${track.model.id}`}
         onMouseMove={event => {
-          if (!ref.current) {
-            return
-          }
-          const { left } = ref.current.getBoundingClientRect()
-          const mouseX = event.clientX - left - scrollX
-          const col = Math.floor(mouseX / colWidth)
-          if (col >= 0 && col < numColumns) {
-            model.setMousePos(col, undefined)
-          } else {
-            model.setMousePos(undefined, undefined)
+          if (ref.current) {
+            onMouseMove(event, ref.current)
           }
         }}
         onMouseLeave={() => {
-          model.setMousePos(undefined, undefined)
+          onMouseLeave()
         }}
       >
         <track.ReactComponent model={model} track={track} />
+        {hover ? (
+          <BaseTooltip clientPoint={{ x: hover.x, y: hover.y + 15 }}>
+            <TrackTooltipContent model={model} track={track} col={hover.col} />
+          </BaseTooltip>
+        ) : null}
       </div>
     </div>
   )
