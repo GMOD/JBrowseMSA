@@ -493,6 +493,15 @@ alignment band comes through `renderHighlights`, the path the row sets take.
 
 About 350 lines plus 150 of test. Two days, and it closes the `gheatmap`.
 
+Shipped 2026-09-16 as the `rowPanels` property with the `strip` kind, reaching
+all four wrappers. `resolvedRowPanels` gives each strip its color per row name,
+its pixel column and its legend entries, and `rowPanelsWidth` comes out of
+`msaAreaWidth`, which moves the alignment, the minimap and the tracks right by
+the strips. The headers share the top band with the tree ruler and the minimap,
+as DOM text on screen and `rotate(-90)` in the export, each clipped to the
+band's height. `renderStrip.ts` is the one draw path, and the export adds a
+`rowpanels-panel` clip group between the tree and the alignment.
+
 ### 9. The `features` kind and the `align` transform
 
 A `features` row panel draws `annotationsByRow` with the span mark from
