@@ -76,6 +76,8 @@ one.
 
 `treeMetadata` holds the data, but no code draws it. A strip is a named metadata
 key drawn as a colored column between the tree and the alignment, with a legend.
+[panels-and-marks](panels-and-marks.md) carries the current design: the strip is
+a `rowPanels` record of `kind: "strip"`, and the tint is a `rowTint` encoding.
 
 ```json
 "rowStrips": [
