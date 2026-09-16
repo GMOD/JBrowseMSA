@@ -105,8 +105,8 @@ curl -sf "https://www.ebi.ac.uk/interpro/api/entry/pfam/PF00069/?annotation=hmm"
   gzip -dc > pf00069.hmm
 
 # score every candidate first, and keep only what clears Pfam's own gathering
-# threshold -- this is what drops the atypical, non-ePK-fold kinases
-# (PI3/PI4-kinase, ADCK, alpha-type...) that would otherwise align to noise
+# threshold. That drops the atypical, non-ePK-fold kinases (PI3/PI4-kinase,
+# ADCK, alpha-type...) that would otherwise align to noise
 docker run --rm -v "$PWD:/work" -w /work quay.io/biocontainers/hmmer:3.4--h7d74f8d_5 \
   hmmsearch --cut_ga --tblout hmmsearch.tbl -o hmmsearch.out pf00069.hmm all.fasta
 
@@ -165,8 +165,8 @@ numbering, as K271, T315 and D381-F382-G383. ABL1 is a row in this alignment, so
 walking its row gives the column of each landmark:
 
 ```python
-# ABL1's own row, ungapped, tells you which alignment column holds which of
-# its residues -- walk it once and you have all three landmarks
+# ABL1's own row maps each of its residues to an alignment column, so one
+# walk along it gives all three landmarks
 full_abl1 = uniprot_sequence['ABL1']  # 1130 aa, P00519
 aligned_abl1 = alignment['ABL1']       # 262 columns
 ```

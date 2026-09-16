@@ -8,7 +8,7 @@ its copies in six bacterial genomes, aligns them and opens the result with the
 base pairs drawn over the columns, where each row shows whether its pairs still
 match.
 
-The pipeline uses four tools: `curl`, `cmsearch`, `cmalign` and FastTree.
+The pipeline runs `curl`, `python3`, `cmsearch`, `cmalign` and FastTree.
 
 ## Prerequisites
 
@@ -252,7 +252,7 @@ the next row.
 
 ## 10. The tree
 
-[![](../media/rna-family-tree.png)](<https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A330%2C%22colWidth%22%3A3%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A853%2C%22rowHeight%22%3A17%2C%22highlights%22%3A%5B%7B%22rows%22%3A%5B%22Bsub_yxjG%22%2C%22Bsub_yxjH%22%5D%2C%22color%22%3A%22rgba(21%2C101%2C192%2C0.18)%22%7D%5D%7D%7D>)%22%7D%5D%7D%7D>)
+[![](../media/rna-family-tree.png)](<https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A330%2C%22colWidth%22%3A3%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Frna%2Fsam-riboswitch.sto%22%7D%2C%22height%22%3A853%2C%22rowHeight%22%3A17%2C%22highlights%22%3A%5B%7B%22rows%22%3A%5B%22Bsub_yxjG%22%2C%22Bsub_yxjH%22%5D%2C%22color%22%3A%22rgba(21%2C101%2C192%2C0.18)%22%7D%5D%7D%7D>)
 
 The tree with the whole alignment beside it at three pixels per column. Rows
 that lead the same gene in different species mostly do not come out together:

@@ -71,7 +71,7 @@ export const tutorials: Tutorial[] = [
       'ClinVar, AlphaMissense and a saturation screen, each a bar per residue over the same fifteen-species p53 alignment. The three sources share no data and draw over the same columns.',
     thumb: p53Thumb,
     thumbAlt:
-      'Three bar tracks — ClinVar, AlphaMissense and MaveDB — over a p53 ortholog alignment, all three peaking on the DNA-binding domain',
+      'ClinVar, AlphaMissense and MaveDB bar tracks over a p53 ortholog alignment, all three peaking on the DNA-binding domain',
     thumbPosition: 'left',
   },
   {
