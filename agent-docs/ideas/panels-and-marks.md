@@ -402,7 +402,10 @@ draws nothing and reports nothing.
 Leave `rowData` and `encodings` out of `preservedOnReset` (`model.ts:194`). An
 encoding naming a field of the previous file would color nothing.
 
-Roughly 450 lines plus 250 of test. Three days.
+Roughly 450 lines plus 250 of test. Three days. Shipped 2026-09-16: `scales.ts`,
+`rowData` over `data.treeMetadata`, `encodings`, `resolvedEncodings`,
+`tipLabelColors`, `rowTints`, both overlay fixes, and all four wrapper surfaces.
+The `treeMetadata` getter is gone; `rowDataOf` replaces it.
 
 ### 4. One legend for every scale
 
@@ -420,7 +423,8 @@ Keep the property name `showDomainLegend` (`model.ts:303`). It sits in
 `preservedOnReset` and travels in shared URLs.
 
 One day. From here on every scale, on any panel, has a legend without further
-work.
+work. The list shipped 2026-09-16 as `model.legends` with `legendRows` behind
+both renderings; the encoding producers ship with step 5.
 
 ### 5. The `branch` channel
 
