@@ -61,12 +61,12 @@ you can read one site down the whole family.
 - **Pan** by click-dragging the alignment, or scroll vertically/horizontally.
 - **Zoom** with the magnifier buttons in the header. Ctrl+wheel zooms at the
   cursor whatever the wheel is set to do.
-- **Scroll zoom** puts zoom on the plain wheel. The three mouse buttons in the
-  header choose which cell dimensions a wheel zoom scales: both, columns only,
-  or rows only. Columns only holds the row height, so the labels stay at their
-  size while the alignment compresses; rows only holds the column width. Click
-  the selected button and the wheel returns to scrolling. Hold shift to pan
-  while scroll zoom is on.
+- **Scroll zoom** puts zoom on the plain wheel. The mouse button in the header
+  opens a menu with the four things the wheel can do: scroll the alignment, zoom
+  both axes, zoom columns only, or zoom rows only. Zooming columns only holds
+  the row height, so the labels stay at their size while the alignment
+  compresses; rows only holds the column width. The button's icon shows the mode
+  in force. Hold shift to pan while the wheel zooms.
 - **Fit** the alignment to the window on both axes, horizontally or vertically
   from the zoom controls. **Reset zoom** returns to the defaults.
 - Set a small row height and column width to zoom out far enough to see a whole

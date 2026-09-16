@@ -1,16 +1,13 @@
 import React from 'react'
 
+import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
 import ZoomIn from '@mui/icons-material/ZoomIn'
 import ZoomOut from '@mui/icons-material/ZoomOut'
-import {
-  IconButton,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-} from '@mui/material'
+import { IconButton, Tooltip } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import {
+  MouseScroll,
   MouseZoomBoth,
   MouseZoomHorizontal,
   MouseZoomVertical,
@@ -19,21 +16,41 @@ import {
 import type { ScrollZoomAxis } from '../../constants.ts'
 import type { MsaViewModel } from '../../model.ts'
 
-const axisButtons = [
+interface WheelMode {
+  label: string
+  // undefined is the wheel scrolling the alignment, which is the default
+  axis?: ScrollZoomAxis
+  Icon: typeof MouseScroll
+  helpText?: string
+}
+
+const scrollMode: WheelMode = {
+  label: 'Scrolls the alignment',
+  Icon: MouseScroll,
+  helpText: 'Ctrl+wheel zooms both axes at the cursor.',
+}
+
+const wheelModes: WheelMode[] = [
+  scrollMode,
   {
-    axis: 'both' as const,
+    label: 'Zooms both axes',
+    axis: 'both',
     Icon: MouseZoomBoth,
-    label: 'Wheel zooms both axes',
+    helpText: 'Hold shift to pan while the wheel zooms.',
   },
   {
-    axis: 'horizontal' as const,
+    label: 'Zooms columns only',
+    axis: 'horizontal',
     Icon: MouseZoomHorizontal,
-    label: 'Wheel zooms columns only, holding the row height',
+    helpText:
+      'Holds the row height, so the labels and letters stay at their size while the alignment compresses.',
   },
   {
-    axis: 'vertical' as const,
+    label: 'Zooms rows only',
+    axis: 'vertical',
     Icon: MouseZoomVertical,
-    label: 'Wheel zooms rows only, holding the column width',
+    helpText:
+      'Holds the column width, so the alignment stays as wide while the rows grow or shrink.',
   },
 ]
 
@@ -43,6 +60,8 @@ const ZoomControls = observer(function ZoomControls({
   model: MsaViewModel
 }) {
   const { scrollZoom, scrollZoomAxis } = model
+  const activeAxis = scrollZoom ? scrollZoomAxis : undefined
+  const current = wheelModes.find(m => m.axis === activeAxis) ?? scrollMode
   return (
     <>
       <Tooltip title="Zoom in">
@@ -65,32 +84,30 @@ const ZoomControls = observer(function ZoomControls({
           <ZoomOut />
         </IconButton>
       </Tooltip>
-      <ToggleButtonGroup
-        exclusive
-        size="small"
-        aria-label="Mouse wheel zoom"
-        // null is the default state: no axis picked, so the wheel scrolls the
-        // alignment
-        value={scrollZoom ? scrollZoomAxis : null}
-        onChange={(_event, value: ScrollZoomAxis | null) => {
-          model.setScrollZoom(value !== null)
-          if (value !== null) {
-            model.setScrollZoomAxis(value)
-          }
-        }}
+      <CascadingMenuButton
+        data-testid="scroll_zoom_menu"
+        tooltip={`Mouse wheel: ${current.label.toLowerCase()} (ctrl+wheel always zooms)`}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        menuItems={[
+          { type: 'subHeader', label: 'Mouse wheel' },
+          ...wheelModes.map(({ label, axis, Icon, helpText }) => ({
+            label,
+            icon: Icon,
+            helpText,
+            type: 'radio' as const,
+            checked: current.label === label,
+            onClick: () => {
+              model.setScrollZoom(axis !== undefined)
+              if (axis !== undefined) {
+                model.setScrollZoomAxis(axis)
+              }
+            },
+          })),
+        ]}
       >
-        {axisButtons.map(({ axis, Icon, label }) => (
-          <ToggleButton
-            key={axis}
-            value={axis}
-            aria-label={label}
-            title={`${label} (click again and the wheel scrolls instead; ctrl+wheel always zooms)`}
-            sx={{ border: 'none' }}
-          >
-            <Icon />
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+        <current.Icon />
+      </CascadingMenuButton>
     </>
   )
 })

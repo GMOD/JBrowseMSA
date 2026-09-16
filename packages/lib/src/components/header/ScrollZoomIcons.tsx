@@ -32,6 +32,13 @@ function MouseZoom({
   )
 }
 
+// the bare body, for a wheel that scrolls. @mui/icons-material's own `Mouse` is
+// a solid silhouette, which would jump to a different drawing when the menu
+// changes the mode.
+export function MouseScroll(props: SvgIconProps) {
+  return <MouseZoom {...props} arrows={[]} />
+}
+
 export function MouseZoomBoth(props: SvgIconProps) {
   return <MouseZoom {...props} arrows={[LEFT, RIGHT, UP, DOWN]} />
 }
