@@ -12,6 +12,7 @@ import Loading from './Loading.tsx'
 import type { MsaViewModel } from '../model.ts'
 import type {
   Cell,
+  Clade,
   ColumnTrackSpec,
   Encoding,
   Highlight,
@@ -58,6 +59,12 @@ export interface MSAViewerProps {
    * for whole rows, each with an optional `label` and `color`
    */
   highlights?: Highlight[]
+  /**
+   * clades of the tree with a mark drawn over them: `{mrca, tips, mark}` or
+   * `{range, tips, mark}`, with `mark: 'highlight'` filling the rows behind
+   * the clade (see docs/layers.md)
+   */
+  clades?: Clade[]
   /** row name to diff every other row against (matches render as ".") */
   relativeTo?: string
   /** tracks supplied as data: per-column bar values or a text row (see docs/layers.md) */
@@ -189,6 +196,7 @@ function Viewer({
   allowedGappyness,
   highlightColumns,
   highlights,
+  clades,
   relativeTo,
   columnTracks,
   residueMappings,
@@ -232,6 +240,7 @@ function Viewer({
       ...(allowedGappyness !== undefined ? { allowedGappyness } : {}),
       ...(highlightColumns ? { highlightColumns } : {}),
       ...(highlights ? { highlights } : {}),
+      ...(clades ? { clades } : {}),
       ...(relativeTo ? { relativeTo } : {}),
       ...(columnTracks ? { columnTracks } : {}),
       ...(residueMappings ? { residueMappings } : {}),
@@ -318,6 +327,10 @@ function Viewer({
   useEffect(() => {
     model.setHighlights(JSON.parse(highlightsKey))
   }, [model, highlightsKey])
+  const cladesKey = JSON.stringify(clades ?? [])
+  useEffect(() => {
+    model.setClades(JSON.parse(cladesKey))
+  }, [model, cladesKey])
   const columnTracksKey = JSON.stringify(columnTracks ?? [])
   useEffect(() => {
     model.setColumnTracks(JSON.parse(columnTracksKey))

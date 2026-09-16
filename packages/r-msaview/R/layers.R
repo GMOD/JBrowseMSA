@@ -6,7 +6,8 @@
 #'
 #' @param e1 An \code{msaview} htmlwidget.
 #' @param e2 A layer from \code{\link{geom_msa_highlight}},
-#'   \code{\link{geom_msa_track}}, \code{\link{geom_msa_domains}},
+#'   \code{\link{geom_msa_clade}}, \code{\link{geom_msa_track}},
+#'   \code{\link{geom_msa_domains}},
 #'   \code{\link{geom_msa_rowdata}}, \code{\link{scale_residue_color}},
 #'   \code{\link{scale_row_color}}, \code{\link{theme_msa}} or
 #'   \code{\link{coord_msa}}.
@@ -132,6 +133,41 @@ geom_msa_highlight <- function(data = NULL, start = NULL, end = NULL,
     append = list(highlights = convert_highlights(highlights)),
     set = list(highlightColumns = convert_highlight_columns(columns))
   )
+}
+
+#' Mark a clade of the tree
+#'
+#' Fills the rows of a clade with a translucent rectangle, from the clade's
+#' common ancestor across the tree and the alignment, which is ggtree's
+#' \code{geom_hilight}.
+#'
+#' \code{mrca} names tips whose most recent common ancestor is the clade, and
+#' \code{range} names the first and last tip of a run in display order, which
+#' need not be monophyletic. \code{tips} is the number of tips the clade
+#' covers: a clade that resolves to a different number is dropped, so a
+#' re-rooted tree loses the rectangle rather than putting it on another clade.
+#'
+#' @param mrca Tip names whose common ancestor is the clade.
+#' @param tips The number of tips the clade covers.
+#' @param range The first and last tip of a run, in display order.
+#' @param color A CSS color for the rectangle.
+#' @param label Text naming the clade, drawn by the bracket mark.
+#' @return A layer to add to a viewer with \code{+}.
+#'
+#' @examples
+#' \dontrun{
+#' msaview(msa = "h5.aln", tree = "h5.nh") +
+#'   geom_msa_clade(c("Gs/TW/TNC1/2015", "Ck/TW/a174/2015"), tips = 47,
+#'                  color = "#fff3c4", label = "2.3.4.4 H5Nx")
+#' }
+#' @export
+geom_msa_clade <- function(mrca = NULL, tips = NULL, range = NULL,
+                           color = NULL, label = NULL) {
+  clade <- drop_null(list(
+    mrca = mrca, range = range, tips = tips, mark = "highlight",
+    color = color, label = label
+  ))
+  msa_layer(append = list(clades = convert_clades(list(clade))))
 }
 
 #' A track of your own numbers, text or arcs

@@ -30,6 +30,8 @@ import { packDomainLanes } from './components/msa/packDomainLanes.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import TrackBlocks from './components/tracks/TrackBlocks.tsx'
 import {
+  cladeHighlightAlpha,
+  cladeHighlightColor,
   defaultAllowedGappyness,
   defaultColWidth,
   defaultColorSchemeName,
@@ -71,8 +73,10 @@ import {
   find,
   forEachDescendant,
   hierarchy,
+  leafIndex,
   leaves,
   maxLength,
+  mrca,
   setBrLength,
   sort,
   sum as hierarchySum,
@@ -115,6 +119,7 @@ import type {
   Arc,
   BasicTrack,
   Cell,
+  Clade,
   ResidueMappingProblem,
   ColumnTrackSpec,
   DomainBand,
@@ -127,6 +132,7 @@ import type {
   Region,
   ResidueMapping,
   ResidueSegment,
+  ResolvedClade,
   ResolvedEncoding,
   ResolvedHighlight,
   RowResidue,
@@ -237,8 +243,60 @@ function trackIsOff(
   return turnedOffTracks.get(id) ?? (defaultOff || defaultOffTracks.has(id))
 }
 
-// shared empty result, so observers don't see a fresh [] as a change
+// shared empty results, so observers don't see a fresh [] as a change
 const noDomains: Annotation[] = []
+const noClades: ResolvedClade[] = []
+
+/**
+ * The rows a clade covers, or undefined when it does not resolve: a tip name
+ * the tree does not have or has twice, or a leaf count `tips` disagrees with.
+ * `index` and `rowNamesSet` are the memoized passes over the tree.
+ */
+function cladeRows(
+  clade: Clade,
+  root: HierarchyNode<NodeWithIds>,
+  index: Map<string, HierarchyNode<NodeWithIds> | undefined>,
+  rowNamesSet: Map<string, number>,
+): [number, number] | undefined {
+  if (clade.range) {
+    const ends = clade.range.map(name =>
+      index.get(name) ? rowNamesSet.get(name) : undefined,
+    )
+    const [a, b] = ends
+    if (a === undefined || b === undefined) {
+      return undefined
+    }
+    const rows: [number, number] = a <= b ? [a, b] : [b, a]
+    return rows[1] - rows[0] + 1 === clade.tips ? rows : undefined
+  }
+  const node = clade.mrca ? mrca(root, clade.mrca, index) : undefined
+  if (!node) {
+    return undefined
+  }
+  const names = leaves(node).map(n => n.data.name)
+  if (names.length !== clade.tips) {
+    return undefined
+  }
+  let first = Infinity
+  let last = -Infinity
+  for (const name of names) {
+    const row = rowNamesSet.get(name)
+    if (row !== undefined) {
+      first = Math.min(first, row)
+      last = Math.max(last, row)
+    }
+  }
+  return first <= last ? [first, last] : undefined
+}
+
+// a producer's color with no alpha of its own draws translucent, so the tree
+// and the residues stay readable under it
+function cladeFill(color = cladeHighlightColor) {
+  const parsed = colord(color)
+  return parsed.alpha() === 1
+    ? parsed.alpha(cladeHighlightAlpha).toRgbString()
+    : color
+}
 
 // the channels reading the feature table; every other channel reads rowData
 const featureChannels = new Set<EncodingChannel>([
@@ -539,6 +597,14 @@ function stateModelFactory() {
         highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
         /**
          * #property
+         * clades of the tree with a mark drawn over them. `mrca` names tips
+         * whose common ancestor is the clade, or `range` its first and last
+         * tip in display order, and `tips` is the leaf count the producer
+         * measured. See docs/layers.md
+         */
+        clades: stripDefault(types.array(types.frozen<Clade>()), []),
+        /**
+         * #property
          * what the viewer's own marks read from `rowData`:
          * `{channel, field, scale?}` per channel, where `channel` is
          * `tipLabel` or `rowTint`. See docs/layers.md
@@ -801,6 +867,14 @@ function stateModelFactory() {
        */
       setHighlights(highlights: Highlight[]) {
         self.highlights.replace(highlights)
+      },
+
+      /**
+       * #action
+       * replace the clades the viewer marks (see docs/layers.md)
+       */
+      setClades(clades: Clade[]) {
+        self.clades.replace(clades)
       },
       /**
        * #action
@@ -3109,6 +3183,27 @@ function stateModelFactory() {
           }
           const span = self.visibleSpan({ row, start, end })
           return span ? [{ ...base, ...span, rowIndices: [] }] : []
+        })
+      },
+
+      /**
+       * #getter
+       * `clades` resolved to the rows each one covers. The tip names resolve
+       * against `tree` rather than `root`, so a clade whose ancestor the user
+       * collapsed keeps its rows. One leaf pass over the tree serves every
+       * clade.
+       */
+      get resolvedClades(): ResolvedClade[] {
+        if (self.clades.length === 0) {
+          return noClades
+        }
+        const root = hierarchy(self.tree, d => d.children)
+        const index = leafIndex(root)
+        return self.clades.flatMap(clade => {
+          const rows = cladeRows(clade, root, index, self.rowNamesSet)
+          return rows
+            ? [{ rows, mark: clade.mark, color: cladeFill(clade.color) }]
+            : []
         })
       },
 

@@ -67,6 +67,12 @@
 #'   with the label beside it.
 #' @param highlight_columns Alignment columns (1-based) to put under a
 #'   persistent overlay, as a numeric vector.
+#' @param clades Clades of the tree to mark, each a list with \code{mrca} (tip
+#'   names whose most recent common ancestor is the clade) or \code{range}
+#'   (the first and last tip of a run, in display order), \code{tips} (the
+#'   number of tips the clade covers), \code{mark = "highlight"}, and an
+#'   optional \code{color} and \code{label}. A clade that resolves to a
+#'   different number of tips is dropped.
 #' @param residue_mappings Which residue of which structure each residue of a
 #'   row is, for a viewer showing a structure beside the alignment. A list of
 #'   mappings, each a list with \code{row}, \code{structure} (a list with
@@ -216,6 +222,7 @@
 msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     column_tracks = NULL, show_branch_len = NULL,
                     highlights = NULL, highlight_columns = NULL,
+                    clades = NULL,
                     residue_mappings = NULL, row_data = NULL,
                     encodings = NULL, relative_to = NULL,
                     region = NULL, col_width = NULL, row_height = NULL,
@@ -245,6 +252,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$showBranchLen <- show_branch_len
   props$highlights <- convert_highlights(highlights)
   props$highlightColumns <- convert_highlight_columns(highlight_columns)
+  props$clades <- convert_clades(clades)
   props$residueMappings <- convert_residue_mappings(residue_mappings)
   props$rowData <- convert_row_data(row_data)
   props$encodings <- convert_encodings(encodings)
@@ -427,6 +435,29 @@ convert_encodings <- function(encodings) {
       if (!is.null(e$scale$map)) e$scale$map <- as.list(e$scale$map)
     }
     e
+  }))
+}
+
+# Each clade serializes as one JSON object. `mrca` and `range` stay arrays at
+# length one, and they hold row names, so they take the substitution the
+# alignment and the tree take.
+convert_clades <- function(clades) {
+  if (is.null(clades)) return(NULL)
+  if (!is.list(clades)) {
+    stop("clades must be a list of clades, each a list with mrca or range, and tips")
+  }
+  unname(lapply(clades, function(clade) {
+    if (is.null(clade$mrca) && is.null(clade$range)) {
+      stop("a clade needs 'mrca', the tip names it spans, or 'range', its two ends")
+    }
+    if (is.null(clade$tips)) {
+      stop("a clade needs 'tips', the number of tips it covers")
+    }
+    if (!is.null(clade$mrca)) clade$mrca <- I(sanitize_names(clade$mrca))
+    if (!is.null(clade$range)) clade$range <- I(sanitize_names(clade$range))
+    clade$tips <- as.integer(clade$tips)
+    clade$mark <- clade$mark %||% "highlight"
+    clade
   }))
 }
 

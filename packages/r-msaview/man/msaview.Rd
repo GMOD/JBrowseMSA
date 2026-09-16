@@ -13,6 +13,7 @@ msaview(
   show_branch_len = NULL,
   highlights = NULL,
   highlight_columns = NULL,
+  clades = NULL,
   residue_mappings = NULL,
   row_data = NULL,
   encodings = NULL,
@@ -96,6 +97,13 @@ with the label beside it.}
 
 \item{highlight_columns}{Alignment columns (1-based) to put under a
 persistent overlay, as a numeric vector.}
+
+\item{clades}{Clades of the tree to mark, each a list with \code{mrca} (tip
+names whose most recent common ancestor is the clade) or \code{range}
+(the first and last tip of a run, in display order), \code{tips} (the
+number of tips the clade covers), \code{mark = "highlight"}, and an
+optional \code{color} and \code{label}. A clade that resolves to a
+different number of tips is dropped.}
 
 \item{residue_mappings}{Which residue of which structure each residue of a
 row is, for a viewer showing a structure beside the alignment. A list of

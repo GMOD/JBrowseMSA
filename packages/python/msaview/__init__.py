@@ -55,6 +55,8 @@ class MSAView(anywidget.AnyWidget):
     allowed_gappyness = traitlets.Float(None, allow_none=True).tag(sync=True)
     highlights = traitlets.List(traitlets.Dict()).tag(sync=True)
     highlight_columns = traitlets.List(traitlets.Int()).tag(sync=True)
+    # clades of the tree with a mark over them, keyed by tip names
+    clades = traitlets.List(traitlets.Dict()).tag(sync=True)
     column_tracks = _ColumnTracks(traitlets.Dict()).tag(sync=True)
     residue_mappings = traitlets.List(traitlets.Dict()).tag(sync=True)
     # extra fields per row name, and what the viewer's marks read from that

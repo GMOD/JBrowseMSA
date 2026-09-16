@@ -70,6 +70,19 @@ IOptionalIType<ISimpleType<number>, [undefined]>
 allowedGappyness: stripDefault(types.number, defaultAllowedGappyness)
 ```
 
+#### property: clades
+
+clades of the tree with a mark drawn over them. `mrca` names tips whose common
+ancestor is the clade, or `range` its first and last tip in display order, and
+`tips` is the leaf count the producer measured. See docs/layers.md
+
+```js
+// type signature
+IOptionalIType<IArrayType<IType<Clade, Clade, Clade>>, [undefined]>
+// code
+clades: stripDefault(types.array(types.frozen<Clade>()), [])
+```
+
 #### property: collapsed
 
 array of tree parent nodes that are 'collapsed' (all children are hidden)
@@ -1289,6 +1302,17 @@ structure from a mapping made against a different alignment.
 ResidueMappingProblem[]
 ```
 
+#### getter: resolvedClades
+
+`clades` resolved to the rows each one covers. The tip names resolve against
+`tree` rather than `root`, so a clade whose ancestor the user collapsed keeps
+its rows. One leaf pass over the tree serves every clade.
+
+```js
+// type
+ResolvedClade[]
+```
+
 #### getter: resolvedEncodings
 
 each encoding with its scale resolved against the values its field takes: a
@@ -1939,6 +1963,15 @@ keep a hidden overlay hidden.
 ```js
 // type signature
 setAnnotations: (annotations: Annotation[]) => void
+```
+
+#### action: setClades
+
+replace the clades the viewer marks (see docs/layers.md)
+
+```js
+// type signature
+setClades: (clades: Clade[]) => void
 ```
 
 #### action: setColumnTracks

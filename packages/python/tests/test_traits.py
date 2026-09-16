@@ -30,6 +30,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "allowed_gappyness": None,
         "highlights": [],
         "highlight_columns": [],
+        "clades": [],
         "column_tracks": [],
         "residue_mappings": [],
         "row_data": {},

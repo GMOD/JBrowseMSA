@@ -85,6 +85,11 @@ export const maxNeighborJoiningRows = 500
 // keeps it.
 export const rowTintAlpha = 0.25
 
+// The fill a `clades` record with the `highlight` mark draws behind its rows,
+// and the opacity a producer's own color takes when it carries none.
+export const cladeHighlightColor = '#fff3c4'
+export const cladeHighlightAlpha = 0.6
+
 // The largest inline document the snapshot carries. A larger pasted or
 // locally-opened file stays in the live model and out of the snapshot, keeping
 // shared URLs sendable. `unshareableData` warns using the same number.

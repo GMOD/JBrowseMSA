@@ -6,6 +6,20 @@ test_that("highlight columns go in on their own", {
   expect_false("highlights" %in% names(w$x$props))
 })
 
+test_that("a clade carries its tip names sanitized and its count", {
+  w <- msaview(msa = msa) +
+    geom_msa_clade(c("Homo sapiens", "Mouse"), tips = 2, color = "#fff3c4")
+  clade <- w$x$props$clades[[1]]
+  expect_equal(as.character(clade$mrca), c("Homo_sapiens", "Mouse"))
+  expect_equal(clade$tips, 2L)
+  expect_equal(clade$mark, "highlight")
+  expect_equal(clade$color, "#fff3c4")
+})
+
+test_that("a clade needs a tip count", {
+  expect_error(geom_msa_clade(c("Homo sapiens", "Mouse")), "tips")
+})
+
 test_that("a structure mapping lands under residueMappings", {
   mapping <- list(
     row = "Homo sapiens",
@@ -73,6 +87,7 @@ test_that("every prop-carrying msaview argument has a layer", {
     geom_msa_domains("##gff-version 3"),
     geom_msa_highlight(start = 1, end = 2),
     geom_msa_highlight(columns = 1),
+    geom_msa_clade(c("Homo sapiens", "Mouse"), tips = 2),
     geom_msa_track(c(1), name = "t"),
     geom_msa_structure(list(list(
       row = "a", structure = list(id = "1ABC"),
@@ -97,6 +112,7 @@ test_that("every prop-carrying msaview argument has a layer", {
     column_tracks = list(list(id = "t", name = "t", kind = "bar", values = 1)),
     show_branch_len = TRUE, highlights = list(list(start = 1, end = 2)),
     highlight_columns = 1,
+    clades = list(list(mrca = c("a", "b"), tips = 2, mark = "highlight")),
     residue_mappings = list(list(
       row = "a", structure = list(id = "1ABC"),
       segments = list(list(rowStart = 1, rowEnd = 2))

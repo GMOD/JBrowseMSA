@@ -143,6 +143,52 @@ or a genome browser, call `model.applyHighlight(owner, list)` and
 highlights, and stay out of the snapshot. `clearHighlight(owner)` removes only
 that owner's highlights, so two sources can highlight at once.
 
+## clades
+
+A clade of the tree with a mark over it. `mark: "highlight"` fills the rows
+behind the clade with a translucent rectangle, running from the clade's common
+ancestor to the right edge of the tree area and on across the alignment, which
+is ggtree's `geom_hilight`.
+
+```json
+"clades": [
+  {
+    "mrca": ["Gs/TW/TNC1/2015", "Ck/TW/a174/2015"],
+    "tips": 47,
+    "mark": "highlight",
+    "color": "#fff3c4",
+    "label": "2.3.4.4 H5Nx"
+  },
+  { "range": ["Dk/VN/1/2012", "Ck/VN/14/2012"], "tips": 6, "mark": "highlight" }
+]
+```
+
+`mrca` names tips whose most recent common ancestor is the clade, and the mark
+covers every tip under that ancestor. Two names are enough for a clade of any
+size, and a name the tree does not have, or has twice, drops the record: a
+duplicated tip name cannot say which tip it means.
+
+`tips` is the leaf count the producer measured. The viewer resolves the ancestor
+and counts the leaves under it, and a count that differs drops the clade. A
+re-rooted or re-estimated tree therefore loses the rectangle instead of drawing
+it over a different clade, the way `residueMappings.rowLength` guards a mapping
+against a re-aligned row.
+
+`range` takes the two ends of a run of tips in display order, in either order,
+and covers every tip between them, monophyletic or not. Its `tips` is checked
+the same way, against the length of the run.
+
+`color` is any CSS color, defaulting to a light yellow. A color carrying no
+alpha of its own draws at 60% opacity, so the branches and the residues under it
+stay readable. `label` is reserved for the bracket mark, and the highlight mark
+draws nothing from it.
+
+The tips resolve against the tree as loaded, so collapsing a clade's ancestor or
+focusing on part of the tree keeps the mark on the rows that remain on screen.
+
+React: the `clades` prop on `MSAViewer`, or `model.setClades(list)`. R:
+`geom_msa_clade(c("Gs/TW/TNC1/2015", "Ck/TW/a174/2015"), tips = 47)`.
+
 ## rowData
 
 A table of fields per row, keyed by row name: a lineage, a host, a collection

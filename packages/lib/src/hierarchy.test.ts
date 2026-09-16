@@ -2,12 +2,16 @@ import { describe, expect, test } from 'vitest'
 
 import {
   calcDepthToLeaf,
+  clusterLayout,
   collapse,
   collapsedSubtreeMaxLength,
   find,
   hierarchy,
+  leafIndex,
   leaves,
   maxLength,
+  mrca,
+  nodeCoveringRows,
   setBrLength,
   sort,
   sum,
@@ -77,6 +81,67 @@ describe('leaves', () => {
     const h = hierarchy(makeTree(), d => d.children)
     const l = leaves(h)
     expect(l.map(n => n.data.name)).toEqual(['A1', 'A2', 'B1', 'B2'])
+  })
+})
+
+describe('mrca', () => {
+  test('lifts a tip set to the node above it', () => {
+    const h = hierarchy(makeTree(), d => d.children)
+    expect(mrca(h, ['A1', 'A2'])?.data.id).toBe('A')
+    expect(mrca(h, ['A1', 'B2'])?.data.id).toBe('root')
+    expect(mrca(h, ['A1', 'A2', 'B1'])?.data.id).toBe('root')
+  })
+
+  test('one name resolves to that tip', () => {
+    const h = hierarchy(makeTree(), d => d.children)
+    expect(mrca(h, ['B1'])?.data.id).toBe('B1')
+  })
+
+  test('an unknown name, an internal name and an empty set resolve to nothing', () => {
+    const h = hierarchy(makeTree(), d => d.children)
+    expect(mrca(h, ['A1', 'nope'])).toBeUndefined()
+    expect(mrca(h, ['A1', 'A'])).toBeUndefined()
+    expect(mrca(h, [])).toBeUndefined()
+  })
+
+  test('a name two tips share resolves to nothing', () => {
+    const tree: NodeWithIds = {
+      id: 'root',
+      name: 'root',
+      children: [
+        {
+          id: 'A',
+          name: 'A',
+          children: [
+            { id: 'A1', name: 'dup', children: [] },
+            { id: 'A2', name: 'A2', children: [] },
+          ],
+        },
+        { id: 'B1', name: 'dup', children: [] },
+      ],
+    }
+    const h = hierarchy(tree, d => d.children)
+    expect(leafIndex(h).get('dup')).toBeUndefined()
+    expect(mrca(h, ['dup', 'A2'])).toBeUndefined()
+    expect(mrca(h, ['A2', 'A1'])).toBeUndefined()
+  })
+
+  test('a 50k-deep caterpillar tree resolves without recursion', () => {
+    const h = hierarchy(makeDeepTree(50_000), d => d.children)
+    expect(mrca(h, ['leaf0', 'leaf1'])?.data.id).toBe('node1')
+    expect(mrca(h, ['leaf0', 'leaf50000'])?.data.id).toBe('node50000')
+    expect(mrca(h, ['leaf200', 'leaf100'])?.data.id).toBe('node200')
+  })
+})
+
+describe('nodeCoveringRows', () => {
+  test('descends to the deepest node whose rows cover the run', () => {
+    const h = hierarchy(makeTree(), d => d.children)
+    clusterLayout(h, 40, 100)
+    // four tips over 40px of row space, so the tip centers are 5, 15, 25, 35
+    expect(nodeCoveringRows(h, 5, 15).data.id).toBe('A')
+    expect(nodeCoveringRows(h, 25, 25).data.id).toBe('B1')
+    expect(nodeCoveringRows(h, 15, 25).data.id).toBe('root')
   })
 })
 

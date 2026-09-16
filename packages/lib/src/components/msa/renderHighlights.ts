@@ -78,11 +78,12 @@ export function drawHighlightLabel({
 }
 
 /**
- * The persistent overlay on the alignment: the `rowTint` encoding's wash, the
- * row tints and bordered column bands of `highlights`, and a label above each
- * band. `offsetX`/`offsetY` are the content coordinates at the canvas origin,
- * the convention renderMSABlock uses, so the live overlay passes
- * -scrollX/-scrollY and the export passes its layout offsets.
+ * The persistent overlay on the alignment: the band behind each clade of
+ * `clades`, the `rowTint` encoding's wash, the row tints and bordered column
+ * bands of `highlights`, and a label above each band. `offsetX`/`offsetY` are
+ * the content coordinates at the canvas origin, the convention renderMSABlock
+ * uses, so the live overlay passes -scrollX/-scrollY and the export passes its
+ * layout offsets.
  *
  * Rows are culled to the ones this block covers. A tint over every row of a
  * large alignment would otherwise draw the whole column of rects in each block,
@@ -105,13 +106,25 @@ export function renderHighlights({
   width: number
   height: number
 }) {
-  const { resolvedHighlights, rowTints, colWidth, rowHeight } = model
+  const { resolvedClades, resolvedHighlights, rowTints, colWidth, rowHeight } =
+    model
   const placed: LabelBox[] = []
   ctx.lineWidth = 2
   const firstRow = Math.max(0, Math.floor(offsetY / rowHeight))
   const lastRow = Math.ceil((offsetY + height) / rowHeight)
   const fillRow = (index: number) => {
     ctx.fillRect(0, index * rowHeight - offsetY, width, rowHeight)
+  }
+  for (const { rows, color } of resolvedClades) {
+    if (rows[1] >= firstRow && rows[0] <= lastRow) {
+      ctx.fillStyle = color
+      ctx.fillRect(
+        0,
+        rows[0] * rowHeight - offsetY,
+        width,
+        (rows[1] - rows[0] + 1) * rowHeight,
+      )
+    }
   }
   if (rowTints) {
     for (

@@ -3,6 +3,7 @@ import { hostTheme, watchHostTheme } from './hostTheme.ts'
 import type { AnyModel, Render } from '@anywidget/types'
 import type {
   Cell,
+  Clade,
   ColumnTrackSpec,
   Encoding,
   Highlight,
@@ -29,6 +30,7 @@ export interface Traits {
   allowed_gappyness: number | null
   highlights: Highlight[]
   highlight_columns: number[]
+  clades: Clade[]
   column_tracks: ColumnTrackSpec[]
   residue_mappings: ResidueMapping[]
   row_data: Record<string, Record<string, string>>
@@ -62,6 +64,7 @@ export const INPUT_TRAITS = [
   'allowed_gappyness',
   'highlights',
   'highlight_columns',
+  'clades',
   'column_tracks',
   'residue_mappings',
   'row_data',
@@ -103,6 +106,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     allowedGappyness: optional(model.get('allowed_gappyness')),
     highlights: model.get('highlights'),
     highlightColumns: model.get('highlight_columns'),
+    clades: model.get('clades'),
     columnTracks: model.get('column_tracks'),
     residueMappings: model.get('residue_mappings'),
     rowData: model.get('row_data'),

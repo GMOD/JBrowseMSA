@@ -214,3 +214,76 @@ export function setBrLength(d: HierarchyNode, y0: number, k: number) {
     }
   }
 }
+
+/**
+ * Every leaf by name, with a name two leaves share mapping to undefined: a tip
+ * set naming it cannot say which tip it means.
+ */
+export function leafIndex<T extends { name: string }>(root: HierarchyNode<T>) {
+  const index = new Map<string, HierarchyNode<T> | undefined>()
+  for (const leaf of leaves(root)) {
+    const { name } = leaf.data
+    index.set(name, index.has(name) ? undefined : leaf)
+  }
+  return index
+}
+
+/**
+ * The most recent common ancestor of a set of tip names, or undefined when a
+ * name is not a tip of this tree or names two of them.
+ *
+ * Each name lifts through `parent` to the ancestor the names before it share,
+ * so the walk holds two nodes. Recording a root-to-tip path per name instead
+ * costs the depth in memory per name, and a caterpillar tree's depth is its tip
+ * count. `index` is `leafIndex(root)`, which a caller resolving several tip
+ * sets against one tree builds once.
+ */
+export function mrca<T extends { name: string }>(
+  root: HierarchyNode<T>,
+  names: string[],
+  index = leafIndex(root),
+) {
+  let node: HierarchyNode<T> | undefined
+  for (const name of names) {
+    let other = index.get(name)
+    if (!other) {
+      return undefined
+    }
+    if (!node) {
+      node = other
+      continue
+    }
+    while (node.depth > other.depth) {
+      node = node.parent!
+    }
+    while (other.depth > node.depth) {
+      other = other.parent!
+    }
+    while (node !== other) {
+      node = node.parent!
+      other = other.parent!
+    }
+  }
+  return node
+}
+
+/**
+ * The deepest node whose subtree covers a run of rows, given in the row-space
+ * coordinates clusterLayout writes to xMin/xMax. A subtree's leaves are one
+ * contiguous run, so at most one child per level covers the run and the descent
+ * visits the tree's depth rather than its nodes.
+ */
+export function nodeCoveringRows<T>(
+  root: HierarchyNode<T>,
+  top: number,
+  bottom: number,
+) {
+  let node = root
+  for (;;) {
+    const child = node.children?.find(c => c.xMin! <= top && c.xMax! >= bottom)
+    if (!child) {
+      return node
+    }
+    node = child
+  }
+}

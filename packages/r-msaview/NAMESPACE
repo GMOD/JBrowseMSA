@@ -3,6 +3,7 @@
 S3method("+",msaview)
 S3method(print,msaview_layer)
 export(coord_msa)
+export(geom_msa_clade)
 export(geom_msa_domains)
 export(geom_msa_highlight)
 export(geom_msa_rowdata)

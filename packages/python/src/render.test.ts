@@ -37,6 +37,7 @@ const defaults: Traits = {
   allowed_gappyness: null,
   highlights: [],
   highlight_columns: [],
+  clades: [],
   column_tracks: [],
   residue_mappings: [],
   row_data: {},

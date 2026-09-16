@@ -63,6 +63,7 @@ Props:
 | `columnTracks`      | `ColumnTrackSpec[]`      | Tracks supplied as data (see below)                                                 |
 | `highlights`        | `Highlight[]`            | Labeled highlights (see below)                                                      |
 | `highlightColumns`  | `number[]`               | Columns (0-based) under a persistent overlay                                        |
+| `clades`            | `Clade[]`                | Tree clades with a mark over them (see below)                                       |
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                                         |
 | `rowData`           | `Record<string, ...>`    | Extra fields per row name, such as a lineage or a host                              |
 | `encodings`         | `Encoding[]`             | What the marks read: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
@@ -80,11 +81,11 @@ The viewer applies a changed prop to the mounted model, so a host can put a
 control on one without re-fetching the alignment. Each prop updates only its own
 setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
-the data layers (`highlights`, `columnTracks`, `residueMappings`, `rowData`,
-`encodings`, `highlightColumns`) and the filehandles by content, so passing a
-freshly computed array or location object on every render costs nothing. A new
-`msa`, `tree` or `gff` string, or a filehandle pointing somewhere else, builds a
-new model and resets the view.
+the data layers (`highlights`, `clades`, `columnTracks`, `residueMappings`,
+`rowData`, `encodings`, `highlightColumns`) and the filehandles by content, so
+passing a freshly computed array or location object on every render costs
+nothing. A new `msa`, `tree` or `gff` string, or a filehandle pointing somewhere
+else, builds a new model and resets the view.
 
 ### Events
 
@@ -140,6 +141,27 @@ SVG export draws it.
 />
 ```
 
+`clades` marks a clade of the tree: `mrca` names tips whose common ancestor is
+the clade, `tips` is the leaf count the producer measured, and the `highlight`
+mark fills the rows behind the clade across the tree and the alignment. A clade
+that resolves to a different leaf count is dropped, so a re-rooted tree loses
+the rectangle rather than putting it on the wrong clade.
+
+```tsx
+<MSAViewer
+  msa={msa}
+  tree={tree}
+  clades={[
+    {
+      mrca: ['Gs/TW/TNC1/2015', 'Ck/TW/a174/2015'],
+      tips: 47,
+      mark: 'highlight',
+      color: '#fff3c4',
+    },
+  ]}
+/>
+```
+
 `rowData` is a field table keyed by row name, and `encodings` says which mark
 reads which field: `tipLabel` colors the tip labels in the tree, `rowTint`
 washes the row across the tree gutter and the alignment, and `branch` colors a
@@ -165,8 +187,9 @@ naming each span of the overlay.
 
 The [layers reference](https://gmod.org/JBrowseMSA/layers) lists every field of
 every layer and the coordinate rules they share. At runtime
-`model.setHighlights(list)`, `model.setColumnTracks(tracks)` and
-`model.setRowData(table)` replace what the props set.
+`model.setHighlights(list)`, `model.setClades(list)`,
+`model.setColumnTracks(tracks)` and `model.setRowData(table)` replace what the
+props set.
 
 ### One panel in your own page
 

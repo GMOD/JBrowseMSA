@@ -225,6 +225,35 @@ export interface Highlight {
 }
 
 /**
+ * What the viewer draws over a clade. `highlight` fills the rows behind it,
+ * across the tree and the alignment.
+ */
+export type CladeMark = 'highlight'
+
+/**
+ * A clade of the tree and the mark drawn over it. `mrca` names tips whose most
+ * recent common ancestor is the clade; `range` names the first and last tip of
+ * a run in display order, in either order. `tips` is the leaf count the
+ * producer measured, and a clade that resolves to a different count is dropped.
+ * `label` is reserved for the bracket mark. See docs/layers.md
+ */
+export interface Clade {
+  mrca?: string[]
+  range?: [string, string]
+  tips: number
+  mark: CladeMark
+  color?: string
+  label?: string
+}
+
+/** a Clade resolved to the rows it covers, with its fill color settled */
+export interface ResolvedClade {
+  rows: [number, number]
+  mark: CladeMark
+  color: string
+}
+
+/**
  * A span in Highlight coordinates: 1-based inclusive residues of `row`, or
  * columns of the file without it
  */

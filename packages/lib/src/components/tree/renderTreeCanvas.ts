@@ -1,4 +1,4 @@
-import { calcDepthToLeaf } from '../../hierarchy.ts'
+import { calcDepthToLeaf, nodeCoveringRows } from '../../hierarchy.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import {
@@ -469,6 +469,53 @@ function firstRow(rowIndices: number[]) {
   return min
 }
 
+// the highlight mark of the `clades` layer: a translucent rectangle from the
+// clade's common ancestor to the right edge of the tree area, under the
+// branches. A clade spanning hundreds of rows crosses several blocks, so each
+// block draws the whole rectangle and the canvas takes the part that is its.
+function renderCladeHighlights({
+  ctx,
+  model,
+  offsetY,
+  tipX,
+  maxDepthToLeaf,
+  blockSizeYOverride,
+}: {
+  ctx: RenderCtx
+  model: MsaViewModel
+  offsetY: number
+  tipX: number
+  maxDepthToLeaf: number
+  blockSizeYOverride?: number
+}) {
+  const {
+    resolvedClades,
+    hierarchy,
+    showBranchLenEffective: showBranchLen,
+    rowHeight,
+    treeAreaWidth,
+    marginLeft,
+    blockSize,
+  } = model
+  const by = blockSizeYOverride ?? blockSize
+  const right = treeAreaWidth - marginLeft
+  for (const { rows, color } of resolvedClades) {
+    const top = rows[0] * rowHeight
+    const bottom = (rows[1] + 1) * rowHeight
+    if (bottom < offsetY || top > offsetY + by) {
+      continue
+    }
+    const node = nodeCoveringRows(
+      hierarchy,
+      top + rowHeight / 2,
+      bottom - rowHeight / 2,
+    )
+    const x = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf) ?? 0
+    ctx.fillStyle = color
+    ctx.fillRect(x, top, right - x, bottom - top)
+  }
+}
+
 // the `rowTint` encoding and the row sets of `highlights`, washed across the
 // tree area under the labels, with each set's label in the gutter at its first
 // row
@@ -595,6 +642,14 @@ export function renderTreeCanvas({
   // every block of every redraw, and `collapsed` is a list
   const collapsedSet = new Set(model.collapsed)
 
+  renderCladeHighlights({
+    ctx,
+    model,
+    offsetY,
+    tipX,
+    maxDepthToLeaf,
+    blockSizeYOverride,
+  })
   renderRowHighlights({ ctx, model, theme, offsetY, blockSizeYOverride })
   setFontSize(ctx, fontSize)
 

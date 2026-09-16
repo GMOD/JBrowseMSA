@@ -82,6 +82,7 @@ msaview(msa = "p53.aln", tree = "p53.nh") +
 | `geom_msa_domains()`    | a GFF3 file, URL, text or data frame of annotations     |
 | `geom_msa_highlight()`  | a data frame of spans, or one span from its arguments   |
 | `geom_msa_track()`      | a track of your numbers, text or arcs                   |
+| `geom_msa_clade()`      | a rectangle behind the rows of a clade of the tree      |
 | `geom_msa_structure()`  | which structure residue each row residue is             |
 | `geom_msa_rowdata()`    | a data frame of extra fields per row                    |
 | `scale_row_color()`     | colors a tip label or a row tint by one of those fields |
@@ -90,9 +91,9 @@ msaview(msa = "p53.aln", tree = "p53.nh") +
 | `coord_msa()`           | the span the viewer opens on                            |
 | `theme_msa()`           | cell size, tree gutter, toolbar, light or dark          |
 
-`geom_msa_highlight()`, `geom_msa_track()`, `geom_msa_structure()` and
-`scale_row_color()` accumulate, so calling one twice adds two. The others
-replace what an earlier layer set.
+`geom_msa_highlight()`, `geom_msa_clade()`, `geom_msa_track()`,
+`geom_msa_structure()` and `scale_row_color()` accumulate, so calling one twice
+adds two. The others replace what an earlier layer set.
 
 A layer builds the same props the matching `msaview()` argument does, so the two
 styles mix freely and produce the same viewer. `msa` and `tree` are the viewer
