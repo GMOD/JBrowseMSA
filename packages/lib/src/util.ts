@@ -29,6 +29,14 @@ export function adjustColorForContrast(color: string, bg: string): string {
   return result
 }
 
+// a wash over the alignment or the tree: a color carrying its own alpha draws
+// at that alpha, and one with none takes `alpha` so the marks under it stay
+// readable
+export function withAlpha(color: string, alpha: number) {
+  const parsed = colord(color)
+  return parsed.alpha() === 1 ? parsed.alpha(alpha).toRgbString() : color
+}
+
 export function outlineColor(fill: string) {
   return colord(fill).darken(0.1).toHex()
 }

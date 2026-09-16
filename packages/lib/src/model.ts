@@ -9,7 +9,6 @@ import {
   isAlive,
   types,
 } from '@jbrowse/mobx-state-tree'
-import { colord } from 'colord'
 import { autorun, transaction } from 'mobx'
 import {
   generateNodeIds,
@@ -106,6 +105,7 @@ import {
   outlineColor,
   skipBlanks,
   transform,
+  withAlpha,
 } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 import { parseWuss } from './wuss.ts'
@@ -259,10 +259,9 @@ function cladeRows(
   rowNamesSet: Map<string, number>,
 ): [number, number] | undefined {
   if (clade.range) {
-    const ends = clade.range.map(name =>
+    const [a, b] = clade.range.map(name =>
       index.get(name) ? rowNamesSet.get(name) : undefined,
     )
-    const [a, b] = ends
     if (a === undefined || b === undefined) {
       return undefined
     }
@@ -273,29 +272,20 @@ function cladeRows(
   if (!node) {
     return undefined
   }
-  const names = leaves(node).map(n => n.data.name)
-  if (names.length !== clade.tips) {
+  const tips = leaves(node)
+  if (tips.length !== clade.tips) {
     return undefined
   }
   let first = Infinity
   let last = -Infinity
-  for (const name of names) {
-    const row = rowNamesSet.get(name)
+  for (const tip of tips) {
+    const row = rowNamesSet.get(tip.data.name)
     if (row !== undefined) {
       first = Math.min(first, row)
       last = Math.max(last, row)
     }
   }
   return first <= last ? [first, last] : undefined
-}
-
-// a producer's color with no alpha of its own draws translucent, so the tree
-// and the residues stay readable under it
-function cladeFill(color = cladeHighlightColor) {
-  const parsed = colord(color)
-  return parsed.alpha() === 1
-    ? parsed.alpha(cladeHighlightAlpha).toRgbString()
-    : color
 }
 
 // the channels reading the feature table; every other channel reads rowData
@@ -3202,7 +3192,16 @@ function stateModelFactory() {
         return self.clades.flatMap(clade => {
           const rows = cladeRows(clade, root, index, self.rowNamesSet)
           return rows
-            ? [{ rows, mark: clade.mark, color: cladeFill(clade.color) }]
+            ? [
+                {
+                  rows,
+                  mark: clade.mark,
+                  color: withAlpha(
+                    clade.color ?? cladeHighlightColor,
+                    cladeHighlightAlpha,
+                  ),
+                },
+              ]
             : []
         })
       },
@@ -3319,10 +3318,7 @@ function stateModelFactory() {
           if (!color) {
             return undefined
           }
-          const parsed = colord(color)
-          return parsed.alpha() === 1
-            ? parsed.alpha(rowTintAlpha).toRgbString()
-            : color
+          return withAlpha(color, rowTintAlpha)
         })
       },
 
