@@ -308,13 +308,13 @@ for node in all_nodes:
 
 def clade_count(field):
     value = shared_values(field)
-    maximal = 0
+    maximal = collections.Counter()
     for node in all_nodes:
         if value[id(node)] is None:
             continue
         parent = parent_of.get(id(node))
         if parent is None or value[id(parent)] != value[id(node)]:
-            maximal += 1
+            maximal[value[id(node)]] += 1
     colored = sum(1 for n in all_nodes[1:] if value[id(n)] is not None)
     colored_internal = sum(1 for n in internal[1:] if value[id(n)] is not None)
     return maximal, colored, colored_internal
@@ -323,10 +323,12 @@ def clade_count(field):
 for field in [*META_FIELDS, *SEGMENT_FIELDS]:
     values = {row[field] for row in table.values()}
     maximal, colored, colored_internal = clade_count(field)
+    per_value = ", ".join(f"{v} {n}" for v, n in maximal.most_common(4))
     print(
-        f"{field}: {len(values)} values in {maximal} clades, "
+        f"{field}: {len(values)} values in {sum(maximal.values())} clades, "
         f"{colored}/{len(all_nodes) - 1} edges colored, "
-        f"{colored_internal}/{len(internal) - 1} of them above an internal node"
+        f"{colored_internal}/{len(internal) - 1} of them above an internal "
+        f"node; clades per value: {per_value}"
     )
 
 
@@ -344,6 +346,19 @@ def display_rows(node):
 
 order = display_rows(root)
 row_of = {name: i for i, name in enumerate(order)}
+runs = []
+for i, name in enumerate(order):
+    state = table[name]["state"]
+    if runs and runs[-1][0] == state:
+        runs[-1][2] += 1
+    else:
+        runs.append([state, i, 1])
+for state, start, length in runs:
+    if length >= 8:
+        print(
+            f"display rows {start}-{start + length - 1}: {length} rows of "
+            f"{state}, the first {order[start]}"
+        )
 
 # 8. the groups a clade record can mark: for each value of a field, the
 # smallest node covering every tip that carries it. A group the node covers

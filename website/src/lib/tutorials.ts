@@ -19,6 +19,7 @@
 import codonThumb from '../../../docs/media/codon-spry-patch.png'
 import fluThumb from '../../../docs/media/flu-drift-siteb.png'
 import jbrowseThumb from '../../../docs/media/genome-browser-tp53-protein3d.png'
+import h5n1Thumb from '../../../docs/media/influenza_surveillance_figure-overview.png'
 import kinaseThumb from '../../../docs/media/kinase-pocket-family.png'
 import mitoThumb from '../../../docs/media/mitogenome_genes-4.png'
 import p53Thumb from '../../../docs/media/p53-variant-three-tracks.png'
@@ -120,6 +121,16 @@ export const tutorials: Tutorial[] = [
     thumb: metadataThumb,
     thumbAlt:
       'RSV tip labels colored by Nextstrain clade, green A.D rows giving way to purple A.D.3 rows, with the clade legend beside them',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'influenza_surveillance_figure',
+    title: 'An H5N1 surveillance figure',
+    blurb:
+      "204 genomes from Nextstrain's H5N1 cattle-outbreak build, with the host, the collecting state and one amino-acid site per segment as nine strips beside the HA alignment. NP 119 cuts the tree into 15 clades; host cuts it into 112.",
+    thumb: h5n1Thumb,
+    thumbAlt:
+      'An H5N1 tree with tip labels colored by state, nine color strips beside it, labeled brackets in the gutter and the whole tree in an overview band above',
     thumbPosition: 'left',
   },
   {

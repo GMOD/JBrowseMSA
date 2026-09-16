@@ -94,14 +94,15 @@ every number that page quotes:
 | `mitogenome/mito.nwk`         | Newick          | ClustalW neighbor-joining tree from the alignment above                                                                                                          |
 | `mitogenome/mito-genes.gff`   | GFF3 (genes)    | RefSeq's own GFF3 per accession, reduced to 37 genes per genome with `Name=` and `complex=`, plus a control region per genome carrying `color=255,205,0`          |
 
-The `proteases/` and `h3n2/` folders back the two tutorials whose pipeline runs
-inside a language rather than a shell, and each folder's own README names its
-files:
+The `proteases/`, `h3n2/` and `h5n1/` folders back the tutorials whose pipeline
+runs inside a language rather than a shell, and each folder's own README names
+its files:
 
-| Folder       | Tutorial                                                                           | Built by                                          |
-| ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `proteases/` | [r_protease_triad](../../../../docs/tutorials/r_protease_triad.md)                 | `docs/tutorials/scripts/build_r_protease_triad.R` |
-| `h3n2/`      | [notebook_flu_drift](../../../../docs/tutorials/notebook_flu_drift.md)             | `docs/tutorials/scripts/build_flu_drift.py`       |
+| Folder       | Tutorial                                                                                       | Built by                                                        |
+| ------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `proteases/` | [r_protease_triad](../../../../docs/tutorials/r_protease_triad.md)                             | `docs/tutorials/scripts/build_r_protease_triad.R`               |
+| `h3n2/`      | [notebook_flu_drift](../../../../docs/tutorials/notebook_flu_drift.md)                         | `docs/tutorials/scripts/build_flu_drift.py`                     |
+| `h5n1/`      | [influenza_surveillance_figure](../../../../docs/tutorials/influenza_surveillance_figure.md)   | `docs/tutorials/scripts/build_influenza_surveillance_figure.py` |
 
 The parsers detect the format from file content (the `CLUSTAL` / `# STOCKHOLM` /
 `>` / `##gff` header), so the extensions above are only for readability.
