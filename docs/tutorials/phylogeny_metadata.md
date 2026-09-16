@@ -180,9 +180,9 @@ clades in six `highlights` records: 122 names, 6,586 characters of the link. One
 
 All 184 rows at the geometry the phylogeny-at-scale page used for its bands.
 Each tint runs from the left edge of the tree gutter across the alignment at 25%
-opacity, so the nucleotide colors under it stay readable. The green bands on
-rows 93 to 108 and 137 to 142 are A.D, the purple band on rows 80 to 92 is
-A.D.3, and the blue band on rows 146 to 157 is A.D.2.2.
+opacity, so the nucleotide colors under it stay readable. The green bands, rows
+93 to 108 and a shorter run below them, are A.D, the purple band on rows 80 to
+92 is A.D.3, and the blue band on rows 146 to 157 is A.D.2.2.
 
 ## 6. A rectangle over one clade
 

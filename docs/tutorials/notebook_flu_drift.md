@@ -55,18 +55,12 @@ strains["row"] = [
 ]
 ```
 
-The accessions come out of one Entrez search per strain name, which the build
-script at the bottom of this page runs:
-
-```python
-term = '"A/Darwin/9/2021"[All Fields] AND hemagglutinin[Protein Name]'
-with Entrez.esearch(db="protein", term=term, retmax=20) as handle:
-    ids = Entrez.read(handle)["IdList"]
-```
-
-A strain has several records, some of them partial, so the script keeps the
-first one 566 residues long. The list above is what it found, pinned, because a
-search run next year can return a different first hit.
+Each accession came from one Entrez search of the protein database for the
+strain name, `"A/Darwin/9/2021"[All Fields] AND hemagglutinin[Protein Name]`. A
+strain has several records, some of them partial, and the one kept is the
+full-length HA0 of 566 residues. The build script at the bottom of this page
+pins the list above, because a search run next year can return a different first
+hit.
 
 `strains.row` is the label the viewer draws down the side: the year first, so
 the rows sort by date and a Newick tip name carries no space.

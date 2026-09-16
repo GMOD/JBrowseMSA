@@ -153,9 +153,9 @@ rows carry a substitution, and no row in this window has a gap.
 
 ## Check the counts
 
-The build script picked the two windows above. It slides a 100-column window
-across each gene of the subsampled alignment and counts how many columns hold
-more than one letter:
+The build script counts, over each whole gene of the subsampled alignment and
+over the two 100-column windows above, how many columns hold more than one
+letter:
 
 ```python
 def variable_columns(seqs, start1, end1):

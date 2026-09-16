@@ -413,9 +413,9 @@ grep -E 'p\.Arg248[A-Z]' mavedb.csv | grep -v Ter |
   awk -F, '{s += $5; n++} END {printf "%.2f over %d\n", s / n, n}'   # 1.50 over 19
 ```
 
-The same three at P47 return 0 variants, 0.15 over 19, and -0.70 over 19. The
-third number is negative, so the residue draws nothing on a track that clamps at
-zero.
+The same three at P47 return 0 variants, 0.15 over 19, and a negative MaveDB
+mean. The build script writes a negative mean as 0, since the track clamps at
+zero, so the residue draws nothing there.
 
 The six ClinVar records at 248 are `c.742C>T` and `c.741_742delinsTT`, both
 p.Arg248Trp, plus Gly, Pro, Leu and Gln. A count here is variants on record,

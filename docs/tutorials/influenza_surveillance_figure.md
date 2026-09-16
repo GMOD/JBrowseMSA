@@ -208,7 +208,9 @@ one.
 
 The build script counts, for each field, how many edges take a color and how
 many maximal clades the field's values cut the tree into. A field that follows
-the tree perfectly has one clade per value:
+the tree perfectly has one clade per value. Each line the script prints goes on
+to name the largest clades per value, and the block below stops at the edge
+counts:
 
 ```
 host: 4 values in 112 clades, 285/352 edges colored, 81/148 of them above an internal node
