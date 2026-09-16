@@ -47,10 +47,18 @@ const Toggles = observer(function ({ model }: { model: MsaViewModel }) {
 })
 
 const FeatureTable = observer(function ({ model }: { model: MsaViewModel }) {
-  const { annotationTypes, annotations, fillPalette } = model
+  const { annotationTypes, annotations, featureColors, fillPalette } = model
   const counts = new Map<string, number>()
+  const swatches = new Map<string, string>()
   for (const annot of annotations) {
-    counts.set(annot.accession, (counts.get(annot.accession) ?? 0) + 1)
+    const { accession } = annot
+    counts.set(accession, (counts.get(accession) ?? 0) + 1)
+    if (!swatches.has(accession)) {
+      swatches.set(
+        accession,
+        featureColors.get(annot)?.fill ?? fillPalette[accession]!,
+      )
+    }
   }
   return (
     <>
@@ -86,7 +94,7 @@ const FeatureTable = observer(function ({ model }: { model: MsaViewModel }) {
                     style={{
                       width: 20,
                       height: 20,
-                      background: fillPalette[accession],
+                      background: swatches.get(accession),
                     }}
                   />
                 </TableCell>

@@ -118,6 +118,7 @@ function drawTilesAndText({
     subFeatureRows,
     domainUnderline,
     domainBandsByStart,
+    featureColors,
   } = model
 
   const tiles = drawTiles && bgColor
@@ -172,7 +173,7 @@ function drawTilesAndText({
             const covering = bandAt(col)
             ctx.fillStyle = covering
               ? // on top of a domain box: contrast against the box fill
-                contrastText(model.fillPalette[covering.annotation.accession])
+                contrastText(featureColors.get(covering.annotation)?.fill)
               : isMatchingReference
                 ? // the dot sits on the faint reference-match wash, which is
                   // the theme's background with a little of its text color in it

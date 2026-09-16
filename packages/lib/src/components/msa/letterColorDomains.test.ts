@@ -6,6 +6,7 @@ import { expect, test } from 'vitest'
 
 import { domainUnderlineHeight } from '../../constants.ts'
 import stateModelFactory from '../../model.ts'
+import { contrastTextFn } from '../../util.ts'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
 
@@ -147,4 +148,20 @@ test('with the letters too small to draw, the overlay keeps its filled boxes', (
   expect(model.domainUnderline).toBe(false)
 
   expect(drawOverlay(model).every(r => r.h === model.rowHeight)).toBe(true)
+})
+
+test('letters over a box contrast against the color the box was painted', () => {
+  // a GFF color= overrides the accession palette, so the letters read the
+  // resolved fill the overlay used, which here is black
+  const model = makeModel()
+  model.applyGFFText(`${gff};color=#000000`)
+  expect(model.featureColors.values().next().value?.fill).toBe('#000000')
+  expect(model.fillPalette.IPR000001).not.toBe('#000000')
+
+  const theme = createJBrowseTheme()
+  const covered = drawLetters(model).slice(0, 30)
+  expect(covered).toHaveLength(30)
+  expect(new Set(covered.map(l => l.fill))).toEqual(
+    new Set([contrastTextFn(theme)('#000000')]),
+  )
 })
