@@ -25,7 +25,12 @@ them, and follow it in this file too: agents copy the prose here as house voice.
   `writeExampleData.mjs` copies into the app
 - `packages/svgcanvas`: vendored ESM fork of svgcanvas for SVG export
 - `packages/r-msaview`: R htmlwidget package with ggtree/Biostrings/treeio
-  interop
+  interop. `R/msaview.R` is the one function taking every prop as an argument,
+  and `R/layers.R` is the same surface composed with `+`, the way ggplot2 and
+  ggtree add a geom. A layer is a `set`/`append` pair over the props, applied by
+  `+.msaview`, so a layer adds no prop of its own and the embed-API parity check
+  reads `msaview.R` alone. `msa` and `tree` stay arguments; every other argument
+  has a layer, which `test-layer-coverage.R` checks
 - `packages/python`: the `msaview-widget` anywidget (import `msaview`). Its
   traits are the `MSAViewer` props in snake case, and `src/render.ts` maps them
   onto `mount()`. The built `msaview/static/widget.js` is gitignored and shipped

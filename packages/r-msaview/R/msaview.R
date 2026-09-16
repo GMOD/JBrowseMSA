@@ -209,10 +209,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     tree_area_width = NULL, auto_tree_area_width = NULL,
                     residue_encoding = NULL, theme = NULL, hide_header = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
-  if (!is.null(residue_encoding) && !residue_encoding %in% c("fill", "color")) {
-    stop("residue_encoding must be 'fill' or 'color', got '",
-         residue_encoding, "'")
-  }
+  check_residue_encoding(residue_encoding)
 
   # the viewer fetches a URL itself; passed on as document text, a URL draws a
   # one-row alignment named after it
@@ -401,6 +398,12 @@ convert_region <- function(region) {
   region$end <- as.integer(region$end)
   if (!is.null(region$row)) region$row <- sanitize_names(region$row)
   region
+}
+
+check_residue_encoding <- function(encoding) {
+  if (!is.null(encoding) && !encoding %in% c("fill", "color")) {
+    stop("residue_encoding must be 'fill' or 'color', got '", encoding, "'")
+  }
 }
 
 sanitize_names_or_null <- function(x) {

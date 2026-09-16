@@ -51,6 +51,52 @@ is the long version: fourteen UniProt accessions cut to their peptidase S1
 domain, aligned with DECIPHER, and drawn with a BLOSUM62 track, disulfide arcs
 and a band on each catalytic residue.
 
+### Layers, composed with `+`
+
+Every argument of `msaview()` is also a layer, added the way ggplot2 and ggtree
+add a geom. Each layer reads a data frame, so a table of variants or per-column
+numbers goes in as it already sits in your session.
+
+```r
+library(msaviewr)
+
+variants <- data.frame(
+  row   = c("Human", "Human"),
+  start = c(248, 273),
+  end   = c(248, 273),
+  label = c("R248Q", "R273H")
+)
+
+msaview(msa = "p53.aln", tree = "p53.nh") +
+  geom_msa_domains("p53-domains.gff") +
+  geom_msa_highlight(variants) +
+  geom_msa_track(data.frame(value = conservation), name = "Conservation") +
+  scale_residue_color("clustal", encoding = "color") +
+  stat_msa_diff("Human") +
+  coord_msa(100, 288, row = "Human") +
+  theme_msa("dark", col_width = 14)
+```
+
+| Layer                   | What it adds                                          |
+| ----------------------- | ----------------------------------------------------- |
+| `geom_msa_domains()`    | a GFF3 file, URL, text or data frame of annotations   |
+| `geom_msa_highlight()`  | a data frame of spans, or one span from its arguments |
+| `geom_msa_track()`      | a track of your numbers, text or arcs                 |
+| `geom_msa_structure()`  | which structure residue each row residue is           |
+| `scale_residue_color()` | the color scheme, and the channel it paints           |
+| `stat_msa_diff()`       | draws every row as its differences from one row       |
+| `coord_msa()`           | the span the viewer opens on                          |
+| `theme_msa()`           | cell size, tree gutter, toolbar, light or dark        |
+
+`geom_msa_highlight()`, `geom_msa_track()` and `geom_msa_structure()`
+accumulate, so calling one twice adds two. The others replace what an earlier
+layer set.
+
+A layer builds the same props the matching `msaview()` argument does, so the two
+styles mix freely and produce the same viewer. `msa` and `tree` are the viewer
+itself and stay arguments; every other argument has a layer, which
+`test-layer-coverage.R` checks.
+
 ### Named character vector
 
 ```r
