@@ -147,7 +147,7 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
   return svgSafeColors(
     markup.replaceAll(/<g data-layer="([^"]+)"><\/g>/g, (match, id: string) => {
       const ctx = layers.get(id)
-      return ctx ? `<g>${ctx.getSvg().innerHTML}</g>` : match
+      return ctx ? `<g id="${id}">${ctx.getSvg().innerHTML}</g>` : match
     }),
   )
 }
@@ -206,7 +206,7 @@ function MsaSvg({
       />
       {includeMinimap ? (
         <>
-          <g transform={`translate(${treeAreaWidth} 0)`}>
+          <g id="minimap-panel" transform={`translate(${treeAreaWidth} 0)`}>
             <MinimapSVG model={model} theme={theme} />
           </g>
           <g transform={`translate(0 ${minimapHeight})`}>{body}</g>
@@ -215,7 +215,7 @@ function MsaSvg({
         body
       )}
       {legendWidth > 0 ? (
-        <g transform={`translate(${width} ${legendTop})`}>
+        <g id="legend-panel" transform={`translate(${width} ${legendTop})`}>
           <LegendSVG model={model} theme={theme} width={legendWidth} />
         </g>
       ) : null}
@@ -344,6 +344,7 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
   return (
     <>
       <ClipGroup
+        panelId="tree-panel"
         clipId={`tree-${id}`}
         width={treeAreaWidth}
         height={contentHeight}
@@ -351,6 +352,7 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
         layers={layers}
       />
       <ClipGroup
+        panelId="msa-panel"
         clipId={`msa-${id}`}
         width={msaAreaWidth}
         height={contentHeight}
@@ -438,6 +440,7 @@ function TrackRendering({ model, theme, layout, Context, layers }: LayerProps) {
       <TrackLabelsSVG model={model} theme={theme} />
       <g transform={`translate(${treeAreaWidth} 0)`}>
         <ClipGroup
+          panelId="tracks-panel"
           clipId={`tracks-${id}`}
           width={msaAreaWidth}
           height={trackHeight}
@@ -494,7 +497,12 @@ function TrackLabelsSVG({
 // Clips a svgcanvas Context to its box and leaves a placeholder for renderToSvg
 // to splice the layer's own markup into. `underlay` draws beneath that markup,
 // inside the same clip, for the parts of a layer React emits directly.
+//
+// `panelId` names the spliced group in the output, the same name in every
+// export, so a figure can be taken apart in Illustrator or svgutils. `clipId`
+// carries the model id, which keeps two viewers on one page from colliding.
 function ClipGroup({
+  panelId,
   clipId,
   width,
   height,
@@ -503,6 +511,7 @@ function ClipGroup({
   layers,
   underlay,
 }: {
+  panelId: string
   clipId: string
   width: number
   height: number
@@ -511,7 +520,7 @@ function ClipGroup({
   layers: LayerMap
   underlay?: React.ReactNode
 }) {
-  layers.set(clipId, ctx)
+  layers.set(panelId, ctx)
   return (
     <>
       <defs>
@@ -521,7 +530,7 @@ function ClipGroup({
       </defs>
       <g clipPath={`url(#${clipId})`} transform={transform}>
         {underlay}
-        <g data-layer={clipId} />
+        <g data-layer={panelId} />
       </g>
     </>
   )

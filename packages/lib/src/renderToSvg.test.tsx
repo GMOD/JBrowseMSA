@@ -73,3 +73,64 @@ test('no attribute is serialized as the string "undefined"', async () => {
   expect(svg).toContain('<text')
   expect(svg).not.toContain('="undefined"')
 })
+
+// The panel ids let a figure be taken apart in Illustrator or svgutils, so they
+// read the same in every export. The clipPath ids carry the model id instead,
+// which keeps two viewers on one page from clipping each other.
+function idsOf(svg: string, attr: string) {
+  return [...svg.matchAll(new RegExp(`${attr}="([^"]+)"`, 'g'))].map(m => m[1]!)
+}
+
+function panelIds(svg: string) {
+  return idsOf(svg, 'id')
+    .filter(id => id.endsWith('-panel'))
+    .sort()
+}
+
+function exportWithPanels(id: string) {
+  const model = createTestModel({
+    id,
+    data: { msa: syntheticProteinMsa(20, 400) },
+  })
+  model.setDomains({
+    seq1: {
+      xref: [{ id: 'seq1' }],
+      matches: [
+        {
+          signature: {
+            entry: {
+              name: 'Kinase',
+              accession: 'PF00069',
+              description: 'Protein kinase domain',
+            },
+          },
+          locations: [{ start: 1, end: 5 }],
+        },
+      ],
+    },
+  })
+  return renderToSvg(model, {
+    theme: createJBrowseTheme(),
+    exportType: 'viewport',
+    includeMinimap: true,
+    includeTracks: true,
+  })
+}
+
+test('the panel ids do not vary with the model id', async () => {
+  const a = await exportWithPanels('viewer-a')
+  const b = await exportWithPanels('viewer-b')
+
+  expect(panelIds(a)).toEqual([
+    'legend-panel',
+    'minimap-panel',
+    'msa-panel',
+    'tracks-panel',
+    'tree-panel',
+  ])
+  expect(panelIds(b)).toEqual(panelIds(a))
+
+  const clips = idsOf(a, 'clip-path')
+  expect(clips).toContain('url(#tree-viewer-a)')
+  expect(idsOf(b, 'clip-path')).not.toEqual(clips)
+})
