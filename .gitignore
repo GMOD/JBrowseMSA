@@ -132,3 +132,23 @@ pages-dist
 !vendor-jbrowse/jbrowse-render-core.tgz
 .claude
 __pycache__/
+
+# Figure bytes live in s3://jbrowse.org/msaview-figures/ and git tracks
+# media.lock instead. `pnpm media:pull` installs them; scripts/media-store/
+# README.md says why. The ten below stay tracked because the root README and the
+# lib, cli, python and r-msaview package READMEs link them by relative path,
+# which GitHub resolves against the repo and npm rewrites to a raw URL: dropping
+# them breaks those images with no build to catch it, and a store URL carries a
+# content hash that would go stale on the next regen. They are also the figures
+# nobody regenerates.
+docs/media/*
+!docs/media/cli-clustalx.png
+!docs/media/cli-domains.png
+!docs/media/cli-letters.png
+!docs/media/cli-quickstart.png
+!docs/media/example-domains.svg
+!docs/media/example-protein.svg
+!docs/media/python-entropy-and-clicks.png
+!docs/media/python-quickstart.png
+!docs/media/r-nucleotide.svg
+!docs/media/r-quickstart.svg

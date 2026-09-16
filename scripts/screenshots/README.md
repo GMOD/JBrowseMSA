@@ -11,9 +11,19 @@ pnpm screenshots:all --filter=braf   # only figures whose name/link matches
 ```
 
 `scripts/screenshots/generate-screenshots.mjs` is the orchestrator. It runs
-three phases, each writing into `docs/media`. A re-render overwrites a committed
-image only when its pixels changed (rendering is deterministic), so a full regen
-leaves unchanged figures untouched.
+three phases, each writing into `docs/media`. A re-render overwrites an image
+only when its pixels changed, so a full regen leaves unchanged figures
+untouched. That gate reads the figure already on disk, which is why both
+`screenshots` scripts run `pnpm media:pull` first: with nothing there every spec
+looks new and a run rewrites all 150.
+
+**A regenerated figure is not a git change.** The bytes live in
+`s3://jbrowse.org/msaview-figures/` and `docs/media` is gitignored, so
+`git status` stays clean after a regen and the work reaches other people only
+through `pnpm media:push`, which uploads the new bytes and rewrites
+`media.lock`. That manifest line is the diff a reviewer reads, and
+`pnpm media:report --base main` renders the before and after. See
+`scripts/media-store/README.md`.
 
 `docs/media` holds only what a rendered page shows, and `pnpm check:media` (CI
 runs it) fails on a file no page does. Dropping a figure from a page therefore

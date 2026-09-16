@@ -69,6 +69,14 @@ static copy of what `/examples` runs live and the tutorials build, so it is gone
 and `/gallery` redirects to the index. `docs/media` holds only what a rendered
 page shows; a figure that stops being shown loses its screenshot spec too.
 
+Figure bytes live in `s3://jbrowse.org/msaview-figures/`, not in git, and
+`media.lock` tracks one content-addressed line per file. `docs/media` is
+gitignored apart from the ten figures the published READMEs link by relative
+path, so **regenerating a figure leaves `git status` clean** and the bytes reach
+anyone else only through `pnpm media:push`. Every script that reads the
+directory pulls first. `scripts/media-store/README.md` carries the design and
+the numbers behind it.
+
 ## Architecture decisions
 
 - `packages/lib/src/model.ts` is a large MST model (~2000 lines). Do not attempt

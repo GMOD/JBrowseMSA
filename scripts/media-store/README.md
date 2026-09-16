@@ -48,29 +48,43 @@ carries the reasoning at length. Four properties come from there:
 a blob nobody uploaded breaks `pull` for everyone who reads that line first.
 Failing the other way leaves orphan blobs, which nobody sees.
 
-## The cutover, which has not happened yet
+## What a regenerated figure now takes
 
-The store is populated and verified: all 150 figures are pushed, and deleting
-`docs/media` and running `pnpm media:pull` reconstructs it byte for byte. What
-remains is taking the bytes out of git, and that is a separate commit because
-four things read `docs/media` from disk and each needs `media:pull` in front of
-it first:
+`docs/media` is gitignored, so a regen produces no git change on its own. The
+bytes reach other people only through `pnpm media:push`, which uploads them and
+rewrites `media.lock`, and that manifest line is what lands in the pull request.
+Reviewing one means `pnpm media:report --base main`.
 
-- `pnpm build:site` and `build:pages`. `website/src/lib/tutorials.ts` imports
-  individual figures (`import plddtThumb from '../../../docs/media/...'`), so a
-  missing file fails the astro build rather than shipping a broken page.
-- `.github/workflows/deploy-docs.yml`, before it builds the site.
-- `scripts/check-media-refs.mjs`, which reads the directory.
-- Any `generate.mjs` run. Its diff gate compares a fresh capture against the
-  figure already on disk, so without a pull every spec looks new and a run
-  rewrites all of them.
+Four commands read the figures off disk, and each pulls first, so a fresh clone
+runs any of them with nothing installed:
 
-**Ten figures stay in git.** The root README and the `lib`, `cli`, `python` and
-`r-msaview` package READMEs link them by relative path, which GitHub resolves
-against the repo and npm rewrites to a raw URL. Gitignoring them breaks those
-images on both, with no build to catch it, and pointing the READMEs at store
-URLs does not help because a store URL carries the content hash and would go
-stale on the next regen. They are also the figures nobody regenerates:
+- `pnpm build:site`, and `build:pages` through it.
+  `website/src/lib/tutorials.ts` imports individual figures
+  (`import plddtThumb from '../../../docs/media/...'`), so a missing one fails
+  the astro build rather than shipping a broken page.
+  `.github/workflows/deploy-docs.yml` inherits the pull from this script.
+- `pnpm check:media`, which reads the directory. `.github/workflows/push.yml`
+  inherits it the same way.
+- `pnpm screenshots` and `pnpm screenshots:all`. The generator's diff gate
+  compares a fresh capture against the figure already on disk, so a run with
+  nothing there would rewrite all 150 and report every one as moved.
+
+`pnpm figures` needs no pull. It writes the four export SVGs, and all four are
+tracked (see below).
+
+CI needs no AWS credentials and no new workflow step. `media:pull` is also the
+gate that a manifest line's blob was really uploaded: it verifies every file
+against the sha256 on the line and fails loudly on a mismatch, so a `media.lock`
+committed without its `media:push` turns the build red.
+
+## Ten figures stay in git
+
+The root README and the `lib`, `cli`, `python` and `r-msaview` package READMEs
+link them by relative path, which GitHub resolves against the repo and npm
+rewrites to a raw URL. Gitignoring them breaks those images on both, with no
+build to catch it, and pointing the READMEs at store URLs does not help because
+a store URL carries the content hash and would go stale on the next regen. They
+are also the figures nobody regenerates:
 
 ```
 cli-clustalx.png  cli-domains.png  cli-letters.png  cli-quickstart.png
@@ -78,6 +92,6 @@ example-domains.svg  example-protein.svg  r-nucleotide.svg  r-quickstart.svg
 python-quickstart.png  python-entropy-and-clicks.png
 ```
 
-So `.gitignore` takes `docs/media/*` plus a `!` line for each of those ten. They
-stay in the manifest as well, which costs ten lines and keeps `media:check`
-asking one question about one directory.
+`.gitignore` takes `docs/media/*` plus a `!` line for each. They stay in the
+manifest as well, which costs ten lines and keeps `media:check` asking one
+question about one directory.
