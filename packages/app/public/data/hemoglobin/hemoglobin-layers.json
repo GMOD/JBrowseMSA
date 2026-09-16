@@ -1,0 +1,368 @@
+{
+  "columnTracks": [
+    {
+      "id": "2hhb-contacts",
+      "name": "2HHB chain contacts",
+      "kind": "arc",
+      "row": "Human",
+      "arcs": [
+        {
+          "start": 32,
+          "end": 265,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 32,
+          "end": 266,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 32,
+          "end": 267,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 32,
+          "end": 270,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 35,
+          "end": 267,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 35,
+          "end": 271,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 36,
+          "end": 270,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 36,
+          "end": 271,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 36,
+          "end": 274,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 37,
+          "end": 274,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 104,
+          "end": 251,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 104,
+          "end": 274,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 108,
+          "end": 254,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 108,
+          "end": 258,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 108,
+          "end": 270,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 111,
+          "end": 255,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 111,
+          "end": 258,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 111,
+          "end": 259,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 112,
+          "end": 258,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 112,
+          "end": 262,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 115,
+          "end": 259,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 118,
+          "end": 173,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 118,
+          "end": 259,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 119,
+          "end": 173,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 120,
+          "end": 173,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 120,
+          "end": 176,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 120,
+          "end": 198,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 123,
+          "end": 173,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 123,
+          "end": 177,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 123,
+          "end": 255,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 127,
+          "end": 177,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 127,
+          "end": 178,
+          "color": "#4e79a7"
+        },
+        {
+          "start": 38,
+          "end": 289,
+          "color": "#e15759"
+        },
+        {
+          "start": 39,
+          "end": 243,
+          "color": "#e15759"
+        },
+        {
+          "start": 41,
+          "end": 289,
+          "color": "#e15759"
+        },
+        {
+          "start": 42,
+          "end": 240,
+          "color": "#e15759"
+        },
+        {
+          "start": 42,
+          "end": 242,
+          "color": "#e15759"
+        },
+        {
+          "start": 42,
+          "end": 288,
+          "color": "#e15759"
+        },
+        {
+          "start": 43,
+          "end": 183,
+          "color": "#e15759"
+        },
+        {
+          "start": 43,
+          "end": 242,
+          "color": "#e15759"
+        },
+        {
+          "start": 45,
+          "end": 240,
+          "color": "#e15759"
+        },
+        {
+          "start": 92,
+          "end": 183,
+          "color": "#e15759"
+        },
+        {
+          "start": 93,
+          "end": 180,
+          "color": "#e15759"
+        },
+        {
+          "start": 93,
+          "end": 182,
+          "color": "#e15759"
+        },
+        {
+          "start": 93,
+          "end": 183,
+          "color": "#e15759"
+        },
+        {
+          "start": 93,
+          "end": 186,
+          "color": "#e15759"
+        },
+        {
+          "start": 95,
+          "end": 180,
+          "color": "#e15759"
+        },
+        {
+          "start": 95,
+          "end": 242,
+          "color": "#e15759"
+        },
+        {
+          "start": 95,
+          "end": 244,
+          "color": "#e15759"
+        },
+        {
+          "start": 95,
+          "end": 248,
+          "color": "#e15759"
+        },
+        {
+          "start": 96,
+          "end": 180,
+          "color": "#e15759"
+        },
+        {
+          "start": 97,
+          "end": 244,
+          "color": "#e15759"
+        },
+        {
+          "start": 98,
+          "end": 242,
+          "color": "#e15759"
+        },
+        {
+          "start": 141,
+          "end": 179,
+          "color": "#e15759"
+        },
+        {
+          "start": 141,
+          "end": 180,
+          "color": "#e15759"
+        },
+        {
+          "start": 142,
+          "end": 177,
+          "color": "#e15759"
+        },
+        {
+          "start": 142,
+          "end": 178,
+          "color": "#e15759"
+        },
+        {
+          "start": 142,
+          "end": 179,
+          "color": "#e15759"
+        }
+      ],
+      "height": 70
+    },
+    {
+      "id": "2hhb-class",
+      "name": "2HHB residue class",
+      "kind": "text",
+      "row": "Human",
+      "data": "OEOEEEBOEOBEEBOEEBEEEBOEBBOOBBO1BB11122B222O2EOEEEEEBEEBEEOBEEOBEOBEEBBEEBEEBEEOBEEEBEEOBEE22O2222OEOOO1BBB1BB11EB1EO111EO1OBB1OBBEOBOEOOEEE22OEEOEEEOEEOBEEBBEEOEOEEBBBOBBB1BB12222B22EB2EOEEOEEEEOB1EBEEBEEEBEEEBOOOOEBOEEOEEBEEEBOEEBEEOBEEE2O222BOE2OB1BB11BB11EO1EE111EO11BB1EBBEBBBEBBEEE22",
+      "colors": {
+        "1": "#4e79a7",
+        "2": "#e15759",
+        "B": "#8c8c8c",
+        "E": "#f1ce63",
+        "O": "#ffffff"
+      },
+      "height": 16
+    }
+  ],
+  "residueMappings": [
+    {
+      "row": "Human",
+      "accession": "NP_000549.1",
+      "structure": {
+        "id": "2HHB",
+        "kind": "experimental",
+        "asymId": "A",
+        "url": "https://files.rcsb.org/download/2HHB.cif"
+      },
+      "segments": [
+        {
+          "rowStart": 2,
+          "rowEnd": 142,
+          "structStart": 1,
+          "structEnd": 141
+        }
+      ],
+      "unobserved": [],
+      "rowLength": 289,
+      "generated": {
+        "by": "sequence match",
+        "date": "2026-09-16"
+      }
+    },
+    {
+      "row": "Human",
+      "accession": "NP_000509.1",
+      "structure": {
+        "id": "2HHB",
+        "kind": "experimental",
+        "asymId": "B",
+        "url": "https://files.rcsb.org/download/2HHB.cif"
+      },
+      "segments": [
+        {
+          "rowStart": 144,
+          "rowEnd": 289,
+          "structStart": 1,
+          "structEnd": 146
+        }
+      ],
+      "unobserved": [],
+      "rowLength": 289,
+      "generated": {
+        "by": "sequence match",
+        "date": "2026-09-16"
+      }
+    }
+  ]
+}

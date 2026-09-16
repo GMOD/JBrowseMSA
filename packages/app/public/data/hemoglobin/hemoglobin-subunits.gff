@@ -1,0 +1,23 @@
+##gff-version 3
+Human	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Human	RefSeq	polypeptide_region	143	289	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Macaque	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Macaque	RefSeq	polypeptide_region	143	289	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Mouse	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Mouse	RefSeq	polypeptide_region	143	289	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Rat	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Rat	RefSeq	polypeptide_region	143	289	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Cow	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Cow	RefSeq	polypeptide_region	143	287	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Pig	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Pig	RefSeq	polypeptide_region	143	289	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Horse	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Horse	RefSeq	polypeptide_region	143	289	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Platypus	RefSeq	polypeptide_region	1	141	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Platypus	RefSeq	polypeptide_region	142	288	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Chicken	RefSeq	polypeptide_region	1	142	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Chicken	RefSeq	polypeptide_region	143	289	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Zebrafish	RefSeq	polypeptide_region	1	143	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Zebrafish	RefSeq	polypeptide_region	144	290	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759
+Trout	RefSeq	polypeptide_region	1	143	.	.	.	Name=alpha;signature_desc=hemoglobin subunit alpha;color=%234e79a7
+Trout	RefSeq	polypeptide_region	144	290	.	.	.	Name=beta;signature_desc=hemoglobin subunit beta;color=%23e15759

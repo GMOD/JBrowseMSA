@@ -26,6 +26,7 @@ import mitoThumb from '../../../docs/media/mitogenome_genes-4.png'
 import p53Thumb from '../../../docs/media/p53-variant-three-tracks.png'
 import metadataThumb from '../../../docs/media/phylogeny_metadata-tip-labels.png'
 import proteinThumb from '../../../docs/media/protein-family-domains.png'
+import complexThumb from '../../../docs/media/protein_complex-4.png'
 import proteaseThumb from '../../../docs/media/r-protease-triad.png'
 import rnaThumb from '../../../docs/media/rna-family-overview.png'
 import scaleThumb from '../../../docs/media/scale-clade-groups.png'
@@ -82,6 +83,16 @@ export const tutorials: Tutorial[] = [
     thumb: spikeThumb,
     thumbAlt:
       'Eleven coronavirus spike proteins with their domains as colored blocks and a track marking the residues PDB 6VXX resolved',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'protein_complex',
+    title: "Hemoglobin's two subunits and the interfaces between them",
+    blurb:
+      'Alpha and beta globin from eleven vertebrates, aligned per subunit and concatenated per species, with the 58 residue pairs in contact between the chains of PDB 2HHB drawn as arcs from one block to the other. The sliding alpha1beta2 interface is identical in 20 of its 28 residues from human to trout; the exposed surface is the least conserved class.',
+    thumb: complexThumb,
+    thumbAlt:
+      'Eleven concatenated hemoglobin rows with arcs joining each alpha residue to the beta residue it touches in the crystal, colored by interface',
     thumbPosition: 'left',
   },
   {
