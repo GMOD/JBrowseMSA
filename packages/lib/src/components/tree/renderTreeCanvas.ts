@@ -284,6 +284,53 @@ function renderNodeBubbles({
   })
 }
 
+// The label a newick file puts on an internal node, which is where a bootstrap
+// or posterior support value lands: ((A,B)95,(C,D)80);. withId falls back to the
+// path-derived id for an unnamed node, so a node whose name is its id has no
+// label of its own and an ungated pass prints node-0-1-1 across the tree.
+function renderNodeLabels({
+  ctx,
+  theme,
+  offsetY,
+  model,
+  tipX,
+  maxDepthToLeaf,
+  blockSizeYOverride,
+}: {
+  ctx: RenderCtx
+  theme: Theme
+  offsetY: number
+  model: MsaViewModel
+  tipX: number
+  maxDepthToLeaf: number
+  blockSizeYOverride?: number
+}) {
+  const {
+    hierarchy,
+    showBranchLenEffective: showBranchLen,
+    blockSize,
+    fontSize,
+  } = model
+  const by = blockSizeYOverride ?? blockSize
+  const pad = blockPad(model)
+  setFontSize(ctx, Math.max(6, fontSize - 3))
+  ctx.fillStyle = theme.palette.text.primary
+  ctx.textAlign = 'right'
+  forEachNodeInBlock(hierarchy, offsetY, by, pad, node => {
+    const { id, name } = node.data
+    if (node.height < 1 || name === id) {
+      return
+    }
+    const x = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
+    const y = node.x!
+    if (x !== undefined && inYBlock(y, offsetY, by, pad)) {
+      ctx.fillText(name, x - radius - 1, y - radius - 1)
+    }
+  })
+  ctx.textAlign = 'start'
+  setFontSize(ctx, fontSize)
+}
+
 function renderTreeLabels({
   theme,
   model,
@@ -474,6 +521,7 @@ export function renderTreeCanvas({
     noTree,
     drawTree,
     drawNodeBubbles,
+    drawNodeLabels,
     highResScaleFactor,
     fontSize,
     showTreeText,
@@ -542,6 +590,18 @@ export function renderTreeCanvas({
       collapsedSet,
       draw: drawNodeBubbles,
     })
+
+    if (drawNodeLabels) {
+      renderNodeLabels({
+        ctx,
+        theme,
+        offsetY,
+        model,
+        tipX,
+        maxDepthToLeaf,
+        blockSizeYOverride,
+      })
+    }
   }
 
   if (showTreeText) {

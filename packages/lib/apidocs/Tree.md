@@ -50,6 +50,18 @@ IOptionalIType<ISimpleType<boolean>, [undefined]>
 drawNodeBubbles: stripDefault(types.boolean, defaultDrawNodeBubbles)
 ```
 
+#### property: drawNodeLabels
+
+draw the label a newick file gives an internal node, which is where a bootstrap
+or posterior support value lands
+
+```js
+// type signature
+IOptionalIType<ISimpleType<boolean>, [undefined]>
+// code
+drawNodeLabels: stripDefault(types.boolean, defaultDrawNodeLabels)
+```
+
 #### property: drawTree
 
 draw tree, boolean
@@ -129,6 +141,13 @@ setDrawLabels: (arg: boolean) => void
 ```js
 // type signature
 setDrawNodeBubbles: (arg: boolean) => void
+```
+
+#### action: setDrawNodeLabels
+
+```js
+// type signature
+setDrawNodeLabels: (arg: boolean) => void
 ```
 
 #### action: setDrawTree

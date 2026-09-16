@@ -399,3 +399,56 @@ describe('block culling', () => {
     expect(moves).toBe(expected)
   })
 })
+
+describe('internal node labels', () => {
+  function drawnLabels(newick: string, drawNodeLabels: boolean) {
+    const model = stateModelFactory().create({
+      type: 'MsaView',
+      data: { msa: '>a\nA\n>b\nA\n>c\nA\n>d\nA', tree: newick },
+    })
+    model.setWidth(1000)
+    model.setDrawLabels(false)
+    model.setDrawNodeLabels(drawNodeLabels)
+
+    const drawn: string[] = []
+    const ctx = {
+      font: '12px sans-serif',
+      beginPath() {},
+      stroke() {},
+      fill() {},
+      arc() {},
+      resetTransform() {},
+      scale() {},
+      translate() {},
+      moveTo() {},
+      lineTo() {},
+      fillText(text: string) {
+        drawn.push(text)
+      },
+    } as unknown as RenderCtx
+
+    renderTreeCanvas({
+      model,
+      ctx,
+      offsetY: 0,
+      theme: {
+        palette: { text: { primary: '#000' }, background: { default: '#fff' } },
+      } as Theme,
+    })
+    return drawn
+  }
+
+  it('draws the support value newick puts after each internal paren', () => {
+    expect(drawnLabels('((a,b)95,(c,d)80);', true).sort()).toEqual(['80', '95'])
+  })
+
+  it('draws none of them when the toggle is off', () => {
+    expect(drawnLabels('((a,b)95,(c,d)80);', false)).toEqual([])
+  })
+
+  // withId names an unnamed node after its path, so an ungated pass would print
+  // node-0-1-1 across the tree
+  it('leaves an unlabelled internal node alone', () => {
+    expect(drawnLabels('((a,b),(c,d));', true)).toEqual([])
+  })
+})

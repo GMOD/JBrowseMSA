@@ -208,6 +208,7 @@ export const preservedOnReset = new Set([
   'showBranchLen',
   'drawTree',
   'drawNodeBubbles',
+  'drawNodeLabels',
   'autoTreeAreaWidth',
   'turnedOffTracks',
   'trackHeights',

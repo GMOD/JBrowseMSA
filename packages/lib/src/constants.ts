@@ -72,6 +72,7 @@ export const defaultTreeWidth = 300
 export const defaultShowBranchLen = true
 export const defaultDrawTree = true
 export const defaultDrawNodeBubbles = true
+export const defaultDrawNodeLabels = false
 
 // Neighbor joining does not run above this many rows. The distance matrix is
 // O(n^2*L) and the join loop O(n^3), both on the main thread with no progress

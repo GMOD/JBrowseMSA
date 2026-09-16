@@ -3,6 +3,7 @@ import { types } from '@jbrowse/mobx-state-tree'
 import {
   defaultDrawLabels,
   defaultDrawNodeBubbles,
+  defaultDrawNodeLabels,
   defaultDrawTree,
   defaultLabelsAlignRight,
   defaultShowBranchLen,
@@ -62,6 +63,13 @@ export function TreeModelF() {
 
       /**
        * #property
+       * draw the label a newick file gives an internal node, which is where a
+       * bootstrap or posterior support value lands
+       */
+      drawNodeLabels: stripDefault(types.boolean, defaultDrawNodeLabels),
+
+      /**
+       * #property
        * auto-size treeAreaWidth to fit the row labels (plus the tree, if drawn)
        * instead of using a fixed width. useful when there is no tree, so the
        * label gutter isn't padded out to the default 400px
@@ -115,6 +123,12 @@ export function TreeModelF() {
        */
       setDrawNodeBubbles(arg: boolean) {
         self.drawNodeBubbles = arg
+      },
+      /**
+       * #action
+       */
+      setDrawNodeLabels(arg: boolean) {
+        self.drawNodeLabels = arg
       },
       /**
        * #action

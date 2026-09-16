@@ -47,10 +47,11 @@ and docs.
 ### Available via [Tree](../tree)
 
 **Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth,
-showBranchLen, drawTree, drawNodeBubbles, autoTreeAreaWidth
+showBranchLen, drawTree, drawNodeBubbles, drawNodeLabels, autoTreeAreaWidth
 
 **Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree,
-setAutoTreeAreaWidth, setShowBranchLen, setDrawNodeBubbles, setDrawLabels
+setAutoTreeAreaWidth, setShowBranchLen, setDrawNodeBubbles, setDrawNodeLabels,
+setDrawLabels
 
 ### Available via [MSAModel](../msamodel)
 
