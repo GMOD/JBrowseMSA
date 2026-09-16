@@ -3060,7 +3060,8 @@ function stateModelFactory() {
         const colors = new Map<string, string>()
         for (const [name, row] of Object.entries(self.rowData)) {
           const value = row?.[encoding.field]
-          const color = value === undefined ? undefined : encoding.colorOf(value)
+          const color =
+            value === undefined ? undefined : encoding.colorOf(value)
           if (color) {
             colors.set(name, color)
           }
@@ -3083,7 +3084,8 @@ function stateModelFactory() {
         }
         return self.rowNames.map(name => {
           const value = self.rowDataOf(name)?.[encoding.field]
-          const color = value === undefined ? undefined : encoding.colorOf(value)
+          const color =
+            value === undefined ? undefined : encoding.colorOf(value)
           if (!color) {
             return undefined
           }

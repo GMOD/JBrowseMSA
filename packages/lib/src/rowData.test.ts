@@ -128,7 +128,11 @@ test('tip label colors and row tints follow the encodings', () => {
 
   model.setEncodings([
     { channel: 'tipLabel', field: 'clade' },
-    { channel: 'rowTint', field: 'clade', scale: { map: { '19B': '#ff0000' } } },
+    {
+      channel: 'rowTint',
+      field: 'clade',
+      scale: { map: { '19B': '#ff0000' } },
+    },
   ])
 
   expect(model.tipLabelColors?.get('seq1')).toBe('#F8766D')
