@@ -27,6 +27,18 @@ def test_a_url_points_at_the_url_trait():
         MSAView(msa="https://example.org/x.aln")
 
 
+def test_a_path_to_a_missing_file_is_an_error():
+    with pytest.raises(FileNotFoundError, match="no such file"):
+        MSAView(msa="missing.aln")
+    with pytest.raises(FileNotFoundError, match="tree="):
+        MSAView(tree="/nowhere/tree.nwk")
+
+
+def test_a_one_line_document_is_text():
+    assert MSAView(tree="(a,b);").tree == "(a,b);"
+    assert MSAView(msa=">a MK.1").msa == ">a MK.1"
+
+
 def test_a_dict_becomes_fasta():
     view = MSAView(msa={"human": "MK-A", "mouse": "MKLA"})
     assert view.msa == ">human\nMK-A\n>mouse\nMKLA\n"

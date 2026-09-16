@@ -23,10 +23,23 @@ def _document(value: Any, trait: str) -> str | None:
                 f"{trait}= takes a document or a file path; "
                 f"pass a URL as {trait}_url= so the viewer fetches it"
             )
-        if "\n" not in value and os.path.isfile(value):
-            return Path(value).read_text()
+        if "\n" not in value:
+            if os.path.isfile(value):
+                return Path(value).read_text()
+            if _looks_like_path(value):
+                raise FileNotFoundError(
+                    f"{trait}={value!r} looks like a file path and no such file exists"
+                )
         return value
     return None
+
+
+def _looks_like_path(value: str) -> bool:
+    """One line ending in an extension, with none of the characters a FASTA,
+    Stockholm, Newick or GFF document is made of."""
+    return not re.search(r"[\t>#(;]", value) and bool(
+        re.search(r"\.[A-Za-z0-9]{1,8}$", value)
+    )
 
 
 def _fasta(rows: Iterable[tuple[str, str]]) -> str:
