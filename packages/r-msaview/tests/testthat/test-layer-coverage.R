@@ -20,6 +20,16 @@ test_that("a clade needs a tip count", {
   expect_error(geom_msa_clade(c("Homo sapiens", "Mouse")), "tips")
 })
 
+test_that("a clade takes the mark it is given", {
+  w <- msaview(msa = msa) +
+    geom_msa_clade(c("Homo sapiens", "Mouse"), tips = 2,
+                   mark = "bracket", label = "rodents and us") +
+    geom_msa_clade(c("Homo sapiens", "Mouse"), tips = 2, mark = "collapse")
+  expect_equal(w$x$props$clades[[1]]$mark, "bracket")
+  expect_equal(w$x$props$clades[[1]]$label, "rodents and us")
+  expect_equal(w$x$props$clades[[2]]$mark, "collapse")
+})
+
 test_that("a structure mapping lands under residueMappings", {
   mapping <- list(
     row = "Homo sapiens",
