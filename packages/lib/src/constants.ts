@@ -98,8 +98,12 @@ export const cladeHighlightAlpha = 0.6
 export const maxInlineSnapshotBytes = 50_000
 
 // Height of the band the `rowPanels` headers draw in, above the strips in the
-// top area beside the tree ruler and the minimap.
+// top area beside the tree ruler and the minimap. A panel wider than the band
+// is tall writes its header across, where it has more room.
 export const rowPanelHeaderHeight = 56
+
+// Height of the branch-length scale bar above the tree.
+export const treeScaleBarHeight = 22
 
 // Width of a `features` row panel that names none, wide enough for a gene
 // neighborhood of a few arrows to read.

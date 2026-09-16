@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { expect, test } from 'vitest'
 
+import { treeScaleBarHeight } from './constants.ts'
 import MSAModelF from './model.ts'
 
 // the tree names a tip the alignment has no sequence for. It still occupies a
@@ -43,8 +44,24 @@ test('fit vertically leaves every row on screen', () => {
   const model = makeModel()
   model.fitVertically()
   expect(model.totalHeight).toBeLessThanOrEqual(model.msaAreaHeight)
-  // and the rows own that space: nothing else is stacked in it
   expect(model.msaAreaHeight).toBe(
-    model.height - model.headerHeight - model.totalTrackAreaHeight,
+    model.height -
+      model.headerHeight -
+      model.totalTrackAreaHeight -
+      model.topBandHeight,
   )
+})
+
+test('the top band counts the scale bar over a phylogram', () => {
+  const model = makeModel()
+  expect(model.treeScaleBar).toBeDefined()
+  expect(model.showHorizontalScrollbar).toBe(false)
+  expect(model.topBandHeight).toBe(treeScaleBarHeight)
+
+  model.setShowTreeOverview(true)
+  expect(model.topBandHeight).toBe(model.overviewHeight + treeScaleBarHeight)
+
+  model.setShowBranchLen(false)
+  expect(model.treeScaleBar).toBeUndefined()
+  expect(model.topBandHeight).toBe(model.overviewHeight)
 })

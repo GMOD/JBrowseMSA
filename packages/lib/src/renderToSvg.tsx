@@ -11,6 +11,7 @@ import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCa
 import { renderPersistentHighlights } from './components/msa/renderHighlights.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
+import { headerRunsAcross } from './components/rowpanels/headerLayout.ts'
 import { renderRowPanels } from './components/rowpanels/renderRowPanel.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import {
@@ -322,17 +323,20 @@ function RowPanelHeadersSVG({
   return resolvedRowPanels.length === 0 ? null : (
     <g id="rowpanel-headers">
       {resolvedRowPanels.map(panel => {
-        const size = Math.min(fontSize, panel.width)
-        const x = treeAreaWidth + panel.offsetX + panel.width / 2 + size / 3
-        // the band is as tall as the name is long, so a name past its height
-        // has to be clipped here; text that overruns runs off the figure
-        const maxChars = Math.floor((y - LEGEND_PAD) / (size * CHAR_WIDTH))
+        const across = headerRunsAcross(panel.width)
+        const size = across ? fontSize : Math.min(fontSize, panel.width)
+        const center = treeAreaWidth + panel.offsetX + panel.width / 2
+        const x = across ? center : center + size / 3
+        const room = across ? panel.width : y - LEGEND_PAD
+        const maxChars = Math.floor(room / (size * CHAR_WIDTH))
         return size < 5 ? null : (
           <text
             key={panel.id}
             x={x}
             y={y}
-            transform={`rotate(-90 ${x} ${y})`}
+            {...(across
+              ? { textAnchor: 'middle' }
+              : { transform: `rotate(-90 ${x} ${y})` })}
             fontSize={size}
             fill={theme.palette.text.primary}
           >

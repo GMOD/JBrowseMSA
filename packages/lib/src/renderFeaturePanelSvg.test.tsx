@@ -103,9 +103,8 @@ test('a tree and a GFF with no alignment export the panel and no columns', async
   expect(Number(/<svg width="(\d+)"/.exec(svg)?.[1])).toBe(
     model.treeAreaWidth + model.rowPanelsWidth + 120,
   )
-  // the header band clips a name longer than its height, as it does a strip's
   expect(svg).toContain('<g id="rowpanel-headers">')
-  expect(svg).toContain('>neig…<')
+  expect(svg).toContain('>neighborhood<')
 })
 
 test('an alignment beside the panel keeps both', async () => {

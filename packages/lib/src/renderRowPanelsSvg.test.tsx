@@ -89,6 +89,16 @@ test('each header draws over its column, turned on its side', async () => {
   expect(x(headers[0]!.attrs)).toBeGreaterThan(treeAreaWidth)
 })
 
+test('a panel wider than the header band writes its header across', async () => {
+  const { svg } = await exportWith([
+    { kind: 'strip', field: 'NA', header: 'neighborhood', width: 200 },
+  ])
+  const header = /<text([^>]*)>neighborhood<\/text>/.exec(svg)
+  expect(header, 'header clipped or missing').toBeTruthy()
+  expect(header![1]).not.toContain('rotate')
+  expect(header![1]).toContain('text-anchor="middle"')
+})
+
 test('the alignment moves right by the strips, and the page grows with them', async () => {
   const bare = await exportWith([])
   const striped = await exportWith(panels)

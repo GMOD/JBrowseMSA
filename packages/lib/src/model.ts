@@ -29,6 +29,7 @@ import { packDomainLanes } from './components/msa/packDomainLanes.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import TrackBlocks from './components/tracks/TrackBlocks.tsx'
 import { cladeGutterWidth } from './components/tree/cladeBrackets.ts'
+import { scaleBarLength } from './components/tree/scaleBar.ts'
 import {
   cladeHighlightAlpha,
   cladeHighlightColor,
@@ -62,6 +63,7 @@ import {
   scrollZoomAxes,
   segmentFeatureTypes,
   segmentShades,
+  treeScaleBarHeight,
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
 import { exportFileName } from './exportFileName.ts'
@@ -2704,20 +2706,39 @@ function stateModelFactory() {
     .views(self => ({
       /**
        * #getter
+       * the branch-length scale bar over the tree, undefined in cladogram mode
+       * or when the tree area is too narrow for one
+       */
+      get treeScaleBar() {
+        return scaleBarLength(
+          self.pxPerBranchLength,
+          self.treeAreaWidth - self.marginLeft * 2,
+        )
+      },
+      /**
+       * #getter
+       * the band across the top: the minimap over the alignment, the row panel
+       * headers, and the tree overview stacked on the scale bar, as tall as the
+       * tallest of the three
+       */
+      get topBandHeight() {
+        return Math.max(
+          self.showHorizontalScrollbar ? self.minimapHeight : 0,
+          self.rowPanelsHeaderHeight,
+          self.treeOverviewHeight +
+            (this.treeScaleBar ? treeScaleBarHeight : 0),
+        )
+      },
+      /**
+       * #getter
        * the vertical space for alignment rows: the widget height less the
-       * header, the tracks, and the minimap when columns overflow. Shared by
-       * blocksY, maxScrollY, the vertical scrollbar and fitVertically.
+       * header, the top band and the tracks. Shared by blocksY, maxScrollY, the
+       * vertical scrollbar and fitVertically.
        */
       get msaAreaHeight() {
-        // the minimap, the row panel headers and the tree overview share one
-        // band across the top
         return (
           self.height -
-          Math.max(
-            self.showHorizontalScrollbar ? self.minimapHeight : 0,
-            self.rowPanelsHeaderHeight,
-            self.treeOverviewHeight,
-          ) -
+          this.topBandHeight -
           self.headerHeight -
           this.totalTrackAreaHeight
         )

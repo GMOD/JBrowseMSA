@@ -1242,8 +1242,8 @@ MSAParserType
 #### getter: msaAreaHeight
 
 the vertical space for alignment rows: the widget height less the header, the
-tracks, and the minimap when columns overflow. Shared by blocksY, maxScrollY,
-the vertical scrollbar and fitVertically.
+top band and the tracks. Shared by blocksY, maxScrollY, the vertical scrollbar
+and fitVertically.
 
 ```js
 // type
@@ -1596,6 +1596,17 @@ encoding names the channel, which leaves the labels the theme's text color.
 Map<string, string>
 ```
 
+#### getter: topBandHeight
+
+the band across the top: the minimap over the alignment, the row panel headers,
+and the tree overview stacked on the scale bar, as tall as the tallest of the
+three
+
+```js
+// type
+number
+```
+
 #### getter: totalHeight
 
 ```js
@@ -1676,6 +1687,20 @@ one layout serves any band size.
 ```js
 // type
 { root: HierarchyNode<NodeWithIds>; numTips: number; maxDepthToLeaf: number; showBranchLen: boolean; }
+```
+
+#### getter: treeScaleBar
+
+the branch-length scale bar over the tree, undefined in cladogram mode or when
+the tree area is too narrow for one
+
+```js
+// type
+{
+  step: number
+  px: number
+  label: string
+}
 ```
 
 #### getter: turnedOnTracks
