@@ -37,6 +37,10 @@ const LEGEND_SWATCH = 12
 const LEGEND_FONT = 12
 const LEGEND_CHAR_W = 7
 
+// the width of a character as a fraction of the font size, close enough for a
+// sans-serif average
+const CHAR_WIDTH = 0.6
+
 const LEGEND_MAX_W = 360
 const LEGEND_TEXT_X = LEGEND_PAD + LEGEND_SWATCH + 6
 
@@ -260,11 +264,14 @@ function RowPanelHeadersSVG({
 }) {
   const { resolvedRowPanels, treeAreaWidth, fontSize } = model
   const y = bandHeight - 4
-  return (
+  return resolvedRowPanels.length === 0 ? null : (
     <g id="rowpanel-headers">
       {resolvedRowPanels.map(panel => {
         const size = Math.min(fontSize, panel.width)
         const x = treeAreaWidth + panel.offsetX + panel.width / 2 + size / 3
+        // the band is as tall as the name is long, so a name past its height
+        // has to be clipped here; text that overruns runs off the figure
+        const maxChars = Math.floor((y - LEGEND_PAD) / (size * CHAR_WIDTH))
         return size < 5 ? null : (
           <text
             key={panel.id}
@@ -274,7 +281,9 @@ function RowPanelHeadersSVG({
             fontSize={size}
             fill={theme.palette.text.primary}
           >
-            {panel.header}
+            {panel.header.length > maxChars
+              ? `${panel.header.slice(0, Math.max(1, maxChars - 1))}…`
+              : panel.header}
           </text>
         )
       })}

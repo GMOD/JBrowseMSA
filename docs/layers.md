@@ -355,7 +355,9 @@ scrolls with the tree and the alignment, and a row the table gives no value
 leaves its cell empty.
 
 Each header draws above its column in the band the tree's scale bar and the
-minimap share, turned on its side, and it exports with the figure.
+minimap share, turned on its side, and it exports with the figure. The band is
+as tall as the minimap, so a header longer than that is clipped to it on screen
+and in the export, and the full name is the column's tooltip.
 
 A strip's scale carries a legend of its own, titled by the field, and every
 strip and encoding over one field lists that field once. So two strips over `HA`
