@@ -1,9 +1,13 @@
+import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { getSnapshot } from '@jbrowse/mobx-state-tree'
+import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
+import { drawTrackBlock } from './components/tracks/drawTracks.ts'
 import stateModelFactory, { defaultTrackHeights } from './model.ts'
 
-import type { ColumnTrackSpec } from './types.ts'
+import type { RenderCtx } from './components/renderCtx.ts'
+import type { BasicTrack, ColumnTrackSpec } from './types.ts'
 
 const MsaView = stateModelFactory()
 
@@ -94,4 +98,41 @@ test('a track too large to share leaves the snapshot but keeps drawing', () => {
   ])
   expect(model.columnTrackContent.get('big')?.values).toHaveLength(20_000)
   expect(getSnapshot(model).columnTracks?.map(t => t.id)).toEqual(['small'])
+})
+
+test('a vertical zoom rebuilds the text track alone, and a bar track skips its redraw', () => {
+  const model = makeModel([
+    { id: 't', name: 'dN/dS', kind: 'bar', values: [1] },
+    { id: 'f', name: 'Frame', kind: 'text', data: '1' },
+  ])
+  model.setWidth(800)
+  const seen: BasicTrack[][] = []
+  const stopTracks = autorun(() => {
+    seen.push(model.columnTrackModels)
+  })
+  const bar = seen[0]![0]!
+  const ctx = new Proxy({}, { get: () => () => ({}) }) as RenderCtx
+  let draws = 0
+  const stopDraw = autorun(() => {
+    draws++
+    drawTrackBlock({
+      model,
+      ctx,
+      track: bar,
+      offsetX: 0,
+      theme: createJBrowseTheme(),
+    })
+  })
+
+  model.setRowHeight(model.rowHeight + 10)
+  expect(seen).toHaveLength(2)
+  expect(seen[1]![0]).toBe(bar)
+  expect(seen[1]![1]).not.toBe(seen[0]![1])
+  expect(seen[1]![1]!.model.height).toBe(model.rowHeight)
+  expect(draws).toBe(1)
+
+  model.setColWidth(model.colWidth + 2)
+  expect(draws).toBe(2)
+  stopTracks()
+  stopDraw()
 })

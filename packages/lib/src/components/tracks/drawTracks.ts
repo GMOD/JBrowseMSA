@@ -309,18 +309,9 @@ export function drawTrackBlock({
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
 }) {
-  const {
-    blockSize,
-    bgColor,
-    colWidth,
-    colStats,
-    colorScheme: modelColorScheme,
-    fontSize,
-    rowHeight,
-    showMsaLetters,
-    alphabetMaxBits,
-    highResScaleFactor,
-  } = model
+  // an autorun tracks every model read here, so each kind reads only what it
+  // draws and a vertical zoom leaves the bar and arc canvases alone
+  const { blockSize, colWidth, highResScaleFactor } = model
   const {
     id,
     kind,
@@ -367,9 +358,9 @@ export function drawTrackBlock({
     case 'logo': {
       drawSequenceLogo({
         ctx,
-        colStats,
-        colorScheme: modelColorScheme,
-        maxBits: alphabetMaxBits,
+        colStats: model.colStats,
+        colorScheme: model.colorScheme,
+        maxBits: model.alphabetMaxBits,
         textColor,
         colWidth,
         trackHeight,
@@ -399,13 +390,14 @@ export function drawTrackBlock({
       break
     }
     case 'text': {
+      const { bgColor, fontSize, rowHeight, showMsaLetters } = model
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       setFontSize(ctx, fontSize)
       drawTextTrackContent({
         ctx,
         data,
-        colorScheme: customColorScheme ?? modelColorScheme,
+        colorScheme: customColorScheme ?? model.colorScheme,
         contrastText: contrastTextFn(theme),
         bgColor,
         drawLetters: showMsaLetters,

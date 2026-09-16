@@ -9,7 +9,7 @@ import {
   isAlive,
   types,
 } from '@jbrowse/mobx-state-tree'
-import { autorun, transaction } from 'mobx'
+import { autorun, computed, transaction } from 'mobx'
 import {
   generateNodeIds,
   gffToAnnotations,
@@ -156,6 +156,7 @@ import type {
 } from './types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
 import type { Instance } from '@jbrowse/mobx-state-tree'
+import type { IComputedValue } from 'mobx'
 import type { InterProScanResults } from 'msa-parsers'
 
 function parseTreeText(text: string) {
@@ -935,8 +936,7 @@ function stateModelFactory() {
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        | { nodeId: string; descendantNames: string[] }
-        | undefined,
+        { nodeId: string; descendantNames: string[] } | undefined,
 
       /**
        * #volatile
@@ -2094,6 +2094,144 @@ function stateModelFactory() {
         return self.drawLabels && self.rowHeight >= minLetterRowHeight
       },
     }))
+    .views(self => {
+      // a spec is a frozen value, so it keys its computed until setColumnTracks
+      // replaces it
+      const columnTrackModels = new WeakMap<
+        ColumnTrackSpec,
+        IComputedValue<BasicTrack>
+      >()
+      return {
+        /**
+         * #getter
+         * a data track's values or string, projected from its row's residues
+         * onto alignment columns when it names a row
+         */
+        get columnTrackContent() {
+          const { MSA, blanks, hideGapsEffective } = self
+          const width = MSA?.getWidth() ?? 0
+          const project = <T>(track: ColumnTrackSpec, items: T[], fill: T) => {
+            if (!track.row) {
+              return items
+            }
+            const out = Array.from({ length: width }, () => fill)
+            const index = self.seqPosIndex(track.row)
+            items.forEach((item, seqPos) => {
+              const col = index?.[seqPos]
+              if (col !== undefined) {
+                out[col] = item
+              }
+            })
+            return out
+          }
+          const skip = <T>(items: T[]) =>
+            hideGapsEffective ? dropBlanks(blanks, items) : items
+          // an arc endpoint maps row residue -> column -> visible column.
+          // visibleColsBefore, not globalColToVisibleCol, so an endpoint in a
+          // hidden column moves to the neighboring visible one and the arc stays
+          const resolve = (track: ColumnTrackSpec, pos: number) => {
+            const col = track.row
+              ? self.seqPosIndex(track.row)?.[pos - 1]
+              : pos - 1
+            if (col === undefined || col < 0 || col >= width) {
+              return undefined
+            }
+            return hideGapsEffective ? visibleColsBefore(blanks, col) : col
+          }
+          return new Map<
+            string,
+            { values?: number[]; data?: string; arcs?: Arc[] }
+          >(
+            self.columnTracks.map(track => {
+              if (track.kind === 'arc') {
+                const arcs = (track.arcs ?? [])
+                  .map(arc => {
+                    const start = resolve(track, Math.min(arc.start, arc.end))
+                    const end = resolve(track, Math.max(arc.start, arc.end))
+                    return start !== undefined &&
+                      end !== undefined &&
+                      start < end
+                      ? { start, end, color: arc.color }
+                      : undefined
+                  })
+                  .filter(notEmpty)
+                return [track.id, { arcs }] as const
+              }
+              if (track.kind === 'bar') {
+                const max = track.max ?? 1
+                const values = skip(project(track, track.values ?? [], 0)).map(
+                  v => Math.min(1, Math.max(0, v / max)),
+                )
+                return [track.id, { values }] as const
+              }
+              const data = skip(
+                project(track, (track.data ?? '').split(''), ' '),
+              )
+              return [track.id, { data: data.join('') }] as const
+            }),
+          )
+        },
+        /**
+         * #method
+         * the height a track draws at: what the user dragged its divider to,
+         * then the height its snapshot asked for, then its kind's default. Only
+         * a text track falls through to rowHeight
+         */
+        trackHeight(
+          kind: TrackKind,
+          heightKey = kind as string,
+          given?: number,
+        ) {
+          return (
+            self.trackHeights.get(heightKey) ??
+            given ??
+            defaultTrackHeights[kind] ??
+            self.rowHeight
+          )
+        },
+        /**
+         * #method
+         * the track a column track spec draws as, computed once per spec. A
+         * text track's height falls through to rowHeight, and its own computed
+         * confines the vertical zoom to it, so a sibling keeps its object and
+         * its canvas skips the redraw
+         */
+        columnTrackModel(track: ColumnTrackSpec): BasicTrack {
+          let computedModel = columnTrackModels.get(track)
+          if (!computedModel) {
+            computedModel = computed(() => {
+              const heightKey = resizableKinds.has(track.kind)
+                ? ownHeightKey(track.id)
+                : undefined
+              const content = this.columnTrackContent.get(track.id)
+              return {
+                model: {
+                  id: track.id,
+                  name: track.name,
+                  kind: track.kind,
+                  heightKey,
+                  height: this.trackHeight(track.kind, heightKey, track.height),
+                  barColor: track.color,
+                  arcColor: track.color,
+                  customColorScheme: track.colors,
+                  data: content?.data,
+                  arcs: content?.arcs,
+                },
+                ReactComponent: TrackBlocks,
+              }
+            })
+            columnTrackModels.set(track, computedModel)
+          }
+          return computedModel.get()
+        },
+        /**
+         * #getter
+         */
+        get columnTrackModels(): BasicTrack[] {
+          return self.columnTracks.map(track => this.columnTrackModel(track))
+        },
+      }
+    })
     .views(self => ({
       /**
        * #getter
@@ -2201,111 +2339,6 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * a data track's values or string, projected from its row's residues
-       * onto alignment columns when it names a row
-       */
-      get columnTrackContent() {
-        const { MSA, blanks, hideGapsEffective } = self
-        const width = MSA?.getWidth() ?? 0
-        const project = <T>(track: ColumnTrackSpec, items: T[], fill: T) => {
-          if (!track.row) {
-            return items
-          }
-          const out = Array.from({ length: width }, () => fill)
-          const index = self.seqPosIndex(track.row)
-          items.forEach((item, seqPos) => {
-            const col = index?.[seqPos]
-            if (col !== undefined) {
-              out[col] = item
-            }
-          })
-          return out
-        }
-        const skip = <T>(items: T[]) =>
-          hideGapsEffective ? dropBlanks(blanks, items) : items
-        // an arc endpoint maps row residue -> column -> visible column.
-        // visibleColsBefore, not globalColToVisibleCol, so an endpoint in a
-        // hidden column moves to the neighboring visible one and the arc stays
-        const resolve = (track: ColumnTrackSpec, pos: number) => {
-          const col = track.row
-            ? self.seqPosIndex(track.row)?.[pos - 1]
-            : pos - 1
-          if (col === undefined || col < 0 || col >= width) {
-            return undefined
-          }
-          return hideGapsEffective ? visibleColsBefore(blanks, col) : col
-        }
-        return new Map<
-          string,
-          { values?: number[]; data?: string; arcs?: Arc[] }
-        >(
-          self.columnTracks.map(track => {
-            if (track.kind === 'arc') {
-              const arcs = (track.arcs ?? [])
-                .map(arc => {
-                  const start = resolve(track, Math.min(arc.start, arc.end))
-                  const end = resolve(track, Math.max(arc.start, arc.end))
-                  return start !== undefined && end !== undefined && start < end
-                    ? { start, end, color: arc.color }
-                    : undefined
-                })
-                .filter(notEmpty)
-              return [track.id, { arcs }] as const
-            }
-            if (track.kind === 'bar') {
-              const max = track.max ?? 1
-              const values = skip(project(track, track.values ?? [], 0)).map(
-                v => Math.min(1, Math.max(0, v / max)),
-              )
-              return [track.id, { values }] as const
-            }
-            const data = skip(project(track, (track.data ?? '').split(''), ' '))
-            return [track.id, { data: data.join('') }] as const
-          }),
-        )
-      },
-      /**
-       * #method
-       * the height a track draws at: what the user dragged its divider to,
-       * then the height its snapshot asked for, then its kind's default. Only
-       * a text track falls through to rowHeight, and `??` short-circuits
-       * before reading it, so vertical zoom does not rebuild the other tracks
-       */
-      trackHeight(kind: TrackKind, heightKey = kind as string, given?: number) {
-        return (
-          self.trackHeights.get(heightKey) ??
-          given ??
-          defaultTrackHeights[kind] ??
-          self.rowHeight
-        )
-      },
-      /**
-       * #getter
-       */
-      get columnTrackModels(): BasicTrack[] {
-        return self.columnTracks.map(track => {
-          const heightKey = resizableKinds.has(track.kind)
-            ? ownHeightKey(track.id)
-            : undefined
-          return {
-            model: {
-              id: track.id,
-              name: track.name,
-              kind: track.kind,
-              heightKey,
-              height: this.trackHeight(track.kind, heightKey, track.height),
-              barColor: track.color,
-              arcColor: track.color,
-              customColorScheme: track.colors,
-              data: this.columnTrackContent.get(track.id)?.data,
-              arcs: this.columnTrackContent.get(track.id)?.arcs,
-            },
-            ReactComponent: TrackBlocks,
-          }
-        })
-      },
-      /**
-       * #getter
        * the consensus secondary structure as a track, when there is one. A
        * separate getter keeps the object stable across zoom, so its canvas
        * does not redraw
@@ -2320,7 +2353,7 @@ function stateModelFactory() {
                   name: 'Base pairs',
                   kind: 'arc' as const,
                   heightKey: 'arc',
-                  height: this.trackHeight('arc'),
+                  height: self.trackHeight('arc'),
                   arcs,
                 },
                 ReactComponent: TrackBlocks,
@@ -2369,7 +2402,7 @@ function stateModelFactory() {
           model: {
             ...model,
             heightKey: resizableKinds.has(model.kind) ? model.kind : undefined,
-            height: this.trackHeight(model.kind),
+            height: self.trackHeight(model.kind),
           },
           ReactComponent: TrackBlocks,
         }))
@@ -2379,7 +2412,7 @@ function stateModelFactory() {
         return [
           ...this.adapterTrackModels,
           ...this.basePairTrackModels,
-          ...this.columnTrackModels,
+          ...self.columnTrackModels,
           // every computed track reads the alignment's columns, and a tree, a
           // GFF and a features panel draw a figure with none
           ...(self.numColumns > 0 ? this.computedTrackModels : []),
