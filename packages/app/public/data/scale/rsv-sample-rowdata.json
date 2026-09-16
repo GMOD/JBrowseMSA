@@ -1,0 +1,1106 @@
+{
+"01-000868|A.2.1.1|Netherlands|2001": {
+"clade": "A.2.1.1",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2001"
+},
+"010102013|A.D.5.3|Canada|2018": {
+"clade": "A.D.5.3",
+"country": "Canada",
+"region": "North America",
+"year": "2018"
+},
+"010102023|A.D|Canada|2018": {
+"clade": "A.D",
+"country": "Canada",
+"region": "North America",
+"year": "2018"
+},
+"010203004|A.D.3|Canada|2019": {
+"clade": "A.D.3",
+"country": "Canada",
+"region": "North America",
+"year": "2019"
+},
+"010203010|A.D.2.2|Canada|2019": {
+"clade": "A.D.2.2",
+"country": "Canada",
+"region": "North America",
+"year": "2019"
+},
+"07-040054|A.3|Netherlands|2007": {
+"clade": "A.3",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2007"
+},
+"070103033|A.D.1|Russia|2020": {
+"clade": "A.D.1",
+"country": "Russia",
+"region": "Europe",
+"year": "2020"
+},
+"270101030|A.D|South_Africa|2018": {
+"clade": "A.D",
+"country": "South Africa",
+"region": "Africa",
+"year": "2018"
+},
+"270101055|A.D|South_Africa|2018": {
+"clade": "A.D",
+"country": "South Africa",
+"region": "Africa",
+"year": "2018"
+},
+"270101094|A.D.4.1|South_Africa|2018": {
+"clade": "A.D.4.1",
+"country": "South Africa",
+"region": "Africa",
+"year": "2018"
+},
+"310101018|A.D.2.2|Netherlands|2017": {
+"clade": "A.D.2.2",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2017"
+},
+"310103009|A.D.2.1|Netherlands|2020": {
+"clade": "A.D.2.1",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2020"
+},
+"330102006|A.D|France|2018": {
+"clade": "A.D",
+"country": "France",
+"region": "Europe",
+"year": "2018"
+},
+"330103019|A.D|France|2019": {
+"clade": "A.D",
+"country": "France",
+"region": "Europe",
+"year": "2019"
+},
+"330103036|A.D.3|France|2019": {
+"clade": "A.D.3",
+"country": "France",
+"region": "Europe",
+"year": "2019"
+},
+"340102001|A.D.2.2.1|Spain|2018": {
+"clade": "A.D.2.2.1",
+"country": "Spain",
+"region": "Europe",
+"year": "2018"
+},
+"340102003|A.D.1|Spain|2018": {
+"clade": "A.D.1",
+"country": "Spain",
+"region": "Europe",
+"year": "2018"
+},
+"340103016|A.D.1|Spain|2019": {
+"clade": "A.D.1",
+"country": "Spain",
+"region": "Europe",
+"year": "2019"
+},
+"340103038|A.D.1|Spain|2020": {
+"clade": "A.D.1",
+"country": "Spain",
+"region": "Europe",
+"year": "2020"
+},
+"358101010|A.D.2.2|Finland|2017": {
+"clade": "A.D.2.2",
+"country": "Finland",
+"region": "Europe",
+"year": "2017"
+},
+"358101013|A.D.2.2|Finland|2018": {
+"clade": "A.D.2.2",
+"country": "Finland",
+"region": "Europe",
+"year": "2018"
+},
+"358102024|A.D.1|Finland|2019": {
+"clade": "A.D.1",
+"country": "Finland",
+"region": "Europe",
+"year": "2019"
+},
+"358103041|A.D.1|Finland|2020": {
+"clade": "A.D.1",
+"country": "Finland",
+"region": "Europe",
+"year": "2020"
+},
+"390103014|A.D.1|Italy|2020": {
+"clade": "A.D.1",
+"country": "Italy",
+"region": "Europe",
+"year": "2020"
+},
+"390103016|A.D|Italy|2020": {
+"clade": "A.D",
+"country": "Italy",
+"region": "Europe",
+"year": "2020"
+},
+"490103017|A.D.2.2|Germany|2020": {
+"clade": "A.D.2.2",
+"country": "Germany",
+"region": "Europe",
+"year": "2020"
+},
+"550102102|A.D.1|Brazil|2019": {
+"clade": "A.D.1",
+"country": "Brazil",
+"region": "South America",
+"year": "2019"
+},
+"550102148|A.D.1|Brazil|2019": {
+"clade": "A.D.1",
+"country": "Brazil",
+"region": "South America",
+"year": "2019"
+},
+"550102180|A.D.3|Brazil|2019": {
+"clade": "A.D.3",
+"country": "Brazil",
+"region": "South America",
+"year": "2019"
+},
+"610102013|A.D.3|Australia|2019": {
+"clade": "A.D.3",
+"country": "Australia",
+"region": "Oceania",
+"year": "2019"
+},
+"610103034|A.D.1.2|Australia|2021": {
+"clade": "A.D.1.2",
+"country": "Australia",
+"region": "Oceania",
+"year": "2021"
+},
+"610103041|A.D.1.2|Australia|2021": {
+"clade": "A.D.1.2",
+"country": "Australia",
+"region": "Oceania",
+"year": "2021"
+},
+"810103005|A.D.2.2|Japan|2019": {
+"clade": "A.D.2.2",
+"country": "Japan",
+"region": "Asia",
+"year": "2019"
+},
+"810103019|A.D.2.2|Japan|2019": {
+"clade": "A.D.2.2",
+"country": "Japan",
+"region": "Asia",
+"year": "2019"
+},
+"810103038|A.D|Japan|2019": {
+"clade": "A.D",
+"country": "Japan",
+"region": "Asia",
+"year": "2019"
+},
+"820103050|A.D.2.1|South_Korea|2019": {
+"clade": "A.D.2.1",
+"country": "South Korea",
+"region": "Asia",
+"year": "2019"
+},
+"BJ69438|A.3.1.1|China|2015": {
+"clade": "A.3.1.1",
+"country": "China",
+"region": "Asia",
+"year": "2015"
+},
+"DW-RAT-036|A.D.1|Australia|2022": {
+"clade": "A.D.1",
+"country": "Australia",
+"region": "Oceania",
+"year": "2022"
+},
+"HRSV/A/Argentina/BA-HNRG-112/2015|A.D|Argentina|2015": {
+"clade": "A.D",
+"country": "Argentina",
+"region": "South America",
+"year": "2015"
+},
+"HRSV/A/Argentina/BA-HNRG-215/2016|A.D|Argentina|2016": {
+"clade": "A.D",
+"country": "Argentina",
+"region": "South America",
+"year": "2016"
+},
+"HRSV/A/Argentina/BA-HNRG-270/2016|A.D.2.2.1|Argentina|2016": {
+"clade": "A.D.2.2.1",
+"country": "Argentina",
+"region": "South America",
+"year": "2016"
+},
+"HRSV/A/Philippines/99058/2019|A.D|Philippines|2019": {
+"clade": "A.D",
+"country": "Philippines",
+"region": "Asia",
+"year": "2019"
+},
+"HRSV/A/Philippines/99082/2020|A.D.5.3|Philippines|2020": {
+"clade": "A.D.5.3",
+"country": "Philippines",
+"region": "Asia",
+"year": "2020"
+},
+"JF920047|A.3.1|USA|2008": {
+"clade": "A.3.1",
+"country": "USA",
+"region": "North America",
+"year": "2008"
+},
+"JF920054|A.3.1|USA|2010": {
+"clade": "A.3.1",
+"country": "USA",
+"region": "North America",
+"year": "2010"
+},
+"KEN/KILIFI/WGS/1022_28/12/2011|A.3.1|Kenya|2011": {
+"clade": "A.3.1",
+"country": "Kenya",
+"region": "Africa",
+"year": "2011"
+},
+"KEN/KILIFI/WGS/1045_10/04/2012|A.3.1|Kenya|2012": {
+"clade": "A.3.1",
+"country": "Kenya",
+"region": "Africa",
+"year": "2012"
+},
+"KEN/KILIFI/WGS/1071_14/08/2012|A.D|Kenya|2012": {
+"clade": "A.D",
+"country": "Kenya",
+"region": "Africa",
+"year": "2012"
+},
+"KEN/KILIFI/WGS/1119_15/12/2012|A.D|Kenya|2012": {
+"clade": "A.D",
+"country": "Kenya",
+"region": "Africa",
+"year": "2012"
+},
+"KEN/KILIFI/WGS/1286_04/01/2015|A.D.4|Kenya|2015": {
+"clade": "A.D.4",
+"country": "Kenya",
+"region": "Africa",
+"year": "2015"
+},
+"KEN/KILIFI/WGS/1288_07/01/2015|A.D.4|Kenya|2015": {
+"clade": "A.D.4",
+"country": "Kenya",
+"region": "Africa",
+"year": "2015"
+},
+"KEN/KILIFI/WGS/1299_04/02/2015|A.D.4|Kenya|2015": {
+"clade": "A.D.4",
+"country": "Kenya",
+"region": "Africa",
+"year": "2015"
+},
+"KEN/KILIFI/WGS/1308_05/03/2015|A.D.4|Kenya|2015": {
+"clade": "A.D.4",
+"country": "Kenya",
+"region": "Africa",
+"year": "2015"
+},
+"KF530261|A.3.1|Germany|2008": {
+"clade": "A.3.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2008"
+},
+"KF530269|A.3.1.1|USA|2009": {
+"clade": "A.3.1.1",
+"country": "USA",
+"region": "North America",
+"year": "2009"
+},
+"KJ627250|A.3.1|Peru|2010": {
+"clade": "A.3.1",
+"country": "Peru",
+"region": "South America",
+"year": "2010"
+},
+"KJ627259|A.3.1|Peru|2011": {
+"clade": "A.3.1",
+"country": "Peru",
+"region": "South America",
+"year": "2011"
+},
+"KJ627260|A.3|Peru|2008": {
+"clade": "A.3",
+"country": "Peru",
+"region": "South America",
+"year": "2008"
+},
+"KJ627360|A.3.1|Peru|2009": {
+"clade": "A.3.1",
+"country": "Peru",
+"region": "South America",
+"year": "2009"
+},
+"KJ627374|A.3.1.1|Peru|2011": {
+"clade": "A.3.1.1",
+"country": "Peru",
+"region": "South America",
+"year": "2011"
+},
+"KJ723464|A.3|USA|1989": {
+"clade": "A.3",
+"country": "USA",
+"region": "North America",
+"year": "1989"
+},
+"KJ723491|A.1|USA|1988": {
+"clade": "A.1",
+"country": "USA",
+"region": "North America",
+"year": "1988"
+},
+"KP258701|A.2|USA|1994": {
+"clade": "A.2",
+"country": "USA",
+"region": "North America",
+"year": "1994"
+},
+"KP258726|A.2|USA|1996": {
+"clade": "A.2",
+"country": "USA",
+"region": "North America",
+"year": "1996"
+},
+"KP258733|A.3|USA|1984": {
+"clade": "A.3",
+"country": "USA",
+"region": "North America",
+"year": "1984"
+},
+"KU316103|A.1|USA|1983": {
+"clade": "A.1",
+"country": "USA",
+"region": "North America",
+"year": "1983"
+},
+"KU316126|A.3|USA|1984": {
+"clade": "A.3",
+"country": "USA",
+"region": "North America",
+"year": "1984"
+},
+"KU316135|A|USA|1981": {
+"clade": "A",
+"country": "USA",
+"region": "North America",
+"year": "1981"
+},
+"KU316143|A|USA|1982": {
+"clade": "A",
+"country": "USA",
+"region": "North America",
+"year": "1982"
+},
+"KU316154|A.1|USA|1985": {
+"clade": "A.1",
+"country": "USA",
+"region": "North America",
+"year": "1985"
+},
+"KU316161|A.2|USA|1993": {
+"clade": "A.2",
+"country": "USA",
+"region": "North America",
+"year": "1993"
+},
+"KU316171|A.1|USA|1977": {
+"clade": "A.1",
+"country": "USA",
+"region": "North America",
+"year": "1977"
+},
+"KU950561|A.2.1.1|USA|2006": {
+"clade": "A.2.1.1",
+"country": "USA",
+"region": "North America",
+"year": "2006"
+},
+"KU950654|A.D|USA|2012": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2012"
+},
+"KU962879|A.3.1|China|2008": {
+"clade": "A.3.1",
+"country": "China",
+"region": "Asia",
+"year": "2008"
+},
+"KX655662|A.3.1|Jordan|2011": {
+"clade": "A.3.1",
+"country": "Jordan",
+"region": "Asia",
+"year": "2011"
+},
+"KX655665|A.3.1|Jordan|2013": {
+"clade": "A.3.1",
+"country": "Jordan",
+"region": "Asia",
+"year": "2013"
+},
+"KX765887|A.D|New_Zealand|2015": {
+"clade": "A.D",
+"country": "New Zealand",
+"region": "Oceania",
+"year": "2015"
+},
+"KX765902|A.D|New_Zealand|2014": {
+"clade": "A.D",
+"country": "New Zealand",
+"region": "Oceania",
+"year": "2014"
+},
+"KX765916|A.D|New_Zealand|2015": {
+"clade": "A.D",
+"country": "New Zealand",
+"region": "Oceania",
+"year": "2015"
+},
+"Kilifi/RSVA/HF20064_11/04/2018|A.D.4|Kenya|2018": {
+"clade": "A.D.4",
+"country": "Kenya",
+"region": "Africa",
+"year": "2018"
+},
+"Kilifi/RSVA/HF20086_01/08/2018|A.D.4|Kenya|2018": {
+"clade": "A.D.4",
+"country": "Kenya",
+"region": "Africa",
+"year": "2018"
+},
+"Kilifi/RSVA/HF20155_2021-08-28|A.D.5.3|Kenya|2021": {
+"clade": "A.D.5.3",
+"country": "Kenya",
+"region": "Africa",
+"year": "2021"
+},
+"Kilifi/RSVA/HF20179_2022-03-01|A.D.1|Kenya|2022": {
+"clade": "A.D.1",
+"country": "Kenya",
+"region": "Africa",
+"year": "2022"
+},
+"Kilifi/RSVA/HF20205_2022-04-13|A.D.1|Kenya|2022": {
+"clade": "A.D.1",
+"country": "Kenya",
+"region": "Africa",
+"year": "2022"
+},
+"Kilifi/RSVA/HF20218_2022-07-06|A.D.5.3|Kenya|2022": {
+"clade": "A.D.5.3",
+"country": "Kenya",
+"region": "Africa",
+"year": "2022"
+},
+"Kilifi_10891_58_RSVA_2006|A.3|Kenya|2006": {
+"clade": "A.3",
+"country": "Kenya",
+"region": "Africa",
+"year": "2006"
+},
+"Kilifi_11863_15_RSVA_2010|A.3.1|Kenya|2010": {
+"clade": "A.3.1",
+"country": "Kenya",
+"region": "Africa",
+"year": "2010"
+},
+"MF001054|A.3.1|USA|2015": {
+"clade": "A.3.1",
+"country": "USA",
+"region": "North America",
+"year": "2015"
+},
+"MG642041|A|USA|1985": {
+"clade": "A",
+"country": "USA",
+"region": "North America",
+"year": "1985"
+},
+"MG642083|A.2|USA|1987": {
+"clade": "A.2",
+"country": "USA",
+"region": "North America",
+"year": "1987"
+},
+"MH760594|A.3.1|Australia|2010": {
+"clade": "A.3.1",
+"country": "Australia",
+"region": "Oceania",
+"year": "2010"
+},
+"MH760606|A.D|Australia|2013": {
+"clade": "A.D",
+"country": "Australia",
+"region": "Oceania",
+"year": "2013"
+},
+"MH760629|A.D|Australia|2016": {
+"clade": "A.D",
+"country": "Australia",
+"region": "Oceania",
+"year": "2016"
+},
+"MH760647|A.D|Australia|2015": {
+"clade": "A.D",
+"country": "Australia",
+"region": "Oceania",
+"year": "2015"
+},
+"MH828495|A.D|Vietnam|2014": {
+"clade": "A.D",
+"country": "Vietnam",
+"region": "Asia",
+"year": "2014"
+},
+"MH828499|A.D|Vietnam|2015": {
+"clade": "A.D",
+"country": "Vietnam",
+"region": "Asia",
+"year": "2015"
+},
+"MK749884|A.D|Nicaragua|2016": {
+"clade": "A.D",
+"country": "Nicaragua",
+"region": "North America",
+"year": "2016"
+},
+"MK749895|A.D|Nicaragua|2016": {
+"clade": "A.D",
+"country": "Nicaragua",
+"region": "North America",
+"year": "2016"
+},
+"MK749911|A.D.2.2|Nicaragua|2016": {
+"clade": "A.D.2.2",
+"country": "Nicaragua",
+"region": "North America",
+"year": "2016"
+},
+"MK749913|A.D.2|Nicaragua|2016": {
+"clade": "A.D.2",
+"country": "Nicaragua",
+"region": "North America",
+"year": "2016"
+},
+"MN-MDH-RSVA-00289|A.D.5.2|USA|2023": {
+"clade": "A.D.5.2",
+"country": "USA",
+"region": "North America",
+"year": "2023"
+},
+"MN-MDH-RSVA-00391|A.D.1|USA|2023": {
+"clade": "A.D.1",
+"country": "USA",
+"region": "North America",
+"year": "2023"
+},
+"MN071210|A.3.1.1|USA|2011": {
+"clade": "A.3.1.1",
+"country": "USA",
+"region": "North America",
+"year": "2011"
+},
+"MN078115|A.D|USA|2011": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2011"
+},
+"MN536993|A.D|USA|2015": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2015"
+},
+"MN536999|A.D|USA|2015": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2015"
+},
+"MW033958|A.D.2.2|USA|2018": {
+"clade": "A.D.2.2",
+"country": "USA",
+"region": "North America",
+"year": "2018"
+},
+"MW160747|A.D|Australia|2016": {
+"clade": "A.D",
+"country": "Australia",
+"region": "Oceania",
+"year": "2016"
+},
+"MW160762|A.D.5|Australia|2017": {
+"clade": "A.D.5",
+"country": "Australia",
+"region": "Oceania",
+"year": "2017"
+},
+"MZ151852|A.D.3|Russia|2020": {
+"clade": "A.D.3",
+"country": "Russia",
+"region": "Europe",
+"year": "2020"
+},
+"MZ151854|A.D.1|Russia|2020": {
+"clade": "A.D.1",
+"country": "Russia",
+"region": "Europe",
+"year": "2020"
+},
+"MZ221194|A.D|China|2018": {
+"clade": "A.D",
+"country": "China",
+"region": "Asia",
+"year": "2018"
+},
+"OK649592|A.3|USA|1994": {
+"clade": "A.3",
+"country": "USA",
+"region": "North America",
+"year": "1994"
+},
+"OK649601|A.3.1|Brazil|2008": {
+"clade": "A.3.1",
+"country": "Brazil",
+"region": "South America",
+"year": "2008"
+},
+"OK649646|A.2.1.1|Brazil|2010": {
+"clade": "A.2.1.1",
+"country": "Brazil",
+"region": "South America",
+"year": "2010"
+},
+"OK649659|A.3|Canada|1995": {
+"clade": "A.3",
+"country": "Canada",
+"region": "North America",
+"year": "1995"
+},
+"OK649664|A.3|Kenya|2007": {
+"clade": "A.3",
+"country": "Kenya",
+"region": "Africa",
+"year": "2007"
+},
+"OK649670|A.1|USA|1995": {
+"clade": "A.1",
+"country": "USA",
+"region": "North America",
+"year": "1995"
+},
+"OK649677|A.2.1.1|USA|2004": {
+"clade": "A.2.1.1",
+"country": "USA",
+"region": "North America",
+"year": "2004"
+},
+"OK649678|A.3|USA|2005": {
+"clade": "A.3",
+"country": "USA",
+"region": "North America",
+"year": "2005"
+},
+"OM256488|A.D.5|NA|2018": {
+"clade": "A.D.5",
+"country": "NA",
+"region": "NA",
+"year": "2018"
+},
+"OM857295|A.D.1.3|Australia|2020": {
+"clade": "A.D.1.3",
+"country": "Australia",
+"region": "Oceania",
+"year": "2020"
+},
+"OQ941765|A.D.2.2|Australia|2018": {
+"clade": "A.D.2.2",
+"country": "Australia",
+"region": "Oceania",
+"year": "2018"
+},
+"OQ941767|A.D.1|Australia|2018": {
+"clade": "A.D.1",
+"country": "Australia",
+"region": "Oceania",
+"year": "2018"
+},
+"OX02-8260-D03|A.D.1|United_Kingdom|2019": {
+"clade": "A.D.1",
+"country": "United Kingdom",
+"region": "Europe",
+"year": "2019"
+},
+"OX02-8377-V01|A.D.2.2.1|United_Kingdom|2018": {
+"clade": "A.D.2.2.1",
+"country": "United Kingdom",
+"region": "Europe",
+"year": "2018"
+},
+"OX02-8584-V01|A.D.2.2|United_Kingdom|2019": {
+"clade": "A.D.2.2",
+"country": "United Kingdom",
+"region": "Europe",
+"year": "2019"
+},
+"OX02-9657-V01|A.D.1|United_Kingdom|2020": {
+"clade": "A.D.1",
+"country": "United Kingdom",
+"region": "Europe",
+"year": "2020"
+},
+"OX02-9767-D09|A.D.3|United_Kingdom|2020": {
+"clade": "A.D.3",
+"country": "United Kingdom",
+"region": "Europe",
+"year": "2020"
+},
+"PP411979|A.D.3|Thailand|2023": {
+"clade": "A.D.3",
+"country": "Thailand",
+"region": "Asia",
+"year": "2023"
+},
+"PP508189|A.D.5.1|Peru|2023": {
+"clade": "A.D.5.1",
+"country": "Peru",
+"region": "South America",
+"year": "2023"
+},
+"PP784984|A.D.4.1|South_Africa|2021": {
+"clade": "A.D.4.1",
+"country": "South Africa",
+"region": "Africa",
+"year": "2021"
+},
+"PP784986|A.D.4.1|South_Africa|2021": {
+"clade": "A.D.4.1",
+"country": "South Africa",
+"region": "Africa",
+"year": "2021"
+},
+"Patient_E_D14|A.D.5.2|France|2021": {
+"clade": "A.D.5.2",
+"country": "France",
+"region": "Europe",
+"year": "2021"
+},
+"RSV-A/MX/UANL-92777/2023|A.D.1|Mexico|2023": {
+"clade": "A.D.1",
+"country": "Mexico",
+"region": "North America",
+"year": "2023"
+},
+"RSV-A/US/BID-V7345/2002|A.2.1.1|USA|2002": {
+"clade": "A.2.1.1",
+"country": "USA",
+"region": "North America",
+"year": "2002"
+},
+"RSV-A/US/BID-V7358/2002|A.2.1.1|USA|2002": {
+"clade": "A.2.1.1",
+"country": "USA",
+"region": "North America",
+"year": "2002"
+},
+"RSV-A/US/BID-V8320/2002|A.2.1|USA|2002": {
+"clade": "A.2.1",
+"country": "USA",
+"region": "North America",
+"year": "2002"
+},
+"RSV-A/US/BID-V8359/2003|A.2.1|USA|2003": {
+"clade": "A.2.1",
+"country": "USA",
+"region": "North America",
+"year": "2003"
+},
+"RSV-A/US/BID-V8485/2001|A.2.1|USA|2001": {
+"clade": "A.2.1",
+"country": "USA",
+"region": "North America",
+"year": "2001"
+},
+"RSV-A/US/BID-V8543/2003|A.2.1.1|USA|2003": {
+"clade": "A.2.1.1",
+"country": "USA",
+"region": "North America",
+"year": "2003"
+},
+"RSV-A/human/USA/WA-S23239/2019|A.D.5|USA|2019": {
+"clade": "A.D.5",
+"country": "USA",
+"region": "North America",
+"year": "2019"
+},
+"RSV-A/human/USA/WA-S23245/2019|A.D.1|USA|2019": {
+"clade": "A.D.1",
+"country": "USA",
+"region": "North America",
+"year": "2019"
+},
+"RSV-A/human/USA/WA-S23254/2019|A.D.1|USA|2019": {
+"clade": "A.D.1",
+"country": "USA",
+"region": "North America",
+"year": "2019"
+},
+"RSV-A/human/USA/WA-S23267/2019|A.D.1|USA|2019": {
+"clade": "A.D.1",
+"country": "USA",
+"region": "North America",
+"year": "2019"
+},
+"RSV-A/human/USA/WA-S25218/2020|A.D.1|USA|2020": {
+"clade": "A.D.1",
+"country": "USA",
+"region": "North America",
+"year": "2020"
+},
+"RSV597|A.3.1|Netherlands|2007": {
+"clade": "A.3.1",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2007"
+},
+"RSVA/20190070/BJ/CHN/2019.01.15|A.D.3|China|2019": {
+"clade": "A.D.3",
+"country": "China",
+"region": "Asia",
+"year": "2019"
+},
+"RSVA/20200035/BJ/CHN/2020.01.09|A.D.3|China|2020": {
+"clade": "A.D.3",
+"country": "China",
+"region": "Asia",
+"year": "2020"
+},
+"RSVA/USA/ACRI-037/2016|A.D|USA|2016": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2016"
+},
+"SE01A-0172-V02|A.D|Spain|2020": {
+"clade": "A.D",
+"country": "Spain",
+"region": "Europe",
+"year": "2020"
+},
+"SE02-0023-V01|A.D.3|Spain|2020": {
+"clade": "A.D.3",
+"country": "Spain",
+"region": "Europe",
+"year": "2020"
+},
+"TOp-12-061|A.3.1.1|Philippines|2012": {
+"clade": "A.3.1.1",
+"country": "Philippines",
+"region": "Asia",
+"year": "2012"
+},
+"UU01A-0060-V02|A.D.3|Netherlands|2018": {
+"clade": "A.D.3",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2018"
+},
+"UU02-0012-V01|A.D.1|Netherlands|2017": {
+"clade": "A.D.1",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2017"
+},
+"UU02-0045-D04|A.D|Netherlands|2018": {
+"clade": "A.D",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2018"
+},
+"UU02-0055-D03|A.D|Netherlands|2018": {
+"clade": "A.D",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2018"
+},
+"UU02-0093-V01|A.D.2.2|Netherlands|2019": {
+"clade": "A.D.2.2",
+"country": "Netherlands",
+"region": "Europe",
+"year": "2019"
+},
+"VN-390-7/10|A.3.1|Vietnam|2010": {
+"clade": "A.3.1",
+"country": "Vietnam",
+"region": "Asia",
+"year": "2010"
+},
+"VN-784-5/10|A.3.1|Vietnam|2010": {
+"clade": "A.3.1",
+"country": "Vietnam",
+"region": "Asia",
+"year": "2010"
+},
+"VN-795-7/10|A.3.1|Vietnam|2010": {
+"clade": "A.3.1",
+"country": "Vietnam",
+"region": "Asia",
+"year": "2010"
+},
+"Zam-NDL060_2018-03-21|A.D|Zambia|2018": {
+"clade": "A.D",
+"country": "Zambia",
+"region": "Africa",
+"year": "2018"
+},
+"b37|A.D|USA|2016": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2016"
+},
+"hRSV-A-G43Q68M3|A.D.1|USA|2023": {
+"clade": "A.D.1",
+"country": "USA",
+"region": "North America",
+"year": "2023"
+},
+"hRSV-A-G43S01V0|A.D.5.2|USA|2024": {
+"clade": "A.D.5.2",
+"country": "USA",
+"region": "North America",
+"year": "2024"
+},
+"hRSV/A/Germany/04-01144/2004|A.2.1|Germany|2004": {
+"clade": "A.2.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2004"
+},
+"hRSV/A/Germany/05-00962/2005|A.3|Germany|2005": {
+"clade": "A.3",
+"country": "Germany",
+"region": "Europe",
+"year": "2005"
+},
+"hRSV/A/Germany/08-02984/2008|A.2.1|Germany|2008": {
+"clade": "A.2.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2008"
+},
+"hRSV/A/Germany/09-03766/2009|A.3.1|Germany|2009": {
+"clade": "A.3.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2009"
+},
+"hRSV/A/Germany/10-03936/2010|A.3.1|Germany|2010": {
+"clade": "A.3.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2010"
+},
+"hRSV/A/Germany/10-04112/2010|A.3.1.1|Germany|2010": {
+"clade": "A.3.1.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2010"
+},
+"hRSV/A/Germany/11-01819/2011|A.3.1|Germany|2011": {
+"clade": "A.3.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2011"
+},
+"hRSV/A/Germany/12-01411/2012|A.3.1.1|Germany|2012": {
+"clade": "A.3.1.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2012"
+},
+"hRSV/A/Germany/12-02800/2012|A.D|Germany|2012": {
+"clade": "A.D",
+"country": "Germany",
+"region": "Europe",
+"year": "2012"
+},
+"hRSV/A/Germany/18-03012/2018|A.D|Germany|2018": {
+"clade": "A.D",
+"country": "Germany",
+"region": "Europe",
+"year": "2018"
+},
+"hRSV/A/Germany/19-02346/2019|A.D.1|Germany|2019": {
+"clade": "A.D.1",
+"country": "Germany",
+"region": "Europe",
+"year": "2019"
+},
+"hRSV/A/Germany/20-02604/2020|A.D.5|Germany|2020": {
+"clade": "A.D.5",
+"country": "Germany",
+"region": "Europe",
+"year": "2020"
+},
+"hRSV/A/Germany/22-01517/2021|A.D.3|Germany|2021": {
+"clade": "A.D.3",
+"country": "Germany",
+"region": "Europe",
+"year": "2021"
+},
+"hRSV/A/Germany/23-00282/2022|A.D.5.2|Germany|2022": {
+"clade": "A.D.5.2",
+"country": "Germany",
+"region": "Europe",
+"year": "2022"
+},
+"hRSV/A/Germany/23-00760/2022|A.D.3|Germany|2022": {
+"clade": "A.D.3",
+"country": "Germany",
+"region": "Europe",
+"year": "2022"
+},
+"hRSV/A/USA/7E2/2010|A.3|USA|2010": {
+"clade": "A.3",
+"country": "USA",
+"region": "North America",
+"year": "2010"
+},
+"p1306-121310709A|A.D|USA|2012": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2012"
+},
+"p1306-121310721A|A.D|USA|2013": {
+"clade": "A.D",
+"country": "USA",
+"region": "North America",
+"year": "2013"
+}
+}
