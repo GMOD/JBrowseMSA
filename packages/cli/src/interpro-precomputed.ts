@@ -2,12 +2,8 @@ import * as fs from 'node:fs'
 
 import { annotationsToGFF, getUngappedSequence, parseMSA } from 'msa-parsers'
 
-import {
-  cacheLocation,
-  fetchWithRetry,
-  readCached,
-  writeCached,
-} from './interpro-cache.ts'
+import { fetchWithRetry } from './fetchWithRetry.ts'
+import { cacheLocation, readCached, writeCached } from './interpro-cache.ts'
 
 import type { MSAFormat } from 'msa-parsers'
 

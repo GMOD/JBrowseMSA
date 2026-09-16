@@ -1,3 +1,5 @@
+import { fetchWithRetry } from './fetchWithRetry.ts'
+
 import type { InterProScanResponse, InterProScanResults } from 'msa-parsers'
 
 const BASE_URL = 'https://www.ebi.ac.uk/Tools/services/rest/iprscan5'
@@ -7,16 +9,18 @@ async function submitJob(
   programs: string[],
   email: string,
 ): Promise<string> {
-  const response = await fetch(`${BASE_URL}/run`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+  const response = await fetchWithRetry(`${BASE_URL}/run`, {
+    init: {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        email,
+        sequence: `>${sequence.id}\n${sequence.seq}`,
+        appl: programs.join(','),
+      }),
     },
-    body: new URLSearchParams({
-      email,
-      sequence: `>${sequence.id}\n${sequence.seq}`,
-      appl: programs.join(','),
-    }),
   })
 
   if (!response.ok) {
@@ -28,7 +32,7 @@ async function submitJob(
 }
 
 async function checkStatus(jobId: string): Promise<string> {
-  const response = await fetch(`${BASE_URL}/status/${jobId}`)
+  const response = await fetchWithRetry(`${BASE_URL}/status/${jobId}`)
   if (!response.ok) {
     throw new Error(`Failed to check status: ${response.statusText}`)
   }
@@ -36,7 +40,7 @@ async function checkStatus(jobId: string): Promise<string> {
 }
 
 async function getResults(jobId: string): Promise<InterProScanResponse> {
-  const response = await fetch(`${BASE_URL}/result/${jobId}/json`)
+  const response = await fetchWithRetry(`${BASE_URL}/result/${jobId}/json`)
   if (!response.ok) {
     throw new Error(`Failed to get results: ${response.statusText}`)
   }
