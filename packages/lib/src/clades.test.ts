@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 
 import {
   bracketBarWidth,
@@ -8,7 +8,27 @@ import {
 } from './components/tree/cladeBrackets.ts'
 import MSAModelF from './model.ts'
 
+import type * as FetchUtils from './fetchUtils.ts'
 import type { Clade } from './types.ts'
+
+// uri -> resolver of the fetch a filehandle autorun kicked off
+const inFlight = new Map<string, (text: string) => void>()
+
+vi.mock('@jbrowse/core/util/io', () => ({
+  openLocation: (loc: { uri: string }) => loc,
+}))
+
+vi.mock('./fetchUtils.ts', async importOriginal => ({
+  ...(await importOriginal<typeof FetchUtils>()),
+  fetchTextWithProgress: (loc: { uri: string }) =>
+    new Promise<string>(resolve => {
+      inFlight.set(loc.uri, resolve)
+    }),
+}))
+
+function flush() {
+  return new Promise(resolve => setTimeout(resolve, 0))
+}
 
 const msa = `>A
 MKAA
@@ -151,6 +171,27 @@ test('a label too long for the gutter is capped', () => {
 
 test('a collapse mark collapses the clade at load', () => {
   const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  expect(model.collapsed).toEqual(['node-0-0-1'])
+  expect(model.rowNames).toEqual(['node-0-0-1', 'C', 'D'])
+})
+
+test('a collapse mark waits for a tree filehandle that lands after the MSA', async () => {
+  const model = MSAModelF().create({
+    id: 'clades-filehandle-test',
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    msaFilehandle: { locationType: 'UriLocation', uri: 'aln.fa' },
+    treeFilehandle: { locationType: 'UriLocation', uri: 'tree.nh' },
+    clades: [{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }],
+  })
+  model.setWidth(800)
+  inFlight.get('aln.fa')!(msa)
+  await flush()
+  expect(model.dataInitialized).toBe(true)
+  expect(model.collapsed).toEqual([])
+
+  inFlight.get('tree.nh')!(tree)
+  await flush()
   expect(model.collapsed).toEqual(['node-0-0-1'])
   expect(model.rowNames).toEqual(['node-0-0-1', 'C', 'D'])
 })

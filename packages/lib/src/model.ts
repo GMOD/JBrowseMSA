@@ -4002,7 +4002,9 @@ function stateModelFactory() {
         // alignment all read. The tree arrives with the model for inline data
         // and later for a filehandle, so the seeding waits for it and then runs
         // once: expanding a seeded clade sticks, and the record collapses it
-        // again only on reload.
+        // again only on reload. `dataInitialized` is true once the MSA alone
+        // has loaded, when the tree is still the flat stub, so a tree
+        // filehandle holds the seeding until its text lands.
         let cladesSeeded = false
         addDisposer(
           self,
@@ -4010,6 +4012,7 @@ function stateModelFactory() {
             if (
               cladesSeeded ||
               !self.dataInitialized ||
+              (self.treeFilehandle && !self.data.tree) ||
               self.clades.length === 0
             ) {
               return
