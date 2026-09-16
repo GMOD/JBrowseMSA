@@ -59,7 +59,7 @@ const pathXs = (path: string) =>
 
 test('each gene draws as an arrow in its scale color', async () => {
   const { svg } = await exportWith(panels)
-  const paths = [...panelGroup(svg).matchAll(/<path[^>]*>/g)].map(m => m[0]!)
+  const paths = [...panelGroup(svg).matchAll(/<path[^>]*>/g)].map(m => m[0])
   expect(paths).toHaveLength(4)
 
   const fills = paths.map(p => /fill="([^"]+)"/.exec(p)?.[1])
@@ -77,7 +77,7 @@ test('each gene draws as an arrow in its scale color', async () => {
 test('align lines the named gene up across the rows', async () => {
   const { svg } = await exportWith(panels)
   const starts = [...panelGroup(svg).matchAll(/<path[^>]*>/g)].map(
-    m => pathXs(m[0]!)[0]!,
+    m => pathXs(m[0])[0]!,
   )
   // g1's genE and g2's genE both start at the aligned x; g1's genA is left of
   // it and g3's genA keeps its own origin

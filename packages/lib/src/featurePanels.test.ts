@@ -29,7 +29,10 @@ function makeModel(rowPanels: RowPanelSpec[], data: Record<string, string>) {
   return model
 }
 
-function featurePanel(rowPanels: RowPanelSpec[], data = { tree, gff }) {
+function featurePanel(
+  rowPanels: RowPanelSpec[],
+  data: Record<string, string> = { tree, gff },
+) {
   const model = makeModel(rowPanels, data)
   return {
     model,

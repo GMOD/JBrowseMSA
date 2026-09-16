@@ -287,9 +287,11 @@ rowHeight: stripDefault(types.number, defaultRowHeight)
 
 #### property: rowPanels
 
-panels drawn between the tree and the alignment, one cell per row:
-`{kind: "strip", field, scale?, width?, header?}` colors each row from a
-`rowData` field. See docs/layers.md
+panels drawn between the tree and the alignment:
+`{kind: "strip", field, scale?, width?, header?}` colors one cell per row from a
+`rowData` field, and
+`{kind: "features", x, encoding?, transform?, width?, header?}` draws the spans
+the GFF carries. See docs/layers.md
 
 ```js
 // type signature
@@ -965,6 +967,17 @@ read.
 ```js
 // type
 boolean
+```
+
+#### getter: featureAlignShifts
+
+the shift an `align` transform gives each row, keyed by the feature name it
+aligns on: the offset putting the first feature of that name at zero. A row
+carrying no such feature is absent, and keeps its own origin.
+
+```js
+// type
+Map<string, Map<string, number>>
 ```
 
 #### getter: featureColors

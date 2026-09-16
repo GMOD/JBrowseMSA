@@ -54,6 +54,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `column_tracks`                  | list of bar, text or arc tracks                                                           |
 | `row_data`                       | extra fields per row name, such as a lineage or a host                                    |
 | `encodings`                      | `{channel, field, scale}`: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
+| `row_panels`                     | `strip` and `features` panels drawn beside the tree                                       |
 | `relative_to`                    | a row name; other rows draw as their differences from it                                  |
 | `region`                         | `{start, end}` columns or `{row, start, end}` residues                                    |
 | `allowed_gappyness`              | hide columns at least this percent gaps (default 100)                                     |

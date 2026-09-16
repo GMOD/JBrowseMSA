@@ -107,12 +107,30 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   `minLetterRowHeight`, where the box is the only thing left to read.
 - `rowPanels` is the row-scale counterpart of `columnTracks`:
   `components/rowpanels/RowPanels.tsx` mounts one canvas column per record
-  between the tree and the alignment, tiled by `blocksY`, and `renderStrip.ts`
-  is the draw path the live view and the SVG export share. `rowPanelsWidth`
-  comes out of `msaAreaWidth` in `model.ts`, which is what moves the alignment,
-  the minimap and the tracks right by the strips; the headers take their own
-  band in `TopArea` and export as a `rotate(-90)` text each. Row panels stay out
-  of the track machinery, which is column space.
+  between the tree and the alignment, tiled by `blocksY`, and
+  `renderRowPanel.ts` dispatches on the record's `kind` for the live view and
+  the SVG export both. `rowPanelsWidth` comes out of `msaAreaWidth` in
+  `model.ts`, which is what moves the alignment, the minimap and the tracks
+  right by the panels; the headers take their own band in `TopArea` and export
+  as a `rotate(-90)` text each. Row panels stay out of the track machinery,
+  which is column space.
+
+  `renderStrip.ts` draws the `strip` kind, a cell per row. `features` draws the
+  GFF's spans per row through `components/msa/drawFeatureSpans.ts`, the one span
+  mark: the alignment's overlay (`renderBoxFeatureCanvasBlock.ts`) and the panel
+  each hand it an x mapping, the fills, the labels and a row geometry, so a
+  strand arrow is drawn in one place. `resolvedRowPanels` resolves a panel's
+  spans to panel pixels: `x: "column"` scales `domainBands` by `colWidth`, and
+  `x: "position"` packs each row's features in residue positions through
+  `packDomainLanes`, which is generic over `{startCol, endCol}`, and maps their
+  extent onto the panel width. The `align` transform's per-row shift comes from
+  `featureAlignShifts`. A record's own `encoding` resolves through
+  `resolveScale` and `featureFields.ts` the way the top-level `featureFill` and
+  `featureLabel` do, and falls back to them. A tree, a `gff` and a `features`
+  panel make a figure with no alignment at all: `dataInitialized` is
+  `msa || tree`, `numColumns` is 0, and the alignment panel is zero columns wide
+  on screen and in the export.
+
 - The tree overview (`components/tree/TreeOverview.tsx`,
   `renderTreeOverview.ts`) is the brush on the row scale, behind
   `showTreeOverview`. It draws `get tree()` rather than `root`, so the whole
@@ -136,9 +154,10 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   `renderToSvg.tsx` for the export. A producer contributes
   `{ id, title, entries }`, and `legendRows` flattens the list into the rows
   both renderings stack top to bottom, giving each legend a title row once there
-  is more than one. The domain overlay is the only producer today. The property
-  behind the overlay's collapse toggle stays `showDomainLegend`, because that
-  name travels in the shared URL.
+  is more than one. The domain overlay, the row-table encodings and the row
+  panels are its producers, each keyed by the field its scale reads. The
+  property behind the overlay's collapse toggle stays `showDomainLegend`,
+  because that name travels in the shared URL.
 - The viewer calls no remote compute queue and runs no analysis long enough to
   freeze the tab. The one exception is neighbor joining, capped at
   `maxNeighborJoiningRows`, because on a small alignment it is faster than

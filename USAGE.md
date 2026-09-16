@@ -206,6 +206,33 @@ Strips over one field share that field's legend.
 />
 ```
 
+A `features` record draws the spans the GFF carries in a panel of its own, as
+arrows where a gene has a strand. `x: 'position'` draws each row in its own
+residue positions on one linear scale, so the figure below needs no `msa`: the
+tree and the gene arrows fill the view. The `align` transform shifts each row so
+that `genE` starts at one x, and a genome lacking it keeps its own origin, which
+is gggenes' `make_alignment_dummies`.
+
+```tsx
+<MSAViewer
+  tree={tree}
+  gff={gff}
+  rowPanels={[
+    {
+      kind: 'features',
+      x: 'position',
+      width: 320,
+      header: 'neighborhood',
+      encoding: {
+        color: { field: 'Name', scale: { palette: 'set1' } },
+        label: 'Name',
+      },
+      transform: [{ type: 'align', on: 'genE' }],
+    },
+  ]}
+/>
+```
+
 The [layers reference](https://gmod.org/JBrowseMSA/layers) lists every field of
 every layer and the coordinate rules they share. At runtime
 `model.setHighlights(list)`, `model.setClades(list)`,

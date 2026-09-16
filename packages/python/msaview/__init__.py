@@ -7,6 +7,28 @@ https://github.com/GMOD/JBrowseMSA/blob/main/USAGE.md, and `highlights` and
     from msaview import MSAView
 
     MSAView(msa="globin.aln", tree="globin.nh", hide_header=True)
+
+A `row_panels` record draws beside the tree. `kind="features"` draws the spans
+the GFF carries as arrows in a column of their own, over each row's residue
+positions and aligned on one gene, which needs no alignment at all::
+
+    MSAView(
+        tree="marker.nh",
+        gff="neighborhoods.gff",
+        row_panels=[
+            {
+                "kind": "features",
+                "x": "position",
+                "width": 320,
+                "header": "neighborhood",
+                "encoding": {
+                    "color": {"field": "Name", "scale": {"palette": "set1"}},
+                    "label": "Name",
+                },
+                "transform": [{"type": "align", "on": "genE"}],
+            }
+        ],
+    )
 """
 
 from __future__ import annotations
@@ -63,7 +85,8 @@ class MSAView(anywidget.AnyWidget):
     # table or from the features the GFF carries
     row_data = traitlets.Dict(traitlets.Dict()).tag(sync=True)
     encodings = traitlets.List(traitlets.Dict()).tag(sync=True)
-    # panels between the tree and the alignment, one colored cell per row
+    # panels between the tree and the alignment: a colored cell per row, or
+    # the GFF's spans as arrows
     row_panels = traitlets.List(traitlets.Dict()).tag(sync=True)
     relative_to = traitlets.Unicode(None, allow_none=True).tag(sync=True)
     region = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)

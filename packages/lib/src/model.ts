@@ -833,9 +833,11 @@ function stateModelFactory() {
         encodings: stripDefault(types.array(types.frozen<Encoding>()), []),
         /**
          * #property
-         * panels drawn between the tree and the alignment, one cell per row:
-         * `{kind: "strip", field, scale?, width?, header?}` colors each row
-         * from a `rowData` field. See docs/layers.md
+         * panels drawn between the tree and the alignment:
+         * `{kind: "strip", field, scale?, width?, header?}` colors one cell
+         * per row from a `rowData` field, and
+         * `{kind: "features", x, encoding?, transform?, width?, header?}`
+         * draws the spans the GFF carries. See docs/layers.md
          */
         rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), []),
       }),

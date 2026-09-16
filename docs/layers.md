@@ -353,10 +353,11 @@ a data channel, so it draws whether or not the residue letters do.
 
 ## rowPanels
 
-A column of colored cells beside the tree, one cell per alignment row. Each
-record names a `kind`, and `strip` is the one kind today: it reads a field of
-`rowData` and colors each row's cell through `scale`. Eight strips make the
-tip-aligned matrix ggtree draws with `gheatmap`.
+A panel beside the tree on the row scale, the counterpart of `columnTracks` on
+the column scale. Each record names a `kind`. A `strip` reads a field of
+`rowData` and colors each row's cell through `scale`, and eight strips make the
+tip-aligned matrix ggtree draws with `gheatmap`. A `features` panel draws the
+spans `gff` carries, one row per alignment row, which is gggenes.
 
 ```json
 {
@@ -377,13 +378,13 @@ tip-aligned matrix ggtree draws with `gheatmap`.
 }
 ```
 
-| Field    | Meaning                                                             |
-| -------- | ------------------------------------------------------------------- |
-| `kind`   | `strip`                                                             |
-| `field`  | the `rowData` field the cells read                                  |
-| `scale`  | `{palette}` or `{map}`; the ggplot palette when the record omits it |
-| `width`  | the column's pixel width, defaulting to the row height              |
-| `header` | the name drawn above the column, defaulting to the field            |
+| Field    | Meaning                                                              |
+| -------- | -------------------------------------------------------------------- |
+| `kind`   | `strip` or `features`                                                |
+| `field`  | the `rowData` field a strip's cells read                             |
+| `scale`  | `{palette}` or `{map}`; the ggplot palette when the record omits it  |
+| `width`  | the column's pixel width: a row height for a strip, 200 for features |
+| `header` | the name drawn above the column, defaulting to a strip's field       |
 
 The panels sit between the tree and the alignment, and they take their width out
 of the alignment's: the alignment scrolls and fits within what is left. A strip
@@ -395,14 +396,69 @@ minimap share, turned on its side, and it exports with the figure. The band is
 as tall as the minimap, so a header longer than that is clipped to it on screen
 and in the export, and the full name is the column's tooltip.
 
-A strip's scale carries a legend of its own, titled by the field, and every
-strip and encoding over one field lists that field once. So two strips over `HA`
+A panel's scale carries a legend of its own, titled by the field, and every
+panel and encoding over one field lists that field once. So two strips over `HA`
 and a `tipLabel` encoding over `HA` produce one legend, and a strip over `NA`
-adds a second.
+adds a second. A `features` panel taking the overlay's colors lists them under
+the legend the overlay already draws.
+
+### The features panel
+
+A `features` record draws the same spans the alignment's overlay draws, in a
+column of its own: an arrow where the GFF gives a gene a strand, a box
+otherwise, labeled where the text fits. Features that overlap within a row stack
+into lanes, which divide the row's height between them.
+
+| Field       | Meaning                                                                                   |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| `x`         | `column` draws in the alignment's columns; `position` in each row's own residue positions |
+| `encoding`  | `{color: {field, scale}, label: field}` over a field of the features                      |
+| `transform` | `[{type: "align", on: <Name value>}]`, only under `x: "position"`                         |
+
+`x: "position"` maps every row's features onto one linear scale across the
+extent they cover, so a genome with no alignment has an x. A tree, a GFF and a
+`features` panel therefore draw a figure with no `msa` at all: the alignment
+panel is zero columns wide and the tree and the panel fill the view.
+
+`{type: "align", on: "genE"}` shifts each row so that the first feature whose
+`Name` is `genE` starts at zero, which is gggenes' `make_alignment_dummies`. A
+row carrying no such feature keeps its own origin. An `align` under
+`x: "column"` draws nothing different, since the columns are the alignment's.
+
+`encoding.color` reads any field of the feature table: `accession`, `name`,
+`featureType`, or a GFF attribute of column 9. A record naming none takes the
+colors the overlay gives the same features, which is a `featureFill` encoding
+where one is set and the accession palette otherwise, and `encoding.label` falls
+back to the `featureLabel` encoding the same way. A feature's own GFF `color=`
+wins over either.
+
+```json
+{
+  "type": "MsaView",
+  "data": {
+    "tree": "((genome1:0.1,genome2:0.1):0.2,genome3:0.3);",
+    "gff": "##gff-version 3\ngenome1\tncbi\tgene\t1\t500\t.\t+\t.\tName=genD\ngenome1\tncbi\tgene\t600\t1000\t.\t+\t.\tName=genE\ngenome2\tncbi\tgene\t200\t700\t.\t+\t.\tName=genE\ngenome3\tncbi\tgene\t1\t400\t.\t-\t.\tName=genD"
+  },
+  "rowPanels": [
+    {
+      "kind": "features",
+      "x": "position",
+      "width": 320,
+      "header": "neighborhood",
+      "encoding": {
+        "color": { "field": "Name", "scale": { "palette": "set1" } },
+        "label": "Name"
+      },
+      "transform": [{ "type": "align", "on": "genE" }]
+    }
+  ]
+}
+```
 
 React: the `rowPanels` prop on `MSAViewer`, or `model.setRowPanels(list)`. R:
-`geom_msa_strip("HA", palette = "set1", width = 12)`. Python: the `row_panels`
-trait.
+`geom_msa_strip("HA", palette = "set1", width = 12)` and
+`geom_msa_features(color = "Name", label = "Name", align = "genE")`. Python: the
+`row_panels` trait.
 
 ## residueMappings
 
