@@ -38,7 +38,11 @@ const AnnotationLegend = observer(function ({
       <IconButton
         size="small"
         title={expanded ? 'Collapse key' : 'Expand key'}
-        style={{ alignSelf: 'flex-end', padding: 1 }}
+        style={
+          expanded
+            ? { position: 'absolute', top: 0, right: 0, padding: 1 }
+            : { padding: 1 }
+        }
         onClick={() => {
           model.setShowDomainLegend(!expanded)
         }}
@@ -46,11 +50,16 @@ const AnnotationLegend = observer(function ({
         <ExpandIcon style={{ fontSize: 14 }} />
       </IconButton>
       {expanded ? (
-        <div style={{ overflow: 'auto', padding: '0 6px 4px' }}>
-          {visible.map(({ accession, name }) => (
+        <div style={{ overflow: 'auto', padding: '2px 6px 4px' }}>
+          {visible.map(({ accession, name }, i) => (
             <div
               key={accession}
-              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                marginRight: i === 0 ? 18 : 0,
+              }}
               title={accession}
             >
               <div
