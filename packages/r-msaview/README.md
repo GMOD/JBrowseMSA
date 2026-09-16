@@ -37,7 +37,7 @@ widget
 # webshot2::webshot("alignment.html", "alignment.png")                  # PNG (requires webshot2)
 
 # SVG via the CLI (requires react-msaview-cli installed via npm/npx):
-# writeLines(widget$x$config$data$msa, "alignment.fasta")
+# writeLines(widget$x$props$msa, "alignment.fasta")
 # system2("react-msaview-cli", c("export-svg", "--msa", "alignment.fasta", "--output", "alignment.svg"))
 # Or with tree: system2("react-msaview-cli", c("export-svg", "--msa", "alignment.fasta", "--tree", "tree.nwk", "--output", "alignment.svg"))
 ```
@@ -85,6 +85,8 @@ msaview(msa = "p53.aln", tree = "p53.nh") +
 | `geom_msa_clade()`      | a rectangle behind the rows of a clade of the tree      |
 | `geom_msa_structure()`  | which structure residue each row residue is             |
 | `geom_msa_rowdata()`    | a data frame of extra fields per row                    |
+| `geom_msa_strip()`      | a color strip beside the tree from one of those fields  |
+| `geom_msa_features()`   | the GFF's spans per row in a panel beside the tree      |
 | `scale_row_color()`     | colors a tip label or a row tint by one of those fields |
 | `scale_residue_color()` | the color scheme, and the channel it paints             |
 | `stat_msa_diff()`       | draws every row as its differences from one row         |
@@ -92,8 +94,9 @@ msaview(msa = "p53.aln", tree = "p53.nh") +
 | `theme_msa()`           | cell size, tree gutter, toolbar, light or dark          |
 
 `geom_msa_highlight()`, `geom_msa_clade()`, `geom_msa_track()`,
-`geom_msa_structure()` and `scale_row_color()` accumulate, so calling one twice
-adds two. The others replace what an earlier layer set.
+`geom_msa_structure()`, `geom_msa_strip()`, `geom_msa_features()` and
+`scale_row_color()` accumulate, so calling one twice adds two. The others
+replace what an earlier layer set.
 
 A layer builds the same props the matching `msaview()` argument does, so the two
 styles mix freely and produce the same viewer. `msa` and `tree` are the viewer

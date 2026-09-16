@@ -147,7 +147,8 @@ Total time: 13.70 seconds  Unique: 474/474  Bad splits: 0/471
 on its built-in neighbor joining. That neighbor joining is a distance method
 with no model of amino acid substitution. FastTree fits one, and on 474
 sequences it is also the faster of the two. Past the cap, the app's error
-message points to this page.
+message points to the
+[protein family tutorial](https://gmod.org/JBrowseMSA/tutorials/protein_family).
 
 The tree orders the alignment's rows by clade, so neighboring rows are related
 kinases. Clicking any tip opens a node-info dialog with its row metadata from

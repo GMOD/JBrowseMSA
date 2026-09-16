@@ -49,7 +49,8 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `height`                         | pixels                                                                                    |
 | `col_width`, `row_height`        | pixels per column and per row                                                             |
 | `highlights`                     | list of `{start, end}`, `{row, start, end}` or `{rows}`                                   |
-| `highlight_columns`              | columns (1-based) under a persistent overlay                                              |
+| `clades`                         | list of `{mrca or range, tips, mark}` clades of the tree to mark                          |
+| `highlight_columns`              | columns (0-based) under a persistent overlay                                              |
 | `residue_mappings`               | which structure residue each row residue is                                               |
 | `column_tracks`                  | list of bar, text or arc tracks                                                           |
 | `row_data`                       | extra fields per row name, such as a lineage or a host                                    |

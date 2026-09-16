@@ -22,7 +22,7 @@ them, and follow it in this file too: agents copy the prose here as house voice.
 - `packages/examples`: the live examples the website's /examples page mounts.
   `src/examples/catalog.ts` holds each example's name, category and description,
   and `data/` holds the alignments, trees and GFFs as files, which
-  `writeExampleData.mjs` copies into the app
+  `scripts/screenshots/writeExampleData.mjs` copies into the app
 - `packages/svgcanvas`: vendored ESM fork of svgcanvas for SVG export
 - `packages/r-msaview`: R htmlwidget package with ggtree/Biostrings/treeio
   interop. `R/msaview.R` is the one function taking every prop as an argument,

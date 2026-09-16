@@ -71,18 +71,18 @@ SVG.
 }
 ```
 
-| Field    | Kind | Meaning                                                             |
-| -------- | ---- | ------------------------------------------------------------------- |
-| `id`     | both | Unique key. The Tracks menu and `turnedOffTracks` use it            |
-| `name`   | both | Label beside the track                                              |
-| `values` | bar  | One number per column, or per residue of `row`                      |
-| `max`    | bar  | Value drawn at full height (default 1)                              |
-| `color`  | bar  | Bar fill (default gray)                                             |
-| `data`   | text | One character per column, or per residue of `row`                   |
-| `colors` | text | Character to background color; the active color scheme otherwise    |
-| `arcs`   | arc  | `{start, end, color?}` pairs; each end is a column or a residue     |
-| `row`    | both | Row name whose residues the values or characters index              |
-| `height` | both | Pixel height (default: the conservation track's, or the row height) |
+| Field    | Kind | Meaning                                                                     |
+| -------- | ---- | --------------------------------------------------------------------------- |
+| `id`     | both | Unique key. The Tracks menu and `turnedOffTracks` use it                    |
+| `name`   | both | Label beside the track                                                      |
+| `values` | bar  | One number per column, or per residue of `row`                              |
+| `max`    | bar  | Value drawn at full height (default 1)                                      |
+| `color`  | bar  | Bar fill (default gray)                                                     |
+| `data`   | text | One character per column, or per residue of `row`                           |
+| `colors` | text | Character to background color; the active color scheme otherwise            |
+| `arcs`   | arc  | `{start, end, color?}` pairs; each end is a column or a residue             |
+| `row`    | both | Row name whose residues the values or characters index                      |
+| `height` | both | Pixel height (default 40 for a bar, 50 for an arc, the row height for text) |
 
 An arc joins two positions, such as a base pair, a disulfide bond or a residue
 contact; bar and text tracks hold one value per position. Both ends of an arc
