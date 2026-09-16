@@ -81,5 +81,14 @@ page quotes:
 | ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `rna/sam-riboswitch.sto` | Stockholm (tree+SS) | 37 SAM-I riboswitches found by `cmsearch` with the Rfam [RF00162](https://rfam.org/family/RF00162) model in six Firmicute genomes, aligned to it with `cmalign`, consensus structure and SAM contacts copied from the Rfam seed, FastTree tree embedded as `#=GF NH` |
 
+The `proteases/` and `h3n2/` folders back the two tutorials whose pipeline runs
+inside a language rather than a shell, and each folder's own README names its
+files:
+
+| Folder       | Tutorial                                                                           | Built by                                          |
+| ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `proteases/` | [r_protease_triad](../../../../docs/tutorials/r_protease_triad.md)                 | `docs/tutorials/scripts/build_r_protease_triad.R` |
+| `h3n2/`      | [notebook_flu_drift](../../../../docs/tutorials/notebook_flu_drift.md)             | `docs/tutorials/scripts/build_flu_drift.py`       |
+
 The parsers detect the format from file content (the `CLUSTAL` / `# STOCKHOLM` /
 `>` / `##gff` header), so the extensions above are only for readability.

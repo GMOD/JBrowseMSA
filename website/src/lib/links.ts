@@ -56,4 +56,9 @@ export const docs: SiteLink[] = [
     href: `${base}/r-package`,
     body: 'The msaviewr htmlwidget, with ape, Biostrings, ggtree, treeio and Shiny interop.',
   },
+  {
+    label: 'Python package',
+    href: `${base}/python-package`,
+    body: 'The msaview-widget anywidget for JupyterLab, Notebook, VS Code and Colab, with Biopython, numpy and pandas interop.',
+  },
 ]

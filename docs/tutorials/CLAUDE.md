@@ -23,6 +23,12 @@ loads, in a form a reader runs on their own data; everything else lives in
 `scripts/build_<topic>.sh`, which `## Reproduce it end to end` curls from GitHub
 and runs. Every number in the prose is one a run of that script printed.
 
+A pipeline that runs inside a language ships that language's script instead,
+`build_<topic>.R` or `build_<topic>.py`, and the reproduce section runs it with
+`Rscript` or `python`. The page's own snippets are the same code the script
+runs, so a reader following along and a reader running the script get the same
+files.
+
 Section order: opening paragraph, `## Prerequisites`,
 `## Where the data comes from` (one bullet per file, ending in the raw URL), the
 steps, `## Reproduce it end to end`, `## See also` (bare links),
@@ -64,6 +70,13 @@ Three traps the existing pages hit:
 - **An anchor that resolves can still draw off-canvas**, and nothing reports it.
   A collapsed clade outside the captured window is the usual way in, so look at
   every figure you ship.
+- **`generate.mjs` serves `packages/app/dist`.** A file added or rewritten under
+  `packages/app/public/data/` reaches a figure only after
+  `pnpm --filter app build`, and until then the capture uses the copy from the
+  last build with no warning.
+- **The aligner decides the row order of its output.** ClustalW writes the rows
+  in guide-tree order, so a series a reader should read in file order (by year,
+  by accession) needs the file rewritten in that order after the aligner runs.
 
 Hosted files the links load go under `packages/app/public/data/<topic>/`, served
 at `gmod.org/JBrowseMSA/demo/data/<topic>/`, with a row in that directory's

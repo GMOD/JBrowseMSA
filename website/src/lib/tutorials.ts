@@ -17,10 +17,12 @@
 // toolbar and the pale first rows for the body of the alignment.
 
 import codonThumb from '../../../docs/media/codon-spry-patch.png'
+import fluThumb from '../../../docs/media/flu-drift-siteb.png'
 import jbrowseThumb from '../../../docs/media/genome-browser-tp53-protein3d.png'
 import kinaseThumb from '../../../docs/media/kinase-pocket-family.png'
 import p53Thumb from '../../../docs/media/p53-variant-three-tracks.png'
 import proteinThumb from '../../../docs/media/protein-family-domains.png'
+import proteaseThumb from '../../../docs/media/r-protease-triad.png'
 import rnaThumb from '../../../docs/media/rna-family-overview.png'
 import scaleThumb from '../../../docs/media/scale-clade-groups.png'
 import spikeThumb from '../../../docs/media/spike-structure-final.png'
@@ -106,6 +108,26 @@ export const tutorials: Tutorial[] = [
     thumb: codonThumb,
     thumbAlt:
       '32 primate TRIM5 orthologs at codon resolution over the SPRY v1 patch, with a red per-codon dN/dS track above',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'r_protease_triad',
+    title: 'A protease family in R',
+    blurb:
+      'Fourteen peptidase S1 domains cut from UniProt entries with Biostrings, aligned with DECIPHER, a tree from ape, and two layers R computes. Nine rows read the catalytic H, D and S; five read something else.',
+    thumb: proteaseThumb,
+    thumbAlt:
+      'The GDSGGP motif of nine serine proteases beside five relatives that read A, M, Y or G at the catalytic serine',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'notebook_flu_drift',
+    title: 'Influenza drift in a notebook',
+    blurb:
+      '25 H3N2 vaccine strains from 1968 to 2022 as one hemagglutinin alignment in Jupyter, with a per-column count of how often each column changed. Antigenic site B reads 24 different strings; the fusion peptide reads two.',
+    thumb: fluThumb,
+    thumbAlt:
+      'Antigenic site B across 25 influenza vaccine strains in year order, the letters under the two bands turning over every few rows',
     thumbPosition: 'left',
   },
   {
