@@ -37,21 +37,37 @@ const TrackLabel = observer(function TrackLabel({
   const trackLabelHeight = Math.min(height, fontSize)
 
   return (
+    // a flex row, not inline text: zooming in grows fontSize against a tree
+    // area the leaf labels sized, and a name that wrapped took its menu button
+    // onto a second line, under the next track's button
     <div
       style={{
         width,
         height,
         flexShrink: 0,
-        textAlign: 'right',
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
+        gap: 2,
         fontSize: trackLabelHeight,
       }}
     >
-      {drawLabels ? name : ''}{' '}
+      <span
+        title={name}
+        style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {drawLabels ? name : ''}
+      </span>
       <IconButton
         className={classes.button}
         style={{
           width: trackLabelHeight,
           height: trackLabelHeight,
+          flexShrink: 0,
         }}
         onClick={event => {
           setAnchorEl(event.currentTarget)
