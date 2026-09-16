@@ -49,7 +49,7 @@ function span(panel: ResolvedFeaturePanel, row: string, name: string) {
 
 test('a tree and a GFF with no alignment give the panel its x', () => {
   const { model, panel } = featurePanel([
-    { kind: 'features', x: 'position', width: 216 },
+    { kind: 'features', x: 'position', width: 201 },
   ])
   expect(model.numColumns).toBe(0)
   expect(model.dataInitialized).toBe(true)
@@ -57,8 +57,8 @@ test('a tree and a GFF with no alignment give the panel its x', () => {
   expect(model.tracks).toEqual([])
   expect([...panel.spans.keys()]).toEqual(['g1', 'g2', 'g3'])
 
-  // the extent runs 0..1000 over 200 drawable pixels, one row height short of
-  // the panel so an arrowhead fits
+  // the extent runs 0..1000 over 200 drawable pixels, the panel less the pixel
+  // its rightmost stroke needs
   expect(model.rowHeight).toBe(16)
   expect(span(panel, 'g1', 'genA').xStart).toBe(0)
   expect(span(panel, 'g1', 'genA').xEnd).toBe(100)
@@ -71,7 +71,7 @@ test('align puts the named gene at one x, and a row lacking it keeps its origin'
     {
       kind: 'features',
       x: 'position',
-      width: 216,
+      width: 201,
       transform: [{ type: 'align', on: 'genE' }],
     },
   ])

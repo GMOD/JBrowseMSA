@@ -27,8 +27,14 @@ export interface SpanLayout {
   height: (laneCount: number) => number
   /** the band's top edge, from its row baseline, its lane and its height */
   top: (y: number, lane: number, height: number) => number
-  /** how far a strand head reaches past the body */
+  /** how far back from the feature's end the head starts */
   headLength: (height: number) => number
+  /**
+   * how far the head rises above the band. A bar too thin to taper reads its
+   * direction off a head taller than itself, and the bar sits on the row's
+   * bottom edge, so the room is above.
+   */
+  headRise?: (height: number) => number
 }
 
 /** the rows of `bandsByRow` that `leaves` covers, in display order */
@@ -81,6 +87,7 @@ export function drawFeatureSpans<T extends SpanBand>({
   for (const { y, bands } of rows) {
     const h = layout.height(bands[0]!.laneCount)
     const headLen = layout.headLength(h)
+    const rise = layout.headRise?.(h) ?? 0
     const labelled = h >= minFeatureLabelHeight
     for (const band of bands) {
       const [xStart, xEnd] = xOf(band)
@@ -93,17 +100,19 @@ export function drawFeatureSpans<T extends SpanBand>({
       ctx.fillStyle = fill
       ctx.strokeStyle = stroke
       const { strand } = band.annotation
+      const head = strand === undefined ? 0 : Math.min(headLen, w)
       if (strand === undefined) {
         ctx.fillRect(xStart, t, w, h)
         ctx.strokeRect(xStart, t, w, h)
       } else {
-        drawGeneArrow({ ctx, x: xStart, t, w, h, headLen, strand })
+        drawGeneArrow({ ctx, x: xStart, t, w, h, head, rise, strand })
       }
       const label = labelled ? labelOf?.(band) : undefined
       if (label !== undefined) {
         const fontSize = Math.min(h - 2, 11)
         ctx.font = `${fontSize}px sans-serif`
-        if (ctx.measureText(label).width + 2 <= w) {
+        // the head narrows to a point, so only about half of it holds text
+        if (ctx.measureText(label).width + 2 <= w - head / 2) {
           labelDrawn?.(band)
           ctx.fillStyle = contrastText(fill)
           ctx.textAlign = 'center'
@@ -115,19 +124,24 @@ export function drawFeatureSpans<T extends SpanBand>({
   }
 }
 
-// A gene arrow: a full-width rectangular body spanning the feature's
-// start..end columns, plus a triangular head that points *beyond* that end in
-// the strand direction (right for +, left for -). Keeping the body aligned to
-// the exact start/end columns means + and - strand features read as having the
-// same boundaries; the arrow lives outside them purely to show transcription
-// direction, preserving the column-by-column homology down the rows.
+/**
+ * A gene arrow, drawn the way gggenes and gggenomes draw one: the head is the
+ * last `head` pixels *of* the feature, tapering to a point at its end, and a
+ * feature shorter than the head is all head. The glyph therefore covers its
+ * start..end span and nothing else, so adjacent genes butt together instead of
+ * biting triangles out of each other, a neighbour never draws over a label, and
+ * a gene 20 columns wide reads as 20 columns wide.
+ *
+ * `rise` lifts the head above the band, for a bar too thin to taper.
+ */
 function drawGeneArrow({
   ctx,
   x,
   t,
   w,
   h,
-  headLen,
+  head,
+  rise,
   strand,
 }: {
   ctx: RenderCtx
@@ -135,18 +149,31 @@ function drawGeneArrow({
   t: number
   w: number
   h: number
-  headLen: number
+  head: number
+  rise: number
   strand: number
 }) {
-  const dir = strand > 0 ? 1 : -1
-  const bodyStart = strand > 0 ? x : x + w
-  const bodyEnd = strand > 0 ? x + w : x
+  const tip = strand > 0 ? x + w : x
+  const tail = strand > 0 ? x : x + w
+  const flange = strand > 0 ? tip - head : tip + head
+  const bottom = t + h
+  const crown = t - rise
+  const point = (crown + bottom) / 2
   ctx.beginPath()
-  ctx.moveTo(bodyStart, t)
-  ctx.lineTo(bodyEnd, t)
-  ctx.lineTo(bodyEnd + dir * headLen, t + h / 2)
-  ctx.lineTo(bodyEnd, t + h)
-  ctx.lineTo(bodyStart, t + h)
+  if (head >= w) {
+    ctx.moveTo(tail, crown)
+    ctx.lineTo(tip, point)
+    ctx.lineTo(tail, bottom)
+  } else {
+    ctx.moveTo(tail, t)
+    ctx.lineTo(flange, t)
+    if (rise > 0) {
+      ctx.lineTo(flange, crown)
+    }
+    ctx.lineTo(tip, point)
+    ctx.lineTo(flange, bottom)
+    ctx.lineTo(tail, bottom)
+  }
   ctx.closePath()
   ctx.fill()
   ctx.stroke()

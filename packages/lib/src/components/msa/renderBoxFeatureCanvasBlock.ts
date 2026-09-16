@@ -66,9 +66,6 @@ export function renderBoxFeatureCanvasBlock({
   // whole band. Keyed by accession rather than drawn on row 0, because the rows
   // carrying the gene model are often not the first ones in the alignment
   const labelled = drawSegmentLabels ? new Set<string>() : undefined
-  // gene arrow heads stick out up to a row height past the band, so pad the
-  // cull window enough that a band just outside the block still draws its head
-  const cull = rowHeight + colWidth
 
   drawFeatureSpans<DomainBand>({
     ctx,
@@ -87,9 +84,11 @@ export function renderBoxFeatureCanvasBlock({
         y -
         rowHeight +
         (subFeatureRows ? lane * h : domainUnderline ? rowHeight - h : 0),
-      // the head keeps its full size on an underline bar, since a head as short
-      // as the bar reads as a nub rather than as a direction
       headLength: h => (domainUnderline ? rowHeight / 2 : h),
+      // a head only as tall as an underline bar tapers over ten pixels of
+      // three, which reads as nothing; it takes the lower two fifths of the
+      // row instead, leaving the letters above it
+      headRise: h => (domainUnderline ? Math.max(0, rowHeight * 0.4 - h) : 0),
     },
     xOf: band => [band.startCol * colWidth, band.endCol * colWidth],
     colors: featureColors,
@@ -100,7 +99,7 @@ export function renderBoxFeatureCanvasBlock({
         : undefined),
     labelDrawn: band => labelled?.add(band.annotation.accession),
     contrastText: contrastTextFn(theme),
-    xMin: offsetX - cull,
-    xMax: offsetX + bx + cull,
+    xMin: offsetX,
+    xMax: offsetX + bx,
   })
 }

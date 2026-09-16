@@ -268,7 +268,6 @@ function featureLabelMap(annotations: Annotation[], field: string) {
 function featurePanelSpans({
   panel,
   width,
-  rowHeight,
   colWidth,
   domainBands,
   annotationsByRow,
@@ -276,7 +275,6 @@ function featurePanelSpans({
 }: {
   panel: RowFeaturesSpec
   width: number
-  rowHeight: number
   colWidth: number
   domainBands: Map<string, DomainBand[]>
   annotationsByRow: Record<string, Annotation[]>
@@ -315,9 +313,9 @@ function featurePanelSpans({
       max = Math.max(max, end)
     }
   }
-  // the arrowhead on the rightmost feature reaches a row height past its end,
-  // so the extent maps onto the panel less that much
-  const drawable = Math.max(1, width - rowHeight)
+  // a gene arrow ends where its feature does, so the extent maps onto the whole
+  // panel less the pixel the rightmost stroke needs
+  const drawable = Math.max(1, width - 1)
   const scale = max > min ? drawable / (max - min) : 0
   // a lane opens where a span covers more than a tenth of the one before it,
   // which keeps the genes of an operon on one lane: adjacent genes commonly
@@ -3686,7 +3684,6 @@ function stateModelFactory() {
               spans: featurePanelSpans({
                 panel,
                 width,
-                rowHeight: self.rowHeight,
                 colWidth: self.colWidth,
                 domainBands: this.domainBands,
                 annotationsByRow: self.annotationsByRow,
