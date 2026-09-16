@@ -1,4 +1,4 @@
-import { subFeatureRowHeight } from '../../constants.ts'
+import { domainUnderlineHeight, subFeatureRowHeight } from '../../constants.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
@@ -64,16 +64,24 @@ function drawTiles({
     strokePalette,
     segmentLabels,
     showMsaLetters,
+    domainUnderline,
     domainBands,
   } = model
-  const h = subFeatureRows ? subFeatureRowHeight : rowHeight
+  const h = subFeatureRows
+    ? subFeatureRowHeight
+    : domainUnderline
+      ? Math.min(domainUnderlineHeight, rowHeight)
+      : rowHeight
+  // the head keeps its full size on an underline bar, since a head as short as
+  // the bar reads as a nub rather than as a direction
+  const headLen = domainUnderline ? rowHeight / 2 : h
   // exon numbers label the bands only when residue letters aren't drawn (zoomed
   // out); when letters show, the alternating shades alone mark the boundaries
   // and a number would collide with the sequence
   const drawSegmentLabels = !showMsaLetters && !subFeatureRows && h >= 9
-  // gene arrow heads stick out one row-height past the band, so pad the cull
-  // window enough that a band just outside the block still draws its head
-  const cull = h + colWidth
+  // gene arrow heads stick out past the band, so pad the cull window enough
+  // that a band just outside the block still draws its head
+  const cull = headLen + colWidth
   const xMin = offsetX - cull
   const xMax = offsetX + blockWidth + cull
 
@@ -93,7 +101,14 @@ function drawTiles({
         const x = startCol * colWidth
         const lw = colWidth * (endCol - startCol)
         if (x + lw >= xMin && x <= xMax) {
-          const t = y - rowHeight + (subFeatureRows ? stackIndex * h : 0)
+          const t =
+            y -
+            rowHeight +
+            (subFeatureRows
+              ? stackIndex * h
+              : domainUnderline
+                ? rowHeight - h
+                : 0)
           ctx.fillStyle = fillPalette[accession]!
           ctx.strokeStyle = strokePalette[accession]!
           if (strand === undefined) {
@@ -115,7 +130,7 @@ function drawTiles({
               }
             }
           } else {
-            drawGeneArrow({ ctx, x, t, w: lw, h, strand })
+            drawGeneArrow({ ctx, x, t, w: lw, h, headLen, strand })
           }
         }
       }
@@ -135,6 +150,7 @@ function drawGeneArrow({
   t,
   w,
   h,
+  headLen,
   strand,
 }: {
   ctx: RenderCtx
@@ -142,17 +158,18 @@ function drawGeneArrow({
   t: number
   w: number
   h: number
+  headLen: number
   strand: number
 }) {
-  // body spans bodyStart..bodyEnd (the exact columns); the head extends one
-  // row-height past bodyEnd in the strand direction
+  // body spans bodyStart..bodyEnd (the exact columns); the head extends
+  // headLen past bodyEnd in the strand direction
   const dir = strand > 0 ? 1 : -1
   const bodyStart = strand > 0 ? x : x + w
   const bodyEnd = strand > 0 ? x + w : x
   ctx.beginPath()
   ctx.moveTo(bodyStart, t)
   ctx.lineTo(bodyEnd, t)
-  ctx.lineTo(bodyEnd + dir * h, t + h / 2)
+  ctx.lineTo(bodyEnd + dir * headLen, t + h / 2)
   ctx.lineTo(bodyEnd, t + h)
   ctx.lineTo(bodyStart, t + h)
   ctx.closePath()

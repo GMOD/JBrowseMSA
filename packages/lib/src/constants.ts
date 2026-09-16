@@ -14,6 +14,8 @@ export const defaultAllowedGappyness = 100
 export const defaultSubFeatureRows = false
 // row height for each stacked feature when subFeatureRows is on
 export const subFeatureRowHeight = 4
+// height of the bar the overlay draws under a row in letter-color mode
+export const domainUnderlineHeight = 3
 
 // Feature types that are ordinal segments of one transcript. The overlay
 // alternates two shades across them and labels them by number, where a domain

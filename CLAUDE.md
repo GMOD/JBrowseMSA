@@ -82,6 +82,14 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   `react-msaview-cli interpro` builds it from precomputed matches in seconds,
   where the EBI iprscan5 queue the viewer used to submit to took fifteen
   minutes.
+- The domain overlay and the color scheme both want a cell's background, so
+  `domainUnderline` in `model.ts` decides who gets it. In letter-color mode
+  (`bgColor` off) with the letters big enough to draw, the overlay gives up its
+  fill and marks each span with a `domainUnderlineHeight` bar along the bottom
+  of the row, and the letters take the scheme color. A filled box wins back the
+  row wherever the letters cannot carry the scheme: sub-row layout, which stacks
+  its boxes clear of the letters anyway, and zoomed out past
+  `minLetterRowHeight`, where the box is the only thing left to read.
 - The viewer calls no remote compute queue and runs no analysis long enough to
   freeze the tab. The one exception is neighbor joining, capped at
   `maxNeighborJoiningRows`, because on a small alignment it is faster than

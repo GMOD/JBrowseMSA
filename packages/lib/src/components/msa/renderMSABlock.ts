@@ -116,6 +116,7 @@ function drawTilesAndText({
     relativeTo,
     showMsaLetters,
     subFeatureRows,
+    domainUnderline,
     domainBandsByStart,
   } = model
 
@@ -136,8 +137,9 @@ function drawTilesAndText({
     const quarterRowHeight = rowHeight / 4
     // with the tiles coming from the domain overlay instead, letters sit either
     // on a domain box or on the plain background; sub-row layout stacks the boxes
-    // above the letters, so those rows are all plain background
-    const overDomains = !drawTiles && !subFeatureRows
+    // above the letters and letter-color mode shrinks them to a bar under the
+    // row, so neither leaves anything behind a letter
+    const overDomains = !drawTiles && !subFeatureRows && !domainUnderline
 
     for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
       const node = visibleLeaves[i]!
@@ -179,7 +181,7 @@ function drawTilesAndText({
                   ? // on top of a colored tile, or on the background where the
                     // scheme gives that cell no color
                     contrastText(color)
-                  : !drawTiles || !color
+                  : bgColor || !color
                     ? // plain background, uncolored letters
                       theme.palette.text.primary
                     : // letter-color mode: darken/lighten to stay readable
