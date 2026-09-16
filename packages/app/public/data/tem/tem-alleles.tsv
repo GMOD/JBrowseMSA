@@ -1,0 +1,47 @@
+allele	phenotype	subclass	protein_accession	length
+TEM-1	broad-spectrum	BETA-LACTAM	WP_000027057.1	286
+TEM-2	broad-spectrum	BETA-LACTAM	WP_011645017.1	286
+TEM-55	broad-spectrum	BETA-LACTAM	WP_063864938.1	286
+TEM-57	broad-spectrum	BETA-LACTAM	WP_032492330.1	286
+TEM-90	broad-spectrum	BETA-LACTAM	WP_032490026.1	286
+TEM-95	broad-spectrum	BETA-LACTAM	WP_061659705.1	286
+TEM-110	broad-spectrum	BETA-LACTAM	WP_032494237.1	286
+TEM-116	broad-spectrum	BETA-LACTAM	WP_000027050.1	286
+TEM-127	broad-spectrum	BETA-LACTAM	WP_032490959.1	286
+TEM-128	broad-spectrum	BETA-LACTAM	WP_032490960.1	286
+TEM-135	broad-spectrum	BETA-LACTAM	WP_015058868.1	286
+TEM-141	broad-spectrum	BETA-LACTAM	WP_032491376.1	286
+TEM-3	extended-spectrum	CEPHALOSPORIN	WP_032488414.1	286
+TEM-4	extended-spectrum	CEPHALOSPORIN	WP_063864911.1	286
+TEM-5	extended-spectrum	CEPHALOSPORIN	WP_109963600.1	286
+TEM-6	extended-spectrum	CEPHALOSPORIN	WP_063864949.1	286
+TEM-7	extended-spectrum	CEPHALOSPORIN	WP_109874025.1	286
+TEM-8	extended-spectrum	CEPHALOSPORIN	WP_063865014.1	286
+TEM-9	extended-spectrum	CEPHALOSPORIN	WP_102607453.1	286
+TEM-10	extended-spectrum	CEPHALOSPORIN	WP_000027061.1	286
+TEM-11	extended-spectrum	CEPHALOSPORIN	WP_063864800.1	286
+TEM-12	extended-spectrum	CEPHALOSPORIN	WP_042065300.1	286
+TEM-15	extended-spectrum	CEPHALOSPORIN	WP_032492108.1	286
+TEM-16	extended-spectrum	CEPHALOSPORIN	WP_063864870.1	286
+TEM-30	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_021561477.1	286
+TEM-31	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_165539487.1	286
+TEM-32	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_052944427.1	286
+TEM-33	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_013279314.1	286
+TEM-34	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_015379489.1	286
+TEM-35	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_063864910.1	286
+TEM-36	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_075985685.1	286
+TEM-37	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_159373457.1	286
+TEM-39	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_148044474.1	286
+TEM-40	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_021526512.1	286
+TEM-45	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_063864913.1	286
+TEM-54	inhibitor-resistant broad-spectrum	BETA-LACTAM	WP_063864930.1	286
+TEM-68	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_032489741.1	286
+TEM-109	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864799.1	286
+TEM-121	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864807.1	286
+TEM-125	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864811.1	286
+TEM-129	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864833.1	286
+TEM-151	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864862.1	286
+TEM-152	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864863.1	286
+TEM-154	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864865.1	286
+TEM-158	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864868.1	286
+TEM-178	inhibitor-resistant extended-spectrum	CEPHALOSPORIN	WP_063864879.1	285

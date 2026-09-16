@@ -31,6 +31,7 @@ import proteaseThumb from '../../../docs/media/r-protease-triad.png'
 import rnaThumb from '../../../docs/media/rna-family-overview.png'
 import scaleThumb from '../../../docs/media/scale-clade-groups.png'
 import spikeThumb from '../../../docs/media/spike-structure-final.png'
+import temThumb from '../../../docs/media/tem_alleles-strips.png'
 
 import type { ImageMetadata } from 'astro'
 
@@ -93,6 +94,16 @@ export const tutorials: Tutorial[] = [
     thumb: complexThumb,
     thumbAlt:
       'Eleven concatenated hemoglobin rows with arcs joining each alpha residue to the beta residue it touches in the crystal, colored by interface',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'tem_alleles',
+    title: 'TEM beta-lactamase alleles and what they hydrolyze',
+    blurb:
+      "46 named TEM alleles from NCBI's Reference Gene Catalog, with the phenotype the catalog records and the residue each carries at the Ambler positions behind extended-spectrum and inhibitor resistance. All 22 extended-spectrum alleles are substituted at 104, 164, 238 or 240; a control position at 265 splits across three phenotypes.",
+    thumb: temThumb,
+    thumbAlt:
+      'Forty-six TEM allele rows with a phenotype strip and eight residue strips beside the tree, tip labels colored by phenotype',
     thumbPosition: 'left',
   },
   {
