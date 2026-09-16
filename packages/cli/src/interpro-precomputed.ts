@@ -90,21 +90,46 @@ async function fetchRelease(): Promise<string> {
   return json.databases.interpro.version
 }
 
+// The API answers a reviewed accession that has matches with 404, roughly once
+// in nine lookups, so a 404 is asked again a few times before it is taken for
+// an answer. Returns undefined where every attempt gave one.
+async function fetchNotFoundRetried(url: string, attempts = 3) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const res = await fetchWithRetry(url)
+    if (res.status !== 404) {
+      return res
+    }
+    if (attempt < attempts - 1) {
+      await new Promise(resolve => setTimeout(resolve, 1000 * 2 ** attempt))
+    }
+  }
+  return undefined
+}
+
 /**
  * Every entry the member database has for one protein, following `next` across
  * pages (P98161 has 24 InterPro entries, more than one default page of 20).
+ *
+ * Returns undefined where the API answered 404 to the end. The API gives that
+ * answer to a reviewed accession that has matches, several times in a run of a
+ * dozen, so a 404 is retried, and an accession still unresolved after that is
+ * reported rather than recorded as having no matches: caching an empty answer
+ * would keep those domains out of the GFF on every later run too.
  */
 async function fetchEntries(
   accession: string,
   database: string,
-): Promise<ApiResult[]> {
+): Promise<ApiResult[] | undefined> {
   const results: ApiResult[] = []
   let url: string | null =
     `${API}/entry/${database}/protein/uniprot/${accession}/?page_size=200`
   while (url) {
-    const res = await fetchWithRetry(url)
-    // 204 = the protein exists but has no matches in this member database.
-    if (res.status === 204 || res.status === 404) {
+    const res = await fetchNotFoundRetried(url)
+    if (!res) {
+      return undefined
+    }
+    // 204 = the protein exists but has no matches in this member database
+    if (res.status === 204) {
       break
     }
     if (!res.ok) {
@@ -137,13 +162,14 @@ export async function runInterProPrecomputed(
   )
 
   const entriesByAccession = new Map<string, ApiResult[]>()
+  const unresolved: string[] = []
   let fetched = 0
   let cached = 0
   for (const [i, accession] of distinct.entries()) {
     const hit = noCache
       ? undefined
       : readCached<ApiResult[]>(release, database, accession)
-    let entries: ApiResult[]
+    let entries: ApiResult[] | undefined
     if (hit) {
       entries = hit
       cached++
@@ -156,15 +182,26 @@ export async function runInterProPrecomputed(
           `${e}\n${i} of ${distinct.length} accessions are cached; re-run to resume from ${accession}.`,
         )
       }
-      writeCached(release, database, accession, entries)
-      fetched++
+      if (entries) {
+        writeCached(release, database, accession, entries)
+        fetched++
+      } else {
+        unresolved.push(accession)
+      }
     }
-    entriesByAccession.set(accession, entries)
+    entriesByAccession.set(accession, entries ?? [])
+    const count = entries
+      ? `${entries.length} ${database} entries`
+      : 'no answer'
     console.log(
-      `  [${i + 1}/${distinct.length}] ${accession}: ${entries.length} ${database} entries${hit ? ' (cached)' : ''}`,
+      `  [${i + 1}/${distinct.length}] ${accession}: ${count}${hit ? ' (cached)' : ''}`,
     )
-    // a typo, a non-UniProtKB id and a protein with no matches all return empty
-    if (entries.length === 0) {
+    if (!entries) {
+      console.warn(
+        `    the API answered 404 for ${accession} every time; it carries no domains in the GFF, and a re-run tries it again`,
+      )
+    } else if (entries.length === 0) {
+      // a typo, a non-UniProtKB id and a protein with no matches all look alike
       console.warn(
         `    no ${database} matches for ${accession}; check it is a UniProtKB accession and that --database is the right member database`,
       )
@@ -188,6 +225,11 @@ export async function runInterProPrecomputed(
   )
 
   console.log(`${fetched} fetched, ${cached} from ${cacheLocation()}`)
+  if (unresolved.length > 0) {
+    console.warn(
+      `${unresolved.length} of ${distinct.length} accessions did not resolve: ${unresolved.join(', ')}. Re-run to try them again.`,
+    )
+  }
 
   if (options.msaFile) {
     checkLengths(
