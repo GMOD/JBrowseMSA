@@ -65,6 +65,35 @@
 #'   \code{list(rows = c(...))} for whole rows, plus an optional
 #'   \code{label} and \code{color}. Drawn as a bordered band (or row tint)
 #'   with the label beside it.
+#' @param highlight_columns Alignment columns (1-based) to put under a
+#'   persistent overlay, as a numeric vector.
+#' @param residue_mappings Which residue of which structure each residue of a
+#'   row is, for a viewer showing a structure beside the alignment. A list of
+#'   mappings, each a list with \code{row}, \code{structure} (a list with
+#'   \code{id}, \code{kind} and \code{asymId}) and \code{segments} (a list of
+#'   lists with \code{rowStart}, \code{rowEnd}, \code{structStart} and
+#'   \code{structEnd}), plus optional \code{accession}, \code{unobserved} and
+#'   \code{rowLength}.
+#' @param relative_to A row name. Every other row draws as its differences from
+#'   that row, with matching residues as \code{.}.
+#' @param region A span to zoom and scroll to once the alignment loads, as
+#'   \code{list(start, end)} in alignment columns or
+#'   \code{list(row, start, end)} in residues of that row, 1-based inclusive.
+#' @param col_width Width of one alignment column in pixels (horizontal zoom).
+#' @param row_height Height of one row in pixels (vertical zoom).
+#' @param allowed_gappyness Hide columns that are at least this percent gaps.
+#'   Default 100, which hides nothing.
+#' @param draw_tree Logical. If \code{TRUE} (default), draw the phylogeny. If
+#'   \code{FALSE}, leave a gutter holding the row labels alone.
+#' @param tree_area_width Width of the tree and label gutter in pixels.
+#' @param auto_tree_area_width Logical. Size that gutter to the labels it
+#'   holds. Pair with \code{draw_tree = FALSE}.
+#' @param bg_color Logical. If \code{TRUE} (default), the color scheme colors
+#'   each cell's background. If \code{FALSE}, it colors the letters and leaves
+#'   the background plain, which lets a domain overlay mark each span with a
+#'   bar under the row.
+#' @param theme \code{"light"} (default), \code{"dark"}, or a list of MUI theme
+#'   options merged over the JBrowse theme.
 #' @param hide_header Logical. If \code{TRUE}, leave out the viewer's toolbar,
 #'   for a page or Shiny app drawing its own controls.
 #' @param height Widget height (CSS units or pixels).
@@ -173,7 +202,12 @@
 #' @export
 msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     column_tracks = NULL, show_branch_len = NULL,
-                    highlights = NULL, hide_header = NULL,
+                    highlights = NULL, highlight_columns = NULL,
+                    residue_mappings = NULL, relative_to = NULL,
+                    region = NULL, col_width = NULL, row_height = NULL,
+                    allowed_gappyness = NULL, draw_tree = NULL,
+                    tree_area_width = NULL, auto_tree_area_width = NULL,
+                    bg_color = NULL, theme = NULL, hide_header = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
   # the viewer fetches a URL itself; passed on as document text, a URL draws a
   # one-row alignment named after it
@@ -194,6 +228,18 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$columnTracks <- convert_column_tracks(column_tracks)
   props$showBranchLen <- show_branch_len
   props$highlights <- convert_highlights(highlights)
+  props$highlightColumns <- convert_highlight_columns(highlight_columns)
+  props$residueMappings <- convert_residue_mappings(residue_mappings)
+  props$relativeTo <- sanitize_names_or_null(relative_to)
+  props$region <- convert_region(region)
+  props$colWidth <- col_width
+  props$rowHeight <- row_height
+  props$allowedGappyness <- allowed_gappyness
+  props$drawTree <- draw_tree
+  props$treeAreaWidth <- tree_area_width
+  props$autoTreeAreaWidth <- auto_tree_area_width
+  props$bgColor <- bg_color
+  props$theme <- theme
   props$hideHeader <- hide_header
 
   htmlwidgets::createWidget(
@@ -308,6 +354,50 @@ convert_highlights <- function(highlights) {
     if (!is.null(h$row)) h$row <- sanitize_names(h$row)
     h
   })
+}
+
+# One column stays a JSON array. Integers, because a column is a position and
+# jsonlite writes a double as 12.0, which the viewer reads as a fractional
+# column.
+convert_highlight_columns <- function(columns) {
+  if (is.null(columns)) return(NULL)
+  I(as.integer(columns))
+}
+
+# Each mapping serializes as one JSON object, with `segments` and `unobserved`
+# staying arrays at length one.
+convert_residue_mappings <- function(mappings) {
+  if (is.null(mappings)) return(NULL)
+  if (!is.list(mappings)) {
+    stop("residue_mappings must be a list of mappings, each a list with row, structure and segments")
+  }
+  lapply(mappings, function(m) {
+    for (field in c("row", "structure", "segments")) {
+      if (is.null(m[[field]])) stop("residue mapping is missing '", field, "'")
+    }
+    m$row <- sanitize_names(m$row)
+    m$segments <- I(lapply(m$segments, as.list))
+    if (!is.null(m$unobserved)) {
+      m$unobserved <- I(lapply(m$unobserved, function(pair) I(as.integer(pair))))
+    }
+    m
+  })
+}
+
+# One object, not an array, so its scalars unbox the way the viewer reads them
+convert_region <- function(region) {
+  if (is.null(region)) return(NULL)
+  if (!is.list(region) || is.null(region$start) || is.null(region$end)) {
+    stop("region must be a list with start and end, and an optional row")
+  }
+  region$start <- as.integer(region$start)
+  region$end <- as.integer(region$end)
+  if (!is.null(region$row)) region$row <- sanitize_names(region$row)
+  region
+}
+
+sanitize_names_or_null <- function(x) {
+  if (is.null(x)) NULL else sanitize_names(x)
 }
 
 convert_tree <- function(tree) {

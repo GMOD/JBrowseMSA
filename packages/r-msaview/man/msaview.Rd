@@ -12,6 +12,18 @@ msaview(
   column_tracks = NULL,
   show_branch_len = NULL,
   highlights = NULL,
+  highlight_columns = NULL,
+  residue_mappings = NULL,
+  relative_to = NULL,
+  region = NULL,
+  col_width = NULL,
+  row_height = NULL,
+  allowed_gappyness = NULL,
+  draw_tree = NULL,
+  tree_area_width = NULL,
+  auto_tree_area_width = NULL,
+  bg_color = NULL,
+  theme = NULL,
   hide_header = NULL,
   height = NULL,
   width = NULL,
@@ -79,6 +91,47 @@ inclusive coordinates: \code{list(start, end)} for alignment columns,
 \code{list(rows = c(...))} for whole rows, plus an optional
 \code{label} and \code{color}. Drawn as a bordered band (or row tint)
 with the label beside it.}
+
+\item{highlight_columns}{Alignment columns (1-based) to put under a
+persistent overlay, as a numeric vector.}
+
+\item{residue_mappings}{Which residue of which structure each residue of a
+row is, for a viewer showing a structure beside the alignment. A list of
+mappings, each a list with \code{row}, \code{structure} (a list with
+\code{id}, \code{kind} and \code{asymId}) and \code{segments} (a list of
+lists with \code{rowStart}, \code{rowEnd}, \code{structStart} and
+\code{structEnd}), plus optional \code{accession}, \code{unobserved} and
+\code{rowLength}.}
+
+\item{relative_to}{A row name. Every other row draws as its differences from
+that row, with matching residues as \code{.}.}
+
+\item{region}{A span to zoom and scroll to once the alignment loads, as
+\code{list(start, end)} in alignment columns or
+\code{list(row, start, end)} in residues of that row, 1-based inclusive.}
+
+\item{col_width}{Width of one alignment column in pixels (horizontal zoom).}
+
+\item{row_height}{Height of one row in pixels (vertical zoom).}
+
+\item{allowed_gappyness}{Hide columns that are at least this percent gaps.
+Default 100, which hides nothing.}
+
+\item{draw_tree}{Logical. If \code{TRUE} (default), draw the phylogeny. If
+\code{FALSE}, leave a gutter holding the row labels alone.}
+
+\item{tree_area_width}{Width of the tree and label gutter in pixels.}
+
+\item{auto_tree_area_width}{Logical. Size that gutter to the labels it
+holds. Pair with \code{draw_tree = FALSE}.}
+
+\item{bg_color}{Logical. If \code{TRUE} (default), the color scheme colors
+each cell's background. If \code{FALSE}, it colors the letters and leaves
+the background plain, which lets a domain overlay mark each span with a
+bar under the row.}
+
+\item{theme}{\code{"light"} (default), \code{"dark"}, or a list of MUI theme
+options merged over the JBrowse theme.}
 
 \item{hide_header}{Logical. If \code{TRUE}, leave out the viewer's toolbar,
 for a page or Shiny app drawing its own controls.}

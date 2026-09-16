@@ -7,6 +7,8 @@ import type {
   Highlight,
   MSAViewerProps,
   MountedViewer,
+  Region,
+  ResidueMapping,
   Viewport,
   mount,
 } from 'react-msaview'
@@ -23,10 +25,16 @@ export interface Traits {
   height: number | null
   col_width: number | null
   row_height: number | null
+  allowed_gappyness: number | null
   highlights: Highlight[]
+  highlight_columns: number[]
   column_tracks: ColumnTrackSpec[]
+  residue_mappings: ResidueMapping[]
   relative_to: string | null
+  region: Region | null
   draw_tree: boolean
+  tree_area_width: number | null
+  auto_tree_area_width: boolean
   show_branch_len: boolean
   bg_color: boolean
   hide_header: boolean
@@ -48,10 +56,16 @@ export const INPUT_TRAITS = [
   'height',
   'col_width',
   'row_height',
+  'allowed_gappyness',
   'highlights',
+  'highlight_columns',
   'column_tracks',
+  'residue_mappings',
   'relative_to',
+  'region',
   'draw_tree',
+  'tree_area_width',
+  'auto_tree_area_width',
   'show_branch_len',
   'bg_color',
   'hide_header',
@@ -81,10 +95,16 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     height: optional(model.get('height')),
     colWidth: optional(model.get('col_width')),
     rowHeight: optional(model.get('row_height')),
+    allowedGappyness: optional(model.get('allowed_gappyness')),
     highlights: model.get('highlights'),
+    highlightColumns: model.get('highlight_columns'),
     columnTracks: model.get('column_tracks'),
+    residueMappings: model.get('residue_mappings'),
     relativeTo: optional(model.get('relative_to')),
+    region: optional(model.get('region')),
     drawTree: model.get('draw_tree'),
+    treeAreaWidth: optional(model.get('tree_area_width')),
+    autoTreeAreaWidth: model.get('auto_tree_area_width'),
     showBranchLen: model.get('show_branch_len'),
     bgColor: model.get('bg_color'),
     hideHeader: model.get('hide_header'),
