@@ -259,3 +259,30 @@ test_that("convert_column_tracks rejects a track without a kind", {
     "missing 'kind'"
   )
 })
+
+test_that("convert_highlights drops list names", {
+  # Map() over a named vector names its result, a named list serializes as a
+  # JSON object, and the viewer iterates the array it expects
+  highlights <- Map(
+    function(residue, label) {
+      list(row = "Ref", start = residue, end = residue, label = label)
+    },
+    c(His57 = 42, Ser195 = 180), c("His57", "Ser195")
+  )
+  json <- as.character(jsonlite::toJSON(
+    msaviewr:::convert_highlights(highlights),
+    auto_unbox = TRUE
+  ))
+  expect_true(startsWith(json, '[{"row":"Ref"'))
+})
+
+test_that("convert_column_tracks drops list names", {
+  tracks <- list(
+    entropy = list(id = "e", name = "E", kind = "bar", values = c(1, 2))
+  )
+  json <- as.character(jsonlite::toJSON(
+    msaviewr:::convert_column_tracks(tracks),
+    auto_unbox = TRUE
+  ))
+  expect_true(startsWith(json, '[{"id":"e"'))
+})

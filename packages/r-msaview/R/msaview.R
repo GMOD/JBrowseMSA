@@ -346,14 +346,16 @@ convert_msa <- function(msa) {
 
 # Each highlight serializes as one JSON object. `rows` has to stay an array
 # even when it holds one name, and a scalar has to stay a scalar, which
-# htmlwidgets' auto_unbox would otherwise decide per element.
+# htmlwidgets' auto_unbox would otherwise decide per element. unname() keeps
+# the list a JSON array: Map() over a named vector names its result, a named
+# list serializes as a JSON object, and the viewer iterates the value it gets.
 convert_highlights <- function(highlights) {
   if (is.null(highlights)) return(NULL)
-  lapply(highlights, function(h) {
+  unname(lapply(highlights, function(h) {
     if (!is.null(h$rows)) h$rows <- I(sanitize_names(h$rows))
     if (!is.null(h$row)) h$row <- sanitize_names(h$row)
     h
-  })
+  }))
 }
 
 # One column stays a JSON array. Integers, because a column is a position and
@@ -470,7 +472,7 @@ convert_column_tracks <- function(tracks) {
   if (!is.list(tracks)) {
     stop("column_tracks must be a list of tracks, each a list with id, name and kind")
   }
-  lapply(tracks, function(track) {
+  unname(lapply(tracks, function(track) {
     for (field in c("id", "name", "kind")) {
       if (is.null(track[[field]])) stop("column track is missing '", field, "'")
     }
@@ -484,7 +486,7 @@ convert_column_tracks <- function(tracks) {
     if (!is.null(track$colors)) track$colors <- as.list(track$colors)
     if (!is.null(track$arcs)) track$arcs <- convert_arcs(track$arcs)
     track
-  })
+  }))
 }
 
 # An arc track's pairs, as a data frame of start/end (+ optional color) or a
