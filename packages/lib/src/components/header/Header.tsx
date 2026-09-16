@@ -34,7 +34,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
     [model],
   )
   return (
-    <div ref={ref} style={{ display: 'flex' }}>
+    <div ref={ref} style={{ display: 'flex', flexWrap: 'wrap' }}>
       <FileMenu model={model} />
       <ColorSchemeMenu model={model} />
       <TreeSettingsMenu model={model} />
