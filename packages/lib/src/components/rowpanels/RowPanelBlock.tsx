@@ -93,9 +93,10 @@ const RowPanelBlock = observer(function ({
         height={canvasHeight}
         style={{ position: 'absolute', top: offsetY, left: 0, width, height }}
         onMouseMove={event => {
-          const row = Math.floor(
-            (event.nativeEvent.offsetY + offsetY) / rowHeight,
-          )
+          // the blocks are laid out in row space and scrolled by a transform
+          // on their container, so the pointer's row comes off the canvas box
+          const { left, top } = event.currentTarget.getBoundingClientRect()
+          const row = Math.floor((event.clientY - top + offsetY) / rowHeight)
           const name = model.leaves[row]?.data.name
           const lines =
             name === undefined
@@ -104,7 +105,7 @@ const RowPanelBlock = observer(function ({
                   model,
                   panel,
                   name,
-                  x: event.nativeEvent.offsetX,
+                  x: event.clientX - left,
                 })
           setHovered(
             name === undefined || lines.length === 0
