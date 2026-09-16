@@ -17,16 +17,33 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
       <DialogContent>
         <Typography>
           MSAView {version} (
-          <Link href="https://github.com/gmod/react-msaview">Github</Link>)
+          <Link
+            target="_blank"
+            rel="noopener"
+            href="https://github.com/gmod/react-msaview"
+          >
+            Github
+          </Link>
+          )
         </Typography>
 
         <ul>
           <li>
             <Typography>
               We use some color schemes from the{' '}
-              <Link href="https://github.com/biotite-dev/biotite">biotite</Link>{' '}
+              <Link
+                target="_blank"
+                rel="noopener"
+                href="https://github.com/biotite-dev/biotite"
+              >
+                biotite
+              </Link>{' '}
               project, and their license is reproduced{' '}
-              <Link href="https://github.com/biotite-dev/biotite/blob/master/LICENSE.rst">
+              <Link
+                target="_blank"
+                rel="noopener"
+                href="https://github.com/biotite-dev/biotite/blob/master/LICENSE.rst"
+              >
                 here
               </Link>
             </Typography>
@@ -34,7 +51,11 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
           <li>
             <Typography>
               See this page for some information on jalview colorings{' '}
-              <Link href="https://www.jalview.org/help/html/colourSchemes/">
+              <Link
+                target="_blank"
+                rel="noopener"
+                href="https://www.jalview.org/help/html/colourSchemes/"
+              >
                 here
               </Link>
             </Typography>
@@ -43,7 +64,11 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
             <Typography>
               See this page for some info on the clustal, cinema, maeditor, and
               lesk color schemes{' '}
-              <Link href="http://www.bioinformatics.nl/~berndb/aacolour.html">
+              <Link
+                target="_blank"
+                rel="noopener"
+                href="http://www.bioinformatics.nl/~berndb/aacolour.html"
+              >
                 here
               </Link>
             </Typography>
@@ -51,7 +76,11 @@ export default function AboutDialog({ onClose }: { onClose: () => void }) {
           <li>
             <Typography>
               See this paper about the flower color scheme{' '}
-              <Link href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7245768/">
+              <Link
+                target="_blank"
+                rel="noopener"
+                href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7245768/"
+              >
                 here
               </Link>
             </Typography>

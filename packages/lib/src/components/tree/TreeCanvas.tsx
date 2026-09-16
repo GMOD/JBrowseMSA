@@ -71,9 +71,6 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
       ref={ref}
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
-      onMouseLeave={event => {
-        event.preventDefault()
-      }}
       style={{
         height,
         position: 'relative',

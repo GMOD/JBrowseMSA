@@ -24,11 +24,9 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
           Open an MSA file (FASTA, Stockholm, Clustal, A3M or EMF format) and/or
           a tree file (Newick format).
         </Typography>
-        <Typography color="error">
-          Note: you can open up just an MSA or just a tree, both are not
-          required. Some MSA files e.g. stockholm format have an embedded tree
-          also and this is fine, and opening a separate tree file is not
-          required.
+        <Typography color="text.secondary">
+          An MSA alone or a tree alone is enough, and a Stockholm file with an
+          embedded tree needs no separate tree file.
         </Typography>
       </div>
 

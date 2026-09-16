@@ -13,12 +13,12 @@ import { useTreeHover } from './useTreeHover.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
-const useStyles = makeStyles()(() => ({
+const useStyles = makeStyles()(theme => ({
   hover: {
     position: 'absolute',
     pointerEvents: 'none',
     zIndex: 100,
-    background: 'rgba(0,0,0,0.1)',
+    background: theme.palette.action.hover,
   },
 }))
 

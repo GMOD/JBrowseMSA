@@ -2,7 +2,7 @@ import React from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { ErrorBoundary } from '@jbrowse/core/ui/ErrorBoundary'
-import { Button, Typography } from '@mui/material'
+import { Button, CircularProgress, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import MSAView from './MSAView.tsx'
@@ -16,35 +16,7 @@ const LoadingSpinner = observer(function ({ model }: { model: MsaViewModel }) {
     <div
       style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 20 }}
     >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <style>
-          {`@keyframes spinner { to { transform: rotate(360deg); } }`}
-        </style>
-        <circle
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="#ccc"
-          strokeWidth="3"
-          fill="none"
-        />
-        <path
-          d="M12 2a10 10 0 0 1 10 10"
-          stroke="#1976d2"
-          strokeWidth="3"
-          fill="none"
-          strokeLinecap="round"
-          style={{
-            animation: 'spinner 1s linear infinite',
-            transformOrigin: 'center',
-          }}
-        />
-      </svg>
+      <CircularProgress size={24} />
       <Typography variant="h6">{status?.msg ?? 'Loading...'}</Typography>
       {status?.onCancel ? (
         <Button

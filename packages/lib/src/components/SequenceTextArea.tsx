@@ -15,7 +15,6 @@ const useStyles = makeStyles()(theme => ({
   dialogContent: {
     background: theme.palette.action.selected,
     margin: 4,
-    minWidth: '80em',
   },
 }))
 

@@ -54,9 +54,6 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
       data-testid="msa_canvas"
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
-      onMouseLeave={event => {
-        event.preventDefault()
-      }}
       style={{
         position: 'relative',
         height,

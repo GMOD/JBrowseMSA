@@ -29,8 +29,7 @@ const TreeBranchMenu = observer(function ({
         top: node.y,
       }}
       transitionDuration={0}
-      keepMounted
-      open={Boolean(node)}
+      open
       onClose={onClose}
     >
       <MenuItem dense disabled>
