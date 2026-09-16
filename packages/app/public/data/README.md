@@ -49,20 +49,29 @@ page, built by `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
 | `tp53-clinvar-pathogenic.vcf.gz`  | VCF (bgzip+tabix) | ClinVar (GRCh38) variants over the TP53 locus filtered to Pathogenic/Likely_pathogenic; ClinVar updates weekly, so the count changes |
 
 Each folder below backs one tutorial, and the folder's own README names its
-files and the step that writes each:
+files and the step that writes each. `pnpm check:data` (CI runs it) fails on a
+folder missing from this table, a row naming a page or a script that does not
+exist, a file its folder README does not name, and a `?data=` link anywhere in
+the docs that loads a file no longer here.
 
-| Folder       | Tutorial                                                                                       | Built by                                                        |
-| ------------ | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `proteases/` | [r_protease_triad](../../../../docs/tutorials/r_protease_triad.md)                             | `docs/tutorials/scripts/build_r_protease_triad.R`               |
-| `h3n2/`      | [notebook_flu_drift](../../../../docs/tutorials/notebook_flu_drift.md)                         | `docs/tutorials/scripts/build_flu_drift.py`                     |
-| `h5n1/`      | [influenza_surveillance_figure](../../../../docs/tutorials/influenza_surveillance_figure.md)   | `docs/tutorials/scripts/build_influenza_surveillance_figure.py` |
-| `kinase-pocket/` | [kinase_pocket](../../../../docs/tutorials/kinase_pocket.md)                                   | `docs/tutorials/scripts/build_kinase_pocket.sh`                 |
-| `mitogenome/` | [mitogenome_genes](../../../../docs/tutorials/mitogenome_genes.md)                             | `docs/tutorials/scripts/build_mitogenome_genes.sh`              |
-| `neighborhoods/` | [gene_neighborhoods](../../../../docs/tutorials/gene_neighborhoods.md)                         | `docs/tutorials/scripts/build_gene_neighborhoods.sh`            |
-| `rna/`       | [rna_family](../../../../docs/tutorials/rna_family.md)                                         | `docs/tutorials/scripts/build_rna_family.sh`                    |
-| `tdp43/`     | [alphafold_confidence](../../../../docs/tutorials/alphafold_confidence.md)                     | `docs/tutorials/scripts/build_alphafold_confidence.sh`          |
-| `spike/`     | [spike_structure](../../../../docs/tutorials/spike_structure.md)                               | `docs/tutorials/scripts/build_spike_structure.sh`               |
-| `trim5/`     | [codon_selection](../../../../docs/tutorials/codon_selection.md)                               | `docs/tutorials/scripts/build_codon_selection.sh`               |
+| Folder           | Tutorial                                                                                     | Built by                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `h3n2/`          | [notebook_flu_drift](../../../../docs/tutorials/notebook_flu_drift.md)                       | `docs/tutorials/scripts/build_flu_drift.py`                                                                 |
+| `h5n1/`          | [influenza_surveillance_figure](../../../../docs/tutorials/influenza_surveillance_figure.md) | `docs/tutorials/scripts/build_influenza_surveillance_figure.py`                                             |
+| `hemoglobin/`    | [protein_complex](../../../../docs/tutorials/protein_complex.md)                             | `docs/tutorials/scripts/build_protein_complex.sh`                                                           |
+| `kinase-pocket/` | [kinase_pocket](../../../../docs/tutorials/kinase_pocket.md)                                 | `docs/tutorials/scripts/build_kinase_pocket.sh`                                                             |
+| `mitogenome/`    | [mitogenome_genes](../../../../docs/tutorials/mitogenome_genes.md)                           | `docs/tutorials/scripts/build_mitogenome_genes.sh`                                                          |
+| `neighborhoods/` | [gene_neighborhoods](../../../../docs/tutorials/gene_neighborhoods.md)                       | `docs/tutorials/scripts/build_gene_neighborhoods.sh`                                                        |
+| `norovirus/`     | [norovirus_recombination](../../../../docs/tutorials/norovirus_recombination.md)             | `docs/tutorials/scripts/build_norovirus_recombination.sh`                                                   |
+| `p53/`           | [p53_variant_effects](../../../../docs/tutorials/p53_variant_effects.md)                     | `docs/tutorials/scripts/build_p53_variant_effects.sh`                                                       |
+| `proteases/`     | [r_protease_triad](../../../../docs/tutorials/r_protease_triad.md)                           | `docs/tutorials/scripts/build_r_protease_triad.R`                                                           |
+| `recombinant/`   | [recombination_breakpoint](../../../../docs/tutorials/recombination_breakpoint.md)           | `docs/tutorials/scripts/build_recombination_breakpoint.sh`                                                  |
+| `rna/`           | [rna_family](../../../../docs/tutorials/rna_family.md)                                       | `docs/tutorials/scripts/build_rna_family.sh`                                                                |
+| `scale/`         | [phylogeny_at_scale](../../../../docs/tutorials/phylogeny_at_scale.md) and [phylogeny_metadata](../../../../docs/tutorials/phylogeny_metadata.md) | `docs/tutorials/scripts/build_phylogeny_at_scale.sh` and `docs/tutorials/scripts/build_phylogeny_metadata.py` |
+| `spike/`         | [spike_structure](../../../../docs/tutorials/spike_structure.md)                             | `docs/tutorials/scripts/build_spike_structure.sh`                                                           |
+| `tdp43/`         | [alphafold_confidence](../../../../docs/tutorials/alphafold_confidence.md)                   | `docs/tutorials/scripts/build_alphafold_confidence.sh`                                                      |
+| `tem/`           | [tem_alleles](../../../../docs/tutorials/tem_alleles.md)                                     | `docs/tutorials/scripts/build_tem_alleles.sh`                                                               |
+| `trim5/`         | [codon_selection](../../../../docs/tutorials/codon_selection.md)                             | `docs/tutorials/scripts/build_codon_selection.sh`                                                           |
 
 The parsers detect the format from file content (the `CLUSTAL` / `# STOCKHOLM` /
 `>` / `##gff` header), so the extensions above are only for readability.

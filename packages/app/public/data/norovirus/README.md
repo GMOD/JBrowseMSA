@@ -1,6 +1,8 @@
 # Norovirus GII recombination data
 
-The files for the norovirus recombination tutorial, served at
+The files
+[`docs/tutorials/norovirus_recombination.md`](../../../../../docs/tutorials/norovirus_recombination.md)
+loads, served at
 `gmod.org/JBrowseMSA/demo/data/norovirus/*`. All of them come out of one run of
 `docs/tutorials/scripts/build_norovirus_recombination.sh`, which fetches the
 genomes and their GenBank records from NCBI and aligns them with MAFFT.

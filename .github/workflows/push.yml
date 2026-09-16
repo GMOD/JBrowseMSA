@@ -39,6 +39,11 @@ jobs:
       - name: Check every figure is shown by a page
         run: pnpm check:media
 
+      # a renamed data file leaves the page building and the committed figure
+      # unchanged, and 404s the live ?data= link the figure is a picture of
+      - name: Check the hosted data every page links
+        run: pnpm check:data
+
       # editing a spec moves the figure on the next capture but leaves the
       # guide's "click the screenshot" link on the state it used to show
       - name: Check the guide's live links match their specs
