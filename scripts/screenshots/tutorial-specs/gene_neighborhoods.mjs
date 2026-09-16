@@ -11,7 +11,9 @@
 import { fileSnap } from '../snap.mjs'
 
 const tree = { treeFilehandle: { uri: 'data/neighborhoods/trpB.nwk' } }
-const gff = { gffFilehandle: { uri: 'data/neighborhoods/trp-neighborhoods.gff' } }
+const gff = {
+  gffFilehandle: { uri: 'data/neighborhoods/trp-neighborhoods.gff' },
+}
 const msa = { msaFilehandle: { uri: 'data/neighborhoods/trpB.afa' } }
 
 // One color per trp gene name, the map the tutorial's ?data= links carry. Key
@@ -93,9 +95,7 @@ export const specs = [
       ...base,
       ...tree,
       ...gff,
-      rowPanels: [
-        panel(1120, { encoding: byName, transform: alignOnTrpE }),
-      ],
+      rowPanels: [panel(1120, { encoding: byName, transform: alignOnTrpE })],
     }),
     settle: 2500,
     clip: 'viewer',

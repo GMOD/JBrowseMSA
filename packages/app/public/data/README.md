@@ -94,6 +94,18 @@ every number that page quotes:
 | `mitogenome/mito.nwk`         | Newick          | ClustalW neighbor-joining tree from the alignment above                                                                                                          |
 | `mitogenome/mito-genes.gff`   | GFF3 (genes)    | RefSeq's own GFF3 per accession, reduced to 37 genes per genome with `Name=` and `complex=`, plus a control region per genome carrying `color=255,205,0`          |
 
+The `neighborhoods/` folder backs the
+[gene_neighborhoods tutorial](../../../../docs/tutorials/gene_neighborhoods.md)
+and is built by `docs/tutorials/scripts/build_gene_neighborhoods.sh`, which
+prints every number that page quotes:
+
+| File                                  | Format          | Provenance                                                                                                                                       |
+| ------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `neighborhoods/trp-rows.tsv`          | TSV             | The tutorial's row list: twelve RefSeq genome accessions and the row label each becomes                                                          |
+| `neighborhoods/trp-neighborhoods.gff` | GFF3 (genes)    | 176 genes from RefSeq's own GFF3 per genome, cut to 8 kb either side of trpB and turned so trpB points right, each with `Name=`, `role=` and `locus_tag=` |
+| `neighborhoods/trpB.afa`              | FASTA (aligned) | The twelve TrpB proteins from NCBI efetch, aligned with ClustalW, 423 columns                                                                    |
+| `neighborhoods/trpB.nwk`              | Newick          | ClustalW neighbor-joining tree from the alignment above                                                                                          |
+
 The `proteases/`, `h3n2/` and `h5n1/` folders back the tutorials whose pipeline
 runs inside a language rather than a shell, and each folder's own README names
 its files:

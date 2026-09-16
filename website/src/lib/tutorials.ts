@@ -18,6 +18,7 @@
 
 import codonThumb from '../../../docs/media/codon-spry-patch.png'
 import fluThumb from '../../../docs/media/flu-drift-siteb.png'
+import neighborhoodThumb from '../../../docs/media/gene_neighborhoods-3.png'
 import jbrowseThumb from '../../../docs/media/genome-browser-tp53-protein3d.png'
 import h5n1Thumb from '../../../docs/media/influenza_surveillance_figure-overview.png'
 import kinaseThumb from '../../../docs/media/kinase-pocket-family.png'
@@ -131,6 +132,16 @@ export const tutorials: Tutorial[] = [
     thumb: h5n1Thumb,
     thumbAlt:
       'An H5N1 tree with tip labels colored by state, nine color strips beside it, labeled brackets in the gutter and the whole tree in an overview band above',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'gene_neighborhoods',
+    title: 'Gene neighborhoods of the tryptophan operon',
+    blurb:
+      "Twelve bacterial genomes, 8 kb either side of trpB in each, drawn as a row of gene arrows in that genome's own coordinates beside a tree built from TrpB. An align transform on trpE brings ten of the twelve rows onto one origin; the two carrying no trpE stay where they were.",
+    thumb: neighborhoodThumb,
+    thumbAlt:
+      'Twelve rows of bacterial gene arrows aligned on trpE, the trp operon reading as columns of color beside the TrpB tree',
     thumbPosition: 'left',
   },
   {
