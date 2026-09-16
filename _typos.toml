@@ -45,6 +45,13 @@ ABL = "ABL"
 Abl = "Abl"
 abl = "abl"
 
+# mitochondrial gene symbols: ND1 to ND6 and ND4L, the NADH dehydrogenase
+# subunits, read as a truncated "and"
+ND = "ND"
+# O'Leary NA, first author of the RefSeq database paper the mitogenome tutorial
+# cites
+Leary = "Leary"
+
 # the four-letter species prefix the RNA tutorial's row names carry for
 # Clostridium acetobutylicum
 Cace = "Cace"

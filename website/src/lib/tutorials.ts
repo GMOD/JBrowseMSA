@@ -20,6 +20,7 @@ import codonThumb from '../../../docs/media/codon-spry-patch.png'
 import fluThumb from '../../../docs/media/flu-drift-siteb.png'
 import jbrowseThumb from '../../../docs/media/genome-browser-tp53-protein3d.png'
 import kinaseThumb from '../../../docs/media/kinase-pocket-family.png'
+import mitoThumb from '../../../docs/media/mitogenome_genes-4.png'
 import p53Thumb from '../../../docs/media/p53-variant-three-tracks.png'
 import metadataThumb from '../../../docs/media/phylogeny_metadata-tip-labels.png'
 import proteinThumb from '../../../docs/media/protein-family-domains.png'
@@ -49,6 +50,16 @@ export const tutorials: Tutorial[] = [
     thumb: proteinThumb,
     thumbAlt:
       'Twelve NLRP1 orthologs with their Pfam domains as colored blocks, the pyrin domain present in only five rows',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'mitogenome_genes',
+    title: 'Eight mitochondrial genomes and the genes on them',
+    blurb:
+      'Eight mammal mitogenomes from RefSeq as one alignment, with all 37 genes per genome drawn as strand arrows colored by respiratory complex. COX1 starts at a different base in every genome and in one column of the alignment; the control region ends in eight different columns.',
+    thumb: mitoThumb,
+    thumbAlt:
+      'Eight mammal mitochondrial genomes as rows of gene arrows, colored by respiratory complex and labeled by gene name',
     thumbPosition: 'left',
   },
   {
