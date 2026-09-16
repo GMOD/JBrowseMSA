@@ -230,8 +230,8 @@ rows = [row_of[name] for name in best_tips]
 print(f"{best_clade} spans display rows {min(rows)}-{max(rows)}")
 
 # 6. one tip, its raw node_attrs and the row the table gives it.
-label, fields, na = next(t for t in sample if t[0].startswith("MZ221194"))
+label, fields, na = next(t for t in sample if t[0].startswith("RSVA/20200035"))
 raw = {k: na[k] for k in ("clade_membership", "country", "region", "num_date") if k in na}
-print(f"check tip: {label}")
+print(f"check tip: {label}, display row {row_of[label]}")
 print(f"  node_attrs: {json.dumps(raw)}")
 print(f"  row: {json.dumps(fields)}")
