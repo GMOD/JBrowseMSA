@@ -105,7 +105,7 @@ export const specs = [
     // as blocks: every row carries the NACHT/WH/HD2 + FIIND/UPA/CARD core in the
     // same columns, and the N-terminal PYD block is present in only five of the
     // twelve rows. The viewport and colWidth end the 1666 columns left of the
-    // domain legend (absolutely positioned top-right, 260px), which would
+    // domain legend (absolutely positioned top-right, 220px), which would
     // otherwise cover the C-terminal CARD block.
     viewportWidth: 1600,
     url: fileSnap({

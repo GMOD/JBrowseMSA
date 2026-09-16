@@ -28,48 +28,44 @@ const AnnotationLegend = observer(function ({
         top: 4,
         right: 4,
         zIndex: 100,
-        maxWidth: 260,
+        maxWidth: 220,
         maxHeight: '60%',
         display: 'flex',
         flexDirection: 'column',
         opacity: 0.95,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          padding: '2px 4px 2px 8px',
+      <IconButton
+        size="small"
+        title={expanded ? 'Collapse key' : 'Expand key'}
+        style={{ alignSelf: 'flex-end', padding: 1 }}
+        onClick={() => {
+          model.setShowDomainLegend(!expanded)
         }}
       >
-        <IconButton
-          size="small"
-          title={expanded ? 'Collapse key' : 'Expand key'}
-          onClick={() => {
-            model.setShowDomainLegend(!expanded)
-          }}
-        >
-          <ExpandIcon fontSize="small" />
-        </IconButton>
-      </div>
+        <ExpandIcon style={{ fontSize: 14 }} />
+      </IconButton>
       {expanded ? (
-        <div style={{ overflow: 'auto', padding: '0 8px 6px' }}>
+        <div style={{ overflow: 'auto', padding: '0 6px 4px' }}>
           {visible.map(({ accession, name }) => (
             <div
               key={accession}
-              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 4 }}
               title={accession}
             >
               <div
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: 9,
+                  height: 9,
                   flexShrink: 0,
                   background: fillPalette[accession],
                 }}
               />
-              <Typography variant="caption" noWrap>
+              <Typography
+                variant="caption"
+                noWrap
+                style={{ fontSize: 10, lineHeight: 1.4 }}
+              >
                 {name}
               </Typography>
             </div>
