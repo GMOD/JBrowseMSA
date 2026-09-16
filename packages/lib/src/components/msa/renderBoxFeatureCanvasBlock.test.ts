@@ -1,6 +1,7 @@
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { expect, test } from 'vitest'
 
+import { minFeatureLabelHeight } from '../../constants.ts'
 import stateModelFactory from '../../model.ts'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 
@@ -17,13 +18,13 @@ human	src	exon	1	20	.	.	.	ID=human.exon1;Name=exon-1
 human	src	exon	21	40	.	.	.	ID=human.exon2;Name=exon-2
 human	src	exon	41	60	.	.	.	ID=human.exon3;Name=exon-3`
 
-function drawnLabels() {
+function drawnLabels(rowHeight = 20) {
   const model = stateModelFactory().create({
     type: 'MsaView',
     data: { msa },
   })
   model.setWidth(1000)
-  model.setRowHeight(20)
+  model.setRowHeight(rowHeight)
   // segment numbers are drawn in place of residue letters, never on top of them
   model.setDrawMsaLetters(false)
   model.applyGFFText(gff)
@@ -55,4 +56,9 @@ function drawnLabels() {
 
 test('segment numbers are drawn once each, even when row 0 has no gene model', () => {
   expect(drawnLabels()).toEqual(['1', '2', '3'])
+})
+
+test('a band too short for readable text carries no label', () => {
+  expect(drawnLabels(minFeatureLabelHeight)).toEqual(['1', '2', '3'])
+  expect(drawnLabels(minFeatureLabelHeight - 1)).toEqual([])
 })

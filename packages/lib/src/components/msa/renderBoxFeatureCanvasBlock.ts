@@ -61,7 +61,7 @@ export function renderBoxFeatureCanvasBlock({
   // and a number would collide with the sequence. A featureLabel encoding names
   // what every span carries instead
   const drawSegmentLabels =
-    !featureLabels && !showMsaLetters && !subFeatureRows && barHeight >= 9
+    !featureLabels && !showMsaLetters && !subFeatureRows
   // a segment (exon) number labels its band once per block, on the topmost
   // visible row carrying that segment, so it reads as a column header for the
   // whole band. Keyed by accession rather than drawn on row 0, because the rows

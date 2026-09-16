@@ -1,3 +1,5 @@
+import { minFeatureLabelHeight } from '../../constants.ts'
+
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { Annotation, NodeWithIdsAndLength } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
@@ -79,6 +81,7 @@ export function drawFeatureSpans<T extends SpanBand>({
   for (const { y, bands } of rows) {
     const h = layout.height(bands[0]!.laneCount)
     const headLen = layout.headLength(h)
+    const labelled = h >= minFeatureLabelHeight
     for (const band of bands) {
       const [xStart, xEnd] = xOf(band)
       const w = xEnd - xStart
@@ -96,7 +99,7 @@ export function drawFeatureSpans<T extends SpanBand>({
       } else {
         drawGeneArrow({ ctx, x: xStart, t, w, h, headLen, strand })
       }
-      const label = labelOf?.(band)
+      const label = labelled ? labelOf?.(band) : undefined
       if (label !== undefined) {
         const fontSize = Math.min(h - 2, 11)
         ctx.font = `${fontSize}px sans-serif`

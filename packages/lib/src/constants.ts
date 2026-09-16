@@ -48,6 +48,11 @@ export const defaultScrollZoomAxis: ScrollZoomAxis = 'both'
 export const minLetterRowHeight = 8
 export const minLetterColWidth = 5
 
+// A feature span draws its label at two pixels under its height, capped at 11,
+// so a span shorter than this holds no readable text: an underline bar, a
+// sub-row band or a features panel over small rows
+export const minFeatureLabelHeight = 9
+
 // Tree labels are measured once at this size and scaled to the current font
 // size, so a vertical zoom never re-measures the tree.
 export const labelReferenceFontSize = 16
