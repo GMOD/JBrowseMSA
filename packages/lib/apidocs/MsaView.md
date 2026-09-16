@@ -1969,7 +1969,7 @@ visibleSpan: ({ row, start: rawStart, end: rawEnd }: Region) => { startCol: numb
 #### action: addWarning
 
 record a non-fatal load problem: a layer that failed to load, a file that failed
-to parse
+to parse. A message already on the list is not added again
 
 ```js
 // type signature

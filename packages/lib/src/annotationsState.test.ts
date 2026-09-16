@@ -79,3 +79,13 @@ a\tPfam\tprotein_match\t1\t3\t.\t+\t.\tName=PF00009;signature_desc=nine
   expect(model.visibleDomainTypes.map(d => d.accession)).toEqual(['PF00009'])
   expect([...model.annotationTypes.keys()]).toEqual(['PF00009'])
 })
+
+test('a GFF naming no row of the alignment warns', () => {
+  const stray = gff.replace('\na\t', '\nx\t').replace('\nb\t', '\ny\t')
+  const model = makeModel({ msa, gff: stray })
+  expect(model.annotations.length).toBe(2)
+  expect(model.warnings).toEqual([
+    '0 of 2 annotations name a row in this alignment',
+  ])
+  expect(makeModel().warnings).toEqual([])
+})

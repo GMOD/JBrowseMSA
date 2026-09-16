@@ -1060,10 +1060,12 @@ function stateModelFactory() {
       /**
        * #action
        * record a non-fatal load problem: a layer that failed to load, a file
-       * that failed to parse
+       * that failed to parse. A message already on the list is not added again
        */
       addWarning(warning: string) {
-        self.warnings = [...self.warnings, warning]
+        if (!self.warnings.includes(warning)) {
+          self.warnings = [...self.warnings, warning]
+        }
       },
 
       /**
@@ -4193,6 +4195,24 @@ function stateModelFactory() {
             } else if (appliedGFF) {
               appliedGFF = false
               self.setAnnotations([])
+            }
+          }),
+        )
+
+        // a GFF whose first column names rows of some other alignment parses
+        // without error and draws nothing
+        addDisposer(
+          self,
+          autorun(() => {
+            const { annotations, rowNamesSet } = self
+            if (
+              annotations.length > 0 &&
+              rowNamesSet.size > 0 &&
+              !annotations.some(a => rowNamesSet.has(a.id))
+            ) {
+              self.addWarning(
+                `0 of ${annotations.length} annotations name a row in this alignment`,
+              )
             }
           }),
         )
