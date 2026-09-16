@@ -77,13 +77,57 @@ async function runAction(page, action) {
 // Fail a spec whose viewer body rendered empty. The app shell always paints its
 // border box, so a capture with a header and no content would otherwise pass.
 // A loaded viewer (import form included) fills its body.
+// The child-count half of this passes on a frame that mounted and never
+// painted: the toolbar and the tracks fill the body while the alignment stays
+// white. That shipped once, a colorscheme figure captured with its tree and
+// residues missing, at 44% of the published file's bytes and no check red. So
+// read the biggest canvas back as well. A drawn alignment is never one flat
+// color, and the scan stops at the first pixel that differs, so the cost in the
+// normal case is a few pixels.
 async function assertViewerRendered(page, name) {
-  const empty = await page.evaluate(() => {
+  const problem = await page.evaluate(() => {
     const box = document.querySelector('[data-testid="msaview"]')
-    return !box || box.childElementCount === 0
+    if (!box || box.childElementCount === 0) {
+      return 'viewer rendered blank'
+    }
+    // A figure with no alignment is a real one (a tree, a GFF and a features
+    // panel draw at zero columns), so the model says whether there is anything
+    // to paint before the pixels are asked about.
+    const model = window.MSAVIEW_MODEL
+    if (!model?.numColumns || !model.numRows) {
+      return undefined
+    }
+    const painted = [
+      ...(box
+        .querySelector('[data-testid="msa_canvas"]')
+        ?.querySelectorAll('canvas') ?? []),
+    ].some(c => {
+      const ctx = c.width > 0 && c.height > 0 ? c.getContext('2d') : null
+      if (!ctx) {
+        return false
+      }
+      const { data } = ctx.getImageData(0, 0, c.width, c.height)
+      for (let i = 4; i < data.length; i += 4) {
+        if (
+          data[i] !== data[0] ||
+          data[i + 1] !== data[1] ||
+          data[i + 2] !== data[2] ||
+          data[i + 3] !== data[3]
+        ) {
+          return true
+        }
+      }
+      return false
+    })
+    // The overlay layer is legitimately one flat transparent color whenever
+    // nothing is highlighted, so this asks whether ANY block painted rather
+    // than picking a canvas and trusting it to be the right one.
+    return painted
+      ? undefined
+      : `${model.numColumns} columns by ${model.numRows} rows, and every alignment canvas is one flat color`
   })
-  if (empty) {
-    throw new Error(`${name}: viewer rendered blank`)
+  if (problem) {
+    throw new Error(`${name}: ${problem}`)
   }
 }
 
