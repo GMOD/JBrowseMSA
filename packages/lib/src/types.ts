@@ -170,13 +170,15 @@ export type { Annotation }
 export type TidyDomainAnnotation = Annotation
 
 // an annotation resolved to the visible column span it is drawn across.
-// stackIndex is its position among the bands drawn on its row, for the sub-row
-// layout.
+// stackIndex is its position in its row's paint order; lane is the sub-row it
+// occupies, out of the laneCount the row's overlaps need.
 export interface DomainBand {
   annotation: Annotation
   startCol: number
   endCol: number
   stackIndex: number
+  lane: number
+  laneCount: number
 }
 
 /**

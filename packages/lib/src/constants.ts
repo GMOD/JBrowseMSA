@@ -12,7 +12,8 @@ export const defaultShowDomainLegend = true
 export const defaultHideGaps = true
 export const defaultAllowedGappyness = 100
 export const defaultSubFeatureRows = false
-// row height for each stacked feature when subFeatureRows is on
+// height of one sub-row when subFeatureRows is on, unless the row has more
+// lanes than fit at this height (see renderBoxFeatureCanvasBlock)
 export const subFeatureRowHeight = 4
 // height of the bar the overlay draws under a row in letter-color mode
 export const domainUnderlineHeight = 3

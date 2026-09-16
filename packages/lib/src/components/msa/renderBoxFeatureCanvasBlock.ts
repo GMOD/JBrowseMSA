@@ -67,21 +67,18 @@ function drawTiles({
     domainUnderline,
     domainBands,
   } = model
-  const h = subFeatureRows
-    ? subFeatureRowHeight
-    : domainUnderline
-      ? Math.min(domainUnderlineHeight, rowHeight)
-      : rowHeight
-  // the head keeps its full size on an underline bar, since a head as short as
-  // the bar reads as a nub rather than as a direction
-  const headLen = domainUnderline ? rowHeight / 2 : h
+  // the plain and underline modes give every band the same height; a sub-row
+  // band is thinner, and how thin depends on how many lanes its row needs
+  const barHeight = domainUnderline
+    ? Math.min(domainUnderlineHeight, rowHeight)
+    : rowHeight
   // exon numbers label the bands only when residue letters aren't drawn (zoomed
   // out); when letters show, the alternating shades alone mark the boundaries
   // and a number would collide with the sequence
-  const drawSegmentLabels = !showMsaLetters && !subFeatureRows && h >= 9
-  // gene arrow heads stick out past the band, so pad the cull window enough
-  // that a band just outside the block still draws its head
-  const cull = headLen + colWidth
+  const drawSegmentLabels = !showMsaLetters && !subFeatureRows && barHeight >= 9
+  // gene arrow heads stick out up to a row height past the band, so pad the
+  // cull window enough that a band just outside the block still draws its head
+  const cull = rowHeight + colWidth
   const xMin = offsetX - cull
   const xMax = offsetX + blockWidth + cull
 
@@ -96,7 +93,16 @@ function drawTiles({
     const bands = domainBands.get(node.data.name)
 
     if (bands) {
-      for (const { annotation, startCol, endCol, stackIndex } of bands) {
+      // sub-rows are thin, but a row whose lanes would spill onto the row below
+      // shares out the row height between them instead
+      const h = subFeatureRows
+        ? Math.min(subFeatureRowHeight, rowHeight / bands[0]!.laneCount)
+        : barHeight
+      // the head keeps its full size on an underline bar, since a head as short
+      // as the bar reads as a nub rather than as a direction
+      const headLen = domainUnderline ? rowHeight / 2 : h
+
+      for (const { annotation, startCol, endCol, lane } of bands) {
         const { accession, strand } = annotation
         const x = startCol * colWidth
         const lw = colWidth * (endCol - startCol)
@@ -104,11 +110,7 @@ function drawTiles({
           const t =
             y -
             rowHeight +
-            (subFeatureRows
-              ? stackIndex * h
-              : domainUnderline
-                ? rowHeight - h
-                : 0)
+            (subFeatureRows ? lane * h : domainUnderline ? rowHeight - h : 0)
           ctx.fillStyle = fillPalette[accession]!
           ctx.strokeStyle = strokePalette[accession]!
           if (strand === undefined) {

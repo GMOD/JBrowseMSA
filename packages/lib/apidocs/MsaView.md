@@ -866,8 +866,9 @@ boolean
 
 every filtered-on annotation resolved to the visible column span it is drawn
 across, keyed by row name. Each row is ordered longest-first so a nested short
-domain draws on top. Resolved once here instead of per canvas block per redraw;
-the letter renderer also reads the band colors to pick legible letter colors.
+domain draws on top, and each band carries the lane the sub-row layout puts it
+in. Resolved once here instead of per canvas block per redraw; the letter
+renderer also reads the band colors to pick legible letter colors.
 
 ```js
 // type

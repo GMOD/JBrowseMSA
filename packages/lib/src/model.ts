@@ -26,6 +26,7 @@ import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes from './colorSchemes.ts'
 import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
 import { columnStats } from './columnStats.ts'
+import { packDomainLanes } from './components/msa/packDomainLanes.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import TrackBlocks from './components/tracks/TrackBlocks.tsx'
 import {
@@ -2755,9 +2756,10 @@ function stateModelFactory() {
        * #getter
        * every filtered-on annotation resolved to the visible column span it is
        * drawn across, keyed by row name. Each row is ordered longest-first so a
-       * nested short domain draws on top. Resolved once here instead of per
-       * canvas block per redraw; the letter renderer also reads the band
-       * colors to pick legible letter colors.
+       * nested short domain draws on top, and each band carries the lane the
+       * sub-row layout puts it in. Resolved once here instead of per canvas
+       * block per redraw; the letter renderer also reads the band colors to
+       * pick legible letter colors.
        */
       get domainBands() {
         const { blanks } = self
@@ -2785,10 +2787,10 @@ function stateModelFactory() {
                 : undefined
             })
             .filter(notEmpty)
-            // numbered after filtering, so dropped bands leave no empty sub-row
+            // numbered after filtering, so a dropped band leaves no gap
             .map((band, stackIndex) => ({ ...band, stackIndex }))
           if (rowBands.length > 0) {
-            bands.set(name, rowBands)
+            bands.set(name, packDomainLanes(rowBands))
           }
         }
         return bands
