@@ -23,7 +23,9 @@ Two target figures, in order of work:
 
 - **Panel.** A component that owns one scale and shares the other. Adding one
   changes layout, the width bookkeeping in `msaAreaWidth`, and the clip groups
-  in `renderToSvg.tsx`.
+  in `renderToSvg.tsx`. ggtree uses the word the same way: `facet_plot(panel=)`
+  and `geom_facet` add a named panel sharing the tree's y, and `msaplot` and
+  `gheatmap` are two such panels.
 - **Mark.** What a panel draws: a span, a bar, a glyph, a label, a tint. Adding
   one is a draw function.
 - **Channel.** A visual property of a mark that a field feeds: `color`, `label`,
@@ -40,23 +42,58 @@ a linked multi-panel viewer the word covers both a panel and a mark, and the two
 cost different things to add. `docs/layers.md` keeps its filename, and the R `+`
 composition in `layers.R` stays, since ggtree users expect it.
 
+## The general layout
+
+ComplexHeatmap states the layout this viewer has: a body, and on each side of it
+a list of marginal annotations, each one a mark over the axis it shares with the
+body. The alignment is the body. `columnTracks` are the annotations above it and
+`rowPanels` the annotations left of it, and the tree is the first row panel, the
+way a dendrogram is a row annotation there. Vega-Lite spells the same layout as
+a concat of views with a shared positional scale.
+
+Everything else is a guide, in Vega's sense: `TreeRuler` is the axis of the
+branch-length scale, the position ruler is the axis of the column scale, a
+legend is the guide of a color scale, and the minimap and the tree overview are
+brushes on the two positional scales. A guide has no data of its own, so it
+takes no record in either list.
+
+What the layout gives the API:
+
+- **One kind vocabulary on both axes.** A `bar` of one value per column is a
+  `columnTracks` record today. A `bar` of one value per row, such as genome
+  size, is a `rowPanels` record reading a `rowData` field. `text` and `strip`
+  work the same way, `features` and `arc` index positions along the axis, and
+  the record fields match across the two lists: `kind`, `id`, `name`, `scale`,
+  `color`, and `height` or `width` for the extent across the shared axis.
+- **`side` for the other two sides.** `side: "right"` on a row panel puts it
+  past the alignment, where `gheatmap` places its matrix beside the tip labels,
+  and `side: "bottom"` on a track puts a ruler or a logo under the alignment.
+  Both default to the side they draw on today, so the field costs nothing until
+  a figure needs it.
+- **Two lists stay two lists.** `columnTracks` is shipped and travels in shared
+  URLs, and the track machinery (`turnedOffTracks`, `heightKey`, `trackHeights`,
+  `hideGaps`) is column-only. A single `panels` list with an `axis` field would
+  deprecate a property to gain a name.
+
 ## What the figures need
 
-| Mark                             | ggtree / gggenes         | react-msaview today                                                  |
-| -------------------------------- | ------------------------ | -------------------------------------------------------------------- |
-| Phylogram, scale bar             | `ggtree`                 | `renderTree`, `TreeRuler`                                            |
-| Collapsed clade + tip count      | `collapse`               | `renderCollapsedTriangles` (`renderTreeCanvas.ts:135`)               |
-| Tip labels                       | `geom_tiplab`            | `renderTreeLabels` (`renderTreeCanvas.ts:287`)                       |
-| Tip labels colored by a field    | `aes(color=)`            | missing; `treeMetadata` holds the data and no channel reads it       |
-| Support values on internal nodes | `geom_nodelab`           | missing; parsed and never drawn                                      |
-| Clade highlight rectangle        | `geom_hilight`           | missing                                                              |
-| Clade bracket + label            | `geom_cladelab`          | missing                                                              |
-| Tree overview inset              | `viewClade`              | missing; `showOnly` is the focus, with no overview to pick it on     |
-| Tip-aligned categorical matrix   | `gheatmap`               | missing                                                              |
-| Legend for a categorical scale   | `scale_*_manual`         | `AnnotationLegend`, keyed to domain accessions only                  |
-| Strand arrow spans per row       | `geom_gene_arrow`        | `drawGeneArrow` (`renderBoxFeatureCanvasBlock.ts:135`), columns only |
-| Arrow filled by a field, labeled | `aes(fill=)`             | missing; `fillPalette` assigns by accession, and nothing labels      |
-| Rows aligned on one gene         | `make_alignment_dummies` | missing                                                              |
+| Mark                             | ggtree / gggenes                 | react-msaview today                                                  |
+| -------------------------------- | -------------------------------- | -------------------------------------------------------------------- |
+| Phylogram, scale bar             | `ggtree`                         | `renderTree`, `TreeRuler`                                            |
+| Collapsed clade + tip count      | `collapse`                       | `renderCollapsedTriangles` (`renderTreeCanvas.ts:135`)               |
+| Tip labels                       | `geom_tiplab`                    | `renderTreeLabels` (`renderTreeCanvas.ts:287`)                       |
+| Tip labels colored by a field    | `aes(color=)`                    | missing; `treeMetadata` holds the data and no channel reads it       |
+| Support values on internal nodes | `geom_nodelab`                   | missing; parsed and never drawn                                      |
+| Clade highlight rectangle        | `geom_hilight`                   | missing                                                              |
+| Clade bracket + label            | `geom_cladelab`                  | missing                                                              |
+| Bracket over a run of tips       | `geom_strip`                     | missing                                                              |
+| Branches colored by a group      | `groupClade`, `aes(color=group)` | missing                                                              |
+| Tree overview inset              | `viewClade`, `geom_zoom_clade`   | missing; `showOnly` is the focus, with no overview to pick it on     |
+| Tip-aligned categorical matrix   | `gheatmap`                       | missing                                                              |
+| Legend for a categorical scale   | `scale_*_manual`                 | `AnnotationLegend`, keyed to domain accessions only                  |
+| Strand arrow spans per row       | `geom_gene_arrow`                | `drawGeneArrow` (`renderBoxFeatureCanvasBlock.ts:135`), columns only |
+| Arrow filled by a field, labeled | `aes(fill=)`                     | missing; `fillPalette` assigns by accession, and nothing labels      |
+| Rows aligned on one gene         | `make_alignment_dummies`         | missing                                                              |
 
 ## Decisions
 
@@ -64,8 +101,8 @@ composition in `layers.R` stays, since ggtree users expect it.
 
 ```json
 "rowPanels": [
-  { "kind": "strip", "field": "HA", "scale": { "palette": "ggplot" } },
-  { "kind": "strip", "field": "NA" },
+  { "kind": "strip", "field": "HA", "scale": { "palette": "ggplot" }, "width": 12 },
+  { "kind": "strip", "field": "NA", "header": "NA segment" },
   {
     "kind": "features",
     "x": "position",
@@ -82,7 +119,11 @@ composition in `layers.R` stays, since ggtree users expect it.
 `rowPanels` is its counterpart on the row scale. Eight `strip` records reproduce
 a `gheatmap`, and one `features` record reproduces the gene figure. Each record
 carries its own `encoding`, the way each mark in `LinearMarkDisplay` does, so a
-panel's channels sit beside the panel they color.
+panel's channels sit beside the panel they color. A strip's `width` is in pixels
+and defaults to the row height, and `header` defaults to the field, covering
+`gheatmap`'s `width` and `custom_column_labels`. A strip over a field every row
+shares one scale, so eight strips of segment lineages share one legend when they
+name the same `scale`.
 
 The top-level `encodings` array covers channels on the marks the viewer always
 draws:
@@ -91,12 +132,16 @@ draws:
 "encodings": [
   { "channel": "tipLabel", "field": "lineage", "scale": { "palette": "ggplot" } },
   { "channel": "rowTint", "field": "clade", "scale": { "map": { "19B": "#e41a1c" } } },
+  { "channel": "branch", "field": "clade" },
   { "channel": "featureFill", "field": "Name" }
 ]
 ```
 
-`tipLabel` and `rowTint` read `rowData`. `featureFill` reads the feature table
-and replaces the accession palette for the domain overlay in the alignment
+`tipLabel`, `rowTint` and `branch` read `rowData`. `branch` colors an edge by a
+field value when every tip below it shares the value, and leaves the edge in the
+default color otherwise, which is `groupClade` followed by `aes(color = group)`
+in ggtree, with the group read from the table. `featureFill` reads the feature
+table and replaces the accession palette for the domain overlay in the alignment
 panel, so a producer can color pathogenic features red.
 
 Both properties are arrays of frozen records with a discriminator, the shape
@@ -232,6 +277,17 @@ Resolution rules:
 - A tip set whose MRCA is the root annotates the whole tree. Requiring `tips` to
   match already covers it.
 
+A bracket does not always cover a clade. ggtree's `geom_strip(taxa1, taxa2)`
+brackets every tip between two names in display order, monophyletic or not, and
+the sublineage brackets beside the H5 matrix are of that kind. A `clades` record
+therefore takes `range: ["Gs/TW/TNC1/2015", "Gs/TW/TN013/2015"]` in place of
+`mrca`, resolved against the current leaf order, and only `highlight` and
+`bracket` accept it. `collapse` and `focus` name a node and need `mrca`.
+
+`geom_hilight` extends its rectangle to a common right edge with `extendto` and
+`align = "right"`. The rectangle here always runs to the tree area edge, which
+is that setting with no option.
+
 `mark: "collapse"` and `mark: "focus"` seed the existing `collapsed` array and
 `showOnly` once in `afterCreate`, the way `highlightColumns` seeds
 `highlightedColumns` (`model.ts:3088`). A parallel collapse list would miss
@@ -249,7 +305,7 @@ contains the click.
 
 The overview draws `get tree()` at small scale, never the filtered `root`, so
 the focused clade shows inside the whole. It draws the clade rectangles from
-step 6 as well, since the inset in the paper shows them. A 230k-branch tree
+step 7 as well, since the inset in the paper shows them. A 230k-branch tree
 cannot be redrawn per frame, so the overview renders once to an offscreen canvas
 keyed on `data.tree` and `collapsed`, the way `msaRaster.ts` keys its tiles, and
 each frame blits it and strokes the `showOnly` box on top.
@@ -293,7 +349,7 @@ CLI pins `id: 'msaview-export'` (`packages/cli/src/export-svg.ts:79`). A figure
 can then be taken apart in Illustrator or svgutils.
 
 No model change, no parity surface. Half a day. Test: two different `model.id`
-values produce the same panel ids.
+values produce the same panel ids. Shipped 2026-09-16.
 
 ### 2. Internal node labels
 
@@ -310,11 +366,12 @@ its name and an ungated pass prints `node-0-1-1` across the tree.
 `renderCollapsedTriangles` already carries this guard.
 
 About 60 lines, and the SVG export comes with it because `renderTreeCanvas` is
-the shared path (`renderToSvg.tsx:299`). Half a day.
+the shared path (`renderToSvg.tsx:299`). Half a day. Shipped 2026-09-16 as
+`drawNodeLabels`, a tree toggle beside `drawNodeBubbles` with no parity surface.
 
 ### 3. Scales, `rowData`, `tipLabel` and `rowTint`
 
-The gate for steps 5 through 10.
+The gate for steps 5 through 11.
 
 - `packages/lib/src/scales.ts`, new: `resolveScale(spec, values)` returning
   `{ colorOf, legend, kind }`, handling `{palette}` and `{map}`. Continuous
@@ -365,18 +422,28 @@ Keep the property name `showDomainLegend` (`model.ts:303`). It sits in
 One day. From here on every scale, on any panel, has a legend without further
 work.
 
-### 5. `featureFill`, `featureLabel` and GFF `color=`
+### 5. The `branch` channel
+
+One post-order pass over `get tree()` per change of `rowData` and the encoding,
+storing on each internal node the shared value of its tips or nothing.
+`renderTree` (`renderTreeCanvas.ts`) reads it when it strokes the edge from a
+node to its parent, in the color the resolved scale gives that value. The pass
+memoizes with `resolvedEncodings` from step 3, and the legend is the same one
+the `tipLabel` channel over the same field produces, so a figure that colors
+labels and branches by lineage lists lineage once. Half a day.
+
+### 6. `featureFill`, `featureLabel` and GFF `color=`
 
 The `featureFill` encoding resolves a scale over a field of the feature table,
 and `fillPalette` becomes the fallback when no encoding names one. A GFF
 `color=` attribute overrides per feature. `featureLabel` names the field drawn
 inside a span when it fits, with the same measure-then-draw test the exon number
 uses (`renderBoxFeatureCanvasBlock.ts:117`), so a gene arrow carries its name.
-Both apply to the alignment overlay first, and step 8 reads the same resolution.
+Both apply to the alignment overlay first, and step 9 reads the same resolution.
 
 Closes `data-layers.md` item 3. One day.
 
-### 6. MRCA and the clade highlight rectangle
+### 7. MRCA and the clade highlight rectangle
 
 `mrca(hierarchy, names)` in `hierarchy.ts`, iterative for the reason that file
 states. The rectangle runs from `getNodeX` (`renderTreeCanvas.ts:71`) to the
@@ -385,7 +452,7 @@ tree area edge across `[node.xMin!, node.xMax!]`, the span `clusterLayout` sets
 rectangle draws in every block whose range intersects it, clipped by the block.
 One day.
 
-### 7. The `rowPanels` container and the `strip` kind
+### 8. The `rowPanels` container and the `strip` kind
 
 `components/rowpanels/`: `RowPanels.tsx` mounting one canvas per record,
 `renderStrip.ts`. Mount between `TreePanel` and `VerticalResizeHandle` in
@@ -410,7 +477,7 @@ One day.
 
 About 350 lines plus 150 of test. Two days, and it closes the `gheatmap`.
 
-### 8. The `features` kind and the `align` transform
+### 9. The `features` kind and the `align` transform
 
 A `features` row panel draws `annotationsByRow` with the span mark from
 `renderBoxFeatureCanvasBlock.ts`, extracted so the alignment overlay and the
@@ -421,7 +488,7 @@ width. Lane packing reuses `packDomainLanes`
 (`components/msa/packDomainLanes.ts:13`), generalized from
 `Omit<DomainBand, 'lane' | 'laneCount'>[]` to
 `<T extends { startCol: number; endCol: number }>`; a second packer is not
-needed. The fill and the label come from step 5.
+needed. The fill and the label come from step 6.
 
 A tree with no alignment already boots: `dataInitialized` is
 `!!(self.data.msa || self.data.tree)` (`model.ts:2254`), and `numColumns` of 0
@@ -430,7 +497,7 @@ alignment panel has zero width and the features panel fills the space.
 
 About 250 lines. Two days, and the gene figure is complete.
 
-### 9. The tree overview
+### 10. The tree overview
 
 `components/tree/TreeOverview.tsx` and `renderTreeOverview.ts`, with the
 offscreen cache described above. A `showTreeOverview` property, off by default,
@@ -438,7 +505,7 @@ and an `overviewHeight`. Click sets `showOnly`; a second click on the same box
 clears it, matching the existing focus toggle. Export as
 `<g id="tree-overview">` above the tree panel. One day.
 
-### 10. Clade brackets, collapse and focus
+### 11. Clade brackets, collapse and focus
 
 The bracket needs `treeAreaWidth` to reserve a right gutter or it lands under
 the first row panel. Draw the label horizontally, as ggtree does where it fits.
@@ -451,14 +518,14 @@ One day, and the H5 figure is complete.
 
 ## Sequence
 
-Steps 1 through 10 run about two and a half weeks. Steps 1, 2, 4 and 6 each ship
-on their own with nothing owed afterwards, so the sequence is safe to interrupt.
-Steps 1 and 2 can run beside step 3, since they touch `renderToSvg.tsx` and a
-new function in `renderTreeCanvas.ts` and step 3 touches `model.ts`,
-`renderTreeLabels` and `renderHighlights.ts`.
+Steps 1 through 11 run about two and a half weeks. Steps 1, 2, 4, 5 and 7 each
+ship on their own with nothing owed afterwards, so the sequence is safe to
+interrupt. Steps 1 and 2 can run beside step 3, since they touch
+`renderToSvg.tsx` and a new function in `renderTreeCanvas.ts` and step 3 touches
+`model.ts`, `renderTreeLabels` and `renderHighlights.ts`.
 
-Building step 7 before step 3 ships a second palette resolver and a second
-legend source, and then needs deprecating across six surfaces. Building step 5
+Building step 8 before step 3 ships a second palette resolver and a second
+legend source, and then needs deprecating across six surfaces. Building step 6
 before step 4 designs the legend around domain accessions alone and reshapes it
 when a second producer arrives.
 
