@@ -188,6 +188,7 @@ above beside it, and prints every number on this page.
 
 ## See also
 
+- [Coloring an RSV phylogeny by its metadata](https://gmod.org/JBrowseMSA/tutorials/phylogeny_metadata)
 - [A protein family from a list of accessions](https://gmod.org/JBrowseMSA/tutorials/protein_family)
 - [User guide](https://gmod.org/JBrowseMSA/guide)
 - [Data layers](https://gmod.org/JBrowseMSA/layers)

@@ -21,6 +21,7 @@ import fluThumb from '../../../docs/media/flu-drift-siteb.png'
 import jbrowseThumb from '../../../docs/media/genome-browser-tp53-protein3d.png'
 import kinaseThumb from '../../../docs/media/kinase-pocket-family.png'
 import p53Thumb from '../../../docs/media/p53-variant-three-tracks.png'
+import metadataThumb from '../../../docs/media/phylogeny_metadata-tip-labels.png'
 import proteinThumb from '../../../docs/media/protein-family-domains.png'
 import proteaseThumb from '../../../docs/media/r-protease-triad.png'
 import rnaThumb from '../../../docs/media/rna-family-overview.png'
@@ -99,6 +100,16 @@ export const tutorials: Tutorial[] = [
     thumbAlt:
       '1,840 RSV genomes as one alignment beside their tree, the clades reading as labeled bands of color',
     thumbPosition: 'center',
+  },
+  {
+    slug: 'phylogeny_metadata',
+    title: 'Coloring an RSV phylogeny by its metadata',
+    blurb:
+      "The clade, country, region and year Nextstrain records for each of 184 RSV genomes, written as a row table and read by the viewer's tip-label, branch and row-tint channels. Clade colors 109 of the 179 internal edges; country colors 23.",
+    thumb: metadataThumb,
+    thumbAlt:
+      'RSV tip labels colored by Nextstrain clade, green A.D rows giving way to purple A.D.3 rows, with the clade legend beside them',
+    thumbPosition: 'left',
   },
   {
     slug: 'codon_selection',
