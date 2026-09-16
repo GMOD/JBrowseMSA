@@ -4,9 +4,9 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "sync-media": "node scripts/sync-media.mjs",
-    "dev": "pnpm sync-media && astro dev",
-    "build": "pnpm sync-media && astro build",
+    "sync-assets": "node scripts/sync-assets.mjs",
+    "dev": "pnpm sync-assets && astro dev",
+    "build": "pnpm sync-assets && astro build",
     "preview": "astro preview"
   },
   "dependencies": {

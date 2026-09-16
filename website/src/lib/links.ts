@@ -1,11 +1,17 @@
-// The documentation and showcase pages. The header nav reads the label and the
-// href, and the home page also prints the description.
+// Every page the site routes to. The header nav reads the label and the href,
+// and the home page prints the description beside them as its index.
 const base = import.meta.env.BASE_URL
 
 export interface SiteLink {
   label: string
   href: string
   body: string
+}
+
+export const app: SiteLink = {
+  label: 'Standalone app',
+  href: `${base}/demo/`,
+  body: 'Open your own files: a FASTA, Stockholm, Clustal, A3M or EMF alignment, a Newick tree, and GFF3 or InterProScan JSON annotations, from your computer or a URL.',
 }
 
 export const docs: SiteLink[] = [
@@ -17,7 +23,7 @@ export const docs: SiteLink[] = [
   {
     label: 'Tutorials',
     href: `${base}/tutorials`,
-    body: 'Walkthroughs of the data preparation, from sequences to an alignment, a tree and annotations, each ending on a link that opens the result.',
+    body: 'Data preparation outside the viewer, from sequences to an alignment, a tree and annotations, each walkthrough ending on a link that opens the result.',
   },
   {
     label: 'CLI',
@@ -27,7 +33,7 @@ export const docs: SiteLink[] = [
   {
     label: 'Embedding',
     href: `${base}/embedding`,
-    body: 'Props, the model API, and the UMD bundle.',
+    body: 'The React component: props, the model API, and the UMD script tag.',
   },
   {
     label: 'Layers',

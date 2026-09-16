@@ -1,5 +1,5 @@
 ---
-import { docs, showcase } from '../lib/links.ts'
+import { app, docs, showcase } from '../lib/links.ts'
 import '../styles/global.css'
 
 interface Props {
@@ -11,7 +11,6 @@ interface Props {
 const { title, description, wide, fullBleed } = Astro.props
 const base = import.meta.env.BASE_URL
 const home = { href: base, label: 'Home' }
-const demo = { href: `${base}/demo/`, label: 'Standalone app' }
 const groups = [
   { label: 'Docs', items: docs },
   { label: 'Showcase', items: showcase },
@@ -37,7 +36,7 @@ const socialImage = new URL(
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" />
+    <link rel="icon" href={`${base}/favicon.svg`} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="JBrowseMSA" />
     <meta property="og:title" content={title} />
@@ -93,11 +92,11 @@ const socialImage = new URL(
           )
         })}
         <a
-          href={demo.href}
-          class:list={{ active: isActive(demo.href) }}
-          aria-current={isActive(demo.href) ? 'page' : undefined}
+          href={app.href}
+          class:list={{ active: isActive(app.href) }}
+          aria-current={isActive(app.href) ? 'page' : undefined}
         >
-          {demo.label}
+          {app.label}
         </a>
       </nav>
       <a

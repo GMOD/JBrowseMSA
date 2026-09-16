@@ -1,14 +1,8 @@
 ---
 import HomeDemo from '../components/HomeDemo.astro'
-import InputFormats from '../components/InputFormats.astro'
 import LinkList from '../components/LinkList.astro'
 import Base from '../layouts/Base.astro'
-import { docs, showcase } from '../lib/links.ts'
-
-const base = import.meta.env.BASE_URL
-const snippet = `import { MSAViewer } from 'react-msaview'
-
-<MSAViewer msa={fastaText} tree={newickText} gff={domainGff} />`
+import { app, docs, showcase } from '../lib/links.ts'
 ---
 
 <Base
@@ -26,27 +20,6 @@ const snippet = `import { MSAViewer } from 'react-msaview'
 
     <HomeDemo />
 
-    <h2>Open your own files</h2>
-    <p>
-      The <a href={`${base}/demo/`}>standalone app</a> opens an alignment, a
-      tree and an annotation file from your computer or from a URL. It reads:
-    </p>
-    <InputFormats />
-
-    <h2>Put the viewer in your own page</h2>
-    <pre><code>{snippet}</code></pre>
-    <p>
-      The same viewer runs from a <code>&lt;script&gt;</code> tag as a UMD
-      bundle, from R as the <code>msaviewr</code> htmlwidget, and from a Jupyter
-      notebook as the <code>msaview-widget</code> anywidget. The
-      <a href={`${base}/embedding`}>embedding guide</a> has the install line,
-      every prop and the model API.
-    </p>
-
-    <h2>Documentation</h2>
-    <LinkList items={docs} />
-
-    <h2>Showcase</h2>
-    <LinkList items={showcase} />
+    <LinkList items={[app, ...docs, ...showcase]} />
   </article>
 </Base>
