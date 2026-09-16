@@ -58,3 +58,8 @@ Leary = "Leary"
 Cace = "Cace"
 # ggtree spells its clade-highlight geom geom_hilight
 hilight = "hilight"
+
+# Pango lineage names: the BA.* SARS-CoV-2 lineages, read as a truncated "by"
+BA = "BA"
+# journal abbreviation: Nature Communications
+Commun = "Commun"

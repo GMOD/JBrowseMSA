@@ -69,8 +69,8 @@ with open(out, 'w') as fh:
 PY
 
 # 2. align, then infer a neighbor-joining tree from the alignment. Five whole
-#    genomes take about twenty minutes. ClustalW wraps the Newick across
-#    lines, and the viewer wants one string
+#    genomes take about four minutes. ClustalW wraps the Newick across lines,
+#    and the viewer wants one string
 clustalw -INFILE="$OUT/recombinant.fasta" -ALIGN -TYPE=DNA -OUTORDER=INPUT \
   -OUTPUT=FASTA -OUTFILE="$OUT/recombinant.afa" > /dev/null
 clustalw -INFILE="$OUT/recombinant.afa" -TREE -TYPE=DNA -OUTPUTTREE=phylip > /dev/null
