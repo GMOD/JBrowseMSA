@@ -14,19 +14,23 @@ import MSAPanel from './msa/MSAPanel.tsx'
 import { clickColor, hoverColor } from './overlayColors.ts'
 import RowPanelHeaders from './rowpanels/RowPanelHeaders.tsx'
 import RowPanels from './rowpanels/RowPanels.tsx'
+import TreeOverview from './tree/TreeOverview.tsx'
 import TreePanel from './tree/TreePanel.tsx'
 import TreeRuler from './tree/TreeRuler.tsx'
 
 import type { MsaViewModel } from '../model.ts'
 
-// The band above the panels: the tree's scale bar, the strip headers, and the
-// minimap over the alignment. The spacer stands in for the resize handle, so
-// the minimap starts exactly where the alignment canvas does.
+// The band above the panels: the tree overview and scale bar, the strip
+// headers, and the minimap over the alignment. The spacer stands in for the
+// resize handle, so the minimap starts exactly where the alignment canvas does.
 const TopArea = observer(function ({ model }: { model: MsaViewModel }) {
-  const { showHorizontalScrollbar, resizeHandleWidth } = model
+  const { showHorizontalScrollbar, showTreeOverview, resizeHandleWidth } = model
   return (
     <div style={{ display: 'flex' }}>
-      <TreeRuler model={model} />
+      <div style={{ flexShrink: 0 }}>
+        {showTreeOverview ? <TreeOverview model={model} /> : null}
+        <TreeRuler model={model} />
+      </div>
       <RowPanelHeaders model={model} />
       <div style={{ width: resizeHandleWidth, flexShrink: 0 }} />
       {showHorizontalScrollbar ? <Minimap model={model} /> : null}

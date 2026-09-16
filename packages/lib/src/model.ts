@@ -77,6 +77,7 @@ import {
   leaves,
   maxLength,
   mrca,
+  nodeCoveringRows,
   setBrLength,
   sort,
   sum as hierarchySum,
@@ -231,6 +232,8 @@ export const preservedOnReset = new Set([
   'drawTree',
   'drawNodeBubbles',
   'drawNodeLabels',
+  'showTreeOverview',
+  'overviewHeight',
   'autoTreeAreaWidth',
   'turnedOffTracks',
   'trackHeights',
@@ -295,6 +298,78 @@ function cladeRows(
     }
   }
   return first <= last ? [first, last] : undefined
+}
+
+/**
+ * Every clade that resolves, with its fill color settled, against the leaf
+ * order `rowNamesSet` gives. The tree panel resolves against the displayed
+ * rows and the overview against its own, so both take the tree they draw.
+ */
+function resolveClades(
+  clades: Clade[],
+  root: HierarchyNode<NodeWithIds>,
+  rowNamesSet: Map<string, number>,
+): ResolvedClade[] {
+  const index = leafIndex(root)
+  return clades.flatMap(clade => {
+    const rows = cladeRows(clade, root, index, rowNamesSet)
+    return rows
+      ? [
+          {
+            rows,
+            mark: clade.mark,
+            color: withAlpha(
+              clade.color ?? cladeHighlightColor,
+              cladeHighlightAlpha,
+            ),
+          },
+        ]
+      : []
+  })
+}
+
+/**
+ * The tree with the display transforms applied: leaf counts summed, children
+ * sorted by branch length, `showOnly` taken as the new root, and each
+ * `collapsed` clade folded. The overview builds the same tree without the
+ * focus, so it shows the focused subtree inside the whole.
+ */
+function buildTreeRoot(
+  tree: NodeWithIds,
+  collapsed: readonly string[],
+  showOnly?: string,
+) {
+  let hier = hierarchy(tree, d => d.children)
+  hierarchySum(hier, d => (d.children.length > 0 ? 0 : 1))
+  sort(hier, (a, b) => (a.data.length ?? 1) - (b.data.length ?? 1))
+
+  if (showOnly) {
+    const res = find(hier, n => n.data.id === showOnly)
+    if (res) {
+      hier = res
+    }
+  }
+
+  for (const collapsedId of collapsed) {
+    const node = find(hier, n => n.data.id === collapsedId)
+    if (node) {
+      if (node.children) {
+        collapse(node)
+      } else if (node.parent?.children) {
+        node.parent.children = node.parent.children.filter(
+          c => c.data.id !== collapsedId,
+        )
+      }
+    }
+  }
+
+  return hier
+}
+
+// the inclusive tip indices a node covers, from the row-space extent
+// clusterLayout writes to xMin/xMax as tip centers
+function tipRange(node: HierarchyNode): [number, number] {
+  return [Math.round(node.xMin! - 0.5), Math.round(node.xMax! - 0.5)]
 }
 
 // the channels reading the feature table; every other channel reads rowData
@@ -1320,31 +1395,100 @@ function stateModelFactory() {
        * #getter
        */
       get root() {
-        let hier = hierarchy(this.tree, d => d.children)
-        hierarchySum(hier, d => (d.children.length > 0 ? 0 : 1))
-        sort(hier, (a, b) => (a.data.length ?? 1) - (b.data.length ?? 1))
+        return buildTreeRoot(this.tree, self.collapsed, self.showOnly)
+      },
 
-        if (self.showOnly) {
-          const res = find(hier, n => n.data.id === self.showOnly)
-          if (res) {
-            hier = res
-          }
+      /**
+       * #getter
+       * height of the band the tree overview draws in, zero when it is off
+       */
+      get treeOverviewHeight() {
+        return self.showTreeOverview ? self.overviewHeight : 0
+      },
+
+      /**
+       * #getter
+       * the whole tree laid out for the overview, or undefined when the
+       * overview is off. The focus is left out, so the focused subtree draws
+       * inside the whole tree, and the collapsed clades are folded, since
+       * those are rows the view no longer has. `x` is in tip-index space and
+       * `len` is a fraction of the root-to-tip length, so one layout serves
+       * any band size.
+       */
+      get treeOverviewLayout() {
+        if (!self.showTreeOverview) {
+          return undefined
         }
-
-        for (const collapsedId of self.collapsed) {
-          const node = find(hier, n => n.data.id === collapsedId)
-          if (node) {
-            if (node.children) {
-              collapse(node)
-            } else if (node.parent?.children) {
-              node.parent.children = node.parent.children.filter(
-                c => c.data.id !== collapsedId,
-              )
-            }
-          }
+        const root = buildTreeRoot(this.tree, self.collapsed)
+        const numTips = leaves(root).length
+        clusterLayout(root, numTips, 1)
+        const rootLen = Math.max(root.data.length || 0, 0)
+        const extent = maxLength(root) - rootLen
+        setBrLength(root, -rootLen, extent ? 1 / extent : 0)
+        return {
+          root,
+          numTips,
+          maxDepthToLeaf: calcDepthToLeaf(root),
+          showBranchLen: self.showBranchLen && extent > 0,
         }
+      },
 
-        return hier
+      /**
+       * #getter
+       * the `clades` highlights in the overview's own row space, which the
+       * focus does not narrow
+       */
+      get treeOverviewClades(): ResolvedClade[] {
+        const layout = this.treeOverviewLayout
+        if (!layout || self.clades.length === 0) {
+          return noClades
+        }
+        const rowNames = new Map(
+          leaves(layout.root).map((leaf, index) => [leaf.data.name, index]),
+        )
+        return resolveClades(self.clades, layout.root, rowNames)
+      },
+
+      /**
+       * #getter
+       * the inclusive tip rows the focused subtree covers in the overview,
+       * which is the box drawn on it. undefined with no focus
+       */
+      get treeOverviewFocusRows(): [number, number] | undefined {
+        const layout = this.treeOverviewLayout
+        if (!layout || !self.showOnly) {
+          return undefined
+        }
+        const node = find(layout.root, n => n.data.id === self.showOnly)
+        return node ? tipRange(node) : undefined
+      },
+
+      /**
+       * #method
+       * the subtree a point `y` pixels down the tree overview picks: the
+       * deepest one whose tip range covers every row under that pixel, with
+       * the rows it covers. A pixel stands for several tips on a large tree,
+       * which is what keeps the pick off the individual tips. undefined when
+       * the overview is off or the point picks the whole tree.
+       */
+      treeOverviewHit(y: number) {
+        const layout = this.treeOverviewLayout
+        if (!layout) {
+          return undefined
+        }
+        const { root, numTips } = layout
+        const perPixel = numTips / self.overviewHeight
+        const first = clamp(Math.floor(y * perPixel), 0, numTips - 1)
+        const last = clamp(Math.floor((y + 1) * perPixel), first, numTips - 1)
+        let node = nodeCoveringRows(root, first + 0.5, last + 0.5)
+        // focusing one tip leaves a single row on screen, so the pick lifts to
+        // the subtree that tip sits in
+        while (!node.children && node.parent) {
+          node = node.parent
+        }
+        return node === root
+          ? undefined
+          : { id: node.data.id, rows: tipRange(node) }
       },
 
       /**
@@ -2379,12 +2523,14 @@ function stateModelFactory() {
        * blocksY, maxScrollY, the vertical scrollbar and fitVertically.
        */
       get msaAreaHeight() {
-        // the minimap and the row panel headers share one band across the top
+        // the minimap, the row panel headers and the tree overview share one
+        // band across the top
         return (
           self.height -
           Math.max(
             self.showHorizontalScrollbar ? self.minimapHeight : 0,
             self.rowPanelsHeaderHeight,
+            self.treeOverviewHeight,
           ) -
           self.headerHeight -
           this.totalTrackAreaHeight
@@ -3248,23 +3394,11 @@ function stateModelFactory() {
         if (self.clades.length === 0) {
           return noClades
         }
-        const root = hierarchy(self.tree, d => d.children)
-        const index = leafIndex(root)
-        return self.clades.flatMap(clade => {
-          const rows = cladeRows(clade, root, index, self.rowNamesSet)
-          return rows
-            ? [
-                {
-                  rows,
-                  mark: clade.mark,
-                  color: withAlpha(
-                    clade.color ?? cladeHighlightColor,
-                    cladeHighlightAlpha,
-                  ),
-                },
-              ]
-            : []
-        })
+        return resolveClades(
+          self.clades,
+          hierarchy(self.tree, d => d.children),
+          self.rowNamesSet,
+        )
       },
 
       /**
@@ -3471,6 +3605,19 @@ function stateModelFactory() {
        */
       setHideHeader(arg: boolean) {
         self.hideHeader = arg
+      },
+      /**
+       * #action
+       * focus the subtree a click `y` pixels down the tree overview lands on.
+       * A click inside the box already drawn there clears the focus, the way
+       * clicking the focused branch again does.
+       */
+      treeOverviewClick(y: number) {
+        const hit = self.treeOverviewHit(y)
+        const focus = self.treeOverviewFocusRows
+        const inside =
+          !!focus && !!hit && hit.rows[0] >= focus[0] && hit.rows[1] <= focus[1]
+        self.setShowOnly(inside || !hit ? undefined : hit.id)
       },
       /**
        * #action

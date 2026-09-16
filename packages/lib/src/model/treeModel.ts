@@ -6,7 +6,9 @@ import {
   defaultDrawNodeLabels,
   defaultDrawTree,
   defaultLabelsAlignRight,
+  defaultOverviewHeight,
   defaultShowBranchLen,
+  defaultShowTreeOverview,
   defaultTreeAreaWidth,
   defaultTreeWidth,
 } from '../constants.ts'
@@ -70,6 +72,19 @@ export function TreeModelF() {
 
       /**
        * #property
+       * draw the whole tree small above the tree panel, with the focused
+       * subtree boxed. A click on it focuses the subtree under the pointer
+       */
+      showTreeOverview: stripDefault(types.boolean, defaultShowTreeOverview),
+
+      /**
+       * #property
+       * height of the tree overview band, px
+       */
+      overviewHeight: stripDefault(types.number, defaultOverviewHeight),
+
+      /**
+       * #property
        * auto-size treeAreaWidth to fit the row labels (plus the tree, if drawn)
        * instead of using a fixed width. useful when there is no tree, so the
        * label gutter isn't padded out to the default 400px
@@ -129,6 +144,19 @@ export function TreeModelF() {
        */
       setDrawNodeLabels(arg: boolean) {
         self.drawNodeLabels = arg
+      },
+      /**
+       * #action
+       */
+      setShowTreeOverview(arg: boolean) {
+        self.showTreeOverview = arg
+      },
+      /**
+       * #action
+       * set the height of the tree overview band (px)
+       */
+      setOverviewHeight(n: number) {
+        self.overviewHeight = Math.round(n)
       },
       /**
        * #action

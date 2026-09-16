@@ -14,6 +14,7 @@ import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderRowPanels } from './components/rowpanels/renderStrip.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
+import { renderTreeOverview } from './components/tree/renderTreeOverview.ts'
 import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
 import { outlineColor } from './util.ts'
 
@@ -63,7 +64,8 @@ interface Layout {
   height: number
   contentHeight: number
   trackHeight: number
-  // the band the minimap and the row panel headers share across the top
+  // the band the minimap, the row panel headers and the tree overview share
+  // across the top
   topHeight: number
   offsetX: number
   offsetY: number
@@ -85,6 +87,7 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
     msaAreaHeight,
     msaCanvasWidth,
     showHorizontalScrollbar,
+    treeOverviewHeight,
   } = model
   const trackHeight = opts.includeTracks ? totalTrackAreaHeight : 0
   // the minimap reflects the live viewport scroll position, so it's only
@@ -100,6 +103,7 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
   const topHeight = Math.max(
     includeMinimap ? minimapHeight : 0,
     rowPanelsHeaderHeight,
+    treeOverviewHeight,
   )
   const gutterWidth = treeAreaWidth + rowPanelsWidth
 
@@ -235,6 +239,14 @@ function MsaSvg({
             theme={theme}
             bandHeight={topHeight}
           />
+          {model.showTreeOverview ? (
+            <TreeOverviewSVG
+              model={model}
+              theme={theme}
+              Context={Context}
+              layers={layers}
+            />
+          ) : null}
           <g transform={`translate(0 ${topHeight})`}>{body}</g>
         </>
       ) : (
@@ -246,6 +258,41 @@ function MsaSvg({
         </g>
       ) : null}
     </svg>
+  )
+}
+
+// The tree overview in the top band, over the tree column, where the live view
+// puts it. It is part of the figure rather than chrome: the inset is what says
+// where the focused clade sits in the whole tree.
+function TreeOverviewSVG({
+  model,
+  theme,
+  Context,
+  layers,
+}: {
+  model: MsaViewModel
+  theme: Theme
+  Context: typeof ContextType
+  layers: LayerMap
+}) {
+  const { treeAreaWidth, overviewHeight, id } = model
+  const ctx = new Context(treeAreaWidth, overviewHeight)
+  renderTreeOverview({
+    model,
+    ctx,
+    theme,
+    width: treeAreaWidth,
+    height: overviewHeight,
+  })
+  return (
+    <ClipGroup
+      panelId="tree-overview"
+      clipId={`tree-overview-${id}`}
+      width={treeAreaWidth}
+      height={overviewHeight}
+      ctx={ctx}
+      layers={layers}
+    />
   )
 }
 

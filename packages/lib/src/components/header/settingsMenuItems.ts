@@ -55,6 +55,7 @@ export function treeSettingsMenuItems(model: MsaViewModel): MenuItem[] {
     drawNodeBubbles,
     drawNodeLabels,
     drawLabels,
+    showTreeOverview,
   } = model
   return [
     toggle('Show branch length', showBranchLen, arg => {
@@ -68,6 +69,9 @@ export function treeSettingsMenuItems(model: MsaViewModel): MenuItem[] {
     }),
     toggle('Draw internal node labels', drawNodeLabels, arg => {
       model.setDrawNodeLabels(arg)
+    }),
+    toggle('Show tree overview', showTreeOverview, arg => {
+      model.setShowTreeOverview(arg)
     }),
     toggle('Tree labels align right', labelsAlignRight, arg => {
       model.setLabelsAlignRight(arg)

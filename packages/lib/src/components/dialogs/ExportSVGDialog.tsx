@@ -55,10 +55,14 @@ export default function ExportSVGDialog({
     numColumns,
     leaves,
     showMsaLetters,
+    treeOverviewHeight,
   } = model
   const hasTracks = turnedOnTracks.length > 0
   const entireWidth = totalWidth + treeAreaWidth + rowPanelsWidth
-  const entireHeight = totalHeight + (includeTracks ? totalTrackAreaHeight : 0)
+  const entireHeight =
+    totalHeight +
+    (includeTracks ? totalTrackAreaHeight : 0) +
+    treeOverviewHeight
   // the background is one raster image whatever its size, so what the figure
   // actually costs is its residue letters: each is an svg element of its own.
   // Past roughly this many the export runs to tens of seconds and can exhaust
