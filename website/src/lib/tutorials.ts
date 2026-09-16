@@ -29,6 +29,7 @@ import metadataThumb from '../../../docs/media/phylogeny_metadata-tip-labels.png
 import proteinThumb from '../../../docs/media/protein-family-domains.png'
 import complexThumb from '../../../docs/media/protein_complex-4.png'
 import proteaseThumb from '../../../docs/media/r-protease-triad.png'
+import recombinantThumb from '../../../docs/media/recombination_breakpoint-2.png'
 import rnaThumb from '../../../docs/media/rna-family-overview.png'
 import scaleThumb from '../../../docs/media/scale-clade-groups.png'
 import spikeThumb from '../../../docs/media/spike-structure-final.png'
@@ -105,6 +106,16 @@ export const tutorials: Tutorial[] = [
     thumb: complexThumb,
     thumbAlt:
       'Eleven concatenated hemoglobin rows with arcs joining each alpha residue to the beta residue it touches in the crystal, colored by interface',
+    thumbPosition: 'left',
+  },
+  {
+    slug: 'recombination_breakpoint',
+    title: "The recombination breakpoint in XBB's spike gene",
+    blurb:
+      'Five whole SARS-CoV-2 genomes aligned with ClustalW, with the XBB.1 row scanned against each of the two BA.2 descendants it recombines. The two difference counts change places once inside the receptor-binding domain, and 41 of the 44 informative sites put the break between positions 22,896 and 22,942. A BA.5 control run through the same scan crosses nowhere.',
+    thumb: recombinantThumb,
+    thumbAlt:
+      'Five SARS-CoV-2 genome rows under two bar tracks counting the differences between the recombinant row and each parent, one falling to zero where the other rises',
     thumbPosition: 'left',
   },
   {
