@@ -418,11 +418,20 @@ into lanes, which divide the row's height between them.
 | `x`         | `column` draws in the alignment's columns; `position` in each row's own residue positions |
 | `encoding`  | `{color: {field, scale}, label: field}` over a field of the features                      |
 | `transform` | `[{type: "align", on: <Name value>}]`, only under `x: "position"`                         |
+| `position`  | `identity` stacks overlapping features; `strandpile` splits the row by strand             |
 
 `x: "position"` maps every row's features onto one linear scale across the
 extent they cover, so a genome with no alignment has an x. A tree, a GFF and a
 `features` panel therefore draw a figure with no `msa` at all: the alignment
 panel is zero columns wide and the tree and the panel fill the view.
+
+`position: "strandpile"` is gggenomes' `position_strandpile`: the forward
+features stack above a line and the reverse below it, each strand packing on its
+own. It is what shows a divergently transcribed neighbour, which reads as one
+more arrow in a row under `identity`. The deepest row on each side sets the grid
+every row lays out on, so the line sits at one height down the panel and a
+reader can scan it, and a row using only one side leaves the other empty. A
+feature with no strand piles with the forward ones.
 
 `{type: "align", on: "genE"}` shifts each row so that the first feature whose
 `Name` is `genE` starts at zero, which is gggenes' `make_alignment_dummies`. A

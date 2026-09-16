@@ -204,6 +204,56 @@ g2\tncbi\tgene\t1\t500\t.\t+\t.\tName=genA`,
   ])
 })
 
+test('strandpile puts the forward genes above the reverse ones', () => {
+  // g1 runs an operon one way with one gene coming back at it; g2 is all
+  // forward, g3 all reverse
+  const { panel } = featurePanel(
+    [{ kind: 'features', x: 'position', position: 'strandpile' }],
+    {
+      tree,
+      gff: `##gff-version 3
+g1\tncbi\tgene\t1\t500\t.\t+\t.\tName=genA
+g1\tncbi\tgene\t520\t900\t.\t+\t.\tName=genB
+g1\tncbi\tgene\t300\t800\t.\t-\t.\tName=genR
+g2\tncbi\tgene\t1\t500\t.\t+\t.\tName=genA
+g3\tncbi\tgene\t1\t500\t.\t-\t.\tName=genR`,
+    },
+  )
+  const lanes = (row: string) =>
+    Object.fromEntries(
+      panel.spans
+        .get(row)!
+        .map(s => [s.annotation.attributes!.Name, [s.lane, s.laneCount]]),
+    )
+  // one lane each side, so the line between the strands sits halfway down
+  // every row of the panel, including the rows using only one side
+  expect(lanes('g1')).toEqual({ genA: [0, 2], genB: [0, 2], genR: [1, 2] })
+  expect(lanes('g2')).toEqual({ genA: [0, 2] })
+  expect(lanes('g3')).toEqual({ genR: [1, 2] })
+})
+
+test('strandpile stacks within a strand, keeping the other side its own', () => {
+  // two forward genes overlap, so the forward side needs two lanes and the
+  // reverse side drops below both
+  const { panel } = featurePanel(
+    [{ kind: 'features', x: 'position', position: 'strandpile' }],
+    {
+      tree,
+      gff: `##gff-version 3
+g1\tncbi\tgene\t1\t1000\t.\t+\t.\tName=genA
+g1\tncbi\tgene\t100\t900\t.\t+\t.\tName=genB
+g1\tncbi\tgene\t200\t800\t.\t-\t.\tName=genR`,
+    },
+  )
+  expect(
+    Object.fromEntries(
+      panel.spans
+        .get('g1')!
+        .map(s => [s.annotation.attributes!.Name, [s.lane, s.laneCount]]),
+    ),
+  ).toEqual({ genA: [1, 3], genB: [0, 3], genR: [2, 3] })
+})
+
 test('genes sharing a few bases stay in one lane', () => {
   // trpE and trpD of E. coli share one base, and genD covers 200 bases of
   // genC, a fifth of it

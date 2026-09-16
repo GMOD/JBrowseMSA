@@ -131,7 +131,12 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   generic over `{startCol, endCol}`, and maps their extent onto the panel width.
   The packing runs on the pixel spans and shrinks each one by a tenth before
   testing overlap, because adjacent bacterial genes commonly share a few bases
-  and a stop codon over the next start put a whole operon on two lanes. The
+  and a stop codon over the next start put a whole operon on two lanes. Both `x`
+  modes hand their unlaned spans to `panelLanes`, which dispatches on the
+  record's `position`: `strandpile` packs each strand on its own and lays every
+  row out on one grid, sized by the deepest row on each side, so the line
+  between the strands holds still down the panel. A `position` is a lane
+  assignment and nothing else -- no mode of it reaches `drawFeatureSpans`. The
   `align` transform's per-row shift comes from `featureAlignShifts`. A record's
   own `encoding` resolves through `resolveScale` and `featureFields.ts` the way
   the top-level `featureFill` and `featureLabel` do, and falls back to them. A

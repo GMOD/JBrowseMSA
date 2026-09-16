@@ -257,6 +257,56 @@ function featureLabelMap(annotations: Annotation[], field: string) {
   return labels
 }
 
+/** what `packDomainLanes` needs to lay a row out, before it has its lane */
+type Unlaned = Omit<RowPanelSpan, 'lane' | 'laneCount'> & {
+  startCol: number
+  endCol: number
+}
+
+/**
+ * Lanes for `position: "strandpile"`, gggenomes' `position_strandpile`: the
+ * forward features stack above the line and the reverse below it, each strand
+ * packing on its own. The deepest row on each side sets the grid every row lays
+ * out on, so the line between the strands sits at one height down the panel and
+ * a reader can scan it. A feature with no strand piles with the forward ones.
+ */
+function strandpileLanes(
+  rows: [string, Unlaned[]][],
+): Map<string, RowPanelSpan[]> {
+  const piled = rows.map(([name, bands]) => {
+    const reverse = packDomainLanes(
+      bands.filter(b => b.annotation.strand === -1),
+    )
+    const forward = packDomainLanes(
+      bands.filter(b => b.annotation.strand !== -1),
+    )
+    return { name, forward, reverse }
+  })
+  const up = Math.max(0, ...piled.map(p => p.forward[0]?.laneCount ?? 0))
+  const down = Math.max(0, ...piled.map(p => p.reverse[0]?.laneCount ?? 0))
+  const laneCount = up + down
+  return new Map(
+    piled.map(({ name, forward, reverse }) => [
+      name,
+      [
+        // forward level 0 is the lane just above the line, stacking upward
+        ...forward.map(b => ({ ...b, lane: up - 1 - b.lane, laneCount })),
+        ...reverse.map(b => ({ ...b, lane: up + b.lane, laneCount })),
+      ],
+    ]),
+  )
+}
+
+/** one row's spans laid out by the panel's `position` */
+function panelLanes(
+  panel: RowFeaturesSpec,
+  rows: [string, Unlaned[]][],
+): Map<string, RowPanelSpan[]> {
+  return panel.position === 'strandpile'
+    ? strandpileLanes(rows)
+    : new Map(rows.map(([name, bands]) => [name, packDomainLanes(bands)]))
+}
+
 /**
  * The spans a `features` panel draws, keyed by row name and measured in the
  * panel's own pixels. `column` takes the bands the overlay draws, at the
@@ -281,7 +331,8 @@ function featurePanelSpans({
   shifts: Map<string, number> | undefined
 }): Map<string, RowPanelSpan[]> {
   if (panel.x === 'column') {
-    return new Map(
+    return panelLanes(
+      panel,
       [...domainBands].map(([name, bands]) => [
         name,
         bands.map(band => ({
@@ -321,18 +372,17 @@ function featurePanelSpans({
   // which keeps the genes of an operon on one lane: adjacent genes commonly
   // share a few bases, and a stop codon overlapping the next start reads as a
   // second lane over the whole row
-  return new Map(
+  return panelLanes(
+    panel,
     shifted.map(([name, features]) => [
       name,
-      packDomainLanes(
-        features.map(({ annotation, start, end }) => ({
-          annotation,
-          xStart: (start - min) * scale,
-          xEnd: (end - min) * scale,
-          startCol: start,
-          endCol: end - (end - start) * laneOverlap,
-        })),
-      ),
+      features.map(({ annotation, start, end }) => ({
+        annotation,
+        xStart: (start - min) * scale,
+        xEnd: (end - min) * scale,
+        startCol: start,
+        endCol: end - (end - start) * laneOverlap,
+      })),
     ]),
   )
 }

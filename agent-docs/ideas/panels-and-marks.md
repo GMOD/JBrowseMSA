@@ -35,6 +35,11 @@ Two target figures, in order of work:
 - **Transform.** A change of coordinates before drawing. The viewer has one
   today, the projection of residue positions through gaps, and gains one more,
   `align`.
+- **Position.** How marks that would land on top of each other share the room
+  instead. ggplot2 spells its adjustments `position_identity`, `position_stack`
+  and so on, and gggenomes adds `position_strandpile`; a `features` panel's
+  `position` takes the same names. A position moves a mark, it never redraws
+  one, which is why `strandpile` is lane arithmetic and touches no renderer.
 
 "Layer" stays out of the public vocabulary. In ggplot a layer is data plus geom
 plus stat in one coordinate space, and ggtree adds panels with `facet_plot`. In

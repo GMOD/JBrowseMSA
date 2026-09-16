@@ -131,6 +131,8 @@ export interface RowFeaturesSpec {
   header?: string
   encoding?: FeatureEncodingSpec
   transform?: AlignTransform[]
+  /** how overlapping features share the row's height; see docs/layers.md */
+  position?: 'identity' | 'strandpile'
 }
 
 /**
