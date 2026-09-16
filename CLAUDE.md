@@ -121,6 +121,16 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   the tree and the clade rectangles on an offscreen canvas, since a 230k-branch
   tree cannot be redrawn as the focus box follows the pointer, and the SVG
   export runs the same `renderTreeOverview` onto a svgcanvas Context.
+- A `clades` record's `mark` picks what it draws. `highlight` fills the rows,
+  `bracket` draws a bar with the record's `label`, and `collapse` and `focus`
+  seed `collapsed` and `showOnly` once in `afterCreate`, so the collapse the
+  tree, `hideGapsEffective` and the alignment all read is the one the branch
+  menu writes. `cladeGutterWidth` in `components/tree/cladeBrackets.ts` is the
+  column the bracket takes out of the right of the tree area, which the tip
+  labels and the `treeWidth` autorun both give way to, so the bar lands between
+  the labels and the first row panel. The canvas draws the bar and the label is
+  DOM text (`CladeLabels.tsx`) on screen and a `<text>` in the export, since the
+  canvas layer has no rotation.
 - `model.legends` is the one list both legend renderings read:
   `components/msa/AnnotationLegend.tsx` on screen and `LegendSVG` in
   `renderToSvg.tsx` for the export. A producer contributes
