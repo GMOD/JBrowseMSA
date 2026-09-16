@@ -40,7 +40,7 @@ export type { InterProScanResults } from 'msa-parsers'
 export type { ColumnCounts } from './columnCounts.ts'
 export type { ColumnStats } from './columnStats.ts'
 // the scale an encoding reads its field through, and what resolving one gives
-export type { LegendEntry, ResolvedScale, ScaleSpec } from './scales.ts'
+export type { ResolvedScale, ScaleSpec } from './scales.ts'
 export type {
   Accession,
   Annotation,

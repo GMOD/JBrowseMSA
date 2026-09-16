@@ -10,8 +10,8 @@ test('a spec with no palette takes the ggplot colors of its size', () => {
   expect(colorOf('a')).toBe('#F8766D')
   expect(colorOf('b')).toBe('#00BFC4')
   expect(legend).toEqual([
-    { label: 'a', color: '#F8766D' },
-    { label: 'b', color: '#00BFC4' },
+    { id: 'a', label: 'a', color: '#F8766D' },
+    { id: 'b', label: 'b', color: '#00BFC4' },
   ])
 })
 
@@ -43,7 +43,7 @@ test('a map colors the values it names and no others', () => {
   expect(colorOf('21K')).toBeUndefined()
   // 20A is in the map and not in the data, so no legend entry stands for rows
   // that are not there
-  expect(legend).toEqual([{ label: '19B', color: '#e41a1c' }])
+  expect(legend).toEqual([{ id: '19B', label: '19B', color: '#e41a1c' }])
 })
 
 test('the domain sorts, so row order does not move a color', () => {

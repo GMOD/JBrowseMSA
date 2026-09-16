@@ -1,16 +1,12 @@
 import { createPaletteMap } from './createPaletteMap.ts'
 import { paletteNamed } from './ggplotPalettes.ts'
 
+import type { LegendEntry } from './types.ts'
+
 /** how a channel reads a field: a palette by name, or a color per value */
 export interface ScaleSpec {
   palette?: string
   map?: Record<string, string>
-}
-
-/** one value of a categorical scale, as a legend draws it */
-export interface LegendEntry {
-  label: string
-  color: string
 }
 
 export interface ResolvedScale {
@@ -41,6 +37,11 @@ export function resolveScale(
   return {
     kind: 'categorical',
     colorOf: (value: string) => colors[value],
-    legend: labels.map(label => ({ label, color: colors[label]! })),
+    // a categorical value is its own label, and the id a legend keys on
+    legend: labels.map(value => ({
+      id: value,
+      label: value,
+      color: colors[value]!,
+    })),
   }
 }

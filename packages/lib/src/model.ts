@@ -9,6 +9,7 @@ import {
   isAlive,
   types,
 } from '@jbrowse/mobx-state-tree'
+import { colord } from 'colord'
 import { autorun, transaction } from 'mobx'
 import {
   generateNodeIds,
