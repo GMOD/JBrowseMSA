@@ -1,6 +1,12 @@
 // Render msaview/static/widget.js with the traits run_examples.py captured and
-// write images/<notebook>.png. The page loads the bundle from a blob URL, as
-// anywidget does, and hands it a model holding those traits.
+// write docs/media/python-<notebook>.png. The page loads the bundle from a blob
+// URL, as anywidget does, and hands it a model holding those traits.
+//
+// The figures go to docs/media because that is the one directory the website
+// serves: sync-assets.mjs copies it to the site's /media, and the remark plugin
+// in astro.config.mjs rewrites every relative markdown image to a path under
+// there. A figure kept beside its README instead renders on GitHub and 404s on
+// the site, which is what the deploy's link check kept catching.
 //
 //   node scripts/screenshot_examples.mjs
 import { readFile } from 'node:fs/promises'
@@ -13,6 +19,12 @@ import puppeteer from 'puppeteer-core'
 import { BROWSER_ARGS, findChrome } from '../../../scripts/screenshots/lib.mjs'
 
 const PACKAGE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const MEDIA = path.resolve(PACKAGE, '../../docs/media')
+
+// 01_quickstart -> python-quickstart, matching r-quickstart.svg and
+// cli-quickstart.png in the same directory
+const figureName = notebook =>
+  `python-${notebook.replace(/^\d+_/, '').replaceAll('_', '-')}`
 
 const harness = `<!doctype html><html><head><meta charset="utf8">
 <style>body{margin:0;font-family:sans-serif}#root{width:960px;padding:8px}</style>
@@ -71,9 +83,10 @@ for (const [name, traits] of Object.entries(specs)) {
       timeout: 30000,
     })
     await new Promise(resolve => setTimeout(resolve, 1500))
-    const file = path.join(PACKAGE, 'images', `${name}.png`)
-    await (await page.$('#root')).screenshot({ path: file })
-    console.log(`wrote images/${name}.png`)
+    const figure = `${figureName(name)}.png`
+    const root = await page.$('#root')
+    await root.screenshot({ path: path.join(MEDIA, figure) })
+    console.log(`wrote docs/media/${figure}`)
   } catch (e) {
     failed++
     console.error(`${name}: ${e.message}`, errors)

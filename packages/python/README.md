@@ -6,7 +6,7 @@ Notebook, VS Code and any other host [anywidget](https://anywidget.dev)
 supports. The distribution is `msaview-widget` and the import is `msaview`,
 because the name `msaview` on PyPI belongs to another project.
 
-![The globin alignment and tree](images/01_quickstart.png)
+![The globin alignment and tree](../../docs/media/python-quickstart.png)
 
 ## Install
 
@@ -103,7 +103,7 @@ draws per-column Shannon entropy as a bar track, highlights the columns above an
 ipywidgets slider's threshold, and prints the letter each row has at a clicked
 column.
 
-![Entropy track and highlighted columns](images/02_entropy_and_clicks.png)
+![Entropy track and highlighted columns](../../docs/media/python-entropy-and-clicks.png)
 
 [Influenza drift in a notebook](https://gmod.org/JBrowseMSA/tutorials/notebook_flu_drift)
 is the long version: 25 H3N2 vaccine strains from NCBI, aligned, with a
@@ -111,7 +111,8 @@ per-column count of how often each column changed and a band on each antigenic
 site.
 
 `scripts/run_examples.py` executes both notebooks in a kernel, and
-`scripts/screenshot_examples.mjs` renders the widgets they built into `images/`:
+`scripts/screenshot_examples.mjs` renders the widgets they built into
+`docs/media`:
 
 ```sh
 pip install -e "packages/python[examples]"

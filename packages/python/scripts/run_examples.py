@@ -6,7 +6,7 @@
 Each notebook runs top to bottom in a real kernel, with examples/ as its working
 directory. A final cell in the same kernel reads the traits off the last
 `MSAView` each notebook built and writes them to scripts/screenshot_specs.json,
-which scripts/screenshot_examples.mjs renders into images/.
+which scripts/screenshot_examples.mjs renders into docs/media.
 """
 
 from __future__ import annotations
