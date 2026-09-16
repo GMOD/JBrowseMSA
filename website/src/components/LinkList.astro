@@ -1,0 +1,22 @@
+---
+import type { SiteLink } from '../lib/links.ts'
+
+interface Props {
+  items: SiteLink[]
+}
+const { items } = Astro.props
+---
+
+<ul>
+  {items.map(item => (
+    <li>
+      <a href={item.href}>{item.label}</a> — {item.body}
+    </li>
+  ))}
+</ul>
+
+<style>
+  li {
+    margin: 0.4em 0;
+  }
+</style>

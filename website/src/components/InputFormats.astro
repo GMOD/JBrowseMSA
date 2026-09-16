@@ -1,0 +1,41 @@
+---
+const rows = [
+  {
+    what: 'Alignment',
+    formats:
+      'FASTA (gaps already inserted), Stockholm (.stock, may carry its own tree and secondary structure), Clustal (.aln), A3M, EMF',
+  },
+  {
+    what: 'Tree',
+    formats: 'Newick (.nh), or the tree embedded in a Stockholm or EMF file',
+  },
+  {
+    what: 'Annotations',
+    formats:
+      'GFF3 (InterProScan domains, exon and gene models, anything with per-row coordinates), or InterProScan JSON',
+  },
+]
+---
+
+<table>
+  <thead>
+    <tr>
+      <th>Input</th>
+      <th>Formats it reads</th>
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map(row => (
+      <tr>
+        <th scope="row">{row.what}</th>
+        <td>{row.formats}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<style>
+  tbody th {
+    white-space: nowrap;
+  }
+</style>

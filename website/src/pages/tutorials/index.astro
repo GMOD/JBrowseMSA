@@ -1,4 +1,5 @@
 ---
+import LinkList from '../../components/LinkList.astro'
 import Base from '../../layouts/Base.astro'
 import { tutorials } from '../../lib/tutorials.ts'
 
@@ -24,13 +25,12 @@ const base = import.meta.env.BASE_URL
       structure correspondence) load into the viewer as snapshot data.
     </p>
 
-    <div class="cards">
-      {tutorials.map(t => (
-        <a class="card" href={`${base}/tutorials/${t.slug}`}>
-          <h3>{t.title}</h3>
-          <p>{t.blurb}</p>
-        </a>
-      ))}
-    </div>
+    <LinkList
+      items={tutorials.map(t => ({
+        label: t.title,
+        href: `${base}/tutorials/${t.slug}`,
+        body: t.blurb,
+      }))}
+    />
   </article>
 </Base>

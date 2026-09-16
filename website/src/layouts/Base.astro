@@ -1,4 +1,5 @@
 ---
+import { docs, showcase } from '../lib/links.ts'
 import '../styles/global.css'
 
 interface Props {
@@ -12,24 +13,8 @@ const base = import.meta.env.BASE_URL
 const home = { href: base, label: 'Home' }
 const demo = { href: `${base}/demo/`, label: 'Standalone app' }
 const groups = [
-  {
-    label: 'Docs',
-    items: [
-      { href: `${base}/guide`, label: 'User guide' },
-      { href: `${base}/tutorials`, label: 'Tutorials' },
-      { href: `${base}/embedding`, label: 'Embedding' },
-      { href: `${base}/layers`, label: 'Layers' },
-      { href: `${base}/r-package`, label: 'R package' },
-      { href: `${base}/cli`, label: 'CLI' },
-    ],
-  },
-  {
-    label: 'Showcase',
-    items: [
-      { href: `${base}/gallery`, label: 'Gallery' },
-      { href: `${base}/examples`, label: 'Examples' },
-    ],
-  },
+  { label: 'Docs', items: docs },
+  { label: 'Showcase', items: showcase },
 ]
 
 const strip = (s: string) => s.replace(/\/$/, '')

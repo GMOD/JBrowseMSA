@@ -206,111 +206,6 @@ body.app-layout .site-footer {
   margin-top: 0;
 }
 
-.hero h1 {
-  font-size: 2.6rem;
-  margin: 0.2em 0 0.1em;
-}
-
-.hero .tagline {
-  font-size: 1.15rem;
-  color: var(--muted);
-  max-width: 42em;
-}
-
-.embed {
-  margin: 32px -24px;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.card {
-  display: block;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px 18px;
-  text-decoration: none;
-  color: inherit;
-  background: var(--bg-soft);
-  transition:
-    border-color 0.15s,
-    transform 0.15s;
-}
-
-.card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-
-.card h3 {
-  margin: 0 0 6px;
-  color: var(--accent);
-}
-
-.card p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-/* The home page's three steps: a numbered heading, a line of prose, the cards
-   that step leads to. */
-.step {
-  margin-top: 40px;
-}
-
-.step h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-
-.step-n {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.6em;
-  height: 1.6em;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.8em;
-}
-
-.step-body {
-  color: var(--muted);
-  max-width: 46em;
-  margin-top: 0;
-}
-
-.card.primary {
-  border-color: var(--accent);
-  background: var(--bg-soft);
-  box-shadow: inset 3px 0 0 var(--accent);
-}
-
-.formats {
-  border-collapse: collapse;
-  width: 100%;
-  margin-top: 20px;
-  font-size: 0.95rem;
-}
-
-.formats :is(th, td) {
-  border: 1px solid var(--border);
-  padding: 6px 10px;
-  text-align: left;
-  vertical-align: top;
-}
-
-.formats tbody th {
-  white-space: nowrap;
-}
-
 .prose img {
   max-width: 100%;
   height: auto;
@@ -384,6 +279,7 @@ body.app-layout .site-footer {
   border: 1px solid var(--border);
   padding: 6px 10px;
   text-align: left;
+  vertical-align: top;
 }
 
 .site-footer {
@@ -393,24 +289,6 @@ body.app-layout .site-footer {
   color: var(--muted);
   font-size: 0.9rem;
   text-align: center;
-}
-
-.prose a.cta {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  transition:
-    filter 0.15s,
-    transform 0.15s;
-}
-
-.prose a.cta:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {
@@ -430,23 +308,6 @@ body.app-layout .site-footer {
   main {
     padding: 16px;
   }
-  .hero h1 {
-    font-size: 1.9rem;
-  }
-  .hero .tagline {
-    font-size: 1rem;
-  }
-  .embed {
-    margin: 24px -16px;
-  }
-  .cards {
-    grid-template-columns: 1fr;
-  }
-  .formats {
-    display: block;
-    overflow-x: auto;
-  }
-
   /* Keep wide content from forcing the whole page to scroll sideways */
   .prose :is(table, pre) {
     display: block;

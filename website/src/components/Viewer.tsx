@@ -19,40 +19,17 @@ export default function Viewer({ base }: { base: string }) {
     () => desktopQuery.matches,
     () => false,
   )
-  const box = { border: '1px solid var(--border)', borderRadius: 6 }
   return desktop ? (
-    <>
-      <p>A live viewer, running right here on the page:</p>
-      <Suspense fallback={<div style={{ ...box, height: 400 }} />}>
-        <LiveViewer />
-      </Suspense>
-    </>
+    <Suspense fallback={<div style={{ height: 390 }} />}>
+      <LiveViewer />
+    </Suspense>
   ) : (
-    <a
-      href={`${base}/demo/`}
-      style={{
-        display: 'block',
-        overflow: 'hidden',
-        textDecoration: 'none',
-        color: 'inherit',
-        ...box,
-      }}
-    >
+    <a href={`${base}/demo/`}>
       <img
-        src={`${base}/media/colorscheme-clustalx.png`}
-        alt="Multiple sequence alignment viewer with phylogenetic tree"
-        style={{ display: 'block', width: '100%', height: 'auto' }}
+        src={`${base}/media/domain-loss.png`}
+        alt="Multiple sequence alignment viewer with phylogenetic tree and protein domains"
       />
-      <span
-        style={{
-          display: 'block',
-          padding: '10px 12px',
-          color: 'var(--accent)',
-          fontWeight: 600,
-        }}
-      >
-        Open the full interactive demo →
-      </span>
+      Open the interactive viewer
     </a>
   )
 }
