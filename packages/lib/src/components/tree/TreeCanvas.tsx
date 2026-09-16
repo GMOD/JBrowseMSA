@@ -6,6 +6,7 @@ import { observer } from 'mobx-react'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { useWheelScroll } from '../../useWheelScroll.ts'
 import { referenceColor, treeHoverColor } from '../overlayColors.ts'
+import CladeLabels from './CladeLabels.tsx'
 import TreeCanvasBlock from './TreeCanvasBlock.tsx'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -93,6 +94,7 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
         {blocksY.map(block => (
           <TreeCanvasBlock key={block} model={model} offsetY={block} />
         ))}
+        <CladeLabels model={model} />
       </div>
       <canvas
         ref={mouseoverRef}

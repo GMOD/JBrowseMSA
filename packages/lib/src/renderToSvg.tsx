@@ -13,6 +13,13 @@ import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderRowPanels } from './components/rowpanels/renderStrip.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
+import {
+  bracketGap,
+  cladeHeight,
+  cladeInGutter,
+  cladeLabelHorizontal,
+  cladeLabelOffset,
+} from './components/tree/cladeBrackets.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { renderTreeOverview } from './components/tree/renderTreeOverview.ts'
 import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
@@ -338,6 +345,63 @@ function RowPanelHeadersSVG({
   )
 }
 
+// Each bracket's label in the gutter beside its bar, where the live view puts
+// it (see CladeLabels). The canvas layer draws the bar; a label longer than the
+// gutter or the clade is clipped, since text that overruns runs off the figure.
+function CladeLabelsSVG({
+  model,
+  theme,
+  offsetY,
+}: {
+  model: MsaViewModel
+  theme: Theme
+  offsetY: number
+}) {
+  const {
+    resolvedClades,
+    cladeGutterWidth,
+    rowHeight,
+    treeAreaWidth,
+    fontSize,
+  } = model
+  if (cladeGutterWidth === 0) {
+    return null
+  }
+  const gutterLeft = treeAreaWidth - cladeGutterWidth
+  return (
+    <g id="clade-labels">
+      {resolvedClades.map((clade, index) => {
+        const { label, markColor, rows } = clade
+        if (!label || !cladeInGutter(clade)) {
+          return null
+        }
+        const left = gutterLeft + cladeLabelOffset(clade)
+        const top = rows[0] * rowHeight - offsetY
+        const height = cladeHeight(clade, rowHeight)
+        const horizontal = cladeLabelHorizontal(clade, rowHeight, fontSize)
+        const room = horizontal ? treeAreaWidth - left - bracketGap : height
+        const maxChars = Math.floor(room / (fontSize * CHAR_WIDTH))
+        const x = horizontal ? left : left + fontSize
+        const y = horizontal ? top + height / 2 + fontSize / 3 : top + height
+        return (
+          <text
+            key={`${rows[0]}-${rows[1]}-${index}`}
+            x={x}
+            y={y}
+            transform={horizontal ? undefined : `rotate(-90 ${x} ${y})`}
+            fontSize={fontSize}
+            fill={markColor ?? theme.palette.text.primary}
+          >
+            {label.length > maxChars
+              ? `${label.slice(0, Math.max(1, maxChars - 1))}\u2026`
+              : label}
+          </text>
+        )
+      })}
+    </g>
+  )
+}
+
 // the color keys drawn as a reserved column to the right of the alignment,
 // mirroring the on-screen AnnotationLegend overlay
 function LegendSVG({
@@ -483,6 +547,7 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
         ctx={treeCtx}
         layers={layers}
       />
+      <CladeLabelsSVG model={model} theme={theme} offsetY={offsetY} />
       {rowPanelsCtx ? (
         <ClipGroup
           panelId="rowpanels-panel"

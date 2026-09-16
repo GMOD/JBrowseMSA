@@ -6,6 +6,7 @@ import {
   highlightLabelHeight,
   highlightRowFill,
 } from '../msa/renderHighlights.ts'
+import { bracketBarWidth, bracketGap } from './cladeBrackets.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
@@ -499,7 +500,10 @@ function renderCladeHighlights({
   } = model
   const by = blockSizeYOverride ?? blockSize
   const right = treeAreaWidth - marginLeft
-  for (const { rows, color } of resolvedClades) {
+  for (const { rows, color, mark } of resolvedClades) {
+    if (mark !== 'highlight') {
+      continue
+    }
     const top = rows[0] * rowHeight
     const bottom = (rows[1] + 1) * rowHeight
     if (bottom < offsetY || top > offsetY + by) {
@@ -514,6 +518,57 @@ function renderCladeHighlights({
     ctx.fillStyle = color
     ctx.fillRect(x, top, right - x, bottom - top)
   }
+}
+
+// the bar of the bracket mark, in the gutter `cladeGutterWidth` reserves at the
+// right of the tree area. The label beside it is DOM text on screen and a
+// <text> in the export, since the canvas layer has no rotation.
+function renderCladeBrackets({
+  ctx,
+  model,
+  theme,
+  offsetY,
+  blockSizeYOverride,
+}: {
+  ctx: RenderCtx
+  model: MsaViewModel
+  theme: Theme
+  offsetY: number
+  blockSizeYOverride?: number
+}) {
+  const {
+    resolvedClades,
+    cladeGutterWidth,
+    rowHeight,
+    treeAreaWidth,
+    marginLeft,
+    blockSize,
+  } = model
+  if (cladeGutterWidth === 0) {
+    return
+  }
+  const by = blockSizeYOverride ?? blockSize
+  const x =
+    treeAreaWidth -
+    marginLeft -
+    cladeGutterWidth +
+    bracketGap +
+    bracketBarWidth / 2
+  ctx.lineWidth = bracketBarWidth
+  for (const { rows, mark, markColor } of resolvedClades) {
+    const top = rows[0] * rowHeight + 1
+    const bottom = (rows[1] + 1) * rowHeight - 1
+    if (mark !== 'bracket' || bottom < offsetY || top > offsetY + by) {
+      continue
+    }
+    ctx.strokeStyle = markColor ?? theme.palette.text.primary
+    ctx.beginPath()
+    ctx.moveTo(x, top)
+    ctx.lineTo(x, bottom)
+    ctx.stroke()
+  }
+  ctx.lineWidth = 1
+  ctx.strokeStyle = theme.palette.text.primary
 }
 
 // the `rowTint` encoding and the row sets of `highlights`, washed across the
@@ -715,6 +770,8 @@ export function renderTreeCanvas({
       collapsedSet,
     })
   }
+
+  renderCladeBrackets({ ctx, model, theme, offsetY, blockSizeYOverride })
 
   // Finish the index so it's ready for queries
   clickMap?.finish()

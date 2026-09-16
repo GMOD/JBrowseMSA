@@ -28,6 +28,7 @@ import { columnStats } from './columnStats.ts'
 import { packDomainLanes } from './components/msa/packDomainLanes.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import TrackBlocks from './components/tracks/TrackBlocks.tsx'
+import { cladeGutterWidth } from './components/tree/cladeBrackets.ts'
 import {
   cladeHighlightAlpha,
   cladeHighlightColor,
@@ -260,16 +261,17 @@ const noDomains: Annotation[] = []
 const noClades: ResolvedClade[] = []
 
 /**
- * The rows a clade covers, or undefined when it does not resolve: a tip name
- * the tree does not have or has twice, or a leaf count `tips` disagrees with.
- * `index` and `rowNamesSet` are the memoized passes over the tree.
+ * The rows a clade covers and the node an `mrca` names, or undefined when the
+ * clade does not resolve: a tip name the tree does not have or has twice, or a
+ * leaf count `tips` disagrees with. `index` and `rowNamesSet` are the memoized
+ * passes over the tree.
  */
 function cladeRows(
   clade: Clade,
   root: HierarchyNode<NodeWithIds>,
   index: Map<string, HierarchyNode<NodeWithIds> | undefined>,
   rowNamesSet: Map<string, number>,
-): [number, number] | undefined {
+): { rows: [number, number]; nodeId?: string } | undefined {
   if (clade.range) {
     const [a, b] = clade.range.map(name =>
       index.get(name) ? rowNamesSet.get(name) : undefined,
@@ -278,7 +280,7 @@ function cladeRows(
       return undefined
     }
     const rows: [number, number] = a <= b ? [a, b] : [b, a]
-    return rows[1] - rows[0] + 1 === clade.tips ? rows : undefined
+    return rows[1] - rows[0] + 1 === clade.tips ? { rows } : undefined
   }
   const node = clade.mrca ? mrca(root, clade.mrca, index) : undefined
   if (!node) {
@@ -297,13 +299,17 @@ function cladeRows(
       last = Math.max(last, row)
     }
   }
-  return first <= last ? [first, last] : undefined
+  return first <= last
+    ? { rows: [first, last], nodeId: node.data.id }
+    : undefined
 }
 
 /**
  * Every clade that resolves, with its fill color settled, against the leaf
  * order `rowNamesSet` gives. The tree panel resolves against the displayed
- * rows and the overview against its own, so both take the tree they draw.
+ * rows and the overview against its own, so both take the tree they draw. A
+ * `range` record names no node, so `collapse` and `focus`, which need one,
+ * drop it.
  */
 function resolveClades(
   clades: Clade[],
@@ -312,16 +318,19 @@ function resolveClades(
 ): ResolvedClade[] {
   const index = leafIndex(root)
   return clades.flatMap(clade => {
-    const rows = cladeRows(clade, root, index, rowNamesSet)
-    return rows
+    const resolved = cladeRows(clade, root, index, rowNamesSet)
+    const seeding = clade.mark === 'collapse' || clade.mark === 'focus'
+    return resolved && !(seeding && resolved.nodeId === undefined)
       ? [
           {
-            rows,
+            ...resolved,
             mark: clade.mark,
             color: withAlpha(
               clade.color ?? cladeHighlightColor,
               cladeHighlightAlpha,
             ),
+            markColor: clade.color,
+            label: clade.label,
           },
         ]
       : []
@@ -1364,6 +1373,37 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * `clades` resolved to the rows each one covers. The tip names resolve
+       * against `tree` rather than `root`, so a clade whose ancestor the user
+       * collapsed keeps its rows. One leaf pass over the tree serves every
+       * clade. A `range` record names no node, so `collapse` and `focus`, which
+       * need one, drop it.
+       */
+      get resolvedClades(): ResolvedClade[] {
+        if (self.clades.length === 0) {
+          return noClades
+        }
+        return resolveClades(
+          self.clades,
+          hierarchy(this.tree, d => d.children),
+          this.rowNamesSet,
+        )
+      },
+      /**
+       * #getter
+       * the pixel column reserved at the right of the tree area for the bracket
+       * mark, which the tip labels and the tree itself stay clear of. Zero
+       * where no clade draws a bar or a label.
+       */
+      get cladeGutterWidth() {
+        return cladeGutterWidth({
+          clades: this.resolvedClades,
+          rowHeight: self.rowHeight,
+          fontSize: this.fontSize,
+        })
+      },
+      /**
+       * #getter
        */
       get mouseOverRowName() {
         const { mouseRow } = self
@@ -1527,9 +1567,11 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * the right edge the tip labels end at, which is the tree area less the
+       * margin and the bracket gutter
        */
       get treeAreaWidthMinusMargin() {
-        return self.treeAreaWidth - self.marginLeft
+        return self.treeAreaWidth - self.marginLeft - this.cladeGutterWidth
       },
       /**
        * #getter
@@ -3388,24 +3430,6 @@ function stateModelFactory() {
       },
 
       /**
-       * #getter
-       * `clades` resolved to the rows each one covers. The tip names resolve
-       * against `tree` rather than `root`, so a clade whose ancestor the user
-       * collapsed keeps its rows. One leaf pass over the tree serves every
-       * clade.
-       */
-      get resolvedClades(): ResolvedClade[] {
-        if (self.clades.length === 0) {
-          return noClades
-        }
-        return resolveClades(
-          self.clades,
-          hierarchy(self.tree, d => d.children),
-          self.rowNamesSet,
-        )
-      },
-
-      /**
        * #method
        * per-column summary statistics: consensus residue and its identity
        * fraction, both conservation scores, gap fraction, and the sorted non-gap
@@ -3748,6 +3772,37 @@ function stateModelFactory() {
           self.setHighlightedColumns(self.highlightColumns)
         }
 
+        // The `collapse` and `focus` clade marks seed the collapsed list and
+        // the subtree in focus, which the tree, `hideGapsEffective` and the
+        // alignment all read. The tree arrives with the model for inline data
+        // and later for a filehandle, so the seeding waits for it and then runs
+        // once: expanding a seeded clade sticks, and the record collapses it
+        // again only on reload.
+        let cladesSeeded = false
+        addDisposer(
+          self,
+          autorun(() => {
+            if (
+              cladesSeeded ||
+              !self.dataInitialized ||
+              self.clades.length === 0
+            ) {
+              return
+            }
+            cladesSeeded = true
+            for (const { mark, nodeId } of self.resolvedClades) {
+              if (nodeId === undefined) {
+                continue
+              }
+              if (mark === 'collapse' && !self.collapsed.includes(nodeId)) {
+                self.toggleCollapsed(nodeId)
+              } else if (mark === 'focus') {
+                self.setShowOnly(nodeId)
+              }
+            }
+          }),
+        )
+
         // the matchMedia query is pinned to the current device pixel ratio, so
         // each change re-registers against the new one
         if (
@@ -3978,7 +4033,9 @@ function stateModelFactory() {
               (self.noTree || !self.drawTree) &&
               self.labelsWidth
             ) {
-              self.setTreeAreaWidth(self.labelsWidth + self.marginLeft + 12)
+              self.setTreeAreaWidth(
+                self.labelsWidth + self.marginLeft + 12 + self.cladeGutterWidth,
+              )
             }
           }),
         )
@@ -3999,7 +4056,14 @@ function stateModelFactory() {
             }
             pinnedAreaWidth = undefined
             self.setTreeWidth(
-              Math.max(50, areaWidth - labelsWidth - 10 - self.marginLeft),
+              Math.max(
+                50,
+                areaWidth -
+                  labelsWidth -
+                  10 -
+                  self.marginLeft -
+                  self.cladeGutterWidth,
+              ),
             )
           }),
         )

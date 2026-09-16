@@ -115,8 +115,8 @@ export function renderHighlights({
   const fillRow = (index: number) => {
     ctx.fillRect(0, index * rowHeight - offsetY, width, rowHeight)
   }
-  for (const { rows, color } of resolvedClades) {
-    if (rows[1] >= firstRow && rows[0] <= lastRow) {
+  for (const { rows, color, mark } of resolvedClades) {
+    if (mark === 'highlight' && rows[1] >= firstRow && rows[0] <= lastRow) {
       ctx.fillStyle = color
       ctx.fillRect(
         0,

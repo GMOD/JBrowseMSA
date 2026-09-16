@@ -256,16 +256,19 @@ export interface Highlight {
 
 /**
  * What the viewer draws over a clade. `highlight` fills the rows behind it,
- * across the tree and the alignment.
+ * across the tree and the alignment. `bracket` draws a bar and the clade's
+ * `label` in the gutter right of the tip labels. `collapse` and `focus` seed
+ * the collapsed list and the subtree in focus at load.
  */
-export type CladeMark = 'highlight'
+export type CladeMark = 'highlight' | 'bracket' | 'collapse' | 'focus'
 
 /**
  * A clade of the tree and the mark drawn over it. `mrca` names tips whose most
  * recent common ancestor is the clade; `range` names the first and last tip of
  * a run in display order, in either order. `tips` is the leaf count the
  * producer measured, and a clade that resolves to a different count is dropped.
- * `label` is reserved for the bracket mark. See docs/layers.md
+ * `label` names the clade beside a bracket, and a highlight carrying one draws
+ * the label without the bar. See docs/layers.md
  */
 export interface Clade {
   mrca?: string[]
@@ -276,11 +279,20 @@ export interface Clade {
   label?: string
 }
 
-/** a Clade resolved to the rows it covers, with its fill color settled */
+/**
+ * A Clade resolved to the rows it covers, with its fill color settled. `color`
+ * is the highlight fill; `markColor` is the producer's own color for a bracket
+ * bar and its label, unset where the theme's text color stands. `nodeId` is the
+ * node an `mrca` resolved to, which `collapse` and `focus` seed themselves
+ * with, and a `range` record has none.
+ */
 export interface ResolvedClade {
   rows: [number, number]
   mark: CladeMark
   color: string
+  markColor?: string
+  label?: string
+  nodeId?: string
 }
 
 /**

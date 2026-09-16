@@ -33,7 +33,7 @@ function makeModel(clades: Clade[], treeText = tree) {
 test('an MRCA and its tip count resolve to the rows the clade covers', () => {
   const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'highlight' }])
   expect(model.rowNames).toEqual(['A', 'B', 'C', 'D'])
-  expect(model.resolvedClades).toEqual([
+  expect(model.resolvedClades).toMatchObject([
     { rows: [0, 1], mark: 'highlight', color: defaultFill },
   ])
 })
