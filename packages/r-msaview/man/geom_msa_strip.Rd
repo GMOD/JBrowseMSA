@@ -4,7 +4,14 @@
 \alias{geom_msa_strip}
 \title{A column of colored cells beside the tree}
 \usage{
-geom_msa_strip(field, palette = NULL, map = NULL, width = NULL, header = NULL)
+geom_msa_strip(
+  field,
+  palette = NULL,
+  map = NULL,
+  width = NULL,
+  header = NULL,
+  legend = NULL
+)
 }
 \arguments{
 \item{field}{The field to color by.}
@@ -16,6 +23,10 @@ geom_msa_strip(field, palette = NULL, map = NULL, width = NULL, header = NULL)
 \item{width}{The column's width in pixels. Default: the row height.}
 
 \item{header}{The name drawn above the column. Default: the field.}
+
+\item{legend}{The legend's title. Strips naming one title, such as eight
+segment columns over one set of lineage colors, share one legend.
+Default: the field.}
 }
 \value{
 A layer to add to a viewer with \code{+}.

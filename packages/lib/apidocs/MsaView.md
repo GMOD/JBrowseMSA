@@ -1154,7 +1154,9 @@ the categorical color keys drawn for this view, shared by the on-screen legend
 overlay and the SVG export's reserved column. The domain overlay produces the
 first, listing the `featureFill` scale where an encoding names one. Every field
 a row-table encoding or a row panel reads produces one more, so two channels
-over one field, or two strips over it, list that field once
+over one field, or two strips over it, list that field once. A strip's `legend`
+names the title it lists under, so strips over eight fields with one set of
+colors list one legend between them
 
 ```js
 // type
