@@ -12,7 +12,7 @@ function toggle(label: string, checked: boolean, set: (arg: boolean) => void) {
   }
 }
 
-// the only place in the UI to turn a closed track back on
+// the only place in the UI to turn a hidden track back on
 function tracksSubMenu(model: MsaViewModel): MenuItem[] {
   const shown = new Set(model.turnedOnTracks.map(t => t.model.id))
   return model.tracks.map(({ model: { id, name } }) =>
@@ -38,10 +38,10 @@ export function msaSettingsMenuItems(model: MsaViewModel): MenuItem[] {
       model.setDrawMsaLetters(arg)
     }),
     // inverted: bgColor colors the tile, and off colors the letter
-    toggle('Color letters instead of background of tiles', !bgColor, arg => {
+    toggle('Color letters, not cells', !bgColor, arg => {
       model.setBgColor(!arg)
     }),
-    toggle('Enable hiding gappy columns?', hideGaps, arg => {
+    toggle('Hide gappy columns', hideGaps, arg => {
       model.setHideGaps(arg)
     }),
   ]

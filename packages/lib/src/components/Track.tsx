@@ -78,6 +78,7 @@ const TrackLabel = observer(function TrackLabel({
       </span>
       <IconButton
         className={classes.button}
+        aria-label={`${name} track menu`}
         style={{
           width: trackLabelHeight,
           height: trackLabelHeight,
@@ -105,7 +106,7 @@ const TrackLabel = observer(function TrackLabel({
               closeMenu()
             }}
           >
-            Close
+            Hide track
           </MenuItem>
           <MenuItem
             dense

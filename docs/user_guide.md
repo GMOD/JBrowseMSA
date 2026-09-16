@@ -328,10 +328,10 @@ settings**, beside the color-scheme palette.
 
 [![](media/settings-menu.png)][live-settings-menu]
 
-The MSA settings menu holds the Tracks submenu and toggles for drawing letters,
-coloring letters instead of tile backgrounds, showing a track's value on hover,
-and hiding gappy columns. The tree settings menu beside it holds the
-branch-length, label and clickable-bubble toggles.
+The MSA settings menu holds the Tracks submenu and the toggles **Draw letters**,
+**Color letters, not cells**, **Show track values on hover** and **Hide gappy
+columns**. The tree settings menu beside it holds the branch-length, label and
+clickable-bubble toggles.
 
 ## Scaling to large data
 
