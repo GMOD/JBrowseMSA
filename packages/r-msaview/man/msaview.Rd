@@ -22,7 +22,7 @@ msaview(
   draw_tree = NULL,
   tree_area_width = NULL,
   auto_tree_area_width = NULL,
-  bg_color = NULL,
+  residue_encoding = NULL,
   theme = NULL,
   hide_header = NULL,
   height = NULL,
@@ -125,10 +125,10 @@ Default 100, which hides nothing.}
 \item{auto_tree_area_width}{Logical. Size that gutter to the labels it
 holds. Pair with \code{draw_tree = FALSE}.}
 
-\item{bg_color}{Logical. If \code{TRUE} (default), the color scheme colors
-each cell's background. If \code{FALSE}, it colors the letters and leaves
-the background plain, which lets a domain overlay mark each span with a
-bar under the row.}
+\item{residue_encoding}{Which channel \code{color_scheme} paints:
+\code{"fill"} (default) colors each cell's background, and \code{"color"}
+colors the letters, which lets a domain overlay mark each span with a bar
+under the row.}
 
 \item{theme}{\code{"light"} (default), \code{"dark"}, or a list of MUI theme
 options merged over the JBrowse theme.}

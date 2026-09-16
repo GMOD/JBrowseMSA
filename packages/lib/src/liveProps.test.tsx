@@ -104,28 +104,28 @@ test('the tree gutter follows drawTree and treeAreaWidth', () => {
   expect(model.treeAreaWidth).toBe(132)
 })
 
-test('bgColor follows the prop, and the flip keeps the scroll position', () => {
+test('residueEncoding follows the prop, and the flip keeps the scroll position', () => {
   // wider than the alignment pane, so there is a scroll position to keep
   const wide = `>human\n${'MKAANSE'.repeat(40)}\n>mouse\n${'MKA-NSE'.repeat(40)}\n`
-  const render = (bgColor: boolean) => {
+  const render = (residueEncoding: 'fill' | 'color') => {
     act(() => {
-      root.render(<MSAViewer msa={wide} bgColor={bgColor} />)
+      root.render(<MSAViewer msa={wide} residueEncoding={residueEncoding} />)
     })
     return captured!
   }
 
-  const model = render(false)
+  const model = render('color')
   expect(model.bgColor).toBe(false)
   act(() => {
     model.setScrollX(-240)
   })
 
-  expect(render(true)).toBe(model)
+  expect(render('fill')).toBe(model)
   expect(model.bgColor).toBe(true)
   expect(model.scrollX).toBe(-240)
 })
 
-test('a viewer given no bgColor colors the background', () => {
+test('a viewer given no residueEncoding colors the background', () => {
   expect(show({}).bgColor).toBe(true)
 })
 

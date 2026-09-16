@@ -56,6 +56,7 @@ export type {
   NodeWithIds,
   NodeWithIdsAndLength,
   Region,
+  ResidueEncoding,
   ResidueMapping,
   ResidueMappingProblem,
   ResidueSegment,

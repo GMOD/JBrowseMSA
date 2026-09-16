@@ -45,7 +45,7 @@ const defaults: Traits = {
   tree_area_width: null,
   auto_tree_area_width: false,
   show_branch_len: true,
-  bg_color: true,
+  residue_encoding: 'fill',
   hide_header: false,
   theme: 'auto',
   clicked: null,

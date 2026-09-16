@@ -6,36 +6,39 @@ import { MSAViewer } from 'react-msaview'
 
 import { p53DomainsGFF, p53MSA, p53Tree } from './data'
 
-// A filled domain box covers the cells the color scheme colors, so the viewer
-// hands those cells to one of the two. bgColor={false} gives them to the
-// scheme: the letters take the residue colors, and each domain draws as a bar
-// along the bottom of its row. The prop applies to the mounted model, so a
-// click keeps the scroll position. The standalone app has the same switch under
+import type { ResidueEncoding } from 'react-msaview'
+
+// colorScheme is the scale over residue letters, and residueEncoding is the
+// channel it paints. On `fill` it colors the cell, which is also where a domain
+// box draws, so the overlay wins the row and the residue colors go. On `color`
+// it colors the letter, and each domain gives up its fill for a bar along the
+// bottom of its row. The prop applies to the mounted model, so a click keeps
+// the scroll position. The standalone app has the same switch under
 // Settings -> Color letters instead of background of tiles.
 export default function DomainLetterColors() {
-  const [bgColor, setBgColor] = useState(false)
+  const [encoding, setEncoding] = useState<ResidueEncoding>('color')
   return (
     <div>
       <ToggleButtonGroup
         size="small"
         exclusive
-        value={bgColor ? 'background' : 'letters'}
-        onChange={(_, value) => {
+        value={encoding}
+        onChange={(_, value: ResidueEncoding | null) => {
           if (value) {
-            setBgColor(value === 'background')
+            setEncoding(value)
           }
         }}
         sx={{ mb: 1 }}
       >
-        <ToggleButton value="background">Color the background</ToggleButton>
-        <ToggleButton value="letters">Color the letters</ToggleButton>
+        <ToggleButton value="fill">Color the background</ToggleButton>
+        <ToggleButton value="color">Color the letters</ToggleButton>
       </ToggleButtonGroup>
       <MSAViewer
         msa={p53MSA}
         tree={p53Tree}
         gff={p53DomainsGFF}
         colorScheme="maeditor"
-        bgColor={bgColor}
+        residueEncoding={encoding}
         height={460}
       />
     </div>

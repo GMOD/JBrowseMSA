@@ -63,7 +63,7 @@ class MSAView(anywidget.AnyWidget):
     tree_area_width = traitlets.Float(None, allow_none=True).tag(sync=True)
     auto_tree_area_width = traitlets.Bool(False).tag(sync=True)
     show_branch_len = traitlets.Bool(True).tag(sync=True)
-    bg_color = traitlets.Bool(True).tag(sync=True)
+    residue_encoding = traitlets.Enum(["fill", "color"], default_value="fill").tag(sync=True)
     hide_header = traitlets.Bool(False).tag(sync=True)
     # "auto" follows the notebook's light or dark theme; a dict is MUI theme
     # options merged over the JBrowse theme

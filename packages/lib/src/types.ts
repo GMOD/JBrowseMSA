@@ -9,6 +9,13 @@ export interface Accession {
 // it to pick the draw function
 export type TrackKind = 'text' | 'bar' | 'logo' | 'arc' | 'ruler'
 
+/**
+ * Which channel the color scheme paints. `fill` colors the cell a residue sits
+ * in, `color` colors the letter itself, the same distinction a grammar of
+ * graphics draws between a shape's interior and its own ink.
+ */
+export type ResidueEncoding = 'fill' | 'color'
+
 export interface BasicTrackModel {
   id: string
   name: string

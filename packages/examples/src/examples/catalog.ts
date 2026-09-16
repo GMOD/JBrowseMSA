@@ -151,11 +151,11 @@ export const catalog: CatalogEntry[] = [
     name: 'Domain boxes or colored letters (p53)',
     category: 'Protein domains',
     description:
-      'A filled domain box covers the cells the color scheme colors, so the ' +
-      'viewer hands those cells to one of the two. Color the background gives ' +
-      'them to the overlay, and the letters contrast against the box under ' +
-      'them. Color the letters gives them to the scheme, and each domain ' +
-      'draws as a bar along the bottom of its row. p53 puts four InterPro ' +
+      'colorScheme is the scale over residue letters, and residueEncoding is ' +
+      'the channel it paints. On fill it colors the cell, which is where a ' +
+      'domain box draws too, so the overlay wins the row and the residue ' +
+      'colors go. On color it colors the letter, and each domain gives up its ' +
+      'fill for a bar along the bottom of its row. p53 puts four InterPro ' +
       'domains on 16 orthologs, two of them in the first 60 residues. The ' +
       'standalone app has the same switch under Settings → Color letters ' +
       'instead of background of tiles.',

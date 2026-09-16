@@ -88,10 +88,10 @@
 #' @param tree_area_width Width of the tree and label gutter in pixels.
 #' @param auto_tree_area_width Logical. Size that gutter to the labels it
 #'   holds. Pair with \code{draw_tree = FALSE}.
-#' @param bg_color Logical. If \code{TRUE} (default), the color scheme colors
-#'   each cell's background. If \code{FALSE}, it colors the letters and leaves
-#'   the background plain, which lets a domain overlay mark each span with a
-#'   bar under the row.
+#' @param residue_encoding Which channel \code{color_scheme} paints:
+#'   \code{"fill"} (default) colors each cell's background, and \code{"color"}
+#'   colors the letters, which lets a domain overlay mark each span with a bar
+#'   under the row.
 #' @param theme \code{"light"} (default), \code{"dark"}, or a list of MUI theme
 #'   options merged over the JBrowse theme.
 #' @param hide_header Logical. If \code{TRUE}, leave out the viewer's toolbar,
@@ -207,8 +207,13 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     region = NULL, col_width = NULL, row_height = NULL,
                     allowed_gappyness = NULL, draw_tree = NULL,
                     tree_area_width = NULL, auto_tree_area_width = NULL,
-                    bg_color = NULL, theme = NULL, hide_header = NULL,
+                    residue_encoding = NULL, theme = NULL, hide_header = NULL,
                     height = NULL, width = NULL, element_id = NULL) {
+  if (!is.null(residue_encoding) && !residue_encoding %in% c("fill", "color")) {
+    stop("residue_encoding must be 'fill' or 'color', got '",
+         residue_encoding, "'")
+  }
+
   # the viewer fetches a URL itself; passed on as document text, a URL draws a
   # one-row alignment named after it
   msa_text <- if (is_url(msa)) NULL else convert_msa(msa)
@@ -238,7 +243,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$drawTree <- draw_tree
   props$treeAreaWidth <- tree_area_width
   props$autoTreeAreaWidth <- auto_tree_area_width
-  props$bgColor <- bg_color
+  props$residueEncoding <- residue_encoding
   props$theme <- theme
   props$hideHeader <- hide_header
 

@@ -15,6 +15,7 @@ import type {
   ColumnTrackSpec,
   Highlight,
   Region,
+  ResidueEncoding,
   ResidueMapping,
   Viewport,
 } from '../types.ts'
@@ -71,12 +72,12 @@ export interface MSAViewerProps {
   /** draw branch lengths (default true); false draws a cladogram */
   showBranchLen?: boolean
   /**
-   * color a cell's background by the color scheme (default true); false colors
-   * the letters instead and leaves the background plain, which lets a domain
-   * overlay mark each span with a bar under the row and the residue colors show
-   * through
+   * which channel `colorScheme` paints: `fill` (default) colors the background
+   * of the cell a residue sits in, `color` colors the letter itself and leaves
+   * the background plain, which lets a domain overlay mark each span with a bar
+   * under the row and the residue colors show through
    */
-  bgColor?: boolean
+  residueEncoding?: ResidueEncoding
   /**
    * a span to zoom and scroll to once the alignment loads, and again whenever
    * it changes: `{row, start, end}` in residues of that row, or `{start, end}`
@@ -183,7 +184,7 @@ function Viewer({
   columnTracks,
   residueMappings,
   drawTree,
-  bgColor,
+  residueEncoding,
   treeAreaWidth,
   autoTreeAreaWidth,
   showBranchLen,
@@ -218,7 +219,9 @@ function Viewer({
       ...(treeAreaWidth ? { treeAreaWidth } : {}),
       ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),
       ...(showBranchLen !== undefined ? { showBranchLen } : {}),
-      ...(bgColor !== undefined ? { bgColor } : {}),
+      ...(residueEncoding !== undefined
+        ? { bgColor: residueEncoding === 'fill' }
+        : {}),
     }),
   )
 
@@ -276,10 +279,10 @@ function Viewer({
     }
   }, [model, showBranchLen])
   useEffect(() => {
-    if (bgColor !== undefined) {
-      model.setBgColor(bgColor)
+    if (residueEncoding !== undefined) {
+      model.setBgColor(residueEncoding === 'fill')
     }
-  }, [model, bgColor])
+  }, [model, residueEncoding])
   useEffect(() => {
     model.setHideHeader(!!hideHeader)
   }, [model, hideHeader])

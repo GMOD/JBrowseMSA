@@ -38,7 +38,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "tree_area_width": None,
         "auto_tree_area_width": False,
         "show_branch_len": True,
-        "bg_color": True,
+        "residue_encoding": "fill",
         "hide_header": False,
         "theme": "auto",
         "clicked": None,
@@ -69,6 +69,12 @@ def test_theme_takes_a_mode_or_theme_options():
     assert MSAView(theme=options).theme == options
     with pytest.raises(traitlets.TraitError):
         MSAView(theme="sepia")
+
+
+def test_residue_encoding_takes_fill_or_color():
+    assert MSAView(residue_encoding="color").residue_encoding == "color"
+    with pytest.raises(traitlets.TraitError):
+        MSAView(residue_encoding="both")
 
 
 def test_positional_msa_and_tree():

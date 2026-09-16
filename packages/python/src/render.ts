@@ -36,7 +36,7 @@ export interface Traits {
   tree_area_width: number | null
   auto_tree_area_width: boolean
   show_branch_len: boolean
-  bg_color: boolean
+  residue_encoding: 'fill' | 'color'
   hide_header: boolean
   theme: 'auto' | 'light' | 'dark' | Exclude<MSAViewerProps['theme'], string>
   clicked: Cell | null
@@ -67,7 +67,7 @@ export const INPUT_TRAITS = [
   'tree_area_width',
   'auto_tree_area_width',
   'show_branch_len',
-  'bg_color',
+  'residue_encoding',
   'hide_header',
   'theme',
 ] as const
@@ -106,7 +106,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     treeAreaWidth: optional(model.get('tree_area_width')),
     autoTreeAreaWidth: model.get('auto_tree_area_width'),
     showBranchLen: model.get('show_branch_len'),
-    bgColor: model.get('bg_color'),
+    residueEncoding: model.get('residue_encoding'),
     hideHeader: model.get('hide_header'),
     theme: theme === 'auto' ? hostTheme(doc) : theme,
   }

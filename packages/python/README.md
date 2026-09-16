@@ -41,25 +41,25 @@ The traits are the `MSAViewer` props in
 case. `highlights` and `column_tracks` take the JSON shapes in
 [docs/layers.md](https://github.com/GMOD/JBrowseMSA/blob/main/docs/layers.md).
 
-| Trait                            | Value                                                        |
-| -------------------------------- | ------------------------------------------------------------ |
-| `msa`, `tree`, `gff`             | document text or a file path                                 |
-| `msa_url`, `tree_url`, `gff_url` | a URL the viewer fetches                                     |
-| `color_scheme`                   | a scheme name, such as `"clustal"` or `"nucleotide"`         |
-| `height`                         | pixels                                                       |
-| `col_width`, `row_height`        | pixels per column and per row                                |
-| `highlights`                     | list of `{start, end}`, `{row, start, end}` or `{rows}`      |
-| `highlight_columns`              | columns (1-based) under a persistent overlay                 |
-| `residue_mappings`               | which structure residue each row residue is                  |
-| `column_tracks`                  | list of bar, text or arc tracks                              |
-| `relative_to`                    | a row name; other rows draw as their differences from it     |
-| `region`                         | `{start, end}` columns or `{row, start, end}` residues       |
-| `allowed_gappyness`              | hide columns at least this percent gaps (default 100)        |
-| `draw_tree`, `show_branch_len`   | booleans, default `True`                                     |
-| `tree_area_width`                | pixels; `auto_tree_area_width` sizes it to the labels        |
-| `bg_color`                       | boolean, default `True`; `False` colors the letters instead  |
-| `hide_header`                    | boolean, default `False`                                     |
-| `theme`                          | `"auto"` (default), `"light"`, `"dark"` or MUI theme options |
+| Trait                            | Value                                                           |
+| -------------------------------- | --------------------------------------------------------------- |
+| `msa`, `tree`, `gff`             | document text or a file path                                    |
+| `msa_url`, `tree_url`, `gff_url` | a URL the viewer fetches                                        |
+| `color_scheme`                   | a scheme name, such as `"clustal"` or `"nucleotide"`            |
+| `height`                         | pixels                                                          |
+| `col_width`, `row_height`        | pixels per column and per row                                   |
+| `highlights`                     | list of `{start, end}`, `{row, start, end}` or `{rows}`         |
+| `highlight_columns`              | columns (1-based) under a persistent overlay                    |
+| `residue_mappings`               | which structure residue each row residue is                     |
+| `column_tracks`                  | list of bar, text or arc tracks                                 |
+| `relative_to`                    | a row name; other rows draw as their differences from it        |
+| `region`                         | `{start, end}` columns or `{row, start, end}` residues          |
+| `allowed_gappyness`              | hide columns at least this percent gaps (default 100)           |
+| `draw_tree`, `show_branch_len`   | booleans, default `True`                                        |
+| `tree_area_width`                | pixels; `auto_tree_area_width` sizes it to the labels           |
+| `residue_encoding`               | `"fill"` (default) paints the cell; `"color"` paints the letter |
+| `hide_header`                    | boolean, default `False`                                        |
+| `theme`                          | `"auto"` (default), `"light"`, `"dark"` or MUI theme options    |
 
 `theme="auto"` follows JupyterLab's and Notebook 7's `data-jp-theme-light`
 attribute, then VS Code's `data-vscode-theme-kind`, then the browser's
