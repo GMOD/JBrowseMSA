@@ -86,7 +86,12 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   shared URL like every other layer. The viewer does not produce the file.
   `react-msaview-cli interpro` builds it from precomputed matches in seconds,
   where the EBI iprscan5 queue the viewer used to submit to took fifteen
-  minutes.
+  minutes. A span takes its color from its own GFF `color=` attribute first,
+  then from a `featureFill` encoding's scale over a field of the feature table,
+  then from `fillPalette`, and `model.featureColors` resolves that once per
+  change of the features, the encodings or the palette. A `featureLabel`
+  encoding names the field `renderBoxFeatureCanvasBlock` draws inside each span
+  wherever the text fits.
 - The color scheme is a categorical scale over residue letters, and the public
   `residueEncoding` prop names the channel it paints: `fill` colors the cell,
   `color` colors the letter. The MST property behind it stays `bgColor`, because

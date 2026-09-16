@@ -448,7 +448,9 @@ inside a span when it fits, with the same measure-then-draw test the exon number
 uses (`renderBoxFeatureCanvasBlock.ts:117`), so a gene arrow carries its name.
 Both apply to the alignment overlay first, and step 9 reads the same resolution.
 
-Closes `data-layers.md` item 3. One day.
+Closes `data-layers.md` item 3. One day. Shipped 2026-09-16: `featureFill`,
+`featureLabel` and `Annotation.color` from a GFF `color=`, with the domain
+legend listing the scale's values under the field's name.
 
 ### 7. MRCA and the clade highlight rectangle
 

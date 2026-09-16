@@ -57,7 +57,8 @@ class MSAView(anywidget.AnyWidget):
     highlight_columns = traitlets.List(traitlets.Int()).tag(sync=True)
     column_tracks = _ColumnTracks(traitlets.Dict()).tag(sync=True)
     residue_mappings = traitlets.List(traitlets.Dict()).tag(sync=True)
-    # extra fields per row name, and what the viewer's marks read from them
+    # extra fields per row name, and what the viewer's marks read from that
+    # table or from the features the GFF carries
     row_data = traitlets.Dict(traitlets.Dict()).tag(sync=True)
     encodings = traitlets.List(traitlets.Dict()).tag(sync=True)
     relative_to = traitlets.Unicode(None, allow_none=True).tag(sync=True)
