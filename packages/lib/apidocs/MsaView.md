@@ -290,6 +290,20 @@ IOptionalIType<ISimpleType<boolean>, [undefined]>
 scrollZoom: stripDefault(types.boolean, defaultScrollZoom)
 ```
 
+#### property: scrollZoomAxis
+
+which cell dimensions a wheel zoom scales, while `scrollZoom` is on
+
+```js
+// type signature
+IOptionalIType<ISimpleType<"both" | "horizontal" | "vertical">, [undefined]>
+// code
+scrollZoomAxis: stripDefault(
+          types.enumeration('ScrollZoomAxis', [...scrollZoomAxes]),
+          defaultScrollZoomAxis,
+        )
+```
+
 #### property: showDomainLegend
 
 whether the domain legend is expanded. The legend floats over the top-right of
@@ -1481,6 +1495,16 @@ sequence position. Ordinal segments (exons) are numbered on the band instead
 any
 ```
 
+#### getter: wheelZoomAxis
+
+axis a wheel zoom scales, for ctrl+wheel as much as for scroll-zoom. With
+scroll-zoom off the toolbar shows no axis, so ctrl+wheel takes both.
+
+```js
+// type
+;'both' | 'horizontal' | 'vertical'
+```
+
 #### getter: width
 
 ```js
@@ -2064,6 +2088,13 @@ setScrollY: (n: number) => void
 setScrollZoom: (arg: boolean) => void
 ```
 
+#### action: setScrollZoomAxis
+
+```js
+// type signature
+setScrollZoomAxis: (arg: "both" | "horizontal" | "vertical") => void
+```
+
 #### action: setSequenceLogoTrackHeight
 
 ```js
@@ -2212,11 +2243,13 @@ Smoothly zoom by a continuous scaleFactor. The column under the cursor
 (offsetX/offsetY, px relative to the MSA area) stays anchored horizontally.
 Vertically the anchor is biased toward y=0 when the alignment nearly fits the
 viewport, fading to cursor-anchoring as the alignment grows taller than the
-viewport. Drives wheel/trackpad-pinch zoom.
+viewport. Drives wheel/trackpad-pinch zoom. `axis` holds one cell dimension
+fixed; the held axis still re-anchors its scroll offset, since the other one can
+change how much of the alignment fits.
 
 ```js
 // type signature
-zoomToPos: (scaleFactor: number, offsetX: number, offsetY: number) => void
+zoomToPos: (scaleFactor: number, offsetX: number, offsetY: number, axis?: "both" | "horizontal" | "vertical") => void
 ```
 
 #### action: zoomToRegion

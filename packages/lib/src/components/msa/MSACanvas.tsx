@@ -34,7 +34,7 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
   )
   const onZoom = useCallback(
     (scaleFactor: number, offsetX: number, offsetY: number) => {
-      model.zoomToPos(scaleFactor, offsetX, offsetY)
+      model.zoomToPos(scaleFactor, offsetX, offsetY, model.wheelZoomAxis)
     },
     [model],
   )

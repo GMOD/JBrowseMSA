@@ -59,8 +59,14 @@ you can read one site down the whole family.
 ## Navigating
 
 - **Pan** by click-dragging the alignment, or scroll vertically/horizontally.
-- **Zoom** with the magnifier buttons in the header, or enable **scroll zoom**
-  (MSA settings menu) to zoom with the mouse wheel.
+- **Zoom** with the magnifier buttons in the header. Ctrl+wheel zooms at the
+  cursor whatever the wheel is set to do.
+- **Scroll zoom** puts zoom on the plain wheel. The three mouse buttons in the
+  header choose which cell dimensions a wheel zoom scales: both, columns only,
+  or rows only. Columns only holds the row height, so the labels stay at their
+  size while the alignment compresses; rows only holds the column width. Click
+  the selected button and the wheel returns to scrolling. Hold shift to pan
+  while scroll zoom is on.
 - **Fit** the alignment to the window on both axes, horizontally or vertically
   from the zoom controls. **Reset zoom** returns to the defaults.
 - Set a small row height and column width to zoom out far enough to see a whole

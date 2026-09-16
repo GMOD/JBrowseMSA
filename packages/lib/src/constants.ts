@@ -32,6 +32,13 @@ export const segmentShades = ['#9fb6d4', '#d4dcea']
 export const defaultDrawMsaLetters = true
 export const defaultScrollZoom = false
 
+// Which cell dimensions a wheel zoom scales. 'horizontal' holds the row height,
+// which fixes the label and letter font size while the columns compress.
+// 'vertical' does the reverse.
+export const scrollZoomAxes = ['both', 'horizontal', 'vertical'] as const
+export type ScrollZoomAxis = (typeof scrollZoomAxes)[number]
+export const defaultScrollZoomAxis: ScrollZoomAxis = 'both'
+
 // Cell size floors for drawing residue letters and tree labels. Below these a
 // 500px block holds thousands of glyphs, and fillText dominates every zoom
 // frame. A sprite atlas measured slower.

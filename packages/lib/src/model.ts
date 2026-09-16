@@ -39,6 +39,7 @@ import {
   defaultScrollX,
   defaultScrollY,
   defaultScrollZoom,
+  defaultScrollZoomAxis,
   defaultShowDomainLegend,
   defaultShowDomains,
   defaultSubFeatureRows,
@@ -51,6 +52,7 @@ import {
   minLetterColWidth,
   minLetterRowHeight,
   minRowHeight,
+  scrollZoomAxes,
   segmentFeatureTypes,
   segmentShades,
 } from './constants.ts'
@@ -99,6 +101,7 @@ import {
 import { saveAs } from './vendor/fileSaver.ts'
 import { parseWuss } from './wuss.ts'
 
+import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
 import type {
@@ -171,6 +174,7 @@ export const preservedOnReset = new Set([
   'height',
   'drawMsaLetters',
   'scrollZoom',
+  'scrollZoomAxis',
   'bgColor',
   'colorSchemeName',
   'showColumnStats',
@@ -302,6 +306,15 @@ function stateModelFactory() {
          * zoom in/out on plain mouse-wheel without holding ctrl
          */
         scrollZoom: stripDefault(types.boolean, defaultScrollZoom),
+
+        /**
+         * #property
+         * which cell dimensions a wheel zoom scales, while `scrollZoom` is on
+         */
+        scrollZoomAxis: stripDefault(
+          types.enumeration('ScrollZoomAxis', [...scrollZoomAxes]),
+          defaultScrollZoomAxis,
+        ),
 
         /**
          * #property
@@ -2269,6 +2282,15 @@ function stateModelFactory() {
       get maxScrollY() {
         return Math.min(-self.totalHeight + self.msaAreaHeight, 0)
       },
+      /**
+       * #getter
+       * axis a wheel zoom scales, for ctrl+wheel as much as for scroll-zoom.
+       * With scroll-zoom off the toolbar shows no axis, so ctrl+wheel takes
+       * both.
+       */
+      get wheelZoomAxis(): ScrollZoomAxis {
+        return self.scrollZoom ? self.scrollZoomAxis : 'both'
+      },
     }))
     .actions(self => ({
       /**
@@ -2283,6 +2305,13 @@ function stateModelFactory() {
        */
       setScrollZoom(arg: boolean) {
         self.scrollZoom = arg
+      },
+
+      /**
+       * #action
+       */
+      setScrollZoomAxis(arg: ScrollZoomAxis) {
+        self.scrollZoomAxis = arg
       },
 
       /**
@@ -2405,22 +2434,33 @@ function stateModelFactory() {
        * horizontally. Vertically the anchor is biased toward y=0 when the
        * alignment nearly fits the viewport, fading to cursor-anchoring as the
        * alignment grows taller than the viewport.
-       * Drives wheel/trackpad-pinch zoom.
+       * Drives wheel/trackpad-pinch zoom. `axis` holds one cell dimension
+       * fixed; the held axis still re-anchors its scroll offset, since the
+       * other one can change how much of the alignment fits.
        */
-      zoomToPos(scaleFactor: number, offsetX: number, offsetY: number) {
+      zoomToPos(
+        scaleFactor: number,
+        offsetX: number,
+        offsetY: number,
+        axis: ScrollZoomAxis = 'both',
+      ) {
         transaction(() => {
           const colInView = (-self.scrollX + offsetX) / self.colWidth
           const rowInView = (-self.scrollY + offsetY) / self.rowHeight
-          self.colWidth = clamp(
-            self.colWidth * scaleFactor,
-            minColWidth,
-            maxCellSize,
-          )
-          self.rowHeight = clamp(
-            self.rowHeight * scaleFactor,
-            minRowHeight,
-            maxCellSize,
-          )
+          if (axis !== 'vertical') {
+            self.colWidth = clamp(
+              self.colWidth * scaleFactor,
+              minColWidth,
+              maxCellSize,
+            )
+          }
+          if (axis !== 'horizontal') {
+            self.rowHeight = clamp(
+              self.rowHeight * scaleFactor,
+              minRowHeight,
+              maxCellSize,
+            )
+          }
           self.scrollX = clamp(
             offsetX - colInView * self.colWidth,
             self.maxScrollX,
