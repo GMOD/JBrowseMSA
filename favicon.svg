@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg viewBox="10 10 44 44" xmlns="http://www.w3.org/2000/svg">
+  
+  <!-- icon created with help from Claude chatbot -->
+  <!-- prompt "can you create an svg favicon that shows a 'multiple sequence
+  alignment'", and then manually editing the outputted svg -->
+
+  <!-- Row 1 -->
+  <rect x="10" y="12" width="8" height="8" fill="#FF8A80"/>
+  <rect x="19" y="12" width="8" height="8" fill="#FF8A80"/>
+  <rect x="28" y="12" width="8" height="8" fill="#80D8FF"/>
+  <rect x="37" y="12" width="8" height="8" fill="#CCFF90"/>
+  <rect x="46" y="12" width="8" height="8" fill="#80D8FF"/>
+  
+  <!-- Row 2 -->
+  <rect x="10" y="20" width="8" height="8" fill="#FF8A80"/>
+  <rect x="19" y="20" width="8" height="8" fill="#FFFF8D"/>
+  <rect x="28" y="20" width="8" height="8" fill="#80D8FF"/>
+  <rect x="37" y="20" width="8" height="8" fill="#CCFF90"/>
+  <rect x="46" y="20" width="8" height="8" fill="#80D8FF"/>
+  
+  <!-- Row 3 -->
+  <rect x="10" y="28" width="8" height="8" fill="#FF8A80"/>
+  <rect x="19" y="28" width="8" height="8" fill="#FF8A80"/>
+  <rect x="28" y="28" width="8" height="8" fill="#80D8FF"/>
+  <rect x="37" y="28" width="8" height="8" fill="#CFD8DC"/>
+  <rect x="46" y="28" width="8" height="8" fill="#80D8FF"/>
+  
+  <!-- Row 4 -->
+  <rect x="10" y="36" width="8" height="8" fill="#FF8A80"/>
+  <rect x="19" y="36" width="8" height="8" fill="#FF8A80"/>
+  <rect x="28" y="36" width="8" height="8" fill="#FFFF8D"/>
+  <rect x="37" y="36" width="8" height="8" fill="#CCFF90"/>
+  <rect x="46" y="36" width="8" height="8" fill="#CFD8DC"/>
+  
+  <!-- Row 5 -->
+  <rect x="10" y="44" width="8" height="8" fill="#FF8A80"/>
+  <rect x="19" y="44" width="8" height="8" fill="#FF8A80"/>
+  <rect x="28" y="44" width="8" height="8" fill="#80D8FF"/>
+  <rect x="37" y="44" width="8" height="8" fill="#CCFF90"/>
+  <rect x="46" y="44" width="8" height="8" fill="#80D8FF"/>
+</svg>
