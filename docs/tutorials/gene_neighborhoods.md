@@ -176,7 +176,7 @@ Twelve rows of gene arrows, each in its own window coordinates, with the tree
 from the TrpB alignment beside them. The arrows point in the direction of the
 gene, turned so that trpB points right in every row. Nothing lines up: E_coli
 starts trpE at 1,773 and B_subtilis starts it at 3,702, so the same gene sits at
-a different x in every row.
+a different x from row to row.
 
 ## 4. Aligning every row on trpE
 
@@ -212,9 +212,10 @@ between 1975 and 2343, the length of that gene further along.
 [![](../media/gene_neighborhoods-3.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A430%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1120%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22field%22%3A%22Name%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22trpL%22%3A%22%2376b7b2%22%2C%22trpE%22%3A%22%234e79a7%22%2C%22trpG%22%3A%22%23a0cbe8%22%2C%22trpD%22%3A%22%23f28e2b%22%2C%22trpC%22%3A%22%2359a14f%22%2C%22trpCF%22%3A%22%238cd17d%22%2C%22trpF%22%3A%22%23b6992d%22%2C%22trpB%22%3A%22%23e15759%22%2C%22trpA%22%3A%22%23b07aa1%22%2C%22trpI%22%3A%22%239c755f%22%7D%7D%7D%2C%22label%22%3A%22Name%22%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpE%22%7D%5D%7D%5D%7D%7D)
 
 The same twelve rows with the align transform on trpE. Every trpE arrow starts
-at one x, and trpE, trpD, trpB and trpA read as four columns of color down the
-figure. H_influenzae and P_aeruginosa carry no trpE, so the transform leaves
-them on their own origin and their trpB sits where the window put it.
+at one x, and trpD begins where the table above puts it: flush against trpE in
+E_coli and Y_pestis, one trpG further along in the six rows that carry one.
+H_influenzae and P_aeruginosa carry no trpE, so the transform leaves them on
+their own origin and their trpB sits where the window put it.
 
 ## 5. The same spans colored by role
 
@@ -233,9 +234,9 @@ different attribute. The script writes a `role` of `trp`, `regulator`,
 
 The same aligned rows colored by role: blue for the 63 trp genes, red for the
 four regulators, orange for the six genes RefSeq annotates as pseudogenes, grey
-for the other 103. Y_pestis reads trpD as a pseudogene and B_subtilis reads trpC
-as one, each orange inside an otherwise blue run. P_aeruginosa's red trpI sits
-beside its trpB with no trpE in the row.
+for the other 103. RefSeq annotates Y_pestis trpD and B_subtilis trpC as
+pseudogenes, each orange inside an otherwise blue run. P_aeruginosa's red trpI
+sits beside its trpB, in a row with no trpE.
 
 ## 6. The panel beside the alignment it came from
 

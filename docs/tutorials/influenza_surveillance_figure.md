@@ -150,10 +150,10 @@ above it:
 
 Display rows 105 to 142, where the 17-row Idaho run starts. The California
 labels at the top of the frame are red and the Idaho labels below them are
-yellow, with one purple Utah tip and one green Nevada tip inside the Idaho
-block. The backbone above the Idaho rows draws black, because the tips under
-those nodes carry both states between them. The legend in the top right lists
-all 16 states.
+yellow, with one green Nevada tip among the California rows and one purple Utah
+tip inside the Idaho block. The backbone above the Idaho rows draws black,
+because the tips under those nodes carry both states between them. The legend in
+the top right lists all 16 states.
 
 ## 4. Nine strips between the tree and the alignment
 
@@ -196,9 +196,11 @@ same one, so the ten amino-acid states are listed once instead of eight times.
 All 204 rows at a row height of 8, with the branches colored by state and the
 nine strips drawn between the tree and the HA alignment. Each strip's header
 runs up the band above it. The PB2 670, PA 432, NP 119, M1 82 and NS1 67 columns
-each change color once, at the same row; HA 147 and NA 71 change several times.
-Three legends stack in the top right, one per field name plus the shared
-amino-acid one.
+each read one state over display rows 41 to 178 and another outside them:
+exactly those 138 rows for NP 119, M1 82 and NS1 67, 134 of them for PB2 670 and
+137 for PA 432. HA 147 and NA 71 change many times down the column. Three
+legends stack in the top right, one per field name plus the shared amino-acid
+one.
 
 ## 5. How far a field follows the tree
 
@@ -219,10 +221,11 @@ tree into 15 clades, and host, whose four values cut it into 112.
 
 [![](../media/influenza_surveillance_figure-control.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A1700%2C%22treeAreaWidth%22%3A430%2C%22colWidth%22%3A0.35%2C%22rowHeight%22%3A8%2C%22drawLabels%22%3Afalse%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22NP%20119%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22G%22%3A%22%234e79a7%22%2C%22I%22%3A%22%23f28e2b%22%2C%22K%22%3A%22%23e15759%22%2C%22M%22%3A%22%2376b7b2%22%2C%22N%22%3A%22%2359a14f%22%2C%22R%22%3A%22%23edc948%22%2C%22S%22%3A%22%23b07aa1%22%2C%22T%22%3A%22%23ff9da7%22%2C%22V%22%3A%22%239c755f%22%2C%22X%22%3A%22%23bab0ac%22%7D%7D%2C%22width%22%3A16%7D%2C%7B%22kind%22%3A%22strip%22%2C%22field%22%3A%22host%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22Avian%22%3A%22%234e79a7%22%2C%22Cattle%22%3A%22%238c6d31%22%2C%22Human%22%3A%22%23e15759%22%2C%22Nonhuman%20Mammal%22%3A%22%23b07aa1%22%7D%7D%2C%22width%22%3A16%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fh5n1%2Fh5n1-ha.fa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fh5n1%2Fh5n1.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fh5n1%2Fh5n1-rowdata.json%22%7D%7D%7D)
 
-The same 204 rows with two strips at a width of 16. NP 119 reads as two blocks,
-orange I above and brown V below, with a single orange row returning at the
-bottom. Host reads as a brown column of cattle speckled with the 16 avian, 7
-nonhuman-mammal and 4 human rows, which sit wherever the sampling put them.
+The same 204 rows with two strips at a width of 16. NP 119 reads as three
+blocks: 41 orange I rows, the 138 brown V rows of the clade, and 25 orange I
+rows at the bottom. Host reads as a brown column of cattle speckled with the 16
+avian, 7 nonhuman-mammal and 4 human rows, which sit wherever the sampling put
+them.
 
 ## 6. Three groups marked in the gutter
 
