@@ -62,6 +62,7 @@ msaview(
   \item A character string containing GFF3 text
   \item A data frame with columns \code{seqname}, \code{start}, \code{end},
     and optionally \code{name}, \code{description}, \code{signature_desc}
+    and \code{color}, the fill the viewer draws that span with
 }}
 
 \item{color_scheme}{Color scheme name. Options include \code{"maeditor"}

@@ -125,6 +125,13 @@ test_that("df_to_gff3 emits one row per domain with its own attributes", {
   expect_equal(strsplit(lines[3], "\t")[[1]][4:5], c("50", "80"))
 })
 
+test_that("df_to_gff3 writes a color column as the span's fill", {
+  df <- data.frame(seqname = "s1", start = 1, end = 20, name = "Kinase",
+                   color = "#c0392b", stringsAsFactors = FALSE)
+  lines <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]]
+  expect_match(lines[2], "Name=Kinase;color=%23c0392b$")
+})
+
 test_that("df_to_gff3 requires the columns it reads", {
   expect_error(msaviewr:::df_to_gff3(data.frame(start = 1, end = 2)), "seqname")
   expect_error(msaviewr:::df_to_gff3(data.frame(seqname = "s1")), "start")
@@ -285,4 +292,15 @@ test_that("convert_column_tracks drops list names", {
     auto_unbox = TRUE
   ))
   expect_true(startsWith(json, '[{"id":"e"'))
+})
+
+test_that("convert_residue_mappings drops list names", {
+  mappings <- list(
+    src = list(row = "SRC", structure = "2SRC", segments = list(c(1, 84, 1)))
+  )
+  json <- as.character(jsonlite::toJSON(
+    msaviewr:::convert_residue_mappings(mappings),
+    auto_unbox = TRUE
+  ))
+  expect_true(startsWith(json, '[{"row":"SRC"'))
 })

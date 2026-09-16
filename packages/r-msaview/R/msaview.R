@@ -36,6 +36,7 @@
 #'     \item A character string containing GFF3 text
 #'     \item A data frame with columns \code{seqname}, \code{start}, \code{end},
 #'       and optionally \code{name}, \code{description}, \code{signature_desc}
+#'       and \code{color}, the fill the viewer draws that span with
 #'   }
 #' @param color_scheme Color scheme name. Options include \code{"maeditor"}
 #'   (default), \code{"clustal"}, \code{"lesk"}, \code{"cinema"}, \code{"flower"},
@@ -539,7 +540,7 @@ convert_residue_mappings <- function(mappings) {
   if (!is.list(mappings)) {
     stop("residue_mappings must be a list of mappings, each a list with row, structure and segments")
   }
-  lapply(mappings, function(m) {
+  unname(lapply(mappings, function(m) {
     for (field in c("row", "structure", "segments")) {
       if (is.null(m[[field]])) stop("residue mapping is missing '", field, "'")
     }
@@ -549,7 +550,7 @@ convert_residue_mappings <- function(mappings) {
       m$unobserved <- I(lapply(m$unobserved, function(pair) I(as.integer(pair))))
     }
     m
-  })
+  }))
 }
 
 # One object, not an array, so its scalars unbox the way the viewer reads them
@@ -713,7 +714,7 @@ df_to_gff3 <- function(df) {
   coord <- function(name) format(df[[name]], scientific = FALSE, trim = TRUE)
 
   attr_keys <- c(name = "Name", signature_desc = "signature_desc",
-                 description = "description")
+                 description = "description", color = "color")
   attr_keys <- attr_keys[names(attr_keys) %in% names(df)]
   attributes <- if (length(attr_keys) > 0) {
     encoded <- lapply(names(attr_keys), function(col) {
