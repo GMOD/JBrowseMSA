@@ -423,8 +423,9 @@ Keep the property name `showDomainLegend` (`model.ts:303`). It sits in
 `preservedOnReset` and travels in shared URLs.
 
 One day. From here on every scale, on any panel, has a legend without further
-work. The list shipped 2026-09-16 as `model.legends` with `legendRows` behind
-both renderings; the encoding producers ship with step 5.
+work. Shipped 2026-09-16 as `model.legends`, with `legendRows` behind both
+renderings: the domain key first, then one legend per field an encoding reads,
+titled by the field.
 
 ### 5. The `branch` channel
 
@@ -434,7 +435,9 @@ storing on each internal node the shared value of its tips or nothing.
 node to its parent, in the color the resolved scale gives that value. The pass
 memoizes with `resolvedEncodings` from step 3, and the legend is the same one
 the `tipLabel` channel over the same field produces, so a figure that colors
-labels and branches by lineage lists lineage once. Half a day.
+labels and branches by lineage lists lineage once. Half a day. Shipped
+2026-09-16 as `model.branchColors`, a map from node id to color that
+`renderTree` and `renderCollapsedTriangles` read.
 
 ### 6. `featureFill`, `featureLabel` and GFF `color=`
 
