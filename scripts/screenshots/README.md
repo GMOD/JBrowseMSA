@@ -111,9 +111,9 @@ and screenshots it.
 }
 ```
 
-The list holds only the figure the tutorial index shows. The SRC, BRAF V600E and
-TP53 R248 sessions that page links as text are not captured, since no page shows
-a figure for them.
+The list holds only the figure the `tutorials/jbrowse_integration` page shows.
+The SRC, BRAF V600E and TP53 R248 sessions that page links as text are not
+captured, since no page shows a figure for them.
 
 With `expect`, the connected view must resolve and the highlighted query column
 must read the named residue, or the script captures no PNG and fails.

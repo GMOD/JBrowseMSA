@@ -46,14 +46,23 @@ reads the list. Write a tutorial instead of a viewer feature whenever the work
 is data preparation. See `viewer-not-analysis-tool` in the memory and
 `agent-docs/ideas/data-layers.md`.
 
-The index is the site's gallery. Each entry names a `thumb`, one of that
-tutorial's own figures, which astro:assets crops to 5:3 and re-encodes at build
+The index is the site's gallery, and it is cards only — every piece of content
+under `/tutorials` is a page of its own. Each entry names a `thumb`, one of that
+page's own figures, which astro:assets crops to 5:3 and re-encodes at build
 time, so a card cannot drift from its page and no thumbnail file lands in
-`docs/media`. There is no second showcase page: the standalone figure wall at
-`/gallery` was a static copy of what `/examples` runs live and the tutorials
-build, so it is gone and `/gallery` redirects here. `docs/media` holds only what
-a rendered page shows; a figure that stops being shown loses its screenshot spec
-too.
+`docs/media`.
+
+`tutorials/jbrowse_integration.astro` is the one carded page with no markdown
+behind it: it holds the connected JBrowse 2 sessions, whose content is the
+generated URLs in `lib/jbrowseLinks.ts` and `lib/f12CombinedLinks.ts`, thousands
+of percent-encoded characters each. `[slug].astro` builds only slugs the
+markdown glob produces, so a hand-written page at a `/tutorials/<name>` route
+never collides with it.
+
+There is no second showcase page: the standalone figure wall at `/gallery` was a
+static copy of what `/examples` runs live and the tutorials build, so it is gone
+and `/gallery` redirects to the index. `docs/media` holds only what a rendered
+page shows; a figure that stops being shown loses its screenshot spec too.
 
 ## Architecture decisions
 

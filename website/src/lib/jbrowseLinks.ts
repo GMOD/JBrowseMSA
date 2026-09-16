@@ -1,5 +1,5 @@
-// Self-contained JBrowse session URLs for the tutorial index's "Inside JBrowse"
-// section.
+// Self-contained JBrowse session URLs for the tutorials/jbrowse_integration
+// page.
 //
 // The short-form links below are written by hand: since jbrowse-plugin-msaview
 // 3.5 a spec names the transcript (`connectedTranscript`) and what to build

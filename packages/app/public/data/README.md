@@ -30,9 +30,9 @@ it does not cover:
 | `f12-cetacean-exons.gff`  | F12's 14 coding exons projected onto every row (`react-msaview-cli genestructure`), each `Name=exon-N` so one exon is one color across species |
 | `gene-cluster.stock/.gff` | A synthetic colinear gene cluster for the arrow-map overlay; built by `scripts/gene-cluster`                                                   |
 
-The files below back the JBrowse links on the
-[tutorials](https://gmod.org/JBrowseMSA/tutorials#inside-jbrowse) page, built by
-`scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
+The files below back the sessions on the
+[JBrowse 2 integration](https://gmod.org/JBrowseMSA/tutorials/jbrowse_integration)
+page, built by `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
 (see their READMEs), not by `writeExampleData.mjs`:
 
 | File                              | Format            | Provenance                                                                                          |

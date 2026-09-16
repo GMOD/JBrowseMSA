@@ -1,8 +1,8 @@
 /**
- * Capture the JBrowse-integration figure the tutorial index's "Inside JBrowse"
- * section shows. It is one entry in the FIGURES list below: it names a docs link
- * (a connected-session const in website/src/lib/jbrowseLinks.ts, read from the
- * module so a changed link changes the figure) plus a few capture settings
+ * Capture the figure the tutorials/jbrowse_integration page shows. It is one
+ * entry in the FIGURES list below: it names a docs link (a connected-session
+ * const in website/src/lib/jbrowseLinks.ts, read from the module so a changed
+ * link changes the figure) plus a few capture settings
  * (settle time, whether to center the highlighted column, what to assert, an
  * optional annotation overlay). One generic driver loads each link in
  * jbrowse-web and screenshots it.
@@ -12,7 +12,7 @@
  *                                       in all three; needs
  *                                       jbrowse-plugin-protein3d)
  *
- * The SRC, BRAF V600E and TP53 R248 sessions that section links as text are not
+ * The SRC, BRAF V600E and TP53 R248 sessions that page links as text are not
  * captured: no page shows a figure for them, and a PNG nothing renders goes
  * stale unseen.
  *

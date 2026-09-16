@@ -16,7 +16,7 @@
  * and works against the published jbrowse-web + hosted combined config.
  *
  * The script has two outputs with different targets:
- *   - the live "Open in JBrowse" URLs the tutorial index links
+ *   - the live "Open in JBrowse" URLs the jbrowse_integration page links
  *     (writeLinksModule) point at the published jbrowse-web, config and plugin,
  *     so they work for anyone.
  *   - the committed figure PNGs render against a local build when available, so
@@ -66,7 +66,7 @@ const gff = fs.readFileSync(
   'utf8',
 )
 
-// published targets for the live "Inside JBrowse" URLs
+// published targets for the live "JBrowse 2 integration" URLs
 const PUBLISHED_JBROWSE = 'https://jbrowse.org/code/jb2/main'
 const PUBLISHED_CONFIG =
   'https://gmod.org/JBrowseMSA/demo/data/jbrowse-msa-combined-config.json'

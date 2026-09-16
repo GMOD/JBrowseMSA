@@ -2,22 +2,14 @@
 // The site's gallery as well as its table of contents: a walkthrough is the
 // only place a figure comes with the commands that produced it, so the
 // showcase is the list of walkthroughs rather than a separate wall of
-// screenshots. Each card's image is one of that tutorial's own figures, cropped
-// to 5:3 and re-encoded by astro:assets at build time (see lib/tutorials.ts).
+// screenshots. Each card's image is one of that page's own figures, cropped to
+// 5:3 and re-encoded by astro:assets at build time (see lib/tutorials.ts).
+//
+// Cards only. Every section this page used to carry is a page of its own now,
+// so the index is a way in and nothing else.
 import { Image } from 'astro:assets'
 
-import JBrowseFigure from '../../components/JBrowseFigure.astro'
 import Base from '../../layouts/Base.astro'
-import { f12CombinedCloseupUrl } from '../../lib/f12CombinedLinks'
-import {
-  brafV600,
-  buildOnOpen,
-  proteinLinked,
-  tp53PhmmerRp15,
-  tp53Protein3d,
-  tp53R248,
-  tp53UnirefBrowser,
-} from '../../lib/jbrowseLinks'
 import { tutorials } from '../../lib/tutorials.ts'
 
 const base = import.meta.env.BASE_URL
@@ -32,10 +24,12 @@ const base = import.meta.env.BASE_URL
     <p>
       The viewer draws an alignment, a tree and whatever annotations you give
       it. Producing those files takes the work, in command-line tools outside
-      the browser. Each page below is one continuous line of work, where every
-      step consumes what the step before produced, and ends on a URL that opens
-      the result in JBrowseMSA. The picture on each card is a figure from that
-      page, and the page has the commands that made it.
+      the browser. Each walkthrough below is one continuous line of that work,
+      where every step consumes what the step before produced, and ends on a URL
+      that opens the result in JBrowseMSA. The last card is not a walkthrough:
+      it collects the sessions that open an alignment inside JBrowse 2, beside a
+      genome view and a structure. The picture on each card is a figure from the
+      page it opens.
     </p>
 
     <ul class="tutorial-index">
@@ -71,88 +65,6 @@ const base = import.meta.env.BASE_URL
       <a href={`${base}/examples`}>examples</a> page runs the viewer live, one
       page per usage pattern, with the source of each.
     </p>
-
-    <h2 id="inside-jbrowse">Inside JBrowse</h2>
-    <p>
-      An alignment built the way these pages build it can also open
-      <em>inside</em> JBrowse, through the
-      <a href="https://github.com/GMOD/jbrowse-plugin-msaview">
-        JBrowse 2 plugin
-      </a>
-      , connected to a genome view and, with
-      <a href="https://github.com/GMOD/jbrowse-plugin-protein3d">protein3d</a>,
-      the AlphaFold structure. Selecting a region in any view highlights the
-      matching columns, codons and residues in the others. Each session below is
-      one declarative URL.
-    </p>
-
-    <JBrowseFigure
-      src="f12-combined-closeup.png"
-      href={f12CombinedCloseupUrl}
-      alt="A single JBrowse session at base resolution over F12 exon 3: the RefSeq gene annotation track on top and the react-msaview DNA alignment with its species tree below. The four cetaceans show a gap where every other mammal has a C, the shared single-base frameshift, and the highlighted column links the genome to the alignment"
-      body="Genome ↔ alignment in one JBrowse session: the F12 locus (RefSeq annotation, top) over the react-msaview DNA alignment + species tree, zoomed to base resolution at exon 3. The highlighted column links the genome to the alignment. The four cetaceans carry a single-base deletion (a gap where every other mammal has a C) that disables the gene. The 14-exon model is registered to the alignment columns and lifted onto each species."
-    />
-
-    <JBrowseFigure
-      src="genome-browser-tp53-protein3d.png"
-      href={tp53Protein3d}
-      alt="JBrowse: the TP53 gene with ClinVar, the p53 ortholog alignment, and the AlphaFold structure, all connected, with the nuclear export signal motif highlighted across genome, alignment, and 3D structure"
-      body="Genome ↔ alignment ↔ 3D structure: the TP53 gene (RefSeq + ClinVar), the p53 ortholog alignment, and the AlphaFold structure as one connected session. It opens with the nuclear export signal motif (residues 339–350) highlighted on the genome, the alignment columns, and the folded structure."
-    />
-
-    <p>The same connected pattern without the structure view:</p>
-    <ul>
-      <li>
-        <a href={proteinLinked} target="_blank" rel="noopener">
-          SRC ↗
-        </a>{' '}
-        — the Src-family kinase alignment beside the SRC gene.
-      </li>
-      <li>
-        <a href={brafV600} target="_blank" rel="noopener">
-          BRAF V600E ↗
-        </a>{' '}
-        — the RAF family on the invariant V600 codon, with a ClinVar
-        pathogenic-variant track.
-      </li>
-      <li>
-        <a href={tp53R248} target="_blank" rel="noopener">
-          TP53 R248 ↗
-        </a>{' '}
-        — p53 across vertebrates on the R248 hotspot, with ClinVar.
-      </li>
-    </ul>
-
-    {buildOnOpen.live && (
-      <>
-        <p>
-          The links above carry their alignments as files. The two below carry a
-          request instead, and the view builds the alignment when it opens: the
-          spec names the transcript in <code>connectedTranscript</code> and the
-          plugin looks its exon model up in the genome view's gene track, so the
-          whole session is a URL short enough to type.
-        </p>
-        <ul>
-          <li>
-            <a href={tp53UnirefBrowser} target="_blank" rel="noopener">
-              TP53 UniRef cluster ↗
-            </a>{' '}
-            — every reference-proteome protein in UniProtKB within 50% identity
-            of p53, looked up from UniProt and aligned to the transcript in the
-            browser. It submits no job to any service, so it opens in seconds.
-          </li>
-          <li>
-            <a href={tp53PhmmerRp15} target="_blank" rel="noopener">
-              TP53 phmmer search ↗
-            </a>{' '}
-            — the same gene through a phmmer search of UniProt's representative
-            proteomes at 15% similarity, the widest net EBI offers: p53's
-            relatives across the tree of life. The wait is EBI's queue, from
-            seconds to many minutes.
-          </li>
-        </ul>
-      </>
-    )}
   </article>
 </Base>
 

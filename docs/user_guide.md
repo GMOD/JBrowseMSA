@@ -328,8 +328,8 @@ interactive.
 
 - [Embedding guide](https://gmod.org/JBrowseMSA/embedding): React, UMD-in-HTML,
   and the R package.
-- [Inside JBrowse](https://gmod.org/JBrowseMSA/tutorials#inside-jbrowse): the
-  viewer as a view inside JBrowse 2, connected to a genome view and 3D
+- [JBrowse 2 integration](https://gmod.org/JBrowseMSA/tutorials/jbrowse_integration):
+  the viewer as a view inside JBrowse 2, connected to a genome view and 3D
   structure.
 - [jbrowse-plugin-msaview](https://github.com/GMOD/jbrowse-plugin-msaview): the
   JBrowse 2 plugin ([demo](https://jbrowse.org/demos/app)).

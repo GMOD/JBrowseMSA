@@ -1,16 +1,23 @@
-// The tutorials in docs/tutorials, in reading order. The markdown is the page;
-// this list holds the index card text and the browser title, which markdown has
-// no field for. Adding a tutorial means a file there plus an entry here.
+// Every page the tutorial index cards, in reading order. All but the last are
+// docs/tutorials/*.md walkthroughs: the markdown is the page, and this list
+// holds the card text and the browser title, which markdown has no field for.
+// Adding a tutorial means a file there plus an entry here.
+//
+// The last entry, jbrowse_integration, is the hand-written
+// pages/tutorials/jbrowse_integration.astro instead, because its content is
+// generated session URLs rather than prose. [slug].astro builds only the slugs
+// the markdown glob produces, so the two never collide.
 //
 // The index is also the site's gallery, so each entry names a `thumb`: one of
-// the figures that tutorial already shows, which Astro crops to the card's 5:3
-// and re-encodes as a webp at build time. Pointing at the tutorial's own figure
-// keeps a card from drifting from its page, and adds no file to docs/media.
+// the figures that page already shows, which Astro crops to the card's 5:3 and
+// re-encodes as a webp at build time. Pointing at the page's own figure keeps a
+// card from drifting from it, and adds no file to docs/media.
 // `thumbPosition` is what the crop keeps. A wide figure loses width, and 'left'
 // holds the tree and row labels; a tall one loses height, and 'center' skips the
 // toolbar and the pale first rows for the body of the alignment.
 
 import codonThumb from '../../../docs/media/codon-spry-patch.png'
+import jbrowseThumb from '../../../docs/media/genome-browser-tp53-protein3d.png'
 import kinaseThumb from '../../../docs/media/kinase-pocket-family.png'
 import p53Thumb from '../../../docs/media/p53-variant-three-tracks.png'
 import proteinThumb from '../../../docs/media/protein-family-domains.png'
@@ -100,6 +107,16 @@ export const tutorials: Tutorial[] = [
     thumbAlt:
       '32 primate TRIM5 orthologs at codon resolution over the SPRY v1 patch, with a red per-codon dN/dS track above',
     thumbPosition: 'left',
+  },
+  {
+    slug: 'jbrowse_integration',
+    title: 'JBrowse 2 integration',
+    blurb:
+      'The same alignment and tree opened inside JBrowse 2, beside a genome view and an AlphaFold structure. Selecting a region in one view highlights the matching columns, codons and residues in the others, and each session is a single URL.',
+    thumb: jbrowseThumb,
+    thumbAlt:
+      'One JBrowse session holding the TP53 gene with ClinVar, the p53 ortholog alignment and the AlphaFold structure, connected',
+    thumbPosition: 'center',
   },
 ]
 

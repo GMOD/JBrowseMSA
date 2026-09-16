@@ -13,17 +13,18 @@ pnpm --filter website preview   # preview the build
 
 ## How it's wired
 
-| Page                     | What it is                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------- |
-| `index.astro`            | Landing page: hero, a live `MSAViewer` (`src/components/Viewer.tsx`, `client:only="react"`) |
-| `guide.astro`            | `docs/user_guide.md`                                                                        |
-| `layers.astro`           | `docs/layers.md`                                                                            |
-| `embedding.astro`        | `USAGE.md`                                                                                  |
-| `cli.astro`              | `packages/cli/README.md`                                                                    |
-| `r-package.astro`        | `packages/r-msaview/README.md`                                                              |
-| `tutorials/index.astro`  | The gallery: a card per walkthrough from `src/lib/tutorials.ts`, plus the JBrowse figures   |
-| `tutorials/[slug].astro` | One page per `docs/tutorials/*.md`                                                          |
-| `examples.astro`         | `packages/examples` as a React island (`ExamplesApp`)                                       |
+| Page                                  | What it is                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `index.astro`                         | Landing page: hero, a live `MSAViewer` (`src/components/Viewer.tsx`, `client:only="react"`) |
+| `guide.astro`                         | `docs/user_guide.md`                                                                        |
+| `layers.astro`                        | `docs/layers.md`                                                                            |
+| `embedding.astro`                     | `USAGE.md`                                                                                  |
+| `cli.astro`                           | `packages/cli/README.md`                                                                    |
+| `r-package.astro`                     | `packages/r-msaview/README.md`                                                              |
+| `tutorials/index.astro`               | The gallery: one card per entry in `src/lib/tutorials.ts`, and nothing else                 |
+| `tutorials/[slug].astro`              | One page per `docs/tutorials/*.md`                                                          |
+| `tutorials/jbrowse_integration.astro` | The connected JBrowse sessions; hand-written, since its content is generated URLs           |
+| `examples.astro`                      | `packages/examples` as a React island (`ExamplesApp`)                                       |
 
 Rendering the repo's markdown keeps the docs in one place. Small plugins in
 `astro.config.mjs` do the rest: a remark plugin rewrites every markdown image to
