@@ -126,7 +126,7 @@ const AnnotationFileDialog = observer(function ({
         <Button
           variant="contained"
           color="primary"
-          disabled={loading}
+          disabled={loading || (choice === 'file' ? !file : !url.trim())}
           onClick={() => {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ;(async () => {
@@ -153,6 +153,15 @@ const AnnotationFileDialog = observer(function ({
           }}
         >
           Open annotations
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => {
+            handleClose()
+          }}
+        >
+          Cancel
         </Button>
       </DialogActions>
     </Dialog>

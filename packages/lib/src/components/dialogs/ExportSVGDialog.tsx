@@ -167,7 +167,7 @@ export default function ExportSVGDialog({
             })
           }}
         >
-          {exporting ? 'Exporting…' : 'Submit'}
+          {exporting ? 'Exporting…' : 'Export'}
         </Button>
         <Button
           variant="contained"
