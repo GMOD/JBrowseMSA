@@ -37,6 +37,7 @@ import {
   defaultColorSchemeName,
   defaultCurrentAlignment,
   defaultDrawMsaLetters,
+  defaultFeaturePanelWidth,
   defaultHeight,
   defaultHideGaps,
   defaultRowHeight,
@@ -64,6 +65,7 @@ import {
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
 import { exportFileName } from './exportFileName.ts'
+import { featureField, featureName } from './featureFields.ts'
 import { fetchTextWithProgress, isAbortError } from './fetchUtils.ts'
 import { flatToTree } from './flatToTree.ts'
 import {
@@ -117,6 +119,7 @@ import type { ColumnStats } from './columnStats.ts'
 import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
+import type { ScaleSpec } from './scales.ts'
 import type {
   Annotation,
   Arc,
@@ -140,6 +143,8 @@ import type {
   ResolvedEncoding,
   ResolvedHighlight,
   ResolvedRowPanel,
+  RowFeaturesSpec,
+  RowPanelSpan,
   RowPanelSpec,
   RowResidue,
   StructureResidue,
@@ -186,9 +191,149 @@ const ownHeightKey = (id: string) => `own:${id}`
 const HELIX_ARC = '#4e79a7'
 const PSEUDOKNOT_ARC = '#e15759'
 
-// a row panel's own width, or the row height, which makes a strip cell square
+// a row panel's own width, or a default: the row height, which makes a strip
+// cell square, and a gene neighborhood's width for a features panel
 function rowPanelWidth(panel: RowPanelSpec, rowHeight: number) {
-  return panel.width ?? rowHeight
+  return (
+    panel.width ??
+    (panel.kind === 'features' ? defaultFeaturePanelWidth : rowHeight)
+  )
+}
+
+// the fill and outline of every feature in a list: its own GFF `color=` first,
+// then the scale an encoding resolves over one of its fields, then the
+// accession palette
+function featureColorMap(
+  annotations: Annotation[],
+  encoding:
+    | { field: string; colorOf: (value: string) => string | undefined }
+    | undefined,
+  fillPalette: Record<string, string>,
+) {
+  const strokes = new Map<string, string>()
+  const strokeOf = (fill: string) => {
+    const hit = strokes.get(fill)
+    if (hit !== undefined) {
+      return hit
+    }
+    const stroke = outlineColor(fill)
+    strokes.set(fill, stroke)
+    return stroke
+  }
+  return new Map(
+    annotations.map(annotation => {
+      const value = encoding
+        ? featureField(annotation, encoding.field)
+        : undefined
+      const fill =
+        annotation.color ??
+        (value === undefined ? undefined : encoding!.colorOf(value)) ??
+        fillPalette[annotation.accession]!
+      return [annotation, { fill, stroke: strokeOf(fill) }]
+    }),
+  )
+}
+
+// the text a label channel draws inside each span, for the features carrying
+// the field it names
+function featureLabelMap(annotations: Annotation[], field: string) {
+  const labels = new Map<Annotation, string>()
+  for (const annotation of annotations) {
+    const value = featureField(annotation, field)
+    if (value !== undefined) {
+      labels.set(annotation, value)
+    }
+  }
+  return labels
+}
+
+/**
+ * The spans a `features` panel draws, keyed by row name and measured in the
+ * panel's own pixels. `column` takes the bands the overlay draws, at the
+ * alignment's column width. `position` packs each row's features in its own
+ * residue positions, shifted by an `align` transform, and maps the extent they
+ * cover across every row onto the panel width, so a row with no alignment
+ * still has an x.
+ */
+function featurePanelSpans({
+  panel,
+  width,
+  rowHeight,
+  colWidth,
+  domainBands,
+  annotationsByRow,
+  shifts,
+}: {
+  panel: RowFeaturesSpec
+  width: number
+  rowHeight: number
+  colWidth: number
+  domainBands: Map<string, DomainBand[]>
+  annotationsByRow: Record<string, Annotation[]>
+  shifts: Map<string, number> | undefined
+}): Map<string, RowPanelSpan[]> {
+  if (panel.x === 'column') {
+    return new Map(
+      [...domainBands].map(([name, bands]) => [
+        name,
+        bands.map(band => ({
+          ...band,
+          xStart: band.startCol * colWidth,
+          xEnd: band.endCol * colWidth,
+        })),
+      ]),
+    )
+  }
+  const packed = Object.entries(annotationsByRow).map(([name, annotations]) => {
+    const shift = shifts?.get(name) ?? 0
+    return [
+      name,
+      packDomainLanes(
+        annotations.map(annotation => ({
+          annotation,
+          startCol: annotation.start - 1 + shift,
+          endCol: annotation.end + shift,
+        })),
+      ),
+    ] as const
+  })
+  let min = Infinity
+  let max = -Infinity
+  for (const [, bands] of packed) {
+    for (const { startCol, endCol } of bands) {
+      min = Math.min(min, startCol)
+      max = Math.max(max, endCol)
+    }
+  }
+  // the arrowhead on the rightmost feature reaches a row height past its end,
+  // so the extent maps onto the panel less that much
+  const drawable = Math.max(1, width - rowHeight)
+  const scale = max > min ? drawable / (max - min) : 0
+  return new Map(
+    packed.map(([name, bands]) => [
+      name,
+      bands.map(band => ({
+        ...band,
+        xStart: (band.startCol - min) * scale,
+        xEnd: (band.endCol - min) * scale,
+      })),
+    ]),
+  )
+}
+
+// a scale over the values a field takes across the features drawn
+function resolveFeatureScale(
+  field: string,
+  scale: ScaleSpec | undefined,
+  annotations: Annotation[],
+) {
+  return {
+    field,
+    ...resolveScale(
+      scale,
+      annotations.map(a => featureField(a, field)).filter(notEmpty),
+    ),
+  }
 }
 
 // a data track over this size stays in the live model but leaves the snapshot,
@@ -386,14 +531,6 @@ const featureChannels = new Set<EncodingChannel>([
   'featureFill',
   'featureLabel',
 ])
-
-// the value a feature gives an encoded field: an Annotation property, else one
-// of the GFF attributes the parser kept
-function featureField(annotation: Annotation, field: string) {
-  const own = (annotation as unknown as Record<string, unknown>)[field]
-  const value = own ?? annotation.attributes?.[field]
-  return typeof value === 'string' ? value : undefined
-}
 
 // seqPos -> column indexes per row, keyed on the parse so they are garbage
 // collected with it. A computed would rebuild every row's index when read
@@ -3120,33 +3257,10 @@ function stateModelFactory() {
        * Computed once per change of the features, the encodings or the palette
        */
       get featureColors(): Map<Annotation, { fill: string; stroke: string }> {
-        const { featureFillEncoding, fillPalette } = this
-        const strokes = new Map<string, string>()
-        const strokeOf = (fill: string) => {
-          const hit = strokes.get(fill)
-          if (hit !== undefined) {
-            return hit
-          }
-          const stroke = outlineColor(fill)
-          strokes.set(fill, stroke)
-          return stroke
-        }
-        const scaleColorOf = (annotation: Annotation) => {
-          const value = featureFillEncoding
-            ? featureField(annotation, featureFillEncoding.field)
-            : undefined
-          return value === undefined
-            ? undefined
-            : featureFillEncoding!.colorOf(value)
-        }
-        return new Map(
-          self.filteredAnnotations.map(annotation => {
-            const fill =
-              annotation.color ??
-              scaleColorOf(annotation) ??
-              fillPalette[annotation.accession]!
-            return [annotation, { fill, stroke: strokeOf(fill) }]
-          }),
+        return featureColorMap(
+          self.filteredAnnotations,
+          this.featureFillEncoding,
+          this.fillPalette,
         )
       },
 
@@ -3160,17 +3274,9 @@ function stateModelFactory() {
         const encoding = this.resolvedEncodings.find(
           e => e.channel === 'featureLabel',
         )
-        if (!encoding) {
-          return undefined
-        }
-        const labels = new Map<Annotation, string>()
-        for (const annotation of self.filteredAnnotations) {
-          const value = featureField(annotation, encoding.field)
-          if (value !== undefined) {
-            labels.set(annotation, value)
-          }
-        }
-        return labels
+        return encoding
+          ? featureLabelMap(self.filteredAnnotations, encoding.field)
+          : undefined
       },
 
       /**
@@ -3211,49 +3317,51 @@ function stateModelFactory() {
        */
       get legends(): Legend[] {
         const { featureFillEncoding, fillPalette, visibleDomainTypes } = this
-        const entries = featureFillEncoding
-          ? featureFillEncoding.legend
-          : visibleDomainTypes.map(d => ({
-              id: d.accession,
-              label: d.name,
-              color: fillPalette[d.accession]!,
-            }))
-        const domainLegends =
-          self.actuallyShowDomains && entries.length > 0
-            ? [
-                {
-                  id: 'domains',
-                  title: featureFillEncoding?.field ?? 'Domains',
-                  entries,
-                },
-              ]
-            : []
-        const byField = new Map<string, Legend>()
-        const addField = (field: string, entries: LegendEntry[]) => {
+        const byKey = new Map<string, Legend>()
+        // the accession palette keys on no field, so it takes a key of its own
+        const add = (
+          field: string | undefined,
+          entries: LegendEntry[],
+          id?: string,
+        ) => {
           if (entries.length === 0) {
             return
           }
-          const legend = byField.get(field)
+          const key = field === undefined ? 'domains' : `field:${field}`
+          const legend = byKey.get(key)
           if (legend) {
             const seen = new Set(legend.entries.map(e => e.id))
             legend.entries.push(...entries.filter(e => !seen.has(e.id)))
           } else {
-            byField.set(field, {
-              id: `rowData-${field}`,
-              title: field,
+            byKey.set(key, {
+              id: id ?? (field === undefined ? 'domains' : `rowData-${field}`),
+              title: field ?? 'Domains',
               entries: [...entries],
             })
           }
         }
+        if (self.actuallyShowDomains) {
+          add(
+            featureFillEncoding?.field,
+            featureFillEncoding
+              ? featureFillEncoding.legend
+              : visibleDomainTypes.map(d => ({
+                  id: d.accession,
+                  label: d.name,
+                  color: fillPalette[d.accession]!,
+                })),
+            'domains',
+          )
+        }
         for (const { channel, field, legend } of this.resolvedEncodings) {
           if (!featureChannels.has(channel)) {
-            addField(field, legend)
+            add(field, legend)
           }
         }
         for (const { field, legend } of this.resolvedRowPanels) {
-          addField(field, legend)
+          add(field, legend)
         }
-        return [...domainLegends, ...byField.values()]
+        return [...byKey.values()]
       },
 
       /**
@@ -3506,8 +3614,50 @@ function stateModelFactory() {
        */
       get resolvedRowPanels(): ResolvedRowPanel[] {
         const rows = Object.entries(self.rowData)
+        const { fillPalette, featureFillEncoding, featureLabels } = this
+        const annotations = self.filteredAnnotations
         let offsetX = 0
         return self.rowPanels.map((panel, index) => {
+          const width = rowPanelWidth(panel, self.rowHeight)
+          const base = { id: `rowpanel-${index}`, width, offsetX }
+          offsetX += width
+          if (panel.kind === 'features') {
+            const color = panel.encoding?.color
+            const encoding = color
+              ? resolveFeatureScale(color.field, color.scale, annotations)
+              : featureFillEncoding
+            const label = panel.encoding?.label
+            const align = panel.transform?.find(t => t.type === 'align')
+            return {
+              ...base,
+              kind: panel.kind,
+              x: panel.x,
+              header: panel.header ?? '',
+              field: encoding?.field,
+              spans: featurePanelSpans({
+                panel,
+                width,
+                rowHeight: self.rowHeight,
+                colWidth: self.colWidth,
+                domainBands: this.domainBands,
+                annotationsByRow: self.annotationsByRow,
+                shifts: align
+                  ? this.featureAlignShifts.get(align.on)
+                  : undefined,
+              }),
+              colors: featureColorMap(annotations, encoding, fillPalette),
+              labels: label
+                ? featureLabelMap(annotations, label)
+                : featureLabels,
+              legend:
+                encoding?.legend ??
+                this.visibleDomainTypes.map(d => ({
+                  id: d.accession,
+                  label: d.name,
+                  color: fillPalette[d.accession]!,
+                })),
+            }
+          }
           const { colorOf, legend } = resolveScale(
             panel.scale,
             rows.map(([, row]) => row?.[panel.field]).filter(notEmpty),
@@ -3520,20 +3670,47 @@ function stateModelFactory() {
               colors.set(name, color)
             }
           }
-          const width = rowPanelWidth(panel, self.rowHeight)
-          const resolved = {
-            id: `rowpanel-${index}`,
+          return {
+            ...base,
             kind: panel.kind,
             field: panel.field,
             header: panel.header ?? panel.field,
-            width,
-            offsetX,
             colors,
             legend,
           }
-          offsetX += width
-          return resolved
         })
+      },
+
+      /**
+       * #getter
+       * the shift an `align` transform gives each row, keyed by the feature
+       * name it aligns on: the offset putting the first feature of that name
+       * at zero. A row carrying no such feature is absent, and keeps its own
+       * origin.
+       */
+      get featureAlignShifts(): Map<string, Map<string, number>> {
+        const names = new Set(
+          self.rowPanels.flatMap(panel =>
+            panel.kind === 'features' && panel.x === 'position'
+              ? (panel.transform ?? [])
+                  .filter(t => t.type === 'align')
+                  .map(t => t.on)
+              : [],
+          ),
+        )
+        return new Map(
+          [...names].map(on => [
+            on,
+            new Map(
+              Object.entries(self.annotationsByRow)
+                .map(([name, annotations]) => {
+                  const hit = annotations.find(a => featureName(a) === on)
+                  return hit ? ([name, 1 - hit.start] as const) : undefined
+                })
+                .filter(notEmpty),
+            ),
+          ]),
+        )
       },
 
       /**

@@ -1,18 +1,8 @@
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 
 import type { MsaViewModel } from '../../model.ts'
-import type { ResolvedRowPanel } from '../../types.ts'
+import type { ResolvedStripPanel } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
-
-interface StripArgs {
-  ctx: RenderCtx
-  model: MsaViewModel
-  panel: ResolvedRowPanel
-  x: number
-  offsetY: number
-  blockSizeYOverride?: number
-  highResScaleFactorOverride?: number
-}
 
 /**
  * One cell per row of a `strip` panel, in the color its field takes through
@@ -30,7 +20,15 @@ export function renderStrip({
   offsetY,
   blockSizeYOverride,
   highResScaleFactorOverride,
-}: StripArgs) {
+}: {
+  ctx: RenderCtx
+  model: MsaViewModel
+  panel: ResolvedStripPanel
+  x: number
+  offsetY: number
+  blockSizeYOverride?: number
+  highResScaleFactorOverride?: number
+}) {
   const { rowHeight, blockSize, highResScaleFactor } = model
   const by = blockSizeYOverride ?? blockSize
   ctx.resetTransform()
@@ -44,26 +42,5 @@ export function renderStrip({
       // leaf.x is the row's center, at rowHeight*(index+0.5)
       ctx.fillRect(0, leaf.x! - rowHeight / 2, panel.width, rowHeight)
     }
-  }
-}
-
-/** every row panel side by side in one context, for the SVG export */
-export function renderRowPanels({
-  ctx,
-  model,
-  offsetY,
-  blockSizeYOverride,
-  highResScaleFactorOverride,
-}: Omit<StripArgs, 'panel' | 'x'>) {
-  for (const panel of model.resolvedRowPanels) {
-    renderStrip({
-      ctx,
-      model,
-      panel,
-      x: panel.offsetX,
-      offsetY,
-      blockSizeYOverride,
-      highResScaleFactorOverride,
-    })
   }
 }

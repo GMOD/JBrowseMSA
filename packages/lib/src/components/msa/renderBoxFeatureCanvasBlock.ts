@@ -1,10 +1,10 @@
 import { domainUnderlineHeight, subFeatureRowHeight } from '../../constants.ts'
 import { contrastTextFn } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
+import { drawFeatureSpans, spanRows } from './drawFeatureSpans.ts'
 
-import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
-import type { NodeWithIdsAndLength } from '../../types.ts'
+import type { DomainBand } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
@@ -27,46 +27,13 @@ export function renderBoxFeatureCanvasBlock({
   blockSizeXOverride?: number
   blockSizeYOverride?: number
 }) {
-  const { blockSize, rowHeight, highResScaleFactor, actuallyShowDomains } =
-    model
-  if (actuallyShowDomains) {
-    const k = highResScaleFactorOverride ?? highResScaleFactor
-    const bx = blockSizeXOverride ?? blockSize
-    const by = blockSizeYOverride ?? blockSize
-    ctx.resetTransform()
-    ctx.scale(k, k)
-    ctx.translate(-offsetX, rowHeight / 2 - offsetY)
-
-    drawTiles({
-      model,
-      theme,
-      ctx,
-      visibleLeaves: getVisibleLeaves({ model, offsetY, blockSizeY: by }),
-      offsetX,
-      blockWidth: bx,
-    })
-  }
-}
-
-function drawTiles({
-  model,
-  theme,
-  ctx,
-  visibleLeaves,
-  offsetX,
-  blockWidth,
-}: {
-  model: MsaViewModel
-  theme: Theme
-  ctx: RenderCtx
-  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
-  offsetX: number
-  blockWidth: number
-}) {
   const {
+    blockSize,
+    rowHeight,
+    highResScaleFactor,
+    actuallyShowDomains,
     subFeatureRows,
     colWidth,
-    rowHeight,
     featureColors,
     featureLabels,
     segmentLabels,
@@ -74,7 +41,16 @@ function drawTiles({
     domainUnderline,
     domainBands,
   } = model
-  const contrastText = contrastTextFn(theme)
+  if (!actuallyShowDomains) {
+    return
+  }
+  const k = highResScaleFactorOverride ?? highResScaleFactor
+  const bx = blockSizeXOverride ?? blockSize
+  const by = blockSizeYOverride ?? blockSize
+  ctx.resetTransform()
+  ctx.scale(k, k)
+  ctx.translate(-offsetX, rowHeight / 2 - offsetY)
+
   // the plain and underline modes give every band the same height; a sub-row
   // band is thinner, and how thin depends on how many lanes its row needs
   const barHeight = domainUnderline
@@ -86,107 +62,46 @@ function drawTiles({
   // what every span carries instead
   const drawSegmentLabels =
     !featureLabels && !showMsaLetters && !subFeatureRows && barHeight >= 9
-  // gene arrow heads stick out up to a row height past the band, so pad the
-  // cull window enough that a band just outside the block still draws its head
-  const cull = rowHeight + colWidth
-  const xMin = offsetX - cull
-  const xMax = offsetX + blockWidth + cull
-
   // a segment (exon) number labels its band once per block, on the topmost
   // visible row carrying that segment, so it reads as a column header for the
   // whole band. Keyed by accession rather than drawn on row 0, because the rows
   // carrying the gene model are often not the first ones in the alignment
   const labelled = drawSegmentLabels ? new Set<string>() : undefined
+  // gene arrow heads stick out up to a row height past the band, so pad the
+  // cull window enough that a band just outside the block still draws its head
+  const cull = rowHeight + colWidth
 
-  for (const node of visibleLeaves) {
-    const y = node.x!
-    const bands = domainBands.get(node.data.name)
-
-    if (bands) {
+  drawFeatureSpans<DomainBand>({
+    ctx,
+    rows: spanRows(
+      getVisibleLeaves({ model, offsetY, blockSizeY: by }),
+      domainBands,
+    ),
+    layout: {
       // sub-rows are thin, but a row whose lanes would spill onto the row below
       // shares out the row height between them instead
-      const h = subFeatureRows
-        ? Math.min(subFeatureRowHeight, rowHeight / bands[0]!.laneCount)
-        : barHeight
+      height: laneCount =>
+        subFeatureRows
+          ? Math.min(subFeatureRowHeight, rowHeight / laneCount)
+          : barHeight,
+      top: (y, lane, h) =>
+        y -
+        rowHeight +
+        (subFeatureRows ? lane * h : domainUnderline ? rowHeight - h : 0),
       // the head keeps its full size on an underline bar, since a head as short
       // as the bar reads as a nub rather than as a direction
-      const headLen = domainUnderline ? rowHeight / 2 : h
-
-      for (const { annotation, startCol, endCol, lane } of bands) {
-        const { accession, strand } = annotation
-        const x = startCol * colWidth
-        const lw = colWidth * (endCol - startCol)
-        if (x + lw >= xMin && x <= xMax) {
-          const t =
-            y -
-            rowHeight +
-            (subFeatureRows ? lane * h : domainUnderline ? rowHeight - h : 0)
-          const { fill, stroke } = featureColors.get(annotation)!
-          ctx.fillStyle = fill
-          ctx.strokeStyle = stroke
-          if (strand === undefined) {
-            ctx.fillRect(x, t, lw, h)
-            ctx.strokeRect(x, t, lw, h)
-          } else {
-            drawGeneArrow({ ctx, x, t, w: lw, h, headLen, strand })
-          }
-          const label =
-            featureLabels?.get(annotation) ??
-            (labelled && !labelled.has(accession)
-              ? segmentLabels.get(accession)
-              : undefined)
-          if (label !== undefined) {
-            const fontSize = Math.min(h - 2, 11)
-            ctx.font = `${fontSize}px sans-serif`
-            if (ctx.measureText(label).width + 2 <= lw) {
-              labelled?.add(accession)
-              ctx.fillStyle = contrastText(fill)
-              ctx.textAlign = 'center'
-              ctx.textBaseline = 'middle'
-              ctx.fillText(label, x + lw / 2, t + h / 2)
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-// A gene arrow: a full-width rectangular body spanning the feature's
-// start..end columns, plus a triangular head that points *beyond* that end in
-// the strand direction (right for +, left for -). Keeping the body aligned to
-// the exact start/end columns means + and - strand features read as having the
-// same boundaries; the arrow lives outside them purely to show transcription
-// direction, preserving the column-by-column homology down the rows.
-function drawGeneArrow({
-  ctx,
-  x,
-  t,
-  w,
-  h,
-  headLen,
-  strand,
-}: {
-  ctx: RenderCtx
-  x: number
-  t: number
-  w: number
-  h: number
-  headLen: number
-  strand: number
-}) {
-  // body spans bodyStart..bodyEnd (the exact columns); the head extends
-  // headLen past bodyEnd in the strand direction
-  const dir = strand > 0 ? 1 : -1
-  const bodyStart = strand > 0 ? x : x + w
-  const bodyEnd = strand > 0 ? x + w : x
-  ctx.beginPath()
-  ctx.moveTo(bodyStart, t)
-  ctx.lineTo(bodyEnd, t)
-  ctx.lineTo(bodyEnd + dir * headLen, t + h / 2)
-  ctx.lineTo(bodyEnd, t + h)
-  ctx.lineTo(bodyStart, t + h)
-  ctx.closePath()
-  ctx.fill()
-  ctx.stroke()
+      headLength: h => (domainUnderline ? rowHeight / 2 : h),
+    },
+    xOf: band => [band.startCol * colWidth, band.endCol * colWidth],
+    colors: featureColors,
+    labelOf: band =>
+      featureLabels?.get(band.annotation) ??
+      (labelled && !labelled.has(band.annotation.accession)
+        ? segmentLabels.get(band.annotation.accession)
+        : undefined),
+    labelDrawn: band => labelled?.add(band.annotation.accession),
+    contrastText: contrastTextFn(theme),
+    xMin: offsetX - cull,
+    xMax: offsetX + bx + cull,
+  })
 }

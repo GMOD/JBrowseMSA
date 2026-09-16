@@ -11,7 +11,7 @@ import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCa
 import { renderPersistentHighlights } from './components/msa/renderHighlights.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
-import { renderRowPanels } from './components/rowpanels/renderStrip.ts'
+import { renderRowPanels } from './components/rowpanels/renderRowPanel.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import {
   bracketGap,
@@ -503,6 +503,7 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
   if (rowPanelsCtx) {
     renderRowPanels({
       model,
+      theme,
       ctx: rowPanelsCtx,
       offsetY,
       blockSizeYOverride: contentHeight,

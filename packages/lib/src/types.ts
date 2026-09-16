@@ -88,13 +88,11 @@ export interface ColumnTrackSpec {
 }
 
 /**
- * A panel left of the alignment on the row scale, the counterpart of
- * ColumnTrackSpec on the column scale. `kind: "strip"` colors one cell per row
- * from a `rowData` field through `scale`, which is ggtree's `gheatmap`.
- * `width` is in pixels and defaults to the row height, and `header` labels the
- * column and defaults to the field. See docs/layers.md
+ * A strip panel: one cell per row, colored from a `rowData` field through
+ * `scale`, which is ggtree's `gheatmap`. `width` is in pixels and defaults to
+ * the row height, and `header` labels the column and defaults to the field.
  */
-export interface RowPanelSpec {
+export interface RowStripSpec {
   kind: 'strip'
   field: string
   scale?: ScaleSpec
@@ -102,20 +100,85 @@ export interface RowPanelSpec {
   header?: string
 }
 
+/** the channels a `features` panel reads off the feature table */
+export interface FeatureEncodingSpec {
+  color?: { field: string; scale?: ScaleSpec }
+  label?: string
+}
+
 /**
- * A RowPanelSpec with its scale resolved: the color each row takes, keyed by
- * row name, and the pixel column the panel draws in.
+ * Shifts each row so that the first feature named `on` starts at zero, which
+ * is gggenes' `make_alignment_dummies`. Only `x: "position"` reads it.
  */
-export interface ResolvedRowPanel {
+export interface AlignTransform {
+  type: 'align'
+  on: string
+}
+
+/**
+ * A features panel: the GFF's spans per row, as arrows where they carry a
+ * strand. `x: "column"` draws them in the alignment's columns, and
+ * `x: "position"` in each row's own residue positions on one linear scale, so
+ * a genome with no alignment has an x.
+ */
+export interface RowFeaturesSpec {
+  kind: 'features'
+  x: 'column' | 'position'
+  width?: number
+  header?: string
+  encoding?: FeatureEncodingSpec
+  transform?: AlignTransform[]
+}
+
+/**
+ * A panel left of the alignment on the row scale, the counterpart of
+ * ColumnTrackSpec on the column scale. See docs/layers.md
+ */
+export type RowPanelSpec = RowStripSpec | RowFeaturesSpec
+
+interface ResolvedPanelBase {
   id: string
-  kind: 'strip'
-  field: string
   header: string
   width: number
   offsetX: number
-  colors: Map<string, string>
   legend: LegendEntry[]
 }
+
+/**
+ * A strip with its scale resolved: the color each row takes, keyed by row
+ * name, and the pixel column the panel draws in.
+ */
+export interface ResolvedStripPanel extends ResolvedPanelBase {
+  kind: 'strip'
+  field: string
+  colors: Map<string, string>
+}
+
+/** one feature of a features panel, at its pixel span inside the panel */
+export interface RowPanelSpan {
+  annotation: Annotation
+  xStart: number
+  xEnd: number
+  lane: number
+  laneCount: number
+}
+
+/**
+ * A features panel with its x mapping and its scale resolved: the spans per
+ * row name in panel pixels, the fill and outline of each feature, and the
+ * label its `label` channel draws. `field` is the field its color scale reads,
+ * which its legend is titled by.
+ */
+export interface ResolvedFeaturePanel extends ResolvedPanelBase {
+  kind: 'features'
+  x: 'column' | 'position'
+  field?: string
+  spans: Map<string, RowPanelSpan[]>
+  colors: Map<Annotation, { fill: string; stroke: string }>
+  labels?: Map<Annotation, string>
+}
+
+export type ResolvedRowPanel = ResolvedStripPanel | ResolvedFeaturePanel
 
 // One contiguous run where a row's residues and a structure's line up 1:1, as
 // SIFTS reports them. A position no segment covers is unmapped.
