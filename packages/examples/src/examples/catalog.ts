@@ -147,6 +147,20 @@ export const catalog: CatalogEntry[] = [
       'cluster on the tetramerization domain.',
   },
   {
+    id: 'DomainLetterColors',
+    name: 'Domain boxes or colored letters (p53)',
+    category: 'Protein domains',
+    description:
+      'A filled domain box covers the cells the color scheme colors, so the ' +
+      'viewer hands those cells to one of the two. Color the background gives ' +
+      'them to the overlay, and the letters contrast against the box under ' +
+      'them. Color the letters gives them to the scheme, and each domain ' +
+      'draws as a bar along the bottom of its row. p53 puts four InterPro ' +
+      'domains on 16 orthologs, two of them in the first 60 residues. The ' +
+      'standalone app has the same switch under Settings → Color letters ' +
+      'instead of background of tiles.',
+  },
+  {
     id: 'Nlrp1',
     name: 'Domain loss across orthologs (NLRP1)',
     category: 'Protein domains',

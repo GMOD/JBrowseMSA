@@ -65,6 +65,7 @@ Props:
 | `highlightColumns`  | `number[]`               | Columns (0-based) under a persistent overlay                              |
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                               |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram               |
+| `bgColor`           | `boolean`                | Color cell backgrounds (default true); false colors the letters instead   |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns           |
 | `hideHeader`        | `boolean`                | Leave out the toolbar, for a page drawing its own controls                |
 | `theme`             | `string \| ThemeOptions` | `'light'` (default), `'dark'`, or MUI theme options merged over JBrowse's |

@@ -71,6 +71,13 @@ export interface MSAViewerProps {
   /** draw branch lengths (default true); false draws a cladogram */
   showBranchLen?: boolean
   /**
+   * color a cell's background by the color scheme (default true); false colors
+   * the letters instead and leaves the background plain, which lets a domain
+   * overlay mark each span with a bar under the row and the residue colors show
+   * through
+   */
+  bgColor?: boolean
+  /**
    * a span to zoom and scroll to once the alignment loads, and again whenever
    * it changes: `{row, start, end}` in residues of that row, or `{start, end}`
    * in columns, 1-based and inclusive
@@ -176,6 +183,7 @@ function Viewer({
   columnTracks,
   residueMappings,
   drawTree,
+  bgColor,
   treeAreaWidth,
   autoTreeAreaWidth,
   showBranchLen,
@@ -210,6 +218,7 @@ function Viewer({
       ...(treeAreaWidth ? { treeAreaWidth } : {}),
       ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),
       ...(showBranchLen !== undefined ? { showBranchLen } : {}),
+      ...(bgColor !== undefined ? { bgColor } : {}),
     }),
   )
 
@@ -266,6 +275,11 @@ function Viewer({
       model.setShowBranchLen(showBranchLen)
     }
   }, [model, showBranchLen])
+  useEffect(() => {
+    if (bgColor !== undefined) {
+      model.setBgColor(bgColor)
+    }
+  }, [model, bgColor])
   useEffect(() => {
     model.setHideHeader(!!hideHeader)
   }, [model, hideHeader])

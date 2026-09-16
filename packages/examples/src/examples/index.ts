@@ -12,6 +12,8 @@ import CoronaFse from './CoronaFse'
 import CoronaFseSrc from './CoronaFse.tsx?raw'
 import CytochromeC from './CytochromeC'
 import CytochromeCSrc from './CytochromeC.tsx?raw'
+import DomainLetterColors from './DomainLetterColors'
+import DomainLetterColorsSrc from './DomainLetterColors.tsx?raw'
 import Ef1a from './Ef1a'
 import Ef1aSrc from './Ef1a.tsx?raw'
 import F12 from './F12'
@@ -85,6 +87,7 @@ const components: Record<string, [ComponentType, string]> = {
   ColumnTracks: [ColumnTracks, ColumnTracksSrc],
   CoronaFse: [CoronaFse, CoronaFseSrc],
   CytochromeC: [CytochromeC, CytochromeCSrc],
+  DomainLetterColors: [DomainLetterColors, DomainLetterColorsSrc],
   Ef1a: [Ef1a, Ef1aSrc],
   F12: [F12, F12Src],
   GeneCluster: [GeneCluster, GeneClusterSrc],

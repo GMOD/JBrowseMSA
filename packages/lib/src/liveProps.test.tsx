@@ -21,6 +21,13 @@ Reflect.set(globalThis, 'IS_REACT_ACT_ENVIRONMENT', true)
 // and the theme it provided
 let captured: MsaViewModel | undefined
 let capturedTheme: Theme | undefined
+// jsdom measures every element at zero, so the model never gets a width and
+// anything reading msaAreaWidth throws. jbrowse-components maps the same module
+// to the same kind of stub for its jsdom suites.
+vi.mock('@jbrowse/core/util/useMeasure', () => ({
+  default: () => [{ current: undefined }, { width: 808, height: 100000 }],
+}))
+
 vi.mock('./components/Loading.tsx', () => ({
   default: function Loading({ model }: { model: MsaViewModel }) {
     captured = model
@@ -95,6 +102,31 @@ test('the tree gutter follows drawTree and treeAreaWidth', () => {
   show({ drawTree: false, treeAreaWidth: 132 })
   expect(model.drawTree).toBe(false)
   expect(model.treeAreaWidth).toBe(132)
+})
+
+test('bgColor follows the prop, and the flip keeps the scroll position', () => {
+  // wider than the alignment pane, so there is a scroll position to keep
+  const wide = `>human\n${'MKAANSE'.repeat(40)}\n>mouse\n${'MKA-NSE'.repeat(40)}\n`
+  const render = (bgColor: boolean) => {
+    act(() => {
+      root.render(<MSAViewer msa={wide} bgColor={bgColor} />)
+    })
+    return captured!
+  }
+
+  const model = render(false)
+  expect(model.bgColor).toBe(false)
+  act(() => {
+    model.setScrollX(-240)
+  })
+
+  expect(render(true)).toBe(model)
+  expect(model.bgColor).toBe(true)
+  expect(model.scrollX).toBe(-240)
+})
+
+test('a viewer given no bgColor colors the background', () => {
+  expect(show({}).bgColor).toBe(true)
 })
 
 test('a change made inside the viewer survives the host re-rendering', () => {
