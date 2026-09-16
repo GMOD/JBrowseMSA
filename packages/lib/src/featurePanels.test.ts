@@ -133,19 +133,34 @@ test('the panel colors its spans by its own field, and lists that scale', () => 
     '#e41a1c',
   )
   expect(panel.labels!.get(span(panel, 'g3', 'genA').annotation)).toBe('genA')
+  // with no columns the overlay draws nothing and lists nothing, so the
+  // panel's own scale is the whole key
   expect(model.legends.map(l => [l.title, l.entries.map(e => e.id)])).toEqual([
-    ['Domains', ['genA', 'genE']],
     ['class', ['core']],
   ])
 })
 
+test('a panel taking the overlay colors lists them under the domain key', () => {
+  const { model } = featurePanel([{ kind: 'features', x: 'position' }])
+  expect(
+    model.legends.map(l => [l.id, l.title, l.entries.map(e => e.id)]),
+  ).toEqual([['domains', 'Domains', ['genA', 'genE']]])
+})
+
 test('the panel falls back to the top-level encoding, sharing its legend', () => {
-  const { model, panel } = featurePanel([{ kind: 'features', x: 'position' }])
+  const msa = '>g1\nMKAANSE\n>g2\nMKAANSE\n>g3\nMKAANSE'
+  const { model, panel } = featurePanel([{ kind: 'features', x: 'position' }], {
+    tree,
+    gff,
+    msa,
+  })
   model.setEncodings([
     { channel: 'featureFill', field: 'class', scale: { palette: 'set1' } },
   ])
   const resolved = model.resolvedRowPanels[0] as ResolvedFeaturePanel
   expect(resolved.field).toBe('class')
+  // the overlay and the panel read one scale over one field, so the figure
+  // lists it once
   expect(model.legends.map(l => [l.id, l.title])).toEqual([
     ['domains', 'class'],
   ])

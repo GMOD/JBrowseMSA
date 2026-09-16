@@ -3342,7 +3342,9 @@ function stateModelFactory() {
             })
           }
         }
-        if (self.actuallyShowDomains) {
+        // the overlay draws the domain key; with no columns it draws nothing,
+        // and a features panel taking the same colors lists them instead
+        if (self.actuallyShowDomains && self.numColumns > 0) {
           add(
             featureFillEncoding?.field,
             featureFillEncoding

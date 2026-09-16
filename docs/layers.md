@@ -400,7 +400,8 @@ A panel's scale carries a legend of its own, titled by the field, and every
 panel and encoding over one field lists that field once. So two strips over `HA`
 and a `tipLabel` encoding over `HA` produce one legend, and a strip over `NA`
 adds a second. A `features` panel taking the overlay's colors lists them under
-the legend the overlay already draws.
+the same key the overlay draws, and with no alignment behind it the panel's own
+entries are that key.
 
 ### The features panel
 
