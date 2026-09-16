@@ -55,6 +55,7 @@ import {
   minLetterColWidth,
   minLetterRowHeight,
   minRowHeight,
+  rowPanelHeaderHeight,
   rowTintAlpha,
   scrollZoomAxes,
   segmentFeatureTypes,
@@ -127,6 +128,7 @@ import type {
   EncodingChannel,
   Highlight,
   Legend,
+  LegendEntry,
   NodeWithIds,
   NodeWithIdsAndLength,
   Region,
@@ -135,6 +137,8 @@ import type {
   ResolvedClade,
   ResolvedEncoding,
   ResolvedHighlight,
+  ResolvedRowPanel,
+  RowPanelSpec,
   RowResidue,
   StructureResidue,
   TrackKind,
@@ -179,6 +183,11 @@ const ownHeightKey = (id: string) => `own:${id}`
 // them
 const HELIX_ARC = '#4e79a7'
 const PSEUDOKNOT_ARC = '#e15759'
+
+// a row panel's own width, or the row height, which makes a strip cell square
+function rowPanelWidth(panel: RowPanelSpec, rowHeight: number) {
+  return panel.width ?? rowHeight
+}
 
 // a data track over this size stays in the live model but leaves the snapshot,
 // the same rule DataModel applies to an inline document
@@ -600,6 +609,16 @@ function stateModelFactory() {
          * `tipLabel` or `rowTint`. See docs/layers.md
          */
         encodings: stripDefault(types.array(types.frozen<Encoding>()), []),
+        /**
+         * #property
+         * panels drawn between the tree and the alignment, one cell per row:
+         * `{kind: "strip", field, scale?, width?, header?}` colors each row
+         * from a `rowData` field. See docs/layers.md
+         */
+        rowPanels: stripDefault(
+          types.array(types.frozen<RowPanelSpec>()),
+          [],
+        ),
       }),
     )
     .volatile(() => ({
@@ -1333,10 +1352,32 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * widget width minus the tree area gives the space for the MSA
+       * the pixel column the row panels occupy between the tree and the
+       * alignment, the sum of each record's width
+       */
+      get rowPanelsWidth() {
+        return sum(self.rowPanels.map(p => rowPanelWidth(p, self.rowHeight)))
+      },
+      /**
+       * #getter
+       * height of the band the row panel headers draw in, which is zero with
+       * no row panels and leaves the top area as it was
+       */
+      get rowPanelsHeaderHeight() {
+        return self.rowPanels.length > 0 ? rowPanelHeaderHeight : 0
+      },
+      /**
+       * #getter
+       * widget width minus the tree area and the row panels gives the space
+       * for the MSA
        */
       get msaAreaWidth() {
-        return self.width - self.treeAreaWidth - self.resizeHandleWidth
+        return (
+          self.width -
+          self.treeAreaWidth -
+          this.rowPanelsWidth -
+          self.resizeHandleWidth
+        )
       },
 
       /**
@@ -2341,9 +2382,13 @@ function stateModelFactory() {
        * blocksY, maxScrollY, the vertical scrollbar and fitVertically.
        */
       get msaAreaHeight() {
+        // the minimap and the row panel headers share one band across the top
         return (
           self.height -
-          (self.showHorizontalScrollbar ? self.minimapHeight : 0) -
+          Math.max(
+            self.showHorizontalScrollbar ? self.minimapHeight : 0,
+            self.rowPanelsHeaderHeight,
+          ) -
           self.headerHeight -
           this.totalTrackAreaHeight
         )
@@ -2724,6 +2769,13 @@ function stateModelFactory() {
       },
       /**
        * #action
+       * replace the panels drawn between the tree and the alignment
+       */
+      setRowPanels(panels: RowPanelSpec[]) {
+        self.rowPanels.replace(panels)
+      },
+      /**
+       * #action
        * replace the alignment<->structure correspondence (see docs/layers.md)
        */
       setResidueMappings(mappings: ResidueMapping[]) {
@@ -2963,8 +3015,9 @@ function stateModelFactory() {
        * the categorical color keys drawn for this view, shared by the on-screen
        * legend overlay and the SVG export's reserved column. The domain overlay
        * produces the first, listing the `featureFill` scale where an encoding
-       * names one, and each row-table encoding produces one per field, so two
-       * channels over one field list that field once
+       * names one. Every field a row-table encoding or a row panel reads
+       * produces one more, so two channels over one field, or two strips over
+       * it, list that field once
        */
       get legends(): Legend[] {
         const { featureFillEncoding, fillPalette, visibleDomainTypes } = this
@@ -2986,18 +3039,29 @@ function stateModelFactory() {
               ]
             : []
         const byField = new Map<string, Legend>()
-        for (const { channel, field, legend } of this.resolvedEncodings) {
-          if (
-            !featureChannels.has(channel) &&
-            legend.length > 0 &&
-            !byField.has(field)
-          ) {
+        const addField = (field: string, entries: LegendEntry[]) => {
+          if (entries.length === 0) {
+            return
+          }
+          const legend = byField.get(field)
+          if (legend) {
+            const seen = new Set(legend.entries.map(e => e.id))
+            legend.entries.push(...entries.filter(e => !seen.has(e.id)))
+          } else {
             byField.set(field, {
               id: `rowData-${field}`,
               title: field,
-              entries: legend,
+              entries: [...entries],
             })
           }
+        }
+        for (const { channel, field, legend } of this.resolvedEncodings) {
+          if (!featureChannels.has(channel)) {
+            addField(field, legend)
+          }
+        }
+        for (const { field, legend } of this.resolvedRowPanels) {
+          addField(field, legend)
         }
         return [...domainLegends, ...byField.values()]
       },
@@ -3271,6 +3335,45 @@ function stateModelFactory() {
               : rows.map(row => row?.[encoding.field]).filter(notEmpty),
           ),
         }))
+      },
+
+      /**
+       * #getter
+       * each row panel with its scale resolved against the values its field
+       * takes across the row table, giving the color per row name, the pixel
+       * column it draws in, and the entries its legend lists. Resolved once
+       * per change of that table or the panels, never per block per frame.
+       */
+      get resolvedRowPanels(): ResolvedRowPanel[] {
+        const rows = Object.entries(self.rowData)
+        let offsetX = 0
+        return self.rowPanels.map((panel, index) => {
+          const { colorOf, legend } = resolveScale(
+            panel.scale,
+            rows.map(([, row]) => row?.[panel.field]).filter(notEmpty),
+          )
+          const colors = new Map<string, string>()
+          for (const [name, row] of rows) {
+            const value = row?.[panel.field]
+            const color = value === undefined ? undefined : colorOf(value)
+            if (color) {
+              colors.set(name, color)
+            }
+          }
+          const width = rowPanelWidth(panel, self.rowHeight)
+          const resolved = {
+            id: `rowpanel-${index}`,
+            kind: panel.kind,
+            field: panel.field,
+            header: panel.header ?? panel.field,
+            width,
+            offsetX,
+            colors,
+            legend,
+          }
+          offsetX += width
+          return resolved
+        })
       },
 
       /**

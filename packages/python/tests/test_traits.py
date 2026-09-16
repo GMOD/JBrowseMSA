@@ -35,6 +35,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "residue_mappings": [],
         "row_data": {},
         "encodings": [],
+        "row_panels": [],
         "relative_to": None,
         "region": None,
         "draw_tree": True,

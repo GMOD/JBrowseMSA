@@ -19,6 +19,7 @@ import type {
   Region,
   ResidueEncoding,
   ResidueMapping,
+  RowPanelSpec,
   Viewport,
 } from '../types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
@@ -79,6 +80,12 @@ export interface MSAViewerProps {
    * `featureFill` or `featureLabel` over the annotations (see docs/layers.md)
    */
   encodings?: Encoding[]
+  /**
+   * panels between the tree and the alignment, one cell per row:
+   * `{kind: 'strip', field, scale?, width?, header?}` colors each row by a
+   * `rowData` field (see docs/layers.md)
+   */
+  rowPanels?: RowPanelSpec[]
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
   drawTree?: boolean
   /** fixed width (px) of the tree/label area */
@@ -202,6 +209,7 @@ function Viewer({
   residueMappings,
   rowData,
   encodings,
+  rowPanels,
   drawTree,
   residueEncoding,
   treeAreaWidth,
@@ -245,6 +253,7 @@ function Viewer({
       ...(columnTracks ? { columnTracks } : {}),
       ...(residueMappings ? { residueMappings } : {}),
       ...(encodings ? { encodings } : {}),
+      ...(rowPanels ? { rowPanels } : {}),
       ...(drawTree !== undefined ? { drawTree } : {}),
       ...(treeAreaWidth ? { treeAreaWidth } : {}),
       ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),
@@ -351,6 +360,10 @@ function Viewer({
   useEffect(() => {
     model.setEncodings(JSON.parse(encodingsKey))
   }, [model, encodingsKey])
+  const rowPanelsKey = JSON.stringify(rowPanels ?? [])
+  useEffect(() => {
+    model.setRowPanels(JSON.parse(rowPanelsKey))
+  }, [model, rowPanelsKey])
   const highlightColumnsKey = JSON.stringify(highlightColumns ?? null)
   useEffect(() => {
     model.setHighlightedColumns(JSON.parse(highlightColumnsKey) ?? undefined)

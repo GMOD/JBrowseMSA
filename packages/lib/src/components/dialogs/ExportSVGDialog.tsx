@@ -49,6 +49,7 @@ export default function ExportSVGDialog({
     totalWidth,
     totalHeight,
     treeAreaWidth,
+    rowPanelsWidth,
     turnedOnTracks,
     totalTrackAreaHeight,
     numColumns,
@@ -56,7 +57,7 @@ export default function ExportSVGDialog({
     showMsaLetters,
   } = model
   const hasTracks = turnedOnTracks.length > 0
-  const entireWidth = totalWidth + treeAreaWidth
+  const entireWidth = totalWidth + treeAreaWidth + rowPanelsWidth
   const entireHeight = totalHeight + (includeTracks ? totalTrackAreaHeight : 0)
   // the background is one raster image whatever its size, so what the figure
   // actually costs is its residue letters: each is an svg element of its own.

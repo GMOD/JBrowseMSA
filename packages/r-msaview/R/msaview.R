@@ -93,6 +93,13 @@
 #'   a span, both from the features \code{gff} carries), \code{field}, and an
 #'   optional \code{scale}, either \code{list(palette = "set1")} or
 #'   \code{list(map = list(value = "#e41a1c"))}.
+#' @param row_panels Panels drawn between the tree and the alignment, one cell
+#'   per row, which is ggtree's \code{gheatmap}. A list of panels, each a list
+#'   with \code{kind = "strip"}, the \code{field} of \code{row_data} it colors
+#'   by, and optionally \code{scale} (\code{list(palette = "set1")} or
+#'   \code{list(map = list(value = "#e41a1c"))}), \code{width} in pixels
+#'   (default: the row height) and \code{header}, the name drawn above the
+#'   column (default: the field).
 #' @param relative_to A row name. Every other row draws as its differences from
 #'   that row, with matching residues as \code{.}.
 #' @param region A span to zoom and scroll to once the alignment loads, as
@@ -224,7 +231,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     highlights = NULL, highlight_columns = NULL,
                     clades = NULL,
                     residue_mappings = NULL, row_data = NULL,
-                    encodings = NULL, relative_to = NULL,
+                    encodings = NULL, row_panels = NULL, relative_to = NULL,
                     region = NULL, col_width = NULL, row_height = NULL,
                     allowed_gappyness = NULL, draw_tree = NULL,
                     tree_area_width = NULL, auto_tree_area_width = NULL,
@@ -256,6 +263,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$residueMappings <- convert_residue_mappings(residue_mappings)
   props$rowData <- convert_row_data(row_data)
   props$encodings <- convert_encodings(encodings)
+  props$rowPanels <- convert_row_panels(row_panels)
   props$relativeTo <- sanitize_names_or_null(relative_to)
   props$region <- convert_region(region)
   props$colWidth <- col_width
@@ -435,6 +443,28 @@ convert_encodings <- function(encodings) {
       if (!is.null(e$scale$map)) e$scale$map <- as.list(e$scale$map)
     }
     e
+  }))
+}
+
+# Each panel serializes as one JSON object, with its scale an object of its own
+# rather than an array, and its width and header scalars.
+convert_row_panels <- function(panels) {
+  if (is.null(panels)) return(NULL)
+  if (!is.list(panels)) {
+    stop("row_panels must be a list of panels, each a list with kind and field")
+  }
+  unname(lapply(panels, function(panel) {
+    panel$kind <- panel$kind %||% "strip"
+    if (panel$kind != "strip") {
+      stop("row panel kind must be 'strip', got '", panel$kind, "'")
+    }
+    if (is.null(panel$field)) stop("row panel is missing 'field'")
+    if (!is.null(panel$scale)) {
+      panel$scale <- as.list(panel$scale)
+      if (!is.null(panel$scale$map)) panel$scale$map <- as.list(panel$scale$map)
+    }
+    if (!is.null(panel$width)) panel$width <- as.numeric(panel$width)
+    panel
   }))
 }
 

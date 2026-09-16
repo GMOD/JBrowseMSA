@@ -8,7 +8,8 @@
 #' @param e2 A layer from \code{\link{geom_msa_highlight}},
 #'   \code{\link{geom_msa_clade}}, \code{\link{geom_msa_track}},
 #'   \code{\link{geom_msa_domains}},
-#'   \code{\link{geom_msa_rowdata}}, \code{\link{scale_residue_color}},
+#'   \code{\link{geom_msa_rowdata}}, \code{\link{geom_msa_strip}},
+#'   \code{\link{scale_residue_color}},
 #'   \code{\link{scale_row_color}}, \code{\link{theme_msa}} or
 #'   \code{\link{coord_msa}}.
 #' @return The viewer, carrying the layer.
@@ -444,6 +445,42 @@ scale_row_color <- function(field, channel = "tipLabel", palette = NULL,
     scale = if (length(scale) > 0) scale
   ))
   msa_layer(append = list(encodings = convert_encodings(list(encoding))))
+}
+
+#' A column of colored cells beside the tree
+#'
+#' Draws one cell per alignment row between the tree and the alignment, colored
+#' by a field of \code{\link{geom_msa_rowdata}}'s table, which is ggtree's
+#' \code{gheatmap}. Eight of these make the tip-aligned matrix a surveillance
+#' figure puts beside its phylogeny.
+#'
+#' The scale is a named palette (\code{"ggplot"}, \code{"set1"},
+#' \code{"dark2"}, \code{"okabeito"}, \code{"tableau"}) or a color per value,
+#' and strips over one field share that field's legend.
+#'
+#' @param field The field to color by.
+#' @param palette A palette name.
+#' @param map A named list or vector of colors, keyed by field value.
+#' @param width The column's width in pixels. Default: the row height.
+#' @param header The name drawn above the column. Default: the field.
+#' @return A layer to add to a viewer with \code{+}.
+#'
+#' @examples
+#' \dontrun{
+#' msaview(msa = "h5.aln", tree = "h5.nh") +
+#'   geom_msa_rowdata(segments) +
+#'   geom_msa_strip("HA", palette = "set1", width = 12) +
+#'   geom_msa_strip("NA", header = "NA segment")
+#' }
+#' @export
+geom_msa_strip <- function(field, palette = NULL, map = NULL, width = NULL,
+                           header = NULL) {
+  scale <- drop_null(list(palette = palette, map = if (!is.null(map)) as.list(map)))
+  panel <- drop_null(list(
+    kind = "strip", field = field, scale = if (length(scale) > 0) scale,
+    width = width, header = header
+  ))
+  msa_layer(append = list(rowPanels = convert_row_panels(list(panel))))
 }
 
 #' Draw each row as its differences from one row

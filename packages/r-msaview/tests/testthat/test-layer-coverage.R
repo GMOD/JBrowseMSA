@@ -55,6 +55,23 @@ test_that("a scale with no palette or map carries no scale at all", {
   expect_null(w$x$props$encodings[[1]]$scale)
 })
 
+test_that("two strips append two panels, each with its own scale", {
+  w <- msaview(msa = msa) +
+    geom_msa_strip("HA", palette = "set1", width = 12) +
+    geom_msa_strip("NA", header = "NA segment")
+
+  expect_length(w$x$props$rowPanels, 2)
+  expect_equal(w$x$props$rowPanels[[1]]$kind, "strip")
+  expect_equal(w$x$props$rowPanels[[1]]$scale$palette, "set1")
+  expect_equal(w$x$props$rowPanels[[1]]$width, 12)
+  expect_null(w$x$props$rowPanels[[2]]$scale)
+  expect_equal(w$x$props$rowPanels[[2]]$header, "NA segment")
+})
+
+test_that("a strip needs a field", {
+  expect_error(geom_msa_strip(NULL), "field")
+})
+
 test_that("an unknown channel is refused", {
   expect_error(scale_row_color("clade", channel = "tipColor"), "tipLabel")
 })
@@ -94,6 +111,7 @@ test_that("every prop-carrying msaview argument has a layer", {
       segments = list(list(rowStart = 1, rowEnd = 2))
     ))),
     geom_msa_rowdata(data.frame(label = "Homo sapiens", clade = "primate")),
+    geom_msa_strip("clade"),
     scale_row_color("clade", palette = "set1"),
     scale_residue_color("clustal", encoding = "color"),
     coord_msa(1, 2),
@@ -119,6 +137,7 @@ test_that("every prop-carrying msaview argument has a layer", {
     )),
     row_data = data.frame(label = "a", clade = "x"),
     encodings = list(list(channel = "tipLabel", field = "clade")),
+    row_panels = list(list(kind = "strip", field = "clade")),
     relative_to = "a", region = list(start = 1, end = 2), col_width = 1,
     row_height = 1, allowed_gappyness = 1, draw_tree = TRUE,
     tree_area_width = 1, auto_tree_area_width = TRUE,

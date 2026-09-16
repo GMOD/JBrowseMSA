@@ -11,6 +11,7 @@ import type {
   MountedViewer,
   Region,
   ResidueMapping,
+  RowPanelSpec,
   Viewport,
   mount,
 } from 'react-msaview'
@@ -35,6 +36,7 @@ export interface Traits {
   residue_mappings: ResidueMapping[]
   row_data: Record<string, Record<string, string>>
   encodings: Encoding[]
+  row_panels: RowPanelSpec[]
   relative_to: string | null
   region: Region | null
   draw_tree: boolean
@@ -69,6 +71,7 @@ export const INPUT_TRAITS = [
   'residue_mappings',
   'row_data',
   'encodings',
+  'row_panels',
   'relative_to',
   'region',
   'draw_tree',
@@ -111,6 +114,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     residueMappings: model.get('residue_mappings'),
     rowData: model.get('row_data'),
     encodings: model.get('encodings'),
+    rowPanels: model.get('row_panels'),
     relativeTo: optional(model.get('relative_to')),
     region: optional(model.get('region')),
     drawTree: model.get('draw_tree'),

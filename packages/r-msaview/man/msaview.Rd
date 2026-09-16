@@ -17,6 +17,7 @@ msaview(
   residue_mappings = NULL,
   row_data = NULL,
   encodings = NULL,
+  row_panels = NULL,
   relative_to = NULL,
   region = NULL,
   col_width = NULL,
@@ -127,6 +128,14 @@ annotation overlay and \code{"featureLabel"} names the field drawn inside
 a span, both from the features \code{gff} carries), \code{field}, and an
 optional \code{scale}, either \code{list(palette = "set1")} or
 \code{list(map = list(value = "#e41a1c"))}.}
+
+\item{row_panels}{Panels drawn between the tree and the alignment, one cell
+per row, which is ggtree's \code{gheatmap}. A list of panels, each a list
+with \code{kind = "strip"}, the \code{field} of \code{row_data} it colors
+by, and optionally \code{scale} (\code{list(palette = "set1")} or
+\code{list(map = list(value = "#e41a1c"))}), \code{width} in pixels
+(default: the row height) and \code{header}, the name drawn above the
+column (default: the field).}
 
 \item{relative_to}{A row name. Every other row draws as its differences from
 that row, with matching residues as \code{.}.}

@@ -132,7 +132,7 @@ const Track = observer(function ({
   model: MsaViewModel
   track: BasicTrack
 }) {
-  const { resizeHandleWidth, showColumnStats } = model
+  const { resizeHandleWidth, rowPanelsWidth, showColumnStats } = model
   const {
     model: { height },
   } = track
@@ -153,7 +153,11 @@ const Track = observer(function ({
   return (
     <div className={classes.row} style={{ height }}>
       <TrackLabel model={model} track={track} />
-      <div style={{ width: resizeHandleWidth, flexShrink: 0 }} />
+      {/* the row panels are row space, so a track leaves their column empty
+      and starts where the alignment canvas does */}
+      <div
+        style={{ width: rowPanelsWidth + resizeHandleWidth, flexShrink: 0 }}
+      />
       <div
         ref={ref}
         data-testid={`track_${track.model.id}`}

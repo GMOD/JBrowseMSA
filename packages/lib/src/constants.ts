@@ -94,3 +94,7 @@ export const cladeHighlightAlpha = 0.6
 // locally-opened file stays in the live model and out of the snapshot, keeping
 // shared URLs sendable. `unshareableData` warns using the same number.
 export const maxInlineSnapshotBytes = 50_000
+
+// Height of the band the `rowPanels` headers draw in, above the strips in the
+// top area beside the tree ruler and the minimap.
+export const rowPanelHeaderHeight = 56

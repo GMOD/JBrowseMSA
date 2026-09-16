@@ -87,6 +87,36 @@ export interface ColumnTrackSpec {
   height?: number
 }
 
+/**
+ * A panel left of the alignment on the row scale, the counterpart of
+ * ColumnTrackSpec on the column scale. `kind: "strip"` colors one cell per row
+ * from a `rowData` field through `scale`, which is ggtree's `gheatmap`.
+ * `width` is in pixels and defaults to the row height, and `header` labels the
+ * column and defaults to the field. See docs/layers.md
+ */
+export interface RowPanelSpec {
+  kind: 'strip'
+  field: string
+  scale?: ScaleSpec
+  width?: number
+  header?: string
+}
+
+/**
+ * A RowPanelSpec with its scale resolved: the color each row takes, keyed by
+ * row name, and the pixel column the panel draws in.
+ */
+export interface ResolvedRowPanel {
+  id: string
+  kind: 'strip'
+  field: string
+  header: string
+  width: number
+  offsetX: number
+  colors: Map<string, string>
+  legend: LegendEntry[]
+}
+
 // One contiguous run where a row's residues and a structure's line up 1:1, as
 // SIFTS reports them. A position no segment covers is unmapped.
 export interface ResidueSegment {

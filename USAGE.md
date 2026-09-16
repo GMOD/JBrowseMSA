@@ -67,6 +67,7 @@ Props:
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                                         |
 | `rowData`           | `Record<string, ...>`    | Extra fields per row name, such as a lineage or a host                              |
 | `encodings`         | `Encoding[]`             | What the marks read: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
+| `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row (see below)              |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram                         |
 | `residueEncoding`   | `'fill' \| 'color'`      | Which channel `colorScheme` paints: the cell (default) or the letter                |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns                     |
@@ -82,7 +83,8 @@ control on one without re-fetching the alignment. Each prop updates only its own
 setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `clades`, `columnTracks`, `residueMappings`,
-`rowData`, `encodings`, `highlightColumns`) and the filehandles by content, so
+`rowData`, `encodings`, `rowPanels`, `highlightColumns`) and the filehandles by
+content, so
 passing a freshly computed array or location object on every render costs
 nothing. A new `msa`, `tree` or `gff` string, or a filehandle pointing somewhere
 else, builds a new model and resets the view.
@@ -185,11 +187,28 @@ naming each span of the overlay.
 />
 ```
 
+`rowPanels` draws the same table as columns of colored cells between the tree
+and the alignment, which is ggtree's `gheatmap`. Each `strip` record reads one
+field, takes its own `scale`, and carries a rotated `header` over its column.
+Strips over one field share that field's legend.
+
+```tsx
+<MSAViewer
+  msa={msa}
+  tree={tree}
+  rowData={rowData}
+  rowPanels={[
+    { kind: 'strip', field: 'HA', scale: { palette: 'set1' }, width: 12 },
+    { kind: 'strip', field: 'NA', header: 'NA segment' },
+  ]}
+/>
+```
+
 The [layers reference](https://gmod.org/JBrowseMSA/layers) lists every field of
 every layer and the coordinate rules they share. At runtime
 `model.setHighlights(list)`, `model.setClades(list)`,
-`model.setColumnTracks(tracks)` and `model.setRowData(table)` replace what the
-props set.
+`model.setColumnTracks(tracks)`, `model.setRowData(table)` and
+`model.setRowPanels(panels)` replace what the props set.
 
 ### One panel in your own page
 

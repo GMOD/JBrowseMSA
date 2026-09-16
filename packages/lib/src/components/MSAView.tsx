@@ -12,16 +12,23 @@ import Header from './header/Header.tsx'
 import Minimap from './minimap/Minimap.tsx'
 import MSAPanel from './msa/MSAPanel.tsx'
 import { clickColor, hoverColor } from './overlayColors.ts'
+import RowPanelHeaders from './rowpanels/RowPanelHeaders.tsx'
+import RowPanels from './rowpanels/RowPanels.tsx'
 import TreePanel from './tree/TreePanel.tsx'
 import TreeRuler from './tree/TreeRuler.tsx'
 
 import type { MsaViewModel } from '../model.ts'
 
+// The band above the panels: the tree's scale bar, the strip headers, and the
+// minimap over the alignment. The spacer stands in for the resize handle, so
+// the minimap starts exactly where the alignment canvas does.
 const TopArea = observer(function ({ model }: { model: MsaViewModel }) {
-  const { showHorizontalScrollbar } = model
+  const { showHorizontalScrollbar, resizeHandleWidth } = model
   return (
     <div style={{ display: 'flex' }}>
       <TreeRuler model={model} />
+      <RowPanelHeaders model={model} />
+      <div style={{ width: resizeHandleWidth, flexShrink: 0 }} />
       {showHorizontalScrollbar ? <Minimap model={model} /> : null}
     </div>
   )
@@ -38,6 +45,7 @@ const TrackColumnIndicator = observer(function ({
     colWidth,
     scrollX,
     treeAreaWidth,
+    rowPanelsWidth,
     resizeHandleWidth,
     totalTrackAreaHeight,
     msaCanvasWidth,
@@ -53,7 +61,7 @@ const TrackColumnIndicator = observer(function ({
     <div
       style={{
         position: 'absolute',
-        left: treeAreaWidth + resizeHandleWidth,
+        left: treeAreaWidth + rowPanelsWidth + resizeHandleWidth,
         top: 0,
         width: msaCanvasWidth,
         height: totalTrackAreaHeight,
@@ -102,6 +110,7 @@ const MainArea = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <div style={{ display: 'flex' }}>
       <TreePanel model={model} />
+      <RowPanels model={model} />
       <VerticalResizeHandle model={model} />
       <MSAPanel model={model} />
       {showVerticalScrollbar ? <VerticalScrollbar model={model} /> : null}

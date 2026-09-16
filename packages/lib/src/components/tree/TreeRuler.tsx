@@ -9,16 +9,14 @@ import type { MsaViewModel } from '../../model.ts'
 
 const BAR_HEIGHT = 22
 
-// The gutter above the tree panel. It spans the resize handle too, so whatever
-// follows it in the top row starts exactly where the alignment canvas does --
-// MainArea has TreePanel + VerticalResizeHandle before the alignment. A
-// phylogram fills it with a scale bar: without one the branch lengths are drawn
-// to a scale nothing states.
+// The gutter above the tree panel, the width of the tree area, so the strip
+// headers beside it start where the strips do. A phylogram fills it with a
+// scale bar: without one the branch lengths are drawn to a scale nothing
+// states.
 const TreeRuler = observer(({ model }: { model: MsaViewModel }) => {
-  const { treeAreaWidth, resizeHandleWidth, marginLeft, pxPerBranchLength } =
-    model
+  const { treeAreaWidth, marginLeft, pxPerBranchLength } = model
   const theme = useTheme()
-  const width = treeAreaWidth + resizeHandleWidth
+  const width = treeAreaWidth
   const bar = scaleBarLength(pxPerBranchLength, treeAreaWidth - marginLeft * 2)
 
   return (

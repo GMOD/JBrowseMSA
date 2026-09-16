@@ -3,9 +3,9 @@ import React, { useState } from 'react'
 import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
-import { createPortal } from 'react-dom'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
+import PortalTooltip from '../PortalTooltip.tsx'
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'
 import { renderTreeCanvas } from './renderTreeCanvas.ts'
@@ -13,21 +13,7 @@ import { useTreeHover } from './useTreeHover.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
-const useStyles = makeStyles()(theme => ({
-  tooltip: {
-    position: 'fixed',
-    pointerEvents: 'none',
-    zIndex: 10000,
-    backgroundColor: theme.palette.grey[700],
-    color: theme.palette.common.white,
-    padding: '4px 8px',
-    borderRadius: 4,
-    fontSize: 12,
-    whiteSpace: 'nowrap',
-    maxWidth: 300,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-  },
+const useStyles = makeStyles()(() => ({
   hover: {
     position: 'absolute',
     pointerEvents: 'none',
@@ -153,20 +139,11 @@ const TreeCanvasBlock = observer(function ({
         />
       ) : null}
 
-      {/* portaled: the block set sits under a transform, which would otherwise
-      make this fixed tooltip position against the scrolled tree instead of the
-      window */}
-      {hovered
-        ? createPortal(
-            <div
-              className={classes.tooltip}
-              style={{ left: hovered.clientX + 12, top: hovered.clientY + 12 }}
-            >
-              {hovered.name}
-            </div>,
-            document.body,
-          )
-        : null}
+      {hovered ? (
+        <PortalTooltip clientX={hovered.clientX} clientY={hovered.clientY}>
+          {hovered.name}
+        </PortalTooltip>
+      ) : null}
     </>
   )
 })

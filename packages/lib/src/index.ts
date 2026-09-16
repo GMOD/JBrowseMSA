@@ -71,6 +71,8 @@ export type {
   ResolvedClade,
   ResolvedEncoding,
   ResolvedHighlight,
+  ResolvedRowPanel,
+  RowPanelSpec,
   RowResidue,
   StructureResidue,
   TextTrackModel,

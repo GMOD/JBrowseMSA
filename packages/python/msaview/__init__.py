@@ -63,6 +63,8 @@ class MSAView(anywidget.AnyWidget):
     # table or from the features the GFF carries
     row_data = traitlets.Dict(traitlets.Dict()).tag(sync=True)
     encodings = traitlets.List(traitlets.Dict()).tag(sync=True)
+    # panels between the tree and the alignment, one colored cell per row
+    row_panels = traitlets.List(traitlets.Dict()).tag(sync=True)
     relative_to = traitlets.Unicode(None, allow_none=True).tag(sync=True)
     region = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
     draw_tree = traitlets.Bool(True).tag(sync=True)

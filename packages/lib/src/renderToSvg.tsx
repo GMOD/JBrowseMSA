@@ -11,6 +11,7 @@ import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCa
 import { renderPersistentHighlights } from './components/msa/renderHighlights.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
+import { renderRowPanels } from './components/rowpanels/renderStrip.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
@@ -58,6 +59,8 @@ interface Layout {
   height: number
   contentHeight: number
   trackHeight: number
+  // the band the minimap and the row panel headers share across the top
+  topHeight: number
   offsetX: number
   offsetY: number
   includeMinimap: boolean
@@ -71,6 +74,8 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
     totalWidth,
     totalHeight,
     treeAreaWidth,
+    rowPanelsWidth,
+    rowPanelsHeaderHeight,
     totalTrackAreaHeight,
     minimapHeight,
     msaAreaHeight,
@@ -88,6 +93,11 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
     showHorizontalScrollbar
   const rows = legendRows(model.legends)
   const legendWidth = rows.length > 0 ? getLegendWidth(rows) : 0
+  const topHeight = Math.max(
+    includeMinimap ? minimapHeight : 0,
+    rowPanelsHeaderHeight,
+  )
+  const gutterWidth = treeAreaWidth + rowPanelsWidth
 
   // width stays content-only; the legend occupies an extra column added at the
   // svg root in MsaSvg. The viewport export takes the alignment canvas's own
@@ -96,23 +106,24 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
   // columns the scrollbars hide on screen
   return opts.exportType === 'entire'
     ? {
-        width: totalWidth + treeAreaWidth,
+        width: totalWidth + gutterWidth,
         msaAreaWidth: totalWidth,
-        height: totalHeight + trackHeight,
+        height: totalHeight + trackHeight + topHeight,
         contentHeight: totalHeight,
         trackHeight,
+        topHeight,
         offsetX: 0,
         offsetY: 0,
         includeMinimap,
         legendWidth,
       }
     : {
-        width: msaCanvasWidth + treeAreaWidth,
+        width: msaCanvasWidth + gutterWidth,
         msaAreaWidth: msaCanvasWidth,
-        height:
-          msaAreaHeight + (includeMinimap ? minimapHeight : 0) + trackHeight,
+        height: msaAreaHeight + topHeight + trackHeight,
         contentHeight: msaAreaHeight,
         trackHeight,
+        topHeight,
         offsetX: -scrollX,
         offsetY: -scrollY,
         includeMinimap,
@@ -163,10 +174,10 @@ function MsaSvg({
   layout: Layout
   layers: LayerMap
 }) {
-  const { width, trackHeight, includeMinimap, legendWidth } = layout
-  const { treeAreaWidth, minimapHeight } = model
+  const { width, trackHeight, includeMinimap, legendWidth, topHeight } = layout
+  const { treeAreaWidth, rowPanelsWidth } = model
   const totalWidth = width + legendWidth
-  const legendTop = includeMinimap ? minimapHeight : 0
+  const legendTop = topHeight
   // a short alignment with many legend entries has a key taller than its rows,
   // and the page has to hold the whole key
   const height =
@@ -205,12 +216,22 @@ function MsaSvg({
         height="100%"
         fill={theme.palette.background.default}
       />
-      {includeMinimap ? (
+      {topHeight > 0 ? (
         <>
-          <g id="minimap-panel" transform={`translate(${treeAreaWidth} 0)`}>
-            <MinimapSVG model={model} theme={theme} />
-          </g>
-          <g transform={`translate(0 ${minimapHeight})`}>{body}</g>
+          {includeMinimap ? (
+            <g
+              id="minimap-panel"
+              transform={`translate(${treeAreaWidth + rowPanelsWidth} 0)`}
+            >
+              <MinimapSVG model={model} theme={theme} />
+            </g>
+          ) : null}
+          <RowPanelHeadersSVG
+            model={model}
+            theme={theme}
+            bandHeight={topHeight}
+          />
+          <g transform={`translate(0 ${topHeight})`}>{body}</g>
         </>
       ) : (
         body
@@ -221,6 +242,44 @@ function MsaSvg({
         </g>
       ) : null}
     </svg>
+  )
+}
+
+// Each strip's header over the column it names, turned on its side, where the
+// live view puts it (see RowPanelHeaders). The baseline runs up the figure, so
+// the name sits to the left of it, the way TrackLabelsSVG offsets a horizontal
+// baseline by a third of the font size.
+function RowPanelHeadersSVG({
+  model,
+  theme,
+  bandHeight,
+}: {
+  model: MsaViewModel
+  theme: Theme
+  bandHeight: number
+}) {
+  const { resolvedRowPanels, treeAreaWidth, fontSize } = model
+  const y = bandHeight - 4
+  return (
+    <g id="rowpanel-headers">
+      {resolvedRowPanels.map(panel => {
+        const size = Math.min(fontSize, panel.width)
+        const x =
+          treeAreaWidth + panel.offsetX + panel.width / 2 + size / 3
+        return size < 5 ? null : (
+          <text
+            key={panel.id}
+            x={x}
+            y={y}
+            transform={`rotate(-90 ${x} ${y})`}
+            fontSize={size}
+            fill={theme.palette.text.primary}
+          >
+            {panel.header}
+          </text>
+        )
+      })}
+    </g>
   )
 }
 
@@ -297,7 +356,7 @@ interface LayerProps {
 
 function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const { contentHeight, offsetX, offsetY, msaAreaWidth } = layout
-  const { treeAreaWidth, id } = model
+  const { treeAreaWidth, rowPanelsWidth, id } = model
 
   const treeCtx = new Context(treeAreaWidth, contentHeight)
   renderTreeCanvas({
@@ -308,6 +367,19 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
     blockSizeYOverride: contentHeight,
     highResScaleFactorOverride: 1,
   })
+
+  const rowPanelsCtx = rowPanelsWidth
+    ? new Context(rowPanelsWidth, contentHeight)
+    : undefined
+  if (rowPanelsCtx) {
+    renderRowPanels({
+      model,
+      ctx: rowPanelsCtx,
+      offsetY,
+      blockSizeYOverride: contentHeight,
+      highResScaleFactorOverride: 1,
+    })
+  }
 
   const raster = rasterBackground({ model, theme, layout })
 
@@ -356,12 +428,23 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
         ctx={treeCtx}
         layers={layers}
       />
+      {rowPanelsCtx ? (
+        <ClipGroup
+          panelId="rowpanels-panel"
+          clipId={`rowpanels-${id}`}
+          width={rowPanelsWidth}
+          height={contentHeight}
+          transform={`translate(${treeAreaWidth} 0)`}
+          ctx={rowPanelsCtx}
+          layers={layers}
+        />
+      ) : null}
       <ClipGroup
         panelId="msa-panel"
         clipId={`msa-${id}`}
         width={msaAreaWidth}
         height={contentHeight}
-        transform={`translate(${treeAreaWidth} 0)`}
+        transform={`translate(${treeAreaWidth + rowPanelsWidth} 0)`}
         ctx={msaCtx}
         layers={layers}
         underlay={raster}
@@ -428,7 +511,7 @@ function rasterBackground({
 
 function TrackRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const { trackHeight, offsetX, msaAreaWidth } = layout
-  const { treeAreaWidth, id } = model
+  const { treeAreaWidth, rowPanelsWidth, id } = model
 
   const ctx = new Context(msaAreaWidth, trackHeight)
   renderAllTracks({
@@ -443,7 +526,7 @@ function TrackRendering({ model, theme, layout, Context, layers }: LayerProps) {
   return (
     <>
       <TrackLabelsSVG model={model} theme={theme} />
-      <g transform={`translate(${treeAreaWidth} 0)`}>
+      <g transform={`translate(${treeAreaWidth + rowPanelsWidth} 0)`}>
         <ClipGroup
           panelId="tracks-panel"
           clipId={`tracks-${id}`}
