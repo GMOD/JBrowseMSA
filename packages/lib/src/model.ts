@@ -2039,7 +2039,7 @@ function stateModelFactory() {
        * cladogram mode. The tree's scale bar uses it.
        */
       get pxPerBranchLength() {
-        const max = maxLength(this.root)
+        const max = this.rootToTipLength
         return this.showBranchLenEffective && max ? self.treeWidth / max : 0
       },
 

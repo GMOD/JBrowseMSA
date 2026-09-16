@@ -51,6 +51,16 @@ test('a flat tree with lengths is still a phylogram', () => {
   expect(model.showBranchLenEffective).toBe(true)
 })
 
+test('the scale bar reads the extent the layout drew', () => {
+  // the root's own length is not drawn, so the farthest tip lands at treeWidth
+  // and a unit of branch length is treeWidth over the root-to-tip extent
+  const model = makeModel('((a:1,b:2):5,(c:1,d:3):1):4;')
+  expect(model.rootToTipLength).toBe(7)
+  expect(model.pxPerBranchLength).toBe(model.treeWidth / 7)
+  const farthest = Math.max(...model.leaves.map(l => l.len!))
+  expect(farthest).toBeCloseTo(model.treeWidth)
+})
+
 test('a tree with no lengths draws as a cladogram', () => {
   const model = makeModel('((a,b),(c,d));')
   expect(model.allBranchesLength0).toBe(true)
