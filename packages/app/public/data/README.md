@@ -81,6 +81,18 @@ page quotes:
 | ------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `rna/sam-riboswitch.sto` | Stockholm (tree+SS) | 37 SAM-I riboswitches found by `cmsearch` with the Rfam [RF00162](https://rfam.org/family/RF00162) model in six Firmicute genomes, aligned to it with `cmalign`, consensus structure and SAM contacts copied from the Rfam seed, FastTree tree embedded as `#=GF NH` |
 
+The `mitogenome/` folder backs the
+[mitogenome_genes tutorial](../../../../docs/tutorials/mitogenome_genes.md) and
+is built by `docs/tutorials/scripts/build_mitogenome_genes.sh`, which prints
+every number that page quotes:
+
+| File                          | Format          | Provenance                                                                                                                                                       |
+| ----------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mitogenome/mito-rows.tsv`    | TSV             | The tutorial's row table: RefSeq accession and the row label it becomes                                                                                          |
+| `mitogenome/mito.afa`         | FASTA (aligned) | Eight mammal mitochondrial genomes from NCBI efetch, aligned with ClustalW, 17,966 columns                                                                        |
+| `mitogenome/mito.nwk`         | Newick          | ClustalW neighbor-joining tree from the alignment above                                                                                                          |
+| `mitogenome/mito-genes.gff`   | GFF3 (genes)    | RefSeq's own GFF3 per accession, reduced to 37 genes per genome with `Name=` and `complex=`, plus a control region per genome carrying `color=255,205,0`          |
+
 The `proteases/` and `h3n2/` folders back the two tutorials whose pipeline runs
 inside a language rather than a shell, and each folder's own README names its
 files:
