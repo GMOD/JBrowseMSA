@@ -12,6 +12,7 @@ extend-exclude = [
   # aligned protein sequence: runs of one-letter codes that the checker reads as
   # words (THN as THEN, and so on down the alphabet)
   "*.afa",
+  "*.aln",
   "packages/app/public/data/jbrowse-msa-combined-config.json",
   # gene symbols and UniProt accessions read as typos (CHEK1, LIMK1, MAK,
   # Q8IY84, ...)
