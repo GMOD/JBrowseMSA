@@ -23,6 +23,7 @@ import {
 } from './components/tree/cladeBrackets.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { renderTreeOverview } from './components/tree/renderTreeOverview.ts'
+import { treeScaleBarHeight } from './constants.ts'
 import { measureTextCanvas } from './measureTextCanvas.ts'
 import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
 import { outlineColor } from './util.ts'
@@ -73,8 +74,8 @@ interface Layout {
   height: number
   contentHeight: number
   trackHeight: number
-  // the band the minimap, the row panel headers and the tree overview share
-  // across the top
+  // the band the minimap, the row panel headers and the tree overview stacked
+  // on the scale bar share across the top
   topHeight: number
   offsetX: number
   offsetY: number
@@ -97,6 +98,7 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
     msaCanvasWidth,
     showHorizontalScrollbar,
     treeOverviewHeight,
+    treeScaleBar,
   } = model
   const trackHeight = opts.includeTracks ? totalTrackAreaHeight : 0
   // the minimap reflects the live viewport scroll position, so it's only
@@ -112,7 +114,7 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
   const topHeight = Math.max(
     includeMinimap ? minimapHeight : 0,
     rowPanelsHeaderHeight,
-    treeOverviewHeight,
+    treeOverviewHeight + (treeScaleBar ? treeScaleBarHeight : 0),
   )
   const gutterWidth = treeAreaWidth + rowPanelsWidth
 
@@ -256,6 +258,7 @@ function MsaSvg({
               layers={layers}
             />
           ) : null}
+          <TreeScaleBarSVG model={model} theme={theme} />
           <g transform={`translate(0 ${topHeight})`}>{body}</g>
         </>
       ) : (
@@ -302,6 +305,37 @@ function TreeOverviewSVG({
       ctx={ctx}
       layers={layers}
     />
+  )
+}
+
+// The branch-length scale bar under the tree overview, where the live view puts
+// it (see TreeRuler). A phylogram whose branch lengths are drawn to a scale
+// nothing states is a figure a reader cannot measure, so the export carries the
+// bar even though it is chrome on screen.
+function TreeScaleBarSVG({
+  model,
+  theme,
+}: {
+  model: MsaViewModel
+  theme: Theme
+}) {
+  const { marginLeft, treeScaleBar: bar, treeOverviewHeight } = model
+  if (!bar) {
+    return null
+  }
+  const y = treeOverviewHeight + treeScaleBarHeight
+  const color = theme.palette.text.primary
+  return (
+    <g id="tree-scalebar">
+      <text x={marginLeft} y={y - 9} fontSize={10} fill={color}>
+        {bar.label}
+      </text>
+      <path
+        d={`M${marginLeft} ${y - 7} v6 h${bar.px} v-6`}
+        fill="none"
+        stroke={color}
+      />
+    </g>
   )
 }
 

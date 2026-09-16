@@ -123,7 +123,8 @@ clade sits in the whole tree. The SVG export draws the band too.
 With branch lengths on, a scale bar sits in the gutter above the tree: a round
 number of substitutions per site, drawn to the same scale as the branches. The
 scale bar is hidden in cladogram mode, where horizontal position shows topology
-rather than branch length.
+rather than branch length. The SVG export carries the bar too, so a published
+figure states the scale its branches are drawn to.
 
 The tree settings menu toggles branch-length rendering, right-aligned vs
 tree-adjacent labels, and clickable branch bubbles. **Advanced → Calculate
