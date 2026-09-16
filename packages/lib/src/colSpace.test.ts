@@ -34,8 +34,7 @@ test('the last column agrees with the column statistics', () => {
   expect(model.colStats.numColumns).toBe(model.numColumns)
   expect(model.conservation).toHaveLength(model.numColumns)
 
-  model.setMousePos(model.numColumns - 1, 1)
-  expect(model.mouseOverColumnStats?.col).toBe(9)
+  expect(model.columnStatsAt(model.numColumns - 1)?.col).toBe(9)
   expect(model.visibleColToRowLetter('b', 9)).toBe('C')
 })
 

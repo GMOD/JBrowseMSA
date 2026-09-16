@@ -125,9 +125,6 @@ function drawTilesAndText({
   const tiles = drawTiles && bgColor
   const paintTiles = tiles && !rasterTiles
   if (paintTiles || showMsaLetters) {
-    // a letter takes its color from the cell it lands on, so the scheme lookup
-    // is only waste when nothing draws letters
-    const needsColor = paintTiles || showMsaLetters
     const tileColor = tileColorFn(model)
     // Domain fills come from a categorical palette with no fixed lightness, and
     // a dynamic scheme colors a cell from its column, so a readable letter color
@@ -163,7 +160,7 @@ function drawTilesAndText({
           const x = j * colWidth + offsetXAligned
           const isMatchingReference =
             referenceSeq && name !== relativeTo && letter === referenceSeq[j]
-          const color = needsColor ? tileColor(col, letter) : undefined
+          const color = tileColor(col, letter)
 
           if (paintTiles) {
             ctx.fillStyle = isMatchingReference

@@ -68,15 +68,15 @@ describe('property conservation track', () => {
   })
 })
 
-describe('mouseOverColumnStats', () => {
-  test('undefined when nothing hovered', () => {
-    expect(make(protein, 'm0').mouseOverColumnStats).toBeUndefined()
+describe('columnStatsAt', () => {
+  test('undefined past the last column', () => {
+    const model = make(protein, 'm0')
+    expect(model.columnStatsAt(model.numColumns)).toBeUndefined()
   })
 
   test('reports consensus, gaps and distribution for hovered column', () => {
     const model = make(protein, 'm1')
-    model.setMousePos(0, 0)
-    const s = model.mouseOverColumnStats
+    const s = model.columnStatsAt(0)
     expect(s?.consensusLetter).toBe('M')
     expect(s?.consensusFraction).toBe(1)
     expect(s?.gapFraction).toBe(0)
@@ -86,8 +86,7 @@ describe('mouseOverColumnStats', () => {
   test('mixed column reports the majority residue as consensus', () => {
     const model = make(protein, 'm2')
     // col1 = K/R/K -> consensus K at 2/3
-    model.setMousePos(1, 0)
-    const s = model.mouseOverColumnStats
+    const s = model.columnStatsAt(1)
     expect(s?.consensusLetter).toBe('K')
     expect(s?.consensusCount).toBe(2)
   })

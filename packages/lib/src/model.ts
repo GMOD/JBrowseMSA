@@ -111,7 +111,6 @@ import {
   len,
   outlineColor,
   skipBlanks,
-  transform,
   withAlpha,
 } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
@@ -932,7 +931,8 @@ function stateModelFactory() {
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        { nodeId: string; descendantNames: string[] } | undefined,
+        | { nodeId: string; descendantNames: string[] }
+        | undefined,
 
       /**
        * #volatile
@@ -1772,7 +1772,7 @@ function stateModelFactory() {
        */
       get insertionPositions() {
         const { blanks, rows } = this
-        if (blanks.length === 0 || !self.hideGapsEffective) {
+        if (blanks.length === 0) {
           return new Map<string, { pos: number; letters: string }[]>()
         }
         const result = new Map<string, { pos: number; letters: string }[]>()
@@ -2173,11 +2173,7 @@ function stateModelFactory() {
          * then the height its snapshot asked for, then its kind's default. Only
          * a text track falls through to rowHeight
          */
-        trackHeight(
-          kind: TrackKind,
-          heightKey = kind as string,
-          given?: number,
-        ) {
+        trackHeight(kind: TrackKind, heightKey: string = kind, given?: number) {
           return (
             self.trackHeights.get(heightKey) ??
             given ??
@@ -3304,13 +3300,6 @@ function stateModelFactory() {
         )
         return { ...segments, ...categorical }
       },
-      get strokePalette() {
-        return transform(this.fillPalette, ([key, val]) => [
-          key,
-          outlineColor(val),
-        ])
-      },
-
       /**
        * #getter
        * the encoding coloring the overlay's spans, undefined when none does,
@@ -3627,23 +3616,6 @@ function stateModelFactory() {
           conservation,
           propertyConservation,
         })
-      },
-
-      /**
-       * #getter
-       * `columnStatsAt` for the hovered column, undefined when nothing is
-       * hovered
-       */
-      get mouseOverColumnStats(): ColumnStats | undefined {
-        const { mouseCol, colStats, conservation, propertyConservation } = self
-        return mouseCol === undefined
-          ? undefined
-          : columnStats({
-              col: mouseCol,
-              colStats,
-              conservation,
-              propertyConservation,
-            })
       },
 
       /**

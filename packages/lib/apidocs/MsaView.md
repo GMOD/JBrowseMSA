@@ -139,11 +139,7 @@ data from the loaded tree/msa/treeMetadata, generally loaded by autorun
 // type signature
 IOptionalIType<IModelType<{ tree: IMaybe<ISimpleType<string>>; msa: IMaybe<ISimpleType<string>>; treeMetadata: IMaybe<ISimpleType<string>>; gff: IMaybe<...>; }, { ...; }, _NotCustomized, { ...; }>, [...]>
 // code
-data: types.optional(DataModelF(), {
-          tree: '',
-          msa: '',
-          treeMetadata: '',
-        })
+data: types.optional(DataModelF(), {})
 ```
 
 #### property: drawMsaLetters
@@ -1208,15 +1204,6 @@ most-negative allowed scrollY, which keeps the last row in view
 number
 ```
 
-#### getter: mouseOverColumnStats
-
-`columnStatsAt` for the hovered column, undefined when nothing is hovered
-
-```js
-// type
-ColumnStats | undefined
-```
-
 #### getter: mouseOverDomains
 
 domain annotations under the mouse, hit-tested against the exact visible column
@@ -1803,6 +1790,17 @@ undefined past the end of the alignment or for an all-gap column.
 columnStatsAt: (col: number) => ColumnStats | undefined
 ```
 
+#### method: columnTrackModel
+
+the track a column track spec draws as, computed once per spec. A text track's
+height falls through to rowHeight, and its own computed confines the vertical
+zoom to it, so a sibling keeps its object and its canvas skips the redraw
+
+```js
+// type signature
+columnTrackModel: (track: ColumnTrackSpec) => BasicTrack
+```
+
 #### method: getRowData
 
 ```js
@@ -1889,8 +1887,7 @@ structureResidue: (rowName: string, seqPos: number, structureId?: string | undef
 
 the height a track draws at: what the user dragged its divider to, then the
 height its snapshot asked for, then its kind's default. Only a text track falls
-through to rowHeight, and `??` short-circuits before reading it, so vertical
-zoom does not rebuild the other tracks
+through to rowHeight
 
 ```js
 // type signature

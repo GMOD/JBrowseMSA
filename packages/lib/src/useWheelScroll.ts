@@ -147,10 +147,6 @@ export function useWheelScroll({
   }, [mouseDragging, onScrollX, onScrollY])
 
   function onMouseDown(event: React.MouseEvent) {
-    const target = event.target as HTMLElement
-    if (target.draggable || target.dataset.resizer) {
-      return
-    }
     if (event.button === 0) {
       prevX.current = event.clientX
       prevY.current = event.clientY
