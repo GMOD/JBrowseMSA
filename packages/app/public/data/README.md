@@ -89,6 +89,7 @@ every number that page quotes:
 | File                          | Format          | Provenance                                                                                                                                                       |
 | ----------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `mitogenome/mito-rows.tsv`    | TSV             | The tutorial's row table: RefSeq accession and the row label it becomes                                                                                          |
+| `mitogenome/mito-unaligned.afa` | FASTA (padded)  | The same eight genomes as fetched, right-padded to 17,019 columns, so the viewer opens them before the aligner runs                                             |
 | `mitogenome/mito.afa`         | FASTA (aligned) | Eight mammal mitochondrial genomes from NCBI efetch, aligned with ClustalW, 17,966 columns                                                                        |
 | `mitogenome/mito.nwk`         | Newick          | ClustalW neighbor-joining tree from the alignment above                                                                                                          |
 | `mitogenome/mito-genes.gff`   | GFF3 (genes)    | RefSeq's own GFF3 per accession, reduced to 37 genes per genome with `Name=` and `complex=`, plus a control region per genome carrying `color=255,205,0`          |

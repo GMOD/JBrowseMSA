@@ -57,19 +57,39 @@ while IFS=$'\t' read -r accession label; do
   printf '\n' >> "$OUT/mito.fasta"
 done < "$ROWS"
 
-# 3. align. Eight whole mitogenomes take about three minutes
+# 3. the same records right-padded to a common width, which is what the viewer
+#    needs to open the genomes before they are aligned
+python3 - "$OUT/mito.fasta" "$OUT/mito-unaligned.afa" <<'PY'
+import sys
+
+src, dest = sys.argv[1:3]
+records, name = {}, None
+for line in open(src):
+    if line.startswith('>'):
+        name = line[1:].strip()
+        records[name] = ''
+    else:
+        records[name] += line.strip()
+width = max(len(s) for s in records.values())
+with open(dest, 'w') as out:
+    for name, seq in records.items():
+        print(f'>{name}\n{seq}{"-" * (width - len(seq))}', file=out)
+print(f'  {len(records)} genomes padded to {width} columns')
+PY
+
+# 4. align. Eight whole mitogenomes take about three minutes
 echo "aligning"
 clustalw -INFILE="$OUT/mito.fasta" -ALIGN -TYPE=DNA \
   -OUTPUT=FASTA -OUTFILE="$OUT/mito.afa" | grep -E 'Alignment Score|lastres'
 
-# 4. neighbor-joining tree from the alignment. ClustalW wraps the Newick across
+# 5. neighbor-joining tree from the alignment. ClustalW wraps the Newick across
 #    lines; strip the whitespace so it is one string
 clustalw -INFILE="$OUT/mito.afa" -TREE -TYPE=DNA -OUTPUTTREE=phylip > /dev/null
 tr -d '[:space:]' < "$OUT/mito.ph" > "$OUT/mito.nwk"
 cat "$OUT/mito.nwk"
 echo
 
-# 5. one GFF for the viewer: a gene per protein-coding gene, rRNA and tRNA,
+# 6. one GFF for the viewer: a gene per protein-coding gene, rRNA and tRNA,
 #    named, stranded, and carrying the respiratory complex it belongs to
 echo "deriving mito-genes.gff"
 python3 - "$ROWS" "$OUT/raw" "$OUT/mito.fasta" "$OUT/mito-genes.gff" <<'PY'
@@ -164,7 +184,7 @@ for klass in ('I', 'III', 'IV', 'V', 'rRNA', 'tRNA', 'control region'):
     print(f'  {klass}: {tally[klass]}')
 PY
 
-# 6. where each gene lands after the aligner's gaps: the same feature projected
+# 7. where each gene lands after the aligner's gaps: the same feature projected
 #    into alignment columns, row by row
 echo "projecting features into alignment columns"
 python3 - "$OUT/mito.afa" "$OUT/mito-genes.gff" <<'PY'
