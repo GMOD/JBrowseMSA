@@ -48,3 +48,5 @@ abl = "abl"
 # the four-letter species prefix the RNA tutorial's row names carry for
 # Clostridium acetobutylicum
 Cace = "Cace"
+# ggtree spells its clade-highlight geom geom_hilight
+hilight = "hilight"

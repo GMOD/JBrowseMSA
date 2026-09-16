@@ -15,6 +15,12 @@ nobody has to work it out again.
   below change as a result, since an agent can compute them and store the result
   in the snapshot for the viewer to draw. `columnTracks` and `highlights`
   shipped; GFF color, row strips, and `export-svg` from a snapshot remain.
+- [ggtree-style figures](ideas/ggtree-style-figures.md): the eight steps that
+  add clade highlights, clade brackets, support values, tip labels colored by a
+  trait and a tip-aligned metadata matrix, with the decisions (an `encodings`
+  array, one row table, MRCA-addressed clades) argued out first. Supersedes the
+  row-strips sketch in `data-layers.md` and absorbs
+  [row-group-coloring](ideas/row-group-coloring.md).
 - [A selection model](ideas/selection-model.md): the model has no selected
   column range or row set, and the MSA editor needs one before anything else.
   Copy, zoom-to-selection and selective export all build on it.
