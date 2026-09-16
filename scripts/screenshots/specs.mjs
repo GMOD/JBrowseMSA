@@ -8,12 +8,7 @@
 
 import fs from 'node:fs'
 
-import { readJson } from './exampleConsts.mjs'
 import { fileSnap } from './snap.mjs'
-
-// The sickle-cell example imports this layer too, so a regenerated layer
-// updates the figure and the live example together.
-const sickle = readJson('hemoglobinSickle.json')
 
 // Small IL2RA protein alignment + matching tree (same data as the examples).
 const proteinMSA = `CLUSTAL O(1.2.3) multiple sequence alignment
@@ -284,68 +279,6 @@ export const specs = [
       { waitFor: '::-p-text(sequence)' },
     ],
     clip: 'full',
-  },
-  {
-    name: 'sickle-cell',
-    // The globins with the two layers the sickle-cell example carries: the
-    // AlphaMissense per-residue mean over the hemoglobin beta row, and a band
-    // on the substitution at row residue 7, which the shipped SIFTS mapping
-    // converts to 1A3N residue 6. Zoomed to the start of the beta chain so the
-    // band is wider than a hairline.
-    url: fileSnap({
-      height: 480,
-      treeAreaWidth: 215,
-      colWidth: 14,
-      rowHeight: 20,
-      colorSchemeName: 'clustalx_protein_dynamic',
-      msaFilehandle: { uri: 'data/globin.aln' },
-      treeFilehandle: { uri: 'data/globin.nh' },
-      highlights: [
-        {
-          row: sickle.sickle.row,
-          start: sickle.sickle.seqPos,
-          end: sickle.sickle.seqPos,
-          color: 'rgba(214,39,40,0.35)',
-          label: sickle.sickle.label,
-        },
-      ],
-      columnTracks: [
-        {
-          id: 'alphamissense',
-          name: sickle.alphaMissense.name,
-          kind: 'bar',
-          row: sickle.alphaMissense.row,
-          color: '#8e44ad',
-          height: 70,
-          values: sickle.alphaMissense.values,
-          max: sickle.alphaMissense.max,
-        },
-      ],
-    }),
-    settle: 2500,
-    clip: 'viewer',
-    // The band is one column wide under a full-color alignment, so the figure
-    // adds a callout box around it, anchored to the cell: 0-based column 21 of
-    // the Human_beta row is its residue 7.
-    annotations: [
-      {
-        type: 'box',
-        anchor: { col: 21, rowLabel: 'Human_beta' },
-        pad: 2,
-      },
-      {
-        type: 'text',
-        text: 'row residue 7 · p.Glu7Val · 1A3N B:6',
-        fontSize: 15,
-        maxWidth: 500,
-        anchor: {
-          col: 21,
-          rowLabel: 'Human_beta',
-          alignY: 'bottom',
-          dy: 30,
-        },
-      },
-    ],
   },
   {
     name: 'within-protein-conservation',
