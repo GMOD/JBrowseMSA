@@ -27,13 +27,13 @@ else a link needs: file URIs, CORS, and the size limit on inline data.
 
 A track above the alignment, supplied as data. `kind: "bar"` draws one bar per
 column from `values`, scaled by `max` (default 1) and clamped to that range.
-`kind: "text"` draws one character per column from `data`, colored by `colors`.
-`kind: "arc"` joins pairs of positions from `arcs`, drawing each `{start, end}`
-as a curve whose height grows with the distance between its ends. `row` makes
-`values`, `data` or the ends of an arc index that row's residues instead of
-columns, so the first value is residue 1 and the viewer fills in the row's gaps.
-A data track appears in the Tracks menu, toggles like any other, and exports to
-SVG.
+`kind: "text"` draws one character per column from `data`, colored by `colors`,
+which it looks up by the upper-case character. `kind: "arc"` joins pairs of
+positions from `arcs`, drawing each `{start, end}` as a curve whose height grows
+with the distance between its ends. `row` makes `values`, `data` or the ends of
+an arc index that row's residues instead of columns, so the first value is
+residue 1 and the viewer fills in the row's gaps. A data track appears in the
+Tracks menu, toggles like any other, and exports to SVG.
 
 ```json
 {
@@ -79,7 +79,7 @@ SVG.
 | `max`    | bar  | Value drawn at full height (default 1)                                      |
 | `color`  | bar  | Bar fill (default gray)                                                     |
 | `data`   | text | One character per column, or per residue of `row`                           |
-| `colors` | text | Character to background color; the active color scheme otherwise            |
+| `colors` | text | Upper-case character to background color; the active color scheme otherwise |
 | `arcs`   | arc  | `{start, end, color?}` pairs; each end is a column or a residue             |
 | `row`    | both | Row name whose residues the values or characters index                      |
 | `height` | both | Pixel height (default 40 for a bar, 50 for an arc, the row height for text) |
