@@ -402,7 +402,8 @@ function renderTreeLabels({
     // label when the "name" is just the auto-generated internal-node id
     const isAnonymousCollapsed = collapsedSet.has(id) && name === id
     if (!isAnonymousCollapsed && inYBlock(y, offsetY, by, pad)) {
-      // note: +rowHeight/4 matches with -rowHeight/4 in msa
+      // fontSize/4 below the row center, the baseline the alignment letters
+      // share
       const yp = y + fontSize / 4
       let xp = 0
       if (!noTree) {

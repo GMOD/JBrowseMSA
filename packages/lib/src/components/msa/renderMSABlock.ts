@@ -113,6 +113,7 @@ function drawTilesAndText({
     columns,
     colWidth,
     rowHeight,
+    fontSize,
     relativeTo,
     showMsaLetters,
     subFeatureRows,
@@ -134,8 +135,10 @@ function drawTilesAndText({
     const contrastText = contrastTextFn(theme)
     const offsetXAligned = xStart * colWidth
     const halfColWidth = colWidth / 2
-    // note: -rowHeight/4 matches +rowHeight/4 in tree
-    const quarterRowHeight = rowHeight / 4
+    // the context is translated by rowHeight/2, so `y` is the row's bottom
+    // edge and the baseline lands fontSize/4 below the row center, where the
+    // tree puts its tip labels
+    const baselineOffset = rowHeight / 2 - fontSize / 4
     // with the tiles coming from the domain overlay instead, letters sit either
     // on a domain box or on the plain background; sub-row layout stacks the boxes
     // above the letters and letter-color mode shrinks them to a bar under the
@@ -149,7 +152,7 @@ function drawTilesAndText({
       const str = columns.get(name)?.slice(xStart, xEnd)
       if (str) {
         const tileY = y - rowHeight
-        const textY = y - quarterRowHeight
+        const textY = y - baselineOffset
         const bandAt = domainBandCursor(
           overDomains ? domainBandsByStart.get(name) : undefined,
         )
