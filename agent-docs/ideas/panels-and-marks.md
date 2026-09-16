@@ -520,11 +520,10 @@ all four wrappers. `drawFeatureSpans.ts` is the one span mark: the overlay and
 the panel each give it an x mapping, the colors, the labels and a row geometry.
 `resolvedRowPanels` resolves a panel's spans to panel pixels, `x: "position"`
 mapping the extent every row covers, after the shift `featureAlignShifts` gives
-it, onto the panel width less an arrowhead. A record's own `encoding` resolves
-the way `featureFill` and `featureLabel` do and falls back to them, and its
-legend merges by field. The domain key lists nothing at zero columns, so a tree,
-a GFF and a `features` panel draw the gene figure with one legend and no
-alignment.
+it, onto the panel width. A record's own `encoding` resolves the way
+`featureFill` and `featureLabel` do and falls back to them, and its legend
+merges by field. The domain key lists nothing at zero columns, so a tree, a GFF
+and a `features` panel draw the gene figure with one legend and no alignment.
 
 A tree with no alignment already boots: `dataInitialized` is
 `!!(self.data.msa || self.data.tree)` (`model.ts:2254`), and `numColumns` of 0

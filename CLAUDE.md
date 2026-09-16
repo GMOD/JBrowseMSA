@@ -119,20 +119,25 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   GFF's spans per row through `components/msa/drawFeatureSpans.ts`, the one span
   mark: the alignment's overlay (`renderBoxFeatureCanvasBlock.ts`) and the panel
   each hand it an x mapping, the fills, the labels and a row geometry, so a
-  strand arrow is drawn in one place. `resolvedRowPanels` resolves a panel's
-  spans to panel pixels: `x: "column"` scales `domainBands` by `colWidth`, and
-  `x: "position"` packs each row's features in residue positions through
-  `packDomainLanes`, which is generic over `{startCol, endCol}`, and maps their
-  extent onto the panel width. The packing runs on the pixel spans and shrinks
-  each one by a tenth before testing overlap, because adjacent bacterial genes
-  commonly share a few bases and a stop codon over the next start put a whole
-  operon on two lanes. The `align` transform's per-row shift comes from
-  `featureAlignShifts`. A record's own `encoding` resolves through
-  `resolveScale` and `featureFields.ts` the way the top-level `featureFill` and
-  `featureLabel` do, and falls back to them. A tree, a `gff` and a `features`
-  panel make a figure with no alignment at all: `dataInitialized` is
-  `msa || tree`, `numColumns` is 0, and the alignment panel is zero columns wide
-  on screen and in the export.
+  strand arrow is drawn in one place. The head is the last `headLength` pixels
+  _of_ the feature, tapering to a point at its end the way gggenes and gggenomes
+  draw one, and a feature shorter than the head is all head. A glyph therefore
+  covers its own span and nothing past it, which is what lets the genes of an
+  operon butt together instead of biting triangles out of each other. A
+  `headRise` lifts the head above a band too thin to taper, which the underline
+  bar is. `resolvedRowPanels` resolves a panel's spans to panel pixels:
+  `x: "column"` scales `domainBands` by `colWidth`, and `x: "position"` packs
+  each row's features in residue positions through `packDomainLanes`, which is
+  generic over `{startCol, endCol}`, and maps their extent onto the panel width.
+  The packing runs on the pixel spans and shrinks each one by a tenth before
+  testing overlap, because adjacent bacterial genes commonly share a few bases
+  and a stop codon over the next start put a whole operon on two lanes. The
+  `align` transform's per-row shift comes from `featureAlignShifts`. A record's
+  own `encoding` resolves through `resolveScale` and `featureFields.ts` the way
+  the top-level `featureFill` and `featureLabel` do, and falls back to them. A
+  tree, a `gff` and a `features` panel make a figure with no alignment at all:
+  `dataInitialized` is `msa || tree`, `numColumns` is 0, and the alignment panel
+  is zero columns wide on screen and in the export.
 
 - The tree overview (`components/tree/TreeOverview.tsx`,
   `renderTreeOverview.ts`) is the brush on the row scale, behind

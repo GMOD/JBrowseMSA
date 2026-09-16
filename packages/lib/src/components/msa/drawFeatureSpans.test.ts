@@ -5,9 +5,9 @@ import { expect, test } from 'vitest'
 
 import { drawFeatureSpans } from './drawFeatureSpans.ts'
 
-import type { SpanBand, SpanLayout } from './drawFeatureSpans.ts'
 import type { Annotation } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
+import type { SpanBand, SpanLayout } from './drawFeatureSpans.ts'
 
 function annotation(start: number, end: number, strand?: number): Annotation {
   return {
@@ -78,7 +78,7 @@ test('a minus-strand arrow is the mirror of a plus-strand one', () => {
     lane: 0,
     laneCount: 1,
   })
-  expect(minus.map(([x, y]) => [300 - x, y]).sort()).toEqual(plus.sort())
+  expect(minus.map(([x, y]) => [300 - x, y])).toEqual(plus)
 })
 
 test('a feature shorter than the head is all head', () => {
