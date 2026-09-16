@@ -759,22 +759,6 @@ any[]
 any[]
 ```
 
-#### getter: branchColors
-
-the color the `branch` channel gives each tree edge, by the node id at the
-edge's far end, or undefined when no encoding names the channel. A node takes
-the field value its tips agree on, so a clade of one value colors down from
-where it splits off, and a node whose tips disagree or whose value has no color
-is absent and draws in the default color.
-
-The pass runs over the whole tree, never `root`, so a collapsed or focused clade
-keeps the color the full tree gives it.
-
-```js
-// type
-Map<string, string>
-```
-
 #### getter: categoricalDomainTypes
 
 categorical feature types (InterPro domains and the like) that each get their
@@ -928,6 +912,38 @@ read.
 boolean
 ```
 
+#### getter: featureColors
+
+the fill and outline of every feature's span: its own GFF `color=` first, then
+the `featureFill` scale, then the accession palette. Computed once per change of
+the features, the encodings or the palette
+
+```js
+// type
+Map<Annotation, { fill: string; stroke: string; }>
+```
+
+#### getter: featureFillEncoding
+
+the encoding coloring the overlay's spans, undefined when none does, which
+leaves each span the color its accession takes in `fillPalette`
+
+```js
+// type
+ResolvedEncoding
+```
+
+#### getter: featureLabels
+
+the text the `featureLabel` channel draws inside each span, undefined when no
+encoding names the channel. A data channel, so it draws whether or not the
+residue letters do
+
+```js
+// type
+Map<Annotation, string>
+```
+
 #### getter: fontSize
 
 ```js
@@ -1067,9 +1083,8 @@ any[]
 #### getter: legends
 
 the categorical color keys drawn for this view, shared by the on-screen legend
-overlay and the SVG export's reserved column. The domain overlay produces the
-first, and each categorical encoding one per field, so two channels over one
-field list that field once
+overlay and the SVG export's reserved column. The domain overlay is the only
+producer today, and it lists the `featureFill` scale where an encoding names one
 
 ```js
 // type
@@ -1258,9 +1273,10 @@ ResidueMappingProblem[]
 
 #### getter: resolvedEncodings
 
-each encoding with its scale resolved against the values its field takes across
-the row table. Resolved once per change of the table or the encodings, never per
-row per frame.
+each encoding with its scale resolved against the values its field takes: a
+feature channel reads them across the features drawn, every other channel across
+the row table. Resolved once per change of that table or the encodings, never
+per row per frame.
 
 ```js
 // type

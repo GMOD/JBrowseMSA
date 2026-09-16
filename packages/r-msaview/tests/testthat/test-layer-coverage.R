@@ -45,9 +45,20 @@ test_that("an unknown channel is refused", {
   expect_error(scale_row_color("clade", channel = "tipColor"), "tipLabel")
 })
 
+<<<<<<< HEAD
 test_that("the branch channel reaches the props", {
   w <- msaview(msa = msa) + scale_row_color("clade", channel = "branch")
   expect_equal(w$x$props$encodings[[1]]$channel, "branch")
+=======
+test_that("the feature channels read a field of the annotations", {
+  w <- msaview(msa = msa) +
+    scale_row_color("gene", channel = "featureFill", palette = "set1") +
+    scale_row_color("Name", channel = "featureLabel")
+
+  expect_equal(w$x$props$encodings[[1]]$channel, "featureFill")
+  expect_equal(w$x$props$encodings[[1]]$scale$palette, "set1")
+  expect_equal(w$x$props$encodings[[2]]$field, "Name")
+>>>>>>> a72b46bd (docs: the feature channels across the layers reference and the wrappers)
 })
 
 test_that("the diff layer names the row to compare against", {

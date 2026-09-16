@@ -110,12 +110,22 @@ lists with \code{rowStart}, \code{rowEnd}, \code{structStart} and
 field, the shape a ggtree \code{tibble(label = , trait = )} already has. A
 named list of fields per row works too.}
 
+<<<<<<< HEAD
 \item{encodings}{What the viewer's own marks read from \code{row_data}, as a
 list of lists with \code{channel} (\code{"tipLabel"} colors each tip label,
 \code{"rowTint"} washes the row across the tree gutter and the alignment,
 \code{"branch"} colors a tree edge whose tips all share one value),
 \code{field}, and an optional \code{scale}, either
 \code{list(palette = "set1")} or
+=======
+\item{encodings}{What the viewer's own marks read from a table, as a list of
+lists with \code{channel} (\code{"tipLabel"} colors each tip label and
+\code{"rowTint"} washes the row across the tree gutter and the alignment,
+both from \code{row_data}; \code{"featureFill"} colors each span of the
+annotation overlay and \code{"featureLabel"} names the field drawn inside
+a span, both from the features \code{gff} carries), \code{field}, and an
+optional \code{scale}, either \code{list(palette = "set1")} or
+>>>>>>> a72b46bd (docs: the feature channels across the layers reference and the wrappers)
 \code{list(map = list(value = "#e41a1c"))}.}
 
 \item{relative_to}{A row name. Every other row draws as its differences from

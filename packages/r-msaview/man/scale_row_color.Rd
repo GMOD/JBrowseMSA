@@ -2,15 +2,20 @@
 % Please edit documentation in R/layers.R
 \name{scale_row_color}
 \alias{scale_row_color}
-\title{Color a mark by a field of the row table}
+\title{Color a mark by a field of the row or feature table}
 \usage{
 scale_row_color(field, channel = "tipLabel", palette = NULL, map = NULL)
 }
 \arguments{
-\item{field}{The field of the row table to read.}
+\item{field}{The field to read.}
 
+<<<<<<< HEAD
 \item{channel}{\code{"tipLabel"} (default), \code{"rowTint"} or
 \code{"branch"}.}
+=======
+\item{channel}{\code{"tipLabel"} (default), \code{"rowTint"},
+\code{"featureFill"} or \code{"featureLabel"}.}
+>>>>>>> a72b46bd (docs: the feature channels across the layers reference and the wrappers)
 
 \item{palette}{A palette name.}
 
@@ -20,12 +25,25 @@ scale_row_color(field, channel = "tipLabel", palette = NULL, map = NULL)
 A layer to add to a viewer with \code{+}.
 }
 \description{
+<<<<<<< HEAD
 Colors one of the marks the viewer always draws by a field of
 \code{\link{geom_msa_rowdata}}'s table. \code{"tipLabel"} colors each tip
 label in the tree, \code{"rowTint"} washes the row across the tree gutter and
 the alignment, and \code{"branch"} colors a tree edge whose tips all share
 one value, which is ggtree's \code{groupClade} with the group read from the
 table.
+=======
+Colors one of the marks the viewer always draws by a field of a table.
+\code{"tipLabel"} colors each tip label in the tree and \code{"rowTint"}
+washes the row across the tree gutter and the alignment, both from
+\code{\link{geom_msa_rowdata}}'s table. \code{"featureFill"} colors each
+span of the annotation overlay and \code{"featureLabel"} names the field
+drawn inside a span, both from the features the GFF carries, where a field
+is an annotation property (\code{accession}, \code{name},
+\code{featureType}) or a GFF attribute such as \code{Name} or
+\code{gene}. A feature carrying a GFF \code{color=} attribute keeps that
+color.
+>>>>>>> a72b46bd (docs: the feature channels across the layers reference and the wrappers)
 }
 \details{
 The scale is a named palette (\code{"ggplot"}, \code{"set1"},
@@ -39,5 +57,9 @@ msaview(msa = "h5.aln", tree = "h5.nh") +
   scale_row_color("clade", palette = "set1") +
   scale_row_color("clade", channel = "rowTint",
                   map = list("2.3.4.4b" = "#e41a1c"))
+
+msaview(msa = "genes.aln", gff = "genes.gff") +
+  scale_row_color("gene", channel = "featureFill", palette = "set1") +
+  scale_row_color("Name", channel = "featureLabel")
 }
 }

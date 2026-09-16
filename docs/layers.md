@@ -186,10 +186,14 @@ startup:
 
 ## encodings
 
-What the viewer's own marks read from `rowData`. Each entry names a `channel`,
-the `field` feeding it, and the `scale` that turns a field value into a color.
-The `tipLabel` channel colors each tip label in the tree; `rowTint` washes the
-whole row across the tree gutter and the alignment; `branch` colors a tree edge.
+What the viewer's own marks read from a table. Each entry names a `channel`, the
+`field` feeding it, and the `scale` that turns a field value into a color. The
+`tipLabel` channel colors each tip label in the tree, `rowTint` washes the whole
+row across the tree gutter and the alignment, and `branch` colors a tree edge
+whose tips all share one value, each from a field of `rowData`. The
+`featureFill` channel colors each span of the annotation overlay and
+`featureLabel` names the field drawn inside a span, both from a field of the
+features `gff` carries.
 
 ```json
 {
@@ -208,8 +212,8 @@ whole row across the tree gutter and the alignment; `branch` colors a tree edge.
 
 | Field     | Meaning                                                            |
 | --------- | ------------------------------------------------------------------ |
-| `channel` | `tipLabel`, `rowTint` or `branch`                                  |
-| `field`   | the `rowData` field the channel reads                              |
+| `channel` | `tipLabel`, `rowTint`, `branch`, `featureFill` or `featureLabel`   |
+| `field`   | the field the channel reads                                        |
 | `scale`   | `{palette}` or `{map}`; the ggplot palette when the entry omits it |
 
 A `{palette}` names one of `ggplot` (the default), `set1`, `dark2`, `okabeito`
@@ -237,6 +241,33 @@ Two channels over one field list that field once.
 The scales resolve once per change of the table or the encodings, and the tint
 draws in the overlay the `highlights` row sets use, which keeps it out of the
 alignment's raster tile cache.
+
+A feature channel reads any field of the feature table: `accession`, `name`,
+`featureType`, or any GFF attribute of column 9, such as `Name` or `gene`. The
+`featureFill` scale replaces the accession palette the overlay colors spans by,
+and the domain legend lists that scale's values under the field's name. A
+feature carrying a GFF3 `color=` attribute keeps that color whatever the scale
+says, and `255,0,0` reads as `rgb(255,0,0)`, the convention JBrowse and IGV
+honor. A `featureLabel` draws inside its span wherever the text fits, and it is
+a data channel, so it draws whether or not the residue letters do.
+
+```json
+{
+  "type": "MsaView",
+  "data": {
+    "msa": ">duck\nMKAANSE\n>chicken\nMKA-NSE",
+    "gff": "##gff-version 3\nduck\tncbi\tgene\t1\t5\t.\t+\t.\tName=HA;class=surface\nchicken\tncbi\tgene\t1\t4\t.\t+\t.\tName=NP;class=internal;color=255,0,0"
+  },
+  "encodings": [
+    {
+      "channel": "featureFill",
+      "field": "class",
+      "scale": { "palette": "set1" }
+    },
+    { "channel": "featureLabel", "field": "Name" }
+  ]
+}
+```
 
 ## residueMappings
 

@@ -67,8 +67,9 @@ export interface MSAViewerProps {
   /** extra fields per row name, such as a lineage or a host (see docs/layers.md) */
   rowData?: Record<string, Record<string, string>>
   /**
-   * what the viewer's marks read from `rowData`: `{channel, field, scale?}`,
-   * where `channel` is `tipLabel`, `rowTint` or `branch` (see docs/layers.md)
+   * what the viewer's marks read from a table: `{channel, field, scale?}`,
+   * where `channel` is `tipLabel`, `rowTint` or `branch` over `rowData`, or
+   * `featureFill` or `featureLabel` over the annotations (see docs/layers.md)
    */
   encodings?: Encoding[]
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
