@@ -3336,7 +3336,9 @@ function stateModelFactory() {
        * produces the first, listing the `featureFill` scale where an encoding
        * names one. Every field a row-table encoding or a row panel reads
        * produces one more, so two channels over one field, or two strips over
-       * it, list that field once
+       * it, list that field once. A strip's `legend` names the title it lists
+       * under, so strips over eight fields with one set of colors list one
+       * legend between them
        */
       get legends(): Legend[] {
         const { featureFillEncoding, fillPalette, visibleDomainTypes } = this
@@ -3383,8 +3385,8 @@ function stateModelFactory() {
             add(field, legend)
           }
         }
-        for (const { field, legend } of this.resolvedRowPanels) {
-          add(field, legend)
+        for (const { legendTitle, legend } of this.resolvedRowPanels) {
+          add(legendTitle, legend)
         }
         return [...byKey.values()]
       },
@@ -3659,6 +3661,7 @@ function stateModelFactory() {
               x: panel.x,
               header: panel.header ?? '',
               field: encoding?.field,
+              legendTitle: encoding?.field,
               spans: featurePanelSpans({
                 panel,
                 width,
@@ -3700,6 +3703,7 @@ function stateModelFactory() {
             kind: panel.kind,
             field: panel.field,
             header: panel.header ?? panel.field,
+            legendTitle: panel.legend ?? panel.field,
             colors,
             legend,
           }

@@ -385,6 +385,7 @@ spans `gff` carries, one row per alignment row, which is gggenes.
 | `scale`  | `{palette}` or `{map}`; the ggplot palette when the record omits it  |
 | `width`  | the column's pixel width: a row height for a strip, 200 for features |
 | `header` | the name drawn above the column, defaulting to a strip's field       |
+| `legend` | the title a strip's values list under, defaulting to its field       |
 
 The panels sit between the tree and the alignment, and they take their width out
 of the alignment's: the alignment scrolls and fits within what is left. A strip
@@ -456,8 +457,19 @@ wins over either.
 }
 ```
 
+`legend` names the title a strip lists under. Eight segment columns over one set
+of lineage colors read eight fields, so give them one `legend` and the figure
+carries one key for the matrix:
+
+```json
+"rowPanels": [
+  { "kind": "strip", "field": "PB2", "scale": { "map": { "am2.2": "#4e79a7" } }, "legend": "segment lineage" },
+  { "kind": "strip", "field": "PB1", "scale": { "map": { "am4": "#f28e2b" } }, "legend": "segment lineage" }
+]
+```
+
 React: the `rowPanels` prop on `MSAViewer`, or `model.setRowPanels(list)`. R:
-`geom_msa_strip("HA", palette = "set1", width = 12)` and
+`geom_msa_strip("HA", palette = "set1", width = 12, legend = "amino acid")` and
 `geom_msa_features(color = "Name", label = "Name", align = "genE")`. Python: the
 `row_panels` trait.
 

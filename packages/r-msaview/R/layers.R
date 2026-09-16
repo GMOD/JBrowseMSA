@@ -476,6 +476,9 @@ scale_row_color <- function(field, channel = "tipLabel", palette = NULL,
 #' @param map A named list or vector of colors, keyed by field value.
 #' @param width The column's width in pixels. Default: the row height.
 #' @param header The name drawn above the column. Default: the field.
+#' @param legend The legend's title. Strips naming one title, such as eight
+#'   segment columns over one set of lineage colors, share one legend.
+#'   Default: the field.
 #' @return A layer to add to a viewer with \code{+}.
 #'
 #' @examples
@@ -487,11 +490,11 @@ scale_row_color <- function(field, channel = "tipLabel", palette = NULL,
 #' }
 #' @export
 geom_msa_strip <- function(field, palette = NULL, map = NULL, width = NULL,
-                           header = NULL) {
+                           header = NULL, legend = NULL) {
   scale <- drop_null(list(palette = palette, map = if (!is.null(map)) as.list(map)))
   panel <- drop_null(list(
     kind = "strip", field = field, scale = if (length(scale) > 0) scale,
-    width = width, header = header
+    width = width, header = header, legend = legend
   ))
   msa_layer(append = list(rowPanels = convert_row_panels(list(panel))))
 }

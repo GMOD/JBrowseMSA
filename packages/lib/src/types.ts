@@ -91,6 +91,8 @@ export interface ColumnTrackSpec {
  * A strip panel: one cell per row, colored from a `rowData` field through
  * `scale`, which is ggtree's `gheatmap`. `width` is in pixels and defaults to
  * the row height, and `header` labels the column and defaults to the field.
+ * `legend` titles the strip's legend and defaults to the field, and strips
+ * naming one title share one legend.
  */
 export interface RowStripSpec {
   kind: 'strip'
@@ -98,6 +100,7 @@ export interface RowStripSpec {
   scale?: ScaleSpec
   width?: number
   header?: string
+  legend?: string
 }
 
 /** the channels a `features` panel reads off the feature table */
@@ -142,6 +145,8 @@ interface ResolvedPanelBase {
   width: number
   offsetX: number
   legend: LegendEntry[]
+  /** the legend this panel's entries go under; absent means the domain key */
+  legendTitle?: string
 }
 
 /**

@@ -90,6 +90,17 @@ test('two strips over one field list it once, and another field follows', () => 
   expect(model.legends.map(l => l.title)).toEqual(['HA', 'NA'])
 })
 
+test('strips naming one legend list their values under it once', () => {
+  const colors = { map: { H5: '#e41a1c', H7: '#377eb8', N1: '#4daf4a' } }
+  const model = makeModel([
+    { kind: 'strip', field: 'HA', scale: colors, legend: 'lineage' },
+    { kind: 'strip', field: 'NA', scale: colors, legend: 'lineage' },
+  ])
+  expect(model.legends.map(l => l.title)).toEqual(['lineage'])
+  expect(model.legends[0]!.entries.map(e => e.id)).toEqual(['H5', 'H7', 'N1'])
+  expect(model.resolvedRowPanels.map(p => p.header)).toEqual(['HA', 'NA'])
+})
+
 test('setRowPanels replaces the layer', () => {
   const model = makeModel([])
   expect(model.resolvedRowPanels).toEqual([])
