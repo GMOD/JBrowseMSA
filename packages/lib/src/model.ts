@@ -9,7 +9,6 @@ import {
   isAlive,
   types,
 } from '@jbrowse/mobx-state-tree'
-import { colord } from 'colord'
 import { autorun, transaction } from 'mobx'
 import {
   generateNodeIds,
@@ -97,6 +96,7 @@ import {
   computeRowInsertions,
   dropBlanks,
   len,
+  outlineColor,
   skipBlanks,
   transform,
 } from './util.ts'
@@ -116,6 +116,7 @@ import type {
   ColumnTrackSpec,
   DomainBand,
   Highlight,
+  Legend,
   NodeWithIds,
   NodeWithIdsAndLength,
   Region,
@@ -2704,7 +2705,7 @@ function stateModelFactory() {
       get strokePalette() {
         return transform(this.fillPalette, ([key, val]) => [
           key,
-          colord(val).darken(0.1).toHex(),
+          outlineColor(val),
         ])
       },
 
@@ -2733,6 +2734,29 @@ function stateModelFactory() {
         return this.categoricalDomainTypes
           .filter(d => !self.turnedOffFeatures.get(d.accession))
           .toSorted((a, b) => a.start - b.start)
+      },
+
+      /**
+       * #getter
+       * the categorical color keys drawn for this view, shared by the on-screen
+       * legend overlay and the SVG export's reserved column. The domain overlay
+       * is the only producer today
+       */
+      get legends(): Legend[] {
+        const { fillPalette, visibleDomainTypes } = this
+        return self.actuallyShowDomains && visibleDomainTypes.length > 0
+          ? [
+              {
+                id: 'domains',
+                title: 'Domains',
+                entries: visibleDomainTypes.map(d => ({
+                  id: d.accession,
+                  label: d.name,
+                  color: fillPalette[d.accession]!,
+                })),
+              },
+            ]
+          : []
       },
 
       /**

@@ -1036,6 +1036,17 @@ number
 any[]
 ```
 
+#### getter: legends
+
+the categorical color keys drawn for this view, shared by the on-screen legend
+overlay and the SVG export's reserved column. The domain overlay is the only
+producer today
+
+```js
+// type
+Legend[]
+```
+
 #### getter: mappedStructures
 
 the structures with usable mappings. A row can map onto several, such as an

@@ -5,6 +5,7 @@ import { when } from 'mobx'
 
 import { visibleRowRange } from './components/getVisibleLeaves.ts'
 import MinimapSVG from './components/minimap/MinimapSVG.tsx'
+import { legendRows } from './components/msa/legendRows.ts'
 import { rasterImageHref, rasterSupported } from './components/msa/msaRaster.ts'
 import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock.ts'
 import { renderPersistentHighlights } from './components/msa/renderHighlights.ts'
@@ -13,7 +14,9 @@ import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import { renderTreeCanvas } from './components/tree/renderTreeCanvas.ts'
 import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
+import { outlineColor } from './util.ts'
 
+import type { LegendRow } from './components/msa/legendRows.ts'
 import type { MsaViewModel } from './model.ts'
 import type { Context as ContextType } from '@jbrowse/svgcanvas'
 import type { Theme } from '@mui/material'
@@ -25,8 +28,8 @@ export interface ExportSvgOptions {
   exportType: 'entire' | 'viewport'
 }
 
-// domain-legend geometry, shared by the width calculation and the renderer so
-// the reserved column on the right exactly fits the drawn legend
+// legend geometry, shared by the width calculation and the renderer so the
+// reserved column on the right exactly fits the drawn legends
 const LEGEND_PAD = 8
 const LEGEND_ROW_H = 16
 const LEGEND_SWATCH = 12
@@ -36,17 +39,14 @@ const LEGEND_CHAR_W = 7
 const LEGEND_MAX_W = 360
 const LEGEND_TEXT_X = LEGEND_PAD + LEGEND_SWATCH + 6
 
-function getLegendWidth(model: MsaViewModel) {
-  const maxLen = model.visibleDomainTypes.reduce(
-    (a, d) => Math.max(a, d.name.length),
-    0,
-  )
+function getLegendWidth(rows: LegendRow[]) {
+  const maxLen = rows.reduce((a, r) => Math.max(a, r.label.length), 0)
   const w = LEGEND_TEXT_X + LEGEND_PAD + maxLen * LEGEND_CHAR_W
   return Math.min(LEGEND_MAX_W, Math.max(120, w))
 }
 
-function legendHeight(domainTypes: unknown[]) {
-  return LEGEND_PAD * 2 + domainTypes.length * LEGEND_ROW_H
+function legendHeight(rows: LegendRow[]) {
+  return LEGEND_PAD * 2 + rows.length * LEGEND_ROW_H
 }
 
 // resolved sizes/offsets (in svg user units) for the chosen export, shared by
@@ -86,10 +86,8 @@ function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
     opts.exportType === 'viewport' &&
     !!opts.includeMinimap &&
     showHorizontalScrollbar
-  const legendWidth =
-    model.actuallyShowDomains && model.visibleDomainTypes.length > 0
-      ? getLegendWidth(model)
-      : 0
+  const rows = legendRows(model.legends)
+  const legendWidth = rows.length > 0 ? getLegendWidth(rows) : 0
 
   // width stays content-only; the legend occupies an extra column added at the
   // svg root in MsaSvg. The viewport export takes the alignment canvas's own
@@ -166,14 +164,17 @@ function MsaSvg({
   layers: LayerMap
 }) {
   const { width, trackHeight, includeMinimap, legendWidth } = layout
-  const { treeAreaWidth, minimapHeight, visibleDomainTypes } = model
+  const { treeAreaWidth, minimapHeight } = model
   const totalWidth = width + legendWidth
   const legendTop = includeMinimap ? minimapHeight : 0
-  // a short alignment with many domain types has a key taller than its rows,
+  // a short alignment with many legend entries has a key taller than its rows,
   // and the page has to hold the whole key
   const height =
     legendWidth > 0
-      ? Math.max(layout.height, legendTop + legendHeight(visibleDomainTypes))
+      ? Math.max(
+          layout.height,
+          legendTop + legendHeight(legendRows(model.legends)),
+        )
       : layout.height
   const props = { Context, model, theme, layout, layers }
 
@@ -223,8 +224,8 @@ function MsaSvg({
   )
 }
 
-// the domain color key drawn as a reserved column to the right of the
-// alignment, mirroring the on-screen AnnotationLegend overlay
+// the color keys drawn as a reserved column to the right of the alignment,
+// mirroring the on-screen AnnotationLegend overlay
 function LegendSVG({
   model,
   theme,
@@ -234,8 +235,8 @@ function LegendSVG({
   theme: Theme
   width: number
 }) {
-  const { visibleDomainTypes, fillPalette, strokePalette } = model
-  const boxHeight = legendHeight(visibleDomainTypes)
+  const rows = legendRows(model.legends)
+  const boxHeight = legendHeight(rows)
   // the column is capped at LEGEND_MAX_W, so a name too long for it has to be
   // clipped here -- text that overruns the reserved width runs off the figure
   const maxChars = Math.floor(
@@ -252,27 +253,30 @@ function LegendSVG({
         stroke={theme.palette.divider}
         rx={2}
       />
-      {visibleDomainTypes.map((d, i) => {
+      {rows.map((row, i) => {
         const y = LEGEND_PAD + i * LEGEND_ROW_H
         return (
-          <g key={d.accession}>
-            <rect
-              x={LEGEND_PAD}
-              y={y}
-              width={LEGEND_SWATCH}
-              height={LEGEND_SWATCH}
-              fill={fillPalette[d.accession]}
-              stroke={strokePalette[d.accession]}
-            />
+          <g key={row.key}>
+            {row.color ? (
+              <rect
+                x={LEGEND_PAD}
+                y={y}
+                width={LEGEND_SWATCH}
+                height={LEGEND_SWATCH}
+                fill={row.color}
+                stroke={outlineColor(row.color)}
+              />
+            ) : null}
             <text
-              x={LEGEND_TEXT_X}
+              x={row.color ? LEGEND_TEXT_X : LEGEND_PAD}
               y={y + LEGEND_SWATCH - 1}
               fontSize={LEGEND_FONT}
+              fontWeight={row.color ? undefined : 'bold'}
               fill={theme.palette.text.primary}
             >
-              {d.name.length > maxChars
-                ? `${d.name.slice(0, Math.max(1, maxChars - 1))}…`
-                : d.name}
+              {row.label.length > maxChars
+                ? `${row.label.slice(0, Math.max(1, maxChars - 1))}…`
+                : row.label}
             </text>
           </g>
         )

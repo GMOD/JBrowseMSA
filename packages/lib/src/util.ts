@@ -29,6 +29,10 @@ export function adjustColorForContrast(color: string, bg: string): string {
   return result
 }
 
+export function outlineColor(fill: string) {
+  return colord(fill).darken(0.1).toHex()
+}
+
 export function transform<T>(
   obj: Record<string, T>,
   cb: (arg0: [string, T]) => [string, T],

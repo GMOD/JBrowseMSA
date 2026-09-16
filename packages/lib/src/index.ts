@@ -51,6 +51,8 @@ export type {
   ColumnTrackSpec,
   DomainBand,
   Highlight,
+  Legend,
+  LegendEntry,
   Node,
   MappedStructure,
   NodeWithIds,

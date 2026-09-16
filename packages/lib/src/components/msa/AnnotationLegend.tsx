@@ -5,6 +5,8 @@ import ExpandMore from '@mui/icons-material/ExpandMore'
 import { IconButton, Paper, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import { legendRows } from './legendRows.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
 const AnnotationLegend = observer(function ({
@@ -12,15 +14,11 @@ const AnnotationLegend = observer(function ({
 }: {
   model: MsaViewModel
 }) {
-  const {
-    actuallyShowDomains,
-    visibleDomainTypes: visible,
-    fillPalette,
-    showDomainLegend: expanded,
-  } = model
+  const { legends, showDomainLegend: expanded } = model
+  const rows = legendRows(legends)
   const ExpandIcon = expanded ? ExpandLess : ExpandMore
 
-  return actuallyShowDomains && visible.length > 0 ? (
+  return rows.length > 0 ? (
     <Paper
       elevation={3}
       style={{
@@ -51,31 +49,37 @@ const AnnotationLegend = observer(function ({
       </IconButton>
       {expanded ? (
         <div style={{ overflow: 'auto', padding: '2px 6px 4px' }}>
-          {visible.map(({ accession, name }, i) => (
+          {rows.map((row, i) => (
             <div
-              key={accession}
+              key={row.key}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 4,
                 marginRight: i === 0 ? 18 : 0,
               }}
-              title={accession}
+              title={row.hint}
             >
-              <div
-                style={{
-                  width: 9,
-                  height: 9,
-                  flexShrink: 0,
-                  background: fillPalette[accession],
-                }}
-              />
+              {row.color ? (
+                <div
+                  style={{
+                    width: 9,
+                    height: 9,
+                    flexShrink: 0,
+                    background: row.color,
+                  }}
+                />
+              ) : null}
               <Typography
                 variant="caption"
                 noWrap
-                style={{ fontSize: 10, lineHeight: 1.4 }}
+                style={{
+                  fontSize: 10,
+                  lineHeight: 1.4,
+                  fontWeight: row.color ? undefined : 'bold',
+                }}
               >
-                {name}
+                {row.label}
               </Typography>
             </div>
           ))}

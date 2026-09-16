@@ -189,6 +189,27 @@ export interface DomainBand {
 }
 
 /**
+ * One swatch of a categorical color key. `id` is the value the scale read, and
+ * `label` is the text drawn beside the swatch.
+ */
+export interface LegendEntry {
+  id: string
+  label: string
+  color: string
+}
+
+/**
+ * A categorical color key, drawn by the on-screen overlay and reserved as a
+ * column in the SVG export. `title` names the legend where the viewer draws
+ * more than one.
+ */
+export interface Legend {
+  id: string
+  title: string
+  entries: LegendEntry[]
+}
+
+/**
  * A persistent, labeled highlight. Coordinates are 1-based and inclusive, as
  * GFF's are. `row` makes `start`/`end` residues of that row; without it they
  * are alignment columns. `rows` marks whole rows instead.

@@ -100,6 +100,14 @@ page shows; a figure that stops being shown loses its screenshot spec too.
   wins the row back wherever the letters cannot carry the scale: sub-row layout,
   which stacks its boxes clear of the letters anyway, and zoomed out past
   `minLetterRowHeight`, where the box is the only thing left to read.
+- `model.legends` is the one list both legend renderings read:
+  `components/msa/AnnotationLegend.tsx` on screen and `LegendSVG` in
+  `renderToSvg.tsx` for the export. A producer contributes
+  `{ id, title, entries }`, and `legendRows` flattens the list into the rows
+  both renderings stack top to bottom, giving each legend a title row once there
+  is more than one. The domain overlay is the only producer today. The property
+  behind the overlay's collapse toggle stays `showDomainLegend`, because that
+  name travels in the shared URL.
 - The viewer calls no remote compute queue and runs no analysis long enough to
   freeze the tab. The one exception is neighbor joining, capped at
   `maxNeighborJoiningRows`, because on a small alignment it is faster than
