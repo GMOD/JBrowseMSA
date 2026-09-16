@@ -110,6 +110,9 @@ const scanView = tracks => ({
 // columns from 1, as the viewer's header does
 const anchorCol = column => column - 1
 
+// base resolution for the close-up, starting a dozen columns left of the break
+const BASE_WIDTH = 21
+
 // the two halves the breakpoint divides the window into, each counted on the
 // parent that gave the recombinant the other half
 const bjLeft = differsAt('BJ.1', 1, breakpoint.firstWindowColumn)
@@ -270,9 +273,9 @@ export const specs = [
     url: fileSnap({
       height: 420,
       treeAreaWidth: TREE,
-      colWidth: 21,
+      colWidth: BASE_WIDTH,
       rowHeight: 30,
-      scrollX: -(breakpoint.firstColumn - 12) * 21,
+      scrollX: -(breakpoint.firstColumn - 12) * BASE_WIDTH,
       colorSchemeName: 'nucleotide',
       relativeTo: CHILD,
       ...genome,

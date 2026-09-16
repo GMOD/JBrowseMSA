@@ -277,6 +277,9 @@ def crossings(query, lo, hi):
 
 lo, hi = col_of_ref[RBD_START - 1], col_of_ref[RBD_END - 1] + 1
 crossed = {}
+# the figures anchor a callout on the recombinant's crossing, so a row table
+# whose window holds none says so here instead of failing on an empty list
+
 for query in (CHILD, CONTROL):
     over = crossings(query, lo, hi)
     crossed[query] = over
@@ -284,6 +287,9 @@ for query in (CHILD, CONTROL):
     print(f'{query}: the lower of the two curves changes hands {len(over)} '
           f'time{"" if len(over) == 1 else "s"} across the receptor-binding '
           f'domain{where}')
+if not crossed[CHILD]:
+    raise SystemExit(f'the two curves never change places inside {RBD_START}-'
+                     f'{RBD_END}, so that window holds no breakpoint to draw')
 
 # 7. the receptor-binding domain, cut out of the alignment. A bar track holds
 # one value per alignment column and a ?data= link holds several hundred of
