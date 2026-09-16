@@ -69,7 +69,13 @@ function recordingCtx() {
 
 function drawOverlay(model: ReturnType<typeof makeModel>) {
   const { ctx, rects } = recordingCtx()
-  renderBoxFeatureCanvasBlock({ model, ctx, offsetX: 0, offsetY: 0 })
+  renderBoxFeatureCanvasBlock({
+    model,
+    ctx,
+    theme: createJBrowseTheme(),
+    offsetX: 0,
+    offsetY: 0,
+  })
   return rects
 }
 

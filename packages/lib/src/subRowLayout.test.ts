@@ -4,6 +4,7 @@
 // stack them downward without a bound, so a row carrying more annotations than
 // fit drew the rest on top of the rows below it. Lanes now come from overlap,
 // and a row deep enough to overflow shares out its height instead.
+import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { expect, test } from 'vitest'
 
 import { renderBoxFeatureCanvasBlock } from './components/msa/renderBoxFeatureCanvasBlock.ts'
@@ -59,7 +60,13 @@ function drawnBoxes(model: ReturnType<typeof makeModel>) {
     measureText: (t: string) => ({ width: t.length * 6 }),
     fillText() {},
   } as unknown as RenderCtx
-  renderBoxFeatureCanvasBlock({ model, ctx, offsetX: 0, offsetY: 0 })
+  renderBoxFeatureCanvasBlock({
+    model,
+    ctx,
+    theme: createJBrowseTheme(),
+    offsetX: 0,
+    offsetY: 0,
+  })
   return boxes
 }
 

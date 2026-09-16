@@ -38,6 +38,7 @@ const MSACanvasBlock = observer(function ({
       ctx.clearRect(0, 0, canvasSize, canvasSize)
       renderBoxFeatureCanvasBlock({
         ctx,
+        theme,
         offsetX,
         offsetY,
         model,

@@ -1,3 +1,4 @@
+import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { expect, test } from 'vitest'
 
 import stateModelFactory from '../../model.ts'
@@ -42,7 +43,13 @@ function drawnLabels() {
     },
   } as unknown as RenderCtx
 
-  renderBoxFeatureCanvasBlock({ model, ctx, offsetX: 0, offsetY: 0 })
+  renderBoxFeatureCanvasBlock({
+    model,
+    ctx,
+    theme: createJBrowseTheme(),
+    offsetX: 0,
+    offsetY: 0,
+  })
   return labels
 }
 

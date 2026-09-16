@@ -256,14 +256,21 @@ export interface Viewport {
 /**
  * A channel of a mark the viewer always draws. `tipLabel` colors each tip label
  * in the tree, `rowTint` washes the row across the tree gutter and the
- * alignment, and `branch` colors a tree edge whose tips all share one value.
- * All three read a field of `rowData`.
+ * alignment, and `branch` colors a tree edge whose tips all share one value;
+ * all three read a field of `rowData`. `featureFill` colors each span of the
+ * annotation overlay and `featureLabel` names the field drawn inside a span,
+ * both from a field of the feature table.
  */
-export type EncodingChannel = 'tipLabel' | 'rowTint' | 'branch'
+export type EncodingChannel =
+  | 'tipLabel'
+  | 'rowTint'
+  | 'branch'
+  | 'featureFill'
+  | 'featureLabel'
 
 /**
- * A channel, the `rowData` field feeding it, and the scale it reads that field
- * through. See docs/layers.md
+ * A channel, the field feeding it, and the scale it reads that field through.
+ * See docs/layers.md
  */
 export interface Encoding {
   channel: EncodingChannel

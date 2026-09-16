@@ -1,13 +1,16 @@
 import { domainUnderlineHeight, subFeatureRowHeight } from '../../constants.ts'
+import { contrastTextFn } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { NodeWithIdsAndLength } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
+import type { Theme } from '@mui/material'
 
 export function renderBoxFeatureCanvasBlock({
   model,
+  theme,
   offsetX,
   offsetY,
   ctx,
@@ -18,6 +21,7 @@ export function renderBoxFeatureCanvasBlock({
   offsetX: number
   offsetY: number
   model: MsaViewModel
+  theme: Theme
   ctx: RenderCtx
   highResScaleFactorOverride?: number
   blockSizeXOverride?: number
@@ -35,6 +39,7 @@ export function renderBoxFeatureCanvasBlock({
 
     drawTiles({
       model,
+      theme,
       ctx,
       visibleLeaves: getVisibleLeaves({ model, offsetY, blockSizeY: by }),
       offsetX,
@@ -45,12 +50,14 @@ export function renderBoxFeatureCanvasBlock({
 
 function drawTiles({
   model,
+  theme,
   ctx,
   visibleLeaves,
   offsetX,
   blockWidth,
 }: {
   model: MsaViewModel
+  theme: Theme
   ctx: RenderCtx
   visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
   offsetX: number
@@ -60,13 +67,14 @@ function drawTiles({
     subFeatureRows,
     colWidth,
     rowHeight,
-    fillPalette,
-    strokePalette,
+    featureColors,
+    featureLabels,
     segmentLabels,
     showMsaLetters,
     domainUnderline,
     domainBands,
   } = model
+  const contrastText = contrastTextFn(theme)
   // the plain and underline modes give every band the same height; a sub-row
   // band is thinner, and how thin depends on how many lanes its row needs
   const barHeight = domainUnderline
@@ -74,8 +82,10 @@ function drawTiles({
     : rowHeight
   // exon numbers label the bands only when residue letters aren't drawn (zoomed
   // out); when letters show, the alternating shades alone mark the boundaries
-  // and a number would collide with the sequence
-  const drawSegmentLabels = !showMsaLetters && !subFeatureRows && barHeight >= 9
+  // and a number would collide with the sequence. A featureLabel encoding names
+  // what every span carries instead
+  const drawSegmentLabels =
+    !featureLabels && !showMsaLetters && !subFeatureRows && barHeight >= 9
   // gene arrow heads stick out up to a row height past the band, so pad the
   // cull window enough that a band just outside the block still draws its head
   const cull = rowHeight + colWidth
@@ -111,28 +121,30 @@ function drawTiles({
             y -
             rowHeight +
             (subFeatureRows ? lane * h : domainUnderline ? rowHeight - h : 0)
-          ctx.fillStyle = fillPalette[accession]!
-          ctx.strokeStyle = strokePalette[accession]!
+          const { fill, stroke } = featureColors.get(annotation)!
+          ctx.fillStyle = fill
+          ctx.strokeStyle = stroke
           if (strand === undefined) {
             ctx.fillRect(x, t, lw, h)
             ctx.strokeRect(x, t, lw, h)
-            const label =
-              labelled && !labelled.has(accession)
-                ? segmentLabels.get(accession)
-                : undefined
-            if (label !== undefined) {
-              const fontSize = Math.min(h - 2, 11)
-              ctx.font = `${fontSize}px sans-serif`
-              if (ctx.measureText(label).width + 2 <= lw) {
-                labelled!.add(accession)
-                ctx.fillStyle = '#222'
-                ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                ctx.fillText(label, x + lw / 2, t + h / 2)
-              }
-            }
           } else {
             drawGeneArrow({ ctx, x, t, w: lw, h, headLen, strand })
+          }
+          const label =
+            featureLabels?.get(annotation) ??
+            (labelled && !labelled.has(accession)
+              ? segmentLabels.get(accession)
+              : undefined)
+          if (label !== undefined) {
+            const fontSize = Math.min(h - 2, 11)
+            ctx.font = `${fontSize}px sans-serif`
+            if (ctx.measureText(label).width + 2 <= lw) {
+              labelled?.add(accession)
+              ctx.fillStyle = contrastText(fill)
+              ctx.textAlign = 'center'
+              ctx.textBaseline = 'middle'
+              ctx.fillText(label, x + lw / 2, t + h / 2)
+            }
           }
         }
       }

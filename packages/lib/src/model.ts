@@ -119,6 +119,7 @@ import type {
   ColumnTrackSpec,
   DomainBand,
   Encoding,
+  EncodingChannel,
   Highlight,
   Legend,
   NodeWithIds,
@@ -238,6 +239,20 @@ function trackIsOff(
 
 // shared empty result, so observers don't see a fresh [] as a change
 const noDomains: Annotation[] = []
+
+// the channels reading the feature table; every other channel reads rowData
+const featureChannels = new Set<EncodingChannel>([
+  'featureFill',
+  'featureLabel',
+])
+
+// the value a feature gives an encoded field: an Annotation property, else one
+// of the GFF attributes the parser kept
+function featureField(annotation: Annotation, field: string) {
+  const own = (annotation as unknown as Record<string, unknown>)[field]
+  const value = own ?? annotation.attributes?.[field]
+  return typeof value === 'string' ? value : undefined
+}
 
 // seqPos -> column indexes per row, keyed on the parse so they are garbage
 // collected with it. A computed would rebuild every row's index when read
@@ -2785,6 +2800,75 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * the encoding coloring the overlay's spans, undefined when none does,
+       * which leaves each span the color its accession takes in `fillPalette`
+       */
+      get featureFillEncoding(): ResolvedEncoding | undefined {
+        return this.resolvedEncodings.find(e => e.channel === 'featureFill')
+      },
+
+      /**
+       * #getter
+       * the fill and outline of every feature's span: its own GFF `color=`
+       * first, then the `featureFill` scale, then the accession palette.
+       * Computed once per change of the features, the encodings or the palette
+       */
+      get featureColors(): Map<Annotation, { fill: string; stroke: string }> {
+        const { featureFillEncoding, fillPalette } = this
+        const strokes = new Map<string, string>()
+        const strokeOf = (fill: string) => {
+          const hit = strokes.get(fill)
+          if (hit !== undefined) {
+            return hit
+          }
+          const stroke = outlineColor(fill)
+          strokes.set(fill, stroke)
+          return stroke
+        }
+        const scaleColorOf = (annotation: Annotation) => {
+          const value = featureFillEncoding
+            ? featureField(annotation, featureFillEncoding.field)
+            : undefined
+          return value === undefined
+            ? undefined
+            : featureFillEncoding!.colorOf(value)
+        }
+        return new Map(
+          self.filteredAnnotations.map(annotation => {
+            const fill =
+              annotation.color ??
+              scaleColorOf(annotation) ??
+              fillPalette[annotation.accession]!
+            return [annotation, { fill, stroke: strokeOf(fill) }]
+          }),
+        )
+      },
+
+      /**
+       * #getter
+       * the text the `featureLabel` channel draws inside each span, undefined
+       * when no encoding names the channel. A data channel, so it draws
+       * whether or not the residue letters do
+       */
+      get featureLabels(): Map<Annotation, string> | undefined {
+        const encoding = this.resolvedEncodings.find(
+          e => e.channel === 'featureLabel',
+        )
+        if (!encoding) {
+          return undefined
+        }
+        const labels = new Map<Annotation, string>()
+        for (const annotation of self.filteredAnnotations) {
+          const value = featureField(annotation, encoding.field)
+          if (value !== undefined) {
+            labels.set(annotation, value)
+          }
+        }
+        return labels
+      },
+
+      /**
+       * #getter
        * accession -> number drawn on each segment band: the trailing number of
        * the feature name ("exon-3" -> "3"), else its 1-based position
        */
@@ -2814,28 +2898,36 @@ function stateModelFactory() {
        * #getter
        * the categorical color keys drawn for this view, shared by the on-screen
        * legend overlay and the SVG export's reserved column. The domain overlay
-       * produces the first, and each categorical encoding one per field, so two
+       * produces the first, listing the `featureFill` scale where an encoding
+       * names one, and each row-table encoding produces one per field, so two
        * channels over one field list that field once
        */
       get legends(): Legend[] {
-        const { fillPalette, visibleDomainTypes } = this
+        const { featureFillEncoding, fillPalette, visibleDomainTypes } = this
+        const entries = featureFillEncoding
+          ? featureFillEncoding.legend
+          : visibleDomainTypes.map(d => ({
+              id: d.accession,
+              label: d.name,
+              color: fillPalette[d.accession]!,
+            }))
         const domainLegends =
-          self.actuallyShowDomains && visibleDomainTypes.length > 0
+          self.actuallyShowDomains && entries.length > 0
             ? [
                 {
                   id: 'domains',
-                  title: 'Domains',
-                  entries: visibleDomainTypes.map(d => ({
-                    id: d.accession,
-                    label: d.name,
-                    color: fillPalette[d.accession]!,
-                  })),
+                  title: featureFillEncoding?.field ?? 'Domains',
+                  entries,
                 },
               ]
             : []
         const byField = new Map<string, Legend>()
-        for (const { field, legend } of this.resolvedEncodings) {
-          if (legend.length > 0 && !byField.has(field)) {
+        for (const { channel, field, legend } of this.resolvedEncodings) {
+          if (
+            !featureChannels.has(channel) &&
+            legend.length > 0 &&
+            !byField.has(field)
+          ) {
             byField.set(field, {
               id: `rowData-${field}`,
               title: field,
@@ -3067,16 +3159,22 @@ function stateModelFactory() {
       /**
        * #getter
        * each encoding with its scale resolved against the values its field
-       * takes across the row table. Resolved once per change of the table or
-       * the encodings, never per row per frame.
+       * takes: a feature channel reads them across the features drawn, every
+       * other channel across the row table. Resolved once per change of that
+       * table or the encodings, never per row per frame.
        */
       get resolvedEncodings(): ResolvedEncoding[] {
         const rows = Object.values(self.rowData)
+        const features = self.filteredAnnotations
         return self.encodings.map(encoding => ({
           ...encoding,
           ...resolveScale(
             encoding.scale,
-            rows.map(row => row?.[encoding.field]).filter(notEmpty),
+            featureChannels.has(encoding.channel)
+              ? features
+                  .map(a => featureField(a, encoding.field))
+                  .filter(notEmpty)
+              : rows.map(row => row?.[encoding.field]).filter(notEmpty),
           ),
         }))
       },

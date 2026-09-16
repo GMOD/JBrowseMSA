@@ -314,6 +314,7 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const msaCtx = new Context(msaAreaWidth, contentHeight)
   renderBoxFeatureCanvasBlock({
     model,
+    theme,
     ctx: msaCtx,
     offsetX,
     offsetY,
