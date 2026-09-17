@@ -4,6 +4,84 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [8.1.0](https://github.com/GMOD/JBrowseMSA/compare/v8.0.0...v8.1.0) (2026-09-17)
+
+### Bug Fixes
+
+- The Python README's figures live in docs/media ([ad9bd2b](https://github.com/GMOD/JBrowseMSA/commit/ad9bd2b962ec8b4be7d1546dae98d6ebce9c017d))
+- A Stockholm header ends the open alignment ([b60fd5f](https://github.com/GMOD/JBrowseMSA/commit/b60fd5f0c30782926c8487f5f1e9b2dff417074f))
+- Residue_mappings drops list names, df_to_gff3 writes color ([5be04f4](https://github.com/GMOD/JBrowseMSA/commit/5be04f42853cd1adc849af810a73249f2717d73a))
+- A path to a missing file raises FileNotFoundError ([3e22b1d](https://github.com/GMOD/JBrowseMSA/commit/3e22b1df507d6333f2abc1c87139a3d717c15fdd))
+- The EBI job calls retry on a transient status ([5a36da5](https://github.com/GMOD/JBrowseMSA/commit/5a36da5d1afbd3cb4ed0adb2731a64bc2ef9ba61))
+- A non-numeric --width or --height is an error ([bba2f4a](https://github.com/GMOD/JBrowseMSA/commit/bba2f4a40bf5ad061fadb62cb856c1f7dc301609))
+- Scale the scale bar by the root-to-tip extent the layout draws ([7186055](https://github.com/GMOD/JBrowseMSA/commit/7186055d9a68bfc2468cb52a2a627301eee1cc36))
+- Hold collapse and focus seeding until a tree filehandle lands ([dcc462b](https://github.com/GMOD/JBrowseMSA/commit/dcc462bacb83958331a9283c91515596771ef9d0))
+- Disable Open annotations until a file or URL is chosen ([8d75b12](https://github.com/GMOD/JBrowseMSA/commit/8d75b127705d6d9cd0c16c9346f03f2b8db10cbf))
+- Contrast letters against the fill the domain box was painted with ([044db2a](https://github.com/GMOD/JBrowseMSA/commit/044db2a8ad74be7e23255ddd7987529c9b4dec9e))
+- Put the letter baseline where the tree puts its tip labels ([2ef68ad](https://github.com/GMOD/JBrowseMSA/commit/2ef68ada1762306ad2e6db69c05dc72ac8827519))
+- Draw a span label only where the span is tall enough to hold it ([b7f014b](https://github.com/GMOD/JBrowseMSA/commit/b7f014b9f2683108f0b9067dba65c2fd072eb47e))
+- Default `data` to an empty object ([7eba5ed](https://github.com/GMOD/JBrowseMSA/commit/7eba5ed752dfece68788c84b37a8ad8caccb1cfb))
+- Submit an EBI job once, retry only the reads ([f335f7b](https://github.com/GMOD/JBrowseMSA/commit/f335f7b40b667b9deac10d05e4b5539742afcd80))
+- An InterPro 404 is asked again, and never cached as "no matches" ([080a68b](https://github.com/GMOD/JBrowseMSA/commit/080a68b7cfea0ef1022c63145786b93e16a1ac63))
+- A row's spans are all drawn before any of its labels ([b46d2d9](https://github.com/GMOD/JBrowseMSA/commit/b46d2d9cc70f656c809c41779c620216fd689554))
+- The render guard checks that the alignment painted ([191126e](https://github.com/GMOD/JBrowseMSA/commit/191126ecc92a8fb6ad69e2833acfea976efd3c1d))
+- Capture the viewport and crop, so no layer goes missing ([10b0a49](https://github.com/GMOD/JBrowseMSA/commit/10b0a497788bbe473160ea2fb17048956d64d961))
+
+### Chores
+
+- Bump docgen's aliased TypeScript from v5 to v6 ([60084e3](https://github.com/GMOD/JBrowseMSA/commit/60084e3c69c31102517bd5bee2e153d2415e13da))
+- Check:data holds the hosted data to its provenance table ([ae8dad7](https://github.com/GMOD/JBrowseMSA/commit/ae8dad75ee501396918a4dfb91905fae15676c49))
+- Take the figure bytes out of git ([7408fcf](https://github.com/GMOD/JBrowseMSA/commit/7408fcff3c13f6d48f69329fab96fbb2f447e6a5))
+
+### Documentation
+
+- Match the prose to the code ([d2f7c3d](https://github.com/GMOD/JBrowseMSA/commit/d2f7c3d68fef4c61833360c7bff0c1cc7ac5c264))
+- The PYD-only link hides domains through turnedOffFeatures ([42b56d0](https://github.com/GMOD/JBrowseMSA/commit/42b56d012aa3a09a29540cfe6ba416061d2691fc))
+- Fix the RNA tree link, name the tools, drop dashes ([017ffc3](https://github.com/GMOD/JBrowseMSA/commit/017ffc34a93962f032853871db5c0ce819a75cf6))
+- List every hosted file under Where the data comes from ([afd105d](https://github.com/GMOD/JBrowseMSA/commit/afd105d746ed0cc7d06a658ef90f8203c1721b7d))
+- A README per hosted tutorial folder ([32d6ff1](https://github.com/GMOD/JBrowseMSA/commit/32d6ff1aac4d9ea996f8bad9f9b0f5cab06e84c9))
+- Say what the build scripts print ([5b60400](https://github.com/GMOD/JBrowseMSA/commit/5b604004d8ff1ed6298218fce5d8dbe464573a49))
+- Drop the sickle-cell figure no page shows ([e53ca4a](https://github.com/GMOD/JBrowseMSA/commit/e53ca4a6bc384267711fd677701cf0e2ff2fb811))
+- Regenerate the settings menu figure with the renamed toggles ([6fd08b6](https://github.com/GMOD/JBrowseMSA/commit/6fd08b605dde56ae15a77c1a1ce27b7f90532871))
+- Hemoglobin's two subunits and the interfaces between them ([992c4a9](https://github.com/GMOD/JBrowseMSA/commit/992c4a9725878e1cc3ed00464ce43e35162e9208))
+- A text track's color keys are upper case ([ec68a26](https://github.com/GMOD/JBrowseMSA/commit/ec68a2678295b760d1c76e54423bf3e074c2e1b6))
+- TEM beta-lactamase alleles and their phenotype ([386988a](https://github.com/GMOD/JBrowseMSA/commit/386988a15b58114ce82b9e5bb1cbdf1b9679da30))
+- AlphaFold confidence across a TDP-43 ortholog set ([fc04ac5](https://github.com/GMOD/JBrowseMSA/commit/fc04ac5d91f0f10eb197b371ca5dccbd65e760a7))
+- The XBB recombination breakpoint from two difference counts ([22e16c0](https://github.com/GMOD/JBrowseMSA/commit/22e16c0e3a1619b5ea4cbe6a8bf6c0b3f748d015))
+- Guard the recombination scan and name the data README's steps ([b216014](https://github.com/GMOD/JBrowseMSA/commit/b2160145f143dfccca9d9a7a0972df1ca9830002))
+- The Pango lineage names pass the spell check ([b026fec](https://github.com/GMOD/JBrowseMSA/commit/b026fecf22cb201a9ecb2f354db03cbdca78a47b))
+- The gene figures, redrawn with the head inside the feature ([48153e1](https://github.com/GMOD/JBrowseMSA/commit/48153e1f4d918c94605d44b9881cf40a5b95fcc6))
+- The recombination figures draw their ORFs as arrows ([44b1631](https://github.com/GMOD/JBrowseMSA/commit/44b16315b98c1cf541f03e2abe7401f1ffc34e05))
+- Norovirus recombination pipeline, data and figure spec ([752109f](https://github.com/GMOD/JBrowseMSA/commit/752109f5bb565d9011f4e71f8048559043830bf2))
+- The norovirus recombination page, its figures and its card ([dad9aa1](https://github.com/GMOD/JBrowseMSA/commit/dad9aa1723e4761753982fe7be586d0ebd98f6e1))
+- Two figure traps, and the two recombination pages cross-link ([b6e5e58](https://github.com/GMOD/JBrowseMSA/commit/b6e5e586e3b96addc12717317ce3de8613e1ca89))
+- A figure per layer, and less prose around them ([9de13e2](https://github.com/GMOD/JBrowseMSA/commit/9de13e2539acad619abb9a018d7f18af514bff55))
+- Rebaseline every figure against this checkout's renderer ([8284f92](https://github.com/GMOD/JBrowseMSA/commit/8284f92183fc4c79d706467f4b7b336ab55fe231))
+- Say which check catches which failure ([aa7f432](https://github.com/GMOD/JBrowseMSA/commit/aa7f432ae8c8974debf98e59514cff6e1e3f1311))
+
+### Features
+
+- Warn when a GFF names no row of the alignment ([613f001](https://github.com/GMOD/JBrowseMSA/commit/613f00157fb9a0f518d0ebc249ac31107597d1d6))
+- A gene arrow's head lives inside the feature it points for ([f9925bf](https://github.com/GMOD/JBrowseMSA/commit/f9925bf707c59f4a085c913ee521f756bcad2734))
+- Position: "strandpile" splits a features panel by strand ([29941a8](https://github.com/GMOD/JBrowseMSA/commit/29941a83cb45c83a6e3839949900007bf449a05a))
+- Content-addressed blob store for docs/media ([8d5c467](https://github.com/GMOD/JBrowseMSA/commit/8d5c467fc055fb5a90c0ee2cea5049944bf12c3c))
+- Populate and verify the S3 blob store for docs/media ([5239c1e](https://github.com/GMOD/JBrowseMSA/commit/5239c1e9a06d419d1884ea6227aa288b0162d7e6))
+
+### Other Changes
+
+- Rename the MSA settings toggles and the track menu's Hide track ([a85ba16](https://github.com/GMOD/JBrowseMSA/commit/a85ba160487813d4b68990dcbd5ebf02d8ff91eb))
+- The toolbar wraps, and the warning is a button ([c48b54e](https://github.com/GMOD/JBrowseMSA/commit/c48b54ea3f3a7b78ff1945a7e4f8e69e833b90f3))
+- Small component cleanups ([1bf9728](https://github.com/GMOD/JBrowseMSA/commit/1bf9728b0f3f61adf7248fcd0190d41d72e8fee0))
+
+### Performance Improvements
+
+- Keep a column track's object and canvas through a vertical zoom ([aa4abc0](https://github.com/GMOD/JBrowseMSA/commit/aa4abc0b8a86e653a6880e8baa1086cdee8eb89a))
+- Mount canvas blocks only as far as the content reaches ([f10528c](https://github.com/GMOD/JBrowseMSA/commit/f10528c7bb0f69d37f4d58f773db01558016964b))
+
+### Refactoring
+
+- Delete unread getters, a constant flag and a guard nothing sets ([5bf5c5d](https://github.com/GMOD/JBrowseMSA/commit/5bf5c5d4718e4f982b707e204f150ec78b493cd0))
+
 ## [8.0.0](https://github.com/GMOD/JBrowseMSA/compare/v7.0.0...v8.0.0) (2026-09-16)
 
 ### Bug Fixes
