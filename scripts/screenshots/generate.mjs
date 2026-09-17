@@ -131,6 +131,74 @@ async function assertViewerRendered(page, name) {
   }
 }
 
+// Capture the whole viewport, then cut the element out of it inside the page.
+//
+// Chrome re-composites the page against the clip rectangle that
+// `Page.captureScreenshot` carries, and it reads the surface back before the
+// compositor has rastered every layer. The frame that comes back has the tree,
+// the row labels and the alignment missing while the toolbar and the tracks
+// draw, which is how a blank colorscheme-clustalx reached docs/media.
+// `assertViewerRendered` passes it, because the page itself is fine: the model,
+// the block count and the canvas pixels all read the same as a good run.
+//
+// Measured on 16 cores loaded with 24 busy loops, capturing one spec 150 times
+// at concurrency 12: 4 clipped captures came back blank and 0 of 300 crops did.
+// Every clipped path does it, an element screenshot, a `clip` on a page
+// screenshot and `captureBeyondViewport` alike, while 360 unclipped viewport
+// captures under the same load produced none. The crop is pixel-identical to a
+// clipped capture that worked (ImageMagick AE 0), so no committed figure moves.
+//
+// The crop rounds the way puppeteer rounds a clip, reads getBoundingClientRect,
+// whose origin is the viewport the capture covers, and clamps to the viewport,
+// which is the intersection puppeteer takes. The scroll matters for the two
+// kinase-pocket compose parts, whose viewer stands ~8px taller than the frame
+// they set: puppeteer scrolls a partly visible element into view before it
+// clips, and dropping that cut 14px off the stacked figure.
+async function captureElement(page, selector, file) {
+  await page.evaluate(sel => {
+    document.querySelector(sel).scrollIntoViewIfNeeded()
+    return new Promise(resolve => {
+      requestAnimationFrame(() => {
+        resolve()
+      })
+    })
+  }, selector)
+  const viewport = await page.screenshot({ encoding: 'base64' })
+  const url = await page.evaluate(
+    async (data, sel) => {
+      const box = document.querySelector(sel).getBoundingClientRect()
+      const { devicePixelRatio: dpr, innerWidth, innerHeight } = window
+      const x = Math.max(Math.round(box.x), 0)
+      const y = Math.max(Math.round(box.y), 0)
+      const width = Math.min(Math.round(box.right), innerWidth) - x
+      const height = Math.min(Math.round(box.bottom), innerHeight) - y
+      const img = new Image()
+      img.src = `data:image/png;base64,${data}`
+      await img.decode()
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(width * dpr)
+      canvas.height = Math.round(height * dpr)
+      canvas
+        .getContext('2d')
+        .drawImage(
+          img,
+          Math.round(x * dpr),
+          Math.round(y * dpr),
+          canvas.width,
+          canvas.height,
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        )
+      return canvas.toDataURL('image/png')
+    },
+    viewport,
+    selector,
+  )
+  fs.writeFileSync(file, Buffer.from(url.slice(url.indexOf(',') + 1), 'base64'))
+}
+
 // Freeze CSS transitions/animations so MUI menu/dialog fly-outs snap to their
 // settled state, then wait for the browser to rasterize the current
 // DOM (a single rAF fires before paint; two chained rAFs guarantee a committed
@@ -158,11 +226,11 @@ async function shoot(page, spec, file) {
       }),
   )
   if (spec.clip === 'viewer') {
-    const el = await page.waitForSelector('[data-testid="msaview"]', {
+    await page.waitForSelector('[data-testid="msaview"]', {
       visible: true,
       timeout: 20000,
     })
-    await el.screenshot({ path: file })
+    await captureElement(page, '[data-testid="msaview"]', file)
   } else {
     await page.screenshot({ path: file })
   }
