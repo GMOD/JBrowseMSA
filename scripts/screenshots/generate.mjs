@@ -77,13 +77,16 @@ async function runAction(page, action) {
 // Fail a spec whose viewer body rendered empty. The app shell always paints its
 // border box, so a capture with a header and no content would otherwise pass.
 // A loaded viewer (import form included) fills its body.
-// The child-count half of this passes on a frame that mounted and never
-// painted: the toolbar and the tracks fill the body while the alignment stays
-// white. That shipped once, a colorscheme figure captured with its tree and
-// residues missing, at 44% of the published file's bytes and no check red. So
-// read the biggest canvas back as well. A drawn alignment is never one flat
-// color, and the scan stops at the first pixel that differs, so the cost in the
-// normal case is a few pixels.
+// Whether the viewer painted, asked of the page. The child-count half passes on
+// a viewer that mounted and drew nothing, since the toolbar and the tracks fill
+// the body on their own, so the pixels of the alignment canvases answer the rest
+// of it. A drawn alignment is never one flat color, and the scan stops at the
+// first pixel that differs, so the cost in the normal case is a few pixels.
+//
+// This does NOT catch the blank colorscheme-clustalx that reached docs/media.
+// That page was fine and the capture dropped its layers, which is what
+// `captureElement` above is for. Both checks are worth keeping: one reads the
+// page, the other decides how the page is read.
 async function assertViewerRendered(page, name) {
   const problem = await page.evaluate(() => {
     const box = document.querySelector('[data-testid="msaview"]')
