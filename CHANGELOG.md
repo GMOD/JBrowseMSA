@@ -4,6 +4,13 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [8.2.0](https://github.com/GMOD/JBrowseMSA/compare/v8.1.0...v8.2.0) (2026-09-18)
+
+### Features
+
+- ExpandSpec reads a shorthand view spec, and region is a model property ([ec0249e](https://github.com/GMOD/JBrowseMSA/commit/ec0249e86e605f343a11205c3688293c78912634))
+- ExpandSpec reads a shorthand view spec, and region is a model property ([242cafe](https://github.com/GMOD/JBrowseMSA/commit/242cafe2829af229564cbc39426497575ec02105))
+
 ## [8.1.0](https://github.com/GMOD/JBrowseMSA/compare/v8.0.0...v8.1.0) (2026-09-17)
 
 ### Bug Fixes
