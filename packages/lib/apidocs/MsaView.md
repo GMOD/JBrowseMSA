@@ -245,6 +245,20 @@ IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPat
 msaFilehandle: types.maybe(FileLocation)
 ```
 
+#### property: region
+
+where the view opens, in `highlights` coordinates: `{row, start, end}` zooms
+onto residues of that row, `{start, end}` onto alignment columns. Applied once
+the alignment and any tree file have loaded, then cleared, so a reloaded session
+keeps the reader's own scroll.
+
+```js
+// type signature
+IType<Region | undefined, Region | undefined, Region | undefined>
+// code
+region: types.frozen<Region | undefined>()
+```
+
 #### property: relativeTo
 
 ```js
@@ -1801,6 +1815,16 @@ zoom to it, so a sibling keeps its object and its canvas skips the redraw
 columnTrackModel: (track: ColumnTrackSpec) => BasicTrack
 ```
 
+#### method: fillHighlightLabel
+
+a highlight label with `{residue}` and `{position}` filled in from the row's
+letter at `start`, which is how the `175` shorthand draws "R175"
+
+```js
+// type signature
+fillHighlightLabel: (label: string, row?: string | undefined, start?: number | undefined) => string
+```
+
 #### method: getRowData
 
 ```js
@@ -2352,6 +2376,13 @@ setMSA: (result: string) => void
 ```js
 // type signature
 setMSAFilehandle: (msaFilehandle?: FileLocation | undefined) => void
+```
+
+#### action: setRegion
+
+```js
+// type signature
+setRegion: (region?: Region | undefined) => void
 ```
 
 #### action: setResidueMappings
