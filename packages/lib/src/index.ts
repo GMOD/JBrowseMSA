@@ -18,6 +18,14 @@ export {
 // the row count above which calculateNeighborJoiningTreeFromMSA throws, for
 // hosts gating their own menu item
 export { maxNeighborJoiningRows } from './constants.ts'
+// the short forms a link or a script can write a view in; see docs/layers.md
+export { expandSpec, residueLabel } from './expandSpec.ts'
+export type {
+  ColumnTrackShorthand,
+  HighlightShorthand,
+  MsaSpec,
+  RegionShorthand,
+} from './expandSpec.ts'
 export { default as MSAView } from './components/Loading.tsx'
 export { default as MSAViewer } from './components/MSAViewer.tsx'
 export type { MSAViewerProps } from './components/MSAViewer.tsx'

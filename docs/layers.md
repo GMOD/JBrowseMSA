@@ -24,6 +24,52 @@ const url = `https://gmod.org/JBrowseMSA/demo/?data=${encodeURIComponent(JSON.st
 The [user guide](https://gmod.org/JBrowseMSA/guide#link-to-a-view) covers what
 else a link needs: file URIs, CORS, and the size limit on inline data.
 
+## Shorthand
+
+A link or a script can write a view in short forms, which `expandSpec` (exported
+from `react-msaview`) turns into the snapshot. The app's `?data=` and
+jbrowse-plugin-msaview's session spec both apply it, and a full snapshot passes
+through unchanged.
+
+```json
+{
+  "type": "MsaView",
+  "msa": "https://gmod.org/JBrowseMSA/demo/data/p53/p53-vertebrates.afa",
+  "tree": "https://gmod.org/JBrowseMSA/demo/data/p53/p53-vertebrates.nh",
+  "query": "Human",
+  "highlights": ["102-292 DNA-binding", 175, 248, 273],
+  "region": "170-290",
+  "columnTracks": [
+    {
+      "name": "ClinVar",
+      "color": "#c0392b",
+      "max": 8,
+      "start": 104,
+      "values": [2, 1, 0, 0, 2, 4]
+    }
+  ]
+}
+```
+
+| Short form                 | Expands to                                                                              |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| `msa`                      | `msaFilehandle` for a url, `data.msa` for text spanning more than one line              |
+| `tree`                     | `treeFilehandle` for a url, `data.tree` for newick text starting with `(`               |
+| `query`                    | `relativeTo`, and the `row` of every highlight, region and column track that names none |
+| a highlight `175`          | residue 175 of the query row, labeled with its letter and number, "R175"                |
+| a highlight `"102-292 DB"` | residues 102-292 labeled "DB"; `"248"` is residue 248 and `"248 hotspot"` labels it     |
+| `region: "170-290"`        | `{row, start: 170, end: 290}`                                                           |
+| a column track's `id`      | taken from `name` when absent, "ClinVar pathogenic" becoming `clinvar-pathogenic`       |
+| a column track's `kind`    | `bar` for `values`, `text` for `data`, `arc` for `arcs`                                 |
+| a column track's `start`   | the position its `values` or `data` begins at, so leading zeros stay out of the link    |
+
+Without `query`, the same highlight forms are alignment columns and a single one
+gets no label. `"row": null` on an object entry takes it off the query row onto
+alignment columns. A highlight's `label` may name `{residue}` and `{position}`,
+which the viewer fills from the row's letter at `start`: `175` expands to the
+label `{residue}{position}`. A malformed string, such as `"R175"` or
+`"170..290"`, opens the view on an error naming it.
+
 ## columnTracks
 
 A track above the alignment, supplied as data. `kind` picks what it draws: `bar`
@@ -145,6 +191,12 @@ or a genome browser, call `model.applyHighlight(owner, list)` and
 `model.clearHighlight(owner)`. They take the same shape, draw over the persisted
 highlights, and stay out of the snapshot. `clearHighlight(owner)` removes only
 that owner's highlights, so two sources can highlight at once.
+
+`region` takes the same coordinates and names where the view opens:
+`{"row": "Human", "start": 170, "end": 290}` zooms onto those residues once the
+alignment and any tree file have loaded. The viewer then clears it, so a
+reloaded session keeps the reader's own scroll. `model.zoomToRegion(region)`
+does the same at runtime.
 
 ## clades
 

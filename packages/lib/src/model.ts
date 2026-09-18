@@ -879,6 +879,14 @@ function stateModelFactory() {
         highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
         /**
          * #property
+         * where the view opens, in `highlights` coordinates: `{row, start,
+         * end}` zooms onto residues of that row, `{start, end}` onto alignment
+         * columns. Applied once the alignment and any tree file have loaded,
+         * then cleared, so a reloaded session keeps the reader's own scroll.
+         */
+        region: types.frozen<Region | undefined>(),
+        /**
+         * #property
          * clades of the tree with a mark drawn over them. `mrca` names tips
          * whose common ancestor is the clade, or `range` its first and last
          * tip in display order, and `tips` is the leaf count the producer
@@ -1155,6 +1163,12 @@ function stateModelFactory() {
        */
       setHighlightedColumns(columns?: number[]) {
         self.highlightedColumns = columns
+      },
+      /**
+       * #action
+       */
+      setRegion(region?: Region) {
+        self.region = region
       },
       /**
        * #action
@@ -3622,6 +3636,26 @@ function stateModelFactory() {
       },
 
       /**
+       * #method
+       * a highlight label with `{residue}` and `{position}` filled in from the
+       * row's letter at `start`, which is how the `175` shorthand draws "R175"
+       */
+      fillHighlightLabel(label: string, row?: string, start?: number) {
+        if (!label.includes('{')) {
+          return label
+        }
+        const col =
+          row && start !== undefined
+            ? self.seqPosIndex(row)?.[start - 1]
+            : undefined
+        const residue =
+          row && col !== undefined ? (self.MSA?.getRow(row)[col] ?? '') : ''
+        return label
+          .replaceAll('{residue}', residue)
+          .replaceAll('{position}', start === undefined ? '' : String(start))
+      },
+
+      /**
        * #getter
        * `highlights` projected onto what is on screen: residue spans go
        * through the named row's gap structure, column spans through the
@@ -3636,7 +3670,10 @@ function stateModelFactory() {
           ...Object.values(transientHighlights).flat(),
         ]
         return all.flatMap(({ row, rows, start, end, label, color }) => {
-          const base = { label, color }
+          const base = {
+            label: label && this.fillHighlightLabel(label, row, start),
+            color,
+          }
           if (rows) {
             const rowIndices = rows
               .map(name => rowNamesSet.get(name))
@@ -4077,6 +4114,25 @@ function stateModelFactory() {
               } else if (mark === 'focus') {
                 self.setShowOnly(nodeId)
               }
+            }
+          }),
+        )
+
+        // zoomToRegion needs a width and resolves residues through the visible
+        // columns, so this waits for both, and for a tree file whose collapsed
+        // clades would hide columns and move the target after the zoom
+        addDisposer(
+          self,
+          autorun(() => {
+            const { region } = self
+            if (
+              region &&
+              self.viewInitialized &&
+              self.numColumns > 0 &&
+              !(self.treeFilehandle && !self.data.tree)
+            ) {
+              this.zoomToRegion(region)
+              self.setRegion(undefined)
             }
           }),
         )

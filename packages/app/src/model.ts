@@ -1,8 +1,9 @@
 import { addDisposer, getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
-import { MSAModelF } from 'react-msaview'
+import { MSAModelF, expandSpec } from 'react-msaview'
 
 import type { Instance, SnapshotIn } from '@jbrowse/mobx-state-tree'
+import type { MsaSpec } from 'react-msaview'
 
 const App = types
   .model({
@@ -43,11 +44,14 @@ const empty = { msaview: { type: 'MsaView' as const } }
 function toSnapshot(param: string): SnapshotIn<typeof App> {
   const parsed: unknown = JSON.parse(param)
   if (parsed && typeof parsed === 'object') {
-    if ('msaview' in parsed) {
-      return parsed as SnapshotIn<typeof App>
-    }
-    if ('type' in parsed && parsed.type === 'MsaView') {
-      return { msaview: parsed } as SnapshotIn<typeof App>
+    const view =
+      'msaview' in parsed
+        ? parsed.msaview
+        : 'type' in parsed && parsed.type === 'MsaView'
+          ? parsed
+          : undefined
+    if (view && typeof view === 'object') {
+      return { msaview: expandSpec(view as MsaSpec) } as SnapshotIn<typeof App>
     }
   }
   throw new Error(

@@ -32,6 +32,32 @@ test('?data= takes a bare MsaView snapshot, as docs/layers.md writes it', () => 
   expect(app.msaview.highlights.length).toBe(1)
 })
 
+test('?data= takes the shorthand expandSpec reads', () => {
+  const app = createApp(
+    JSON.stringify({
+      type: 'MsaView',
+      msa,
+      query: 'human',
+      highlights: [3],
+      columnTracks: [{ name: 'Score', start: 2, values: [1, 0.5] }],
+    }),
+  )
+  expect(app.msaview.error).toBeUndefined()
+  expect(app.msaview.relativeTo).toBe('human')
+  expect(app.msaview.resolvedHighlights[0]?.label).toBe('A3')
+  expect(app.msaview.columnTracks[0]).toMatchObject({
+    id: 'score',
+    kind: 'bar',
+    row: 'human',
+    values: [0, 1, 0.5],
+  })
+})
+
+test('a malformed shorthand opens on an error naming it', () => {
+  const app = createApp(JSON.stringify({ type: 'MsaView', msa, region: 'x' }))
+  expect(String(app.msaview.error)).toMatch(/region "x"/)
+})
+
 test.each([
   ['unparsable JSON', '{"type":"MsaView",'],
   ['an object that is not a view', '{"data":{"msa":">a\\nA"}}'],
