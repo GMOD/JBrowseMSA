@@ -63,11 +63,11 @@ Props:
 | `columnTracks`      | `ColumnTrackSpec[]`      | Tracks supplied as data (see below)                                                 |
 | `highlights`        | `Highlight[]`            | Labeled highlights (see below)                                                      |
 | `highlightColumns`  | `number[]`               | Columns (0-based) under a persistent overlay                                        |
-| `clades`            | `Clade[]`                | Tree clades with a mark over them (see below)                                       |
+| `clades`            | `Clade[]`                | Tree clades with a mark over them                                                   |
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                                         |
 | `rowData`           | `Record<string, ...>`    | Extra fields per row name, such as a lineage or a host                              |
 | `encodings`         | `Encoding[]`             | What the marks read: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
-| `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row (see below)             |
+| `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row                         |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram                         |
 | `residueEncoding`   | `'fill' \| 'color'`      | Which channel `colorScheme` paints: the cell (default) or the letter                |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns                     |
@@ -142,99 +142,14 @@ SVG export draws it.
 />
 ```
 
-`clades` marks a clade of the tree: `mrca` names tips whose common ancestor is
-the clade, and `tips` is the leaf count the producer measured. A clade that
-resolves to a different leaf count is dropped, so a re-rooted tree loses the
-mark rather than putting it on the wrong clade. `mark` says what to draw:
-`highlight` fills the rows behind the clade across the tree and the alignment,
-`bracket` draws a bar and the record's `label` in a gutter at the right of the
-tree, and `collapse` and `focus` open the viewer with the clade collapsed or
-with the rest of the tree hidden.
-
-```tsx
-<MSAViewer
-  msa={msa}
-  tree={tree}
-  clades={[
-    {
-      mrca: ['Gs/TW/TNC1/2015', 'Ck/TW/a174/2015'],
-      tips: 47,
-      mark: 'bracket',
-      label: '2.3.4.4 H5Nx',
-    },
-  ]}
-/>
-```
-
-`rowData` is a field table keyed by row name, and `encodings` says which mark
-reads which field: `tipLabel` colors the tip labels in the tree, `rowTint`
-washes the row across the tree gutter and the alignment, and `branch` colors a
-tree edge whose tips all share one value. The scale is a named palette or a
-color per value, and a value the table gives no color keeps the plain mark.
-`featureFill` and `featureLabel` read a field of the annotations, coloring and
-naming each span of the overlay.
-
-```tsx
-<MSAViewer
-  msa={msa}
-  tree={tree}
-  rowData={{
-    'A/duck/Anhui/1/2013': { clade: '2.3.4.4b' },
-    'A/chicken/Taiwan/a174/2015': { clade: '2.3.2.1c' },
-  }}
-  encodings={[
-    { channel: 'tipLabel', field: 'clade', scale: { palette: 'set1' } },
-    { channel: 'rowTint', field: 'clade' },
-  ]}
-/>
-```
-
-`rowPanels` draws the same table as columns of colored cells between the tree
-and the alignment, which is ggtree's `gheatmap`. Each `strip` record reads one
-field, takes its own `scale`, and carries a rotated `header` over its column.
-Strips over one field share that field's legend.
-
-```tsx
-<MSAViewer
-  msa={msa}
-  tree={tree}
-  rowData={rowData}
-  rowPanels={[
-    { kind: 'strip', field: 'HA', scale: { palette: 'set1' }, width: 12 },
-    { kind: 'strip', field: 'NA', header: 'NA segment' },
-  ]}
-/>
-```
-
-A `features` record draws the spans the GFF carries in a panel of its own, as
-arrows where a gene has a strand. `x: 'position'` draws each row in its own
-residue positions on one linear scale, so the figure below needs no `msa`: the
-tree and the gene arrows fill the view. The `align` transform shifts each row so
-that `genE` starts at one x, and a genome lacking it keeps its own origin, which
-is gggenes' `make_alignment_dummies`.
-
-```tsx
-<MSAViewer
-  tree={tree}
-  gff={gff}
-  rowPanels={[
-    {
-      kind: 'features',
-      x: 'position',
-      width: 320,
-      header: 'neighborhood',
-      encoding: {
-        color: { field: 'Name', scale: { palette: 'set1' } },
-        label: 'Name',
-      },
-      transform: [{ type: 'align', on: 'genE' }],
-    },
-  ]}
-/>
-```
+`clades` marks a clade of the tree with a highlight, a bracket, a collapse or a
+focus. `rowData` is a field table keyed by row name. `encodings` colors the tip
+labels, rows and branches by a `rowData` field, and the annotation spans by a
+field of the GFF. `rowPanels` draws per-row panels between the tree and the
+alignment: colored strips, or the GFF's spans as gene arrows.
 
 The [layers reference](https://gmod.org/JBrowseMSA/layers) lists every field of
-every layer and the coordinate rules they share. At runtime
+every layer, with examples, and the coordinate rules they share. At runtime
 `model.setHighlights(list)`, `model.setClades(list)`,
 `model.setColumnTracks(tracks)`, `model.setRowData(table)` and
 `model.setRowPanels(panels)` replace what the props set.
