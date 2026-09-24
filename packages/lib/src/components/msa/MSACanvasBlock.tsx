@@ -23,13 +23,8 @@ const MSACanvasBlock = observer(function ({
 }) {
   const { blockSize, highResScaleFactor } = model
   const theme = useTheme()
-  const { tooltipPoint, onMouseMove, onClick, onMouseLeave } = useMsaBlockMouse(
-    {
-      model,
-      offsetX,
-      offsetY,
-    },
-  )
+  const { tooltipPoint, onMouseMove, onMouseDown, onClick, onMouseLeave } =
+    useMsaBlockMouse({ model, offsetX, offsetY })
 
   const canvasSize = blockSize * highResScaleFactor
   const ref = useCanvasAutorun({
@@ -76,6 +71,7 @@ const MSACanvasBlock = observer(function ({
             onMouseMove(event, ref.current)
           }
         }}
+        onMouseDown={onMouseDown}
         onClick={event => {
           if (ref.current) {
             onClick(event, ref.current)

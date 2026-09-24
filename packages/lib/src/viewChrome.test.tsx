@@ -182,6 +182,33 @@ test('one divider resizes conservation and property conservation together', asyn
   expect(model.trackHeight('bar')).toBe(before + 20)
 })
 
+function clickCell(from: { x: number; y: number }, to = from) {
+  const block = container.querySelector<HTMLElement>(
+    '[data-testid="msa_canvas"] canvas',
+  )!
+  act(() => {
+    block.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        clientX: from.x,
+        clientY: from.y,
+      }),
+    )
+    block.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, clientX: to.x, clientY: to.y }),
+    )
+  })
+}
+
+test('a click pins the crosshair and a short pan does not', () => {
+  clickCell({ x: 30, y: 30 }, { x: 60, y: 30 })
+  expect(model.mouseClickCol).toBeUndefined()
+
+  clickCell({ x: 30, y: 30 }, { x: 31, y: 31 })
+  expect(model.mouseClickCol).toBe(Math.floor(31 / model.colWidth))
+  expect(model.mouseClickRow).toBe(Math.floor(31 / model.rowHeight))
+})
+
 test('the tree gutter carries a scale bar, and the ruler track draws', async () => {
   expect(model.pxPerBranchLength).toBeGreaterThan(0)
   // the gutter above the tree: a path for the bar, and the round length beside

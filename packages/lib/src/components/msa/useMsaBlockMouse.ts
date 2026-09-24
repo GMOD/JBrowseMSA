@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import type { MsaViewModel } from '../../model.ts'
 import type React from 'react'
+
+const maxClickTravel = 3
 
 function eventToColRow({
   event,
@@ -45,6 +47,7 @@ export function useMsaBlockMouse({
   offsetY: number
 }) {
   const [tooltipPoint, setTooltipPoint] = useState<{ x: number; y: number }>()
+  const downAt = useRef<{ x: number; y: number }>(undefined)
 
   function colRow(event: React.MouseEvent, el: HTMLElement) {
     const { colWidth, rowHeight } = model
@@ -70,7 +73,20 @@ export function useMsaBlockMouse({
     )
   }
 
+  function onMouseDown(event: React.MouseEvent) {
+    downAt.current = { x: event.clientX, y: event.clientY }
+  }
+
   function onClick(event: React.MouseEvent, el: HTMLElement) {
+    const down = downAt.current
+    downAt.current = undefined
+    if (
+      down &&
+      Math.hypot(event.clientX - down.x, event.clientY - down.y) >
+        maxClickTravel
+    ) {
+      return
+    }
     const pos = colRow(event, el)
     const { col, row } = pos
     const { mouseClickCol, mouseClickRow } = model
@@ -86,5 +102,5 @@ export function useMsaBlockMouse({
     setTooltipPoint(undefined)
   }
 
-  return { tooltipPoint, onMouseMove, onClick, onMouseLeave }
+  return { tooltipPoint, onMouseMove, onMouseDown, onClick, onMouseLeave }
 }
