@@ -52,10 +52,6 @@ nobody has to work it out again.
   The fix needs a decision on minimum height.
 - [Consolidate the protein-link generators](ideas/consolidate-script-generators.md):
   738 LOC doing one thing four times; one generator plus four configs is ~200.
-- [Precomputed alignments for mouse, fly and worm](ideas/multi-assembly-alignments.md):
-  `build-data.mjs` already builds them. Host the files, including `.cds`, and
-  replace each species' on-demand alignment with a single read of the hosted
-  one.
 - [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md): the
   join loop is cubic. The file explains why `@gmod/hclust`'s fix for the same
   loop does not port, and what does.
@@ -73,6 +69,9 @@ nobody has to work it out again.
   generator is not worth adding the binaries.
 - [useWheelScroll's shared rAF flag](ideas/closed/usewheelscroll-shared-raf-flag.md):
   a contended frame loses no drag delta, so no fix is needed.
+- [Precomputed alignments for mouse, fly and worm](ideas/closed/multi-assembly-alignments.md):
+  the gene explorer that would have read them is gone, replaced by jb2hubs'
+  `/protein-browser`.
 - [WebGL/GPU rendering for the MSA canvas](ideas/closed/webgl-rendering.md): a
   glyph atlas measured 2-3x slower than `fillText`, and the raster tile cache
   already makes zoom cost independent of column width.
