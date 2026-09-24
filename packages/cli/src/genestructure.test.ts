@@ -1,10 +1,55 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import {
   codingExons,
   pickTranscript,
   projectExonsOntoRows,
+  resolveGeneId,
 } from './genestructure.ts'
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+describe('resolveGeneId', () => {
+  function respond(response: Response) {
+    const fetchMock = vi.fn().mockResolvedValue(response)
+    vi.stubGlobal('fetch', fetchMock)
+    return fetchMock
+  }
+
+  test('a 404 names the gene and taxon', async () => {
+    respond(new Response('', { status: 404 }))
+    await expect(resolveGeneId('F99', 'human')).rejects.toThrow(
+      'no gene F99 in taxon human',
+    )
+  })
+
+  test('an empty answer names the gene and taxon, with the API reason', async () => {
+    respond(
+      Response.json({
+        messages: [{ error: { message: 'notataxon is not recognized' } }],
+      }),
+    )
+    await expect(resolveGeneId('F12', 'notataxon')).rejects.toThrow(
+      'no gene F12 in taxon notataxon: notataxon is not recognized',
+    )
+  })
+
+  test('a retryable status is retried', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('', { status: 503 }))
+      .mockResolvedValueOnce(
+        Response.json({ reports: [{ gene: { gene_id: '2161' } }] }),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    vi.useFakeTimers({ shouldAdvanceTime: true, advanceTimeDelta: 1000 })
+    await expect(resolveGeneId('F12', 'human')).resolves.toBe('2161')
+    vi.useRealTimers()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+})
 
 // codingExons works purely in transcript coordinates (exon lengths in transcript
 // order, intersected with the CDS range), so it is strand-agnostic and needs no

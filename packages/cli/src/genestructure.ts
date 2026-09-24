@@ -2,6 +2,8 @@ import * as fs from 'node:fs'
 
 import { parseMSA } from 'msa-parsers'
 
+import { fetchWithRetry } from './fetchWithRetry.ts'
+
 import type { MSAFormat } from 'msa-parsers'
 
 // Build a gene-structure GFF (one feature per exon, per alignment row) that
@@ -44,8 +46,11 @@ interface Transcript {
   genomic_locations?: { exons: Exon[] }[]
 }
 
-async function fetchJson(url: string): Promise<unknown> {
-  const res = await fetch(url)
+async function fetchJson(url: string, notFound: string): Promise<unknown> {
+  const res = await fetchWithRetry(url)
+  if (res.status === 404) {
+    throw new Error(notFound)
+  }
   if (!res.ok) {
     throw new Error(`request failed (${res.status}): ${url}`)
   }
@@ -56,22 +61,37 @@ function getReports(json: unknown): Record<string, unknown>[] {
   return (json as { reports?: Record<string, unknown>[] }).reports ?? []
 }
 
-async function resolveGeneId(gene: string, taxon: string): Promise<string> {
+// NCBI Datasets answers an unknown taxon with 200 and the reason in `messages`
+function apiMessage(json: unknown) {
+  return (json as { messages?: { error?: { message?: string } }[] })
+    .messages?.[0]?.error?.message
+}
+
+export async function resolveGeneId(
+  gene: string,
+  taxon: string,
+): Promise<string> {
+  const notFound = `no gene ${gene} in taxon ${taxon}`
   const json = await fetchJson(
     `${API}/gene/symbol/${encodeURIComponent(gene)}/taxon/${encodeURIComponent(taxon)}`,
+    notFound,
   )
   const report = getReports(json)[0] as
     | { gene?: { gene_id?: string } }
     | undefined
   const id = report?.gene?.gene_id
   if (!id) {
-    throw new Error(`no gene found for symbol "${gene}" in taxon "${taxon}"`)
+    const message = apiMessage(json)
+    throw new Error(message ? `${notFound}: ${message}` : notFound)
   }
   return id
 }
 
 async function fetchTranscripts(geneId: string): Promise<Transcript[]> {
-  const json = await fetchJson(`${API}/gene/id/${geneId}/product_report`)
+  const json = await fetchJson(
+    `${API}/gene/id/${geneId}/product_report`,
+    `no gene with NCBI GeneID ${geneId}`,
+  )
   const transcripts: Transcript[] = []
   for (const report of getReports(json)) {
     const product = (report as { product?: { transcripts?: Transcript[] } })
