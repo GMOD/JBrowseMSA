@@ -130,9 +130,7 @@ test('shareLink refuses a link past maxLinkLength', async () => {
   expect(app.msaview.unshareableData).toEqual([])
   const link = await shareLink(app, href)
   expect(link.url).toBeUndefined()
-  expect(link.problem).toMatch(
-    `over ${maxLinkLength.toLocaleString('en-US')}`,
-  )
+  expect(link.problem).toMatch(`over ${maxLinkLength.toLocaleString('en-US')}`)
 })
 
 test('shareLink names a document the snapshot dropped', async () => {

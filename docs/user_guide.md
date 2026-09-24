@@ -202,11 +202,10 @@ options to copy them and to show/hide gaps.
 ## Sharing and exporting
 
 - **Share a session** with **Copy link** above the viewer, which copies the page
-  URL as of the click. The URL encodes the view state
-  (colors, zoom, collapsed clades, highlights), so a collaborator who opens the
-  link sees the same view. A file you opened from your own computer goes into
-  the link too, up to a size limit described under
-  [Link to a view](#link-to-a-view).
+  URL as of the click. The URL encodes the view state (colors, zoom, collapsed
+  clades, highlights), so a collaborator who opens the link sees the same view.
+  A file you opened from your own computer goes into the link too, up to a size
+  limit described under [Link to a view](#link-to-a-view).
 - **Point at something** before you share. The snapshot carries labeled
   highlights: a residue of a named sequence, a column range, or a set of rows,
   each with a note drawn beside it. The view state stores them (see the
@@ -223,8 +222,8 @@ viewport, and checkboxes for the minimap and tracks.
 
 ## Link to a view
 
-Besides **Copy link**, a script can build a link. The app
-reads one query parameter, `?data=`, holding the URL-encoded JSON of the view:
+Besides **Copy link**, a script can build a link. The app reads one query
+parameter, `?data=`, holding the URL-encoded JSON of the view:
 
 ```js
 const view = {
@@ -252,16 +251,16 @@ Three things decide whether the link works for the person who opens it:
   holding them has to send `Access-Control-Allow-Origin`. GitHub Pages, S3 with
   a CORS rule, and the public EBI/NCBI/PDBe APIs send it. Most institutional web
   servers and Google Drive do not, and the view then opens on a fetch error.
-- **Size.** The app gzips the snapshot into `?data=`, and gmod.org refuses a
-  URL over about 8,000 characters. The link inlines a pasted or locally opened
-  file up to 15 kB, which compresses under that for the protein and DNA
-  alignments we measured. A larger file stays in the running viewer but leaves
-  the snapshot, and the header shows **Not in the link**. When a file is too
-  large, or the whole view still encodes past 8,000 characters, the app removes
-  the `?data=` parameter so the address bar never holds a URL that opens empty
-  or fails, and **Copy link** turns off and says why. To share a larger file, serve
-  it over HTTP and open it by URL; the link then stores the address, which works
-  at any file size. The same 15 kB limit applies to a
+- **Size.** The app gzips the snapshot into `?data=`, and gmod.org refuses a URL
+  over about 8,000 characters. The link inlines a pasted or locally opened file
+  up to 15 kB, which compresses under that for the protein and DNA alignments we
+  measured. A larger file stays in the running viewer but leaves the snapshot,
+  and the header shows **Not in the link**. When a file is too large, or the
+  whole view still encodes past 8,000 characters, the app removes the `?data=`
+  parameter so the address bar never holds a URL that opens empty or fails, and
+  **Copy link** turns off and says why. To share a larger file, serve it over
+  HTTP and open it by URL; the link then stores the address, which works at any
+  file size. The same 15 kB limit applies to a
   [data track](https://gmod.org/JBrowseMSA/layers#columntracks).
 
 ## Tracks
