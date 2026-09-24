@@ -51,7 +51,7 @@ nobody has to work it out again.
   hardcoded 4px per sub-feature overflows into the next row past ~10 entries.
   The fix needs a decision on minimum height.
 - [Consolidate the protein-link generators](ideas/consolidate-script-generators.md):
-  738 LOC doing one thing four times; one generator plus four configs is ~200.
+  658 LOC doing one thing four times; one generator plus four configs is ~200.
 - [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md): the
   join loop is cubic. The file explains why `@gmod/hclust`'s fix for the same
   loop does not port, and what does.
