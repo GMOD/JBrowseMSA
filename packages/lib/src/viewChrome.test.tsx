@@ -118,9 +118,7 @@ test('the view mounts with both scrollbars', () => {
 })
 
 test('the header offers a row search', () => {
-  expect(
-    container.querySelector('input[placeholder="Find row"]'),
-  ).toBeTruthy()
+  expect(container.querySelector('input[placeholder="Find row"]')).toBeTruthy()
 })
 
 test('dragging the tree divider widens the tree area', async () => {

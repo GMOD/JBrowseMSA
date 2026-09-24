@@ -20,7 +20,9 @@ afterEach(() => {
 })
 
 test('the size warning follows the model while the dialog is open', () => {
-  const model = createTestModel({ data: { msa: syntheticProteinMsa(600, 200) } })
+  const model = createTestModel({
+    data: { msa: syntheticProteinMsa(600, 200) },
+  })
   model.setDrawMsaLetters(false)
   const container = document.createElement('div')
   document.body.append(container)

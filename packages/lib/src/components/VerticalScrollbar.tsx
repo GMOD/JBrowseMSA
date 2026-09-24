@@ -25,7 +25,8 @@ const VerticalScrollbar = observer(({ model }: { model: MsaViewModel }) => {
     <div
       onMouseDown={event => {
         if (event.button === 0 && event.target === event.currentTarget) {
-          const y = event.clientY - event.currentTarget.getBoundingClientRect().top
+          const y =
+            event.clientY - event.currentTarget.getBoundingClientRect().top
           model.setScrollY(-y / unit + msaAreaHeight / 2)
         }
       }}

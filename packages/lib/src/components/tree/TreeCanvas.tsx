@@ -13,8 +13,7 @@ import type { MsaViewModel } from '../../model.ts'
 
 const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { height, blocksY, treeAreaWidth, scrollY, highResScaleFactor } =
-    model
+  const { height, blocksY, treeAreaWidth, scrollY, highResScaleFactor } = model
   const onScrollY = useCallback(
     (d: number) => {
       model.doScrollY(d)
