@@ -7,6 +7,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 
+import TopBar from './TopBar'
 import { createApp } from './model'
 
 import type { AppModel } from './model'
@@ -48,6 +49,7 @@ const App = observer(function ({ model }: { model: AppModel }) {
   const ref = useWidthSetter(msaview)
   return (
     <div>
+      <TopBar model={model} />
       <div
         ref={ref}
         data-testid="msaview"
