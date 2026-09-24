@@ -47,8 +47,9 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <div style={{ paddingLeft: 20, margin: 'auto' }}>
         <MultiAlignmentSelector model={model} />
       </div>
-      <HeaderInfoArea model={model} />
-      <Spacer />
+      <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex' }}>
+        <HeaderInfoArea model={model} />
+      </div>
       <LoadWarnings model={model} />
       <UnshareableDataWarning model={model} />
       <StatusMessage model={model} variant="header" />
@@ -65,9 +66,5 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
     </div>
   )
 })
-
-function Spacer() {
-  return <div style={{ flex: 1 }} />
-}
 
 export default Header
