@@ -32,16 +32,17 @@ const AnnotationLegend = observer(function ({
         display: 'flex',
         flexDirection: 'column',
         opacity: 0.95,
+        pointerEvents: 'none',
       }}
     >
       <IconButton
         size="small"
         title={expanded ? 'Collapse key' : 'Expand key'}
-        style={
-          expanded
-            ? { position: 'absolute', top: 0, right: 0, padding: 1 }
-            : { padding: 1 }
-        }
+        style={{
+          padding: 1,
+          pointerEvents: 'auto',
+          ...(expanded && { position: 'absolute', top: 0, right: 0 }),
+        }}
         onClick={() => {
           model.setShowDomainLegend(!expanded)
         }}
@@ -59,7 +60,6 @@ const AnnotationLegend = observer(function ({
                 gap: 4,
                 marginRight: i === 0 ? 18 : 0,
               }}
-              title={row.hint}
             >
               {row.color ? (
                 <div
@@ -74,10 +74,16 @@ const AnnotationLegend = observer(function ({
               <Typography
                 variant="caption"
                 noWrap
+                title={
+                  row.hint && row.hint !== row.label
+                    ? `${row.label} (${row.hint})`
+                    : row.label
+                }
                 style={{
                   fontSize: 10,
                   lineHeight: 1.4,
                   fontWeight: row.color ? undefined : 'bold',
+                  pointerEvents: 'auto',
                 }}
               >
                 {row.label}

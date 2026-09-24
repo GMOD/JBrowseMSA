@@ -40,3 +40,18 @@ test('the key floats above the overlay the tints draw in', () => {
   expect(zIndexOf(overlay)).toBe(msaOverlayZIndex)
   expect(zIndexOf(legend)).toBeGreaterThan(zIndexOf(overlay))
 })
+
+test('the key passes the pointer through to the cells under it', () => {
+  const { legend } = mount()
+  const [paper, button] = [...legend.matchAll(/pointer-events: *(\w+)/g)].map(
+    m => m[1],
+  )
+  expect(paper).toBe('none')
+  expect(button).toBe('auto')
+})
+
+test('a truncated label carries its full text on hover', () => {
+  const { legend } = mount()
+  expect(legend).toMatch(/title="H5[^"]*"/)
+  expect(legend).toMatch(/title="H7[^"]*"/)
+})
