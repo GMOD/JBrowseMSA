@@ -1,8 +1,6 @@
 // Regenerates packages/app/public/data/{braf.aln,braf.nh} from scratch: fetches
 // the RAF-family sequences from UniProt by accession and aligns them with
-// ClustalW. This is the data the BRAF V600E genome-browser example aligns; the
-// link itself is built by generate.mjs, which reads braf.aln to locate the V600
-// column, so no column index is maintained by hand.
+// ClustalW. The brafV600 session in website/src/lib/jbrowseLinks.ts loads them.
 //
 // Usage:  node scripts/braf-protein-link/build-alignment.mjs
 // Requires: clustalw on PATH, and network access to rest.uniprot.org.
@@ -19,7 +17,7 @@ const dataDir = join(here, '..', '..', 'packages', 'app', 'public', 'data')
 // RAF family: the three human paralogs + BRAF in mouse/chicken + the Drosophila
 // ortholog, keyed by UniProt entry name -> reviewed (Swiss-Prot) accession. The
 // entry name becomes the FASTA/alignment row name (BRAF_HUMAN is the query row
-// the protein<->genome link maps to RefSeq NM_004333.6).
+// the session maps to RefSeq NM_004333.6).
 const SEQUENCES = {
   BRAF_HUMAN: 'P15056',
   BRAF_MOUSE: 'P28028',

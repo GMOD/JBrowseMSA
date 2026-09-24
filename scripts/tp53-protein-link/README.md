@@ -1,59 +1,44 @@
-# TP53 R248 example (conservation ↔ pathogenicity, on the hotspot)
+# TP53 session data
 
-Builds the **TP53** example on the _Genome browser_ docs page: the p53 ortholog
-alignment opened _inside_ JBrowse, **connected** to the human **TP53** gene on
-hg38, zoomed onto the **R248** codon, with a **ClinVar pathogenic-variant
-track** in the genome view. The pathogenic variants at the R248 codon line up
-with a 100%-conserved alignment column. The connection works as in
-`scripts/src-protein-link/` (SRC) and `scripts/braf-protein-link/` (BRAF).
+`build-data.mjs` builds the files behind the two **TP53** sessions on the
+[JBrowse 2 integration](https://gmod.org/JBrowseMSA/tutorials/jbrowse_integration)
+page, the hand-written `tp53R248` and `tp53Protein3d` specs in
+`website/src/lib/jbrowseLinks.ts`:
+
+- `tp53R248` opens the p53 ortholog alignment _inside_ JBrowse, **connected** to
+  the human **TP53** gene on hg38, zoomed onto the **R248** codon, with a
+  **ClinVar pathogenic-variant track** in the genome view. The pathogenic
+  variants at the R248 codon line up with a 100%-conserved alignment column.
+- `tp53Protein3d` adds the AlphaFold p53 structure through
+  [jbrowse-plugin-protein3d](https://github.com/GMOD/jbrowse-plugin-protein3d)
+  and opens with the nuclear export signal motif (residues 339–350) highlighted
+  in the genome, the alignment and the structure.
 
 R248 is the most frequently mutated residue in TP53 across human cancers: it
 contacts DNA in the minor groove, is invariant across vertebrates, and the codon
 collects a dense stack of distinct pathogenic substitutions.
 
-## Two scripts
+## The files
 
-- **`build-data.mjs`** regenerates the hosted data under
-  `packages/app/public/data/`:
-  - `tp53-p53-orthologs.fa` / `tp53-p53.nh`: p53 protein alignment + ClustalW
-    neighbor-joining tree across 13 vertebrates. The `human` row is RefSeq
-    `NP_000537.3` (the product of `NM_000546.6`, the transcript the link maps
-    to), so residue _i_ lines up with codon _i_. Requires `clustalw` + `curl`.
-  - `tp53-clinvar-pathogenic.vcf.gz(.tbi)`: ClinVar variants across the TP53
-    locus (`17:7668134-7687471`) filtered to germline classification Pathogenic
-    / Likely_pathogenic. Requires `tabix` + `bgzip`. **ClinVar updates weekly**,
-    so the variant count changes slightly between runs, unlike the alignment,
-    which is byte-reproducible.
-- **`generate.mjs`** prints the declarative JBrowse link. It names R248 in the
-  query row's own residue numbering and derives the `connectedFeature` (as the
-  BRAF and SRC scripts do) from the public RefSeq GFF. Requires `tabix`.
+`build-data.mjs` regenerates the hosted data under `packages/app/public/data/`:
 
-## How the link works
+- `tp53-p53-orthologs.fa` / `tp53-p53.nh`: p53 protein alignment + ClustalW
+  neighbor-joining tree across 13 vertebrates. The `human` row is RefSeq
+  `NP_000537.3`, the product of `NM_000546.6`, the transcript both sessions name
+  in `connectedTranscript`, so residue _i_ lines up with codon _i_. Requires
+  `clustalw` + `curl`.
+- `tp53-clinvar-pathogenic.vcf.gz(.tbi)`: ClinVar variants across the TP53 locus
+  (`17:7668134-7687471`) filtered to germline classification Pathogenic /
+  Likely_pathogenic. Requires `tabix` + `bgzip`. **ClinVar updates weekly**, so
+  the variant count changes slightly between runs, unlike the alignment, which
+  is byte-reproducible.
 
-A single session spec (`?config=…&session=spec-…`) with two views:
-
-- a `LinearGenomeView` (pinned `id` `lgv-tp53`) on the R248 codon, with a
-  `highlight` band over it and
-  `tracks: [hg38-ncbiRefSeq, hg38-tp53-clinvar-pathogenic]`, and
-- an `MsaView` whose `connectedViewId` points at it, plus `connectedFeature`
-  (the TP53 transcript model), `querySeqName: human`, and
-  `highlights: [{ row: "human", start: 248, end: 248, label: "R248" }]`; the
-  viewer projects the residue through the alignment's gaps.
-
-The ClinVar track is defined in `jbrowse-msa-combined-config.json` (the shared
-config), pointing at the hosted VCF; the VCF keeps refName `17`, resolved to
-`chr17` by the hg38 `refNameAliases`.
-
-## Dependencies in the rest of the stack
-
-Same as the SRC/BRAF examples: the jbrowse-components `main` (forwards a spec
-`id` to `LaunchView-LinearGenomeView`) and `jbrowse-plugin-msaview` built on
-react-msaview ≥ 6.3.0 (which forwards `connectedViewId` and `connectedFeature`,
-and draws `highlights`).
+`jbrowse-msa-combined-config.json` (the shared config) defines the
+`hg38-tp53-clinvar-pathogenic` track over the hosted VCF. The VCF keeps refName
+`17`, which the hg38 `refNameAliases` resolve to `chr17`.
 
 ## Usage
 
 ```sh
-node scripts/tp53-protein-link/build-data.mjs   # rebuild hosted data
-node scripts/tp53-protein-link/generate.mjs     # print the declarative URL
+node scripts/tp53-protein-link/build-data.mjs
 ```

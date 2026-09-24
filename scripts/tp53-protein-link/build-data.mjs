@@ -4,9 +4,10 @@
 //   tp53-clinvar-pathogenic.vcf.gz(.tbi)  ClinVar pathogenic/likely-pathogenic
 //                            variants across the TP53 locus
 //
-// This is the data the BRAF/SRC-style protein<->genome link uses (built by
-// generate.mjs). The `human` row is RefSeq NP_000537.3, the protein of the
-// transcript the link maps to (NM_000546.6), so residue i lines up with codon i.
+// The tp53R248 and tp53Protein3d sessions in website/src/lib/jbrowseLinks.ts
+// load them. The `human` row is RefSeq NP_000537.3, the protein of the
+// transcript the sessions map to (NM_000546.6), so residue i lines up with
+// codon i.
 //
 // Usage:  node scripts/tp53-protein-link/build-data.mjs
 // Requires: clustalw, tabix, bgzip, curl on PATH; network access to NCBI.
@@ -22,7 +23,7 @@ const dataDir = join(here, '..', '..', 'packages', 'app', 'public', 'data')
 
 // One p53 ortholog per species, keyed by the display name that becomes the
 // alignment row. `human` is the canonical RefSeq protein NP_000537.3 (= the
-// product of NM_000546.6, the transcript the genome link maps to); the rest are
+// product of NM_000546.6, the transcript the sessions map to); the rest are
 // the current NCBI RefSeq proteins for representative vertebrates spanning ~430
 // Myr, chosen to show how deeply p53's DNA-binding core (and R248) is conserved.
 const SPECIES = {

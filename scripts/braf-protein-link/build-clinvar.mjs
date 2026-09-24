@@ -2,10 +2,9 @@
 //   braf-clinvar-pathogenic.vcf.gz(.tbi): ClinVar pathogenic/likely-pathogenic
 //                            variants across the BRAF locus
 //
-// Mirrors the ClinVar part of scripts/tp53-protein-link/build-data.mjs. The BRAF
-// genome-link example (generate.mjs) shows this track in the LinearGenomeView,
-// over the codon the alignment's V600 column maps to. The BRAF alignment + tree are built separately by
-// build-alignment.mjs.
+// Mirrors the ClinVar part of scripts/tp53-protein-link/build-data.mjs. The
+// brafV600 session in website/src/lib/jbrowseLinks.ts shows this track over the
+// V600 codon.
 //
 // Usage:  node scripts/braf-protein-link/build-clinvar.mjs
 // Requires: tabix, bgzip on PATH; network access to NCBI.
