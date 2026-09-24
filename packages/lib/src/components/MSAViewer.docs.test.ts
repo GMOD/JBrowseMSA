@@ -26,3 +26,30 @@ test('the USAGE.md props table lists exactly the MSAViewer props', () => {
     [...list].sort((a, b) => (a ?? '').localeCompare(b ?? ''))
   expect(alphabetical(documented)).toEqual(alphabetical(props))
 })
+
+test('USAGE.md lists exactly the <jbrowse-msa> attributes and properties', () => {
+  const source = readFileSync(new URL('../element.ts', import.meta.url), 'utf8')
+  const usage = readFileSync(
+    new URL('../../../../USAGE.md', import.meta.url),
+    'utf8',
+  )
+  const names = (text: string | undefined, pattern: RegExp) =>
+    [...(text ?? '').matchAll(pattern)].map(m => m[1]).toSorted()
+
+  const attributes = /const ownAttributes = \[([\s\S]*?)\]/.exec(source)?.[1]
+  const properties = /type ElementData = Pick<\s*MSAViewerProps,([^>]*)>/.exec(
+    source,
+  )?.[1]
+  expect(attributes, 'could not find ownAttributes').toBeTruthy()
+  expect(properties, 'could not find ElementData').toBeTruthy()
+
+  const docs = /\nAttributes:\s([\s\S]*?)\.\sProperties:\s([\s\S]*?)\.\s/.exec(
+    usage,
+  )
+  expect(docs, 'could not find the element attribute list').toBeTruthy()
+
+  expect(names(docs![1], /`([\w-]+)`/g)).toEqual(
+    names(attributes, /'([\w-]+)'/g),
+  )
+  expect(names(docs![2], /`(\w+)`/g)).toEqual(names(properties, /'(\w+)'/g))
+})
