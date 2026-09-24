@@ -36,8 +36,11 @@ const GappynessSlider = observer(function GappynessSlider({
         // The thumb follows local state while dragging and the model takes the
         // value on release, since each write recomputes the gap columns over
         // the whole alignment.
+        //
+        // The thumb centers on the track's ends, so the margin keeps its
+        // overhang off the label and the row search beside it.
         data-testid="gappyness_slider"
-        style={{ width: 100 }}
+        style={{ width: 100, marginInline: 10 }}
         min={1}
         max={100}
         value={value}
