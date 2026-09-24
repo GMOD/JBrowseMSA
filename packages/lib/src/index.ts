@@ -36,7 +36,7 @@ export type { MsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MountedViewer } from './mount.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
-export type { HierarchyNode } from './hierarchy.ts'
+export type { HierarchyNode, LaidOutNode, TreeScale } from './hierarchy.ts'
 // InterProScanResults is the EBI wire format that setDomains still accepts;
 // Annotation is the source-agnostic shape everything else is written against
 export type { InterProScanResults } from 'msa-parsers'
