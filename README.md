@@ -87,8 +87,8 @@ writes, as labelled boxes on the alignment:
 ## Development
 
 ```bash
-git clone https://github.com/GMOD/react-msaview
-cd react-msaview
+git clone https://github.com/GMOD/JBrowseMSA
+cd JBrowseMSA
 pnpm install
 ```
 
