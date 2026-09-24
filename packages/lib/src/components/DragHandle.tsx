@@ -8,6 +8,10 @@ import type { Theme } from '@mui/material'
 
 export const scrollbarThumbFill = 'rgba(66,119,127,0.3)'
 
+// the model's resizeHandleWidth feeds the layout, so a divider keeps its drawn
+// width and widens its target with this much invisible margin each side
+const hitSlop = 4
+
 // The scroll thumbs (minimap, vertical scrollbar) and the resize dividers are
 // one widget -- press, drag along an axis, report the pixel delta -- differing
 // only in the affordance they present, so the variant carries the whole
@@ -91,6 +95,18 @@ export default function DragHandle({
         background: hovered ? fillHovered(theme) : fill(theme),
         ...style,
       }}
-    />
+    >
+      {variant === 'resizer' ? (
+        <div
+          style={{
+            position: 'absolute',
+            zIndex: 101,
+            ...(axis === 'x'
+              ? { top: 0, bottom: 0, left: -hitSlop, right: -hitSlop }
+              : { left: 0, right: 0, top: -hitSlop, bottom: -hitSlop }),
+          }}
+        />
+      ) : null}
+    </div>
   )
 }

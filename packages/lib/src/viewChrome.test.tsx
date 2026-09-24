@@ -129,6 +129,14 @@ test('dragging the tree divider widens the tree area', async () => {
   expect(model.treeAreaWidth).toBe(before + 60)
 })
 
+test('a divider takes a drag from just beside it', async () => {
+  const [zone] = byCursor('ew-resize')[0]!.children
+  expect((zone as HTMLElement).style.left).toBe('-4px')
+  const before = model.treeAreaWidth
+  await drag(zone as HTMLElement, { x: 30 })
+  expect(model.treeAreaWidth).toBe(before + 30)
+})
+
 test('dragging the view divider grows the view', async () => {
   const before = model.height
   // the last ns-resize handle is the one below the whole view
