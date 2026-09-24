@@ -212,6 +212,22 @@ test('expanding a seeded clade sticks until the next load', () => {
   expect(model.rowNames).toEqual(['A', 'B', 'C', 'D'])
 })
 
+test('clades set after load seed their collapse', () => {
+  const model = makeModel([])
+  model.setClades([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  expect(model.collapsed).toEqual(['node-0-0-1'])
+  model.setClades([{ mrca: ['C', 'D'], tips: 2, mark: 'focus' }])
+  expect(model.showOnly).toBe('node-0-1-1')
+})
+
+test('clades seed again after reset and a new load', () => {
+  const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  model.reset()
+  model.setClades([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  model.setData({ msa, tree })
+  expect(model.collapsed).toEqual(['node-0-0-1'])
+})
+
 test('a focus mark opens on the clade', () => {
   const model = makeModel([{ mrca: ['C', 'D'], tips: 2, mark: 'focus' }])
   expect(model.showOnly).toBe('node-0-1-1')
