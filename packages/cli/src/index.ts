@@ -26,17 +26,17 @@ const options = {
   gff: {
     type: 'string',
   },
+  spec: {
+    type: 'string',
+  },
   'color-scheme': {
     type: 'string',
-    default: 'maeditor',
   },
   width: {
     type: 'string',
-    default: '1200',
   },
   height: {
     type: 'string',
-    default: '600',
   },
   'tree-area-width': {
     type: 'string',
@@ -186,7 +186,10 @@ OPTIONS (genestructure):
   -o, --output <file>           Output GFF file (default: genestructure.gff)
 
 OPTIONS (export-svg):
-  --msa <file>                  MSA file (FASTA, Stockholm, Clustal, A3M, EMF) [required]
+  --spec <file.json>            MsaView spec or snapshot, with any layer from
+                                docs/layers.md; the flags below override it
+  --msa <file>                  MSA file (FASTA, Stockholm, Clustal, A3M, EMF)
+                                [required without --spec]
   --format <name>               Force the MSA format instead of sniffing it
   --tree <file>                 Newick tree file (optional)
   --gff <file>                  Domain or exon GFF, or InterProScan JSON (optional)
@@ -244,8 +247,8 @@ function readNumber(name: string, value: string, integer = false) {
   return n
 }
 
-function readInt(name: string, value: string) {
-  return readNumber(name, value, true)
+function readOptional(name: string, value?: string, integer = false) {
+  return value === undefined ? undefined : readNumber(name, value, integer)
 }
 
 function readList(value: string) {
@@ -266,32 +269,27 @@ async function main() {
   const format = readFormat(values.format)
 
   if (command === 'export-svg') {
-    const msaFile = values.msa
-    if (!msaFile) {
-      console.error('Error: --msa <file> is required')
+    if (!values.msa && !values.spec) {
+      console.error('Error: --msa <file> or --spec <file.json> is required')
       process.exit(1)
     }
     const outputFile = values.output ?? 'alignment.svg'
     await exportSvg({
-      msaFile,
+      specFile: values.spec,
+      msaFile: values.msa,
       treeFile: values.tree,
       gffFile: values.gff,
       outputFile,
       colorScheme: values['color-scheme'],
-      width: readInt('width', values.width),
-      height: readInt('height', values.height),
-      treeAreaWidth:
-        values['tree-area-width'] !== undefined
-          ? readInt('tree-area-width', values['tree-area-width'])
-          : undefined,
-      colWidth:
-        values['col-width'] !== undefined
-          ? readNumber('col-width', values['col-width'])
-          : undefined,
-      rowHeight:
-        values['row-height'] !== undefined
-          ? readNumber('row-height', values['row-height'])
-          : undefined,
+      width: readOptional('width', values.width, true),
+      height: readOptional('height', values.height, true),
+      treeAreaWidth: readOptional(
+        'tree-area-width',
+        values['tree-area-width'],
+        true,
+      ),
+      colWidth: readOptional('col-width', values['col-width']),
+      rowHeight: readOptional('row-height', values['row-height']),
       format,
       tracks: values.tracks !== undefined ? readList(values.tracks) : undefined,
       viewport: values.viewport,

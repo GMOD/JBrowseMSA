@@ -1,11 +1,15 @@
 import * as fs from 'node:fs'
+import * as path from 'node:path'
 
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { JSDOM } from 'jsdom'
 import { enableStaticRendering } from 'mobx-react'
 import { annotationTextToGFF } from 'msa-parsers'
 
+import { fetchWithRetry } from './fetchWithRetry.ts'
+
 import type { MSAFormat } from 'msa-parsers'
+import type { MsaSpec } from 'react-msaview'
 
 /**
  * jsdom has no pixels, so without this the export draws a <rect> per cell and a
@@ -26,14 +30,64 @@ async function installNodeCanvas(g: Record<string, unknown>) {
   }
 }
 
+const FILEHANDLES = [
+  ['msaFilehandle', 'msa'],
+  ['treeFilehandle', 'tree'],
+  ['gffFilehandle', 'gff'],
+  ['treeMetadataFilehandle', 'treeMetadata'],
+] as const
+
+interface Location {
+  uri?: string
+  localPath?: string
+}
+
+async function readLocation(location: Location, baseDir: string) {
+  const where = location.uri ?? location.localPath
+  if (!where) {
+    throw new Error(`a filehandle in the spec has no uri or localPath`)
+  }
+  if (/^https?:\/\//.test(where)) {
+    const res = await fetchWithRetry(where)
+    if (!res.ok) {
+      throw new Error(`${where}: ${res.status} ${res.statusText}`)
+    }
+    return res.text()
+  }
+  return fs.readFileSync(path.resolve(baseDir, where), 'utf8')
+}
+
+/**
+ * The spec file as a snapshot, with every filehandle read into `data` so the
+ * model is complete on create. A relative path resolves against the spec
+ * file's directory.
+ */
+async function readSpec(specFile: string) {
+  const expandSpec = (await import('react-msaview')).expandSpec
+  const json = JSON.parse(fs.readFileSync(specFile, 'utf8')) as {
+    msaview?: MsaSpec
+  } & MsaSpec
+  const snapshot = expandSpec(json.msaview ?? json)
+  const data = { ...(snapshot.data as Record<string, string> | undefined) }
+  for (const [key, field] of FILEHANDLES) {
+    const location = snapshot[key] as Location | undefined
+    if (location) {
+      data[field] ??= await readLocation(location, path.dirname(specFile))
+      delete snapshot[key]
+    }
+  }
+  return { ...snapshot, data }
+}
+
 export async function exportSvg({
+  specFile,
   msaFile,
   treeFile,
   gffFile,
   outputFile,
   colorScheme,
   height,
-  width,
+  width = 1200,
   treeAreaWidth,
   colWidth,
   rowHeight,
@@ -42,13 +96,14 @@ export async function exportSvg({
   viewport,
   minimap,
 }: {
-  msaFile: string
+  specFile?: string
+  msaFile?: string
   treeFile?: string
   gffFile?: string
   outputFile: string
-  colorScheme: string
-  height: number
-  width: number
+  colorScheme?: string
+  height?: number
+  width?: number
   treeAreaWidth?: number
   colWidth?: number
   rowHeight?: number
@@ -71,24 +126,40 @@ export async function exportSvg({
   await installNodeCanvas(g)
 
   const theme = createJBrowseTheme()
-  const msa = fs.readFileSync(msaFile, 'utf8')
-  const tree = treeFile ? fs.readFileSync(treeFile, 'utf8') : ''
-  const gff = gffFile
-    ? annotationTextToGFF(fs.readFileSync(gffFile, 'utf8'))
-    : undefined
+  const spec: Record<string, unknown> & { data?: Record<string, string> } =
+    specFile ? await readSpec(specFile) : {}
+  const data = { ...spec.data }
+  if (msaFile) {
+    data.msa = fs.readFileSync(msaFile, 'utf8')
+  }
+  if (treeFile) {
+    data.tree = fs.readFileSync(treeFile, 'utf8')
+  }
+  if (gffFile) {
+    data.gff = fs.readFileSync(gffFile, 'utf8')
+  }
+  if (data.gff) {
+    data.gff = annotationTextToGFF(data.gff)
+  }
+  if (!data.msa && !data.tree) {
+    throw new Error('nothing to draw: give --msa, or a --spec with an msa or a tree')
+  }
 
   const model = MSAModelF().create({
+    colorSchemeName: 'maeditor',
+    height: 600,
+    ...spec,
     // a fixed id keeps clipPath ids, and so the output bytes, stable across runs
     id: 'msaview-export',
     type: 'MsaView',
-    height,
-    colorSchemeName: colorScheme,
+    ...(colorScheme === undefined ? {} : { colorSchemeName: colorScheme }),
+    ...(height === undefined ? {} : { height }),
     // an entire-alignment export is sized by cell size, not --width/--height;
     // cells below the letter threshold draw a long alignment as blocks
     ...(colWidth === undefined ? {} : { colWidth }),
     ...(rowHeight === undefined ? {} : { rowHeight }),
     ...(format ? { msaFormat: format } : {}),
-    data: { msa, tree, ...(gff ? { gff } : {}) },
+    data,
   })
   if (treeAreaWidth !== undefined) {
     model.setTreeAreaWidth(treeAreaWidth)
@@ -118,7 +189,8 @@ export async function exportSvg({
     theme,
     exportType: viewport ? 'viewport' : 'entire',
     includeMinimap: minimap,
-    includeTracks: !!tracks && model.turnedOnTracks.length > 0,
+    includeTracks:
+      (!!tracks || !!specFile) && model.turnedOnTracks.length > 0,
   })
   fs.writeFileSync(outputFile, svg)
 }

@@ -28,7 +28,6 @@ async function render(options: Partial<Parameters<typeof exportSvg>[0]>) {
   const outputFile = path.join(dir, 'out.svg')
   await exportSvg({
     outputFile,
-    colorScheme: 'maeditor',
     width: 800,
     height: 300,
     ...options,
@@ -61,4 +60,54 @@ test('an InterProScan JSON --gff draws its domains', async () => {
   )
   const svg = await render({ msaFile: write('a.fa', MSA), gffFile })
   expect(svg).toContain('Testdomain')
+})
+
+test('--spec draws the columnTracks example from docs/layers.md', async () => {
+  const specFile = write(
+    'columnTracks.json',
+    JSON.stringify({
+      type: 'MsaView',
+      data: { msa: '>human\nMKAANSE\n>mouse\nMKA-NSE' },
+      columnTracks: [
+        {
+          id: 'dnds',
+          name: 'dN/dS',
+          kind: 'bar',
+          values: [0.1, 0.4, 1.8, 0.2, 0.3, 0.1],
+          max: 2,
+          color: '#6a51a3',
+          row: 'human',
+        },
+        {
+          id: 'frame',
+          name: 'Codon frame',
+          kind: 'text',
+          data: '1231231',
+          colors: { '1': '#ddd', '2': '#bbb', '3': '#999' },
+        },
+      ],
+    }),
+  )
+  const svg = await render({ specFile })
+  expect(svg).toContain('dN/dS')
+  expect(svg).toContain('Codon frame')
+  expect(svg).toContain('#6a51a3')
+})
+
+test('--spec reads a shorthand msa path beside the spec, and --msa overrides it', async () => {
+  write('spec-rows.fa', MSA)
+  const specFile = write(
+    'shorthand.json',
+    JSON.stringify({
+      msa: 'spec-rows.fa',
+      query: 'seq1',
+      highlights: ['2-5 Motif'],
+    }),
+  )
+  expect(await render({ specFile })).toContain('Motif')
+
+  const other = write('other.fa', '>other1\nMKAANSE\n>other2\nMKAANSE\n')
+  const svg = await render({ specFile, msaFile: other })
+  expect(svg).toContain('other1')
+  expect(svg).not.toContain('seq1')
 })

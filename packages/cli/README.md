@@ -73,6 +73,7 @@ react-msaview-cli export-svg --msa <file> [options]
 
 | Option                   | Description                                    | Default         |
 | ------------------------ | ---------------------------------------------- | --------------- |
+| `--spec <file.json>`     | View spec or snapshot (see below)              |                 |
 | `--msa <file>`           | MSA file (FASTA, Stockholm, Clustal, A3M, EMF) | _required_      |
 | `--tree <file>`          | Newick tree file                               |                 |
 | `--gff <file>`           | Domain or exon GFF, or InterProScan JSON       |                 |
@@ -99,6 +100,20 @@ matches no track.
 ```bash
 react-msaview-cli export-svg --msa kinases.aln --tracks conservation,position-ruler \
   -o kinases.svg
+```
+
+### Layers
+
+`--spec` takes an `MsaView` snapshot or its shorthand as a JSON file, so any
+layer in [docs/layers.md](../../docs/layers.md) draws in the figure: column
+tracks, highlights, clades, row panels, encodings. A spec that sets
+`msa`, `tree`, or a filehandle's `uri` to a relative path reads it beside the
+spec file, and an `http(s)` one fetches it. `--msa` is then optional, and every
+flag given on the command line overrides the spec. The figure draws the tracks
+the app would show for the spec, unless `--tracks` names them.
+
+```bash
+react-msaview-cli export-svg --spec p53-view.json -o p53.svg
 ```
 
 ### Sizing the figure
