@@ -15,6 +15,13 @@ const treeOrderLabels: Record<TreeOrder, string> = {
   ladderizeReverse: 'Ladderize, large clades first',
 }
 
+function outgroupLabel(outgroup: string[]) {
+  const [first, ...rest] = outgroup
+  return rest.length === 0
+    ? `Outgroup ${first}`
+    : `Outgroup ${first} … ${rest.at(-1)}`
+}
+
 function toggle(label: string, checked: boolean, set: (arg: boolean) => void) {
   return {
     label,
@@ -104,9 +111,15 @@ export function treeSettingsMenuItems(model: MsaViewModel): MenuItem[] {
         radio('Midpoint', treeRoot === 'midpoint', () => {
           model.setTreeRoot('midpoint')
         }),
-        // set from a node's menu, so this only reports it
+        // "Reroot here" in a node's menu sets the outgroup, so this only
+        // reports it
         ...(typeof treeRoot === 'object'
-          ? [{ ...radio('On an outgroup', true, () => {}), disabled: true }]
+          ? [
+              {
+                ...radio(outgroupLabel(treeRoot.outgroup), true, () => {}),
+                disabled: true,
+              },
+            ]
           : []),
       ],
     },

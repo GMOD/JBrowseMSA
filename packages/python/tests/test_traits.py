@@ -93,7 +93,7 @@ def test_tree_root_takes_the_midpoint_or_an_outgroup():
     assert view.tree_root == "midpoint"
     view.tree_root = ["A", "B"]
     assert view.tree_root == ["A", "B"]
-    with pytest.raises(traitlets.TraitError):
-        view.tree_root = "outgroup"
+    view.tree_root = "A"
+    assert view.tree_root == "A"
     with pytest.raises(traitlets.TraitError):
         view.tree_order = "sideways"

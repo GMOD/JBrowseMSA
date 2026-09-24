@@ -99,9 +99,9 @@ class MSAView(anywidget.AnyWidget):
         default_value=None,
         allow_none=True,
     ).tag(sync=True)
-    # "midpoint", or the outgroup's tip names
+    # "midpoint", or the outgroup's tip names: a list, or one name
     tree_root = traitlets.Union(
-        [traitlets.Enum(["midpoint"]), traitlets.List(traitlets.Unicode())],
+        [traitlets.Unicode(), traitlets.List(traitlets.Unicode())],
         default_value=None,
         allow_none=True,
     ).tag(sync=True)

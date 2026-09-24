@@ -111,6 +111,21 @@ A branch node's menu also has **Show only this node**, which narrows the view to
 that subtree: the rows below it are the whole alignment until **Disable show
 only this node** puts the rest back.
 
+**Rotate this node** swaps the clades below a branch node, the way ggtree's
+`rotate` does, and the alignment rows move with the tips. A second click puts
+them back, and **Tree settings → Order → Undo rotations** clears every rotation.
+The same Order submenu sets the child order for the whole tree: by branch length
+(the default), as the file writes it, or ladderized with the small or the large
+clades first.
+
+**Reroot here**, on any node but the root, roots the tree halfway along the
+branch above that node. **Tree settings → Root → Midpoint** roots it halfway
+along the longest path between two tips, which suits the unrooted trees
+FastTree, IQ-TREE and neighbor joining write. Rerooting renumbers the nodes, so
+it expands collapsed clades, clears rotations and leaves the show-only view.
+[Data layers](https://gmod.org/JBrowseMSA/layers#treeorder-and-treeroot) covers
+`treeOrder` and `treeRoot`, the properties behind these menus.
+
 **Tree settings → Show tree overview** puts the whole tree in a band above the
 tree panel, small enough that a few hundred tips fit in 120 pixels, with the
 focused subtree drawn as a box on it and the `clades` highlights in place. A
@@ -126,13 +141,13 @@ scale bar is hidden in cladogram mode, where horizontal position shows topology
 rather than branch length. The SVG export carries the bar too, so a published
 figure states the scale its branches are drawn to.
 
-The tree settings menu toggles branch-length rendering, right-aligned vs
-tree-adjacent labels, and clickable branch bubbles. **Advanced → Calculate
-neighbor joining tree (BLOSUM62)** builds a quick tree for an alignment loaded
-without one, up to 500 rows. On a larger alignment the calculation would freeze
-the page for several seconds or more, so the menu item explains the limit and
-does not run. Build a tree that size with FastTree or IQ-TREE and open it beside
-the alignment; the
+The tree settings menu sets the child order and the root, and toggles
+branch-length rendering, right-aligned vs tree-adjacent labels, and clickable
+branch bubbles. **Advanced → Calculate neighbor joining tree (BLOSUM62)** builds
+a quick tree for an alignment loaded without one, up to 500 rows. On a larger
+alignment the calculation would freeze the page for several seconds or more, so
+the menu item explains the limit and does not run. Build a tree that size with
+FastTree or IQ-TREE and open it beside the alignment; the
 [protein family tutorial](https://gmod.org/JBrowseMSA/tutorials/protein_family)
 covers the whole path.
 
@@ -334,8 +349,8 @@ settings**, beside the color-scheme palette.
 
 The MSA settings menu holds the Tracks submenu and the toggles **Draw letters**,
 **Color letters, not cells**, **Show track values on hover** and **Hide gappy
-columns**. The tree settings menu beside it holds the branch-length, label and
-clickable-bubble toggles.
+columns**. The tree settings menu beside it holds the Order and Root submenus
+and the branch-length, label and clickable-bubble toggles.
 
 ## Scaling to large data
 

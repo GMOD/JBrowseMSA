@@ -154,6 +154,9 @@ export function midpointRoot<N extends TreeNode>(root: N): TreeNode {
   const a = farthest(reach(tips[0]!).dist)
   const { dist, via } = reach(a)
   const b = farthest(dist)
+  if (b === a) {
+    return root
+  }
   const half = dist.get(b)! / 2
   let node = b
   let next = via.get(node)!

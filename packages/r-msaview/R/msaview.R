@@ -538,14 +538,14 @@ convert_clades <- function(clades) {
 
 check_tree_order <- function(order) {
   orders <- c("branchLength", "input", "ladderize", "ladderizeReverse")
-  if (!is.null(order) && !order %in% orders) {
+  if (!is.null(order) && !(length(order) == 1 && order %in% orders)) {
     stop("tree_order must be one of ", paste(orders, collapse = ", "))
   }
   order
 }
 
-# "midpoint" goes as the string; any other names are an outgroup, which stays
-# an array at length one and takes the row-name substitution the tree takes
+# "midpoint" goes as the string, and any other names are an outgroup, which
+# stays an array at length one and takes the tree's row-name substitution
 convert_tree_root <- function(root) {
   if (is.null(root)) return(NULL)
   if (identical(root, "midpoint")) return("midpoint")

@@ -146,6 +146,11 @@ describe('midpointRoot', () => {
     expect(write(midpointRoot(tree))).toBe('((C,(D,E)),(B,A))')
   })
 
+  test('keeps the root of a tree whose branches all have length zero', () => {
+    const tree = parseNewick('((A:0,B:0):0,C:0);')
+    expect(midpointRoot(tree)).toBe(tree)
+  })
+
   test('keeps a caterpillar of 20000 tips off the call stack', () => {
     let newick = 'T0:1'
     for (let i = 1; i < 20000; i++) {

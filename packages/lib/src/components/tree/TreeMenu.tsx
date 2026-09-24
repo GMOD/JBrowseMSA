@@ -78,7 +78,7 @@ const TreeMenu = observer(function ({
             : 'Show only this node'}
         </MenuItem>
       )}
-      {leaf ? null : (
+      {leaf || isCollapsed ? null : (
         <MenuItem
           dense
           onClick={() => {

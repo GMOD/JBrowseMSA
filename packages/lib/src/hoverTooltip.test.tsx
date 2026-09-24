@@ -176,3 +176,22 @@ test('a branch menu toggles show-only', () => {
   expect(model.showOnly).toBe(id)
   expect(closed).toBe(1)
 })
+
+test('a collapsed node offers no rotation, which would move hidden rows', () => {
+  const { id } = model.hierarchy.data
+  model.toggleCollapsed(id)
+  act(() => {
+    root.render(
+      <TreeMenu
+        node={{ x: 0, y: 0, name: 'Clade', id, leaf: false }}
+        model={model}
+        onClose={() => {}}
+      />,
+    )
+  })
+  expect(menuItems()).toEqual([
+    'Clade',
+    'Expand this node',
+    'Show only this node',
+  ])
+})

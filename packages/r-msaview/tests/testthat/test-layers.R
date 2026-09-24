@@ -197,6 +197,7 @@ test_that("coord_tree passes the midpoint root as a string", {
 
 test_that("a tree order outside the four is refused", {
   expect_error(coord_tree(order = "sideways"), "tree_order")
+  expect_error(coord_tree(order = c("input", "ladderize")), "tree_order")
 })
 
 test_that("a rotate clade reaches the props", {

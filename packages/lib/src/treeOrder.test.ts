@@ -176,3 +176,23 @@ test('rerooting keeps a support value on the branch it labels', () => {
     nodeOf(model, ['B', 'C', 'D', 'E']).data.id,
   )
 })
+
+test("a Stockholm file's own tree reroots without its old ids as labels", () => {
+  const stockholm = [
+    '# STOCKHOLM 1.0',
+    `#=GF NH ${tree}`,
+    ...tips.map(name => `${name} MKAA`),
+    '//',
+  ].join('\n')
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    data: { msa: stockholm },
+    treeRoot: 'midpoint',
+  })
+  const internal = descendants(model.root).filter(n => n.children)
+  expect(internal.length).toBeGreaterThan(1)
+  for (const node of internal) {
+    expect(node.data.name).toBe(node.data.id)
+  }
+  expect(model.rowNames).toEqual(['D', 'E', 'C', 'A', 'B'])
+})

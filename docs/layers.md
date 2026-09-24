@@ -333,7 +333,7 @@ React: the `treeOrder` and `treeRoot` props on `MSAViewer`, or
 `model.setTreeOrder(order)` and `model.setTreeRoot(root)`. R:
 `coord_tree(order = "ladderize", root = "midpoint")`, or `root` as a vector of
 outgroup tip names. Python: `tree_order` and `tree_root`, the latter
-`"midpoint"` or a list of tip names.
+`"midpoint"`, one tip name or a list of them.
 
 ## rowData
 

@@ -146,6 +146,8 @@ test('tree_root takes the midpoint, or a list of names as an outgroup', () => {
   })
   model.change('tree_root', ['A', 'B'])
   expect(mounted.props.at(-1)?.treeRoot).toEqual({ outgroup: ['A', 'B'] })
+  model.change('tree_root', 'A')
+  expect(mounted.props.at(-1)?.treeRoot).toEqual({ outgroup: ['A'] })
   model.change('tree_root', null)
   expect(mounted.props.at(-1)?.treeRoot).toBeUndefined()
 })

@@ -206,6 +206,14 @@ the numbers behind it.
   transformed container per panel (`MSACanvas`, `TreeCanvas`, `TrackBlocks`).
   Anything `position: fixed` inside those containers has to be portaled, since a
   transformed ancestor becomes its containing block.
+- Node ids are path-derived from `tree`, which is `inputTree` after `treeRoot`
+  reroots it (`rerootTree.ts`). `collapsed`, `rotated` and `showOnly` hold those
+  ids, so `setTreeRoot` clears all three and the seeding clade marks apply
+  again. `treeRoot` names tips, so it survives a reload of the same tree.
+  `buildTreeRoot` sorts each node's children by `treeOrder`, then reverses the
+  `rotated` ones. `rerootTree.ts` imports nothing and works on the plain
+  `parseNewick` node, so it can move into `@gmod/newick`, which the
+  jbrowse-components tree sidebar also uses.
 - `hierarchy.ts` no longer implements the tree traversals. They live in
   `@gmod/newick` now, shared with the tree sidebar in jbrowse-components, and
   the file is a typing shim that re-exports them plus this viewer's own layout

@@ -60,6 +60,8 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `region`                         | `{start, end}` columns or `{row, start, end}` residues                                    |
 | `allowed_gappyness`              | hide columns at least this percent gaps (default 100)                                     |
 | `draw_tree`, `show_branch_len`   | booleans, default `True`                                                                  |
+| `tree_order`                     | `"branchLength"` (default), `"input"`, `"ladderize"` or `"ladderizeReverse"`              |
+| `tree_root`                      | `"midpoint"`, or outgroup tip names: one name or a list                                   |
 | `tree_area_width`                | pixels; `auto_tree_area_width` sizes it to the labels                                     |
 | `residue_encoding`               | `"fill"` (default) paints the cell; `"color"` paints the letter                           |
 | `hide_header`                    | boolean, default `False`                                                                  |

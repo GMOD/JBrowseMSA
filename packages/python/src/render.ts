@@ -46,7 +46,7 @@ export interface Traits {
   auto_tree_area_width: boolean
   show_branch_len: boolean
   tree_order: TreeOrder | null
-  tree_root: 'midpoint' | string[] | null
+  tree_root: string | string[] | null
   residue_encoding: 'fill' | 'color'
   hide_header: boolean
   theme: 'auto' | 'light' | 'dark' | Exclude<MSAViewerProps['theme'], string>
@@ -89,6 +89,16 @@ export const INPUT_TRAITS = [
   'theme',
 ] as const
 
+// "midpoint", or one tip name or a list of them as the outgroup, as R's
+// tree_root takes them
+function treeRoot(root: Traits['tree_root']): TreeRoot | undefined {
+  return root === null || root === ''
+    ? undefined
+    : root === 'midpoint'
+      ? root
+      : { outgroup: typeof root === 'string' ? [root] : root }
+}
+
 // the kernel sends traitlets' None as null, and MSAViewer reads an absent prop
 // as "keep the default"
 function optional<T>(value: T | null | '') {
@@ -97,14 +107,6 @@ function optional<T>(value: T | null | '') {
 
 function uriLocation(uri: string) {
   return uri ? { uri, locationType: 'UriLocation' as const } : undefined
-}
-
-function treeRoot(root: Traits['tree_root']): TreeRoot | undefined {
-  return root === null
-    ? undefined
-    : root === 'midpoint'
-      ? root
-      : { outgroup: root }
 }
 
 export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
