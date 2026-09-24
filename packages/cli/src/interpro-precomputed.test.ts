@@ -47,8 +47,9 @@ function json(body: unknown) {
 async function run(inputLines: string, msa?: string) {
   const input = path.join(dir, 'accessions.tsv')
   fs.writeFileSync(input, inputLines)
-  const msaFile = msa === undefined ? undefined : path.join(dir, 'rows.fa')
-  if (msaFile) {
+  let msaFile: string | undefined
+  if (msa !== undefined) {
+    msaFile = path.join(dir, 'rows.fa')
     fs.writeFileSync(msaFile, msa)
   }
   const { runInterProPrecomputed } = await import('./interpro-precomputed.ts')
