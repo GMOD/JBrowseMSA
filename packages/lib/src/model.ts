@@ -141,7 +141,6 @@ import type {
   Legend,
   LegendEntry,
   NodeWithIds,
-  NodeWithIdsAndLength,
   Region,
   ResidueMapping,
   ResidueSegment,
@@ -2103,8 +2102,8 @@ function stateModelFactory() {
        * #getter
        * the laid-out tree, with pixel positions on every node
        */
-      get hierarchy(): HierarchyNode<NodeWithIdsAndLength> {
-        return this.treeLayout.root as HierarchyNode<NodeWithIdsAndLength>
+      get hierarchy(): HierarchyNode<NodeWithIds> {
+        return this.treeLayout.root
       },
 
       /**
@@ -2117,8 +2116,8 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      get leaves() {
-        return this.treeLayout.leaves as HierarchyNode<NodeWithIdsAndLength>[]
+      get leaves(): HierarchyNode<NodeWithIds>[] {
+        return this.treeLayout.leaves
       },
 
       /**

@@ -445,10 +445,5 @@ export interface NodeWithIds {
   noTree?: boolean
 }
 
-export interface NodeWithIdsAndLength {
-  id: string
-  name: string
-  children: NodeWithIdsAndLength[]
-  noTree?: boolean
-  length: number
-}
+/** @deprecated the same type as `NodeWithIds` */
+export type NodeWithIdsAndLength = NodeWithIds
