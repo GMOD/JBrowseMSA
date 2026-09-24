@@ -1071,11 +1071,11 @@ boolean
 
 #### getter: hierarchy
 
-generates a new tree that is clustered with x,y positions
+the laid-out tree, with pixel positions on every node
 
 ```js
 // type
-HierarchyNode<NodeWithIdsAndLength>
+HierarchyNode<NodeWithIds>
 ```
 
 #### getter: highlightedColumnRuns
@@ -1175,7 +1175,7 @@ number
 
 ```js
 // type
-HierarchyNode < NodeWithIdsAndLength > []
+HierarchyNode < NodeWithIds > []
 ```
 
 #### getter: legends
@@ -1677,6 +1677,18 @@ the bracket gutter
 ```js
 // type
 number
+```
+
+#### getter: treeLayout
+
+`root` laid out on new nodes in row and branch-length units, read in pixels
+through `rowHeight` and `treeWidth`. A zoom leaves it and every node in it as
+they are, and an observer reading a node's `x` or `len` observes the size it
+scales by.
+
+```js
+// type
+{ root: LaidOutNode<NodeWithIds>; leaves: LaidOutNode<NodeWithIds>[]; rootToTipLength: number; }
 ```
 
 #### getter: treeOverviewClades
