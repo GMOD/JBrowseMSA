@@ -90,6 +90,22 @@ test('height, color scheme and zoom follow the props', () => {
   expect(model.rowHeight).toBe(6)
 })
 
+test('colorScheme takes a scheme name or a letter map', () => {
+  const model = show({ colorScheme: { map: { K: '#1f77b4' } } })
+  expect(model.customColorScheme).toEqual({ K: '#1f77b4' })
+  expect(model.colorScheme.K).toBe('#1f77b4')
+
+  show({ colorScheme: { map: { K: '#1f77b4' } } })
+  expect(model.customColorScheme).toEqual({ K: '#1f77b4' })
+
+  show({ colorScheme: { map: { R: '#d62728' } } })
+  expect(model.customColorScheme).toEqual({ R: '#d62728' })
+
+  show({ colorScheme: 'lesk' })
+  expect(model.customColorScheme).toBeUndefined()
+  expect(model.colorSchemeName).toBe('lesk')
+})
+
 test('dropping relativeTo turns the reference diff back off', () => {
   const model = show({ relativeTo: 'human' })
   expect(model.relativeTo).toBe('human')

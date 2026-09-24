@@ -17,6 +17,13 @@ export type TrackKind = 'text' | 'bar' | 'logo' | 'arc' | 'ruler'
  */
 export type ResidueEncoding = 'fill' | 'color'
 
+/**
+ * The residue colors: a scheme name from the built-in table, or a scale's
+ * `{map}` of letter to color, which leaves every letter it does not list
+ * uncolored
+ */
+export type ColorScheme = string | Required<Pick<ScaleSpec, 'map'>>
+
 export interface BasicTrackModel {
   id: string
   name: string

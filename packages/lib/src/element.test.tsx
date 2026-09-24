@@ -139,3 +139,24 @@ test('a fractional range from a Nightingale zoom widens to whole residues', asyn
   })
   expect(model.viewport).toEqual({ startColumn: 12, endColumn: 22 })
 })
+
+test('the colorScheme property carries a letter map past the attribute', async () => {
+  const { element, model } = await setup()
+  const el = element as HTMLElement & { colorScheme?: unknown }
+  act(() => {
+    element.setAttribute('color-scheme', 'clustal')
+  })
+  expect(model.colorSchemeName).toBe('clustal')
+
+  act(() => {
+    el.colorScheme = { map: { K: '#1f77b4' } }
+  })
+  expect(model.customColorScheme).toEqual({ K: '#1f77b4' })
+
+  act(() => {
+    el.colorScheme = undefined
+    element.setAttribute('color-scheme', 'lesk')
+  })
+  expect(model.customColorScheme).toBeUndefined()
+  expect(model.colorSchemeName).toBe('lesk')
+})

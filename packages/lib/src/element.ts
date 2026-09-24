@@ -7,6 +7,7 @@ import type { MsaViewModel } from './model.ts'
 import type { MountedViewer } from './mount.tsx'
 import type {
   Cell,
+  ColorScheme,
   ColumnTrackSpec,
   Highlight,
   ResidueMapping,
@@ -15,7 +16,13 @@ import type {
 
 type ElementData = Pick<
   MSAViewerProps,
-  'msa' | 'tree' | 'gff' | 'highlights' | 'columnTracks' | 'residueMappings'
+  | 'msa'
+  | 'tree'
+  | 'gff'
+  | 'colorScheme'
+  | 'highlights'
+  | 'columnTracks'
+  | 'residueMappings'
 >
 
 interface NightingaleManager extends HTMLElement {
@@ -78,8 +85,10 @@ function residueRange(model: MsaViewModel, row: string, viewport: Viewport) {
 /**
  * Registers a custom element that renders MSAViewer, for pages with no React.
  * Attributes: msa-url, tree-url, gff-url, color-scheme, height, hide-header,
- * theme, tree-area-width and reference-row. Properties: msa, tree and gff text, highlights,
- * columnTracks and residueMappings. Events: cell-hover, cell-click and
+ * theme, tree-area-width and reference-row. Properties: msa, tree and gff text,
+ * colorScheme, highlights, columnTracks and residueMappings. The colorScheme
+ * property takes a `{map}` the color-scheme attribute cannot hold, and wins
+ * over the attribute while set. Events: cell-hover, cell-click and
  * viewport-change, each with the MSAViewer callback's value as detail.
  *
  * Inside a <nightingale-manager>, the element registers with it and speaks its
@@ -122,6 +131,12 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
     set gff(value: string | undefined) {
       this.#setData({ gff: value })
     }
+    get colorScheme() {
+      return this.#data.colorScheme
+    }
+    set colorScheme(value: ColorScheme | undefined) {
+      this.#setData({ colorScheme: value })
+    }
     get highlights() {
       return this.#data.highlights
     }
@@ -157,7 +172,10 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
         msaFilehandle: location(this.getAttribute('msa-url')),
         treeFilehandle: location(this.getAttribute('tree-url')),
         gffFilehandle: location(this.getAttribute('gff-url')),
-        colorScheme: this.getAttribute('color-scheme') ?? undefined,
+        colorScheme:
+          this.#data.colorScheme ??
+          this.getAttribute('color-scheme') ??
+          undefined,
         height: numberAttribute(this.getAttribute('height')),
         treeAreaWidth: numberAttribute(this.getAttribute('tree-area-width')),
         hideHeader: this.hasAttribute('hide-header'),

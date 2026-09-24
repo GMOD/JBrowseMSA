@@ -60,6 +60,7 @@ export type {
   Cell,
   Clade,
   CladeMark,
+  ColorScheme,
   ColumnTrackSpec,
   DomainBand,
   Encoding,

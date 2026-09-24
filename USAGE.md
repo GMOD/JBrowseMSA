@@ -51,7 +51,7 @@ Props:
 | `msaFilehandle`     | `FileLocation`           | Remote file location for alignment                                                  |
 | `treeFilehandle`    | `FileLocation`           | Remote file location for tree                                                       |
 | `gffFilehandle`     | `FileLocation`           | Remote file location for domain GFF                                                 |
-| `colorScheme`       | `string`                 | Color scheme name (see below)                                                       |
+| `colorScheme`       | `string \| {map}`        | Color scheme name, or a color per residue letter (see below)                        |
 | `height`            | `number`                 | Widget height in pixels                                                             |
 | `colWidth`          | `number`                 | Per-column width in pixels (horizontal zoom)                                        |
 | `rowHeight`         | `number`                 | Per-row height in pixels (vertical zoom)                                            |
@@ -300,10 +300,11 @@ components.
 
 Attributes: `msa-url`, `tree-url`, `gff-url`, `color-scheme`, `height`,
 `hide-header`, `theme`, `tree-area-width` and `reference-row`. Properties:
-`msa`, `tree` and `gff` text, `highlights`, `columnTracks` and
-`residueMappings`. The element dispatches `cell-hover`, `cell-click` and
-`viewport-change` events whose `detail` is the value the matching `MSAViewer`
-callback receives.
+`msa`, `tree` and `gff` text, `colorScheme`, `highlights`, `columnTracks` and
+`residueMappings`. The `colorScheme` property takes the `{map}` form the
+attribute cannot hold, and while set it wins over the attribute. The element
+dispatches `cell-hover`, `cell-click` and `viewport-change` events whose
+`detail` is the value the matching `MSAViewer` callback receives.
 
 Inside a [Nightingale](https://github.com/ebi-webcomponents/nightingale)
 `<nightingale-manager>`, the element registers with the manager like a
@@ -333,6 +334,25 @@ jalview_prophelix, jalview_propstrand, jalview_propturn
 **Dynamic (per-column):** clustalx_protein_dynamic, percent_identity_dynamic
 
 **No residue colors:** none
+
+### A color per letter
+
+`colorScheme` also takes `{map}`, a color per residue letter, for coloring only
+the residues a host cares about:
+
+```tsx
+<MSAViewer
+  msa={msa}
+  colorScheme={{ map: { K: '#1f77b4', R: '#1f77b4', D: '#d62728' } }}
+/>
+```
+
+The viewer upper-cases every row before coloring it, as the built-in schemes
+expect, so a map's letters match in either case: `k` or `K` colors every lysine,
+whether the file writes it `k` or `K`. Every letter the map leaves out is
+uncolored, gaps included; list `-` and `.` to color them. The model stores the
+map as `customColorScheme`, and picking a scheme from the palette menu clears
+it.
 
 ## API
 

@@ -13,6 +13,7 @@ import type { MsaViewModel } from '../model.ts'
 import type {
   Cell,
   Clade,
+  ColorScheme,
   ColumnTrackSpec,
   Encoding,
   Highlight,
@@ -44,7 +45,11 @@ export interface MSAViewerProps {
   msaFilehandle?: FileLocationType
   treeFilehandle?: FileLocationType
   gffFilehandle?: FileLocationType
-  colorScheme?: string
+  /**
+   * a scheme name from the built-in table, or `{map}`, a color per residue
+   * letter that leaves every other letter uncolored
+   */
+  colorScheme?: ColorScheme
   height?: number
   /** initial per-column pixel width (zoom level) */
   colWidth?: number
@@ -138,6 +143,14 @@ export interface MSAViewerProps {
    * model when msa, tree, gff or a filehandle changes
    */
   onModel?: (model: MsaViewModel) => void
+}
+
+function colorSchemeSnapshot(scheme: ColorScheme | undefined) {
+  return typeof scheme === 'string'
+    ? { colorSchemeName: scheme }
+    : scheme
+      ? { customColorScheme: scheme.map }
+      : {}
 }
 
 type DataSource = Pick<
@@ -256,7 +269,7 @@ function Viewer({
       ...(msaFilehandle ? { msaFilehandle } : {}),
       ...(treeFilehandle ? { treeFilehandle } : {}),
       ...(gffFilehandle ? { gffFilehandle } : {}),
-      ...(colorScheme ? { colorSchemeName: colorScheme } : {}),
+      ...colorSchemeSnapshot(colorScheme),
       ...(height ? { height } : {}),
       ...(colWidth ? { colWidth } : {}),
       ...(rowHeight ? { rowHeight } : {}),
@@ -299,11 +312,6 @@ function Viewer({
       model.setHeight(height)
     }
   }, [model, height])
-  useEffect(() => {
-    if (colorScheme !== undefined) {
-      model.setColorSchemeName(colorScheme)
-    }
-  }, [model, colorScheme])
   useEffect(() => {
     if (colWidth !== undefined) {
       model.setColWidth(colWidth)
@@ -354,6 +362,15 @@ function Viewer({
 
   // keyed by content, since a host computing a layer inline passes a new array
   // on every render
+  const colorSchemeKey = JSON.stringify(colorScheme ?? null)
+  useEffect(() => {
+    const scheme = JSON.parse(colorSchemeKey) as ColorScheme | null
+    if (typeof scheme === 'string') {
+      model.setColorSchemeName(scheme)
+    } else if (scheme) {
+      model.setCustomColorScheme(scheme.map)
+    }
+  }, [model, colorSchemeKey])
   const highlightsKey = JSON.stringify(highlights ?? [])
   useEffect(() => {
     model.setHighlights(JSON.parse(highlightsKey))
