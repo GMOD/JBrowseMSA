@@ -435,10 +435,21 @@ function resolveFeatureScale(
   }
 }
 
+const columnTrackBytes = new WeakMap<ColumnTrackSpec, number>()
+
+function columnTrackSize(track: ColumnTrackSpec) {
+  let bytes = columnTrackBytes.get(track)
+  if (bytes === undefined) {
+    bytes = JSON.stringify(track).length
+    columnTrackBytes.set(track, bytes)
+  }
+  return bytes
+}
+
 // a data track over this size stays in the live model but leaves the snapshot,
 // the same rule DataModel applies to an inline document
 function columnTrackSizes(tracks?: readonly ColumnTrackSpec[]) {
-  return (tracks ?? []).map(t => JSON.stringify(t).length)
+  return (tracks ?? []).map(columnTrackSize)
 }
 
 function smallColumnTracks(tracks?: ColumnTrackSpec[]) {

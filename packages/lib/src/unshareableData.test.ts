@@ -2,7 +2,7 @@
 // drops an inline document past maxInlineSnapshotBytes. `unshareableData`
 // reports what was dropped.
 import { getSnapshot, types } from '@jbrowse/mobx-state-tree'
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 
 import { maxInlineSnapshotBytes } from './constants.ts'
 import stateModelFactory from './model.ts'
@@ -113,6 +113,29 @@ test('a data track too large for the snapshot is reported, not dropped in silenc
   expect(
     (getSnapshot(model) as { columnTracks?: unknown[] }).columnTracks,
   ).toBeUndefined()
+})
+
+test('a snapshot measures each data track once, however often it is taken', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: smallMsa },
+  })
+  const values = Array.from({ length: 100 }, () => 1)
+  model.setColumnTracks([{ id: 'small', name: 'Small', kind: 'bar', values }])
+  const stringify = vi.spyOn(JSON, 'stringify')
+  try {
+    getSnapshot(model)
+    model.setRowHeight(model.rowHeight + 1)
+    getSnapshot(model)
+    model.setRowHeight(model.rowHeight + 1)
+    getSnapshot(model)
+    expect(
+      stringify.mock.calls.filter(([v]) => v === model.columnTracks[0]),
+    ).toHaveLength(1)
+  } finally {
+    stringify.mockRestore()
+  }
 })
 
 test('a host that restores the data itself silences the warning', () => {
