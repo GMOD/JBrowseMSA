@@ -27,7 +27,8 @@ label.}
 highlight carrying one.}
 
 \item{mark}{What to draw over the clade: \code{"highlight"},
-\code{"bracket"}, \code{"collapse"} or \code{"focus"}.}
+\code{"bracket"}, \code{"collapse"}, \code{"focus"} or
+\code{"rotate"}.}
 }
 \value{
 A layer to add to a viewer with \code{+}.
@@ -39,8 +40,9 @@ alignment, which is ggtree's \code{geom_hilight}.
 \code{mark = "bracket"} draws a bar beside the rows carrying
 \code{label}, which is \code{geom_cladelab}, or \code{geom_strip} over a
 \code{range}. \code{mark = "collapse"} and \code{mark = "focus"} open the
-viewer with the clade collapsed, or with the rest of the tree hidden, and
-both need \code{mrca}.
+viewer with the clade collapsed, or with the rest of the tree hidden.
+\code{mark = "rotate"} swaps the order of the clade's children, which is
+ggtree's \code{rotate}. All three need \code{mrca}.
 }
 \details{
 \code{mrca} names tips whose most recent common ancestor is the clade, and

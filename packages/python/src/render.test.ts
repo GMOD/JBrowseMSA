@@ -49,6 +49,8 @@ const defaults: Traits = {
   tree_area_width: null,
   auto_tree_area_width: false,
   show_branch_len: true,
+  tree_order: null,
+  tree_root: null,
   residue_encoding: 'fill',
   hide_header: false,
   theme: 'auto',
@@ -133,6 +135,19 @@ test('traits become MSAViewer props, with empty values left unset', () => {
     hideHeader: true,
     theme: 'light',
   })
+})
+
+test('tree_root takes the midpoint, or a list of names as an outgroup', () => {
+  const model = fakeModel({ tree_order: 'ladderize', tree_root: 'midpoint' })
+  renderWidget(model)
+  expect(mounted.props[0]).toMatchObject({
+    treeOrder: 'ladderize',
+    treeRoot: 'midpoint',
+  })
+  model.change('tree_root', ['A', 'B'])
+  expect(mounted.props.at(-1)?.treeRoot).toEqual({ outgroup: ['A', 'B'] })
+  model.change('tree_root', null)
+  expect(mounted.props.at(-1)?.treeRoot).toBeUndefined()
 })
 
 test('a trait change updates the mounted viewer', () => {

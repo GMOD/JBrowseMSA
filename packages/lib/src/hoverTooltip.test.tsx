@@ -144,6 +144,7 @@ test('clicking a leaf label opens the leaf menu', () => {
     leaf.data.name,
     'More info...',
     'Collapse subtree',
+    'Reroot here',
     'Indicate differences from this row',
   ])
 })
@@ -166,6 +167,7 @@ test('a branch menu toggles show-only', () => {
     'Clade',
     'Collapse this node',
     'Show only this node',
+    'Rotate this node',
   ])
   const items = document.querySelectorAll<HTMLElement>('[role="menuitem"]')
   act(() => {

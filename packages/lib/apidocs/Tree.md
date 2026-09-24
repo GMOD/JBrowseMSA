@@ -131,6 +131,22 @@ IOptionalIType<ISimpleType<number>, [undefined]>
 treeAreaWidth: stripDefault(types.number, defaultTreeAreaWidth)
 ```
 
+#### property: treeOrder
+
+the order each node's children draw in: `branchLength` (shortest first), `input`
+(as the file gives them), `ladderize` (fewest tips first) or `ladderizeReverse`
+(most tips first)
+
+```js
+// type signature
+IOptionalIType<ISimpleType<TreeOrder>, [undefined]>
+// code
+treeOrder: stripDefault(
+        types.enumeration<TreeOrder>('TreeOrder', [...treeOrders]),
+        defaultTreeOrder,
+      )
+```
+
 #### property: treeWidth
 
 width of the tree within the treeArea, px. automatically synced to fit within
@@ -217,6 +233,13 @@ set tree area width (px)
 ```js
 // type signature
 setTreeAreaWidth: (n: number) => void
+```
+
+#### action: setTreeOrder
+
+```js
+// type signature
+setTreeOrder: (order: TreeOrder) => void
 ```
 
 #### action: setTreeWidth

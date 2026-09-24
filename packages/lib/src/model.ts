@@ -81,6 +81,7 @@ import {
   clusterLayout,
   collapse,
   find,
+  forEachDescendant,
   hierarchy,
   layoutTree,
   leafIndex,
@@ -100,6 +101,7 @@ import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { parseAsn1 } from './parseAsn1.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
+import { midpointRoot, rerootTree } from './rerootTree.ts'
 import {
   globalColToVisibleCol,
   seqPosOfGlobalCol,
@@ -125,6 +127,7 @@ import type { ColumnStats } from './columnStats.ts'
 import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
+import type { TreeNode } from './rerootTree.ts'
 import type { ScaleSpec } from './scales.ts'
 import type {
   Annotation,
@@ -132,6 +135,7 @@ import type {
   BasicTrack,
   Cell,
   Clade,
+  CladeMark,
   ResidueMappingProblem,
   ColumnTrackSpec,
   DomainBand,
@@ -148,6 +152,8 @@ import type {
   ResolvedEncoding,
   ResolvedFeaturePanel,
   ResolvedHighlight,
+  TreeOrder,
+  TreeRoot,
   ResolvedRowPanel,
   ResolvedStripPanel,
   RowFeaturesSpec,
@@ -483,6 +489,7 @@ export const preservedOnReset = new Set([
   'treeAreaWidth',
   'treeWidth',
   'showBranchLen',
+  'treeOrder',
   'drawTree',
   'drawNodeBubbles',
   'drawNodeLabels',
@@ -508,6 +515,9 @@ function trackIsOff(
 ) {
   return turnedOffTracks.get(id) ?? (defaultOff || defaultOffTracks.has(id))
 }
+
+// the marks that set tree state from a node rather than drawing
+const seedingMarks = new Set<CladeMark>(['collapse', 'focus', 'rotate'])
 
 // shared empty results, so observers don't see a fresh [] as a change
 const noDomains: Annotation[] = []
@@ -561,8 +571,7 @@ function cladeRows(
  * Every clade that resolves, with its fill color settled, against the leaf
  * order `rowNamesSet` gives. The tree panel resolves against the displayed
  * rows and the overview against its own, so both take the tree they draw. A
- * `range` record names no node, so `collapse` and `focus`, which need one,
- * drop it.
+ * `range` record names no node, so the seeding marks, which need one, drop it.
  */
 function resolveClades(
   clades: Clade[],
@@ -572,7 +581,7 @@ function resolveClades(
   const index = leafIndex(root)
   return clades.flatMap(clade => {
     const resolved = cladeRows(clade, root, index, rowNamesSet)
-    const seeding = clade.mark === 'collapse' || clade.mark === 'focus'
+    const seeding = seedingMarks.has(clade.mark)
     return resolved && !(seeding && resolved.nodeId === undefined)
       ? [
           {
@@ -590,20 +599,50 @@ function resolveClades(
   })
 }
 
+const childOrders: Record<
+  TreeOrder,
+  ((a: HierarchyNode, b: HierarchyNode) => number) | undefined
+> = {
+  input: undefined,
+  branchLength: (a, b) => (a.data.length ?? 1) - (b.data.length ?? 1),
+  ladderize: (a, b) => a.value! - b.value!,
+  ladderizeReverse: (a, b) => b.value! - a.value!,
+}
+
 /**
  * The tree with the display transforms applied: leaf counts summed, children
- * sorted by branch length, `showOnly` taken as the new root, and each
- * `collapsed` clade folded. The overview builds the same tree without the
- * focus, so it shows the focused subtree inside the whole.
+ * put in `order` and each `rotated` node's reversed, `showOnly` taken as the
+ * new root, and each `collapsed` clade folded. The overview builds the same
+ * tree without the focus, so it shows the focused subtree inside the whole.
  */
 function buildTreeRoot(
   tree: NodeWithIds,
-  collapsed: readonly string[],
-  showOnly?: string,
+  {
+    collapsed,
+    rotated,
+    order,
+    showOnly,
+  }: {
+    collapsed: readonly string[]
+    rotated: readonly string[]
+    order: TreeOrder
+    showOnly?: string
+  },
 ) {
   let hier = hierarchy(tree, d => d.children)
   hierarchySum(hier, d => (d.children.length > 0 ? 0 : 1))
-  sort(hier, (a, b) => (a.data.length ?? 1) - (b.data.length ?? 1))
+  const compare = childOrders[order]
+  if (compare) {
+    sort(hier, compare)
+  }
+  if (rotated.length > 0) {
+    const flip = new Set(rotated)
+    forEachDescendant(hier, n => {
+      if (flip.has(n.data.id)) {
+        n.children?.reverse()
+      }
+    })
+  }
 
   if (showOnly) {
     const res = find(hier, n => n.data.id === showOnly)
@@ -626,6 +665,53 @@ function buildTreeRoot(
   }
 
   return hier
+}
+
+/**
+ * The node whose branch an outgroup roots the tree on: the outgroup's most
+ * recent common ancestor, or the rest of the tips' where that ancestor is the
+ * root, since the outgroup then straddles the root and the branch above the
+ * other side is the same branch of the unrooted tree.
+ */
+function outgroupNode(root: HierarchyNode, outgroup: string[]) {
+  const index = leafIndex(root)
+  const node = mrca(root, outgroup, index)
+  if (node !== root) {
+    return node
+  }
+  const out = new Set(outgroup)
+  const rest = leaves(root)
+    .map(n => n.data.name)
+    .filter(name => !out.has(name))
+  const other = mrca(root, rest, index)
+  return other === root ? undefined : other
+}
+
+/**
+ * `tree` rerooted as `treeRoot` asks, with fresh path ids. The ids of the tree
+ * as written become names on unnamed nodes, and a rerooting would carry them
+ * along as labels, so they come off first.
+ */
+function rootTree(tree: NodeWithIds, treeRoot: TreeRoot) {
+  const plain = new Map<NodeWithIds, TreeNode>()
+  for (const node of preorder(tree).reverse()) {
+    plain.set(node, {
+      name: node.name === node.id ? undefined : node.name,
+      length: node.length,
+      children: node.children.map(c => plain.get(c)!),
+    })
+  }
+  const input = plain.get(tree)!
+  if (treeRoot === 'midpoint') {
+    return generateNodeIds(midpointRoot(input))
+  }
+  const target = outgroupNode(
+    hierarchy(tree, d => d.children),
+    treeRoot.outgroup,
+  )
+  return target
+    ? generateNodeIds(rerootTree(input, plain.get(target.data)!))
+    : tree
 }
 
 // the inclusive tip indices a node covers, from the row-space extent
@@ -840,6 +926,22 @@ function stateModelFactory() {
 
         /**
          * #property
+         * tree nodes whose children draw in reverse order, which is ggtree's
+         * `rotate`: the same tree, with the clades on either side of the node
+         * swapped
+         */
+        rotated: stripDefault(types.array(types.string), []),
+
+        /**
+         * #property
+         * where the tree is rooted: `midpoint` roots it halfway along the
+         * longest path between two tips, `{outgroup}` on the branch above
+         * the tips named, and undefined keeps the file's root
+         */
+        treeRoot: types.frozen<TreeRoot | undefined>(),
+
+        /**
+         * #property
          * focus on particular subtree
          */
         showOnly: types.maybe(types.string),
@@ -932,7 +1034,8 @@ function stateModelFactory() {
          * clades of the tree with a mark drawn over them. `mrca` names tips
          * whose common ancestor is the clade, or `range` its first and last
          * tip in display order, and `tips` is the leaf count the producer
-         * measured. `mark` is `highlight`, `bracket`, `collapse` or `focus`.
+         * measured. `mark` is `highlight`, `bracket`, `collapse`, `focus` or
+         * `rotate`.
          * See docs/layers.md
          */
         clades: stripDefault(types.array(types.frozen<Clade>()), []),
@@ -1295,8 +1398,9 @@ function stateModelFactory() {
       /**
        * #action
        * switch to another alignment of a multi-alignment file (Stockholm).
-       * Clears the collapsed node ids, the subtree in focus, the reference row
-       * and the scroll position, which all refer to the previous alignment
+       * Clears the collapsed and rotated node ids, the subtree in focus, the
+       * reference row and the scroll position, which all refer to the
+       * previous alignment
        */
       setCurrentAlignment(n: number) {
         if (n === self.currentAlignment) {
@@ -1305,6 +1409,7 @@ function stateModelFactory() {
         transaction(() => {
           self.currentAlignment = n
           self.collapsed.clear()
+          self.rotated.clear()
           this.setShowOnly(undefined)
           this.drawRelativeTo(undefined)
           self.scrollX = 0
@@ -1322,6 +1427,42 @@ function stateModelFactory() {
         } else {
           self.collapsed.push(node)
         }
+      },
+
+      /**
+       * #action
+       * reverse the order of the given node's children, or restore it
+       */
+      toggleRotated(node: string) {
+        if (self.rotated.includes(node)) {
+          self.rotated.remove(node)
+        } else {
+          self.rotated.push(node)
+        }
+      },
+
+      /**
+       * #action
+       */
+      clearRotated() {
+        self.rotated.clear()
+      },
+
+      /**
+       * #action
+       * reroot the tree. Clears `collapsed`, `rotated` and `showOnly`, whose
+       * path-derived node ids name other nodes in the rerooted tree
+       */
+      setTreeRoot(treeRoot?: TreeRoot) {
+        if (compareStructural(self.treeRoot, treeRoot)) {
+          return
+        }
+        transaction(() => {
+          self.treeRoot = treeRoot
+          self.collapsed.clear()
+          self.rotated.clear()
+          this.setShowOnly(undefined)
+        })
       },
 
       /**
@@ -1603,8 +1744,9 @@ function stateModelFactory() {
 
       /**
        * #getter
+       * the tree the file or the alignment gives, before `treeRoot`
        */
-      get tree(): NodeWithIds {
+      get inputTree(): NodeWithIds {
         const text = self.data.tree
         return text
           ? generateNodeIds(parseTreeText(text))
@@ -1614,6 +1756,19 @@ function stateModelFactory() {
               id: 'empty',
               name: 'empty',
             })
+      },
+
+      /**
+       * #getter
+       * the tree as the file or the alignment gives it, rerooted where
+       * `treeRoot` asks. Every node id, and so `collapsed`, `rotated` and
+       * `showOnly`, refers to this tree.
+       */
+      get tree(): NodeWithIds {
+        const tree = this.inputTree
+        return self.treeRoot && !tree.noTree
+          ? rootTree(tree, self.treeRoot)
+          : tree
       },
 
       /**
@@ -1637,8 +1792,8 @@ function stateModelFactory() {
        * `clades` resolved to the rows each one covers. The tip names resolve
        * against `tree` rather than `root`, so a clade whose ancestor the user
        * collapsed keeps its rows. One leaf pass over the tree serves every
-       * clade. A `range` record names no node, so `collapse` and `focus`, which
-       * need one, drop it.
+       * clade. A `range` record names no node, so `collapse`, `focus` and
+       * `rotate`, which need one, drop it.
        */
       get resolvedClades(): ResolvedClade[] {
         if (self.clades.length === 0) {
@@ -1696,7 +1851,12 @@ function stateModelFactory() {
        * #getter
        */
       get root() {
-        return buildTreeRoot(this.tree, self.collapsed, self.showOnly)
+        return buildTreeRoot(this.tree, {
+          collapsed: self.collapsed,
+          rotated: self.rotated,
+          order: self.treeOrder,
+          showOnly: self.showOnly,
+        })
       },
 
       /**
@@ -1720,7 +1880,11 @@ function stateModelFactory() {
         if (!self.showTreeOverview) {
           return undefined
         }
-        const root = buildTreeRoot(this.tree, self.collapsed)
+        const root = buildTreeRoot(this.tree, {
+          collapsed: self.collapsed,
+          rotated: self.rotated,
+          order: self.treeOrder,
+        })
         const numTips = leaves(root).length
         clusterLayout(root, numTips, 1)
         const rootLen = Math.max(root.data.length || 0, 0)
@@ -3134,13 +3298,43 @@ function stateModelFactory() {
 
       /**
        * #action
-       * swap in a different tree over the same alignment. Clears `collapsed`
-       * and `showOnly`, since path-derived node ids (node-0-0-1) from the old
+       * root the tree on the branch above the given node. The node's tips are
+       * a split of the unrooted tree, and the side of it that is a clade in
+       * the tree as written stands for it as an outgroup, by its first and
+       * last tip, so the root survives the path ids changing under it
+       */
+      rerootAt(nodeId: string) {
+        const shown = find(
+          hierarchy(self.tree, d => d.children),
+          n => n.data.id === nodeId,
+        )
+        if (!shown?.parent) {
+          return
+        }
+        const node = outgroupNode(
+          hierarchy(self.inputTree, d => d.children),
+          leaves(shown).map(n => n.data.name),
+        )
+        if (node) {
+          const tips = leaves(node)
+          self.setTreeRoot({
+            outgroup: [
+              ...new Set([tips[0]!.data.name, tips.at(-1)!.data.name]),
+            ],
+          })
+        }
+      },
+
+      /**
+       * #action
+       * swap in a different tree over the same alignment. Clears `collapsed`,
+       * `rotated` and `showOnly`, since path-derived node ids (node-0-0-1) from the old
        * tree would match unrelated nodes in the new one.
        */
       replaceTree(newick: string) {
         transaction(() => {
           self.collapsed.clear()
+          self.rotated.clear()
           self.setShowOnly(undefined)
           self.setTree(newick)
         })
@@ -4181,23 +4375,25 @@ function stateModelFactory() {
           self.setHighlightedColumns(self.highlightColumns)
         }
 
-        // The `collapse` and `focus` clade marks seed the collapsed list and
-        // the subtree in focus, which the tree, `hideGapsEffective` and the
-        // alignment all read. The tree arrives with the model for inline data
-        // and later for a filehandle, so the seeding waits for it and then runs
-        // once per data load and once per change of `clades`: expanding a
-        // seeded clade sticks until either changes. `dataInitialized` is true
-        // once the MSA alone has loaded, when the tree is still the flat stub,
-        // so a tree filehandle holds the seeding until its text lands.
+        // The `collapse`, `focus` and `rotate` clade marks seed the collapsed
+        // list, the subtree in focus and the rotated nodes, which the tree,
+        // `hideGapsEffective` and the alignment all read. The tree arrives with
+        // the model for inline data and later for a filehandle, so the seeding
+        // waits for it and then runs once per data load, per change of
+        // `clades` and per reroot, which clears the node ids the seeding
+        // wrote: expanding a seeded clade sticks until one of those changes.
+        // `dataInitialized` is true once the MSA alone has loaded, when the
+        // tree is still the flat stub, so a tree filehandle holds the seeding
+        // until its text lands.
         addDisposer(
           self,
           reaction(
             () =>
               self.dataInitialized && !(self.treeFilehandle && !self.data.tree)
-                ? getSnapshot(self.clades)
+                ? { clades: getSnapshot(self.clades), treeRoot: self.treeRoot }
                 : undefined,
-            clades => {
-              if (!clades?.length) {
+            seed => {
+              if (!seed?.clades.length) {
                 return
               }
               for (const { mark, nodeId } of self.resolvedClades) {
@@ -4208,6 +4404,11 @@ function stateModelFactory() {
                   self.toggleCollapsed(nodeId)
                 } else if (mark === 'focus') {
                   self.setShowOnly(nodeId)
+                } else if (
+                  mark === 'rotate' &&
+                  !self.rotated.includes(nodeId)
+                ) {
+                  self.toggleRotated(nodeId)
                 }
               }
             },

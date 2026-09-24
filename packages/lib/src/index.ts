@@ -86,6 +86,8 @@ export type {
   TextTrackModel,
   TidyDomainAnnotation,
   TrackKind,
+  TreeOrder,
+  TreeRoot,
   UnshareableData,
   Viewport,
 } from './types.ts'

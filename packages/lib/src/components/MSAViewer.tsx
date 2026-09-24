@@ -20,6 +20,8 @@ import type {
   ResidueEncoding,
   ResidueMapping,
   RowPanelSpec,
+  TreeOrder,
+  TreeRoot,
   Viewport,
 } from '../types.ts'
 import type { FileLocation as FileLocationType } from '@jbrowse/core/util/types'
@@ -94,6 +96,17 @@ export interface MSAViewerProps {
   autoTreeAreaWidth?: boolean
   /** draw branch lengths (default true); false draws a cladogram */
   showBranchLen?: boolean
+  /**
+   * the order each node's children draw in: `branchLength` (default,
+   * shortest first), `input` (as the file gives them), `ladderize` (fewest
+   * tips first) or `ladderizeReverse` (most tips first)
+   */
+  treeOrder?: TreeOrder
+  /**
+   * reroot the tree: `midpoint`, or `{outgroup: [tip names]}` on the branch
+   * above those tips' common ancestor
+   */
+  treeRoot?: TreeRoot
   /**
    * which channel `colorScheme` paints: `fill` (default) colors the background
    * of the cell a residue sits in, `color` colors the letter itself and leaves
@@ -215,6 +228,8 @@ function Viewer({
   treeAreaWidth,
   autoTreeAreaWidth,
   showBranchLen,
+  treeOrder,
+  treeRoot,
   region,
   hideHeader,
   theme,
@@ -258,6 +273,8 @@ function Viewer({
       ...(treeAreaWidth ? { treeAreaWidth } : {}),
       ...(autoTreeAreaWidth ? { autoTreeAreaWidth } : {}),
       ...(showBranchLen !== undefined ? { showBranchLen } : {}),
+      ...(treeOrder ? { treeOrder } : {}),
+      ...(treeRoot ? { treeRoot } : {}),
       ...(residueEncoding !== undefined
         ? { bgColor: residueEncoding === 'fill' }
         : {}),
@@ -318,6 +335,11 @@ function Viewer({
     }
   }, [model, showBranchLen])
   useEffect(() => {
+    if (treeOrder !== undefined) {
+      model.setTreeOrder(treeOrder)
+    }
+  }, [model, treeOrder])
+  useEffect(() => {
     if (residueEncoding !== undefined) {
       model.setBgColor(residueEncoding === 'fill')
     }
@@ -336,6 +358,10 @@ function Viewer({
   useEffect(() => {
     model.setHighlights(JSON.parse(highlightsKey))
   }, [model, highlightsKey])
+  const treeRootKey = JSON.stringify(treeRoot ?? null)
+  useEffect(() => {
+    model.setTreeRoot(JSON.parse(treeRootKey) ?? undefined)
+  }, [model, treeRootKey])
   const cladesKey = JSON.stringify(clades ?? [])
   useEffect(() => {
     model.setClades(JSON.parse(cladesKey))

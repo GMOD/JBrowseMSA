@@ -42,6 +42,8 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "tree_area_width": None,
         "auto_tree_area_width": False,
         "show_branch_len": True,
+        "tree_order": None,
+        "tree_root": None,
         "residue_encoding": "fill",
         "hide_header": False,
         "theme": "auto",
@@ -84,3 +86,14 @@ def test_residue_encoding_takes_fill_or_color():
 def test_positional_msa_and_tree():
     view = MSAView(">a\nMK\n", "(a);")
     assert (view.msa, view.tree) == (">a\nMK\n", "(a);")
+
+
+def test_tree_root_takes_the_midpoint_or_an_outgroup():
+    view = MSAView(tree_order="ladderize", tree_root="midpoint")
+    assert view.tree_root == "midpoint"
+    view.tree_root = ["A", "B"]
+    assert view.tree_root == ["A", "B"]
+    with pytest.raises(traitlets.TraitError):
+        view.tree_root = "outgroup"
+    with pytest.raises(traitlets.TraitError):
+        view.tree_order = "sideways"

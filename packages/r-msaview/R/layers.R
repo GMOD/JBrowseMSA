@@ -145,8 +145,9 @@ geom_msa_highlight <- function(data = NULL, start = NULL, end = NULL,
 #' \code{mark = "bracket"} draws a bar beside the rows carrying
 #' \code{label}, which is \code{geom_cladelab}, or \code{geom_strip} over a
 #' \code{range}. \code{mark = "collapse"} and \code{mark = "focus"} open the
-#' viewer with the clade collapsed, or with the rest of the tree hidden, and
-#' both need \code{mrca}.
+#' viewer with the clade collapsed, or with the rest of the tree hidden.
+#' \code{mark = "rotate"} swaps the order of the clade's children, which is
+#' ggtree's \code{rotate}. All three need \code{mrca}.
 #'
 #' \code{mrca} names tips whose most recent common ancestor is the clade, and
 #' \code{range} names the first and last tip of a run in display order, which
@@ -162,7 +163,8 @@ geom_msa_highlight <- function(data = NULL, start = NULL, end = NULL,
 #' @param label Text naming the clade, drawn by the bracket mark and by a
 #'   highlight carrying one.
 #' @param mark What to draw over the clade: \code{"highlight"},
-#'   \code{"bracket"}, \code{"collapse"} or \code{"focus"}.
+#'   \code{"bracket"}, \code{"collapse"}, \code{"focus"} or
+#'   \code{"rotate"}.
 #' @return A layer to add to a viewer with \code{+}.
 #'
 #' @examples
@@ -335,6 +337,32 @@ theme_msa <- function(theme = NULL, col_width = NULL, row_height = NULL,
     drawTree = draw_tree, showBranchLen = show_branch_len,
     treeAreaWidth = tree_area_width, autoTreeAreaWidth = auto_tree_area_width,
     allowedGappyness = allowed_gappyness, hideHeader = hide_header
+  ))
+}
+
+#' The order and root of the tree
+#'
+#' \code{order = "ladderize"} is ggtree's \code{ladderize}, and
+#' \code{root} does what treeio's \code{root} and phytools'
+#' \code{midpoint.root} do to the tree before ggtree draws it. The rows of
+#' the alignment follow the tips.
+#'
+#' @param order \code{"branchLength"}, \code{"input"}, \code{"ladderize"}
+#'   or \code{"ladderizeReverse"}. See \code{tree_order} in
+#'   \code{\link{msaview}}.
+#' @param root \code{"midpoint"}, or the outgroup's tip names.
+#' @return A layer to add to a viewer with \code{+}.
+#'
+#' @examples
+#' \dontrun{
+#' msaview(msa = "h5.aln", tree = "h5.nh") +
+#'   coord_tree(order = "ladderize", root = "midpoint")
+#' }
+#' @export
+coord_tree <- function(order = NULL, root = NULL) {
+  msa_layer(set = list(
+    treeOrder = check_tree_order(order),
+    treeRoot = convert_tree_root(root)
   ))
 }
 

@@ -94,6 +94,17 @@ class MSAView(anywidget.AnyWidget):
     tree_area_width = traitlets.Float(None, allow_none=True).tag(sync=True)
     auto_tree_area_width = traitlets.Bool(False).tag(sync=True)
     show_branch_len = traitlets.Bool(True).tag(sync=True)
+    tree_order = traitlets.Enum(
+        ["branchLength", "input", "ladderize", "ladderizeReverse"],
+        default_value=None,
+        allow_none=True,
+    ).tag(sync=True)
+    # "midpoint", or the outgroup's tip names
+    tree_root = traitlets.Union(
+        [traitlets.Enum(["midpoint"]), traitlets.List(traitlets.Unicode())],
+        default_value=None,
+        allow_none=True,
+    ).tag(sync=True)
     residue_encoding = traitlets.Enum(["fill", "color"], default_value="fill").tag(sync=True)
     hide_header = traitlets.Bool(False).tag(sync=True)
     # "auto" follows the notebook's light or dark theme; a dict is MUI theme

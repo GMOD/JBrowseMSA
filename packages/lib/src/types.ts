@@ -327,10 +327,36 @@ export interface Highlight {
 /**
  * What the viewer draws over a clade. `highlight` fills the rows behind it,
  * across the tree and the alignment. `bracket` draws a bar and the clade's
- * `label` in the gutter right of the tip labels. `collapse` and `focus` seed
- * the collapsed list and the subtree in focus at load.
+ * `label` in the gutter right of the tip labels. `collapse`, `focus` and
+ * `rotate` seed the collapsed list, the subtree in focus and the rotated nodes
+ * at load.
  */
-export type CladeMark = 'highlight' | 'bracket' | 'collapse' | 'focus'
+export type CladeMark =
+  | 'highlight'
+  | 'bracket'
+  | 'collapse'
+  | 'focus'
+  | 'rotate'
+
+/**
+ * The order each node's children draw in, top to bottom. `branchLength` puts
+ * the shortest branch first, `input` keeps the file's order, `ladderize` puts
+ * the clade with the fewest tips first, so the deep clades step down toward
+ * the bottom, and `ladderizeReverse` puts the one with the most tips first.
+ */
+export type TreeOrder =
+  | 'branchLength'
+  | 'input'
+  | 'ladderize'
+  | 'ladderizeReverse'
+
+/**
+ * Where the tree is rooted: `midpoint` halfway along the longest path between
+ * two tips, and `{outgroup}` on the branch above those tips' most recent common
+ * ancestor, or above the rest of the tips' where the outgroup straddles the
+ * root the file gives.
+ */
+export type TreeRoot = 'midpoint' | { outgroup: string[] }
 
 /**
  * A clade of the tree and the mark drawn over it. `mrca` names tips whose most

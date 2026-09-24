@@ -11,6 +11,8 @@ msaview(
   color_scheme = NULL,
   column_tracks = NULL,
   show_branch_len = NULL,
+  tree_order = NULL,
+  tree_root = NULL,
   highlights = NULL,
   highlight_columns = NULL,
   clades = NULL,
@@ -90,6 +92,15 @@ pixel height.}
 \item{show_branch_len}{Logical. If \code{TRUE}, draw branch lengths
 (phylogram). If \code{FALSE}, draw a cladogram.}
 
+\item{tree_order}{The order each node's children draw in, top to bottom:
+\code{"branchLength"} (the default, shortest branch first),
+\code{"input"} (as the tree file gives them), \code{"ladderize"}
+(fewest tips first) or \code{"ladderizeReverse"} (most tips first).}
+
+\item{tree_root}{Where to root the tree: \code{"midpoint"}, halfway along
+the longest path between two tips, or a character vector of outgroup tip
+names, rooting on the branch above their common ancestor.}
+
 \item{highlights}{A list of labeled highlights, each a list with 1-based
 inclusive coordinates: \code{list(start, end)} for alignment columns,
 \code{list(row, start, end)} for residues of the named row, or
@@ -104,7 +115,8 @@ persistent overlay, as a numeric vector.}
 names whose most recent common ancestor is the clade) or \code{range}
 (the first and last tip of a run, in display order), \code{tips} (the
 number of tips the clade covers), \code{mark} (\code{"highlight"},
-\code{"bracket"}, \code{"collapse"} or \code{"focus"}), and an
+\code{"bracket"}, \code{"collapse"}, \code{"focus"} or
+\code{"rotate"}), and an
 optional \code{color} and \code{label}. A clade that resolves to a
 different number of tips is dropped.}
 

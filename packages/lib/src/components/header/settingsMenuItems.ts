@@ -1,5 +1,19 @@
+import { treeOrders } from '../../constants.ts'
+
 import type { MsaViewModel } from '../../model.ts'
+import type { TreeOrder } from '../../types.ts'
 import type { MenuItem } from '@jbrowse/core/ui/Menu'
+
+function radio(label: string, checked: boolean, onClick: () => void) {
+  return { label, type: 'radio' as const, checked, onClick }
+}
+
+const treeOrderLabels: Record<TreeOrder, string> = {
+  branchLength: 'By branch length',
+  input: 'As written',
+  ladderize: 'Ladderize, small clades first',
+  ladderizeReverse: 'Ladderize, large clades first',
+}
 
 function toggle(label: string, checked: boolean, set: (arg: boolean) => void) {
   return {
@@ -56,8 +70,47 @@ export function treeSettingsMenuItems(model: MsaViewModel): MenuItem[] {
     drawNodeLabels,
     drawLabels,
     showTreeOverview,
+    treeOrder,
+    treeRoot,
+    rotated,
   } = model
   return [
+    {
+      label: 'Order',
+      type: 'subMenu' as const,
+      subMenu: [
+        ...treeOrders.map(order =>
+          radio(treeOrderLabels[order], treeOrder === order, () => {
+            model.setTreeOrder(order)
+          }),
+        ),
+        { type: 'divider' as const },
+        {
+          label: 'Undo rotations',
+          disabled: rotated.length === 0,
+          onClick: () => {
+            model.clearRotated()
+          },
+        },
+      ],
+    },
+    {
+      label: 'Root',
+      type: 'subMenu' as const,
+      subMenu: [
+        radio('As written', treeRoot === undefined, () => {
+          model.setTreeRoot(undefined)
+        }),
+        radio('Midpoint', treeRoot === 'midpoint', () => {
+          model.setTreeRoot('midpoint')
+        }),
+        // set from a node's menu, so this only reports it
+        ...(typeof treeRoot === 'object'
+          ? [{ ...radio('On an outgroup', true, () => {}), disabled: true }]
+          : []),
+      ],
+    },
+    { type: 'divider' as const },
     toggle('Show branch length', showBranchLen, arg => {
       model.setShowBranchLen(arg)
     }),

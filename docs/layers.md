@@ -204,7 +204,7 @@ does the same at runtime.
 
 ## clades
 
-A clade of the tree with a mark over it. `mark` takes one of four values:
+A clade of the tree with a mark over it. `mark` takes one of five values:
 
 - `highlight` fills the rows behind the clade with a translucent rectangle,
   running from the clade's common ancestor to the right edge of the tree area
@@ -215,6 +215,8 @@ A clade of the tree with a mark over it. `mark` takes one of four values:
   this node" does.
 - `focus` opens the viewer on the clade alone, the way "Show only this node"
   does.
+- `rotate` swaps the order of the clade's children at load, the way "Rotate this
+  node" does, which is ggtree's `rotate`. The rows follow the tips.
 
 [![](media/layers-clades.png)][live-layers-clades]
 
@@ -272,12 +274,12 @@ ellipsis. A label reads across the rows where they are taller than the font, and
 runs up the bar where they are not. A `highlight` record carrying a `label`
 draws it the same way, with no bar.
 
-`collapse` and `focus` seed the viewer's own `collapsed` list and `showOnly`
-once, when the tree resolves, so `hideGaps` counts the rows that remain exactly
-as when the user collapses a clade by hand. Both marks name a node, so they need
-`mrca`: a `range` record carrying one of them drops. Expanding a seeded clade or
-clearing the focus holds for the rest of the session, and the record applies
-again the next time the link is opened.
+`collapse`, `focus` and `rotate` seed the viewer's own `collapsed`, `showOnly`
+and `rotated` lists when the tree resolves, so `hideGaps` counts the rows that
+remain exactly as when the user collapses a clade by hand. The three marks name
+a node, so they need `mrca`: a `range` record carrying one of them drops.
+Expanding a seeded clade or clearing the focus holds until the tree is rerooted,
+and the record applies again the next time the link is opened.
 
 Every mark resolves against the tree as loaded, so collapsing a clade's ancestor
 or focusing on part of the tree keeps the mark on the rows that remain on
@@ -285,6 +287,53 @@ screen.
 
 React: the `clades` prop on `MSAViewer`, or `model.setClades(list)`. R:
 `geom_msa_clade(c("Gs/TW/TNC1/2015", "Ck/TW/a174/2015"), tips = 47)`.
+
+## treeOrder and treeRoot
+
+`treeOrder` sets the order each node's children draw in, top to bottom, and the
+rows of the alignment follow the tips:
+
+- `branchLength`, the default, puts the child with the shorter branch first.
+- `input` keeps the order the tree file gives.
+- `ladderize` puts the child with fewer tips first, so the deep clades step down
+  toward the bottom, which is ape's `ladderize` as `plot.phylo` draws it.
+- `ladderizeReverse` puts the child with more tips first, which is ggtree's
+  default.
+
+A rotation from the branch menu or a `rotate` clade reverses one node's children
+after the order applies. "Undo rotations" in the tree settings clears them.
+
+`treeRoot` reroots the tree before the viewer draws it. `"midpoint"` puts the
+root halfway along the longest path between two tips, the usual root for the
+unrooted trees FastTree, IQ-TREE and neighbor joining write. An outgroup puts it
+halfway along the branch above the tips' most recent common ancestor:
+
+```json
+"treeRoot": { "outgroup": ["Dk/VN/1/2012", "Ck/VN/14/2012"] }
+```
+
+Where that ancestor is the root of the file's tree, the outgroup straddles the
+root, and the viewer roots above the common ancestor of the other tips, which is
+the same branch of the unrooted tree. A tree whose outgroup resolves to neither
+side, or names a tip it does not have, keeps its own root.
+
+A support value labels the branch above its node. When the viewer reroots, the
+nodes between the new root and the old one turn over, and each support value
+moves with its branch to the node now at the lower end of it. A root with two
+children has one branch left once the new root takes one of them, so the viewer
+drops it and joins its two branches into one.
+
+"Reroot here" in the branch menu writes the outgroup as the first and last tip
+of the node's side of the split in the file's tree, so a second reroot resolves
+against the file and the link stays short. Rerooting renumbers the nodes, so it
+clears `collapsed`, `rotated` and `showOnly`, and the `collapse`, `focus` and
+`rotate` clades seed again on the new tree.
+
+React: the `treeOrder` and `treeRoot` props on `MSAViewer`, or
+`model.setTreeOrder(order)` and `model.setTreeRoot(root)`. R:
+`coord_tree(order = "ladderize", root = "midpoint")`, or `root` as a vector of
+outgroup tip names. Python: `tree_order` and `tree_root`, the latter
+`"midpoint"` or a list of tip names.
 
 ## rowData
 

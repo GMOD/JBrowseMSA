@@ -161,6 +161,7 @@ test_that("every prop-carrying msaview argument has a layer", {
     scale_row_color("clade", palette = "set1"),
     scale_residue_color("clustal", encoding = "color"),
     coord_msa(1, 2),
+    coord_tree(order = "ladderize", root = "midpoint"),
     stat_msa_diff("a"),
     theme_msa("dark", col_width = 1, row_height = 1, draw_tree = TRUE,
               show_branch_len = TRUE, tree_area_width = 1,
@@ -174,7 +175,8 @@ test_that("every prop-carrying msaview argument has a layer", {
   from_args <- msaview(
     msa = msa, gff = "##gff-version 3", color_scheme = "clustal",
     column_tracks = list(list(id = "t", name = "t", kind = "bar", values = 1)),
-    show_branch_len = TRUE, highlights = list(list(start = 1, end = 2)),
+    show_branch_len = TRUE, tree_order = "ladderize", tree_root = "midpoint",
+    highlights = list(list(start = 1, end = 2)),
     highlight_columns = 1,
     clades = list(list(mrca = c("a", "b"), tips = 2, mark = "highlight")),
     residue_mappings = list(list(

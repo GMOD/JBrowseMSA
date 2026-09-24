@@ -1,3 +1,5 @@
+import type { TreeOrder } from './types.ts'
+
 // Main model defaults
 export const defaultRowHeight = 16
 export const defaultColWidth = 12
@@ -75,6 +77,13 @@ export const defaultLabelsAlignRight = false
 export const defaultTreeAreaWidth = 400
 export const defaultTreeWidth = 300
 export const defaultShowBranchLen = true
+export const treeOrders = [
+  'branchLength',
+  'input',
+  'ladderize',
+  'ladderizeReverse',
+] as const satisfies readonly TreeOrder[]
+export const defaultTreeOrder: TreeOrder = 'branchLength'
 export const defaultDrawTree = true
 export const defaultDrawNodeBubbles = true
 export const defaultDrawNodeLabels = false

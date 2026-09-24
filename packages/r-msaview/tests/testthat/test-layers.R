@@ -182,3 +182,25 @@ test_that("a layer prints the props it carries", {
   expect_output(print(theme_msa("dark")), "msaviewr layer")
   expect_output(print(geom_msa_highlight(start = 1, end = 2)), "highlights")
 })
+
+test_that("coord_tree sets the order and roots on an outgroup", {
+  w <- msaview(msa = msa) +
+    coord_tree(order = "ladderize", root = c("Homo sapiens"))
+  expect_equal(w$x$props$treeOrder, "ladderize")
+  expect_equal(as.character(w$x$props$treeRoot$outgroup), "Homo_sapiens")
+})
+
+test_that("coord_tree passes the midpoint root as a string", {
+  w <- msaview(msa = msa) + coord_tree(root = "midpoint")
+  expect_equal(w$x$props$treeRoot, "midpoint")
+})
+
+test_that("a tree order outside the four is refused", {
+  expect_error(coord_tree(order = "sideways"), "tree_order")
+})
+
+test_that("a rotate clade reaches the props", {
+  w <- msaview(msa = msa) +
+    geom_msa_clade(c("Homo sapiens", "Mouse"), tips = 2, mark = "rotate")
+  expect_equal(w$x$props$clades[[1]]$mark, "rotate")
+})

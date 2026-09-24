@@ -29,6 +29,7 @@ const TreeMenu = observer(function ({
   const { collapsed, showOnly, relativeTo } = model
   const { name, id, leaf } = node
   const isCollapsed = collapsed.includes(id)
+  const isRoot = id === model.tree.id
   const noun = leaf ? 'subtree' : 'this node'
   return (
     <Menu
@@ -75,6 +76,28 @@ const TreeMenu = observer(function ({
           {showOnly === id
             ? 'Disable show only this node'
             : 'Show only this node'}
+        </MenuItem>
+      )}
+      {leaf ? null : (
+        <MenuItem
+          dense
+          onClick={() => {
+            model.toggleRotated(id)
+            onClose()
+          }}
+        >
+          Rotate this node
+        </MenuItem>
+      )}
+      {isRoot ? null : (
+        <MenuItem
+          dense
+          onClick={() => {
+            model.rerootAt(id)
+            onClose()
+          }}
+        >
+          Reroot here
         </MenuItem>
       )}
       {leaf ? (

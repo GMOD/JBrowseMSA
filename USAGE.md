@@ -69,6 +69,8 @@ Props:
 | `encodings`         | `Encoding[]`             | What the marks read: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
 | `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row                         |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram                         |
+| `treeOrder`         | `TreeOrder`              | Child order: `branchLength` (default), `input`, `ladderize`, `ladderizeReverse`     |
+| `treeRoot`          | `TreeRoot`               | Reroot: `'midpoint'`, or `{outgroup: [tip names]}`                                  |
 | `residueEncoding`   | `'fill' \| 'color'`      | Which channel `colorScheme` paints: the cell (default) or the letter                |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns                     |
 | `hideHeader`        | `boolean`                | Leave out the toolbar, for a page drawing its own controls                          |
@@ -83,10 +85,10 @@ control on one without re-fetching the alignment. Each prop updates only its own
 setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `clades`, `columnTracks`, `residueMappings`,
-`rowData`, `encodings`, `rowPanels`, `highlightColumns`) and the filehandles by
-content, so passing a freshly computed array or location object on every render
-costs nothing. A new `msa`, `tree` or `gff` string, or a filehandle pointing
-somewhere else, builds a new model and resets the view.
+`rowData`, `encodings`, `rowPanels`, `highlightColumns`), `treeRoot` and the
+filehandles by content, so passing a freshly computed array or location object
+on every render costs nothing. A new `msa`, `tree` or `gff` string, or a
+filehandle pointing somewhere else, builds a new model and resets the view.
 
 ### Events
 

@@ -47,12 +47,12 @@ and docs.
 ### Available via [Tree](../tree)
 
 **Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth,
-showBranchLen, drawTree, drawNodeBubbles, drawNodeLabels, showTreeOverview,
-overviewHeight, autoTreeAreaWidth
+showBranchLen, treeOrder, drawTree, drawNodeBubbles, drawNodeLabels,
+showTreeOverview, overviewHeight, autoTreeAreaWidth
 
 **Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree,
-setAutoTreeAreaWidth, setShowBranchLen, setDrawNodeBubbles, setDrawNodeLabels,
-setShowTreeOverview, setOverviewHeight, setDrawLabels
+setAutoTreeAreaWidth, setShowBranchLen, setTreeOrder, setDrawNodeBubbles,
+setDrawNodeLabels, setShowTreeOverview, setOverviewHeight, setDrawLabels
 
 ### Available via [MSAModel](../msamodel)
 
@@ -76,7 +76,7 @@ allowedGappyness: stripDefault(types.number, defaultAllowedGappyness)
 clades of the tree with a mark drawn over them. `mrca` names tips whose common
 ancestor is the clade, or `range` its first and last tip in display order, and
 `tips` is the leaf count the producer measured. `mark` is `highlight`,
-`bracket`, `collapse` or `focus`. See docs/layers.md
+`bracket`, `collapse`, `focus` or `rotate`. See docs/layers.md
 
 ```js
 // type signature
@@ -284,6 +284,18 @@ residueMappings: stripDefault(
         )
 ```
 
+#### property: rotated
+
+tree nodes whose children draw in reverse order, which is ggtree's `rotate`: the
+same tree, with the clades on either side of the node swapped
+
+```js
+// type signature
+IOptionalIType<IArrayType<ISimpleType<string>>, [undefined]>
+// code
+rotated: stripDefault(types.array(types.string), [])
+```
+
 #### property: rowHeight
 
 height of each row, px
@@ -433,6 +445,19 @@ filehandle object for tree metadata
 IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
 // code
 treeMetadataFilehandle: types.maybe(FileLocation)
+```
+
+#### property: treeRoot
+
+where the tree is rooted: `midpoint` roots it halfway along the longest path
+between two tips, `{outgroup}` on the branch above the tips named, and undefined
+keeps the file's root
+
+```js
+// type signature
+IType<TreeRoot | undefined, TreeRoot | undefined, TreeRoot | undefined>
+// code
+treeRoot: types.frozen<TreeRoot | undefined>()
 ```
 
 #### property: turnedOffFeatures
@@ -1138,6 +1163,15 @@ the memoized name->index map.
 number[]
 ```
 
+#### getter: inputTree
+
+the tree the file or the alignment gives, before `treeRoot`
+
+```js
+// type
+NodeWithIds
+```
+
 #### getter: insertionPositions
 
 Returns a map of row name to array of insertions with display position and
@@ -1375,7 +1409,7 @@ ResidueMappingProblem[]
 `clades` resolved to the rows each one covers. The tip names resolve against
 `tree` rather than `root`, so a clade whose ancestor the user collapsed keeps
 its rows. One leaf pass over the tree serves every clade. A `range` record names
-no node, so `collapse` and `focus`, which need one, drop it.
+no node, so `collapse`, `focus` and `rotate`, which need one, drop it.
 
 ```js
 // type
@@ -1663,6 +1697,10 @@ number
 ```
 
 #### getter: tree
+
+the tree as the file or the alignment gives it, rerooted where `treeRoot` asks.
+Every node id, and so `collapsed`, `rotated` and `showOnly`, refers to this
+tree.
 
 ```js
 // type
@@ -2093,6 +2131,13 @@ remove `owner`'s highlights, leaving other owners' in place
 clearHighlight: (owner: string) => void
 ```
 
+#### action: clearRotated
+
+```js
+// type signature
+clearRotated: () => void
+```
+
 #### action: clearWarnings
 
 ```js
@@ -2154,13 +2199,25 @@ fitVertically: () => void
 
 #### action: replaceTree
 
-swap in a different tree over the same alignment. Clears `collapsed` and
-`showOnly`, since path-derived node ids (node-0-0-1) from the old tree would
+swap in a different tree over the same alignment. Clears `collapsed`, `rotated`
+and `showOnly`, since path-derived node ids (node-0-0-1) from the old tree would
 match unrelated nodes in the new one.
 
 ```js
 // type signature
 replaceTree: (newick: string) => void
+```
+
+#### action: rerootAt
+
+root the tree on the branch above the given node. The node's tips are a split of
+the unrooted tree, and the side of it that is a clade in the tree as written
+stands for it as an outgroup, by its first and last tip, so the root survives
+the path ids changing under it
+
+```js
+// type signature
+rerootAt: (nodeId: string) => void
 ```
 
 #### action: reset
@@ -2230,8 +2287,8 @@ setColWidth: (n: number) => void
 #### action: setCurrentAlignment
 
 switch to another alignment of a multi-alignment file (Stockholm). Clears the
-collapsed node ids, the subtree in focus, the reference row and the scroll
-position, which all refer to the previous alignment
+collapsed and rotated node ids, the subtree in focus, the reference row and the
+scroll position, which all refer to the previous alignment
 
 ```js
 // type signature
@@ -2594,6 +2651,16 @@ setTreeMetadata: (result: string) => void
 setTreeMetadataFilehandle: (treeMetadataFilehandle?: FileLocation | undefined) => void
 ```
 
+#### action: setTreeRoot
+
+reroot the tree. Clears `collapsed`, `rotated` and `showOnly`, whose
+path-derived node ids name other nodes in the rerooted tree
+
+```js
+// type signature
+setTreeRoot: (treeRoot?: TreeRoot | undefined) => void
+```
+
 #### action: setWidth
 
 ```js
@@ -2608,6 +2675,15 @@ collapse or un-collapse the subtree rooted at the given tree node id
 ```js
 // type signature
 toggleCollapsed: (node: string) => void
+```
+
+#### action: toggleRotated
+
+reverse the order of the given node's children, or restore it
+
+```js
+// type signature
+toggleRotated: (node: string) => void
 ```
 
 #### action: toggleTrack

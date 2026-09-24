@@ -8,11 +8,15 @@ import {
   defaultLabelsAlignRight,
   defaultOverviewHeight,
   defaultShowBranchLen,
+  defaultTreeOrder,
   defaultShowTreeOverview,
   defaultTreeAreaWidth,
   defaultTreeWidth,
+  treeOrders,
 } from '../constants.ts'
 import { stripDefault } from '../stripDefault.ts'
+
+import type { TreeOrder } from '../types.ts'
 
 /**
  * #stateModel Tree
@@ -50,6 +54,17 @@ export function TreeModelF() {
        * account evolutionary distances
        */
       showBranchLen: stripDefault(types.boolean, defaultShowBranchLen),
+
+      /**
+       * #property
+       * the order each node's children draw in: `branchLength` (shortest
+       * first), `input` (as the file gives them), `ladderize` (fewest tips
+       * first) or `ladderizeReverse` (most tips first)
+       */
+      treeOrder: stripDefault(
+        types.enumeration<TreeOrder>('TreeOrder', [...treeOrders]),
+        defaultTreeOrder,
+      ),
 
       /**
        * #property
@@ -131,6 +146,13 @@ export function TreeModelF() {
        */
       setShowBranchLen(arg: boolean) {
         self.showBranchLen = arg
+      },
+
+      /**
+       * #action
+       */
+      setTreeOrder(order: TreeOrder) {
+        self.treeOrder = order
       },
 
       /**

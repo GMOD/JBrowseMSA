@@ -12,6 +12,8 @@ import type {
   Region,
   ResidueMapping,
   RowPanelSpec,
+  TreeOrder,
+  TreeRoot,
   Viewport,
   mount,
 } from 'react-msaview'
@@ -43,6 +45,8 @@ export interface Traits {
   tree_area_width: number | null
   auto_tree_area_width: boolean
   show_branch_len: boolean
+  tree_order: TreeOrder | null
+  tree_root: 'midpoint' | string[] | null
   residue_encoding: 'fill' | 'color'
   hide_header: boolean
   theme: 'auto' | 'light' | 'dark' | Exclude<MSAViewerProps['theme'], string>
@@ -78,6 +82,8 @@ export const INPUT_TRAITS = [
   'tree_area_width',
   'auto_tree_area_width',
   'show_branch_len',
+  'tree_order',
+  'tree_root',
   'residue_encoding',
   'hide_header',
   'theme',
@@ -91,6 +97,14 @@ function optional<T>(value: T | null | '') {
 
 function uriLocation(uri: string) {
   return uri ? { uri, locationType: 'UriLocation' as const } : undefined
+}
+
+function treeRoot(root: Traits['tree_root']): TreeRoot | undefined {
+  return root === null
+    ? undefined
+    : root === 'midpoint'
+      ? root
+      : { outgroup: root }
 }
 
 export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
@@ -121,6 +135,8 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     treeAreaWidth: optional(model.get('tree_area_width')),
     autoTreeAreaWidth: model.get('auto_tree_area_width'),
     showBranchLen: model.get('show_branch_len'),
+    treeOrder: optional(model.get('tree_order')),
+    treeRoot: treeRoot(model.get('tree_root')),
     residueEncoding: model.get('residue_encoding'),
     hideHeader: model.get('hide_header'),
     theme: theme === 'auto' ? hostTheme(doc) : theme,
