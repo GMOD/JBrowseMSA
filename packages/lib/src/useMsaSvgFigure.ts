@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { getSnapshot } from '@jbrowse/mobx-state-tree'
-import { compareStructural, reaction } from 'mobx'
+import { compareShallow, reaction } from 'mobx'
 
 import { renderToSvg } from './renderToSvg.tsx'
 
@@ -18,7 +18,8 @@ export interface MsaSvgFigure {
 /**
  * The viewer's SVG export of its viewport, as markup for the page to insert.
  * It redraws after the view settles: `delay` ms after the last scroll, zoom,
- * resize or change to the snapshot. A draw a later one overtakes is dropped.
+ * resize, highlight or change to the snapshot. A draw a later one overtakes is
+ * dropped.
  *
  * The figure's row names and letters are SVG text, so the browser's find
  * locates them, a reader can select them, and print stylesheets apply.
@@ -37,7 +38,13 @@ export function useMsaSvgFigure(
     const dispose = reaction(
       () =>
         model.viewInitialized && model.dataInitialized
-          ? [getSnapshot(model), model.width, model.height]
+          ? [
+              getSnapshot(model),
+              model.width,
+              model.height,
+              model.resolvedHighlights,
+              model.highlightedColumnRuns,
+            ]
           : undefined,
       key => {
         if (!key) {
@@ -61,7 +68,7 @@ export function useMsaSvgFigure(
           },
         )
       },
-      { delay, fireImmediately: true, equals: compareStructural },
+      { delay, fireImmediately: true, equals: compareShallow },
     )
     return () => {
       latest = -1
