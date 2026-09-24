@@ -17,9 +17,11 @@ export function renderTreeMouseover({
     mouseRow,
     referenceRowIndex,
     hoveredRowIndices,
+    highResScaleFactor,
   } = model
   ctx.resetTransform()
-  ctx.clearRect(0, 0, width, height)
+  ctx.clearRect(0, 0, width * highResScaleFactor, height * highResScaleFactor)
+  ctx.scale(highResScaleFactor, highResScaleFactor)
 
   const rowBand = (index: number) => {
     ctx.fillRect(0, index * rowHeight + scrollY, width, rowHeight)

@@ -13,7 +13,8 @@ import type { MsaViewModel } from '../../model.ts'
 
 const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { height, blocksY, treeAreaWidth, scrollY } = model
+  const { height, blocksY, treeAreaWidth, scrollY, highResScaleFactor } =
+    model
   const onScrollY = useCallback(
     (d: number) => {
       model.doScrollY(d)
@@ -22,14 +23,16 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   )
   const { onMouseDown, onMouseUp } = useWheelScroll({ ref, onScrollY })
 
+  const canvasWidth = treeAreaWidth * highResScaleFactor
+  const canvasHeight = height * highResScaleFactor
   const mouseoverRef = useCanvasAutorun({
     draw: ctx => {
       if (isAlive(model)) {
         renderTreeMouseover({ ctx, model })
       }
     },
-    width: treeAreaWidth,
-    height,
+    width: canvasWidth,
+    height: canvasHeight,
     deps: [model],
   })
 
@@ -62,8 +65,8 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
       </div>
       <canvas
         ref={mouseoverRef}
-        width={treeAreaWidth}
-        height={height}
+        width={canvasWidth}
+        height={canvasHeight}
         style={{
           position: 'absolute',
           top: 0,
