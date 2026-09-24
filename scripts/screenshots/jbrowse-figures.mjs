@@ -129,8 +129,7 @@ const FIGURES = [
     centerHighlight: true,
     expect: { connected: true },
     // assert the ProteinView resolved its connected genome view and the domain
-    // selection was applied (clickedStructureRange seeded from
-    // initialSelection)
+    // selection was applied (the selected ranges seeded from initialSelection)
     expectProtein: { connected: true, selected: true },
   },
 ]
@@ -241,7 +240,8 @@ function inspectAndCenter(page, { expectCol, centerCol, queryName, center }) {
 
 // Read the ProteinView model for the three-view figure's assertions: that it
 // resolved its connected genome view and that the declarative domain selection
-// (clickedStructureRange, seeded from initialSelection) was applied.
+// (the selected ranges, seeded from initialSelection) was applied. protein3d
+// after 0.14 holds a list, clickedStructureRanges; 0.14 and before, one range.
 function inspectProtein(page) {
   return page.evaluate(() => {
     const pv = window.JBrowseRootModel.session.views.find(
@@ -251,9 +251,11 @@ function inspectProtein(page) {
     return {
       exists: !!pv,
       connected: !!structure?.connectedView,
-      range: structure?.clickedStructureRange
-        ? { ...structure.clickedStructureRange }
-        : undefined,
+      ranges: structure?.clickedStructureRanges
+        ? structure.clickedStructureRanges.map(r => ({ ...r }))
+        : structure?.clickedStructureRange
+          ? [{ ...structure.clickedStructureRange }]
+          : [],
     }
   })
 }
@@ -266,7 +268,7 @@ function checkProteinExpectations(fig, result) {
   if (fig.expectProtein?.connected && !result.connected) {
     problems.push('ProteinView connectedView did not resolve')
   }
-  if (fig.expectProtein?.selected && !result.range) {
+  if (fig.expectProtein?.selected && result.ranges.length === 0) {
     problems.push('ProteinView domain selection (initialSelection) not applied')
   }
   return problems
