@@ -28,6 +28,38 @@ function collapseFirstClade(model: ReturnType<typeof makeModel>) {
   return clade.data.id
 }
 
+test('ragged rows score conservation as their padded form does', () => {
+  const conservation = (data: string) => {
+    const model = MSAModelF().create({
+      type: 'MsaView',
+      msaFormat: 'fasta',
+      data: { msa: data },
+    })
+    model.setWidth(800)
+    return model.conservation
+  }
+  expect(conservation('>a\nAAAA\n>b\nAA')).toEqual(
+    conservation('>a\nAAAA\n>b\nAA--'),
+  )
+})
+
+test('hiding gaps scans the full width when a collapsed clade holds the longest rows', () => {
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: {
+      msa: '>a\nMKAANSE\n>b\nMKAANSE\n>c\nMKWWN\n>d\nMKWWN',
+      tree: '((a,b),(c,d));',
+    },
+    hideGaps: true,
+  })
+  model.setWidth(800)
+  collapseFirstClade(model)
+  expect(model.blanks).toEqual([5, 6])
+  expect(model.numColumns).toBe(5)
+  expect(model.colStats.numColumns).toBe(5)
+})
+
 test('a hidden row still has a sequence and coordinates', () => {
   const model = makeModel()
   const col = model.seqPosToGlobalCol('a', 3)

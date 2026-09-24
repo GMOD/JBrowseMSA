@@ -1806,9 +1806,10 @@ function stateModelFactory() {
           return []
         }
         // ragged input (a3m, hand-edited fasta) can have rows shorter than the
-        // alignment; the widest row defines the column count and a row that
-        // stops early counts as gapped for the remainder
-        const numCols = strs.reduce((max, str) => Math.max(max, str.length), 0)
+        // alignment; the widest row of the whole alignment, collapsed rows
+        // included, defines the column count as it does for numColumns, and a
+        // row that stops early counts as gapped for the remainder
+        const numCols = this.MSA?.getWidth() ?? 0
         const numRows = strs.length
         const threshold = Math.ceil((realAllowedGappyness / 100) * numRows)
         const blankCounts = new Uint32Array(numCols)
@@ -1939,7 +1940,7 @@ function stateModelFactory() {
        * #getter
        */
       get colStats() {
-        return columnCountsFromRows(this.columns2d)
+        return columnCountsFromRows(this.columns2d, this.numColumns)
       },
 
       /**

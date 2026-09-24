@@ -63,15 +63,21 @@ export class ColumnCounts {
     this.totals = new Uint32Array(numColumns)
   }
 
+  /** tallies a row, counting the columns past a short row's end as gaps */
   addRow(row: string) {
-    const { counts, totals, slotTotals } = this
-    const n = Math.min(row.length, this.numColumns)
+    const { counts, totals, slotTotals, numColumns } = this
+    const n = Math.min(row.length, numColumns)
     for (let col = 0; col < n; col++) {
       const slot = slotOf(row.charCodeAt(col))
       counts[col * SLOTS + slot]!++
       totals[col]!++
       slotTotals[slot]!++
     }
+    for (let col = n; col < numColumns; col++) {
+      counts[col * SLOTS + DASH]!++
+      totals[col]!++
+    }
+    slotTotals[DASH]! += numColumns - n
   }
 
   add(col: number, letter: string) {
@@ -161,11 +167,13 @@ export const numResidueSlots = SLOTS
 
 /**
  * Tally counts from alignment rows (gapped sequence strings, one per row). The
- * column count follows the longest row, matching what a per-column tally of
- * ragged input produces.
+ * column count defaults to the longest row, and a shorter row counts as gapped
+ * to the end.
  */
-export function columnCountsFromRows(rows: string[]) {
-  const numColumns = rows.reduce((max, row) => Math.max(max, row.length), 0)
+export function columnCountsFromRows(
+  rows: string[],
+  numColumns = rows.reduce((max, row) => Math.max(max, row.length), 0),
+) {
   const counts = new ColumnCounts(numColumns)
   for (const row of rows) {
     counts.addRow(row)

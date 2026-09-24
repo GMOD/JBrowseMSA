@@ -44,7 +44,17 @@ describe('columnCounts', () => {
     const counts = columnCountsFromRows(['AAAA', 'AA'])
     expect(counts.numColumns).toBe(4)
     expect(counts.total(0)).toBe(2)
-    expect(counts.total(3)).toBe(1)
+    expect(counts.total(3)).toBe(2)
+  })
+
+  test('a short row counts as gapped to the end, as its padded form does', () => {
+    const ragged = columnCountsFromRows(['AAAA', 'AA'])
+    const padded = columnCountsFromRows(['AAAA', 'AA--'])
+    for (let col = 0; col < 4; col++) {
+      expect(ragged.gapCount(col)).toBe(padded.gapCount(col))
+      expect(ragged.total(col)).toBe(padded.total(col))
+    }
+    expect(columnCountsFromRows(['AA'], 3).gapCount(2)).toBe(1)
   })
 
   test('entropy is taken over the non-gap residues only', () => {
