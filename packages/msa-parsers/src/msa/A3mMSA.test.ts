@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import A3mMSA from './A3mMSA.ts'
+import { splitFastaRecords } from './fastaRecords.ts'
 
 // A3M format rules (see https://yanglab.qd.sdu.edu.cn/trRosetta/msa_format.html):
 //
@@ -67,6 +68,21 @@ ACDEF
 >seq2
 ACDEF---`
       expect(A3mMSA.sniff(notA3m)).toBe(false)
+    })
+
+    test('returns false when rows with inserts differ in match columns', () => {
+      expect(A3mMSA.sniff('>a\nACDEFgh\n>b\nACDEFG\n')).toBe(false)
+    })
+
+    test('reads records split once by the caller', () => {
+      const a3m = '>seq1\nACDEFghiKLMNPQ\n>seq2\nACDEFKLMNPQ\n'
+      const records = splitFastaRecords(a3m)
+      expect(A3mMSA.sniff(records)).toBe(true)
+      const fromRecords = new A3mMSA(records)
+      const fromText = new A3mMSA(a3m)
+      expect(fromRecords.getNames()).toEqual(fromText.getNames())
+      expect(fromRecords.getRow('seq1')).toBe(fromText.getRow('seq1'))
+      expect(fromRecords.getRow('seq2')).toBe('ACDEF...KLMNPQ')
     })
   })
 

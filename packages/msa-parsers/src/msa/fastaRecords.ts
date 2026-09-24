@@ -49,3 +49,7 @@ export function splitFastaRecords(text: string): FastaRecord[] {
 
   return records
 }
+
+export function toRecords(input: string | FastaRecord[]) {
+  return typeof input === 'string' ? splitFastaRecords(input) : input
+}

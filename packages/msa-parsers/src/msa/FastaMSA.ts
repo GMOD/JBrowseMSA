@@ -1,5 +1,7 @@
 import BaseMSA from './BaseMSA.ts'
-import { splitFastaRecords } from './fastaRecords.ts'
+import { toRecords } from './fastaRecords.ts'
+
+import type { FastaRecord } from './fastaRecords.ts'
 
 export default class FastaMSA extends BaseMSA {
   private MSA: {
@@ -11,9 +13,9 @@ export default class FastaMSA extends BaseMSA {
   // keys (e.g. a numeric ">123" defline) to the front, scrambling row order
   private orderedNames: string[]
 
-  constructor(text: string) {
+  constructor(input: string | FastaRecord[]) {
     super()
-    const records = splitFastaRecords(text)
+    const records = toRecords(input)
     const seqdata: Record<string, string> = Object.create(null)
     const colonNormalized: Record<string, string> = Object.create(null)
 

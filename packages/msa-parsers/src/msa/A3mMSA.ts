@@ -1,5 +1,7 @@
 import BaseMSA from './BaseMSA.ts'
-import { fastaSniff, splitFastaRecords } from './fastaRecords.ts'
+import { fastaSniff, toRecords } from './fastaRecords.ts'
+
+import type { FastaRecord } from './fastaRecords.ts'
 
 /**
  * A3M Format Parser
@@ -70,9 +72,9 @@ export default class A3mMSA extends BaseMSA {
   private MSA: { seqdata: Record<string, string> }
   private orderedNames: string[]
 
-  constructor(text: string) {
+  constructor(input: string | FastaRecord[]) {
     super()
-    const records = splitFastaRecords(text)
+    const records = toRecords(input)
     this.orderedNames = records.map(r => r.id)
     this.MSA = {
       seqdata: expandA3M(
@@ -82,12 +84,12 @@ export default class A3mMSA extends BaseMSA {
     }
   }
 
-  static sniff(text: string): boolean {
-    if (!fastaSniff(text)) {
+  static sniff(input: string | FastaRecord[]): boolean {
+    if (typeof input === 'string' && !fastaSniff(input)) {
       return false
     }
 
-    const seqs = splitFastaRecords(text)
+    const seqs = toRecords(input)
       .map(r => r.seq)
       .filter(s => !!s)
 
@@ -104,11 +106,24 @@ export default class A3mMSA extends BaseMSA {
       return false
     }
 
-    const rows = seqs.map(parseRow)
-    const hasLowercase = rows.some(r => r.inserts.some(i => !!i))
-    const sameMatchLength = new Set(rows.map(r => r.matches.length)).size === 1
-
-    return hasLowercase && sameMatchLength
+    let hasLowercase = false
+    let matchCount: number | undefined
+    for (const seq of seqs) {
+      let matches = 0
+      for (let i = 0; i < seq.length; i++) {
+        const code = seq.charCodeAt(i)
+        if (isMatch(code)) {
+          matches++
+        } else if (isLower(code)) {
+          hasLowercase = true
+        }
+      }
+      if (matchCount !== undefined && matches !== matchCount) {
+        return false
+      }
+      matchCount = matches
+    }
+    return hasLowercase
   }
 
   getMSA() {

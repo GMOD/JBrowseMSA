@@ -3,7 +3,7 @@ import ClustalMSA from './ClustalMSA.ts'
 import EmfMSA from './EmfMSA.ts'
 import FastaMSA from './FastaMSA.ts'
 import StockholmMSA, { stockholmSniff } from './StockholmMSA.ts'
-import { fastaSniff } from './fastaRecords.ts'
+import { fastaSniff, splitFastaRecords } from './fastaRecords.ts'
 
 export { parseEmfTree } from 'emf-js'
 export { default as parseNewick } from './parseNewick.ts'
@@ -54,11 +54,9 @@ export function parseMSA(
   if (stockholmSniff(text)) {
     return new StockholmMSA(text, currentAlignment)
   }
-  if (A3mMSA.sniff(text)) {
-    return new A3mMSA(text)
-  }
   if (fastaSniff(text)) {
-    return new FastaMSA(text)
+    const records = splitFastaRecords(text)
+    return A3mMSA.sniff(records) ? new A3mMSA(records) : new FastaMSA(records)
   }
   if (text.startsWith('SEQ')) {
     return new EmfMSA(text)
