@@ -157,7 +157,8 @@ agent produces one that does not.
    `rowTint` encoding.
 5. `export-svg` from a snapshot, so an agent can render what it wrote. Shipped
    2026-09-24 as `export-svg --spec`.
-6. Letter color map. Still open.
+6. Letter color map. Shipped 2026-09-24 as `customColorScheme`, which the
+   `colorScheme` prop sets from `{map}`.
 
 ## What it changes in the backlog
 

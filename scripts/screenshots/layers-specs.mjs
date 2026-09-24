@@ -544,4 +544,17 @@ export const linkSpecs = [
       },
     }),
   },
+  {
+    name: 'layers-customcolorscheme',
+    // the customColorScheme section's inline snapshot
+    url: fileSnap({
+      data: { msa: '>human\nMKAANSE\n>mouse\nMKA-NSE' },
+      customColorScheme: {
+        K: '#1f77b4',
+        R: '#1f77b4',
+        D: '#d62728',
+        E: '#d62728',
+      },
+    }),
+  },
 ]

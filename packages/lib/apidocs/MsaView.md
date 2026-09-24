@@ -56,9 +56,11 @@ setDrawNodeLabels, setShowTreeOverview, setOverviewHeight, setDrawLabels
 
 ### Available via [MSAModel](../msamodel)
 
-**Properties:** bgColor, colorSchemeName, showColumnStats, msaFormat
+**Properties:** bgColor, colorSchemeName, customColorScheme, showColumnStats,
+msaFormat
 
-**Actions:** setColorSchemeName, setBgColor, setShowColumnStats, setMSAFormat
+**Actions:** setColorSchemeName, setCustomColorScheme, setBgColor,
+setShowColumnStats, setMSAFormat
 
 ### MsaView - Properties
 
@@ -1026,6 +1028,17 @@ read.
 ```js
 // type
 boolean
+```
+
+#### getter: dynamicColorSchemeName
+
+the scheme coloring each cell from its column's statistics, or undefined while
+the cells take a fixed color per letter, from the built-in table or from
+`customColorScheme`
+
+```js
+// type
+string | undefined
 ```
 
 #### getter: featureAlignShifts

@@ -39,6 +39,18 @@ IOptionalIType<ISimpleType<string>, [undefined]>
 colorSchemeName: stripDefault(types.string, defaultColorSchemeName)
 ```
 
+#### property: customColorScheme
+
+a color per residue letter, which replaces the `colorSchemeName` table while
+set. A letter the map leaves out takes no color
+
+```js
+// type signature
+IType<Record<string, string> | undefined, Record<string, string> | undefined, Record<string, string> | undefined>
+// code
+customColorScheme: types.frozen<Record<string, string> | undefined>()
+```
+
 #### property: msaFormat
 
 force the MSA data to be parsed as a specific format instead of relying on
@@ -76,11 +88,21 @@ setBgColor: (arg: boolean) => void
 
 #### action: setColorSchemeName
 
-set color scheme name
+pick a scheme from the built-in table, which clears `customColorScheme`
 
 ```js
 // type signature
 setColorSchemeName: (name: string) => void
+```
+
+#### action: setCustomColorScheme
+
+color residues from a map of letter to color, or pass undefined to return to
+`colorSchemeName`
+
+```js
+// type signature
+setCustomColorScheme: (map?: Record<string, string> | undefined) => void
 ```
 
 #### action: setMSAFormat

@@ -10,9 +10,9 @@ nobody has to work it out again.
 ## Open, roughly in the order I would argue for them
 
 - [Layers that take data](ideas/data-layers.md): the viewer as an agent's render
-  target. `columnTracks`, `highlights`, GFF `color=`, row strips, `rowTint` and
-  `export-svg --spec` shipped; a letter color map and a JSON `features` field
-  remain.
+  target. `columnTracks`, `highlights`, GFF `color=`, row strips, `rowTint`,
+  `export-svg --spec` and the `customColorScheme` letter map shipped; a JSON
+  `features` field remains.
 - [A selection model](ideas/selection-model.md): the model has no selected
   column range or row set, and the MSA editor needs one before anything else.
   Copy, zoom-to-selection and selective export all build on it.

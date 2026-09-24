@@ -102,6 +102,11 @@ of each column.
 `percent_identity_dynamic` shades each column by its percent identity, so
 conserved sites stand out.
 
+A link can also color letters from its own
+[map](https://gmod.org/JBrowseMSA/layers#customcolorscheme) of residue letter to
+color. The menu then shows a checked **Custom** entry, and picking a scheme
+replaces the map.
+
 ## Working with the tree
 
 Click a branch node to **collapse** that subtree. Collapsing also hides any

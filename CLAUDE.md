@@ -105,7 +105,10 @@ the numbers behind it.
   `color` colors the letter. The MST property behind it stays `bgColor`, because
   that name travels in the shared URL. The vocabulary is the one
   jbrowse-components uses for `LinearMarkDisplay` (marks, encodings, channels,
-  scales); name new public API to match.
+  scales); name new public API to match. The `colorScheme` prop takes a scheme
+  name or a scale's `{map}`, which the model keeps as `customColorScheme` and
+  which wins over `colorSchemeName` while set. Test for a per-column scheme with
+  `dynamicColorSchemeName`, which is undefined under a map.
 - A domain box and the scale contend for the same channel, so `domainUnderline`
   in `model.ts` decides who gets it. Under `residueEncoding: 'color'` with the
   letters big enough to draw, the overlay gives up its fill and marks each span
