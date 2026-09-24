@@ -5,6 +5,7 @@ import { observer } from 'mobx-react'
 import { useWheelScroll } from '../../useWheelScroll.ts'
 import Loading from './Loading.tsx'
 import MSACanvasBlock from './MSACanvasBlock.tsx'
+import { onMsaKey } from './msaKeys.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -52,6 +53,13 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
       // screenshot callouts anchor to columns from this rect's origin:
       // col*colWidth + scrollX, row*rowHeight + scrollY
       data-testid="msa_canvas"
+      tabIndex={0}
+      aria-label="Alignment. Arrow keys scroll, shift pages, + and - zoom, Home and End jump to the first and last column."
+      onKeyDown={event => {
+        if (onMsaKey(model, event)) {
+          event.preventDefault()
+        }
+      }}
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
       style={{

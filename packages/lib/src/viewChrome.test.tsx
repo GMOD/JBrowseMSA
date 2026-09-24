@@ -215,6 +215,44 @@ test('a click pins the crosshair and a short pan does not', () => {
   expect(model.mouseClickRow).toBe(Math.floor(31 / model.rowHeight))
 })
 
+function press(key: string, shiftKey = false) {
+  const el = container.querySelector<HTMLElement>('[data-testid="msa_canvas"]')!
+  expect(el.tabIndex).toBe(0)
+  act(() => {
+    el.dispatchEvent(
+      new KeyboardEvent('keydown', { key, shiftKey, bubbles: true }),
+    )
+  })
+}
+
+test('the keyboard scrolls and zooms the focused alignment', () => {
+  const { colWidth, rowHeight } = model
+  press('ArrowRight')
+  expect(model.scrollX).toBe(-colWidth)
+  press('ArrowDown')
+  expect(model.scrollY).toBe(-rowHeight)
+  press('ArrowLeft')
+  press('ArrowUp')
+  expect([model.scrollX, model.scrollY]).toEqual([0, 0])
+
+  press('ArrowRight', true)
+  expect(model.scrollX).toBe(Math.max(-model.msaCanvasWidth, model.maxScrollX))
+  press('End')
+  expect(model.scrollX).toBe(model.maxScrollX)
+  press('Home')
+  expect(model.scrollX).toBe(0)
+
+  press('+')
+  const zoomed = model.colWidth
+  expect(zoomed).toBeGreaterThan(colWidth)
+  press('-')
+  expect(model.colWidth).toBeLessThan(zoomed)
+})
+
+test('the dividers are separators', () => {
+  expect(container.querySelectorAll('[role="separator"]')).toHaveLength(3)
+})
+
 test('the tree gutter carries a scale bar, and the ruler track draws', async () => {
   expect(model.pxPerBranchLength).toBeGreaterThan(0)
   // the gutter above the tree: a path for the bar, and the round length beside

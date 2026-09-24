@@ -71,6 +71,10 @@ export default function DragHandle({
 
   return (
     <div
+      {...(variant === 'resizer' && {
+        role: 'separator',
+        'aria-orientation': axis === 'x' ? 'vertical' : 'horizontal',
+      })}
       onMouseEnter={() => {
         setHovered(true)
       }}
