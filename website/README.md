@@ -21,6 +21,7 @@ pnpm --filter website preview   # preview the build
 | `embedding.astro`                     | `USAGE.md`                                                                                  |
 | `cli.astro`                           | `packages/cli/README.md`                                                                    |
 | `r-package.astro`                     | `packages/r-msaview/README.md`                                                              |
+| `python-package.astro`                | `packages/python/README.md`                                                                 |
 | `tutorials/index.astro`               | The gallery: one card per entry in `src/lib/tutorials.ts`, and nothing else                 |
 | `tutorials/[slug].astro`              | One page per `docs/tutorials/*.md`                                                          |
 | `tutorials/jbrowse_integration.astro` | The connected JBrowse sessions; hand-written, since its content is generated URLs           |
