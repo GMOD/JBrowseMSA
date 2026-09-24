@@ -107,12 +107,12 @@ react-msaview-cli export-svg --msa kinases.aln --tracks conservation,position-ru
 ### Layers
 
 `--spec` takes an `MsaView` snapshot or its shorthand as a JSON file, so any
-layer in [docs/layers.md](../../docs/layers.md) draws in the figure: column
-tracks, highlights, clades, row panels, encodings. A spec that sets `msa`,
-`tree`, or a filehandle's `uri` to a relative path reads it beside the spec
-file, and an `http(s)` one fetches it. `--msa` is then optional, and every flag
-given on the command line overrides the spec. The figure draws the tracks the
-app would show for the spec, unless `--tracks` names them.
+layer in [the layers reference](https://gmod.org/JBrowseMSA/layers) draws in the
+figure: column tracks, highlights, clades, row panels, encodings. A spec that
+sets `msa`, `tree`, or a filehandle's `uri` to a relative path reads it beside
+the spec file, and an `http(s)` one fetches it. `--msa` is then optional, and
+every flag given on the command line overrides the spec. The figure draws the
+tracks the app would show for the spec, unless `--tracks` names them.
 
 ```bash
 react-msaview-cli export-svg --spec p53-view.json -o p53.svg

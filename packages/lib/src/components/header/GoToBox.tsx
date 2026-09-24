@@ -10,7 +10,7 @@ import type { MsaViewModel } from '../../model.ts'
 const filterOptions = createFilterOptions<string>({ limit: 50 })
 const label = 'Go to row or column'
 
-const GoTo = observer(function ({ model }: { model: MsaViewModel }) {
+const GoToBox = observer(function ({ model }: { model: MsaViewModel }) {
   const [missed, setMissed] = useState(false)
   const names = findableRowNames(model)
   return names.length > 1 || model.numColumns > 0 ? (
@@ -46,4 +46,4 @@ const GoTo = observer(function ({ model }: { model: MsaViewModel }) {
   ) : null
 })
 
-export default GoTo
+export default GoToBox
