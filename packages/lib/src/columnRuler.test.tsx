@@ -5,7 +5,7 @@
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { beforeAll, expect, test } from 'vitest'
 
-import { rulerStep } from './components/tracks/drawTracks.ts'
+import { rulerCols, rulerStep } from './components/tracks/drawTracks.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
@@ -44,10 +44,15 @@ test('the ruler is off until it is turned on', async () => {
 
 test('ticks are numbered by alignment column', async () => {
   const ticks = await exportTicks(makeModel())
-  // 1-based column numbers at the step the zoom leaves room for
-  expect(ticks.length).toBeGreaterThan(3)
-  expect(ticks[0]).toBe('1')
-  expect(Number(ticks[1]) - Number(ticks[0])).toBe(rulerStep(16))
+  // column 1, then the 1-based multiples of the step the zoom leaves room for
+  expect(ticks.slice(0, 4)).toEqual(['1', '5', '10', '15'])
+})
+
+test('column 1 leads each step, and a later block starts at a multiple', () => {
+  expect(rulerCols(0, 30, 12)).toEqual([0, 4, 9, 14, 19, 24, 29])
+  expect(rulerCols(0, 8, 30)).toEqual([0, 1, 3, 5, 7])
+  expect(rulerCols(0, 3, 60)).toEqual([0, 1, 2])
+  expect(rulerCols(10, 20, 12)).toEqual([14, 19])
 })
 
 test('a reference row numbers the ticks by its own residues', async () => {
@@ -56,10 +61,10 @@ test('a reference row numbers the ticks by its own residues', async () => {
 
   const ticks = await exportTicks(model)
   // seq2 opens with two gaps: column 1 has no residue to name, so the first
-  // tick is column 6, which is its residue 4
-  expect(ticks[0]).toBe('4')
+  // tick is column 5, which is its residue 3
+  expect(ticks[0]).toBe('3')
   expect(ticks.slice(0, 3)).toEqual(
-    [5, 10, 15].map(col => `${model.visibleColToSeqPosOneBased('seq2', col)}`),
+    [4, 9, 14].map(col => `${model.visibleColToSeqPosOneBased('seq2', col)}`),
   )
 })
 

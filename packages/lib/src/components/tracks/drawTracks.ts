@@ -159,6 +159,20 @@ export function rulerStep(colWidth: number, minPixels = 55) {
   return step
 }
 
+// The 0-based columns in [xStart, end) to label: column 1, then each column
+// whose 1-based number is a multiple of the step. A step of 2 or more puts the
+// first multiple at least half a step's width past column 1, which clears the
+// two labels.
+export function rulerCols(xStart: number, end: number, colWidth: number) {
+  const step = rulerStep(colWidth)
+  const cols = step > 1 && xStart <= 0 && end > 0 ? [0] : []
+  const first = Math.max(1, Math.ceil((xStart + 1) / step)) * step
+  for (let n = first; n <= end; n += step) {
+    cols.push(n - 1)
+  }
+  return cols
+}
+
 const RULER_FONT_SIZE = 10
 const TICK_HEIGHT = 4
 
@@ -186,7 +200,6 @@ export function drawColumnRuler({
     blockWidth: blockSize,
     colWidth,
   })
-  const step = rulerStep(colWidth)
   const end = Math.min(xEnd, numColumns)
   setFontSize(ctx, RULER_FONT_SIZE)
   ctx.textAlign = 'center'
@@ -195,7 +208,7 @@ export function drawColumnRuler({
   ctx.strokeStyle = textColor
   ctx.lineWidth = 1
 
-  for (let col = Math.ceil(xStart / step) * step; col < end; col += step) {
+  for (const col of rulerCols(xStart, end, colWidth)) {
     const text = label(col)
     if (text === undefined) {
       continue
