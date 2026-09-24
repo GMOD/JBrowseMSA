@@ -1,0 +1,292 @@
+---
+import { Code } from 'astro:components'
+
+import StructureLinkedDatasets from '../../components/StructureLinkedViewer.tsx'
+import Base from '../../layouts/Base.astro'
+
+import type { Dataset } from '../../components/StructureLinkedViewer.tsx'
+
+const base = import.meta.env.BASE_URL
+const data = 'https://gmod.org/JBrowseMSA/demo/data'
+
+const datasets: Dataset[] = [
+  {
+    id: 'spike',
+    label: 'Spike and 6VXX',
+    msaUrl: `${data}/spike/spike.afa`,
+    treeUrl: `${data}/spike/spike.nwk`,
+    gffUrl: `${data}/spike/spike-domains.gff`,
+    layersUrl: `${data}/spike/spike-layers.json`,
+    structureUrl: 'https://files.rcsb.org/download/6VXX.cif',
+    structureId: '6VXX',
+    focus: { row: 'SARS-CoV-2', start: 655, end: 710 },
+    stops: [
+      {
+        label: 'PRRA insert',
+        region: { row: 'SARS-CoV-2', start: 655, end: 710 },
+      },
+      { label: 'HR1', region: { row: 'SARS-CoV-2', start: 910, end: 980 } },
+      { label: 'Whole alignment', region: { start: 1, end: 1660 } },
+    ],
+  },
+  {
+    id: 'hemoglobin',
+    label: 'Hemoglobin and 2HHB',
+    msaUrl: `${data}/hemoglobin/hemoglobin.afa`,
+    treeUrl: `${data}/hemoglobin/hemoglobin.nwk`,
+    gffUrl: `${data}/hemoglobin/hemoglobin-subunits.gff`,
+    layersUrl: `${data}/hemoglobin/hemoglobin-layers.json`,
+    structureUrl: 'https://files.rcsb.org/download/2HHB.cif',
+    structureId: '2HHB',
+    focus: { start: 1, end: 290 },
+    stops: [
+      { label: 'Alpha', region: { row: 'Human', start: 1, end: 142 } },
+      { label: 'Beta', region: { row: 'Human', start: 143, end: 289 } },
+      { label: 'Whole alignment', region: { start: 1, end: 290 } },
+    ],
+  },
+]
+
+const bridge = `import { MSAViewer } from 'react-msaview'
+import {
+  StructureElement,
+  StructureProperties,
+  StructureSelection,
+} from 'molstar/lib/mol-model/structure'
+import { Script } from 'molstar/lib/mol-script/script'
+
+function residueLoci(structure, labelSeqId, asymId) {
+  const selection = Script.getStructureSelection(
+    Q =>
+      Q.struct.generator.atomGroups({
+        'chain-test': Q.core.rel.eq([
+          Q.struct.atomProperty.macromolecular.label_asym_id(),
+          asymId,
+        ]),
+        'residue-test': Q.core.rel.eq([
+          Q.struct.atomProperty.macromolecular.label_seq_id(),
+          labelSeqId,
+        ]),
+      }),
+    structure,
+  )
+  return StructureSelection.toLociWithSourceUnits(selection)
+}
+
+function onCellHover(cell) {
+  const hit = cell?.residue && model.structureResidue(cell.row, cell.residue, '6VXX')
+  const structure =
+    plugin.managers.structure.hierarchy.current.structures[0]?.cell.obj?.data
+  const { lociHighlights } = plugin.managers.interactivity
+  if (hit && structure) {
+    const loci = residueLoci(structure, hit.position, hit.structure.asymId)
+    lociHighlights.highlightOnly({ loci }, false)
+  } else {
+    lociHighlights.clearHighlights()
+  }
+}
+
+plugin.behaviors.interaction.hover.subscribe(({ current }) => {
+  const loc = StructureElement.Loci.is(current.loci)
+    ? StructureElement.Loci.getFirstLocation(current.loci)
+    : undefined
+  const hit =
+    loc &&
+    model.rowResidue(
+      '6VXX',
+      StructureProperties.residue.label_seq_id(loc),
+      StructureProperties.chain.label_asym_id(loc),
+    )
+  if (hit) {
+    model.applyHighlight('structure', [
+      { row: hit.rowName, start: hit.seqPos, end: hit.seqPos },
+    ])
+  } else {
+    model.clearHighlight('structure')
+  }
+})
+
+<MSAViewer
+  msaFilehandle={{ uri: 'spike.afa', locationType: 'UriLocation' }}
+  residueMappings={layers.residueMappings}
+  onModel={m => {
+    model = m
+  }}
+  onCellHover={onCellHover}
+/>`
+---
+
+<Base
+  title="An alignment linked to its structure | JBrowseMSA"
+  description="The spike and hemoglobin alignments beside PDB 6VXX and 2HHB in Mol*, where hovering a residue in either view lights the same residue in the other through the residueMappings layer."
+>
+  <article class="prose">
+    <h1>An alignment linked to its structure</h1>
+    <p>
+      The <a href={`${base}/tutorials/spike_structure`}>spike</a> and
+      <a href={`${base}/tutorials/protein_complex`}>hemoglobin</a> tutorials
+      each end on a <code>residueMappings</code> layer, which records the
+      structure residue for each residue of one row. The viewer below loads one
+      of those alignments with its layers and the PDB entry the mapping names,
+      and draws the structure in Mol* under the alignment. A residue hovered in
+      the alignment lights in the structure, a residue hovered in the structure
+      lights in the alignment, and the line under the structure reports what
+      each lookup returned.
+    </p>
+
+    <div class="structure-link-frame">
+      <StructureLinkedDatasets
+        client:only="react"
+        datasets={datasets}
+        fallbackSrc={`${base}/media/structure_link-spike.png`}
+        fallbackAlt="The spike alignment on the PRRA insert above PDB 6VXX in Mol*, with the SARS-CoV-2 row mapped onto chain A"
+      />
+    </div>
+
+    <h2>What to hover</h2>
+    <p>
+      The spike set opens on the PRRA insert. Hover the SARS-CoV-2 row: each
+      residue from 14 to 1211 reaches chain A of 6VXX at its position plus 19.
+      Residues 681 to 684 report <em>no coordinates</em>, because 6VXX declares
+      structure residues 696 to 707 in its sequence and resolved none of them.
+      Press <strong>HR1</strong> and hover row residues 920 to 970: each one
+      lights on chain A, structure residues 939 to 989. Click a cell to turn the
+      camera to that residue, and click a residue in the structure to scroll the
+      alignment to its column.
+    </p>
+    <p>
+      The hemoglobin set holds one row per species, alpha and beta concatenated.
+      On the Human row, alpha columns reach chain A of 2HHB and beta columns
+      reach chain B. Residues 1 and 143 are the initiator methionines, which the
+      mature chains lack, and report
+      <em>outside the mapped region</em>. The arcs under the alignment join the
+      residue pairs in contact between the chains.
+    </p>
+
+    <h2>The built-in control</h2>
+    <p>
+      Each mapping names one row and one chain. Chains B and C of 6VXX carry the
+      same sequence as chain A, and chains C and D of 2HHB repeat A and B, so a
+      hover on any of them reports <em>no row maps here</em> and lights nothing
+      in the alignment. The other rows of each alignment report
+      <em>no mapping onto 6VXX</em> or <em>onto 2HHB</em>. The viewer also
+      checks each mapping against the loaded row, and prints any mapping it
+      ignores under the status line, so a mapping made against another alignment
+      lights no residue.
+    </p>
+
+    <h2>Put it on your own page</h2>
+    <p>
+      The two bridges are one call each way. <code>structureResidue</code>
+      takes a row and a 1-based residue and returns the structure residue as a
+      <code>label_seq_id</code>, with its chain and whether it has coordinates.{' '}
+      <code>rowResidue</code> takes a structure residue and its chain and
+      returns the row and residue, which <code>applyHighlight</code>
+      draws. Both return <code>undefined</code> where no mapping covers the
+      residue. <code>model</code> comes from <code>onModel</code>, and
+      <code>plugin</code> is the Mol* plugin with the structure loaded:
+    </p>
+    <Code code={bridge} lang="tsx" />
+    <p>
+      The page loads these files, all served with
+      <code>Access-Control-Allow-Origin</code>:
+    </p>
+    <ul>
+      <li>https://gmod.org/JBrowseMSA/demo/data/spike/spike.afa</li>
+      <li>https://gmod.org/JBrowseMSA/demo/data/spike/spike.nwk</li>
+      <li>https://gmod.org/JBrowseMSA/demo/data/spike/spike-domains.gff</li>
+      <li>https://gmod.org/JBrowseMSA/demo/data/spike/spike-layers.json</li>
+      <li>https://files.rcsb.org/download/6VXX.cif</li>
+      <li>https://gmod.org/JBrowseMSA/demo/data/hemoglobin/hemoglobin.afa</li>
+      <li>https://gmod.org/JBrowseMSA/demo/data/hemoglobin/hemoglobin.nwk</li>
+      <li>
+        https://gmod.org/JBrowseMSA/demo/data/hemoglobin/hemoglobin-subunits.gff
+      </li>
+      <li>
+        https://gmod.org/JBrowseMSA/demo/data/hemoglobin/hemoglobin-layers.json
+      </li>
+      <li>https://files.rcsb.org/download/2HHB.cif</li>
+    </ul>
+
+    <h2>See also</h2>
+    <ul>
+      <li>
+        <a href={`${base}/tutorials/spike_structure`}>
+          The SARS-CoV-2 furin insert and PDB 6VXX
+        </a>
+      </li>
+      <li>
+        <a href={`${base}/tutorials/protein_complex`}>
+          Hemoglobin's two subunits and the interfaces between them
+        </a>
+      </li>
+      <li>
+        <a href={`${base}/layers#residuemappings`}>residueMappings</a>
+      </li>
+      <li>
+        <a href={`${base}/embedding`}>Embedding</a>
+      </li>
+    </ul>
+  </article>
+</Base>
+
+<style is:global>
+  .structure-link-frame {
+    margin: 24px 0;
+  }
+  .structure-link-datasets,
+  .structure-link-stops {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .structure-link-datasets button,
+  .structure-link-stops button {
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .structure-link-datasets button[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .structure-link {
+    border: 1px solid var(--border);
+    padding: 8px;
+  }
+  .structure-link-canvas {
+    position: relative;
+    height: 400px;
+    margin-top: 8px;
+    border: 1px solid var(--border);
+  }
+  .structure-link-loading {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+  }
+  .structure-link-status {
+    margin: 8px 0 0;
+    min-height: 1.5em;
+    font-variant-numeric: tabular-nums;
+  }
+  .structure-link-mapped,
+  .structure-link-problem {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .structure-link-problem {
+    color: #b3261e;
+  }
+</style>
