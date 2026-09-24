@@ -58,12 +58,15 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
   const {
     isLoading,
     dataInitialized,
+    data,
     error,
     resetCount,
     msaFilehandle,
     treeFilehandle,
   } = model
-  const hasPendingFilehandle = !!(msaFilehandle || treeFilehandle)
+  const hasData = !!(data.msa || data.tree)
+  // a failed load keeps its filehandle, so the error outranks the spinner
+  const loading = !error && !!(msaFilehandle || treeFilehandle || isLoading)
 
   return (
     <div>
@@ -80,14 +83,15 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
           ) : (
             <MSAView model={model} />
           )
-        ) : error ? (
-          // checked before the spinner: a failed load keeps its filehandle
-          // (only an abort clears it), so hasPendingFilehandle stays true
+        ) : hasData ? (
           <Reset model={model} error={error} />
-        ) : hasPendingFilehandle || isLoading ? (
-          <LoadingSpinner model={model} />
         ) : (
-          <ImportForm model={model} />
+          <>
+            {loading ? <LoadingSpinner model={model} /> : null}
+            <div style={{ display: loading ? 'none' : undefined }}>
+              <ImportForm model={model} />
+            </div>
+          </>
         )}
       </ErrorBoundary>
     </div>

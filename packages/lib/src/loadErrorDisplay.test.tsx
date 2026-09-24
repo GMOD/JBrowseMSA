@@ -57,6 +57,26 @@ test('a load that fails shows the error rather than a spinner forever', () => {
   expect(container.textContent).not.toContain('Loading')
 })
 
+test('a failed load keeps the import form and what it holds', () => {
+  render()
+  const form = container.querySelector('input')
+  expect(form).not.toBeNull()
+
+  act(() => {
+    model.setMSAFilehandle(uri('https://example.com/missing.fa'))
+  })
+  expect(form!.closest('[style*="display: none"]')).not.toBeNull()
+
+  act(() => {
+    model.setLoadingMSA(false)
+    model.setError(new Error('HTTP 404 fetching missing.fa'))
+  })
+  expect(container.textContent).toContain('404')
+  expect(container.textContent).not.toContain('Return to import form')
+  expect(container.contains(form)).toBe(true)
+  expect(form!.closest('[style*="display: none"]')).toBeNull()
+})
+
 test('a load still in flight is a spinner, not an error', () => {
   model.setMSAFilehandle(uri('https://example.com/slow.a3m'))
   render()
