@@ -121,6 +121,7 @@ import {
   withAlpha,
 } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
+import { writeNewick } from './writeNewick.ts'
 import { parseWuss } from './wuss.ts'
 
 import type { ColumnStats } from './columnStats.ts'
@@ -1857,6 +1858,21 @@ function stateModelFactory() {
           order: self.treeOrder,
           showOnly: self.showOnly,
         })
+      },
+
+      /**
+       * #getter
+       * the tree as Newick in the order and with the root it is drawn, with
+       * every clade, collapsed or out of focus
+       */
+      get treeNewick() {
+        return writeNewick(
+          buildTreeRoot(this.tree, {
+            collapsed: [],
+            rotated: self.rotated,
+            order: self.treeOrder,
+          }),
+        )
       },
 
       /**
@@ -4291,6 +4307,21 @@ function stateModelFactory() {
         const html = await renderToSvg(self as MsaViewModel, opts)
         const blob = new Blob([html], { type: 'image/svg+xml' })
         saveAs(blob, exportFileName(self.msaFilehandle, 'svg'))
+      },
+      /**
+       * #action
+       * save `treeNewick` as a file
+       */
+      exportNewick() {
+        const blob = new Blob([self.treeNewick], { type: 'text/plain' })
+        saveAs(
+          blob,
+          exportFileName(
+            self.treeFilehandle ?? self.msaFilehandle,
+            'nwk',
+            'tree',
+          ),
+        )
       },
       /**
        * #action

@@ -1,6 +1,7 @@
 import React, { lazy } from 'react'
 
 import CascadingMenuButton from '@jbrowse/core/ui/CascadingMenuButton'
+import AccountTree from '@mui/icons-material/AccountTree'
 import Assignment from '@mui/icons-material/Assignment'
 import FolderOpen from '@mui/icons-material/FolderOpen'
 import Menu from '@mui/icons-material/Menu'
@@ -46,6 +47,14 @@ const FileMenu = observer(({ model }: { model: MsaViewModel }) => {
           subMenu: getAnnotationsMenu({
             model,
           }),
+        },
+        {
+          label: 'Export tree (Newick)',
+          icon: AccountTree,
+          disabled: !!model.tree.noTree,
+          onClick: () => {
+            model.exportNewick()
+          },
         },
         {
           label: 'Export SVG',

@@ -123,6 +123,8 @@ branch above that node. **Tree settings → Root → Midpoint** roots it halfway
 along the longest path between two tips, which suits the unrooted trees
 FastTree, IQ-TREE and neighbor joining write. Rerooting renumbers the nodes, so
 it expands collapsed clades, clears rotations and leaves the show-only view.
+**File → Export tree (Newick)** saves the tree with the root, order and
+rotations on screen, collapsed clades included.
 [Data layers](https://gmod.org/JBrowseMSA/layers#treeorder-and-treeroot) covers
 `treeOrder` and `treeRoot`, the properties behind these menus.
 

@@ -1729,6 +1729,16 @@ scales by.
 { root: LaidOutNode<NodeWithIds>; leaves: LaidOutNode<NodeWithIds>[]; rootToTipLength: number; }
 ```
 
+#### getter: treeNewick
+
+the tree as Newick in the order and with the root it is drawn, with every clade,
+collapsed or out of focus
+
+```js
+// type
+string
+```
+
 #### getter: treeOverviewClades
 
 the `clades` highlights in the overview's own row space, which the focus does
@@ -2167,6 +2177,15 @@ draw the alignment with positions numbered relative to the given row's sequence
 ```js
 // type signature
 drawRelativeTo: (id: string | undefined) => void
+```
+
+#### action: exportNewick
+
+save `treeNewick` as a file
+
+```js
+// type signature
+exportNewick: () => void
 ```
 
 #### action: exportSVG
