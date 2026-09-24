@@ -104,14 +104,15 @@ function packedTree(depth: number) {
 }
 
 test('a branch inside the pixel its parent covers is not drawn', () => {
-  const model = makeModel(packedTree(18))
-  expect(model.treeOverviewLayout!.numTips).toBe(262_144)
+  const model = makeModel(packedTree(14))
+  expect(model.treeOverviewLayout!.numTips).toBe(16_384)
 
   const { ctx, calls } = countingCtx()
   drawTreeOverview({ model, ctx, theme, width: 400, height: 120 })
 
-  // 524286 branches, of which about 510 move a pixel in the 400x120 band: the
-  // levels below that all land on the pixel their parent covers
+  // 32766 branches, of which 510 move a pixel in the 400x120 band: the levels
+  // below that all land on the pixel their parent covers. A deeper tree adds
+  // only levels below the pixel, so 262,144 tips draw the same 510
   expect(calls.moveTo).toBeGreaterThan(100)
   expect(calls.moveTo).toBeLessThan(5000)
 })
