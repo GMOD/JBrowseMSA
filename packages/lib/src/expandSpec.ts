@@ -59,9 +59,9 @@ function parseSpan(text: string, what: string) {
       `${what} "${text}" is not "start", "start-end" or either followed by a label`,
     )
   }
-  const start = Number(match[1])
-  const end = match[2] === undefined ? start : Number(match[2])
-  return { start, end, label: match[3] }
+  const a = Number(match[1])
+  const b = match[2] === undefined ? a : Number(match[2])
+  return { start: Math.min(a, b), end: Math.max(a, b), label: match[3] }
 }
 
 function withRow<T extends RowChoice>(entry: T, query?: string) {

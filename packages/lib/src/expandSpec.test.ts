@@ -92,6 +92,13 @@ test('region takes "start-end" on the query row', () => {
   expect(expandSpec({ region: '10-20' }).region).toEqual({ start: 10, end: 20 })
 })
 
+test('a span written end first reads in order', () => {
+  expect(expandSpec({ region: '20-10' }).region).toEqual({ start: 10, end: 20 })
+  expect(expandSpec({ highlights: ['9-3 loop'] }).highlights).toEqual([
+    { start: 3, end: 9, label: 'loop' },
+  ])
+})
+
 test('a malformed span names itself', () => {
   expect(() => expandSpec({ highlights: ['R175'] })).toThrow(/highlight "R175"/)
   expect(() => expandSpec({ region: '170..290' })).toThrow(/region "170..290"/)
