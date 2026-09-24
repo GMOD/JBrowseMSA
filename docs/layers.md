@@ -482,8 +482,8 @@ draws whether or not the residue letters do.
 ## customColorScheme
 
 A color per residue letter, which replaces the built-in color scheme while it is
-set. The letters the map lists take its colors, and every letter it leaves out
-is uncolored, as a value a `{map}` scale leaves out is.
+set. The letters the map lists take its colors, and every other letter is
+uncolored, the rule a `{map}` scale in `encodings` follows.
 
 ```json
 {
