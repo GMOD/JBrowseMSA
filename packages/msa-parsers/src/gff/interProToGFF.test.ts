@@ -189,6 +189,13 @@ describe('interProToGFF', () => {
     ])
   })
 
+  test('round-trips a row name holding a percent sign', () => {
+    const gff = annotationsToGFF(
+      gffToAnnotations(parseGFF('a%25b/1-9\tsrc\tgene\t1\t5\t.\t+\t.\tName=x')),
+    )
+    expect(parseGFF(gff)[0]?.seq_id).toBe('a%b/1-9')
+  })
+
   test('URL-encodes special characters in attributes', () => {
     const results: Record<string, InterProScanResults> = {
       seq1: {

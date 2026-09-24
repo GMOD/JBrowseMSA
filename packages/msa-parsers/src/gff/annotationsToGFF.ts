@@ -20,7 +20,7 @@ export function annotationsToGFF(
       const { accession, name, description, featureType } = annotation
       const { id, start, end, strand } = annotation
       return [
-        id,
+        id.replaceAll(/[%\t\n\r]/g, encodeURIComponent),
         'InterProScan',
         // GFF-sourced annotations carry their original type; writing every
         // feature back out as protein_match would turn an exon overlay into

@@ -16,34 +16,26 @@ function unquote(val: string) {
   return val.replace(/^"(.*)"$/, '$1')
 }
 
-function parseAttributes(col9?: string): Record<string, string | undefined> {
+function parseAttributes(col9?: string): Record<string, string> {
   if (!col9) {
     return {}
   }
-  return Object.fromEntries(
-    col9
-      .split(';')
-      .map(f => f.trim())
-      .filter(f => !!f)
-      .map(f => {
-        const eq = f.indexOf('=')
-        const key = (eq === -1 ? f : f.slice(0, eq)).trim()
-        const val = eq === -1 ? undefined : f.slice(eq + 1)
-        // split on comma (the GFF3 multi-value separator) BEFORE decoding, so a
-        // literal comma encoded as %2C survives the split and isn't mistaken
-        // for a separator
-        return [
-          key,
-          val
-            ? val
-                .split(',')
-                .map(v => unquote(safeDecode(v).trim()))
-                .join(' ')
-            : undefined,
-        ]
-      })
-      .filter(([key]) => key !== ''),
-  )
+  const attributes: Record<string, string> = {}
+  for (const field of col9.split(';')) {
+    const eq = field.indexOf('=')
+    const key = field.slice(0, eq).trim()
+    const val = field.slice(eq + 1)
+    // split on comma (the GFF3 multi-value separator) BEFORE decoding, so a
+    // literal comma encoded as %2C survives the split and isn't mistaken
+    // for a separator
+    if (eq !== -1 && key && val) {
+      attributes[key] = val
+        .split(',')
+        .map(v => unquote(safeDecode(v).trim()))
+        .join(' ')
+    }
+  }
+  return attributes
 }
 
 export function parseGFF(str?: string): GFFRecord[] {
@@ -73,7 +65,7 @@ export function parseGFF(str?: string): GFFRecord[] {
     // "start=") can't turn a number field into a string
     return {
       ...parseAttributes(col9),
-      seq_id: seq_id ?? '',
+      seq_id: safeDecode(seq_id ?? ''),
       source: source ?? '',
       type: type ?? '',
       start: Number(start) || 0,

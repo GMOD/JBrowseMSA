@@ -111,6 +111,18 @@ MPIGSKERPTFFEIFKTRCNKADLGPISLN
     expect(result[0]?.Note).toBe('100%done')
   })
 
+  test('decodes a percent-encoded seq_id', () => {
+    const result = parseGFF('HBA%2FHUMAN/27-137\tsrc\tgene\t1\t5\t.\t+\t.\tName=x')
+    expect(result[0]?.seq_id).toBe('HBA/HUMAN/27-137')
+  })
+
+  test('drops an attribute with no value', () => {
+    const result = parseGFF('a\tsrc\tgene\t1\t5\t.\t+\t.\tName=x;flag;Note=')
+    expect(Object.keys(result[0]!)).not.toContain('flag')
+    expect(Object.keys(result[0]!)).not.toContain('Note')
+    expect(result[0]?.Name).toBe('x')
+  })
+
   test('keeps text after a second equals sign', () => {
     const gff = 'seq1\tSource\ttype\t1\t10\t.\t.\t.\tNote=a=b'
     const result = parseGFF(gff)
