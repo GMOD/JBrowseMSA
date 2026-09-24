@@ -2373,13 +2373,6 @@ function stateModelFactory() {
 
       /**
        * #getter
-       */
-      get seqConsensus() {
-        return self.MSA?.seqConsensus
-      },
-
-      /**
-       * #getter
        * the base pairs of the consensus secondary structure, as arcs, in
        * visible column space (hidden columns are removed before parsing)
        */
@@ -3951,19 +3944,9 @@ function stateModelFactory() {
         const encoding = this.resolvedEncodings.find(
           e => e.channel === 'tipLabel',
         )
-        if (!encoding) {
-          return undefined
-        }
-        const colors = new Map<string, string>()
-        for (const [name, row] of Object.entries(self.rowData)) {
-          const value = row?.[encoding.field]
-          const color =
-            value === undefined ? undefined : encoding.colorOf(value)
-          if (color) {
-            colors.set(name, color)
-          }
-        }
-        return colors
+        return encoding
+          ? colorByRow(self.rowData, encoding.field, encoding.colorOf)
+          : undefined
       },
 
       /**
@@ -3979,14 +3962,14 @@ function stateModelFactory() {
         if (!encoding) {
           return undefined
         }
+        const colors = colorByRow(
+          self.rowData,
+          encoding.field,
+          encoding.colorOf,
+        )
         return self.rowNames.map(name => {
-          const value = self.rowDataOf(name)?.[encoding.field]
-          const color =
-            value === undefined ? undefined : encoding.colorOf(value)
-          if (!color) {
-            return undefined
-          }
-          return withAlpha(color, rowTintAlpha)
+          const color = colors.get(name)
+          return color && withAlpha(color, rowTintAlpha)
         })
       },
 
