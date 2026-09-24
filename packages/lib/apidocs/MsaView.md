@@ -1057,7 +1057,7 @@ number
 
 ```js
 // type
-{ info: string; version: string | undefined; } | Record<string, unknown> | { General: Record<string, string[]>; Accessions: { [k: string]: string; }; Dbxref: { [k: string]: string; }; }
+Record<string, unknown> | { info: string; version: string | undefined; } | { General: Record<string, string[]>; Accessions: { [k: string]: string; }; Dbxref: { [k: string]: string; }; }
 ```
 
 #### getter: hideGapsEffective
@@ -1744,12 +1744,12 @@ loaded documents left out of the snapshot, largest first. A file opened from
 disk or pasted in becomes inline text, and DataModel drops an inline document
 past `maxInlineSnapshotBytes`.
 
-The header lists these, and the standalone app stops rewriting the address bar
-while the list is non-empty, so a copied link does not open an empty viewer
-unannounced. A document fetched from a URL never appears here, since the
-snapshot keeps its filehandle.
+The header lists these, and the standalone app drops `?data=` from the address
+bar while the list is non-empty or the encoded link would pass 8,000 characters,
+so a copied link never opens an empty viewer unannounced. A document fetched
+from a URL never appears here, since the snapshot keeps its filehandle.
 
-Empty when `hostRestoresData` is true.
+Empty when `hostCarriesData` is true.
 
 ```js
 // type
