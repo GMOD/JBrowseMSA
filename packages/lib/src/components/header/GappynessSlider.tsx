@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import { Slider, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
@@ -11,6 +11,8 @@ const GappynessSlider = observer(function GappynessSlider({
   model: MsaViewModel
 }) {
   const { hideGaps, allowedGappyness } = model
+  const [dragValue, setDragValue] = useState<number>()
+  const value = dragValue ?? allowedGappyness
   if (!hideGaps) {
     return null
   }
@@ -20,7 +22,7 @@ const GappynessSlider = observer(function GappynessSlider({
           least ceil(allowedGappyness% of the rows), so at 100 it hides the
           columns that are entirely gaps rather than nothing */}
       <Typography style={{ whiteSpace: 'nowrap' }}>
-        Hide columns w/ &ge;{allowedGappyness}% gaps
+        Hide columns w/ &ge;{value}% gaps
       </Typography>
       <Slider
         // In JBrowse other MUI Sliders share the page, so `.MuiSlider-thumb`
@@ -30,13 +32,21 @@ const GappynessSlider = observer(function GappynessSlider({
         //
         // Not `slotProps={{ input: ... }}`: that widens `onChange`'s `val` to
         // `number | number[]`, which setAllowedGappyness rejects.
+        //
+        // The thumb follows local state while dragging and the model takes the
+        // value on release, since each write recomputes the gap columns over
+        // the whole alignment.
         data-testid="gappyness_slider"
         style={{ width: 100 }}
         min={1}
         max={100}
-        value={allowedGappyness}
+        value={value}
         onChange={(_, val) => {
+          setDragValue(val)
+        }}
+        onChangeCommitted={(_, val) => {
           model.setAllowedGappyness(val)
+          setDragValue(undefined)
         }}
       />
     </div>
