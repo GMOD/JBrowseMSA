@@ -1023,9 +1023,16 @@ function stateModelFactory() {
        * #volatile
        * non-fatal load problems: an optional layer that failed to load, an
        * overlay that failed to parse. `error` replaces the view and is for the
-       * alignment itself
+       * alignment itself. `warnings` adds the ones derived from the data
        */
-      warnings: [] as string[],
+      loadWarnings: [] as string[],
+
+      /**
+       * #volatile
+       * derived warnings the user dismissed, which stay hidden while the data
+       * behind them holds
+       */
+      dismissedWarnings: [] as string[],
 
       /**
        * #volatile
@@ -1119,16 +1126,9 @@ function stateModelFactory() {
        * that failed to parse. A message already on the list is not added again
        */
       addWarning(warning: string) {
-        if (!self.warnings.includes(warning)) {
-          self.warnings = [...self.warnings, warning]
+        if (!self.loadWarnings.includes(warning)) {
+          self.loadWarnings = [...self.loadWarnings, warning]
         }
-      },
-
-      /**
-       * #action
-       */
-      clearWarnings() {
-        self.warnings = []
       },
 
       /**
@@ -2939,6 +2939,30 @@ function stateModelFactory() {
       },
       /**
        * #getter
+       * warnings that follow from the loaded data and clear when it changes. A
+       * GFF whose first column names rows of some other alignment parses
+       * without error and draws nothing
+       */
+      get dataWarnings(): string[] {
+        const { annotations, rowNamesSet } = self
+        return self.dataInitialized &&
+          annotations.length > 0 &&
+          !annotations.some(a => rowNamesSet.has(a.id))
+          ? [`0 of ${annotations.length} annotations name a row in this alignment`]
+          : []
+      },
+      /**
+       * #getter
+       * the load warnings and the undismissed data warnings, for the header
+       */
+      get warnings(): string[] {
+        return [
+          ...self.loadWarnings,
+          ...this.dataWarnings.filter(w => !self.dismissedWarnings.includes(w)),
+        ]
+      },
+      /**
+       * #getter
        */
       get maxScrollX() {
         return Math.min(-self.totalWidth + (self.msaAreaWidth - 100), 0)
@@ -2966,6 +2990,14 @@ function stateModelFactory() {
        */
       setDrawMsaLetters(arg: boolean) {
         self.drawMsaLetters = arg
+      },
+
+      /**
+       * #action
+       */
+      clearWarnings() {
+        self.loadWarnings = []
+        self.dismissedWarnings = self.dataWarnings
       },
 
       /**
@@ -3974,7 +4006,8 @@ function stateModelFactory() {
        */
       reset() {
         self.resetCount++
-        self.clearWarnings()
+        self.loadWarnings = []
+        self.dismissedWarnings = []
         self.setStatus(undefined)
         applySnapshot(
           self,
@@ -4298,24 +4331,6 @@ function stateModelFactory() {
             } else if (appliedGFF) {
               appliedGFF = false
               self.setAnnotations([])
-            }
-          }),
-        )
-
-        // a GFF whose first column names rows of some other alignment parses
-        // without error and draws nothing
-        addDisposer(
-          self,
-          autorun(() => {
-            const { annotations, rowNamesSet } = self
-            if (
-              annotations.length > 0 &&
-              rowNamesSet.size > 0 &&
-              !annotations.some(a => rowNamesSet.has(a.id))
-            ) {
-              self.addWarning(
-                `0 of ${annotations.length} annotations name a row in this alignment`,
-              )
             }
           }),
         )

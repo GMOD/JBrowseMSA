@@ -89,3 +89,29 @@ test('a GFF naming no row of the alignment warns', () => {
   ])
   expect(makeModel().warnings).toEqual([])
 })
+
+test('a GFF that lands before the alignment does not warn', () => {
+  const model = makeModel({ gff })
+  expect(model.warnings).toEqual([])
+  model.setData({ msa, gff })
+  expect(model.warnings).toEqual([])
+})
+
+test('the row-mismatch warning clears once the rows match', () => {
+  const stray = gff.replace('\na\t', '\nx\t').replace('\nb\t', '\ny\t')
+  const model = makeModel({ msa, gff: stray })
+  expect(model.warnings).toHaveLength(1)
+  model.setData({ msa, gff })
+  expect(model.warnings).toEqual([])
+})
+
+test('a dismissed row-mismatch warning stays dismissed until it changes', () => {
+  const stray = gff.replace('\na\t', '\nx\t').replace('\nb\t', '\ny\t')
+  const model = makeModel({ msa, gff: stray })
+  model.clearWarnings()
+  expect(model.warnings).toEqual([])
+  model.setData({ msa, gff: stray.replace(/\ny\t.*\n/, '\n') })
+  expect(model.warnings).toEqual([
+    '0 of 1 annotations name a row in this alignment',
+  ])
+})
