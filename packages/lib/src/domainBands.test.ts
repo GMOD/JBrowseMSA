@@ -103,6 +103,35 @@ test('mouseOverDomains hit-tests against the drawn span', () => {
   expect(model.mouseOverDomains).toEqual([])
 })
 
+test('a feature past the end of its row stops at the last residue', () => {
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: '>a\nMKLVWYA\n>b\nMKL--YA' },
+  })
+  model.setWidth(800)
+  model.applyGFFText(`##gff-version 3
+a	Pfam	protein_match	1	10	.	.	.	Name=PF00001
+b	Pfam	protein_match	3	12	.	.	.	Name=PF00002
+b	Pfam	protein_match	9	12	.	.	.	Name=PF00003`)
+  expect(model.numColumns).toBe(7)
+  expect(model.domainBands.get('a')!.map(b => [b.startCol, b.endCol])).toEqual([
+    [0, 7],
+  ])
+  expect(model.domainBands.get('b')!.map(b => [b.startCol, b.endCol])).toEqual([
+    [2, 7],
+  ])
+  expect(model.visibleSpan({ row: 'a', start: 1, end: 10 })).toEqual({
+    startCol: 0,
+    endCol: 6,
+  })
+  expect(model.visibleSpan({ row: 'b', start: 9, end: 12 })).toBeUndefined()
+  expect(model.visibleSpan({ start: 5, end: 10 })).toEqual({
+    startCol: 4,
+    endCol: 6,
+  })
+})
+
 test('filtering a domain off removes its band', () => {
   const model = makeModel()
   model.setFilter('PF00001', false)

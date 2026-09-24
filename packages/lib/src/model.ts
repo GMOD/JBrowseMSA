@@ -2598,6 +2598,22 @@ function stateModelFactory() {
 
       /**
        * #method
+       * the global column of a span's last residue, clamping a position past
+       * the end of the row to its last residue. Undefined for a row name the
+       * alignment does not have, or a row with no residues.
+       *
+       * @param rowName - The name of the row
+       * @param seqPos - The sequence position (0-based, ungapped)
+       */
+      seqEndToGlobalCol(rowName: string, seqPos: number) {
+        const index = self.seqPosIndex(rowName)
+        return index && index.length > 0
+          ? index[Math.min(seqPos, index.length - 1)]
+          : undefined
+      },
+
+      /**
+       * #method
        * Convert a sequence position (ungapped) directly to a visible column index.
        * This combines seqPosToGlobalCol and globalColToVisibleCol.
        *
@@ -2625,10 +2641,10 @@ function stateModelFactory() {
         const start = Math.max(1, Math.floor(rawStart))
         const end = Math.ceil(rawEnd)
         let startGlobal = start - 1
-        let endGlobal = end - 1
+        let endGlobal = Math.min(end, self.MSA?.getWidth() ?? end) - 1
         if (row !== undefined) {
           const rowStart = this.seqPosToGlobalCol(row, start - 1)
-          const rowEnd = this.seqPosToGlobalCol(row, end - 1)
+          const rowEnd = this.seqEndToGlobalCol(row, end - 1)
           if (rowStart === undefined || rowEnd === undefined) {
             return undefined
           }
@@ -3566,7 +3582,7 @@ function stateModelFactory() {
               // column moves to the neighboring boundary. Bands with no visible
               // columns, or naming a missing row, are dropped.
               const start = self.seqPosToGlobalCol(name, annotation.start - 1)
-              const end = self.seqPosToGlobalCol(name, annotation.end - 1)
+              const end = self.seqEndToGlobalCol(name, annotation.end - 1)
               if (start === undefined || end === undefined) {
                 return undefined
               }
