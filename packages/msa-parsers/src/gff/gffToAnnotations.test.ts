@@ -68,6 +68,7 @@ test('gives gene-level features a direction but leaves exons/domains as blocks',
   const annotations = gffToAnnotations([
     record({ type: 'gene', strand: '+', Name: 'GENEA' }),
     record({ type: 'mRNA', strand: '-', Name: 'GENEB' }),
+    record({ type: 'CDS', strand: '-', Name: 'orfA' }),
     record({ type: 'exon', strand: '+', Name: 'exon-1' }),
     record({ type: 'protein_match', strand: '+', Name: 'PF00001' }),
   ])
@@ -76,6 +77,7 @@ test('gives gene-level features a direction but leaves exons/domains as blocks',
   ).toEqual({
     GENEA: 1, // + gene -> arrow right
     GENEB: -1, // - gene -> arrow left
+    orfA: -1, // a prokaryotic gene is a CDS row
     'exon-1': undefined, // exon stays a block even though it is stranded
     PF00001: undefined, // protein domain stays a block
   })

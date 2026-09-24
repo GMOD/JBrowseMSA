@@ -1,11 +1,11 @@
 import type { Annotation, GFFRecord } from '../types.ts'
 
-// Feature types that read as a directional "gene" and get an arrowhead in the
-// overlay. Exon/CDS/UTR/domain features deliberately stay rectangular blocks —
-// turning every exon into an arrow is misleading, since exons are segments of a
-// single transcript, not independently-oriented genes.
+// Feature types drawn with an arrowhead for their strand. A prokaryotic GFF
+// writes each gene as a CDS row. Exon, UTR and domain features stay blocks,
+// since an exon is a segment of one transcript.
 const GENE_LEVEL_TYPES = new Set([
   'gene',
+  'CDS',
   'pseudogene',
   'mRNA',
   'transcript',
