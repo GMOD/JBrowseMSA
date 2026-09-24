@@ -23,7 +23,7 @@ export function useTreeHover({
   const { anchor, hoverAt, clearAnchor } = useHoverAnchor<ClickEntry>()
 
   // leaf labels win over the branch/bubble targets they overlap, so a click on a
-  // name opens the node menu rather than the branch menu
+  // name opens the leaf's menu
   function hitTest(event: React.MouseEvent) {
     const x = event.nativeEvent.offsetX
     const y = event.nativeEvent.offsetY + offsetY

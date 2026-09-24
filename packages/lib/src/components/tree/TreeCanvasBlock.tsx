@@ -6,12 +6,12 @@ import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
-import TreeBranchMenu from './TreeBranchMenu.tsx'
-import TreeNodeMenu from './TreeNodeMenu.tsx'
+import TreeMenu from './TreeMenu.tsx'
 import { renderTreeCanvas } from './renderTreeCanvas.ts'
 import { useTreeHover } from './useTreeHover.ts'
 
 import type { MsaViewModel } from '../../model.ts'
+import type { TreeMenuTarget } from './TreeMenu.tsx'
 
 const useStyles = makeStyles()(theme => ({
   hover: {
@@ -22,13 +22,6 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
-interface MenuData {
-  name: string
-  id: string
-  x: number
-  y: number
-}
-
 const TreeCanvasBlock = observer(function ({
   model,
   offsetY,
@@ -38,8 +31,7 @@ const TreeCanvasBlock = observer(function ({
 }) {
   const { classes } = useStyles()
   const theme = useTheme()
-  const [branchMenu, setBranchMenu] = useState<MenuData>()
-  const [nodeMenu, setNodeMenu] = useState<MenuData>()
+  const [menu, setMenu] = useState<TreeMenuTarget>()
   const { clickMap, anchor, hitTest, onMouseMove, onMouseLeave } = useTreeHover(
     { model, offsetY },
   )
@@ -79,22 +71,12 @@ const TreeCanvasBlock = observer(function ({
 
   return (
     <>
-      {branchMenu ? (
-        <TreeBranchMenu
-          node={branchMenu}
+      {menu ? (
+        <TreeMenu
+          node={menu}
           model={model}
           onClose={() => {
-            setBranchMenu(undefined)
-          }}
-        />
-      ) : null}
-
-      {nodeMenu ? (
-        <TreeNodeMenu
-          node={nodeMenu}
-          model={model}
-          onClose={() => {
-            setNodeMenu(undefined)
+            setMenu(undefined)
           }}
         />
       ) : null}
@@ -113,17 +95,13 @@ const TreeCanvasBlock = observer(function ({
         onClick={event => {
           const entry = hitTest(event)
           if (entry) {
-            const menu = {
+            setMenu({
               x: event.clientX,
               y: event.clientY,
               id: entry.id,
               name: entry.name,
-            }
-            if (entry.branch) {
-              setBranchMenu(menu)
-            } else {
-              setNodeMenu(menu)
-            }
+              leaf: !entry.branch,
+            })
           }
         }}
       />
