@@ -381,10 +381,8 @@ describe('parseMSA input normalization', () => {
     expect(msa.getRow('101')).toBe('MKV.LAA.GT')
   })
 
-  test('reads every format with Windows line endings', () => {
-    const crlf = (text: string) => text.replaceAll('\n', '\r\n')
-    const inputs = {
-      clustal: `CLUSTAL W (1.83) multiple sequence alignment
+  const crlfInputs = {
+    clustal: `CLUSTAL W (1.83) multiple sequence alignment
 
 seqA      ACDEFGHIKL
 seqB      ACDEFGHIKM
@@ -394,19 +392,19 @@ seqA      MNPQRSTVWY
 seqB      MNPQRSTVWY
           **********
 `,
-      stockholm: `# STOCKHOLM 1.0
+    stockholm: `# STOCKHOLM 1.0
 seqA ACDEFGHIKL
 seqB ACDEFGHIKM
 seqA MNPQRSTVWY
 seqB MNPQRSTVWY
 //
 `,
-      a3m: `>seqA
+    a3m: `>seqA
 ACDEFGHIKLMNPQRSTVWY
 >seqB
 ACDEFGHIKMmnMNPQRSTVWY
 `,
-      emf: `SEQ human seqA 1 1 20 1 g1
+    emf: `SEQ human seqA 1 1 20 1 g1
 SEQ mouse seqB 1 1 20 1 g2
 DATA
 AA
@@ -431,15 +429,18 @@ WW
 YY
 //
 `,
-    }
-    for (const [format, text] of Object.entries(inputs)) {
-      const msa = parseMSA(crlf(text))
-      expect(msa.getNames(), format).toEqual(['seqA', 'seqB'])
-      expect(msa.getRow('seqA').replaceAll('.', ''), format).toBe(
+  }
+
+  test.each(Object.entries(crlfInputs))(
+    'reads %s with Windows line endings',
+    (_format, text) => {
+      const msa = parseMSA(text.replaceAll('\n', '\r\n'))
+      expect(msa.getNames()).toEqual(['seqA', 'seqB'])
+      expect(msa.getRow('seqA').replaceAll('.', '')).toBe(
         'ACDEFGHIKLMNPQRSTVWY',
       )
-    }
-  })
+    },
+  )
 
   test('rejects an HTML page instead of reading it as Clustal', () => {
     const page =

@@ -112,7 +112,9 @@ MPIGSKERPTFFEIFKTRCNKADLGPISLN
   })
 
   test('decodes a percent-encoded seq_id', () => {
-    const result = parseGFF('HBA%2FHUMAN/27-137\tsrc\tgene\t1\t5\t.\t+\t.\tName=x')
+    const result = parseGFF(
+      'HBA%2FHUMAN/27-137\tsrc\tgene\t1\t5\t.\t+\t.\tName=x',
+    )
     expect(result[0]?.seq_id).toBe('HBA/HUMAN/27-137')
   })
 
