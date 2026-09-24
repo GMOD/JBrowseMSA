@@ -3,10 +3,15 @@
 // The screen states the scale a phylogram's branch lengths are drawn to, so the
 // export has to carry the same bar: without it the figure's horizontal distance
 // means nothing to a reader.
+import React from 'react'
+
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
+import { ThemeProvider } from '@mui/material'
 import { beforeAll, expect, test } from 'vitest'
 
+import TreeRuler from './components/tree/TreeRuler.tsx'
 import { treeScaleBarHeight } from './constants.ts'
+import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
@@ -40,6 +45,19 @@ test('the figure carries the bar the screen states the scale with', async () => 
   const markup = group(svg)
   expect(markup).toContain(`>${bar.label}<`)
   expect(markup).toContain(`h${bar.px}`)
+})
+
+test('the screen draws the same bar as the figure', async () => {
+  const { model, svg } = await exportWith({})
+  const theme = createJBrowseTheme()
+  const ruler = svgSafeColors(
+    renderToStaticMarkup(
+      <ThemeProvider theme={theme}>
+        <TreeRuler model={model} />
+      </ThemeProvider>,
+    ),
+  )
+  expect(/<svg[^>]*>(.*?)<\/svg>/s.exec(ruler)?.[1]).toBe(group(svg))
 })
 
 test('the bar sits under the overview and the band grows for it', async () => {

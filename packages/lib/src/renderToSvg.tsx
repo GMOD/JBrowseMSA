@@ -14,6 +14,7 @@ import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { headerRunsAcross } from './components/rowpanels/headerLayout.ts'
 import { renderRowPanels } from './components/rowpanels/renderRowPanel.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
+import ScaleBarSVG from './components/tree/ScaleBarSVG.tsx'
 import {
   bracketGap,
   cladeHeight,
@@ -323,17 +324,13 @@ function TreeScaleBarSVG({
   if (!bar) {
     return null
   }
-  const y = treeOverviewHeight + treeScaleBarHeight
-  const color = theme.palette.text.primary
   return (
     <g id="tree-scalebar">
-      <text x={marginLeft} y={y - 9} fontSize={10} fill={color}>
-        {bar.label}
-      </text>
-      <path
-        d={`M${marginLeft} ${y - 7} v6 h${bar.px} v-6`}
-        fill="none"
-        stroke={color}
+      <ScaleBarSVG
+        bar={bar}
+        marginLeft={marginLeft}
+        y={treeOverviewHeight + treeScaleBarHeight}
+        color={theme.palette.text.primary}
       />
     </g>
   )

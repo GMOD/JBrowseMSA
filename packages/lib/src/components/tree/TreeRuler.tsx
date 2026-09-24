@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { treeScaleBarHeight as h } from '../../constants.ts'
+import ScaleBarSVG from './ScaleBarSVG.tsx'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -18,19 +19,12 @@ const TreeRuler = observer(({ model }: { model: MsaViewModel }) => {
   return (
     <div style={{ flexShrink: 0, width: treeAreaWidth }}>
       {bar ? (
-        <svg
-          width={treeAreaWidth}
-          height={h}
-          style={{ display: 'block' }}
-          color={theme.palette.text.primary}
-        >
-          <text x={marginLeft} y={h - 9} fontSize={10} fill="currentColor">
-            {bar.label}
-          </text>
-          <path
-            d={`M${marginLeft} ${h - 7} v6 h${bar.px} v-6`}
-            fill="none"
-            stroke="currentColor"
+        <svg width={treeAreaWidth} height={h} style={{ display: 'block' }}>
+          <ScaleBarSVG
+            bar={bar}
+            marginLeft={marginLeft}
+            y={h}
+            color={theme.palette.text.primary}
           />
         </svg>
       ) : null}
