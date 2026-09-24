@@ -191,10 +191,13 @@ the InterPro release the coordinates came from.
 | `--format <name>`     | Force the `--msa` format instead of sniffing it |               |
 | `--no-cache`          | Re-fetch, ignoring the disk cache               | off           |
 
-InterPro computes matches on UniProt's canonical sequence, so on a row that is
-an isoform or a fragment the matches land on the wrong residues. With `--msa`,
-the CLI compares each row's ungapped length against the protein's and warns
-about any that differ. It also warns about any accession with no matches.
+InterPro computes matches on UniProt's canonical sequence. A label ending in
+`/start-end`, as Pfam and Stockholm name a fragment row (`P12931/84-145`), moves
+each match into the fragment's own positions and clips it to the fragment. On an
+isoform row the matches land on the wrong residues. With `--msa`, the CLI
+compares each row's ungapped length against the protein's, or against the
+range's for a fragment, and warns about any that differ. It also warns about any
+accession with no matches.
 
 ```bash
 react-msaview-cli interpro accessions.tsv -o domains.gff

@@ -44,14 +44,19 @@ function json(body: unknown) {
   return new Response(JSON.stringify(body), { status: 200 })
 }
 
-async function run(inputLines: string) {
+async function run(inputLines: string, msa?: string) {
   const input = path.join(dir, 'accessions.tsv')
   fs.writeFileSync(input, inputLines)
+  const msaFile = msa === undefined ? undefined : path.join(dir, 'rows.fa')
+  if (msaFile) {
+    fs.writeFileSync(msaFile, msa)
+  }
   const { runInterProPrecomputed } = await import('./interpro-precomputed.ts')
   await runInterProPrecomputed({
     inputFile: input,
     outputFile: out,
     database: 'pfam',
+    msaFile,
   })
   return fs.readFileSync(out, 'utf8')
 }
@@ -124,5 +129,23 @@ test('an isoform or version suffix reads the canonical accession', async () => {
   expect(gff).toContain('Mouse\t')
   expect(console.warn).toHaveBeenCalledWith(
     expect.stringContaining('canonical sequence'),
+  )
+})
+
+test('a /start-end fragment row gets its matches in its own positions, clipped', async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(json(RELEASE))
+    .mockResolvedValueOnce(json(MATCH))
+  vi.stubGlobal('fetch', fetchMock)
+
+  const fragment = 'A'.repeat(28)
+  const gff = await run(
+    'P00001\tP00001/3-30\n',
+    `>P00001/3-30\n${fragment.slice(0, 10)}--${fragment.slice(10)}\n`,
+  )
+  expect(gff).toContain('P00001/3-30\tInterProScan\tprotein_match\t3\t28\t')
+  expect(console.warn).not.toHaveBeenCalledWith(
+    expect.stringContaining('residues'),
   )
 })

@@ -4,6 +4,7 @@ import { annotationsToGFF, getUngappedSequence, parseMSA } from 'msa-parsers'
 
 import { fetchWithRetry } from './fetchWithRetry.ts'
 import { cacheLocation, readCached, writeCached } from './interpro-cache.ts'
+import { parseRowRange, toFragment } from './rowRange.ts'
 import { parseUniProtAccession } from './uniprotAccession.ts'
 
 import type { MSAFormat } from 'msa-parsers'
@@ -219,21 +220,29 @@ export async function runInterProPrecomputed(
     }
   }
 
-  const annotations = accessions.flatMap(({ accession, label }) =>
-    (entriesByAccession.get(accession) ?? []).flatMap(
+  const annotations = accessions.flatMap(({ accession, label }) => {
+    const range = parseRowRange(label)
+    return (entriesByAccession.get(accession) ?? []).flatMap(
       ({ metadata, proteins }) =>
         (proteins[0]?.entry_protein_locations ?? []).flatMap(loc =>
-          loc.fragments.map(f => ({
-            id: label,
-            accession: metadata.integrated ?? metadata.accession,
-            name: metadata.name,
-            description: metadata.name,
-            start: f.start,
-            end: f.end,
-          })),
+          loc.fragments.flatMap(f => {
+            const span = range ? toFragment(f, range) : f
+            return span
+              ? [
+                  {
+                    id: label,
+                    accession: metadata.integrated ?? metadata.accession,
+                    name: metadata.name,
+                    description: metadata.name,
+                    start: span.start,
+                    end: span.end,
+                  },
+                ]
+              : []
+          }),
         ),
-    ),
-  )
+    )
+  })
 
   console.log(`${fetched} fetched, ${cached} from ${cacheLocation()}`)
   if (unresolved.length > 0) {
@@ -261,9 +270,10 @@ export async function runInterProPrecomputed(
 /**
  * Warn where a row is not the protein the matches were computed on.
  *
- * The coordinates come from UniProt's canonical sequence. An isoform or fragment
- * row has a different length, and its domains would land on wrong residues with
- * no other sign of the problem.
+ * The coordinates come from UniProt's canonical sequence. An isoform row has a
+ * different length, and its domains would land on wrong residues with no other
+ * sign of the problem. A row named `/start-end` is that fragment of the protein,
+ * so its length has to match the range instead.
  */
 function checkLengths(
   msaFile: string,
@@ -278,13 +288,21 @@ function checkLengths(
       .get(accession)
       ?.map(e => e.proteins[0]?.protein_length)
       .find(l => l !== undefined)
+    const range = parseRowRange(label)
+    const expected = range ? range.end - range.start + 1 : proteinLength
     if (!names.has(label)) {
       console.warn(`  ${label}: no such row in ${msaFile}`)
-    } else if (proteinLength !== undefined) {
+    } else if (range && proteinLength !== undefined && range.end > proteinLength) {
+      console.warn(
+        `  ${label}: the range ends past ${accession}, which is ${proteinLength} residues`,
+      )
+    } else if (expected !== undefined) {
       const rowLength = getUngappedSequence(msa.getRow(label)).length
-      if (rowLength !== proteinLength) {
+      if (rowLength !== expected) {
         console.warn(
-          `  ${label}: row is ${rowLength} residues, ${accession} is ${proteinLength}; the matches are computed on the canonical sequence, so an isoform or fragment puts them on the wrong residues`,
+          range
+            ? `  ${label}: row is ${rowLength} residues where its range spans ${expected}, so the matches land on the wrong residues`
+            : `  ${label}: row is ${rowLength} residues, ${accession} is ${proteinLength}; the matches are computed on the canonical sequence, so on an isoform they land on the wrong residues. Name a fragment row ${label}/start-end`,
         )
       }
     }
