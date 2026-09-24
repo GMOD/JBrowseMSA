@@ -5,11 +5,11 @@ import Help from '@mui/icons-material/Help'
 import { IconButton, Tooltip } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import StatusMessage from '../StatusMessage.tsx'
 import ColorSchemeMenu from './ColorSchemeMenu.tsx'
 import FileMenu from './FileMenu.tsx'
 import GappynessSlider from './GappynessSlider.tsx'
 import HeaderInfoArea from './HeaderInfoArea.tsx'
-import HeaderStatusArea from './HeaderStatusArea.tsx'
 import LoadWarnings from './LoadWarnings.tsx'
 import MSASettingsMenu from './MSASettingsMenu.tsx'
 import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
@@ -51,7 +51,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <Spacer />
       <LoadWarnings model={model} />
       <UnshareableDataWarning model={model} />
-      <HeaderStatusArea model={model} />
+      <StatusMessage model={model} variant="header" />
       <Tooltip title="About">
         <IconButton
           aria-label="About"

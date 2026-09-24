@@ -2,34 +2,14 @@ import React from 'react'
 
 import { ErrorMessage } from '@jbrowse/core/ui'
 import { ErrorBoundary } from '@jbrowse/core/ui/ErrorBoundary'
-import { Button, CircularProgress, Typography } from '@mui/material'
+import { Button } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import MSAView from './MSAView.tsx'
+import StatusMessage from './StatusMessage.tsx'
 import ImportForm from './import/ImportForm.tsx'
 
 import type { MsaViewModel } from '../model.ts'
-
-const LoadingSpinner = observer(function ({ model }: { model: MsaViewModel }) {
-  const { status } = model
-  return (
-    <div
-      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 20 }}
-    >
-      <CircularProgress size={24} />
-      <Typography variant="h6">{status?.msg ?? 'Loading...'}</Typography>
-      {status?.onCancel ? (
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => status.onCancel?.()}
-        >
-          Cancel
-        </Button>
-      ) : null}
-    </div>
-  )
-})
 
 const Reset = observer(function ({
   model,
@@ -79,7 +59,7 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
       >
         {dataInitialized ? (
           isLoading ? (
-            <LoadingSpinner model={model} />
+            <StatusMessage model={model} variant="page" />
           ) : (
             <MSAView model={model} />
           )
@@ -87,7 +67,7 @@ const Loading = observer(function ({ model }: { model: MsaViewModel }) {
           <Reset model={model} error={error} />
         ) : (
           <>
-            {loading ? <LoadingSpinner model={model} /> : null}
+            {loading ? <StatusMessage model={model} variant="page" /> : null}
             <div style={{ display: loading ? 'none' : undefined }}>
               <ImportForm model={model} />
             </div>
