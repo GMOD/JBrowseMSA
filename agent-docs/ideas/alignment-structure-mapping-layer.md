@@ -175,8 +175,12 @@ mappings are contiguous segments in every case seen so far.
    cheap declared check, a segment overrunning the row is the undeclared one,
    and `residueMappingProblems` lists why each mapping was ignored.
 
-   No generator produces mappings yet. protein3d already has the SIFTS parsing
-   to write one.
+   Three generators write the layer from a SIFTS lookup.
+   `scripts/examples-gen/structure.mjs` builds the mapping for the Src,
+   sickle-cell hemoglobin and ACE2-spike examples, and
+   `docs/tutorials/scripts/build_spike_structure.sh` and
+   `build_protein_complex.sh` write one for the spike and hemoglobin tutorials.
+   `react-msaview-cli residue-mappings` writes the layer for any alignment.
 
 4. **A published locus type and hover/select callbacks**, so protein3d stops
    reaching into `mouseCol` and `setMousePos` through autoruns. Both repos
