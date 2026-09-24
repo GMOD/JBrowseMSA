@@ -145,14 +145,16 @@ the columns. The viewer draws a **Base pairs** track from it and gives
 pseudoknot pairs their own color. WUSS writes a pseudoknot pair as `A`/`a`
 because it crosses a helix, and brackets can only nest.
 
-A track over 50 kB serialized stays in the live model but leaves the snapshot,
+A track over 15 kB serialized stays in the live model but leaves the snapshot,
 under the same [size rule](https://gmod.org/JBrowseMSA/guide#link-to-a-view)
 that applies to inline alignments. To go past it, host the values and set them
 at runtime with `model.setColumnTracks(...)`.
 
 A `?data=` link has a tighter limit: the server in front of gmod.org answers a
-request line over 8,192 characters with a 414 error instead of the page. That
-line holds the whole URL-encoded snapshot, so three tracks of a few hundred
+request line over 8,192 characters with a 414 error. The demo app gzips the
+snapshot into the link and drops `?data=` from the address bar once the encoded
+URL passes 8,000 characters. The same app still opens a hand-written link of
+plain JSON, which counts every character, so three tracks of a few hundred
 values fit and much more does not. Scale the values to integers and record the
 scale in `max`: `87,` takes three characters and `0.87,` takes five.
 
@@ -309,7 +311,7 @@ whose other columns are the fields, the shape a ggtree
 `tibble(label = , trait = )` has.
 
 A real metadata table needs the filehandle. Five thousand rows with eight fields
-run to roughly 700 kB, far past both the 50 kB inline limit and the
+run to roughly 700 kB, far past both the 15 kB inline limit and the
 8,192-character request line, so the snapshot drops the table and
 `unshareableData` reports the drop. Host the JSON and set
 `treeMetadataFilehandle` to its URL, and the viewer fetches the table at

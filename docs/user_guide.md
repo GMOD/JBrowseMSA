@@ -251,12 +251,16 @@ Three things decide whether the link works for the person who opens it:
   holding them has to send `Access-Control-Allow-Origin`. GitHub Pages, S3 with
   a CORS rule, and the public EBI/NCBI/PDBe APIs send it. Most institutional web
   servers and Google Drive do not, and the view then opens on a fetch error.
-- **Size.** The link inlines a pasted or locally opened file up to 50 kB. A
-  larger file stays in the running viewer but leaves the snapshot, the header
-  shows **Not in the link**, and the app removes the `?data=` parameter so the
-  address bar never holds a URL that opens empty. To share a larger file, serve
+- **Size.** The app gzips the snapshot into `?data=`, and gmod.org refuses a
+  URL over about 8,000 characters. The link inlines a pasted or locally opened
+  file up to 15 kB, which compresses under that for the protein and DNA
+  alignments we measured. A larger file stays in the running viewer but leaves
+  the snapshot, and the header shows **Not in the link**. When a file is too
+  large, or the whole view still encodes past 8,000 characters, the app removes
+  the `?data=` parameter so the address bar never holds a URL that opens empty
+  or fails. To share a larger file, serve
   it over HTTP and open it by URL; the link then stores the address, which works
-  at any file size. The same 50 kB limit applies to a
+  at any file size. The same 15 kB limit applies to a
   [data track](https://gmod.org/JBrowseMSA/layers#columntracks).
 
 ## Tracks

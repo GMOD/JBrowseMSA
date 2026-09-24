@@ -11,7 +11,7 @@ import { createApp } from './model'
 
 import type { AppModel } from './model'
 
-const mymodel = createApp(
+const mymodel = await createApp(
   new URLSearchParams(window.location.search).get('data'),
 )
 
