@@ -7,7 +7,8 @@ The CLI has two groups of commands, and the second draws what the first writes:
 
 - **Annotate**: build a domain or exon GFF for an alignment, from InterPro's
   precomputed matches (`interpro`), a live InterProScan run (`interproscan`), or
-  a RefSeq transcript's exon model (`genestructure`).
+  a RefSeq transcript's exon model (`genestructure`), and relate rows to 3D
+  structures (`residue-mappings`).
 - **Render**: draw the alignment, its tree, and those annotations to a
   standalone SVG (`export-svg`). The command runs the web viewer's renderer
   headlessly, so the figure matches what the app shows.
@@ -16,7 +17,7 @@ The CLI has two groups of commands, and the second draws what the first writes:
 
 - NodeJS v22+
 
-`export-svg` and `interpro` need nothing else. `interproscan` needs a backend to
+`export-svg`, `interpro` and `residue-mappings` need nothing else. `interproscan` needs a backend to
 scan with: the EBI web API (the default, no install), Docker, Singularity, or a
 local InterProScan (see [interproscan](#interproscan)).
 
@@ -342,6 +343,54 @@ react-msaview-cli genestructure f12-cds.stock --gene F12 --ref human -o exons.gf
 
 ## pin a specific transcript
 react-msaview-cli genestructure aln.fa --transcript NM_000505.4 --ref human
+```
+
+### residue-mappings
+
+Build the
+[`residueMappings` layer](https://github.com/GMOD/JBrowseMSA/blob/main/docs/layers.md#residuemappings),
+which tells the viewer which residue of a PDB chain or an AlphaFold model each
+residue of a row is. The output is `{"residueMappings": [...]}`, ready for the
+`residueMappings` prop, a `?data=` link, or the R and Python widgets.
+
+```bash
+react-msaview-cli residue-mappings --msa <file> --row <name> --accession <acc> \
+  (--pdb <id> --chain <id> | --alphafold) [-o mappings.json]
+react-msaview-cli residue-mappings --msa <file> --rows <tsv> [-o mappings.json]
+```
+
+| Option                    | Description                                          | Default |
+| ------------------------- | ---------------------------------------------------- | ------- |
+| `--msa <file>`            | Alignment holding the rows                           |         |
+| `--format <name>`         | Force the MSA format instead of sniffing it          |         |
+| `--rows <tsv>`            | `row`, `accession`, `structure` per line, tab-separated |      |
+| `--row <name>`            | One row, instead of `--rows`                         |         |
+| `--accession <acc>`       | The row's UniProtKB accession                        |         |
+| `--pdb <id> --chain <id>` | The PDB entry and its author chain                   |         |
+| `--alphafold`             | The AlphaFold DB model of the accession instead      |         |
+| `-o, --output <file>`     | Output JSON file                                     | stdout  |
+
+In `--rows`, the structure column is `6VXX:A` or `alphafold`, and a
+`row accession structure` header line is optional. A row may appear on several
+lines to map it onto several structures.
+
+For each row, the CLI first fetches the accession's sequence from UniProt and
+checks the row's ungapped residues against it. A row named `/start-end` has to
+match that slice of the protein, and every position in its mapping is a residue
+of the row. A mismatch stops the run with the row, the accession and the first
+residue where they differ.
+
+For a PDB chain, the segments come from the PDBe SIFTS mapping of the entry,
+and `unobserved` lists every position of the chain's entity outside PDBe's
+observed ranges. `asymId` is the `struct_asym_id` SIFTS gives for the author
+chain. For an AlphaFold model, the model numbers the protein from 1, so the
+mapping is one segment and has no `unobserved`.
+
+```console
+$ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
+    --accession P0DTC2 --pdb 6VXX --chain A -o mappings.json
+  SARS-CoV-2: P0DTC2 onto 6VXX chain A, row 14-1211 at 33-1230
+wrote mappings.json
 ```
 
 ## Input formats

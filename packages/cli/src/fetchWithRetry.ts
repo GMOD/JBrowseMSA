@@ -18,14 +18,18 @@ function retryAfterMs(response: Response) {
  */
 export async function fetchWithRetry(
   url: string,
-  { attempts = 4, baseDelayMs = 1000 } = {},
+  { attempts = 4, baseDelayMs = 1000, headers }: {
+    attempts?: number
+    baseDelayMs?: number
+    headers?: Record<string, string>
+  } = {},
 ) {
   let lastError: unknown
   for (let attempt = 0; attempt < attempts; attempt++) {
     // one wait per failed attempt: Retry-After when present, else exponential
     let wait = baseDelayMs * 2 ** attempt
     try {
-      const response = await fetch(url)
+      const response = await fetch(url, headers ? { headers } : undefined)
       if (!RETRYABLE.has(response.status)) {
         return response
       }

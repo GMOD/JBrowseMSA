@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 
+import * as fs from 'node:fs'
 import { parseArgs } from 'node:util'
 
 import { exportSvg } from './export-svg.ts'
 import { runGeneStructure } from './genestructure.ts'
 import { runInterProPrecomputed } from './interpro-precomputed.ts'
 import { runInterProScan } from './interproscan-msa.ts'
+import {
+  parseRowsTsv,
+  parseStructure,
+  runResidueMappings,
+} from './residue-mappings.ts'
 import { DEFAULT_DOCKER_IMAGE } from './runner.ts'
 
+import type { MappingRow } from './residue-mappings.ts'
 import type { MSAFormat } from 'msa-parsers'
 
 const options = {
@@ -120,6 +127,25 @@ const options = {
   'interproscan-data': {
     type: 'string',
   },
+  rows: {
+    type: 'string',
+  },
+  row: {
+    type: 'string',
+  },
+  accession: {
+    type: 'string',
+  },
+  pdb: {
+    type: 'string',
+  },
+  chain: {
+    type: 'string',
+  },
+  alphafold: {
+    type: 'boolean',
+    default: false,
+  },
   help: {
     type: 'boolean',
     short: 'h',
@@ -140,6 +166,9 @@ COMMANDS:
                   UniProtKB accessions (instant, deterministic, no scan job)
   genestructure   Build an exon-structure GFF for a coding-sequence alignment
                   from a RefSeq transcript (NCBI Datasets), overlaid like domains
+  residue-mappings
+                  Build the residueMappings layer relating alignment rows to
+                  PDB chains (SIFTS) or AlphaFold models
   export-svg      Export alignment as SVG (no browser required)
 
 OPTIONS (interproscan):
@@ -185,6 +214,17 @@ OPTIONS (genestructure):
   --format <name>               Force the MSA format instead of sniffing it
   -o, --output <file>           Output GFF file (default: genestructure.gff)
 
+OPTIONS (residue-mappings):
+  --msa <file>                  Alignment holding the rows [required]
+  --format <name>               Force the MSA format instead of sniffing it
+  --rows <tsv>                  row<TAB>accession<TAB>structure per line, where
+                                structure is PDB:CHAIN (6VXX:A) or alphafold
+  --row <name>                  One row, instead of --rows
+  --accession <acc>             The row's UniProtKB accession
+  --pdb <id> --chain <id>       The PDB entry and author chain to map it onto
+  --alphafold                   Map it onto the AlphaFold DB model instead
+  -o, --output <file>           Output JSON file (default: stdout)
+
 OPTIONS (export-svg):
   --spec <file.json>            MsaView spec or snapshot, with any layer from
                                 docs/layers.md; the flags below override it
@@ -225,6 +265,10 @@ EXAMPLES:
 
   react-msaview-cli genestructure f12-cds.stock --gene F12 --ref human -o exons.gff
   react-msaview-cli genestructure aln.fa --transcript NM_000505.4 --ref human
+
+  react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \\
+    --accession P0DTC2 --pdb 6VXX --chain A -o mappings.json
+  react-msaview-cli residue-mappings --msa spike.afa --rows structures.tsv
 `)
 }
 
@@ -253,6 +297,36 @@ function readOptional(name: string, value?: string, integer = false) {
 
 function readList(value: string) {
   return value.split(',').map(s => s.trim())
+}
+
+function readMappingRows(values: {
+  rows?: string
+  row?: string
+  accession?: string
+  pdb?: string
+  chain?: string
+  alphafold: boolean
+}): MappingRow[] {
+  if (values.rows) {
+    return parseRowsTsv(fs.readFileSync(values.rows, 'utf8'))
+  }
+  const { row, accession, pdb, chain, alphafold } = values
+  if (!row || !accession) {
+    throw new Error('give --rows <tsv>, or --row and --accession')
+  }
+  if (alphafold === !!pdb) {
+    throw new Error('give one of --pdb <id> --chain <id> or --alphafold')
+  }
+  if (pdb && !chain) {
+    throw new Error('--pdb needs --chain')
+  }
+  return [
+    {
+      row,
+      accession,
+      structure: pdb ? parseStructure(`${pdb}:${chain}`) : 'alphafold',
+    },
+  ]
 }
 
 async function main() {
@@ -348,6 +422,17 @@ async function main() {
       geneId: values['gene-id'],
       transcript: values.transcript,
       format,
+    })
+  } else if (command === 'residue-mappings') {
+    if (!values.msa) {
+      console.error('Error: --msa <file> is required')
+      process.exit(1)
+    }
+    await runResidueMappings({
+      msaFile: values.msa,
+      format,
+      rows: readMappingRows(values),
+      outputFile: values.output,
     })
   } else {
     console.error(`Unknown command: ${command}`)
