@@ -129,6 +129,12 @@ test_that("the residue scale sets the scheme and the channel", {
   expect_equal(w$x$props$residueEncoding, "color")
 })
 
+test_that("the residue scale takes a color per letter", {
+  w <- msaview(msa = msa) + scale_residue_color(c(K = "#1f77b4", D = "#d62728"))
+  expect_equal(w$x$props$colorScheme,
+               list(map = list(K = "#1f77b4", D = "#d62728")))
+})
+
 test_that("an invalid channel is an error from either surface", {
   expect_error(scale_residue_color(encoding = "background"),
                "residue_encoding must be 'fill' or 'color'")

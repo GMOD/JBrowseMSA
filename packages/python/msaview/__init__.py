@@ -70,7 +70,13 @@ class MSAView(anywidget.AnyWidget):
     tree_url = traitlets.Unicode("").tag(sync=True)
     gff_url = traitlets.Unicode("").tag(sync=True)
 
-    color_scheme = traitlets.Unicode(None, allow_none=True).tag(sync=True)
+    # a scheme name, or a dict of residue letter to color that leaves every
+    # letter it does not list uncolored
+    color_scheme = traitlets.Union(
+        [traitlets.Unicode(), traitlets.Dict(value_trait=traitlets.Unicode())],
+        default_value=None,
+        allow_none=True,
+    ).tag(sync=True)
     height = traitlets.Int(None, allow_none=True).tag(sync=True)
     col_width = traitlets.Float(None, allow_none=True).tag(sync=True)
     row_height = traitlets.Float(None, allow_none=True).tag(sync=True)

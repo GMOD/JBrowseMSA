@@ -46,6 +46,9 @@
 #'   \code{"jalview_propturn"}, \code{"nucleotide"}, \code{"jbrowse_dna"},
 #'   \code{"rainbow_dna"}, \code{"clustalx_dna"},
 #'   \code{"clustalx_protein_dynamic"}, \code{"percent_identity_dynamic"}.
+#'   A named character vector or list of colors keyed by residue letter, such
+#'   as \code{c(K = "#1f77b4", R = "#1f77b4")}, colors the letters it names in
+#'   either case and leaves every other letter uncolored.
 #' @param column_tracks Tracks supplied as data, drawn above the alignment
 #'   beside the computed conservation tracks. A list of tracks, each a list
 #'   with \code{id}, \code{name}, \code{kind} (\code{"bar"},
@@ -224,6 +227,8 @@
 #' # --- Color schemes ---
 #' msaview(msa = "alignment.fa", color_scheme = "clustalx_protein_dynamic")
 #' msaview(msa = "alignment.fa", color_scheme = "percent_identity_dynamic")
+#' msaview(msa = "alignment.fa",
+#'         color_scheme = c(K = "#1f77b4", R = "#1f77b4", D = "#d62728"))
 #'
 #' # --- In Shiny ---
 #' # input$<output id>_click holds the clicked cell, and
@@ -269,7 +274,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$msaFilehandle <- uri_location(msa)
   props$treeFilehandle <- uri_location(tree)
   props$gffFilehandle <- uri_location(gff)
-  props$colorScheme <- color_scheme
+  props$colorScheme <- convert_color_scheme(color_scheme)
   props$columnTracks <- convert_column_tracks(column_tracks)
   props$showBranchLen <- show_branch_len
   props$treeOrder <- check_tree_order(tree_order)
@@ -590,6 +595,17 @@ convert_region <- function(region) {
   region$end <- as.integer(region$end)
   if (!is.null(region$row)) region$row <- sanitize_names(region$row)
   region
+}
+
+# A scheme name passes through, and a named vector or list of colors becomes
+# the viewer's {map}, one color per residue letter
+convert_color_scheme <- function(scheme) {
+  if (is.null(scheme)) return(NULL)
+  named <- !is.null(names(scheme)) && all(nzchar(names(scheme)))
+  if (named) return(list(map = as.list(scheme)))
+  if (is.character(scheme) && length(scheme) == 1) return(scheme)
+  stop("color_scheme must be a scheme name or a named vector of colors, ",
+       "such as c(K = \"#1f77b4\")")
 }
 
 check_residue_encoding <- function(encoding) {

@@ -77,6 +77,14 @@ def test_theme_takes_a_mode_or_theme_options():
         MSAView(theme="sepia")
 
 
+def test_color_scheme_takes_a_name_or_a_letter_map():
+    assert MSAView(color_scheme="clustal").color_scheme == "clustal"
+    letters = {"K": "#1f77b4", "R": "#1f77b4"}
+    assert MSAView(color_scheme=letters).color_scheme == letters
+    with pytest.raises(traitlets.TraitError):
+        MSAView(color_scheme=["K", "R"])
+
+
 def test_residue_encoding_takes_fill_or_color():
     assert MSAView(residue_encoding="color").residue_encoding == "color"
     with pytest.raises(traitlets.TraitError):

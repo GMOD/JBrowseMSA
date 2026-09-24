@@ -45,7 +45,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | -------------------------------- | ----------------------------------------------------------------------------------------- |
 | `msa`, `tree`, `gff`             | document text or a file path                                                              |
 | `msa_url`, `tree_url`, `gff_url` | a URL the viewer fetches                                                                  |
-| `color_scheme`                   | a scheme name, such as `"clustal"` or `"nucleotide"`                                      |
+| `color_scheme`                   | a scheme name, such as `"clustal"`, or a dict of residue letter to color                  |
 | `height`                         | pixels                                                                                    |
 | `col_width`, `row_height`        | pixels per column and per row                                                             |
 | `highlights`                     | list of `{start, end}`, `{row, start, end}` or `{rows}`                                   |

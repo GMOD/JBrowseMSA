@@ -73,6 +73,22 @@ test_that("msaview passes color_scheme to the props", {
   expect_equal(w$x$props$colorScheme, "clustal")
 })
 
+test_that("a named color vector reaches the viewer as a letter map", {
+  w <- msaview(msa = ">s1\nACGT",
+               color_scheme = c(K = "#1f77b4", R = "#1f77b4"))
+  json <- as.character(jsonlite::toJSON(w$x$props["colorScheme"],
+                                        auto_unbox = TRUE))
+  expect_equal(json, '{"colorScheme":{"map":{"K":"#1f77b4","R":"#1f77b4"}}}')
+
+  one <- msaviewr:::convert_color_scheme(c(K = "#1f77b4"))
+  expect_equal(one, list(map = list(K = "#1f77b4")))
+})
+
+test_that("an unnamed vector of colors is not a color scheme", {
+  expect_error(msaview(msa = ">s1\nACGT", color_scheme = c("red", "blue")),
+               "named vector of colors")
+})
+
 test_that("msaview passes show_branch_len to the props", {
   w <- msaview(msa = ">s1\nACGT", show_branch_len = FALSE)
   expect_false(w$x$props$showBranchLen)

@@ -406,6 +406,13 @@ Nucleotide: `nucleotide`, `jbrowse_dna`, `rainbow_dna`, `clustalx_dna`
 Dynamic (computed per-column): `clustalx_protein_dynamic`,
 `percent_identity_dynamic`
 
+A named vector of colors keyed by residue letter colors those letters, in either
+case, and leaves every other letter uncolored:
+
+```r
+msaview(msa = aa, color_scheme = c(K = "#1f77b4", R = "#1f77b4", D = "#d62728"))
+```
+
 ## Development
 
 The widget's JavaScript is `inst/htmlwidgets/lib/react-msaview.umd.js`, a

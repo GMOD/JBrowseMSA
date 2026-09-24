@@ -291,7 +291,9 @@ geom_msa_domains <- function(gff) {
 #' The residue color scale, and the channel it paints
 #'
 #' @param scheme A color scheme name, such as \code{"clustal"} or
-#'   \code{"nucleotide"}.
+#'   \code{"nucleotide"}, or a named vector of colors keyed by residue letter,
+#'   such as \code{c(K = "#1f77b4", R = "#1f77b4")}, which leaves every letter
+#'   it does not name uncolored.
 #' @param encoding Which channel the scheme paints: \code{"fill"} colors each
 #'   cell's background, \code{"color"} colors the letters, which lets a domain
 #'   overlay mark each span with a bar under the row.
@@ -302,11 +304,17 @@ geom_msa_domains <- function(gff) {
 #' msaview(msa = "p53.aln") +
 #'   geom_msa_domains("p53-domains.gff") +
 #'   scale_residue_color("clustal", encoding = "color")
+#'
+#' msaview(msa = "p53.aln") +
+#'   scale_residue_color(c(K = "#1f77b4", R = "#1f77b4", D = "#d62728"))
 #' }
 #' @export
 scale_residue_color <- function(scheme = NULL, encoding = NULL) {
   check_residue_encoding(encoding)
-  msa_layer(set = list(colorScheme = scheme, residueEncoding = encoding))
+  msa_layer(set = list(
+    colorScheme = convert_color_scheme(scheme),
+    residueEncoding = encoding
+  ))
 }
 
 #' The viewer's chrome and cell size

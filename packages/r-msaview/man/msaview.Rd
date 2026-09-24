@@ -74,7 +74,10 @@ msaview(
 \code{"jalview_prophelix"}, \code{"jalview_propstrand"},
 \code{"jalview_propturn"}, \code{"nucleotide"}, \code{"jbrowse_dna"},
 \code{"rainbow_dna"}, \code{"clustalx_dna"},
-\code{"clustalx_protein_dynamic"}, \code{"percent_identity_dynamic"}.}
+\code{"clustalx_protein_dynamic"}, \code{"percent_identity_dynamic"}.
+A named character vector or list of colors keyed by residue letter, such
+as \code{c(K = "#1f77b4", R = "#1f77b4")}, colors the letters it names in
+either case and leaves every other letter uncolored.}
 
 \item{column_tracks}{Tracks supplied as data, drawn above the alignment
 beside the computed conservation tracks. A list of tracks, each a list
@@ -293,6 +296,8 @@ msaview(
 # --- Color schemes ---
 msaview(msa = "alignment.fa", color_scheme = "clustalx_protein_dynamic")
 msaview(msa = "alignment.fa", color_scheme = "percent_identity_dynamic")
+msaview(msa = "alignment.fa",
+        color_scheme = c(K = "#1f77b4", R = "#1f77b4", D = "#d62728"))
 
 # --- In Shiny ---
 # input$<output id>_click holds the clicked cell, and

@@ -26,7 +26,7 @@ export interface Traits {
   msa_url: string
   tree_url: string
   gff_url: string
-  color_scheme: string | null
+  color_scheme: string | Record<string, string> | null
   height: number | null
   col_width: number | null
   row_height: number | null
@@ -105,6 +105,13 @@ function optional<T>(value: T | null | '') {
   return value === null || value === '' ? undefined : value
 }
 
+// a scheme name, or a dict of residue letter to color
+function colorScheme(scheme: Traits['color_scheme']) {
+  return typeof scheme === 'object' && scheme !== null
+    ? { map: scheme }
+    : optional(scheme)
+}
+
 function uriLocation(uri: string) {
   return uri ? { uri, locationType: 'UriLocation' as const } : undefined
 }
@@ -118,7 +125,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     msaFilehandle: uriLocation(model.get('msa_url')),
     treeFilehandle: uriLocation(model.get('tree_url')),
     gffFilehandle: uriLocation(model.get('gff_url')),
-    colorScheme: optional(model.get('color_scheme')),
+    colorScheme: colorScheme(model.get('color_scheme')),
     height: optional(model.get('height')),
     colWidth: optional(model.get('col_width')),
     rowHeight: optional(model.get('row_height')),

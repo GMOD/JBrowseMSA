@@ -152,6 +152,18 @@ test('tree_root takes the midpoint, or a list of names as an outgroup', () => {
   expect(mounted.props.at(-1)?.treeRoot).toBeUndefined()
 })
 
+test('color_scheme takes a scheme name, or a dict as the letter map', () => {
+  const model = fakeModel({ color_scheme: { K: '#1f77b4', R: '#1f77b4' } })
+  renderWidget(model)
+  expect(mounted.props[0]?.colorScheme).toEqual({
+    map: { K: '#1f77b4', R: '#1f77b4' },
+  })
+  model.change('color_scheme', 'lesk')
+  expect(mounted.props.at(-1)?.colorScheme).toBe('lesk')
+  model.change('color_scheme', null)
+  expect(mounted.props.at(-1)?.colorScheme).toBeUndefined()
+})
+
 test('a trait change updates the mounted viewer', () => {
   const model = fakeModel({})
   renderWidget(model)
