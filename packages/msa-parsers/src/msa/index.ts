@@ -18,11 +18,10 @@ export type MSAParserType =
 export type MSAFormat = 'stockholm' | 'a3m' | 'fasta' | 'emf' | 'clustal'
 
 const htmlPage = /^<(!doctype\s+html|html[\s>])/i
+const clustalHeader = /^(CLUSTAL|MUSCLE|PROBCONS|MSAPROBS|Kalign)/i
 
-// when `format` is given the heuristic sniffing is bypassed -- callers that
-// already know the format (e.g. impg emitting fasta-aln) can force it rather
-// than rely on auto-detection, which is necessarily ambiguous between formats
-// that share a leading '>' (fasta vs a3m)
+// A caller that knows the format, such as impg emitting fasta-aln, passes
+// `format` to skip sniffing, which cannot always tell FASTA from A3M
 export function parseMSA(
   input: string,
   currentAlignment = 0,
@@ -64,7 +63,15 @@ export function parseMSA(
   if (text.startsWith('SEQ')) {
     return new EmfMSA(text)
   }
-  return new ClustalMSA(text)
+  if (clustalHeader.test(text)) {
+    return new ClustalMSA(text)
+  }
+  const firstLine = text.split('\n', 1)[0]!.slice(0, 80)
+  throw new Error(
+    firstLine
+      ? `Unrecognized alignment format: expected FASTA, A3M, Stockholm, Clustal or EMF, but the first line reads "${firstLine}"`
+      : 'The alignment file is empty',
+  )
 }
 
 /**

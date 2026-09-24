@@ -55,12 +55,21 @@ seq2      ACDEFGHIKL
     expect(msa).toBeInstanceOf(ClustalMSA)
   })
 
-  test('defaults to Clustal for unknown format', () => {
-    const unknown = `some unknown format
-that doesn't match anything`
-    const msa = parseMSA(unknown)
+  test('throws on a format it does not recognize', () => {
+    expect(() => parseMSA('hello world\nthis is not an alignment')).toThrow(
+      /Unrecognized alignment format.*"hello world"/,
+    )
+    expect(() => parseMSA(' 2 4\nseqA ACDE\nseqB ACDF\n')).toThrow(/"2 4"/)
+    expect(() => parseMSA('#NEXUS\nbegin data;\n')).toThrow(/"#NEXUS"/)
+    expect(() => parseMSA(' \n\n')).toThrow(/empty/)
+  })
 
-    expect(msa).toBeInstanceOf(ClustalMSA)
+  test('reads the Clustal header of every aligner clustal-js knows', () => {
+    for (const header of ['CLUSTAL W (1.83)', 'MUSCLE (3.8)', 'Kalign (2.0)']) {
+      const msa = parseMSA(`${header}\n\nseq1  ACDE\nseq2  ACDF\n`)
+      expect(msa).toBeInstanceOf(ClustalMSA)
+      expect(msa.getNames()).toEqual(['seq1', 'seq2'])
+    }
   })
 
   test('explicit format bypasses auto-detection', () => {
