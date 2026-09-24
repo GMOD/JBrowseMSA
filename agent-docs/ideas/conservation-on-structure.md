@@ -1,18 +1,22 @@
 # Conservation mapped onto 3D structure
 
-`seqPosToVisibleCol` and `visibleColToSeqPos` are already a documented
-cross-repo contract with jbrowse-plugin-protein3d. The proposal pushes
-per-column conservation _into_ the structure coloring, and the column ↔ residue
-half of the coordinate math is done.
+Color a structure's residues by the conservation of the alignment column each
+one falls in. The per-column number exists (the conservation track, and the
+sequence logo's information content), so the work is the coordinate hop and a
+Mol* color theme.
 
-The row ↔ structure half is not. protein3d currently guesses at hover time which
-alignment row a structure belongs to, and which of its residues a row position
-lands on, by exact sequence equality, and falls back to a 1:1 map when the guess
-fails. [alignment-structure-mapping-layer](alignment-structure-mapping-layer.md)
-replaces that guess with a snapshot layer. Colors pushed through the current
-anchor would be wrong for any structure whose sequence does not match the row's
-exactly, which covers most experimental entries.
+The hop has two routes, one per host:
 
-The sequence logo track's per-column information content is the same kind of
-number, so coloring the structure by information content needs the same wiring
-with a different input.
+- **In JBrowse**, protein3d reaches the alignment through the genome: a column's
+  codon (`connectedHoverHighlights`), then the transcript, then the structure,
+  the path its hover has taken since protein3d `137bb13`. Coloring every residue
+  runs the same hop once per column. protein3d's `agent-docs/plan.md` notes the
+  missing piece there, a custom Mol* `ColorTheme` provider.
+- **On a standalone page** with both viewers and no genome, such as
+  `/tutorials/structure_link`, `structureResidue` reads the hop straight from
+  the `residueMappings` layer
+  ([alignment-structure-mapping-layer](alignment-structure-mapping-layer.md)).
+
+The standalone route is the cheaper first step: `structure_link.astro` already
+holds the Mol* plugin and the model, so it needs the color theme and a toggle,
+with no change to either plugin.

@@ -1,38 +1,31 @@
 # The alignment ↔ structure correspondence as a layer
 
-jbrowse-plugin-protein3d currently works out which structure residue an
-alignment cell corresponds to at hover time, by string equality, and falls back
-to a wrong residue with no warning. The proposal replaces that inference with
-data: a snapshot layer naming the correspondence, computed once by a producer
-such as SIFTS, an AlphaFold model or a curator. The viewer looks the
-correspondence up and returns nothing when there is no entry. This follows
-[layers that take data](data-layers.md), where an agent computes a value and the
-snapshot stores it for the viewer to draw, applied to the one coordinate hop
-this repo does not own.
+A snapshot layer names which structure residue each alignment residue
+corresponds to, computed once by a producer such as SIFTS, an AlphaFold model or
+a curator. The viewer looks the correspondence up and returns nothing when there
+is no entry. This follows [layers that take data](data-layers.md), where an
+agent computes a value and the snapshot stores it for the viewer to draw.
 
 Background reading that prompted this: `~/ideas/sequence-structure-interop.md`,
 local and deliberately outside the repo.
 
-## What happens today
+## Status, 2026-09-24
 
-`jbrowse-plugin-protein3d` drives the MSA ↔ structure hover both ways. It finds
-the alignment row for a structure with `findStructureRowName`
-(`src/AddHighlightModel/msaRowMatch.ts`): the row whose **ungapped sequence
-exactly equals** the structure's sequence. When no row matches, the sync in
-`ProteinToMsaHoverSync.tsx` falls back to `col === seqPos`.
+Every step has shipped or gone. When this note was written,
+jbrowse-plugin-protein3d matched a structure to the alignment row whose ungapped
+sequence equalled the structure's, and fell back to `col === seqPos` when none
+did, which lit a real residue, just the wrong one. protein3d's `137bb13`
+(2026-09-13) deleted that bridge, `msaRowMatch.ts` and
+`ProteinToMsaHoverSync.tsx` both. A hover now passes through the genome:
+protein3d reads msaview's `connectedHoverHighlights`, the codon under the
+hovered column, and maps it genome to transcript to structure the way it maps a
+genome hover (`src/ProteinView/connectedHover.ts`), and msaview mirrors a
+structure hover onto its columns the same way. That path needs a genome view
+both plugins connect to.
 
-Both halves fail in the same cases, and those cases are common. Exact sequence
-equality fails for a construct with an expression tag, a truncation, an
-engineered residue, a selenomethionine substitution, or a row that covers only
-part of the entry. A Pfam alignment whose rows are named `/27-137` never matches
-a full-length structure. The fallback then maps column _n_ to residue _n_, which
-for a gapped row is arbitrary. The user sees a highlight on a real residue, just
-the wrong one, with no error.
-
-The correct hop already exists one file over. `pdbUniProtMapping.ts` parses
-SIFTS into `UniProtStructureSegment[]`, the authoritative UniProt ↔ structure
-correspondence, and uses it for feature display. No code composes it with the
-column ↔ residue hop this repo owns, so the MSA link takes the shortcut.
+`residueMappings` serves the case with no genome: an alignment and a structure
+on one page, such as `/tutorials/structure_link` on this site, which reads
+`structureResidue` and `rowResidue` directly.
 
 ## The layer
 
@@ -122,8 +115,7 @@ callers should migrate.
 ## What it unlocks
 
 [Conservation on 3D structure](conservation-on-structure.md) becomes wiring with
-no lookup step. That file assumes this already, but it cannot work while the row
-↔ structure anchor is a sequence-equality guess.
+no lookup step on a page that holds both viewers.
 
 A **multi-structure overlay** becomes possible without a structural aligner.
 Take the columns where two rows both map to observed residues, feed those
@@ -134,8 +126,7 @@ reproducible from the snapshot, where a superposition tool's run is not. The
 overlay belongs in protein3d, with the mapping layer as its input.
 
 Tooltips can report the per-cell state. With three states in the data, a tooltip
-can say "P69905 · residue 58 · not observed in 1A3N" where today it highlights a
-plausible wrong residue.
+can say "P69905 · residue 58 · not observed in 1A3N".
 
 ## Out of scope
 
@@ -154,8 +145,8 @@ mappings are contiguous segments in every case seen so far.
 
 ## Order
 
-1. **Delete the 1:1 fallback in protein3d.** The change is downstream, small and
-   fixes correctness only. No mapping and no matched row means no highlight.
+1. ~~**Delete the 1:1 fallback in protein3d.**~~ Done downstream: protein3d's
+   `137bb13` removed the whole sequence-matching bridge.
 2. ~~**Owner-keyed highlights here.**~~ Done, see above.
 3. ~~**`residueMappings` plus the two lookup methods.**~~ Done. The layer, the
    types and `structureResidue`/`rowResidue` are in `model.ts`, documented in
@@ -182,10 +173,9 @@ mappings are contiguous segments in every case seen so far.
    `build_protein_complex.sh` write one for the spike and hemoglobin tutorials.
    `react-msaview-cli residue-mappings` writes the layer for any alignment.
 
-4. **A published locus type and hover/select callbacks**, so protein3d stops
-   reaching into `mouseCol` and `setMousePos` through autoruns. Both repos
-   already document that coupling as a hazard. Step 3 makes it worth fixing,
-   because the mapping gives the callbacks a correct residue to carry.
+4. ~~**A published locus type and hover/select callbacks.**~~ Moot: protein3d no
+   longer reads `mouseCol` or calls `setMousePos`, since both hover directions
+   pass through the genome view.
 
 ## Notes
 

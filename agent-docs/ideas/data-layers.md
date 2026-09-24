@@ -163,9 +163,9 @@ agent produces one that does not.
 
 - The row-group-coloring idea becomes the `tint` field of layer 3, which shipped
   as `rowTint`.
-- [find-and-search](find-and-search.md) and
-  [codon-aware-dna-view](codon-aware-dna-view.md) are things an agent computes
-  and pushes as highlights and a text track. They stop being viewer features.
+- Motif search and [codon-aware-dna-view](codon-aware-dna-view.md) are things an
+  agent computes and pushes as highlights and a text track. They stop being
+  viewer features.
 - [selection-model](selection-model.md) stays. It covers the human-to-agent
   direction: the person selects cells, the snapshot stores the selection, and
   the agent reads it back.

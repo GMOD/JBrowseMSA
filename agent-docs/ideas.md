@@ -16,17 +16,10 @@ nobody has to work it out again.
 - [A selection model](ideas/selection-model.md): the model has no selected
   column range or row set, and the MSA editor needs one before anything else.
   Copy, zoom-to-selection and selective export all build on it.
-- [Find / search](ideas/find-and-search.md): row-name search and keyboard
-  navigation shipped. Jump to column remains, and a motif search belongs to an
-  agent that pushes `highlights`.
-- [The alignment ↔ structure correspondence as a layer](ideas/alignment-structure-mapping-layer.md):
-  owner-keyed highlights, the `residueMappings` layer and
-  `react-msaview-cli residue-mappings` shipped. The two steps left are
-  downstream in protein3d: delete its wrong 1:1 fallback, and replace its
-  autoruns on `mouseCol` with hover/select callbacks.
-- [Conservation on 3D structure](ideas/conservation-on-structure.md): both
-  coordinate halves exist in this viewer; protein3d has to read
-  `residueMappings` before its colors are right.
+- [Conservation on 3D structure](ideas/conservation-on-structure.md): color a
+  structure by column conservation. The standalone structure page is the cheap
+  first step; in JBrowse the hop goes through the genome, as protein3d's hover
+  does.
 - [Demo: load by accession](ideas/load-by-accession-demo.md): a Pfam/Rfam box
   that loads a family alignment from EBI with no file handling.
 - [Demo: codon-aware DNA view](ideas/codon-aware-dna-view.md): translate a row,
@@ -46,6 +39,11 @@ nobody has to work it out again.
 - [Ortholog sources beyond NCBI](ideas/ortholog-sources-beyond-ncbi.md):
   measurements of nine ortholog sources, and why jbrowse-plugin-msaview took
   PANTHER, then UniRef, and rejected Ensembl and OrthoDB.
+- [The alignment ↔ structure correspondence as a layer](ideas/alignment-structure-mapping-layer.md):
+  the `residueMappings` layer, its lookups and
+  `react-msaview-cli residue-mappings`. protein3d dropped its sequence-matching
+  bridge for a path through the genome, so the layer serves pages with no genome
+  view.
 
 ## Closed
 
@@ -69,6 +67,7 @@ nobody has to work it out again.
 
 Done and removed: duplicated FASTA defline parsing (now `splitFastaRecords` in
 `msa-parsers/src/msa/fastaRecords.ts`), `parseNewick` returning `any` (now a
-typed `parse(s): NewickNode`), the sequence logo track, row-group coloring (now
-the `rowTint` encoding), and InterPro sub-row boxes overflowing the row (the
-lanes now share out the row height).
+typed `parse(s): NewickNode`), the sequence logo track, row search and jump to
+column (the header's Go to box; motif search is an agent's job under
+data-layers), row-group coloring (now the `rowTint` encoding), and InterPro
+sub-row boxes overflowing the row (the lanes now share out the row height).
