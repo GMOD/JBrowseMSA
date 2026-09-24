@@ -415,6 +415,8 @@ jalview_prophelix, jalview_propstrand, jalview_propturn
 
 **Dynamic (per-column):** clustalx_protein_dynamic, percent_identity_dynamic
 
+**No residue colors:** none
+
 ## API
 
 See the auto-generated API docs:
