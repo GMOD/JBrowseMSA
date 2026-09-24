@@ -12,7 +12,7 @@ export default function CopyButton({
   text,
   label = 'Copy to clipboard',
 }: {
-  text: string
+  text: string | (() => string)
   label?: string
 }) {
   const [copied, setCopied] = useState(false)
@@ -30,7 +30,7 @@ export default function CopyButton({
       variant="contained"
       color="primary"
       onClick={() => {
-        copy(text)
+        copy(typeof text === 'string' ? text : text())
         setCopied(true)
         clearTimeout(timer.current)
         timer.current = setTimeout(() => {
