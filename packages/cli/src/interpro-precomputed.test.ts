@@ -97,3 +97,32 @@ test('a 204 means no matches, which is an answer worth caching', async () => {
   expect(cacheFiles()).toEqual(['P00003.json'])
   expect(fetchMock).toHaveBeenCalledTimes(2)
 })
+
+test('an id that is not a UniProtKB accession fails before any request, naming interproscan', async () => {
+  const fetchMock = vi.fn()
+  vi.stubGlobal('fetch', fetchMock)
+
+  await expect(run('NP_000537.3\tHuman\nP53_HUMAN\tMouse\n')).rejects.toThrow(
+    /NP_000537\.3, P53_HUMAN.*interproscan/,
+  )
+  expect(fetchMock).not.toHaveBeenCalled()
+  expect(cacheFiles()).toEqual([])
+})
+
+test('an isoform or version suffix reads the canonical accession', async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(json(RELEASE))
+    .mockResolvedValueOnce(json(MATCH))
+  vi.stubGlobal('fetch', fetchMock)
+
+  const gff = await run('p00001-2\tHuman\nP00001.4\tMouse\n')
+  expect(fetchMock).toHaveBeenCalledTimes(2)
+  expect(String(fetchMock.mock.calls[1]![0])).toContain('/P00001/')
+  expect(cacheFiles()).toEqual(['P00001.json'])
+  expect(gff).toContain('Human\t')
+  expect(gff).toContain('Mouse\t')
+  expect(console.warn).toHaveBeenCalledWith(
+    expect.stringContaining('canonical sequence'),
+  )
+})

@@ -176,7 +176,10 @@ react-msaview-cli interpro <accessions.tsv> [options]
 ```
 
 The input is one accession per line, optionally followed by a tab- or
-space-separated row label. The command skips lines starting with `#`. It writes
+space-separated row label. The command skips lines starting with `#`. It reads
+an isoform (`P04637-2`) or versioned (`P04637.4`) accession as the canonical one
+and warns, and stops before any request on an entry name (`P53_HUMAN`), a RefSeq
+id or anything else InterPro does not key by; run `interproscan` on those. It writes
 through the same GFF writer as `interproscan`, and adds a `#` header line naming
 the InterPro release the coordinates came from.
 

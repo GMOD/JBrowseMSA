@@ -4,6 +4,7 @@ import { annotationsToGFF, getUngappedSequence, parseMSA } from 'msa-parsers'
 
 import { fetchWithRetry } from './fetchWithRetry.ts'
 import { cacheLocation, readCached, writeCached } from './interpro-cache.ts'
+import { parseUniProtAccession } from './uniprotAccession.ts'
 
 import type { MSAFormat } from 'msa-parsers'
 
@@ -62,19 +63,30 @@ interface ApiRootResponse {
 
 function parseAccessions(text: string): Accession[] {
   const out: Accession[] = []
+  const rejected: string[] = []
   for (const raw of text.split('\n')) {
     const line = raw.trim()
     if (line && !line.startsWith('#')) {
       const sep = line.search(/\s/)
-      if (sep === -1) {
-        out.push({ accession: line, label: line })
+      const token = sep === -1 ? line : line.slice(0, sep)
+      const label = sep === -1 ? line : line.slice(sep + 1).trim()
+      const parsed = parseUniProtAccession(token)
+      if (!parsed) {
+        rejected.push(token)
       } else {
-        out.push({
-          accession: line.slice(0, sep),
-          label: line.slice(sep + 1).trim(),
-        })
+        if (parsed.suffix) {
+          console.warn(
+            `  ${token}: reading ${parsed.accession}; InterPro computes matches on the canonical sequence, so on an isoform or older version they can land on the wrong residues`,
+          )
+        }
+        out.push({ accession: parsed.accession, label })
       }
     }
+  }
+  if (rejected.length > 0) {
+    throw new Error(
+      `not UniProtKB accessions: ${rejected.join(', ')}. InterPro serves precomputed matches by accession only; for other sequences run \`react-msaview-cli interproscan\` on the alignment`,
+    )
   }
   return out
 }
@@ -201,9 +213,8 @@ export async function runInterProPrecomputed(
         `    the API answered 404 for ${accession} every time; it carries no domains in the GFF, and a re-run tries it again`,
       )
     } else if (entries.length === 0) {
-      // a typo, a non-UniProtKB id and a protein with no matches all look alike
       console.warn(
-        `    no ${database} matches for ${accession}; check it is a UniProtKB accession and that --database is the right member database`,
+        `    no ${database} matches for ${accession}; check that --database is the right member database`,
       )
     }
   }
