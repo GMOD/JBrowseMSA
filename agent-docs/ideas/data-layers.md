@@ -89,10 +89,10 @@ a `rowPanels` record of `kind: "strip"`, and the tint is a `rowTint` encoding.
 
 A categorical key with no `colors` takes the ggplot palette in
 `ggplotPalettes.ts`. One extra field, `tint: "clade"`, shades the row background
-across tree label and alignment by that key, and that field covers all of
-[row-group-coloring](row-group-coloring.md) as data. The strip canvas is a new
-narrow panel that scrolls with `TreeCanvas`, so the portal rule for transformed
-containers in `CLAUDE.md` applies to it.
+across tree label and alignment by that key, and that field covers all of the
+row-group-coloring idea as data. The strip canvas is a new narrow panel that
+scrolls with `TreeCanvas`, so the portal rule for transformed containers in
+`CLAUDE.md` applies to it.
 
 ### 4. Highlights with labels, in residue coordinates
 
@@ -133,8 +133,8 @@ agent produces one that does not.
 
 - Every layer is a snapshot field. The standalone app writes the snapshot to
   `?data=`, the plugin takes the same fields through a session spec and through
-  `run_javascript` on the live `MsaView` model, and the CLI should take a whole
-  snapshot for `export-svg` instead of only `msa`, `tree`, and `gff`.
+  `run_javascript` on the live `MsaView` model, and `export-svg --spec` in the
+  CLI takes a whole snapshot.
 - A layer that names a row uses row-residue coordinates, 1-based inclusive as
   GFF is. The viewer projects them to columns, since it holds the gap structure.
 - Large documents follow the `DataModel` rule: inline under 50 kb, otherwise a
@@ -151,15 +151,18 @@ agent produces one that does not.
 1. Column tracks from values. Shipped 2026-09-01 as `columnTracks`.
 2. Highlights in residue coordinates with labels. Shipped 2026-09-01 as
    `highlights`; `highlightColumns` stays as the legacy 0-based column case.
-3. GFF `color`, then JSON features.
-4. Row strips and tint.
-5. `export-svg` from a snapshot, so an agent can render what it wrote.
-6. Letter color map.
+3. GFF `color`, then JSON features. `color=` shipped 2026-09-16 with the
+   `featureFill` encoding; the JSON `features` field is still open.
+4. Row strips and tint. Shipped 2026-09-16 as the `strip` row panel and the
+   `rowTint` encoding.
+5. `export-svg` from a snapshot, so an agent can render what it wrote. Shipped
+   2026-09-24 as `export-svg --spec`.
+6. Letter color map. Still open.
 
 ## What it changes in the backlog
 
-- [row-group-coloring](row-group-coloring.md) becomes the `tint` field of
-  layer 3.
+- The row-group-coloring idea becomes the `tint` field of layer 3, which shipped
+  as `rowTint`.
 - [find-and-search](find-and-search.md) and
   [codon-aware-dna-view](codon-aware-dna-view.md) are things an agent computes
   and pushes as highlights and a text track. They stop being viewer features.

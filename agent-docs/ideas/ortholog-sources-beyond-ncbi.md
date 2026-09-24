@@ -9,6 +9,10 @@ Four of the seven species the page offers (yeast, worm, fly in practice,
 Arabidopsis) therefore cannot build an alignment. This note measures the
 alternatives and picks one, and the pick has shipped; see [Shipped](#shipped).
 
+The fetchers live in jbrowse-plugin-msaview. The gene explorer, with the website
+files this note cites (`ebiAlign.ts`, `scripts/gene-explorer/`), was deleted on
+2026-08-27, and the note stays for its measurements of each source.
+
 ## Measurements
 
 Every probe ran from a dev box on 2026-08-25 with `Origin: https://gmod.org`
@@ -95,7 +99,8 @@ jbrowse-plugin-msaview 3.3.0 ships PANTHER. `source: 'ncbi' | 'panther'` on
 `fetchOrthologRows`, so the query row, the labels, the aligner and the CDD
 overlay take the same rows regardless of source. A **Source** select on the
 Orthologs tab offers the same choice interactively, remembered in local storage.
-The website emits `source: 'panther'` for fly, worm, Arabidopsis and yeast.
+The gene explorer emitted `source: 'panther'` for fly, worm, Arabidopsis and
+yeast until it was deleted.
 
 The CDD overlay question this note left open is settled: `efetch` serves a
 Swiss-Prot accession as a GenPept record with CDD Regions, exactly as it serves
@@ -109,8 +114,7 @@ alignment, and a second copy of the same fetcher in the website would only
 attract edits to the unused one.
 
 NCBI stays the default. Further species coverage belongs in the hosted-alignment
-path (`msaIndexedLocation`, fed by `scripts/gene-explorer/build-data.mjs`),
-which needs no per-source code.
+path (`msaIndexedLocation`), which needs no per-source code.
 
 ## UniRef, 2026-09-05
 

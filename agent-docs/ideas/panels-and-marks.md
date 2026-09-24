@@ -391,7 +391,7 @@ The gate for steps 5 through 11.
 - `renderTreeLabels` (`renderTreeCanvas.ts:358`): color from the `tipLabel`
   channel.
 - `rowTint`: the alpha wash over the culled overlay, across the tree gutter and
-  the alignment. Closes [row-group-coloring](row-group-coloring.md).
+  the alignment. Closes the row-group-coloring idea.
 - Fix the two overlay defects listed above.
 - Parity: `MSAViewer.tsx`, `USAGE.md` (pinned by `MSAViewer.docs.test.ts`),
   `msaview.R` plus a `layers.R` entry (pinned by `test-layer-coverage.R`), and
