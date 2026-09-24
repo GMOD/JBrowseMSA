@@ -28,7 +28,10 @@ export function parseMSA(
   currentAlignment = 0,
   format?: MSAFormat,
 ): MSAParserType {
-  const text = input.replace(/^\uFEFF/, '').trimStart()
+  const text = input
+    .replace(/^\uFEFF/, '')
+    .replaceAll(/\r\n?/g, '\n')
+    .trimStart()
   if (htmlPage.test(text)) {
     throw new Error(
       'Received an HTML page, not an alignment. Check that the URL points at the file itself',
