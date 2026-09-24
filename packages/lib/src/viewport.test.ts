@@ -31,6 +31,21 @@ test('the viewport stops at the last column', () => {
   expect(model.viewport).toEqual({ startColumn: 1, endColumn: 200 })
 })
 
+test('an alignment that fits the width does not scroll', () => {
+  const model = makeModel()
+  model.setColWidth(2)
+  model.setScrollX(-300)
+  expect(model.maxScrollX).toBe(0)
+  expect(model.scrollX).toBe(0)
+})
+
+test('the last column stops at the right edge of the canvas', () => {
+  const model = makeModel()
+  model.setScrollX(-10_000)
+  expect(model.scrollX).toBe(model.msaCanvasWidth - model.totalWidth)
+  expect(model.viewport?.endColumn).toBe(200)
+})
+
 test('a model with no alignment or no width yet has no viewport', () => {
   expect(MSAModelF().create({ type: 'MsaView' }).viewport).toBeUndefined()
   const unmeasured = MSAModelF().create({ type: 'MsaView', data: { msa } })

@@ -2925,6 +2925,28 @@ function stateModelFactory() {
       /**
        * #getter
        */
+      get verticalScrollbarWidth() {
+        return self.showVerticalScrollbar ? 20 : 0
+      },
+      /**
+       * #getter
+       * width of the alignment canvas: the msa area less the vertical
+       * scrollbar. showHorizontalScrollbar must not read it, since that feeds
+       * msaAreaHeight -> showVerticalScrollbar and would form a cycle
+       */
+      get msaCanvasWidth() {
+        return self.msaAreaWidth - this.verticalScrollbarWidth
+      },
+      /**
+       * #getter
+       * most-negative allowed scrollX, which keeps the last column in view
+       */
+      get maxScrollX() {
+        return Math.min(-self.totalWidth + this.msaCanvasWidth, 0)
+      },
+      /**
+       * #getter
+       */
       get blocks2d() {
         return self.blocksY.flatMap(by =>
           self.blocksX.map(bx => [bx, by] as const),
@@ -2960,12 +2982,6 @@ function stateModelFactory() {
           ...self.loadWarnings,
           ...this.dataWarnings.filter(w => !self.dismissedWarnings.includes(w)),
         ]
-      },
-      /**
-       * #getter
-       */
-      get maxScrollX() {
-        return Math.min(-self.totalWidth + (self.msaAreaWidth - 100), 0)
       },
       /**
        * #getter
@@ -3289,21 +3305,6 @@ function stateModelFactory() {
     }))
     .views(self => ({
       /**
-       * #getter
-       */
-      get verticalScrollbarWidth() {
-        return self.showVerticalScrollbar ? 20 : 0
-      },
-      /**
-       * #getter
-       * width of the alignment canvas: the msa area less the vertical
-       * scrollbar. showHorizontalScrollbar must not read it, since that feeds
-       * msaAreaHeight -> showVerticalScrollbar and would form a cycle
-       */
-      get msaCanvasWidth() {
-        return self.msaAreaWidth - this.verticalScrollbarWidth
-      },
-      /**
        * #method
        * the cell at a visible column and row index, in the coordinates a host
        * writes highlights in
@@ -3354,7 +3355,7 @@ function stateModelFactory() {
         }
         const { xStart, xEnd } = visibleColRange({
           offsetX: -scrollX,
-          blockWidth: this.msaCanvasWidth,
+          blockWidth: self.msaCanvasWidth,
           colWidth,
         })
         const last = Math.max(0, Math.min(xEnd, numColumns) - 1)
