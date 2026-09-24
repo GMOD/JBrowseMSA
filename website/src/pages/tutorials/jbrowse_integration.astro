@@ -10,7 +10,6 @@ import Base from '../../layouts/Base.astro'
 import { f12CombinedCloseupUrl } from '../../lib/f12CombinedLinks'
 import {
   brafV600,
-  buildOnOpen,
   proteinLinked,
   tp53PhmmerRp15,
   tp53Protein3d,
@@ -91,37 +90,32 @@ const base = import.meta.env.BASE_URL
       </li>
     </ul>
 
-    {buildOnOpen.live && (
-      <>
-        <h2>Built when the link opens</h2>
-        <p>
-          The sessions above carry their alignments as files. The two below
-          carry a request instead, and the view builds the alignment when it
-          opens: the spec names the transcript in{' '}
-          <code>connectedTranscript</code> and the plugin looks its exon model
-          up in the genome view's gene track, so the whole session is a URL
-          short enough to type.
-        </p>
-        <ul>
-          <li>
-            <a href={tp53UnirefBrowser} target="_blank" rel="noopener">
-              TP53 UniRef cluster ↗
-            </a>{' '}
-            — every reference-proteome protein in UniProtKB within 50% identity
-            of p53, looked up from UniProt and aligned to the transcript in the
-            browser. It submits no job to any service, so it opens in seconds.
-          </li>
-          <li>
-            <a href={tp53PhmmerRp15} target="_blank" rel="noopener">
-              TP53 phmmer search ↗
-            </a>{' '}
-            — the same gene through a phmmer search of UniProt's representative
-            proteomes at 15% similarity, the widest net EBI offers: p53's
-            relatives across the tree of life. The wait is EBI's queue, from
-            seconds to many minutes.
-          </li>
-        </ul>
-      </>
-    )}
+    <h2>Built when the link opens</h2>
+    <p>
+      The sessions above carry their alignments as files. The two below carry a
+      request instead, and the view builds the alignment when it opens: the spec
+      names the transcript in <code>connectedTranscript</code> and the plugin
+      looks its exon model up in the genome view's gene track, so the whole
+      session is a URL short enough to type.
+    </p>
+    <ul>
+      <li>
+        <a href={tp53UnirefBrowser} target="_blank" rel="noopener">
+          TP53 UniRef cluster ↗
+        </a>{' '}
+        — every reference-proteome protein in UniProtKB within 50% identity of
+        p53, looked up from UniProt and aligned to the transcript in the
+        browser. It submits no job to any service, so it opens in seconds.
+      </li>
+      <li>
+        <a href={tp53PhmmerRp15} target="_blank" rel="noopener">
+          TP53 phmmer search ↗
+        </a>{' '}
+        — the same gene through a phmmer search of UniProt's representative
+        proteomes at 15% similarity, the widest net EBI offers: p53's relatives
+        across the tree of life. The wait is EBI's queue, from seconds to many
+        minutes.
+      </li>
+    </ul>
   </article>
 </Base>

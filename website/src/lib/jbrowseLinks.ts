@@ -8,17 +8,6 @@
 // of the file are generator output.
 const HUB_HG38 = 'https://jbrowse.org/ucsc/hg38/config.json'
 
-// The links that build their alignment on open need this plugin release at
-// jbrowse.org/plugins/jbrowse-plugin-msaview/latest, which the hg38 hub config
-// names and which lags npm: 3.5.0 was on npm on 2026-09-13 while the mirror
-// still served 3.4.1. Flip `live` once
-//   curl -s https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/package.json
-// reports 3.5.0 or newer.
-export const buildOnOpen = {
-  needsPlugin: '3.5.0',
-  live: false,
-}
-
 function specUrl(views: Record<string, unknown>[]) {
   return `https://jbrowse.org/code/jb2/main/?config=${encodeURIComponent(HUB_HG38)}&session=spec-${encodeURIComponent(JSON.stringify({ views }))}`
 }
