@@ -39,5 +39,15 @@ export async function fetchWithRetry(
       await delay(wait)
     }
   }
-  throw new Error(`${url} failed after ${attempts} attempts: ${lastError}`)
+  throw new Error(
+    `${url} failed after ${attempts} attempts: ${describe(lastError)}`,
+  )
+}
+
+// undici throws `TypeError: fetch failed` and keeps the reason, such as
+// ENOTFOUND or ECONNREFUSED, on `cause.code`
+function describe(error: unknown) {
+  const code = (error as { cause?: { code?: unknown } } | undefined)?.cause
+    ?.code
+  return typeof code === 'string' ? `${error} (${code})` : String(error)
 }

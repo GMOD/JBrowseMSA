@@ -46,6 +46,20 @@ test('giving up names the url and the attempt count', async () => {
   ).rejects.toThrow(/https:\/\/example\.org\/x failed after 2 attempts/)
 })
 
+test('giving up on a network failure names its cause code', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockRejectedValue(
+      new TypeError('fetch failed', {
+        cause: Object.assign(new Error('getaddrinfo'), { code: 'ENOTFOUND' }),
+      }),
+    ),
+  )
+  await expect(
+    fetchWithRetry('https://example.org/x', { attempts: 1 }),
+  ).rejects.toThrow('TypeError: fetch failed (ENOTFOUND)')
+})
+
 test('a network-level throw is retried like a retryable status', async () => {
   const fetchMock = vi
     .fn()
