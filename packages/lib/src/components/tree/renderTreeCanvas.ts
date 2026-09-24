@@ -65,6 +65,13 @@ function forEachNodeInBlock(
   }
 }
 
+// withId gives an unnamed node its path, node-0-1-1, as its name
+function cladeName(node: HierarchyNode, unnamed: string) {
+  const { id, name } = node.data
+  const label = name === id ? unnamed : name
+  return node.value === undefined ? label : `${label} (${node.value} tips)`
+}
+
 // Calculate node x-coordinate for both phylogram (with branch lengths) and
 // cladogram (topology only) modes. tipX is the pixel x the tips sit at.
 // For cladograms: x = (maxDepthToLeaf - nodeDepthToLeaf) / maxDepthToLeaf * tipX
@@ -183,7 +190,7 @@ function renderCollapsedTriangles({
   const by = blockSizeYOverride ?? blockSize
   const halfHeight = Math.max(2, rowHeight * 0.42)
   forEachNodeInBlock(hierarchy, offsetY, by, blockPad(model), node => {
-    const { id, name } = node.data
+    const { id } = node.data
     if (collapsedSet.has(id)) {
       const apexX = getNodeX(node, showBranchLen, tipX, maxDepthToLeaf)
       const y = node.x!
@@ -213,7 +220,6 @@ function renderCollapsedTriangles({
         // the whole triangle is a click/hover target that opens the
         // branch menu (Expand this node); the apex bubble's own click entry is
         // skipped for collapsed nodes so this descriptive label wins
-        const label = name === id ? 'Collapsed clade' : name
         clickMap?.insert({
           minX: apexX + ml,
           maxX: baseX + ml,
@@ -221,7 +227,7 @@ function renderCollapsedTriangles({
           maxY: y + halfHeight,
           branch: true,
           id,
-          name: count === undefined ? label : `${label} (${count} tips)`,
+          name: cladeName(node, 'Collapsed clade'),
         })
       }
     }
@@ -267,7 +273,7 @@ function renderNodeBubbles({
     }
     const { data } = node
     const y = node.x!
-    const { id, name } = data
+    const { id } = data
     if (node.height >= 1 && inYBlock(y, offsetY, by, blockPad(model))) {
       const isCollapsed = collapsedSet.has(id)
       if (draw) {
@@ -291,7 +297,7 @@ function renderNodeBubbles({
           maxY: y - radius + d,
           branch: true,
           id,
-          name,
+          name: cladeName(node, 'Clade'),
         })
       }
     }

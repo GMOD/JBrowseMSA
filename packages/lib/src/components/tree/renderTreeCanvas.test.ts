@@ -167,10 +167,10 @@ describe('node bubble click targets', () => {
 
   // "draw clickable bubbles" only controls the painting; the branches have to
   // stay clickable with it off
-  function renderWithBubbles(drawNodeBubbles: boolean) {
+  function renderWithBubbles(drawNodeBubbles: boolean, tree = '((a,b),(c,d));') {
     const model = stateModelFactory().create({
       type: 'MsaView',
-      data: { msa: '>a\nA\n>b\nA\n>c\nA\n>d\nA', tree: '((a,b),(c,d));' },
+      data: { msa: '>a\nA\n>b\nA\n>c\nA\n>d\nA', tree },
     })
     model.setWidth(1000)
     model.setDrawLabels(false)
@@ -215,6 +215,15 @@ describe('node bubble click targets', () => {
     const { arcs, hits } = renderWithBubbles(false)
     expect(arcs).toBe(0)
     expect(hits.filter(h => h.branch).length).toBe(3)
+  })
+
+  it('names an unnamed node by its tip count', () => {
+    const { hits } = renderWithBubbles(true, '((a,b)95,(c,d));')
+    expect(hits.filter(h => h.branch).map(h => h.name).sort()).toEqual([
+      '95 (2 tips)',
+      'Clade (2 tips)',
+      'Clade (4 tips)',
+    ])
   })
 })
 
