@@ -1,22 +1,16 @@
-import React, { useState } from 'react'
+import React from 'react'
 
+import BaseTooltip from '@jbrowse/core/ui/BaseTooltip'
 import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { featureField, featureName } from '../../featureFields.ts'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
-import PortalTooltip from '../PortalTooltip.tsx'
+import { useHoverAnchor } from '../useHoverAnchor.ts'
 import { renderRowPanel } from './renderRowPanel.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { ResolvedRowPanel } from '../../types.ts'
-
-interface Hover {
-  name: string
-  lines: string[]
-  clientX: number
-  clientY: number
-}
 
 // what the cell or span under the pointer reads, which is the field a strip
 // colors by, and a span's name, its coordinates and its encoded field
@@ -66,7 +60,10 @@ const RowPanelBlock = observer(function ({
   panel: ResolvedRowPanel
   offsetY: number
 }) {
-  const [hovered, setHovered] = useState<Hover>()
+  const { anchor, hoverAt, clearAnchor } = useHoverAnchor<{
+    name: string
+    lines: string[]
+  }>()
   const theme = useTheme()
   const { blockSize, highResScaleFactor, rowHeight } = model
   const width = panel.width
@@ -107,30 +104,26 @@ const RowPanelBlock = observer(function ({
                   name,
                   x: event.clientX - left,
                 })
-          setHovered(
+          hoverAt(
+            event,
             name === undefined || lines.length === 0
               ? undefined
-              : {
-                  name,
-                  lines,
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                },
+              : { name, lines },
           )
           model.setMousePos(undefined, name === undefined ? undefined : row)
         }}
         onMouseLeave={() => {
-          setHovered(undefined)
+          clearAnchor()
           model.setMousePos(undefined, undefined)
         }}
       />
-      {hovered ? (
-        <PortalTooltip clientX={hovered.clientX} clientY={hovered.clientY}>
-          <div>{hovered.name}</div>
-          {hovered.lines.map(line => (
+      {anchor ? (
+        <BaseTooltip clientPoint={anchor.clientPoint}>
+          <div>{anchor.value.name}</div>
+          {anchor.value.lines.map(line => (
             <div key={line}>{line}</div>
           ))}
-        </PortalTooltip>
+        </BaseTooltip>
       ) : null}
     </>
   )

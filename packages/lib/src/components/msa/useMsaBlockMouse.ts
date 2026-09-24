@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
+
+import { useHoverAnchor } from '../useHoverAnchor.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type React from 'react'
@@ -46,7 +48,7 @@ export function useMsaBlockMouse({
   offsetX: number
   offsetY: number
 }) {
-  const [tooltipPoint, setTooltipPoint] = useState<{ x: number; y: number }>()
+  const { anchor, hoverAt, clearAnchor } = useHoverAnchor<true>()
   const downAt = useRef<{ x: number; y: number }>(undefined)
 
   function colRow(event: React.MouseEvent, el: HTMLElement) {
@@ -68,9 +70,7 @@ export function useMsaBlockMouse({
 
     const hasTooltip =
       !!model.hoveredInsertion || model.mouseOverDomains.length > 0
-    setTooltipPoint(
-      hasTooltip ? { x: event.clientX, y: event.clientY } : undefined,
-    )
+    hoverAt(event, hasTooltip || undefined)
   }
 
   function onMouseDown(event: React.MouseEvent) {
@@ -99,8 +99,8 @@ export function useMsaBlockMouse({
 
   function onMouseLeave() {
     model.setMousePos()
-    setTooltipPoint(undefined)
+    clearAnchor()
   }
 
-  return { tooltipPoint, onMouseMove, onMouseDown, onClick, onMouseLeave }
+  return { anchor, onMouseMove, onMouseDown, onClick, onMouseLeave }
 }

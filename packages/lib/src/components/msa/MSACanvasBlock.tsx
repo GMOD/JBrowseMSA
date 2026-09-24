@@ -23,7 +23,7 @@ const MSACanvasBlock = observer(function ({
 }) {
   const { blockSize, highResScaleFactor } = model
   const theme = useTheme()
-  const { tooltipPoint, onMouseMove, onMouseDown, onClick, onMouseLeave } =
+  const { anchor, onMouseMove, onMouseDown, onClick, onMouseLeave } =
     useMsaBlockMouse({ model, offsetX, offsetY })
 
   const canvasSize = blockSize * highResScaleFactor
@@ -90,10 +90,8 @@ const MSACanvasBlock = observer(function ({
           height: blockSize,
         }}
       />
-      {tooltipPoint ? (
-        <BaseTooltip
-          clientPoint={{ x: tooltipPoint.x, y: tooltipPoint.y + 15 }}
-        >
+      {anchor ? (
+        <BaseTooltip clientPoint={anchor.clientPoint}>
           {hoveredInsertion ? (
             <>
               Insertion ({hoveredInsertion.letters.length}

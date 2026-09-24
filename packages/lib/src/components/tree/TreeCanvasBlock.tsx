@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 
+import BaseTooltip from '@jbrowse/core/ui/BaseTooltip'
 import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { useTheme } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
-import PortalTooltip from '../PortalTooltip.tsx'
 import TreeBranchMenu from './TreeBranchMenu.tsx'
 import TreeNodeMenu from './TreeNodeMenu.tsx'
 import { renderTreeCanvas } from './renderTreeCanvas.ts'
@@ -40,8 +40,10 @@ const TreeCanvasBlock = observer(function ({
   const theme = useTheme()
   const [branchMenu, setBranchMenu] = useState<MenuData>()
   const [nodeMenu, setNodeMenu] = useState<MenuData>()
-  const { clickMap, hovered, hitTest, onMouseMove, onMouseLeave } =
-    useTreeHover({ model, offsetY })
+  const { clickMap, anchor, hitTest, onMouseMove, onMouseLeave } = useTreeHover(
+    { model, offsetY },
+  )
+  const hovered = anchor?.value
 
   const { treeAreaWidth, blockSize, highResScaleFactor } = model
   // TreePanel clips to treeAreaWidth, so a wider canvas is wasted backing store
@@ -139,10 +141,10 @@ const TreeCanvasBlock = observer(function ({
         />
       ) : null}
 
-      {hovered ? (
-        <PortalTooltip clientX={hovered.clientX} clientY={hovered.clientY}>
-          {hovered.name}
-        </PortalTooltip>
+      {anchor ? (
+        <BaseTooltip clientPoint={anchor.clientPoint}>
+          {anchor.value.name}
+        </BaseTooltip>
       ) : null}
     </>
   )

@@ -1,21 +1,16 @@
 import { useState } from 'react'
 
+import { useHoverAnchor } from '../useHoverAnchor.ts'
 import { ClickMapIndex } from './clickMap.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { ClickEntry } from './clickMap.ts'
 import type React from 'react'
 
-export interface TreeHoverTarget extends ClickEntry {
-  clientX: number
-  clientY: number
-}
-
 /**
  * Owns hit-testing for one tree block: the spatial index the render pass fills
- * in, the entry currently under the pointer, and the model hover state that the
- * MSA panel mirrors. The index is a render artifact rather than display state, so
- * it lives in a ref; everything the component draws comes back as plain state.
+ * in, the entry under the pointer with its tooltip anchor, and the model hover
+ * state that the MSA panel mirrors.
  */
 export function useTreeHover({
   model,
@@ -25,7 +20,7 @@ export function useTreeHover({
   offsetY: number
 }) {
   const [clickMap] = useState(() => new ClickMapIndex())
-  const [hovered, setHovered] = useState<TreeHoverTarget>()
+  const { anchor, hoverAt, clearAnchor } = useHoverAnchor<ClickEntry>()
 
   // leaf labels win over the branch/bubble targets they overlap, so a click on a
   // name opens the node menu rather than the branch menu
@@ -43,11 +38,7 @@ export function useTreeHover({
 
   function onMouseMove(event: React.MouseEvent) {
     const entry = hitTest(event)
-    setHovered(
-      entry
-        ? { ...entry, clientX: event.clientX, clientY: event.clientY }
-        : undefined,
-    )
+    hoverAt(event, entry)
     // hovering an internal node highlights every tip below it; hovering a leaf
     // label additionally drives the single-row highlight
     model.setHoveredTreeNode(entry?.id)
@@ -58,10 +49,10 @@ export function useTreeHover({
   }
 
   function onMouseLeave() {
-    setHovered(undefined)
+    clearAnchor()
     model.setHoveredTreeNode(undefined)
     model.setMousePos(undefined, undefined)
   }
 
-  return { clickMap, hovered, hitTest, onMouseMove, onMouseLeave }
+  return { clickMap, anchor, hitTest, onMouseMove, onMouseLeave }
 }

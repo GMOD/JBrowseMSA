@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useHoverAnchor } from '../useHoverAnchor.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type React from 'react'
@@ -18,7 +18,7 @@ export function useTrackHover({
   model: MsaViewModel
   tooltip: boolean
 }) {
-  const [hover, setHover] = useState<{ col: number; x: number; y: number }>()
+  const { anchor, hoverAt, clearAnchor } = useHoverAnchor<number>()
 
   // the blocks are laid out in column space and scrolled by a transform on
   // their container, so the pointer's column comes off the untransformed row
@@ -29,14 +29,14 @@ export function useTrackHover({
     const hit = col >= 0 && col < numColumns
     model.setMousePos(hit ? col : undefined, undefined)
     if (tooltip) {
-      setHover(hit ? { col, x: event.clientX, y: event.clientY } : undefined)
+      hoverAt(event, hit ? col : undefined)
     }
   }
 
   function onMouseLeave() {
-    setHover(undefined)
+    clearAnchor()
     model.setMousePos(undefined, undefined)
   }
 
-  return { hover: tooltip ? hover : undefined, onMouseMove, onMouseLeave }
+  return { anchor: tooltip ? anchor : undefined, onMouseMove, onMouseLeave }
 }

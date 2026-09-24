@@ -146,7 +146,7 @@ const Track = observer(function ({
   )
   useWheelScroll({ ref, onScrollX })
   const { classes } = useStyles()
-  const { hover, onMouseMove, onMouseLeave } = useTrackHover({
+  const { anchor, onMouseMove, onMouseLeave } = useTrackHover({
     model,
     tooltip: showColumnStats,
   })
@@ -172,9 +172,13 @@ const Track = observer(function ({
         }}
       >
         <track.ReactComponent model={model} track={track} />
-        {hover ? (
-          <BaseTooltip clientPoint={{ x: hover.x, y: hover.y + 15 }}>
-            <TrackTooltipContent model={model} track={track} col={hover.col} />
+        {anchor ? (
+          <BaseTooltip clientPoint={anchor.clientPoint}>
+            <TrackTooltipContent
+              model={model}
+              track={track}
+              col={anchor.value}
+            />
           </BaseTooltip>
         ) : null}
       </div>
