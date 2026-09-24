@@ -69,19 +69,10 @@ function parseRow(seq: string): ParsedRow {
 }
 
 export default class A3mMSA extends BaseMSA {
-  private MSA: { seqdata: Record<string, string> }
-  private orderedNames: string[]
-
   constructor(input: string | FastaRecord[]) {
-    super()
     const records = toRecords(input)
-    this.orderedNames = records.map(r => r.id)
-    this.MSA = {
-      seqdata: expandA3M(
-        records.map(r => r.seq),
-        this.orderedNames,
-      ),
-    }
+    const expanded = expandA3M(records.map(r => r.seq))
+    super(records.map((r, i) => [r.id, expanded[i]!]))
   }
 
   static sniff(input: string | FastaRecord[]): boolean {
@@ -125,18 +116,6 @@ export default class A3mMSA extends BaseMSA {
     }
     return hasLowercase
   }
-
-  getMSA() {
-    return this.MSA
-  }
-
-  getNames() {
-    return this.orderedNames
-  }
-
-  getRow(name: string) {
-    return this.MSA.seqdata[name] ?? ''
-  }
 }
 
 /**
@@ -144,7 +123,7 @@ export default class A3mMSA extends BaseMSA {
  * the longest insert any row places there, and rows without one are padded with
  * '.' so all rows stay in register.
  */
-function expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
+function expandA3M(rawSeqs: string[]): string[] {
   const rows = rawSeqs.map(parseRow)
   // a loop, not Math.max(...): an a3m from an hhblits search routinely carries
   // six figures of hits, and spreading one argument per row throws
@@ -162,9 +141,7 @@ function expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
     }
   }
 
-  const expanded: Record<string, string> = Object.create(null)
-
-  for (const [seqIdx, { matches, inserts }] of rows.entries()) {
+  return rows.map(({ matches, inserts }) => {
     const result: string[] = []
     for (let pos = 0; pos <= numPositions; pos++) {
       const ins = inserts[pos] ?? ''
@@ -174,8 +151,6 @@ function expandA3M(rawSeqs: string[], names: string[]): Record<string, string> {
         result.push(matches[pos] ?? '-')
       }
     }
-    expanded[names[seqIdx]!] = result.join('')
-  }
-
-  return expanded
+    return result.join('')
+  })
 }

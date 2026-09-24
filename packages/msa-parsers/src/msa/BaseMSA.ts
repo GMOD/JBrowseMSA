@@ -1,11 +1,30 @@
 import type { MSATrack, NodeWithIds } from '../types.ts'
 
 export default abstract class BaseMSA {
-  abstract getMSA(): unknown
-  abstract getRow(name: string): string
-  abstract getNames(): string[]
-
+  protected rows = new Map<string, string>()
+  private names: string[]
   private width?: number
+
+  /**
+   * A repeated name keeps its first row: names index the rows, so listing the
+   * name twice would render a phantom duplicate row.
+   */
+  constructor(rows: Iterable<readonly [string, string]>) {
+    for (const [name, seq] of rows) {
+      if (!this.rows.has(name)) {
+        this.rows.set(name, seq)
+      }
+    }
+    this.names = [...this.rows.keys()]
+  }
+
+  getRow(name: string): string {
+    return this.rows.get(name) ?? ''
+  }
+
+  getNames(): string[] {
+    return this.names
+  }
 
   /**
    * Column count of the alignment: the length of its widest row, since a

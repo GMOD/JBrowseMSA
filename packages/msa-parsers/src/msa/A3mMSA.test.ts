@@ -310,18 +310,6 @@ ACDEF`
       expect(msa.getWidth()).toBe(5)
     })
 
-    test('getMSA returns seqdata', () => {
-      const a3m = `>seq1
-ACDEF
->seq2
-GHIKL`
-      const msa = new A3mMSA(a3m)
-      const data = msa.getMSA()
-
-      expect(data.seqdata).toHaveProperty('seq1')
-      expect(data.seqdata).toHaveProperty('seq2')
-    })
-
     test('getTree returns noTree structure', () => {
       const a3m = `>seq1
 ACDEF

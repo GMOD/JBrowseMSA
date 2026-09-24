@@ -11,22 +11,18 @@ export default class StockholmMSA extends BaseMSA {
   private MSA: StockholmData
 
   constructor(text: string, currentAlignment: number) {
-    super()
     const res = parseAll(text)
-    this.data = res
     const aln = res[currentAlignment] ?? res[0]
     if (!aln) {
       throw new Error('No alignments found in Stockholm file')
     }
+    super(aln.seqname.map(name => [name, aln.seqdata[name] ?? '']))
+    this.data = res
     this.MSA = aln
   }
 
   getMSA() {
     return this.MSA
-  }
-
-  getRow(name: string) {
-    return this.MSA.seqdata[name] ?? ''
   }
 
   get alignmentNames() {
@@ -53,12 +49,6 @@ export default class StockholmMSA extends BaseMSA {
       accession: this.MSA.gs.AC?.[rowName]?.[0],
       dbxref: this.MSA.gs.DR?.[rowName]?.join('; '),
     }
-  }
-
-  getNames() {
-    // seqname, not Object.keys(seqdata): object key order hoists integer-like
-    // keys (a numeric sequence name) to the front, scrambling row order
-    return this.MSA.seqname
   }
 
   getStructures() {
