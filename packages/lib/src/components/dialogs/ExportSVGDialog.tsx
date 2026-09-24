@@ -15,6 +15,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
+import { observer } from 'mobx-react'
 
 import Checkbox2 from '../Checkbox2.tsx'
 
@@ -30,7 +31,7 @@ function afterPaint(fn: () => void) {
   })
 }
 
-export default function ExportSVGDialog({
+const ExportSVGDialog = observer(function ({
   model,
   onClose,
 }: {
@@ -181,4 +182,6 @@ export default function ExportSVGDialog({
       </DialogActions>
     </Dialog>
   )
-}
+})
+
+export default ExportSVGDialog
