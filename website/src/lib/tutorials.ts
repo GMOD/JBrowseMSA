@@ -1,12 +1,12 @@
-// Every page the tutorial index cards, in reading order. All but the last are
+// Every page the tutorial index cards, in reading order. Most are
 // docs/tutorials/*.md walkthroughs: the markdown is the page, and this list
 // holds the card text and the browser title, which markdown has no field for.
 // Adding a tutorial means a file there plus an entry here.
 //
-// The last entry, jbrowse_integration, is the hand-written
-// pages/tutorials/jbrowse_integration.astro instead, because its content is
-// generated session URLs rather than prose. [slug].astro builds only the slugs
-// the markdown glob produces, so the two never collide.
+// Two entries are hand-written pages under pages/tutorials instead:
+// structure_link, which mounts a live alignment beside a Mol* structure, and
+// jbrowse_integration, whose content is generated session URLs. [slug].astro
+// builds only the slugs the markdown glob produces, so neither collides.
 //
 // The index is also the site's gallery, so each entry names a `thumb`: one of
 // the figures that page already shows, which Astro crops to the card's 5:3 and
@@ -34,6 +34,7 @@ import recombinantThumb from '../../../docs/media/recombination_breakpoint-2.png
 import rnaThumb from '../../../docs/media/rna-family-overview.png'
 import scaleThumb from '../../../docs/media/scale-clade-groups.png'
 import spikeThumb from '../../../docs/media/spike-structure-final.png'
+import structureLinkThumb from '../../../docs/media/structure_link-spike.png'
 import temThumb from '../../../docs/media/tem_alleles-strips.png'
 
 import type { ImageMetadata } from 'astro'
@@ -108,6 +109,16 @@ export const tutorials: Tutorial[] = [
     thumbAlt:
       'Eleven concatenated hemoglobin rows with arcs joining each alpha residue to the beta residue it touches in the crystal, colored by interface',
     thumbPosition: 'left',
+  },
+  {
+    slug: 'structure_link',
+    title: 'An alignment linked to its structure',
+    blurb:
+      'The spike and hemoglobin alignments beside PDB 6VXX and 2HHB in Mol*, joined by the residueMappings layers the two tutorials above build. A residue hovered in either view lights in the other; the PRRA insert reports no coordinates, and a chain no mapping names reports no row.',
+    thumb: structureLinkThumb,
+    thumbAlt:
+      'The spike alignment on the PRRA insert above PDB 6VXX in Mol*, one SARS-CoV-2 residue shown as sticks on chain A',
+    thumbPosition: 'center',
   },
   {
     slug: 'recombination_breakpoint',
