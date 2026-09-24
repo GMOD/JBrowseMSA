@@ -31,6 +31,13 @@ export function MSAModelF() {
 
       /**
        * #property
+       * a color per residue letter, which replaces the `colorSchemeName` table
+       * while set. A letter the map leaves out takes no color
+       */
+      customColorScheme: types.frozen<Record<string, string> | undefined>(),
+
+      /**
+       * #property
        * show a tooltip with the hovered column's value for a track while
        * hovering that track: the conservation scores, the logo's composition,
        * an arc's partner columns
@@ -49,10 +56,21 @@ export function MSAModelF() {
     .actions(self => ({
       /**
        * #action
-       * set color scheme name
+       * pick a scheme from the built-in table, which clears
+       * `customColorScheme`
        */
       setColorSchemeName(name: string) {
         self.colorSchemeName = name
+        self.customColorScheme = undefined
+      },
+
+      /**
+       * #action
+       * color residues from a map of letter to color, or pass undefined to
+       * return to `colorSchemeName`
+       */
+      setCustomColorScheme(map?: Record<string, string>) {
+        self.customColorScheme = map
       },
 
       /**

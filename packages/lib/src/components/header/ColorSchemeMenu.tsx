@@ -8,8 +8,37 @@ import colorSchemes from '../../colorSchemes.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
+// While a `customColorScheme` map is set, a checked Custom entry stands for it
+// and no named scheme is checked. Picking a named scheme clears the map.
+export function colorSchemeMenuItems(model: MsaViewModel) {
+  const { colorSchemeName, customColorScheme } = model
+  const custom = customColorScheme
+    ? [
+        {
+          label: 'Custom',
+          type: 'radio',
+          checked: true,
+          onClick: () => {},
+        } as const,
+      ]
+    : []
+  return [
+    ...custom,
+    ...Object.keys(colorSchemes).map(
+      option =>
+        ({
+          label: option,
+          type: 'radio',
+          checked: !customColorScheme && colorSchemeName === option,
+          onClick: () => {
+            model.setColorSchemeName(option)
+          },
+        }) as const,
+    ),
+  ]
+}
+
 const ColorSchemeMenu = observer(function ({ model }: { model: MsaViewModel }) {
-  const { colorSchemeName } = model
   return (
     <CascadingMenuButton
       data-testid="color_scheme_menu"
@@ -17,17 +46,7 @@ const ColorSchemeMenu = observer(function ({ model }: { model: MsaViewModel }) {
       closeAfterItemClick
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-      menuItems={Object.keys(colorSchemes).map(
-        option =>
-          ({
-            label: option,
-            type: 'radio',
-            checked: colorSchemeName === option,
-            onClick: () => {
-              model.setColorSchemeName(option)
-            },
-          }) as const,
-      )}
+      menuItems={colorSchemeMenuItems(model)}
     >
       <Palette />
     </CascadingMenuButton>

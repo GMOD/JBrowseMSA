@@ -2,7 +2,12 @@
 import { beforeAll, expect, test } from 'vitest'
 
 import MSAModelF from '../../model.ts'
-import { cssColorToPixel, drawMsaRaster, rasterPixels } from './msaRaster.ts'
+import {
+  cssColorToPixel,
+  drawMsaRaster,
+  msaThumbnail,
+  rasterPixels,
+} from './msaRaster.ts'
 
 import type { RasterSpec } from './msaRaster.ts'
 
@@ -184,6 +189,28 @@ test('a zoom reuses the tiles, a recolor rebuilds them', () => {
 
   model.setColorSchemeName('clustalx_protein_dynamic')
   expect(imagesFor(model)[0]).not.toBe(tile)
+})
+
+test('a changed letter map rebuilds the tiles and the minimap strip', () => {
+  const model = make()
+  const thumbnail = () => msaThumbnail({ model, theme: theme(), height: 12 })
+  model.setCustomColorScheme({ K: '#1f77b4' })
+  const tile = imagesFor(model)[0]
+  const strip = thumbnail()
+  expect(tile).toBeDefined()
+  expect(strip).toBeDefined()
+
+  model.setColWidth(3)
+  expect(imagesFor(model)[0]).toBe(tile)
+  expect(thumbnail()).toBe(strip)
+
+  model.setCustomColorScheme({ K: '#d62728' })
+  const recolored = imagesFor(model)[0]
+  expect(recolored).not.toBe(tile)
+  expect(thumbnail()).not.toBe(strip)
+
+  model.setCustomColorScheme(undefined)
+  expect(imagesFor(model)[0]).not.toBe(recolored)
 })
 
 test('a column zoom past a pixel per cell averages columns, not rows', () => {

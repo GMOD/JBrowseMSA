@@ -359,3 +359,23 @@ export default transform(colorSchemes, ([key, val]) => [
   key,
   transform(val, ([letter, color]) => [letter, colord(color).toHex()]),
 ])
+
+const letterTables = new WeakMap<
+  Record<string, string>,
+  Record<string, string>
+>()
+
+/**
+ * A letter map as the renderer looks letters up. The model upper-cases every
+ * row before coloring it, so a table keys its letters in upper case and a map
+ * may key them in either. The table is cached per map, so its identity is
+ * stable enough for the raster cache to key on.
+ */
+export function letterColorTable(map: Record<string, string>) {
+  let table = letterTables.get(map)
+  if (!table) {
+    table = transform(map, ([letter, color]) => [letter.toUpperCase(), color])
+    letterTables.set(map, table)
+  }
+  return table
+}

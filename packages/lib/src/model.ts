@@ -28,7 +28,7 @@ import {
 
 import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
-import colorSchemes from './colorSchemes.ts'
+import colorSchemes, { letterColorTable } from './colorSchemes.ts'
 import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
 import { columnStats } from './columnStats.ts'
 import { packDomainLanes } from './components/msa/packDomainLanes.ts'
@@ -484,6 +484,7 @@ export const preservedOnReset = new Set([
   'scrollZoomAxis',
   'bgColor',
   'colorSchemeName',
+  'customColorScheme',
   'showColumnStats',
   'drawLabels',
   'labelsAlignRight',
@@ -1605,12 +1606,26 @@ function stateModelFactory() {
        * #getter
        */
       get colorScheme() {
+        const { customColorScheme, colorSchemeName } = self
         // colorSchemeName is a free string (menus, snapshots, URL params), so a
         // stale name falls back to the default
-        return (
-          colorSchemes[self.colorSchemeName] ??
-          colorSchemes[defaultColorSchemeName]!
-        )
+        return customColorScheme
+          ? letterColorTable(customColorScheme)
+          : (colorSchemes[colorSchemeName] ??
+              colorSchemes[defaultColorSchemeName]!)
+      },
+
+      /**
+       * #getter
+       * the scheme coloring each cell from its column's statistics, or
+       * undefined while the cells take a fixed color per letter, from the
+       * built-in table or from `customColorScheme`
+       */
+      get dynamicColorSchemeName() {
+        const { customColorScheme, colorSchemeName } = self
+        return !customColorScheme && colorSchemeName.includes('dynamic')
+          ? colorSchemeName
+          : undefined
       },
 
       /**
@@ -4667,7 +4682,7 @@ function stateModelFactory() {
         addDisposer(
           self,
           autorun(() => {
-            if (self.colorSchemeName.includes('dynamic')) {
+            if (self.dynamicColorSchemeName) {
               // eslint-disable-next-line  @typescript-eslint/no-unused-expressions
               self.colStats
             }
