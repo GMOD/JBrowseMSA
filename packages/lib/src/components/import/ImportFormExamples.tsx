@@ -3,16 +3,17 @@ import React from 'react'
 import { Link, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { smallMSA, smallMSAOnly, smallTree } from './data/seq2.ts'
+import { smallMSA, smallTree } from './data/seq2.ts'
 import { load } from './util.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
 const BASE = 'https://jbrowse.org/genomes/multiple_sequence_alignments'
 const TREES = 'https://jbrowse.org/genomes/newick_trees'
+const DEMO = 'https://gmod.org/JBrowseMSA/demo/data'
 
 // each example points at remote files (msa/tree/gff urls) or carries its data
-// inline, as the two small bundled ones do
+// inline
 interface Example {
   label: string
   msa?: string
@@ -23,42 +24,33 @@ interface Example {
 
 const examples: Example[] = [
   {
+    label: 'NLRP1 in 12 mammals, with Pfam domains',
+    msa: `${DEMO}/nlrp1.aln`,
+    tree: `${DEMO}/nlrp1.nh`,
+    gff: `${DEMO}/nlrp1-domains.gff`,
+  },
+  {
+    label: '474 human protein kinase domains, with a FastTree tree',
+    msa: `${DEMO}/kinase-pocket/kinase-pocket.afa`,
+    tree: `${DEMO}/kinase-pocket/kinase-pocket.nwk`,
+  },
+  {
+    label: 'RSV-A G gene in 1,840 genomes, with the Nextstrain tree',
+    msa: `${DEMO}/scale/rsv-full.aln`,
+    tree: `${DEMO}/scale/rsv-full.nh`,
+  },
+  {
     label: '230k COVID-19 samples (tree only)',
     tree: `${TREES}/sarscov2phylo.pub.ft.nh`,
   },
   {
-    label: 'Small protein MSA+tree',
-    inline: { msa: smallMSA, tree: smallTree },
-  },
-  {
-    label: 'Small MSA only',
-    inline: { msa: smallMSAOnly },
-  },
-  {
-    label: 'PFAM SARS-CoV2 multi-stockholm with domains',
+    label: 'Pfam SARS-CoV-2 families, multi-Stockholm with domains',
     msa: `${BASE}/pfam-cov2.stock`,
     gff: `${BASE}/pfam-cov2-domains.gff`,
   },
   {
-    label: 'Lysine stockholm file',
-    msa: `${BASE}/Lysine.stock`,
-  },
-  {
-    label: 'PF01601 stockholm file (SARS-CoV2 spike protein)',
-    msa: `${BASE}/PF01601_full.txt`,
-  },
-  {
-    label: 'Europe COVID full genomes (LR883044.1 and 199 other sequences)',
-    msa: `${BASE}/europe_covid.fa`,
-  },
-  {
-    label: 'MAFFT+VeryFastTree(17.9k samples)',
-    msa: `${BASE}/rhv_test-only.aligned_with_mafft_auto.fa`,
-    tree: `${BASE}/rhv_test-only.aligned_with_mafft_auto.nh`,
-  },
-  {
-    label: 'Human BLAST results mfa',
-    msa: 'https://jbrowse.org/demos/ttc39a.mfa',
+    label: 'Small protein alignment and tree',
+    inline: { msa: smallMSA, tree: smallTree },
   },
 ]
 
