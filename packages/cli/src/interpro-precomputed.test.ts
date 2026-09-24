@@ -104,6 +104,34 @@ test('a 204 means no matches, which is an answer worth caching', async () => {
   expect(fetchMock).toHaveBeenCalledTimes(2)
 })
 
+test('a failed release lookup reads the newest cached release', async () => {
+  for (const release of ['9.0', '110.0']) {
+    const file = path.join(dir, 'cache', release, 'pfam', 'P00001.json')
+    fs.mkdirSync(path.dirname(file), { recursive: true })
+    fs.writeFileSync(file, JSON.stringify(MATCH.results))
+  }
+  const fetchMock = vi.fn().mockResolvedValue(new Response('', { status: 404 }))
+  vi.stubGlobal('fetch', fetchMock)
+
+  const gff = await run('P00001\tHuman\n')
+  expect(fetchMock).toHaveBeenCalledTimes(1)
+  expect(gff).toContain('InterPro 110.0')
+  expect(gff).toContain('IPR000001')
+  expect(console.warn).toHaveBeenCalledWith(
+    expect.stringContaining('release 110.0'),
+  )
+})
+
+test('with nothing cached, a failed release lookup fails the run', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn().mockResolvedValue(new Response('', { status: 404 })),
+  )
+  await expect(run('P00001\tHuman\n')).rejects.toThrow(
+    'InterPro release lookup failed: 404',
+  )
+})
+
 test('an id that is not a UniProtKB accession fails before any request, naming interproscan', async () => {
   const fetchMock = vi.fn()
   vi.stubGlobal('fetch', fetchMock)

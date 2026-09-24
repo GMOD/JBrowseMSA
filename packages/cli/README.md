@@ -229,7 +229,8 @@ fresh coordinates. The cache also records proteins with no matches, so a re-run
 does not fetch them again.
 
 A re-run of the same dataset makes one request, the release lookup, and reads
-the rest from disk. A failed run can therefore resume. The CLI retries with
+the rest from disk. When that lookup fails, the CLI warns and reads the newest
+release in the cache, so a fully cached run needs no network. A failed run can therefore resume. The CLI retries with
 backoff, and if the API stays unreachable, the accessions it already fetched
 stay cached, so the next run fetches only the rest.
 

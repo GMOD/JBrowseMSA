@@ -64,3 +64,15 @@ export function writeCached(
 export function cacheLocation() {
   return CACHE_DIR
 }
+
+export function newestCachedRelease() {
+  try {
+    return fs
+      .readdirSync(CACHE_DIR, { withFileTypes: true })
+      .filter(e => e.isDirectory() && SAFE_SEGMENT.test(e.name))
+      .map(e => e.name)
+      .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0]
+  } catch {
+    return undefined
+  }
+}

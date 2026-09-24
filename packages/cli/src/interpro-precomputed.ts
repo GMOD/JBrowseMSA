@@ -3,7 +3,12 @@ import * as fs from 'node:fs'
 import { annotationsToGFF, getUngappedSequence, parseMSA } from 'msa-parsers'
 
 import { fetchWithRetry } from './fetchWithRetry.ts'
-import { cacheLocation, readCached, writeCached } from './interpro-cache.ts'
+import {
+  cacheLocation,
+  newestCachedRelease,
+  readCached,
+  writeCached,
+} from './interpro-cache.ts'
 import { parseRowRange, toFragment } from './rowRange.ts'
 import { parseUniProtAccession } from './uniprotAccession.ts'
 
@@ -103,6 +108,22 @@ async function fetchRelease(): Promise<string> {
   return json.databases.interpro.version
 }
 
+// a fully cached run then needs no network
+async function resolveRelease() {
+  try {
+    return await fetchRelease()
+  } catch (e) {
+    const cached = newestCachedRelease()
+    if (!cached) {
+      throw e
+    }
+    console.warn(
+      `${e instanceof Error ? e.message : e}\nreading the cache of InterPro release ${cached}, the newest on disk; a newer release may exist`,
+    )
+    return cached
+  }
+}
+
 // The API answers a reviewed accession that has matches with 404, roughly once
 // in nine lookups, so a 404 is asked again a few times before it is taken for
 // an answer. Returns undefined where every attempt gave one.
@@ -169,7 +190,7 @@ export async function runInterProPrecomputed(
       : ` (${distinct.length} distinct)`
   console.log(`Found ${accessions.length} accessions${extra}`)
 
-  const release = await fetchRelease()
+  const release = await resolveRelease()
   console.log(
     `InterPro release ${release}; reading precomputed ${database} matches...`,
   )
