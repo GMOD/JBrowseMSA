@@ -42,7 +42,7 @@ interface Transcript {
   type?: string
   length?: number
   select_category?: string
-  cds?: { range: { begin: string; end: string }[] }
+  cds?: { range?: { begin: string; end: string }[] }
   genomic_locations?: { exons: Exon[] }[]
 }
 
@@ -106,7 +106,7 @@ async function fetchTranscripts(geneId: string): Promise<Transcript[]> {
 // usable = the report has both a CDS range and a genomic exon mapping. The
 // Select transcript occasionally lacks the mapping (mouse Trp53 NM_011640).
 function usable(t: Transcript): boolean {
-  return !!t.cds?.range[0] && !!t.genomic_locations?.[0]?.exons.length
+  return !!t.cds?.range?.length && !!t.genomic_locations?.[0]?.exons.length
 }
 
 export function pickTranscript(
@@ -150,13 +150,22 @@ interface CodingExon {
   cdsLen: number
 }
 
-// each coding exon's extent within the CDS, in coding order, derived from exon
-// lengths (transcript order) intersected with the CDS range — both in transcript
-// coordinates, so this is strand-agnostic
+/**
+ * Each coding exon's extent within the CDS, in coding order, from exon lengths
+ * (transcript order) intersected with the CDS ranges. Both are transcript
+ * coordinates, so this is strand-agnostic.
+ *
+ * A CDS of several ranges, as a programmed frameshift gives, is their
+ * concatenation. An exon that two ranges cross yields a piece per range, and
+ * the pieces share the exon's number.
+ */
 export function codingExons(t: Transcript): CodingExon[] {
   const exons = t.genomic_locations?.[0]?.exons ?? []
-  const cds = t.cds?.range[0]
-  if (!cds) {
+  const ranges = (t.cds?.range ?? []).map(r => ({
+    begin: Number(r.begin),
+    end: Number(r.end),
+  }))
+  if (ranges.length === 0) {
     throw new Error(
       `transcript ${t.accession_version} has no CDS (non-coding?)`,
     )
@@ -167,29 +176,36 @@ export function codingExons(t: Transcript): CodingExon[] {
         `product report; pass --transcript with one that does`,
     )
   }
-  const cdsBegin = Number(cds.begin)
-  const cdsEnd = Number(cds.end)
-  const ordered = [...exons].sort((a, b) => a.order - b.order)
-  const out: CodingExon[] = []
-  let tPos = 1 // transcript coordinate (1-based) of the current exon's start
-  let n = 0
-  for (const e of ordered) {
-    const len = Number(e.end) - Number(e.begin) + 1
-    const tStart = tPos
-    const tEnd = tPos + len - 1
-    const cStart = Math.max(tStart, cdsBegin)
-    const cEnd = Math.min(tEnd, cdsEnd)
-    if (cStart <= cEnd) {
-      n += 1
-      out.push({
-        exon: n,
-        cdsStart: cStart - cdsBegin,
-        cdsLen: cEnd - cStart + 1,
-      })
+  let tPos = 1
+  const spans = [...exons]
+    .sort((a, b) => a.order - b.order)
+    .map(e => {
+      const tStart = tPos
+      tPos += Number(e.end) - Number(e.begin) + 1
+      return { tStart, tEnd: tPos - 1 }
+    })
+  const pieces: { index: number; cdsStart: number; cdsLen: number }[] = []
+  let cdsOffset = 0
+  for (const { begin, end } of ranges) {
+    for (const [index, { tStart, tEnd }] of spans.entries()) {
+      const cStart = Math.max(tStart, begin)
+      const cEnd = Math.min(tEnd, end)
+      if (cStart <= cEnd) {
+        pieces.push({
+          index,
+          cdsStart: cdsOffset + cStart - begin,
+          cdsLen: cEnd - cStart + 1,
+        })
+      }
     }
-    tPos += len
+    cdsOffset += end - begin + 1
   }
-  return out
+  const coding = [...new Set(pieces.map(p => p.index))].sort((a, b) => a - b)
+  return pieces.map(({ index, cdsStart, cdsLen }) => ({
+    exon: coding.indexOf(index) + 1,
+    cdsStart,
+    cdsLen,
+  }))
 }
 
 // 0-based ungapped position -> alignment column holding that non-gap char

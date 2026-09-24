@@ -117,6 +117,34 @@ describe('codingExons', () => {
     expect(out[0]!.cdsStart).toBe(0)
   })
 
+  test('reads every range of a frameshifted CDS', () => {
+    const t = {
+      accession_version: 'ORF1AB.1',
+      cds: {
+        range: [
+          { begin: '11', end: '50' },
+          { begin: '50', end: '80' },
+        ],
+      },
+      genomic_locations: [{ exons: [exon(1, 60), exon(2, 40)] }],
+    }
+    expect(codingExons(t)).toEqual([
+      { exon: 1, cdsStart: 0, cdsLen: 40 },
+      { exon: 1, cdsStart: 40, cdsLen: 11 },
+      { exon: 2, cdsStart: 51, cdsLen: 20 },
+    ])
+  })
+
+  test('a report with a cds and no range reads as no CDS', () => {
+    const t = {
+      accession_version: 'NM_2.1',
+      cds: {},
+      genomic_locations: [{ exons: [exon(1, 10)] }],
+    }
+    expect(() => pickTranscript([t])).not.toThrow()
+    expect(() => codingExons(t)).toThrow(/no CDS/)
+  })
+
   test('throws on a non-coding transcript (no CDS)', () => {
     expect(() =>
       codingExons({
