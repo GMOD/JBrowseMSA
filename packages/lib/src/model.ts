@@ -9,7 +9,13 @@ import {
   isAlive,
   types,
 } from '@jbrowse/mobx-state-tree'
-import { autorun, compareStructural, computed, reaction, transaction } from 'mobx'
+import {
+  autorun,
+  compareStructural,
+  computed,
+  reaction,
+  transaction,
+} from 'mobx'
 import {
   generateNodeIds,
   gffToAnnotations,
@@ -3009,7 +3015,9 @@ function stateModelFactory() {
         return self.dataInitialized &&
           annotations.length > 0 &&
           !annotations.some(a => rowNamesSet.has(a.id))
-          ? [`0 of ${annotations.length} annotations name a row in this alignment`]
+          ? [
+              `0 of ${annotations.length} annotations name a row in this alignment`,
+            ]
           : []
       },
       /**
