@@ -24,8 +24,6 @@ nobody has to work it out again.
   that loads a family alignment from EBI with no file handling.
 - [Demo: codon-aware DNA view](ideas/codon-aware-dna-view.md): translate a row,
   color synonymous and non-synonymous changes, and step the ruler by 3.
-- [Consolidate the protein-link generators](ideas/consolidate-script-generators.md):
-  658 LOC doing one thing four times; one generator plus four configs is ~200.
 - [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md): the
   join loop is cubic. The file explains why `@gmod/hclust`'s fix for the same
   loop does not port, and what does.
@@ -69,5 +67,8 @@ Done and removed: duplicated FASTA defline parsing (now `splitFastaRecords` in
 `msa-parsers/src/msa/fastaRecords.ts`), `parseNewick` returning `any` (now a
 typed `parse(s): NewickNode`), the sequence logo track, row search and jump to
 column (the header's Go to box; motif search is an agent's job under
-data-layers), row-group coloring (now the `rowTint` encoding), and InterPro
-sub-row boxes overflowing the row (the lanes now share out the row height).
+data-layers), row-group coloring (now the `rowTint` encoding), InterPro sub-row
+boxes overflowing the row (the lanes now share out the row height), and the four
+protein-link generators (`jbrowseLinks.ts` now writes the SRC, BRAF, TP53 and
+TP53 3D sessions by hand, naming the transcript in `connectedTranscript` and
+protein3d's `transcriptId`).
