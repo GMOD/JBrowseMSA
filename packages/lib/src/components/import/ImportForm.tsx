@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 import { ErrorMessage, FileSelector } from '@jbrowse/core/ui'
-import { Button, Container, Typography } from '@mui/material'
+import { Box, Button, Container, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import ImportFormExamples from './ImportFormExamples.tsx'
@@ -9,6 +9,8 @@ import { load } from './util.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { FileLocation } from '@jbrowse/core/util/types'
+
+const phone = '@media (max-width: 640px)'
 
 const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
   const [msaFile, setMsaFile] = useState<FileLocation>()
@@ -18,7 +20,7 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
 
   return (
     <Container>
-      <div style={{ width: '50%' }}>
+      <Box sx={{ width: '50%', [phone]: { width: '100%' } }}>
         {error ? <ErrorMessage error={error} /> : null}
         <Typography>
           Open an MSA file (FASTA, Stockholm, Clustal, A3M or EMF format) and/or
@@ -28,14 +30,19 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
           An MSA alone or a tree alone is enough, and a Stockholm file with an
           embedded tree needs no separate tree file.
         </Typography>
-      </div>
+      </Box>
 
-      <div
-        style={{
+      <Box
+        sx={{
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          gap: 40,
+          gap: '40px',
+          [phone]: {
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            gap: '16px',
+          },
         }}
       >
         <div>
@@ -74,7 +81,7 @@ const ImportForm = observer(function ({ model }: { model: MsaViewModel }) {
           <Typography>Examples</Typography>
           <ImportFormExamples model={model} />
         </div>
-      </div>
+      </Box>
     </Container>
   )
 })
