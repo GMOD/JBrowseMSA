@@ -5,9 +5,9 @@ import { observer } from 'mobx-react'
 
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { useWheelScroll } from '../../useWheelScroll.ts'
-import { referenceColor, treeHoverColor } from '../overlayColors.ts'
 import CladeLabels from './CladeLabels.tsx'
 import TreeCanvasBlock from './TreeCanvasBlock.tsx'
+import { renderTreeMouseover } from './renderTreeMouseover.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -25,40 +25,7 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const mouseoverRef = useCanvasAutorun({
     draw: ctx => {
       if (isAlive(model)) {
-        const {
-          rowHeight,
-          treeAreaWidth: w,
-          height: h,
-          scrollY: sy,
-          mouseRow,
-          referenceRowIndex,
-          hoveredRowIndices,
-        } = model
-        ctx.resetTransform()
-        ctx.clearRect(0, 0, w, h)
-
-        // rows are laid out at a fixed pitch, so a row index is all that is
-        // needed to place its band (leaf.x is rowHeight*(index+0.5))
-        const fillRow = (index: number) => {
-          ctx.fillRect(0, index * rowHeight + sy, w, rowHeight)
-        }
-
-        if (referenceRowIndex !== undefined) {
-          ctx.fillStyle = referenceColor
-          fillRow(referenceRowIndex)
-        }
-
-        ctx.fillStyle = treeHoverColor
-        for (const index of hoveredRowIndices) {
-          fillRow(index)
-        }
-        if (
-          mouseRow !== undefined &&
-          mouseRow !== referenceRowIndex &&
-          !hoveredRowIndices.includes(mouseRow)
-        ) {
-          fillRow(mouseRow)
-        }
+        renderTreeMouseover({ ctx, model })
       }
     },
     width: treeAreaWidth,

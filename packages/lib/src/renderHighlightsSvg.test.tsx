@@ -100,9 +100,10 @@ test('highlighted columns and the reference row export as they draw', async () =
   expect(band).toContain(`width="${2 * colWidth}"`)
   expect(band).toContain(`height="${totalHeight}"`)
 
-  const referenceTint = rects(svg).find(r => r.includes('rgb(0,128,255)'))
+  const referenceTint = rects(svg).find(
+    r => r.includes('rgb(0,128,255)') && r.includes(`width="${totalWidth}"`),
+  )
   expect(referenceTint).toContain(`y="${rowHeight}"`)
-  expect(referenceTint).toContain(`width="${totalWidth}"`)
   expect(referenceTint).toContain(`height="${rowHeight}"`)
 })
 

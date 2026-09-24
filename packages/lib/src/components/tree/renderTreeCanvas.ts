@@ -6,6 +6,7 @@ import {
   highlightLabelHeight,
   highlightRowFill,
 } from '../msa/renderHighlights.ts'
+import { referenceColor } from '../overlayColors.ts'
 import { bracketBarWidth, bracketGap } from './cladeBrackets.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
@@ -572,9 +573,9 @@ function renderCladeBrackets({
   ctx.strokeStyle = theme.palette.text.primary
 }
 
-// the `rowTint` encoding and the row sets of `highlights`, washed across the
-// tree area under the labels, with each set's label in the gutter at its first
-// row
+// the `rowTint` encoding, the reference row and the row sets of `highlights`,
+// washed across the tree area under the labels, with each set's label in the
+// gutter at its first row
 function renderRowHighlights({
   ctx,
   model,
@@ -591,6 +592,7 @@ function renderRowHighlights({
   const {
     resolvedHighlights,
     rowTints,
+    referenceRowIndex,
     rowHeight,
     treeAreaWidth,
     marginLeft,
@@ -615,6 +617,10 @@ function renderRowHighlights({
         fillRow(index)
       }
     }
+  }
+  if (referenceRowIndex !== undefined) {
+    ctx.fillStyle = referenceColor
+    fillRow(referenceRowIndex)
   }
   for (const { rowIndices, label, color } of resolvedHighlights) {
     ctx.fillStyle = color ?? highlightRowFill
