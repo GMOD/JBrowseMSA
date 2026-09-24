@@ -24,6 +24,7 @@
     "generic-filehandle2": "^2.4.0",
     "mobx": "^7.0.3",
     "mobx-react": "^10.0.2",
+    "molstar": "^5.11.0",
     "msa-parsers": "workspace:*",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

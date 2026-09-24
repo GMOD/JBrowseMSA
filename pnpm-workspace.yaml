@@ -39,6 +39,7 @@ overrides:
   '@jbrowse/core': file:./vendor-jbrowse/jbrowse-core.tgz
   '@jbrowse/render-core': file:./vendor-jbrowse/jbrowse-render-core.tgz
 allowBuilds:
+  '@scarf/scarf': false
   core-js-pure: false
   esbuild: true
   sharp: true
