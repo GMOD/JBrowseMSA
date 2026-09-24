@@ -10,10 +10,31 @@ import { MSAModelF, expandSpec } from 'react-msaview'
 import type { Instance, SnapshotIn } from '@jbrowse/mobx-state-tree'
 import type { MsaSpec } from 'react-msaview'
 
-// gmod.org answers 414 once the request line passes 8,192 bytes
-export const maxLinkLength = 8000
+// The snapshot rides in the fragment, which the browser never sends, so
+// gmod.org's 8,192-byte request line does not bound a link. Chrome and Firefox
+// both opened a 1,000,000-character link and both refused 2,500,000; Safari is
+// untested.
+export const maxLinkLength = 1_000_000
 
 const gzipPrefix = 'z.'
+
+/**
+ * The snapshot a link carries: `#data=`, or `?data=` for a link written before
+ * the snapshot moved into the fragment
+ */
+export function linkParam({ hash, search }: { hash: string; search: string }) {
+  return (
+    new URLSearchParams(hash.slice(1)).get('data') ??
+    new URLSearchParams(search).get('data')
+  )
+}
+
+function withParam(href: string, param?: string) {
+  const url = new URL(href)
+  url.searchParams.delete('data')
+  url.hash = param ? new URLSearchParams({ data: param }).toString() : ''
+  return url.href
+}
 
 async function pipe(bytes: Uint8Array, transform: GenericTransformStream) {
   const stream = new Response(bytes as BodyInit).body!.pipeThrough(transform)
@@ -54,7 +75,8 @@ export async function decodeParam(param: string) {
 
 const AppBase = types
   .model({
-    msaview: MSAModelF(),
+    // a pasted or local document stays in the link as long as the link does
+    msaview: MSAModelF({ maxInlineSnapshotBytes: maxLinkLength }),
   })
   .volatile(() => ({
     linkProblem: undefined as string | undefined,
@@ -89,13 +111,12 @@ export async function shareLink(
       problem: `The ${what} came from this computer and is too large for a link. Open it by URL to share the view.`,
     }
   }
-  const url = new URL(href)
-  url.searchParams.set('data', await encodeParam(snapshot))
-  return url.href.length > maxLinkLength
+  const url = withParam(href, await encodeParam(snapshot))
+  return url.length > maxLinkLength
     ? {
-        problem: `A link to this view runs to ${url.href.length.toLocaleString('en-US')} characters, and gmod.org refuses one over ${maxLinkLength.toLocaleString('en-US')}. Open the files by URL to share the view.`,
+        problem: `A link to this view runs to ${url.length.toLocaleString('en-US')} characters, over the ${maxLinkLength.toLocaleString('en-US')} a link can hold. Open the files by URL to share the view.`,
       }
-    : { url: url.href }
+    : { url }
 }
 
 const App = AppBase.actions(self => ({
@@ -117,12 +138,12 @@ const App = AppBase.actions(self => ({
             }
             self.setLinkProblem(link.problem)
             // A view too large for the link loses the param, so the address
-            // bar never holds a URL that opens an empty viewer or a 414
-            const url = new URL(link.url ?? window.location.href)
-            if (link.problem !== undefined) {
-              url.searchParams.delete('data')
-            }
-            window.history.replaceState(null, '', url.href)
+            // bar never holds a URL that opens an empty viewer
+            window.history.replaceState(
+              null,
+              '',
+              link.url ?? withParam(window.location.href),
+            )
           })
         },
         { delay: 1000 },
@@ -151,7 +172,7 @@ function toSnapshot(param: string): SnapshotIn<typeof App> {
   )
 }
 
-// `?data=` takes the app snapshot, `{"msaview": {...}}`, or the MsaView
+// A link's `data=` takes the app snapshot, `{"msaview": {...}}`, or the MsaView
 // snapshot on its own, which is what docs/layers.md and every other embedding
 // write, either as JSON or gzipped by `encodeParam`. A value that is none of
 // these opens on an error, since the empty import form would read as the link
@@ -166,7 +187,7 @@ export async function createApp(param: string | null) {
     const app = App.create(empty)
     app.msaview.setError(
       new Error(
-        `Could not open the view in this link's ?data= parameter: ${e instanceof Error ? e.message : String(e)}`,
+        `Could not open the view in this link's data= parameter: ${e instanceof Error ? e.message : String(e)}`,
       ),
     )
     return app

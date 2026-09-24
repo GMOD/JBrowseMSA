@@ -8,13 +8,17 @@ import { observer } from 'mobx-react'
 import { MSAView } from 'react-msaview'
 
 import TopBar from './TopBar'
-import { createApp } from './model'
+import { createApp, linkParam } from './model'
 
 import type { AppModel } from './model'
 
-const mymodel = await createApp(
-  new URLSearchParams(window.location.search).get('data'),
-)
+const mymodel = await createApp(linkParam(window.location))
+
+// A link pasted over this one that differs only in its fragment changes the
+// URL without loading the page. The app's own replaceState fires no event.
+window.addEventListener('hashchange', () => {
+  window.location.reload()
+})
 
 // Published for the screenshot harness the way jbrowse-web publishes
 // window.JBrowseSession: a callout that wants to point at alignment column 38

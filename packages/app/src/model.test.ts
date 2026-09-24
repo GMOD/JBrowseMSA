@@ -5,6 +5,7 @@ import {
   createApp,
   decodeParam,
   encodeParam,
+  linkParam,
   maxLinkLength,
   shareLink,
 } from './model'
@@ -76,7 +77,7 @@ test.each([
   ['a z. value that is not gzip', 'z.bm90IGd6aXA'],
 ])('?data= with %s opens on an error', async (_, param) => {
   const app = await createApp(param)
-  expect(String(app.msaview.error)).toMatch(/\?data= parameter/)
+  expect(String(app.msaview.error)).toMatch(/link's data= parameter/)
 })
 
 const href = 'https://gmod.org/JBrowseMSA/demo/'
@@ -100,16 +101,32 @@ test('?data= takes a gzipped snapshot', async () => {
   expect(app.msaview.rows.length).toBe(2)
 })
 
-test('shareLink round-trips the view through the gzipped param', async () => {
+test('shareLink round-trips the view through the gzipped #data=', async () => {
   const app = await createApp(
     JSON.stringify({ msaview: { type: 'MsaView', data: { msa } } }),
   )
   const link = await shareLink(app, href)
-  const param = new URL(link.url!).searchParams.get('data')
-  expect(param).toMatch(/^z\./)
-  const reopened = await createApp(param)
+  const url = new URL(link.url!)
+  expect(url.hash).toMatch(/^#data=z\./)
+  const reopened = await createApp(linkParam(url))
   expect(reopened.msaview.rows.length).toBe(2)
   expect(reopened.msaview.data.msa).toBe(msa)
+})
+
+test('shareLink moves an old ?data= link into the fragment', async () => {
+  const app = await createApp(
+    JSON.stringify({ msaview: { type: 'MsaView', data: { msa } } }),
+  )
+  const link = await shareLink(app, `${href}?data=old&other=1#stale`)
+  const url = new URL(link.url!)
+  expect(url.search).toBe('?other=1')
+  expect(url.hash).toMatch(/^#data=z\./)
+})
+
+test('linkParam reads #data= first and falls back to ?data=', () => {
+  expect(linkParam({ hash: '#data=new', search: '?data=old' })).toBe('new')
+  expect(linkParam({ hash: '', search: '?data=old' })).toBe('old')
+  expect(linkParam({ hash: '#other=1', search: '' })).toBeNull()
 })
 
 function randomProtein(length: number) {
@@ -120,26 +137,33 @@ function randomProtein(length: number) {
   }).join('')
 }
 
+// random residues compress to about 0.7 link characters each, so two
+// documents each under the inline cap still make a link past maxLinkLength
 test('shareLink refuses a link past maxLinkLength', async () => {
   const app = await createApp(
     JSON.stringify({
       type: 'MsaView',
-      data: { msa: `>a\n${randomProtein(12_000)}` },
+      data: {
+        msa: `>a\n${randomProtein(900_000)}`,
+        treeMetadata: randomProtein(900_000),
+      },
     }),
   )
   expect(app.msaview.unshareableData).toEqual([])
   const link = await shareLink(app, href)
   expect(link.url).toBeUndefined()
-  expect(link.problem).toMatch(`over ${maxLinkLength.toLocaleString('en-US')}`)
+  expect(link.problem).toMatch(
+    `over the ${maxLinkLength.toLocaleString('en-US')}`,
+  )
 })
 
 test('shareLink names a document the snapshot dropped', async () => {
   const app = await createApp(
     JSON.stringify({
       type: 'MsaView',
-      data: { msa: `>a\n${randomProtein(100_000)}` },
+      data: { msa: `>a\n${randomProtein(maxLinkLength + 1000)}` },
     }),
   )
   const link = await shareLink(app, href)
-  expect(link.problem).toMatch(/^The alignment \(100 kB\) came from/)
+  expect(link.problem).toMatch(/^The alignment \(1001 kB\) came from/)
 })

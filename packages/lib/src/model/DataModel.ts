@@ -9,7 +9,7 @@ import { maxInlineSnapshotBytes } from '../constants.ts'
  * data will not be persisted in saved session snapshots, it will be fetched
  * from msaFilehandle at startup
  */
-export function DataModelF() {
+export function DataModelF(maxInlineBytes = maxInlineSnapshotBytes) {
   return types
     .model({
       /**
@@ -56,12 +56,12 @@ export function DataModelF() {
       },
     }))
     .postProcessSnapshot(snap =>
-      // drops any field over maxInlineSnapshotBytes; the parent model's
+      // drops any field over maxInlineBytes; the parent model's
       // `unshareableData` reports what was dropped
       Object.fromEntries(
         Object.entries(snap).map(([key, text]) => [
           key,
-          text && text.length > maxInlineSnapshotBytes ? undefined : text,
+          text && text.length > maxInlineBytes ? undefined : text,
         ]),
       ),
     )

@@ -106,12 +106,12 @@ export const rowTintAlpha = 0.25
 export const cladeHighlightColor = '#fff3c4'
 export const cladeHighlightAlpha = 0.6
 
-// The largest inline document the snapshot carries. A larger pasted or
-// locally-opened file stays in the live model and out of the snapshot, and
-// `unshareableData` warns using the same number. The demo app gzips the
-// snapshot into `?data=`, where 15 kB of the hosted protein alignments encodes
-// to 6,300-7,600 characters, under the 8,192 gmod.org accepts.
-export const maxInlineSnapshotBytes = 15_000
+// The largest inline document a snapshot carries by default, which keeps a
+// jbrowse session small. A larger pasted or locally-opened file stays in the
+// live model and out of the snapshot, and `unshareableData` warns using the
+// same number. `MSAModelF({ maxInlineSnapshotBytes })` sets another; the demo
+// app's links hold far more.
+export const maxInlineSnapshotBytes = 50_000
 
 // Height of the band the `rowPanels` headers draw in, above the strips in the
 // top area beside the tree ruler and the minimap. A panel wider than the band

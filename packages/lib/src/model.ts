@@ -58,7 +58,7 @@ import {
   defaultTreeWidth,
   labelReferenceFontSize,
   maxCellSize,
-  maxInlineSnapshotBytes,
+  maxInlineSnapshotBytes as defaultMaxInlineSnapshotBytes,
   maxNeighborJoiningRows,
   minColWidth,
   minLetterColWidth,
@@ -457,7 +457,10 @@ function columnTrackSizes(tracks?: readonly ColumnTrackSpec[]) {
   return (tracks ?? []).map(columnTrackSize)
 }
 
-function smallColumnTracks(tracks?: ColumnTrackSpec[]) {
+function smallColumnTracks(
+  tracks: ColumnTrackSpec[] | undefined,
+  maxInlineSnapshotBytes: number,
+) {
   const sizes = columnTrackSizes(tracks)
   const kept = tracks?.filter((_t, i) => sizes[i]! <= maxInlineSnapshotBytes)
   return kept?.length ? { columnTracks: kept } : {}
@@ -795,8 +798,15 @@ function preorder(tree: NodeWithIds) {
  * const root = RootModel.create({})
  * root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
  * ```
+ *
+ * `maxInlineSnapshotBytes` is the largest pasted or local document, and the
+ * largest data track, the snapshot keeps; a larger one stays in the live model
+ * and `unshareableData` names it. The standalone app, whose links carry the
+ * snapshot in the URL fragment, raises it.
  */
-function stateModelFactory() {
+function stateModelFactory({
+  maxInlineSnapshotBytes = defaultMaxInlineSnapshotBytes,
+}: { maxInlineSnapshotBytes?: number } = {}) {
   return types
     .compose(
       DialogQueueSessionMixin(),
@@ -992,7 +1002,7 @@ function stateModelFactory() {
          * data from the loaded tree/msa/treeMetadata, generally loaded by
          * autorun
          */
-        data: types.optional(DataModelF(), {}),
+        data: types.optional(DataModelF(maxInlineSnapshotBytes), {}),
 
         /**
          * #property
@@ -1657,9 +1667,9 @@ function stateModelFactory() {
        * from disk or pasted in becomes inline text, and DataModel drops an
        * inline document past `maxInlineSnapshotBytes`.
        *
-       * The header lists these, and the standalone app drops `?data=` from
+       * The header lists these, and the standalone app drops `#data=` from
        * the address bar while the list is non-empty or the encoded link would
-       * pass 8,000 characters, so a copied link never opens an empty viewer
+       * pass its `maxLinkLength`, so a copied link never opens an empty viewer
        * unannounced. A document fetched from a URL never appears here, since
        * the snapshot keeps its filehandle.
        *
@@ -4751,7 +4761,7 @@ function stateModelFactory() {
       // stripDefault handles per-property defaults; this drops inline documents
       // whose filehandle can refetch them
       ...rest,
-      ...smallColumnTracks(columnTracks),
+      ...smallColumnTracks(columnTracks, maxInlineSnapshotBytes),
       data: {
         ...(rest.treeFilehandle ? {} : { tree: data.tree }),
         ...(rest.msaFilehandle ? {} : { msa: data.msa }),
