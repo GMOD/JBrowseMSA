@@ -25,16 +25,16 @@ export interface HierarchyNode<T = NodeWithIds> extends CoreHierarchyNode<T> {
   parent: HierarchyNode<T> | null
   x?: number
   y?: number
-  // the span of `x` over this node's subtree, set by clusterLayout. Leaves are
-  // laid out in order, so a subtree occupies one contiguous run of rows and a
-  // renderer can skip the whole thing when the run misses its block.
+  // the span of `x` over this node's subtree. Leaves are laid out in order, so
+  // a subtree occupies one contiguous run of rows and a renderer can skip the
+  // whole thing when the run misses its block.
   xMin?: number
   xMax?: number
   len?: number
   depthToLeaf?: number
   _children?: HierarchyNode<T>[] | null
   // pixel x-position of the farthest tip of a collapsed subtree, where the base
-  // of the collapsed-clade triangle goes. Set in the model's hierarchy getter.
+  // of the collapsed-clade triangle goes
   collapsedTipXFar?: number
 }
 
@@ -108,6 +108,153 @@ export function clusterLayout<T>(
         stack.push({ node: child, depth: depth + 1 })
       }
     }
+  }
+}
+
+export interface TreeScale {
+  readonly rowHeight: number
+  readonly treeWidth: number
+}
+
+interface LayoutFrame {
+  scale: TreeScale
+  rootToTipLength: number
+}
+
+/**
+ * A node of `layoutTree`: its source node's fields plus its place in unit
+ * space, rows down and branch length across. The pixel getters multiply by the
+ * scale on every read, so a zoom leaves the nodes valid, and an observer
+ * reading `x` observes whatever the scale reads.
+ */
+export class LaidOutNode<T> implements HierarchyNode<T> {
+  data: T
+  depth: number
+  height: number
+  value?: number
+  children: LaidOutNode<T>[] | null
+  depthToLeaf = 0
+  row = 0
+  rowMin = 0
+  rowMax = 0
+  depthFraction = 0
+  branchLength = 0
+  collapsedBranchLength?: number
+
+  constructor(
+    source: HierarchyNode<T>,
+    readonly parent: LaidOutNode<T> | null,
+    private readonly frame: LayoutFrame,
+  ) {
+    this.data = source.data
+    this.depth = source.depth
+    this.height = source.height
+    this.value = source.value
+    this.children = source.children ? [] : null
+  }
+
+  private get pxPerBranchLength() {
+    const { scale, rootToTipLength } = this.frame
+    return rootToTipLength ? scale.treeWidth / rootToTipLength : 0
+  }
+
+  get x() {
+    return this.row * this.frame.scale.rowHeight
+  }
+
+  get xMin() {
+    return this.rowMin * this.frame.scale.rowHeight
+  }
+
+  get xMax() {
+    return this.rowMax * this.frame.scale.rowHeight
+  }
+
+  get y() {
+    return this.depthFraction * this.frame.scale.treeWidth
+  }
+
+  get len() {
+    return this.branchLength * this.pxPerBranchLength
+  }
+
+  get collapsedTipXFar() {
+    return this.collapsedBranchLength === undefined
+      ? undefined
+      : this.collapsedBranchLength * this.pxPerBranchLength
+  }
+}
+
+/**
+ * The layout `clusterLayout` and `setBrLength` write, on new nodes: tips one
+ * row apart, a parent at the mean of its children, and branch length measured
+ * from the root, whose own branch is not drawn. A collapsed node records the
+ * farthest tip of its hidden subtree, where the base of its triangle goes.
+ */
+export function layoutTree<T extends { length?: number }>(
+  root: HierarchyNode<T>,
+  scale: TreeScale,
+) {
+  const frame: LayoutFrame = { scale, rootToTipLength: 0 }
+  const nodes: LaidOutNode<T>[] = []
+  const leafNodes: LaidOutNode<T>[] = []
+  const rootHeight = root.height
+  const stack: { source: HierarchyNode<T>; parent: LaidOutNode<T> | null }[] = [
+    { source: root, parent: null },
+  ]
+  while (stack.length > 0) {
+    const { source, parent } = stack.pop()!
+    const node = new LaidOutNode(source, parent, frame)
+    nodes.push(node)
+    node.depthFraction =
+      rootHeight === 0 ? 1 : (source.depth - root.depth) / rootHeight
+    if (parent) {
+      parent.children!.push(node)
+      node.branchLength =
+        parent.branchLength + Math.max(source.data.length || 0, 0)
+      frame.rootToTipLength = Math.max(frame.rootToTipLength, node.branchLength)
+    }
+    if (source._children) {
+      node.collapsedBranchLength =
+        node.branchLength + collapsedSubtreeMaxLength(source)
+    }
+    if (source.children) {
+      for (let i = source.children.length - 1; i >= 0; i--) {
+        stack.push({ source: source.children[i]!, parent: node })
+      }
+    } else {
+      node.row = leafNodes.length + 0.5
+      node.depthToLeaf = source.depthToLeaf ?? 0
+      leafNodes.push(node)
+    }
+  }
+
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    const node = nodes[i]!
+    if (node.children) {
+      let sum = 0
+      let min = Infinity
+      let max = -Infinity
+      let depthToLeaf = 0
+      for (const child of node.children) {
+        sum += child.row
+        min = Math.min(min, child.rowMin)
+        max = Math.max(max, child.rowMax)
+        depthToLeaf = Math.max(depthToLeaf, 1 + child.depthToLeaf)
+      }
+      node.row = sum / node.children.length
+      node.rowMin = min
+      node.rowMax = max
+      node.depthToLeaf = depthToLeaf
+    } else {
+      node.rowMin = node.row
+      node.rowMax = node.row
+    }
+  }
+  return {
+    root: nodes[0]!,
+    leaves: leafNodes,
+    rootToTipLength: frame.rootToTipLength,
   }
 }
 

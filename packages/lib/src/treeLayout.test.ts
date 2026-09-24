@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 //
-// The layout getters write x/y/len onto the hierarchy nodes, which is fine --
-// those are layout fields. The parsed tree underneath is shared and cached, so
-// anything written onto `data` outlives the frame that wrote it.
+// The parsed tree underneath the layout is shared and cached, so anything
+// written onto `data` outlives the frame that wrote it.
+import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
+import { descendants } from './hierarchy.ts'
 import MSAModelF from './model.ts'
 
 const msa = '>a\nMKAANSE\n>b\nMKA-NSE\n>c\nMKWWNSE\n>d\nMKWWNQE'
@@ -91,4 +92,33 @@ test('without one, the tree width follows the tree area', () => {
   const before = model.treeWidth
   model.setTreeAreaWidth(model.treeAreaWidth + 100)
   expect(model.treeWidth).toBe(before + 100)
+})
+
+test('an observer of the tip positions alone follows a vertical zoom', () => {
+  const model = makeModel('((a:1,b:2):5,(c:1,d:3):1);')
+  let seen: number[] = []
+  const dispose = autorun(() => {
+    seen = model.leaves.map(l => l.x!)
+  })
+  model.setRowHeight(32)
+  expect(seen).toEqual([16, 48, 80, 112])
+  dispose()
+})
+
+test('a zoom keeps the laid-out nodes and leaves the tree it lays out alone', () => {
+  const model = makeModel('((a:1,b:2):5,(c:1,d:3):1);')
+  const dispose = autorun(() => {
+    void model.hierarchy
+  })
+  const { leaves, hierarchy, root } = model
+  model.setRowHeight(32)
+  model.setTreeWidth(300)
+  expect(model.leaves).toBe(leaves)
+  expect(model.hierarchy).toBe(hierarchy)
+  expect(model.root).toBe(root)
+  expect(Math.max(...model.leaves.map(l => l.len!))).toBeCloseTo(300)
+  expect(
+    descendants(root).filter(n => n.x !== undefined || n.len !== undefined),
+  ).toEqual([])
+  dispose()
 })

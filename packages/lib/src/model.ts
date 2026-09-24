@@ -80,10 +80,9 @@ import {
   calcDepthToLeaf,
   clusterLayout,
   collapse,
-  collapsedSubtreeMaxLength,
   find,
-  forEachDescendant,
   hierarchy,
+  layoutTree,
   leafIndex,
   leaves,
   maxLength,
@@ -2084,40 +2083,42 @@ function stateModelFactory() {
       },
       /**
        * #getter
-       * generates a new tree that is clustered with x,y positions
+       * `root` laid out on new nodes in row and branch-length units, read in
+       * pixels through `rowHeight` and `treeWidth`. A zoom leaves it and every
+       * node in it as they are, and an observer reading a node's `x` or `len`
+       * observes the size it scales by.
+       */
+      get treeLayout() {
+        return layoutTree(this.root, {
+          get rowHeight() {
+            return self.rowHeight
+          },
+          get treeWidth() {
+            return self.treeWidth
+          },
+        })
+      },
+
+      /**
+       * #getter
+       * the laid-out tree, with pixel positions on every node
        */
       get hierarchy(): HierarchyNode<NodeWithIdsAndLength> {
-        const r = this.root
-        clusterLayout(r, this.totalHeight, self.treeWidth)
-        const max = this.rootToTipLength
-        const k = max ? self.treeWidth / max : 0
-        // the displayed root starts at x=0, so subtract its length here; `root`
-        // returns the cached parse, which must not be mutated
-        setBrLength(r, -Math.max(r.data.length || 0, 0), k)
-        // for each collapsed clade, record the pixel x-position of its farthest
-        // tip so the renderer can draw a triangle spanning the branch-length
-        // extent of the hidden subtree
-        forEachDescendant(r, node => {
-          if (node._children) {
-            node.collapsedTipXFar =
-              (node.len ?? 0) + collapsedSubtreeMaxLength(node) * k
-          }
-        })
-        return r as HierarchyNode<NodeWithIdsAndLength>
+        return this.treeLayout.root as HierarchyNode<NodeWithIdsAndLength>
       },
 
       /**
        * #getter
        */
       get totalHeight() {
-        return leaves(this.root).length * self.rowHeight
+        return this.leaves.length * self.rowHeight
       },
 
       /**
        * #getter
        */
       get leaves() {
-        return leaves(this.hierarchy)
+        return this.treeLayout.leaves as HierarchyNode<NodeWithIdsAndLength>[]
       },
 
       /**
@@ -2126,8 +2127,7 @@ function stateModelFactory() {
        * the tree's own units
        */
       get rootToTipLength() {
-        const r = this.root
-        return maxLength(r) - Math.max(r.data.length || 0, 0)
+        return this.treeLayout.rootToTipLength
       },
 
       /**
@@ -2154,7 +2154,7 @@ function stateModelFactory() {
        * max topological depth to a tip, used to scale cladogram x-positions
        */
       get maxDepthToLeaf() {
-        return calcDepthToLeaf(this.hierarchy)
+        return this.treeLayout.root.depthToLeaf
       },
 
       /**
