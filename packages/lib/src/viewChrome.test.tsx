@@ -117,8 +117,10 @@ test('the view mounts with both scrollbars', () => {
   expect(byCursor('ns-resize')).toHaveLength(2)
 })
 
-test('the header offers a row search', () => {
-  expect(container.querySelector('input[placeholder="Find row"]')).toBeTruthy()
+test('the header offers a go-to box', () => {
+  expect(
+    container.querySelector('input[placeholder="Go to row or column"]'),
+  ).toBeTruthy()
 })
 
 test('dragging the tree divider widens the tree area', async () => {

@@ -9,11 +9,11 @@ import StatusMessage from '../StatusMessage.tsx'
 import ColorSchemeMenu from './ColorSchemeMenu.tsx'
 import FileMenu from './FileMenu.tsx'
 import GappynessSlider from './GappynessSlider.tsx'
+import GoTo from './GoTo.tsx'
 import HeaderInfoArea from './HeaderInfoArea.tsx'
 import LoadWarnings from './LoadWarnings.tsx'
 import MSASettingsMenu from './MSASettingsMenu.tsx'
 import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
-import RowSearch from './RowSearch.tsx'
 import TreeSettingsMenu from './TreeSettingsMenu.tsx'
 import UnshareableDataWarning from './UnshareableDataWarning.tsx'
 import ZoomControls from './ZoomControls.tsx'
@@ -43,7 +43,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <ZoomControls model={model} />
       <ZoomMenu model={model} />
       <GappynessSlider model={model} />
-      <RowSearch model={model} />
+      <GoTo model={model} />
       <div style={{ paddingLeft: 20, margin: 'auto' }}>
         <MultiAlignmentSelector model={model} />
       </div>

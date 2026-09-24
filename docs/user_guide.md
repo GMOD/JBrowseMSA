@@ -59,6 +59,13 @@ you can read one site down the whole family.
 ## Navigating
 
 - **Pan** by click-dragging the alignment, or scroll vertically/horizontally.
+- **Go to** a row, a column or a residue from the box in the header: a row name,
+  which completes as you type, a column number as the ruler reads it, or
+  `name:N` for residue N of that row. The view centers on the target and lights
+  it, and an entry that names nothing turns the box red.
+- **Keyboard**: click the alignment, then the arrow keys move one cell (a page
+  with shift), `+` and `-` zoom, and Home and End jump to the first and last
+  column.
 - **Zoom** with the magnifier buttons in the header. Ctrl+wheel zooms at the
   cursor whatever the wheel is set to do.
 - **Mouse wheel**: the mouse button in the header opens a menu with the four
