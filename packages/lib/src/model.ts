@@ -3117,50 +3117,51 @@ function stateModelFactory() {
       },
       /**
        * #action
+       * zoom by `scaleFactor` about the center of the alignment area
        */
-      zoomOutHorizontal() {
-        self.colWidth = Math.max(minColWidth, Math.floor(self.colWidth * 0.75))
-        self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
-      },
-      /**
-       * #action
-       */
-      zoomInHorizontal() {
-        self.colWidth = Math.min(maxCellSize, Math.ceil(self.colWidth * 1.5))
-        self.scrollX = clamp(self.scrollX, self.maxScrollX, 0)
-      },
-      /**
-       * #action
-       */
-      zoomInVertical() {
-        self.rowHeight = Math.min(maxCellSize, Math.ceil(self.rowHeight * 1.5))
-      },
-      /**
-       * #action
-       */
-      zoomOutVertical() {
-        self.rowHeight = Math.max(
-          minRowHeight,
-          Math.floor(self.rowHeight * 0.75),
+      zoomAtCenter(scaleFactor: number, axis: ScrollZoomAxis = 'both') {
+        this.zoomToPos(
+          scaleFactor,
+          self.msaCanvasWidth / 2,
+          self.msaAreaHeight / 2,
+          axis,
         )
       },
       /**
        * #action
        */
+      zoomOutHorizontal() {
+        this.zoomAtCenter(0.75, 'horizontal')
+      },
+      /**
+       * #action
+       */
+      zoomInHorizontal() {
+        this.zoomAtCenter(1.5, 'horizontal')
+      },
+      /**
+       * #action
+       */
+      zoomInVertical() {
+        this.zoomAtCenter(1.5, 'vertical')
+      },
+      /**
+       * #action
+       */
+      zoomOutVertical() {
+        this.zoomAtCenter(0.75, 'vertical')
+      },
+      /**
+       * #action
+       */
       zoomIn() {
-        transaction(() => {
-          this.zoomInHorizontal()
-          this.zoomInVertical()
-        })
+        this.zoomAtCenter(1.5)
       },
       /**
        * #action
        */
       zoomOut() {
-        transaction(() => {
-          this.zoomOutHorizontal()
-          this.zoomOutVertical()
-        })
+        this.zoomAtCenter(0.75)
       },
       /**
        * #action

@@ -46,6 +46,29 @@ test('the last column stops at the right edge of the canvas', () => {
   expect(model.viewport?.endColumn).toBe(200)
 })
 
+test('the toolbar zoom holds the column at the center of the view', () => {
+  const model = makeModel()
+  model.setScrollX(-500)
+  const centerCol = () =>
+    (-model.scrollX + model.msaCanvasWidth / 2) / model.colWidth
+  expect(centerCol()).toBe(75)
+  model.zoomIn()
+  expect(model.colWidth).toBe(15)
+  expect(centerCol()).toBeCloseTo(75)
+  model.zoomOut()
+  model.zoomOut()
+  expect(centerCol()).toBeCloseTo(75)
+})
+
+test('the toolbar zoom stops at the cell size limits', () => {
+  const model = makeModel()
+  for (let i = 0; i < 40; i++) {
+    model.zoomOut()
+  }
+  expect(model.colWidth).toBe(0.2)
+  expect(model.rowHeight).toBe(1)
+})
+
 test('a model with no alignment or no width yet has no viewport', () => {
   expect(MSAModelF().create({ type: 'MsaView' }).viewport).toBeUndefined()
   const unmeasured = MSAModelF().create({ type: 'MsaView', data: { msa } })
