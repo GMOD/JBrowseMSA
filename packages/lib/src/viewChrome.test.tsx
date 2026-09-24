@@ -145,6 +145,46 @@ test('dragging the scrollbar thumb scrolls the alignment', async () => {
   expect(model.scrollX).toBeLessThan(0)
 })
 
+function thumbs() {
+  return [
+    ...container.querySelectorAll<HTMLElement>('div[style*="cursor: pointer"]'),
+  ]
+}
+
+function pressAt(el: Element, clientX: number, clientY: number) {
+  act(() => {
+    el.dispatchEvent(
+      new MouseEvent('mousedown', { bubbles: true, clientX, clientY }),
+    )
+  })
+}
+
+test('clicking the minimap bar centers the view there', () => {
+  const bar = thumbs()[0]!.previousElementSibling!
+  const { msaCanvasWidth, totalWidth } = model
+  pressAt(bar, 500, 5)
+  expect(model.scrollX).toBe(
+    Math.max(
+      model.maxScrollX,
+      -(500 * totalWidth) / msaCanvasWidth + msaCanvasWidth / 2,
+    ),
+  )
+  expect(model.scrollX).toBeLessThan(0)
+})
+
+test('clicking the scrollbar track centers the view there', () => {
+  const track = thumbs()[1]!.parentElement!
+  const { msaAreaHeight, totalHeight } = model
+  pressAt(track, 5, 100)
+  expect(model.scrollY).toBe(
+    Math.max(
+      model.maxScrollY,
+      -(100 * totalHeight) / msaAreaHeight + msaAreaHeight / 2,
+    ),
+  )
+  expect(model.scrollY).toBeLessThan(0)
+})
+
 test("dragging a data track's divider resizes that track alone", async () => {
   act(() => {
     model.setColumnTracks([

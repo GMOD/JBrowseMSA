@@ -70,6 +70,12 @@ const Minimap = observer(function ({ model }: { model: MsaViewModel }) {
         ref={ref}
         width={barWidth}
         height={barHeight}
+        onMouseDown={event => {
+          if (event.button === 0 && unit > 0) {
+            const x = event.clientX - event.currentTarget.getBoundingClientRect().left
+            model.setScrollX(-x / unit + msaCanvasWidth / 2)
+          }
+        }}
         style={{
           display: 'block',
           width: msaCanvasWidth,
