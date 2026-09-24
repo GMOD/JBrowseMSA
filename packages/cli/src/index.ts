@@ -189,7 +189,7 @@ OPTIONS (export-svg):
   --msa <file>                  MSA file (FASTA, Stockholm, Clustal, A3M, EMF) [required]
   --format <name>               Force the MSA format instead of sniffing it
   --tree <file>                 Newick tree file (optional)
-  --gff <file>                  InterProScan domain GFF file (optional)
+  --gff <file>                  Domain or exon GFF, or InterProScan JSON (optional)
   -o, --output <file>           Output SVG file (default: alignment.svg)
   --color-scheme <name>         Color scheme (default: maeditor)
   --width <px>                  Canvas width in pixels (default: 1200)

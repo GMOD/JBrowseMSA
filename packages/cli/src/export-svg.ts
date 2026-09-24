@@ -3,6 +3,7 @@ import * as fs from 'node:fs'
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { JSDOM } from 'jsdom'
 import { enableStaticRendering } from 'mobx-react'
+import { annotationTextToGFF } from 'msa-parsers'
 
 import type { MSAFormat } from 'msa-parsers'
 
@@ -72,7 +73,9 @@ export async function exportSvg({
   const theme = createJBrowseTheme()
   const msa = fs.readFileSync(msaFile, 'utf8')
   const tree = treeFile ? fs.readFileSync(treeFile, 'utf8') : ''
-  const gff = gffFile ? fs.readFileSync(gffFile, 'utf8') : undefined
+  const gff = gffFile
+    ? annotationTextToGFF(fs.readFileSync(gffFile, 'utf8'))
+    : undefined
 
   const model = MSAModelF().create({
     // a fixed id keeps clipPath ids, and so the output bytes, stable across runs

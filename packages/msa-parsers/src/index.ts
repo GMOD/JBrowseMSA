@@ -34,3 +34,4 @@ export {
   interProToGFF,
   parseGFF,
 } from './gff/index.ts'
+export { annotationTextToGFF } from './gff/annotationTextToGFF.ts'

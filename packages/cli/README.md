@@ -75,7 +75,7 @@ react-msaview-cli export-svg --msa <file> [options]
 | ------------------------ | ---------------------------------------------- | --------------- |
 | `--msa <file>`           | MSA file (FASTA, Stockholm, Clustal, A3M, EMF) | _required_      |
 | `--tree <file>`          | Newick tree file                               |                 |
-| `--gff <file>`           | Domain or exon GFF (from the commands below)   |                 |
+| `--gff <file>`           | Domain or exon GFF, or InterProScan JSON       |                 |
 | `-o, --output <file>`    | Output SVG file path                           | `alignment.svg` |
 | `--color-scheme <name>`  | Color scheme                                   | `maeditor`      |
 | `--col-width <px>`       | Width of one alignment column                  | `12`            |
