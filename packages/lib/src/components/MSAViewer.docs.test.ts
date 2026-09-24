@@ -34,7 +34,9 @@ test('USAGE.md lists exactly the <jbrowse-msa> attributes and properties', () =>
     'utf8',
   )
   const names = (text: string | undefined, pattern: RegExp) =>
-    [...(text ?? '').matchAll(pattern)].map(m => m[1]).toSorted()
+    [...(text ?? '').matchAll(pattern)]
+      .map(m => m[1]!)
+      .toSorted((a, b) => a.localeCompare(b))
 
   const attributes = /const ownAttributes = \[([\s\S]*?)\]/.exec(source)?.[1]
   const properties = /type ElementData = Pick<\s*MSAViewerProps,([^>]*)>/.exec(
