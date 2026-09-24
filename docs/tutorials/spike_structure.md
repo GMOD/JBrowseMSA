@@ -483,6 +483,7 @@ bash build_spike_structure.sh my-rows.tsv out/
 ## See also
 
 - [Data layers](https://gmod.org/JBrowseMSA/layers)
+- [An alignment linked to its structure](https://gmod.org/JBrowseMSA/tutorials/structure_link)
 - [A protein family from a list of accessions](https://gmod.org/JBrowseMSA/tutorials/protein_family)
 - [CLI](https://gmod.org/JBrowseMSA/cli)
 - [User guide](https://gmod.org/JBrowseMSA/guide)

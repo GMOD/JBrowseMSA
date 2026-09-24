@@ -361,6 +361,7 @@ bash build_protein_complex.sh my-rows.tsv out/
 
 - [Data layers](https://gmod.org/JBrowseMSA/layers)
 - [The SARS-CoV-2 furin insert and PDB 6VXX](https://gmod.org/JBrowseMSA/tutorials/spike_structure)
+- [An alignment linked to its structure](https://gmod.org/JBrowseMSA/tutorials/structure_link)
 - [A protein family from a list of accessions](https://gmod.org/JBrowseMSA/tutorials/protein_family)
 - [User guide](https://gmod.org/JBrowseMSA/guide)
 

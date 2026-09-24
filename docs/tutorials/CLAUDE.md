@@ -94,3 +94,15 @@ from its source instead of rehosted.
 
 Registering a page is a file here plus an entry in
 `website/src/lib/tutorials.ts`.
+
+## Live pages
+
+A page that mounts the viewer beside another live view is a hand-written
+`website/src/pages/tutorials/<slug>.astro` with its React island in
+`website/src/components/`, under a slug no markdown file here uses.
+`structure_link.astro` is the model: its island loads the hosted files from
+`gmod.org/JBrowseMSA/demo/data/`, so it shows what the deployed app serves, and
+it imports Mol\* with a dynamic `import()`, so no other page downloads it. Its
+card figure comes from `scripts/screenshots/structure-link-figure.mjs`, run
+against a dev server or `astro preview`. The script also prints every status
+line its pointer sweep produced, which is the check that both bridges work.
