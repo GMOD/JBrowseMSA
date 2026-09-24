@@ -5,7 +5,7 @@ import { MSAViewer } from 'react-msaview'
 // on the wire, 20 MB of Stockholm) and the browser decompresses it. The URL is
 // the one on the entry page.
 //
-// The first column paints about three seconds after the page opens. After that,
+// The first column paints about four seconds after the page opens. After that,
 // scrolling and zooming stay interactive because the canvas draws only the
 // tiles on screen.
 //

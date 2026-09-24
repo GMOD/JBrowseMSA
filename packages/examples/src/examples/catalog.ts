@@ -157,8 +157,8 @@ export const catalog: CatalogEntry[] = [
       'colors go. On color it colors the letter, and each domain gives up its ' +
       'fill for a bar along the bottom of its row. p53 puts four InterPro ' +
       'domains on 16 orthologs, two of them in the first 60 residues. The ' +
-      'standalone app has the same switch under Settings → Color letters ' +
-      'instead of background of tiles.',
+      'standalone app has the same switch in the MSA settings menu, as ' +
+      '“Color letters, not cells”.',
   },
   {
     id: 'Nlrp1',
@@ -169,8 +169,7 @@ export const catalog: CatalogEntry[] = [
       'N terminus: the PYD is present in primates, dog and hedgehog and absent ' +
       'in rodents, artiodactyls, horse and fish. The core domains sit up to 391 ' +
       'residues apart between rows yet land within 2 alignment columns, ' +
-      'because the overlay places domains by alignment column instead of by ' +
-      'each protein’s own residue numbers.',
+      'because the overlay places each domain by alignment column.',
   },
   {
     id: 'Hox',

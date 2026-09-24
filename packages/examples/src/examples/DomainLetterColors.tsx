@@ -13,8 +13,8 @@ import type { ResidueEncoding } from 'react-msaview'
 // box draws, so the overlay wins the row and the residue colors go. On `color`
 // it colors the letter, and each domain gives up its fill for a bar along the
 // bottom of its row. The prop applies to the mounted model, so a click keeps
-// the scroll position. The standalone app has the same switch under
-// Settings -> Color letters instead of background of tiles.
+// the scroll position. The standalone app has the same switch in the MSA
+// settings menu, as "Color letters, not cells".
 export default function DomainLetterColors() {
   const [encoding, setEncoding] = useState<ResidueEncoding>('color')
   return (
