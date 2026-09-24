@@ -38,6 +38,24 @@ test('the last column agrees with the column statistics', () => {
   expect(model.visibleColToRowLetter('b', 9)).toBe('C')
 })
 
+test('a gap cell reports its gap character and no residue', () => {
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: '>a\nA-.C' },
+  })
+  model.setWidth(800)
+  expect(model.visibleColToRowLetter('a', 1)).toBe('-')
+  expect(model.visibleColToRowLetter('a', 2)).toBe('.')
+  expect(model.cellAt(1, 0)).toEqual({ column: 2, row: 'a', letter: '-' })
+  expect(model.cellAt(3, 0)).toEqual({
+    column: 4,
+    row: 'a',
+    residue: 2,
+    letter: 'C',
+  })
+})
+
 // enough rows to force the vertical scrollbar, which eats into the width the
 // alignment canvas actually gets
 function makeTallModel() {

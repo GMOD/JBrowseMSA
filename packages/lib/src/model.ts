@@ -2495,11 +2495,13 @@ function stateModelFactory() {
 
       /**
        * #method
-       * Return a row-specific letter at a visible column, or undefined if gap.
+       * Return the character a row holds at a visible column: a residue, or
+       * the gap character (`-` or `.`) on a gap. Undefined for a row name the
+       * alignment does not have or a column past the row's end.
        *
        * @param rowName - The name of the row
        * @param visibleCol - The visible column index (what the user sees on screen)
-       * @returns The letter at that position, or undefined if it's a gap
+       * @returns The character at that position
        */
       visibleColToRowLetter(rowName: string, visibleCol: number) {
         return self.rowMap.get(rowName)?.[
@@ -3324,7 +3326,8 @@ function stateModelFactory() {
       /**
        * #method
        * the cell at a visible column and row index, in the coordinates a host
-       * writes highlights in
+       * writes highlights in. On a gap `residue` is undefined and `letter` is
+       * the gap character
        */
       cellAt(visibleCol: number, rowIndex?: number): Cell {
         const column = self.visibleColToGlobalCol(visibleCol)

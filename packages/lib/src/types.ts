@@ -378,8 +378,9 @@ export interface Region {
 /**
  * A cell of the alignment in the host's coordinates, 1-based like Highlight:
  * `column` counts every column of the file, hidden gappy ones included, and
- * `residue` counts the row's own letters, absent on a gap. A pointer over a
- * track has a column and no row.
+ * `residue` counts the row's own letters, absent on a gap. `letter` is the
+ * character in the cell, the gap character (`-` or `.`) on a gap. A pointer
+ * over a track has a column and no row.
  */
 export interface Cell {
   column: number
