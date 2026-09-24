@@ -334,6 +334,31 @@ const TEXT_JITTER = 0.02
 
 export const specs = [
   {
+    name: 'layers-shorthand',
+    // the Shorthand section's example as written, with the p53 files the app
+    // serves in place of their gmod.org URLs
+    viewportWidth: 1400,
+    viewportHeight: 450,
+    url: fileSnap({
+      msa: 'data/p53/p53-vertebrates.afa',
+      tree: 'data/p53/p53-vertebrates.nh',
+      query: 'Human',
+      highlights: ['102-292 DNA-binding', 175, 248, 273],
+      region: '170-290',
+      columnTracks: [
+        {
+          name: 'ClinVar',
+          color: '#c0392b',
+          max: 8,
+          start: 104,
+          values: [2, 1, 0, 0, 2, 4],
+        },
+      ],
+    }),
+    settle: 6000,
+    clip: 'viewer',
+  },
+  {
     name: 'layers-columntracks',
     // the three track kinds over one small alignment: a bar per residue, a
     // character per residue, and three pairs of residues
@@ -425,6 +450,24 @@ export const specs = [
       ],
     }),
     settle: 3000,
+    clip: 'viewer',
+  },
+  {
+    name: 'layers-rowdata',
+    // the rowData section's inline snapshot: two rows and the JSON string
+    // data.treeMetadata holds
+    viewportWidth: 800,
+    viewportHeight: 260,
+    url: fileSnap({
+      data: {
+        msa: '>duck\nMKAANSE\n>chicken\nMKA-NSE',
+        treeMetadata: JSON.stringify({
+          duck: { clade: '2.3.4.4b' },
+          chicken: { clade: '2.3.2.1c' },
+        }),
+      },
+    }),
+    settle: 2500,
     clip: 'viewer',
   },
   {
