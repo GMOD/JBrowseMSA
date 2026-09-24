@@ -119,7 +119,13 @@ try {
   await delay(3000)
   await page.mouse.move(x, y + 1)
   await delay(500)
-  console.log(`captured with: ${await status(page)}`)
+  // a cold dev server reloads the page once it has optimized its deps, and a
+  // capture after that reload shows the alignment still downloading
+  const captured = await status(page)
+  if (!mappedHover.test(captured)) {
+    throw new Error(`the page lost its hover before the capture: ${captured}`)
+  }
+  console.log(`captured with: ${captured}`)
 
   const tmp = tmpShot(name)
   await island.screenshot({ path: tmp })
