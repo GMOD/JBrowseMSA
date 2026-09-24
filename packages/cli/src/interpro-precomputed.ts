@@ -313,7 +313,11 @@ function checkLengths(
     const expected = range ? range.end - range.start + 1 : proteinLength
     if (!names.has(label)) {
       console.warn(`  ${label}: no such row in ${msaFile}`)
-    } else if (range && proteinLength !== undefined && range.end > proteinLength) {
+    } else if (
+      range &&
+      proteinLength !== undefined &&
+      range.end > proteinLength
+    ) {
       console.warn(
         `  ${label}: the range ends past ${accession}, which is ${proteinLength} residues`,
       )

@@ -18,7 +18,11 @@ function retryAfterMs(response: Response) {
  */
 export async function fetchWithRetry(
   url: string,
-  { attempts = 4, baseDelayMs = 1000, headers }: {
+  {
+    attempts = 4,
+    baseDelayMs = 1000,
+    headers,
+  }: {
     attempts?: number
     baseDelayMs?: number
     headers?: Record<string, string>

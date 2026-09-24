@@ -83,7 +83,9 @@ test('a full-length row maps through SIFTS, offset by the construct', async () =
       asymId: 'A',
       url: 'https://files.rcsb.org/download/6VXX.cif',
     },
-    segments: [{ rowStart: 14, rowEnd: 1211, structStart: 33, structEnd: 1230 }],
+    segments: [
+      { rowStart: 14, rowEnd: 1211, structStart: 33, structEnd: 1230 },
+    ],
     unobserved: [
       [1, 45],
       [89, 98],
@@ -137,7 +139,9 @@ test('the viewer accepts the mapping and looks residues up through it', async ()
 test('the furin loop, row 681-684, is mapped and unobserved', async () => {
   const [mapping] = await buildResidueMappings({
     msaText: msa({ 'SARS-CoV-2': SPIKE }),
-    rows: parseRowsTsv('row\taccession\tstructure\nSARS-CoV-2\tP0DTC2\t6vxx:A\n'),
+    rows: parseRowsTsv(
+      'row\taccession\tstructure\nSARS-CoV-2\tP0DTC2\t6vxx:A\n',
+    ),
     date: DATE,
   })
   const [segment] = mapping!.segments
@@ -181,9 +185,7 @@ test('a fragment that SIFTS covers only in part is clipped to the mapped run', a
 test('the AlphaFold model maps by identity, with no unobserved', async () => {
   const [mapping] = await buildResidueMappings({
     msaText: msa({ 'SARS-CoV-2': gapped(SPIKE) }),
-    rows: [
-      { row: 'SARS-CoV-2', accession: 'P0DTC2', structure: 'alphafold' },
-    ],
+    rows: [{ row: 'SARS-CoV-2', accession: 'P0DTC2', structure: 'alphafold' }],
     date: DATE,
   })
   expect(mapping).toEqual({
@@ -245,7 +247,9 @@ test('a fragment range that disagrees with its residues fails at the first one',
       msaText: msa({ [row]: SPIKE.slice(318, 541) }),
       rows: [{ row, accession: 'P0DTC2', structure: 'alphafold' }],
     }),
-  ).rejects.toThrow(/is not P0DTC2 320-542: they first differ at row residue 1,/)
+  ).rejects.toThrow(
+    /is not P0DTC2 320-542: they first differ at row residue 1,/,
+  )
 })
 
 test('a chain SIFTS does not map is reported with the chains it does', async () => {
@@ -260,7 +264,9 @@ test('a chain SIFTS does not map is reported with the chains it does', async () 
         },
       ],
     }),
-  ).rejects.toThrow('6VXX chain Z has no SIFTS mapping to P0DTC2; chains A, B, C do')
+  ).rejects.toThrow(
+    '6VXX chain Z has no SIFTS mapping to P0DTC2; chains A, B, C do',
+  )
 })
 
 test('structure column forms', () => {

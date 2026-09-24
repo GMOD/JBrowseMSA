@@ -1,1 +1,185 @@
-{"6vxx":{"molecules":[{"entity_id":1,"chains":[{"struct_asym_id":"A","chain_id":"A","observed":[{"start":{"residue_number":46,"author_residue_number":27,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":88,"author_residue_number":69,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":99,"author_residue_number":80,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":162,"author_residue_number":143,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":184,"author_residue_number":165,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":191,"author_residue_number":172,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":205,"author_residue_number":186,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":264,"author_residue_number":245,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":282,"author_residue_number":263,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":463,"author_residue_number":444,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":466,"author_residue_number":447,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":473,"author_residue_number":454,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":481,"author_residue_number":462,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":487,"author_residue_number":468,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":508,"author_residue_number":489,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":520,"author_residue_number":501,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":522,"author_residue_number":503,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":639,"author_residue_number":620,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":660,"author_residue_number":641,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":695,"author_residue_number":676,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":708,"author_residue_number":689,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":846,"author_residue_number":827,"author_insertion_code":null,"struct_asym_id":"A"}},{"start":{"residue_number":873,"author_residue_number":854,"author_insertion_code":null,"struct_asym_id":"A"},"end":{"residue_number":1166,"author_residue_number":1147,"author_insertion_code":null,"struct_asym_id":"A"}}]}]}]}}
+{
+  "6vxx": {
+    "molecules": [
+      {
+        "entity_id": 1,
+        "chains": [
+          {
+            "struct_asym_id": "A",
+            "chain_id": "A",
+            "observed": [
+              {
+                "start": {
+                  "residue_number": 46,
+                  "author_residue_number": 27,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 88,
+                  "author_residue_number": 69,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 99,
+                  "author_residue_number": 80,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 162,
+                  "author_residue_number": 143,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 184,
+                  "author_residue_number": 165,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 191,
+                  "author_residue_number": 172,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 205,
+                  "author_residue_number": 186,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 264,
+                  "author_residue_number": 245,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 282,
+                  "author_residue_number": 263,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 463,
+                  "author_residue_number": 444,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 466,
+                  "author_residue_number": 447,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 473,
+                  "author_residue_number": 454,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 481,
+                  "author_residue_number": 462,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 487,
+                  "author_residue_number": 468,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 508,
+                  "author_residue_number": 489,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 520,
+                  "author_residue_number": 501,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 522,
+                  "author_residue_number": 503,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 639,
+                  "author_residue_number": 620,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 660,
+                  "author_residue_number": 641,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 695,
+                  "author_residue_number": 676,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 708,
+                  "author_residue_number": 689,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 846,
+                  "author_residue_number": 827,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              },
+              {
+                "start": {
+                  "residue_number": 873,
+                  "author_residue_number": 854,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                },
+                "end": {
+                  "residue_number": 1166,
+                  "author_residue_number": 1147,
+                  "author_insertion_code": null,
+                  "struct_asym_id": "A"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

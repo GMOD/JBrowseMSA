@@ -17,9 +17,10 @@ The CLI has two groups of commands, and the second draws what the first writes:
 
 - NodeJS v22+
 
-`export-svg`, `interpro` and `residue-mappings` need nothing else. `interproscan` needs a backend to
-scan with: the EBI web API (the default, no install), Docker, Singularity, or a
-local InterProScan (see [interproscan](#interproscan)).
+`export-svg`, `interpro` and `residue-mappings` need nothing else.
+`interproscan` needs a backend to scan with: the EBI web API (the default, no
+install), Docker, Singularity, or a local InterProScan (see
+[interproscan](#interproscan)).
 
 `export-svg` draws the alignment background as one embedded image when
 [@napi-rs/canvas](https://www.npmjs.com/package/@napi-rs/canvas) is present. The
@@ -107,11 +108,11 @@ react-msaview-cli export-svg --msa kinases.aln --tracks conservation,position-ru
 
 `--spec` takes an `MsaView` snapshot or its shorthand as a JSON file, so any
 layer in [docs/layers.md](../../docs/layers.md) draws in the figure: column
-tracks, highlights, clades, row panels, encodings. A spec that sets
-`msa`, `tree`, or a filehandle's `uri` to a relative path reads it beside the
-spec file, and an `http(s)` one fetches it. `--msa` is then optional, and every
-flag given on the command line overrides the spec. The figure draws the tracks
-the app would show for the spec, unless `--tracks` names them.
+tracks, highlights, clades, row panels, encodings. A spec that sets `msa`,
+`tree`, or a filehandle's `uri` to a relative path reads it beside the spec
+file, and an `http(s)` one fetches it. `--msa` is then optional, and every flag
+given on the command line overrides the spec. The figure draws the tracks the
+app would show for the spec, unless `--tracks` names them.
 
 ```bash
 react-msaview-cli export-svg --spec p53-view.json -o p53.svg
@@ -195,9 +196,9 @@ The input is one accession per line, optionally followed by a tab- or
 space-separated row label. The command skips lines starting with `#`. It reads
 an isoform (`P04637-2`) or versioned (`P04637.4`) accession as the canonical one
 and warns, and stops before any request on an entry name (`P53_HUMAN`), a RefSeq
-id or anything else InterPro does not key by; run `interproscan` on those. It writes
-through the same GFF writer as `interproscan`, and adds a `#` header line naming
-the InterPro release the coordinates came from.
+id or anything else InterPro does not key by; run `interproscan` on those. It
+writes through the same GFF writer as `interproscan`, and adds a `#` header line
+naming the InterPro release the coordinates came from.
 
 | Option                | Description                                     | Default       |
 | --------------------- | ----------------------------------------------- | ------------- |
@@ -230,10 +231,12 @@ fresh coordinates. The cache also records proteins with no matches, so a re-run
 does not fetch them again.
 
 A re-run of the same dataset makes one request, the release lookup, and reads
-the rest from disk. When that lookup fails, the CLI warns and reads the newest
-release in the cache, so a fully cached run needs no network. A failed run can therefore resume. The CLI retries with
+the rest from disk. A failed run can therefore resume. The CLI retries with
 backoff, and if the API stays unreachable, the accessions it already fetched
 stay cached, so the next run fetches only the rest.
+
+When the release lookup fails, the CLI warns and reads the newest release in the
+cache, so a fully cached run needs no network.
 
 ### interproscan
 
@@ -359,16 +362,16 @@ react-msaview-cli residue-mappings --msa <file> --row <name> --accession <acc> \
 react-msaview-cli residue-mappings --msa <file> --rows <tsv> [-o mappings.json]
 ```
 
-| Option                    | Description                                          | Default |
-| ------------------------- | ---------------------------------------------------- | ------- |
-| `--msa <file>`            | Alignment holding the rows                           |         |
-| `--format <name>`         | Force the MSA format instead of sniffing it          |         |
-| `--rows <tsv>`            | `row`, `accession`, `structure` per line, tab-separated |      |
-| `--row <name>`            | One row, instead of `--rows`                         |         |
-| `--accession <acc>`       | The row's UniProtKB accession                        |         |
-| `--pdb <id> --chain <id>` | The PDB entry and its author chain                   |         |
-| `--alphafold`             | The AlphaFold DB model of the accession instead      |         |
-| `-o, --output <file>`     | Output JSON file                                     | stdout  |
+| Option                    | Description                                             | Default |
+| ------------------------- | ------------------------------------------------------- | ------- |
+| `--msa <file>`            | Alignment holding the rows                              |         |
+| `--format <name>`         | Force the MSA format instead of sniffing it             |         |
+| `--rows <tsv>`            | `row`, `accession`, `structure` per line, tab-separated |         |
+| `--row <name>`            | One row, instead of `--rows`                            |         |
+| `--accession <acc>`       | The row's UniProtKB accession                           |         |
+| `--pdb <id> --chain <id>` | The PDB entry and its author chain                      |         |
+| `--alphafold`             | The AlphaFold DB model of the accession instead         |         |
+| `-o, --output <file>`     | Output JSON file                                        | stdout  |
 
 In `--rows`, the structure column is `6VXX:A` or `alphafold`, and a
 `row accession structure` header line is optional. A row may appear on several
@@ -380,11 +383,11 @@ match that slice of the protein, and every position in its mapping is a residue
 of the row. A mismatch stops the run with the row, the accession and the first
 residue where they differ.
 
-For a PDB chain, the segments come from the PDBe SIFTS mapping of the entry,
-and `unobserved` lists every position of the chain's entity outside PDBe's
-observed ranges. `asymId` is the `struct_asym_id` SIFTS gives for the author
-chain. For an AlphaFold model, the model numbers the protein from 1, so the
-mapping is one segment and has no `unobserved`.
+For a PDB chain, the segments come from the PDBe SIFTS mapping of the entry, and
+`unobserved` lists every position of the chain's entity outside PDBe's observed
+ranges. `asymId` is the `struct_asym_id` SIFTS gives for the author chain. For
+an AlphaFold model, the model numbers the protein from 1, so the mapping is one
+segment and has no `unobserved`.
 
 ```console
 $ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \

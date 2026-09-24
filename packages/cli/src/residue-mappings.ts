@@ -220,9 +220,7 @@ export function checkRowSequence({
   }
   const offset = range ? range.start - 1 : 0
   const what = range ? `${accession} ${range.start}-${range.end}` : accession
-  const hint = range
-    ? ''
-    : fragmentHint(row, accession, rowSeq, protein)
+  const hint = range ? '' : fragmentHint(row, accession, rowSeq, protein)
   throw new Error(
     `row ${row} is not ${what}: they first differ at row residue ${at + 1}, ` +
       `where the row has ${rowSeq[at] ?? '(its end)'} and ${accession} ` +
@@ -247,7 +245,8 @@ function fragmentHint(
 function complement(observed: RowRange[], length: number) {
   const out: [number, number][] = []
   let next = 1
-  for (const { start, end } of [...observed].sort((a, b) => a.start - b.start)) {
+  const sorted = [...observed].sort((a, b) => a.start - b.start)
+  for (const { start, end } of sorted) {
     if (start > next) {
       out.push([next, Math.min(start - 1, length)])
     }
@@ -288,7 +287,8 @@ async function siftsMapping(
   range: RowRange,
   sources: Sources,
 ) {
-  const byAccession = (await sources.sifts(pdb))[pdb.toLowerCase()]?.UniProt ?? {}
+  const byAccession =
+    (await sources.sifts(pdb))[pdb.toLowerCase()]?.UniProt ?? {}
   const all = byAccession[accession]?.mappings
   if (!all) {
     const found = Object.keys(byAccession)
@@ -332,7 +332,8 @@ async function siftsMapping(
     throw new Error(`PDBe gives no length for entity ${entityId} of ${pdb}`)
   }
   const observed = (
-    (await sources.coverage(`${pdb}:${chain}`))[pdb.toLowerCase()]?.molecules ?? []
+    (await sources.coverage(`${pdb}:${chain}`))[pdb.toLowerCase()]?.molecules ??
+    []
   )
     .flatMap(mol => mol.chains)
     .filter(c => c.chain_id === chain)

@@ -142,7 +142,9 @@ export async function exportSvg({
     data.gff = annotationTextToGFF(data.gff)
   }
   if (!data.msa && !data.tree) {
-    throw new Error('nothing to draw: give --msa, or a --spec with an msa or a tree')
+    throw new Error(
+      'nothing to draw: give --msa, or a --spec with an msa or a tree',
+    )
   }
 
   const model = MSAModelF().create({
@@ -189,8 +191,7 @@ export async function exportSvg({
     theme,
     exportType: viewport ? 'viewport' : 'entire',
     includeMinimap: minimap,
-    includeTracks:
-      (!!tracks || !!specFile) && model.turnedOnTracks.length > 0,
+    includeTracks: (!!tracks || !!specFile) && model.turnedOnTracks.length > 0,
   })
   fs.writeFileSync(outputFile, svg)
 }
