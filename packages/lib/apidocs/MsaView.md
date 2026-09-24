@@ -498,6 +498,18 @@ number
 blockSize: 500
 ```
 
+#### volatile: dismissedWarnings
+
+derived warnings the user dismissed, which stay hidden while the data behind
+them holds
+
+```js
+// type signature
+string[]
+// code
+dismissedWarnings: [] as string[]
+```
+
 #### volatile: error
 
 ```js
@@ -591,6 +603,19 @@ loadingMSA: false
 false
 // code
 loadingTree: false
+```
+
+#### volatile: loadWarnings
+
+non-fatal load problems: an optional layer that failed to load, an overlay that
+failed to parse. `error` replaces the view and is for the alignment itself.
+`warnings` adds the ones derived from the data
+
+```js
+// type signature
+string[]
+// code
+loadWarnings: [] as string[]
 ```
 
 #### volatile: marginLeft
@@ -706,18 +731,6 @@ transientHighlights: {} as Record<string, Highlight[]>
 number | undefined
 // code
 volatileWidth: undefined as number | undefined
-```
-
-#### volatile: warnings
-
-non-fatal load problems: an optional layer that failed to load, an overlay that
-failed to parse. `error` replaces the view and is for the alignment itself
-
-```js
-// type signature
-string[]
-// code
-warnings: [] as string[]
 ```
 
 ### MsaView - Getters
@@ -940,6 +953,17 @@ number[]
 ```js
 // type
 boolean
+```
+
+#### getter: dataWarnings
+
+warnings that follow from the loaded data and clear when it changes. A GFF whose
+first column names rows of some other alignment parses without error and draws
+nothing
+
+```js
+// type
+string[]
 ```
 
 #### getter: domainBands
@@ -1204,6 +1228,8 @@ number
 
 #### getter: maxScrollX
 
+most-negative allowed scrollX, which keeps the last column in view
+
 ```js
 // type
 number
@@ -1382,10 +1408,9 @@ ResolvedHighlight[]
 
 #### getter: resolvedRowPanels
 
-each row panel with its scale resolved against the values its field takes across
-the row table, giving the color per row name, the pixel column it draws in, and
-the entries its legend lists. Resolved once per change of that table or the
-panels, never per block per frame.
+each row panel with its scale from `rowPanelScales` and its geometry: the pixel
+column it draws in and, for a features panel, the spans per row. Resolved once
+per change of those inputs, never per block per frame.
 
 ```js
 // type
@@ -1457,6 +1482,17 @@ string[]
 ```js
 // type
 Map<string, number>
+```
+
+#### getter: rowPanelScales
+
+each row panel's scale resolved against the values its field takes, giving the
+colors, labels and legend entries. Reads no cell size, so a zoom reuses it and
+the legends built from it.
+
+```js
+// type
+(StripPanelScale | FeaturePanelScale)[]
 ```
 
 #### getter: rowPanelsHeaderHeight
@@ -1533,13 +1569,6 @@ feature name ("exon-3" -> "3"), else its 1-based position
 ```js
 // type
 Map<string, string>
-```
-
-#### getter: seqConsensus
-
-```js
-// type
-string | undefined
 ```
 
 #### getter: sequenceType
@@ -1764,6 +1793,15 @@ sequence position. Ordinal segments (exons) are numbered on the band instead
 Annotation[]
 ```
 
+#### getter: warnings
+
+the load warnings and the undismissed data warnings, for the header
+
+```js
+// type
+string[]
+```
+
 #### getter: wheelZoomAxis
 
 axis a wheel zoom scales, for ctrl+wheel as much as for scroll-zoom. With
@@ -1786,7 +1824,7 @@ number
 #### method: cellAt
 
 the cell at a visible column and row index, in the coordinates a host writes
-highlights in
+highlights in. On a gap `residue` is undefined and `letter` is the gap character
 
 ```js
 // type signature
@@ -1860,6 +1898,17 @@ mappings share an entry id, as in a homodimer.
 ```js
 // type signature
 rowResidue: (structureId: string, position: number, asymId?: string | undefined) => RowResidue | undefined
+```
+
+#### method: seqEndToGlobalCol
+
+the global column of a span's last residue, clamping a position past the end of
+the row to its last residue. Undefined for a row name the alignment does not
+have, or a row with no residues.
+
+```js
+// type signature
+seqEndToGlobalCol: (rowName: string, seqPos: number) => number | undefined
 ```
 
 #### method: seqPosIndex
@@ -1944,7 +1993,9 @@ visibleColToGlobalCol: (visibleCol: number) => number
 
 #### method: visibleColToRowLetter
 
-Return a row-specific letter at a visible column, or undefined if gap.
+Return the character a row holds at a visible column: a residue, or the gap
+character (`-` or `.`) on a gap. Undefined for a row name the alignment does not
+have or a column past the row's end.
 
 ```js
 // type signature
@@ -2563,6 +2614,15 @@ focused branch again does.
 ```js
 // type signature
 treeOverviewClick: (y: number) => void
+```
+
+#### action: zoomAtCenter
+
+zoom by `scaleFactor` about the center of the alignment area
+
+```js
+// type signature
+zoomAtCenter: (scaleFactor: number, axis?: "both" | "horizontal" | "vertical") => void
 ```
 
 #### action: zoomIn
