@@ -6,6 +6,7 @@ import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import ListSubheader from '@mui/material/ListSubheader'
+import NativeSelect from '@mui/material/NativeSelect'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 
@@ -147,6 +148,8 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
+const narrow = '@media (max-width: 640px)'
+
 export default function ExampleBrowser({
   sidebarHeader,
   sidebarFooter,
@@ -160,7 +163,13 @@ export default function ExampleBrowser({
   const example = examples.find(e => slugOf(e.name) === slug) ?? examples[0]!
   const { Component } = example
   return (
-    <Box sx={{ display: 'flex', height }}>
+    <Box
+      sx={{
+        display: 'flex',
+        height,
+        [narrow]: { flexDirection: 'column' },
+      }}
+    >
       <Box
         component="nav"
         sx={{
@@ -169,6 +178,7 @@ export default function ExampleBrowser({
           borderRight: 1,
           borderColor: 'divider',
           overflowY: 'auto',
+          [narrow]: { display: 'none' },
         }}
       >
         {sidebarHeader}
@@ -196,7 +206,44 @@ export default function ExampleBrowser({
         {sidebarFooter}
       </Box>
 
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
+      <Box
+        component="nav"
+        sx={{
+          display: 'none',
+          p: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+          [narrow]: { display: 'block' },
+        }}
+      >
+        <NativeSelect
+          fullWidth
+          value={slug}
+          inputProps={{ 'aria-label': 'Example' }}
+          onChange={event => {
+            const next = examples.find(
+              e => slugOf(e.name) === event.target.value,
+            )
+            if (next) {
+              select(next.name)
+            }
+          }}
+        >
+          {categoryOrder.map(category => (
+            <optgroup key={category} label={category}>
+              {examples
+                .filter(e => e.category === category)
+                .map(e => (
+                  <option key={e.name} value={slugOf(e.name)}>
+                    {e.name}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
+        </NativeSelect>
+      </Box>
+
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 3, [narrow]: { p: 2 } }}>
         <Typography variant="h5" gutterBottom>
           {example.name}
         </Typography>
@@ -220,6 +267,9 @@ export default function ExampleBrowser({
           <CopyButton text={example.source} />
         </Box>
         <SourceView source={example.source} />
+        <Box sx={{ display: 'none', mt: 2, [narrow]: { display: 'block' } }}>
+          {sidebarFooter}
+        </Box>
       </Box>
     </Box>
   )
