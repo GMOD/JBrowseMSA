@@ -21,6 +21,7 @@
     "media:push": "node scripts/media-store/media.mjs push",
     "media:check": "node scripts/media-store/media.mjs check",
     "media:report": "node scripts/media-store/media.mjs report",
+    "media:stale": "node scripts/media-store/media.mjs stale",
     "smoke:npm": "node scripts/npm-smoke.mjs",
     "sync:r-bundle": "node scripts/sync-r-bundle.mjs",
     "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",

@@ -25,6 +25,14 @@ through `pnpm media:push`, which uploads the new bytes and rewrites
 `pnpm media:report --base main` renders the before and after. See
 `scripts/media-store/README.md`.
 
+No check compares a figure with the UI it shows, and every capture includes the
+viewer's header, so one header change stales every figure at once.
+`pnpm media:stale` lists the commits since the last regen that rewrote at least
+half the figures and that touch what a capture draws from: the lib, the parsers,
+svgcanvas, the demo app and its data, and these specs, tests excluded.
+`scripts/release.js` prints the list before it tags. A commit on the list may
+change no pixel, so read it before running `pnpm screenshots`.
+
 `docs/media` holds only what a rendered page shows, and `pnpm check:media` (CI
 runs it) fails on a file no page does. Dropping a figure from a page therefore
 means deleting the file and the spec that makes it, in the same commit; a spec

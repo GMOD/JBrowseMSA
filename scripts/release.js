@@ -58,6 +58,11 @@ try {
 // Packages to publish (in dependency order)
 const packages = ['svgcanvas', 'msa-parsers', 'lib', 'cli']
 
+// A release ships the docs too, and nothing else says the figures predate the
+// UI they show. It lists and does not block, since most lib commits change no
+// figure.
+run('node scripts/media-store/media.mjs stale')
+
 // Read current version from lib (the main package)
 const libPkgPath = path.join(rootDir, 'packages/lib/package.json')
 const libPkg = JSON.parse(fs.readFileSync(libPkgPath, 'utf8'))

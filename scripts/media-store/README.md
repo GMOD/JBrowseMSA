@@ -10,6 +10,7 @@ pnpm media:pull [--force]      install every figure the manifest names
 pnpm media:push [--dry-run]    upload new bytes, then rewrite media.lock
 pnpm media:check               CI gate: manifest and worktree agree
 pnpm media:report --base <ref> what moved since <ref>, with before/after images
+pnpm media:stale               renderer commits since the last full regen
 ```
 
 `pnpm check:media` is a different question, and both names are the natural one.

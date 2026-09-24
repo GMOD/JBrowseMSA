@@ -5,6 +5,7 @@ import {
   diffManifests,
   formatManifest,
   imageSize,
+  lastFullRegen,
   mergeManifest,
   parseManifest,
   storeKey,
@@ -185,5 +186,32 @@ describe('mergeManifest', () => {
     expect(merged.get('docs/media/stale.png')).toEqual(
       existing.get('docs/media/stale.png'),
     )
+  })
+})
+
+describe('lastFullRegen', () => {
+  const sha = c => c.repeat(40)
+  const log = [
+    `${sha('a')} 2026-09-24`,
+    '',
+    '1\t1\tmedia.lock',
+    `${sha('b')} 2026-09-20`,
+    '',
+    '139\t139\tmedia.lock',
+    `${sha('c')} 2026-09-16`,
+    '',
+    '154\t0\tmedia.lock',
+  ].join('\n')
+
+  test('skips a regen of a few figures for the last that rewrote half', () => {
+    expect(lastFullRegen(log, 151)).toEqual({
+      sha: sha('b'),
+      date: '2026-09-20',
+      rewrote: 139,
+    })
+  })
+
+  test('is undefined when no commit rewrote half the manifest', () => {
+    expect(lastFullRegen(log, 400)).toBeUndefined()
   })
 })

@@ -4,7 +4,7 @@
  * the manifest grammar and key scheme; this file does the I/O: read
  * docs/media and media.lock, talk to the bucket, print reports.
  *
- *   node scripts/media-store/media.mjs <status|pull|push|check|report>
+ *   node scripts/media-store/media.mjs <status|pull|push|check|report|stale>
  *
  * Backs the root package.json's `media:*` scripts. `pnpm figures` already
  * means the SVG figure vitest suite (`vitest.figures.config.ts`), and
@@ -29,6 +29,7 @@ import {
   formatManifest,
   hashBuffer,
   imageSize,
+  lastFullRegen,
   mergeManifest,
   name,
   parseManifest,
@@ -293,6 +294,55 @@ function cmdReport() {
   }
 }
 
+// What a capture draws from. Tests and the release's version bump change no
+// pixels.
+const RENDER_INPUTS = [
+  'packages/lib/src',
+  'packages/msa-parsers/src',
+  'packages/svgcanvas/src',
+  'packages/app/src',
+  'packages/app/public/data',
+  'packages/examples/data',
+  'scripts/screenshots',
+  ':(exclude,glob)**/*.test.*',
+  ':(exclude)packages/lib/src/version.ts',
+]
+
+const git = args =>
+  execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8' })
+
+// No check compares a figure with the UI it shows, and every capture includes
+// the header, so a week of UI work once left 138 figures stale unnoticed
+function cmdStale() {
+  const total = readLock().size
+  const regen = lastFullRegen(
+    git(['log', '--format=%H %cs', '--numstat', '--', 'media.lock']),
+    total,
+  )
+  if (!regen) {
+    console.log('no media.lock commit rewrote half the figures')
+    return
+  }
+  const commits = git([
+    'log',
+    '--format=  %h %s',
+    `${regen.sha}..HEAD`,
+    '--',
+    ...RENDER_INPUTS,
+  ]).trimEnd()
+  console.log(
+    `The figures were last regenerated as a whole at ${regen.sha.slice(0, 8)} (${regen.date}), which rewrote ${regen.rewrote} of ${total}.`,
+  )
+  if (!commits) {
+    console.log('No commit since then touches what a capture draws from.')
+    return
+  }
+  const count = commits.split('\n').length
+  console.log(
+    `${count} commit(s) since then touch what a capture draws from:\n\n${commits}\n\nIf one of them changes what a figure shows, run pnpm screenshots.`,
+  )
+}
+
 const USAGE = `Usage: node scripts/media-store/media.mjs <command>
 
   status                  diff docs/media against media.lock
@@ -305,6 +355,8 @@ const USAGE = `Usage: node scripts/media-store/media.mjs <command>
   check                    exit non-zero when docs/media and media.lock disagree
   report [--base <ref>]    markdown table of what the manifest changed since
                            <ref> (default HEAD), with links to both images
+  stale                    the commits since the last regen of the figures as
+                           a whole that touch what a capture draws from
 
 Only push needs AWS credentials; the bucket serves public reads, so pull works
 from a fork's CI and a cold clone with none.
@@ -331,6 +383,9 @@ async function main() {
       break
     case 'report':
       cmdReport()
+      break
+    case 'stale':
+      cmdStale()
       break
     default:
       console.error(`unknown command: ${command}\n`)

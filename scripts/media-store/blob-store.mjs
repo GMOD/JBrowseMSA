@@ -86,6 +86,28 @@ export function parseManifest(text, lockName) {
   return entries
 }
 
+/**
+ * The newest commit in `git log --format='%H %cs' --numstat -- media.lock`
+ * output that rewrote at least half of the manifest's `total` entries: the
+ * last regeneration of the figures as a whole. A regen of one tutorial's
+ * figures touches a few lines and does not count.
+ */
+export function lastFullRegen(numstatLog, total) {
+  let commit
+  for (const line of numstatLog.split('\n')) {
+    const header = /^([0-9a-f]{40}) (\S+)$/.exec(line)
+    if (header) {
+      commit = { sha: header[1], date: header[2] }
+      continue
+    }
+    const added = Number.parseInt(line, 10)
+    if (commit && added >= total / 2) {
+      return { ...commit, rewrote: added }
+    }
+  }
+  return undefined
+}
+
 // PNG only: an 8-byte signature then the IHDR chunk, width and height as its
 // first two big-endian uint32s. SVG, and anything else, has no fixed header to
 // read a size from, so it gets {}. Dimensions live in the manifest because a
