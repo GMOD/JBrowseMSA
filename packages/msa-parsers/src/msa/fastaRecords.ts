@@ -13,10 +13,11 @@ export function fastaSniff(text: string) {
  *
  * A record starts at a `>` that begins a line, so a `>` inside a defline
  * (`x->y`, HGVS `c.1799T>A`) stays part of it, and anything before the first
- * record (ColabFold's `#8\t1` header) is skipped. The id is the defline up to
- * the first whitespace, tab included. A repeated id keeps the first record: ids
- * index the row data, so emitting the id twice would render a phantom duplicate
- * row showing the last record's residues.
+ * record (ColabFold's `#8\t1` header) is skipped. The id is the first word of
+ * the defline, so `> name` reads as `name`, and a defline with no word names
+ * its record `unnamed_N` after its position in the file. A repeated id keeps
+ * the first record: ids index the row data, so emitting the id twice would
+ * render a phantom duplicate row showing the last record's residues.
  */
 export function splitFastaRecords(text: string): FastaRecord[] {
   const records: FastaRecord[] = []
@@ -33,11 +34,13 @@ export function splitFastaRecords(text: string): FastaRecord[] {
     }
   }
 
+  let count = 0
   for (const line of text.split('\n')) {
     if (line.startsWith('>')) {
       flush()
-      const id = /^>(\S*)/.exec(line)![1]!
-      current = id ? { id, lines: [] } : undefined
+      count++
+      const id = /^>\s*(\S*)/.exec(line)![1] || `unnamed_${count}`
+      current = { id, lines: [] }
     } else {
       current?.lines.push(line)
     }

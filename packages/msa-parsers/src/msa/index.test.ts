@@ -335,6 +335,18 @@ describe('FASTA deflines', () => {
     expect(msa.getRow('BRCA1')).toBe('ACGA')
   })
 
+  test('whitespace after the > precedes the id', () => {
+    const msa = new FastaMSA('> name1\nACDE\n>name2\nFGHI\n')
+    expect(msa.getNames()).toEqual(['name1', 'name2'])
+    expect(msa.getRow('name1')).toBe('ACDE')
+  })
+
+  test('an empty defline names its record by position', () => {
+    const msa = new FastaMSA('>\nACDE\n>x\nFGHI\n> \nKLMN\n')
+    expect(msa.getNames()).toEqual(['unnamed_1', 'x', 'unnamed_3'])
+    expect(msa.getRow('unnamed_3')).toBe('KLMN')
+  })
+
   test('a tab ends the id', () => {
     const msa = parseMSA('>a\tdesc\nACGT\n>b\tdesc\nACGT\n')
     expect(msa.getNames()).toEqual(['a', 'b'])
