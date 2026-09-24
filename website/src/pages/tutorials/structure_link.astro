@@ -39,6 +39,7 @@ const datasets: Dataset[] = [
     structureUrl: 'https://files.rcsb.org/download/2HHB.cif',
     structureId: '2HHB',
     focus: { start: 1, end: 290 },
+    height: 470,
     stops: [
       { label: 'Alpha', region: { row: 'Human', start: 1, end: 142 } },
       { label: 'Beta', region: { row: 'Human', start: 143, end: 289 } },
@@ -159,20 +160,23 @@ plugin.behaviors.interaction.hover.subscribe(({ current }) => {
       On the Human row, alpha columns reach chain A of 2HHB and beta columns
       reach chain B. Residues 1 and 143 are the initiator methionines, which the
       mature chains lack, and report
-      <em>outside the mapped region</em>. The arcs under the alignment join the
-      residue pairs in contact between the chains.
+      <em>outside the mapped region</em>. The arc track above the alignment
+      joins the residue pairs in contact between the chains.
     </p>
 
     <h2>The built-in control</h2>
     <p>
-      Each mapping names one row and one chain. Chains B and C of 6VXX carry the
-      same sequence as chain A, and chains C and D of 2HHB repeat A and B, so a
-      hover on any of them reports <em>no row maps here</em> and lights nothing
-      in the alignment. The other rows of each alignment report
-      <em>no mapping onto 6VXX</em> or <em>onto 2HHB</em>. The viewer also
-      checks each mapping against the loaded row, and prints any mapping it
-      ignores under the status line, so a mapping made against another alignment
-      lights no residue.
+      Each mapping names one row and one chain. Chains B and C of 6VXX are
+      copies of chain A, and chains C and D of 2HHB are copies of A and B, but
+      no mapping names them. A hover on any of them, or on a glycan, heme or
+      water, reports <em>no row maps here</em> and lights nothing in the
+      alignment. The other rows of each alignment report
+      <em>no mapping onto 6VXX</em> or <em>onto 2HHB</em>.
+    </p>
+    <p>
+      The viewer also checks each mapping against the loaded row and ignores one
+      computed against a different sequence. This page prints each ignored
+      mapping under the status line, and both sets print none.
     </p>
 
     <h2>Put it on your own page</h2>

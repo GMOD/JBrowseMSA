@@ -78,6 +78,7 @@ export interface StructureLinkedViewerProps {
   structureId: string
   focus?: Region
   stops?: Stop[]
+  height?: number
 }
 
 const idle = 'Hover a residue in the alignment or the structure.'
@@ -188,6 +189,7 @@ export function StructureLinkedViewer({
   structureId,
   focus,
   stops,
+  height = 360,
 }: StructureLinkedViewerProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const pluginRef = useRef<PluginUIContext | undefined>(undefined)
@@ -424,7 +426,7 @@ export function StructureLinkedViewer({
           ))}
         </div>
       ) : null}
-      <Suspense fallback={<div style={{ height: 360 }} />}>
+      <Suspense fallback={<div style={{ height }} />}>
         <MSAViewer
           msaFilehandle={uri(msaUrl)}
           treeFilehandle={treeUrl ? uri(treeUrl) : undefined}
@@ -434,7 +436,7 @@ export function StructureLinkedViewer({
           residueMappings={layers.residueMappings}
           colorScheme="clustalx_protein_dynamic"
           treeAreaWidth={150}
-          height={360}
+          height={height}
           region={focus}
           onModel={m => {
             modelRef.current = m

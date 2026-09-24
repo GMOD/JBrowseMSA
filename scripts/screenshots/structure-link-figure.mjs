@@ -139,14 +139,14 @@ try {
   )
   await delay(2000)
   console.log('hemoglobin alignment hover statuses on the Human row:')
-  for (const text of (await sweep(page, msaSelector, 24, 12)).keys()) {
+  for (const text of (await sweep(page, msaSelector, 48, 8)).keys()) {
     if (text.startsWith('Human')) {
       console.log(`  ${text}`)
     }
   }
   console.log('hemoglobin structure hover statuses:')
   for (const text of (
-    await sweep(page, '.structure-link-canvas', 8, 8)
+    await sweep(page, '.structure-link-canvas', 16, 16)
   ).keys()) {
     console.log(`  ${text}`)
   }
