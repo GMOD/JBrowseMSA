@@ -142,8 +142,10 @@ import type {
   ResidueSegment,
   ResolvedClade,
   ResolvedEncoding,
+  ResolvedFeaturePanel,
   ResolvedHighlight,
   ResolvedRowPanel,
+  ResolvedStripPanel,
   RowFeaturesSpec,
   RowPanelSpan,
   RowPanelSpec,
@@ -202,13 +204,38 @@ const UNSCALED_FEATURE = '#d9d9d9'
 const laneOverlap = 0.1
 
 // a row panel's own width, or a default: the row height, which makes a strip
-// cell square, and a gene neighborhood's width for a features panel
-function rowPanelWidth(panel: RowPanelSpec, rowHeight: number) {
+// cell square, and a gene neighborhood's width for a features panel. The row
+// height is read only when used, so a panel with a width of its own does not
+// recompute on a vertical zoom
+function rowPanelWidth(panel: RowPanelSpec, view: { rowHeight: number }) {
   return (
     panel.width ??
-    (panel.kind === 'features' ? defaultFeaturePanelWidth : rowHeight)
+    (panel.kind === 'features' ? defaultFeaturePanelWidth : view.rowHeight)
   )
 }
+
+// the color each row takes from a field of the row table under a scale
+function colorByRow(
+  rowData: Record<string, Record<string, string> | undefined>,
+  field: string,
+  colorOf: (value: string) => string | undefined,
+) {
+  const colors = new Map<string, string>()
+  for (const [name, row] of Object.entries(rowData)) {
+    const value = row?.[field]
+    const color = value === undefined ? undefined : colorOf(value)
+    if (color) {
+      colors.set(name, color)
+    }
+  }
+  return colors
+}
+
+type StripPanelScale = Omit<ResolvedStripPanel, 'id' | 'width' | 'offsetX'>
+type FeaturePanelScale = Omit<
+  ResolvedFeaturePanel,
+  'id' | 'width' | 'offsetX' | 'spans'
+>
 
 // the fill and outline of every feature in a list: its own GFF `color=` first,
 // then the scale an encoding resolves over one of its fields, then the
@@ -1759,7 +1786,7 @@ function stateModelFactory() {
        * alignment, the sum of each record's width
        */
       get rowPanelsWidth() {
-        return sum(self.rowPanels.map(p => rowPanelWidth(p, self.rowHeight)))
+        return sum(self.rowPanels.map(p => rowPanelWidth(p, self)))
       },
       /**
        * #getter
@@ -3539,7 +3566,7 @@ function stateModelFactory() {
             add(field, legend)
           }
         }
-        for (const { legendTitle, legend } of this.resolvedRowPanels) {
+        for (const { legendTitle, legend } of this.rowPanelScales) {
           add(legendTitle, legend)
         }
         return [...byKey.values()]
@@ -3794,45 +3821,30 @@ function stateModelFactory() {
 
       /**
        * #getter
-       * each row panel with its scale resolved against the values its field
-       * takes across the row table, giving the color per row name, the pixel
-       * column it draws in, and the entries its legend lists. Resolved once
-       * per change of that table or the panels, never per block per frame.
+       * each row panel's scale resolved against the values its field takes,
+       * giving the colors, labels and legend entries. Reads no cell size, so
+       * a zoom reuses it and the legends built from it.
        */
-      get resolvedRowPanels(): ResolvedRowPanel[] {
-        const rows = Object.entries(self.rowData)
+      get rowPanelScales(): (StripPanelScale | FeaturePanelScale)[] {
+        const { rowData } = self
         const { fillPalette, featureFillEncoding, featureLabels } = this
         const annotations = self.filteredAnnotations
-        let offsetX = 0
-        return self.rowPanels.map((panel, index) => {
-          const width = rowPanelWidth(panel, self.rowHeight)
-          const base = { id: `rowpanel-${index}`, width, offsetX }
-          offsetX += width
+        return self.rowPanels.map(panel => {
           if (panel.kind === 'features') {
             const color = panel.encoding?.color
             const encoding = color
               ? resolveFeatureScale(color.field, color.scale, annotations)
               : featureFillEncoding
             const label = panel.encoding?.label
-            const align = panel.transform?.find(t => t.type === 'align')
             return {
-              ...base,
               kind: panel.kind,
               x: panel.x,
               header: panel.header ?? '',
               field: encoding?.field,
               legendTitle: encoding?.field,
-              spans: featurePanelSpans({
-                panel,
-                width,
-                colWidth: self.colWidth,
-                domainBands: this.domainBands,
-                annotationsByRow: self.annotationsByRow,
-                shifts: align
-                  ? this.featureAlignShifts.get(align.on)
-                  : undefined,
-              }),
-              colors: featureColorMap(annotations, encoding, fillPalette),
+              colors: color
+                ? featureColorMap(annotations, encoding, fillPalette)
+                : this.featureColors,
               labels: label
                 ? featureLabelMap(annotations, label)
                 : featureLabels,
@@ -3847,25 +3859,53 @@ function stateModelFactory() {
           }
           const { colorOf, legend } = resolveScale(
             panel.scale,
-            rows.map(([, row]) => row?.[panel.field]).filter(notEmpty),
+            Object.values(rowData)
+              .map(row => row?.[panel.field])
+              .filter(notEmpty),
           )
-          const colors = new Map<string, string>()
-          for (const [name, row] of rows) {
-            const value = row?.[panel.field]
-            const color = value === undefined ? undefined : colorOf(value)
-            if (color) {
-              colors.set(name, color)
-            }
-          }
           return {
-            ...base,
             kind: panel.kind,
             field: panel.field,
             header: panel.header ?? panel.field,
             legendTitle: panel.legend ?? panel.field,
-            colors,
+            colors: colorByRow(rowData, panel.field, colorOf),
             legend,
           }
+        })
+      },
+
+      /**
+       * #getter
+       * each row panel with its scale from `rowPanelScales` and its geometry:
+       * the pixel column it draws in and, for a features panel, the spans per
+       * row. Resolved once per change of those inputs, never per block per
+       * frame.
+       */
+      get resolvedRowPanels(): ResolvedRowPanel[] {
+        const scales = this.rowPanelScales
+        let offsetX = 0
+        return self.rowPanels.map((panel, index) => {
+          const width = rowPanelWidth(panel, self)
+          const base = { id: `rowpanel-${index}`, width, offsetX }
+          offsetX += width
+          if (panel.kind === 'features') {
+            const align = panel.transform?.find(t => t.type === 'align')
+            return {
+              ...base,
+              ...(scales[index] as FeaturePanelScale),
+              spans: featurePanelSpans({
+                panel,
+                width,
+                colWidth: self.colWidth,
+                domainBands: this.domainBands,
+                annotationsByRow: self.annotationsByRow,
+                shifts: align
+                  ? this.featureAlignShifts.get(align.on)
+                  : undefined,
+              }),
+            }
+          }
+          return { ...base, ...(scales[index] as StripPanelScale) }
         })
       },
 

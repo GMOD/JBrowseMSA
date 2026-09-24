@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
 import MSAModelF from './model.ts'
@@ -108,6 +109,41 @@ test('setRowPanels replaces the layer', () => {
   model.setRowPanels([{ kind: 'strip', field: 'NA' }])
   expect(model.resolvedRowPanels[0]!.field).toBe('NA')
   expect(model.rowPanelsHeaderHeight).toBeGreaterThan(0)
+})
+
+test('a zoom reuses the legends and the panel scales', () => {
+  const model = makeModel([
+    { kind: 'strip', field: 'HA' },
+    { kind: 'features', x: 'column' },
+  ])
+  model.applyGFFText(`##gff-version 3
+duck\tPfam\tprotein_match\t1\t3\t.\t+\t.\tName=PF00001`)
+  let runs = 0
+  const dispose = autorun(() => {
+    runs++
+    void model.legends
+    void model.rowPanelScales
+  })
+  const { legends, rowPanelScales } = model
+  model.setColWidth(model.colWidth * 2)
+  model.setRowHeight(model.rowHeight * 2)
+  expect(model.legends).toBe(legends)
+  expect(model.rowPanelScales).toBe(rowPanelScales)
+  expect(runs).toBe(1)
+  dispose()
+})
+
+test('a features panel without its own color reuses featureColors', () => {
+  const model = makeModel([{ kind: 'features', x: 'column' }])
+  model.applyGFFText(`##gff-version 3
+duck\tPfam\tprotein_match\t1\t3\t.\t+\t.\tName=PF00001`)
+  const dispose = autorun(() => {
+    void model.resolvedRowPanels
+    void model.featureColors
+  })
+  const [panel] = model.resolvedRowPanels
+  expect(panel!.kind === 'features' && panel!.colors).toBe(model.featureColors)
+  dispose()
 })
 
 test('a field the table lacks colors nothing and lists nothing', () => {
