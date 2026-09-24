@@ -27,9 +27,7 @@
  * jbrowse-msa-combined-config.json with every gmod.org data URL pointed at that
  * local server. A fresh braf-clinvar VCF or a bumped plugin `latest` therefore
  * shows up before it is deployed. --plugin-dist and --protein3d-dist swap in a
- * local msaview or protein3d build to preview an unpublished change; the
- * protein3d figure's `initialSelection` needs the local protein3d build until
- * it is published.
+ * local msaview or protein3d build to preview an unpublished change.
  *
  * The `expect` block on a figure is an assertion: the connected view must
  * resolve and the highlighted column must carry the named residue, or the
@@ -44,6 +42,7 @@
  */
 import fs from 'node:fs'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 import puppeteer from 'puppeteer-core'
 
@@ -83,10 +82,7 @@ const PLUGIN_BUNDLE = 'jbrowse-plugin-msaview.umd.production.min.js'
 const PLUGIN_PUBLISHED =
   'https://jbrowse.org/plugins/jbrowse-plugin-msaview/latest/dist/' +
   PLUGIN_BUNDLE
-// same idea for the protein3d plugin (the three-view figure needs it);
-// --protein3d-dist swaps the published bundle for a local build, which the
-// tp53-protein3d figure currently requires (the declarative `initialSelection`
-// prop is unpublished)
+// same idea for the protein3d plugin, which the three-view figure needs
 const PROTEIN3D_BUNDLE = 'jbrowse-plugin-protein3d.umd.production.min.js'
 const PROTEIN3D_PUBLISHED =
   'https://jbrowse.org/plugins/jbrowse-plugin-protein3d/latest/dist/' +
@@ -135,22 +131,6 @@ const FIGURES = [
 ]
 
 // ---- helpers --------------------------------------------------------------
-// the connected-session links in lib/jbrowseLinks.ts, declared as
-// `export const NAME =\n  'url'`, parsed into { NAME: url }. The consts built by
-// specUrl() don't match and aren't captured; the other single-quoted consts that
-// do match are simply never asked for. The URLs are percent-encoded, so they
-// never contain a single quote.
-function readLinks() {
-  const source = fs.readFileSync(linksModule, 'utf8')
-  const links = {}
-  const re = /const (\w+) =\s*'([^']*)'/g
-  let m
-  while ((m = re.exec(source)) !== null) {
-    links[m[1]] = m[2]
-  }
-  return links
-}
-
 function decodeSpec(url) {
   return JSON.parse(
     decodeURIComponent(
@@ -370,7 +350,8 @@ async function main() {
 
   const executablePath = findChrome()
   fs.mkdirSync(outDir, { recursive: true })
-  const links = readLinks()
+  // Node strips the module's type annotations on import
+  const links = await import(pathToFileURL(linksModule).href)
   const server = await startStaticServer(dataPort, dataDir)
   const dataBase = `http://localhost:${dataPort}`
 
@@ -386,8 +367,6 @@ async function main() {
     console.log(`using local plugin build: ${pluginDist}`)
   }
 
-  // same for a local protein3d build (the three-view figure's declarative
-  // initialSelection prop isn't published yet)
   let protein3dServer
   let protein3dUrl
   if (protein3dDist) {

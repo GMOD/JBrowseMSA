@@ -108,14 +108,7 @@ forwarding):
 cd ~/src/jbrowse-components/products/jbrowse-web && pnpm start   # in another shell
 pnpm screenshots:jbrowse                          # or: --jbrowse-url=http://localhost:3000
 pnpm screenshots:jbrowse --plugin-dist=../jbrowse-plugin-msaview/dist   # preview a local plugin build
-```
-
-The `genome-browser-tp53-protein3d` figure (genome + alignment + AlphaFold
-structure, with a motif highlighted in all three) also needs a local
-`jbrowse-plugin-protein3d` build until its `initialSelection` prop is published:
-
-```sh
-pnpm screenshots:jbrowse --filter=protein3d --protein3d-dist=../jbrowse-plugin-protein3d/dist
+pnpm screenshots:jbrowse --protein3d-dist=../jbrowse-plugin-protein3d/dist   # the same for protein3d
 ```
 
 Each figure is one entry in the `FIGURES` list in

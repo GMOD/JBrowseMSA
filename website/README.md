@@ -24,7 +24,7 @@ pnpm --filter website preview   # preview the build
 | `python-package.astro`                | `packages/python/README.md`                                                                 |
 | `tutorials/index.astro`               | The gallery: one card per entry in `src/lib/tutorials.ts`, and nothing else                 |
 | `tutorials/[slug].astro`              | One page per `docs/tutorials/*.md`                                                          |
-| `tutorials/jbrowse_integration.astro` | The connected JBrowse sessions; hand-written, since its content is generated URLs           |
+| `tutorials/jbrowse_integration.astro` | The connected JBrowse sessions; hand-written, since its content is URLs built in TypeScript |
 | `examples.astro`                      | `packages/examples` as a React island (`ExamplesApp`)                                       |
 
 Rendering the repo's markdown keeps the docs in one place. Small plugins in

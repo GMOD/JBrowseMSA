@@ -58,11 +58,11 @@ time, so a card cannot drift from its page and no thumbnail file lands in
 `docs/media`.
 
 `tutorials/jbrowse_integration.astro` is the one carded page with no markdown
-behind it: it holds the connected JBrowse 2 sessions, whose content is the
-generated URLs in `lib/jbrowseLinks.ts` and `lib/f12CombinedLinks.ts`, thousands
-of percent-encoded characters each. `[slug].astro` builds only slugs the
-markdown glob produces, so a hand-written page at a `/tutorials/<name>` route
-never collides with it.
+behind it: it holds the connected JBrowse 2 sessions. `lib/jbrowseLinks.ts`
+writes each one as a session spec and serializes it into a URL, and
+`lib/f12CombinedLinks.ts` holds a generated URL thousands of percent-encoded
+characters long. `[slug].astro` builds only slugs the markdown glob produces, so
+a hand-written page at a `/tutorials/<name>` route never collides with it.
 
 There is no second showcase page: the standalone figure wall at `/gallery` was a
 static copy of what `/examples` runs live and the tutorials build, so it is gone

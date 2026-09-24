@@ -1,8 +1,8 @@
 ---
 // The one page under /tutorials that is not a docs/tutorials/*.md walkthrough:
-// its content is the connected-session URLs, which are generated TypeScript
-// (lib/jbrowseLinks.ts, lib/f12CombinedLinks.ts) and thousands of percent-encoded
-// characters each, so markdown would have to carry a copy that goes stale.
+// its content is the connected-session URLs that lib/jbrowseLinks.ts and
+// lib/f12CombinedLinks.ts export, so markdown would have to carry a copy that
+// goes stale.
 // [slug].astro builds only slugs the markdown glob produces, so this file owns
 // the route; lib/tutorials.ts still holds the index card.
 import JBrowseFigure from '../../components/JBrowseFigure.astro'
@@ -93,10 +93,11 @@ const base = import.meta.env.BASE_URL
     <h2>Built when the link opens</h2>
     <p>
       The sessions above carry their alignments as files. The two below carry a
-      request instead, and the view builds the alignment when it opens: the spec
-      names the transcript in <code>connectedTranscript</code> and the plugin
-      looks its exon model up in the genome view's gene track, so the whole
-      session is a URL short enough to type.
+      request instead, and the view builds the alignment when it opens from the
+      translation of the transcript the spec names in
+      <code>connectedTranscript</code>. In these and the gene sessions above,
+      the plugin looks the named transcript's exon model up in the genome view's
+      gene track.
     </p>
     <ul>
       <li>
