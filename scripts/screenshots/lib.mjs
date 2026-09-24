@@ -109,8 +109,8 @@ export function findChrome() {
 }
 
 // Serve a directory with permissive CORS (jbrowse-web fetches config/data
-// cross-origin) and a large header cap (the app deep-links a whole alignment via
-// a `?data=` query string, which can exceed node's default 16 KB header limit).
+// cross-origin) and a large header cap (a jbrowse-web `?session=spec-` query
+// string, or an old `?data=` link, can exceed node's default 16 KB limit).
 export function startStaticServer(port, dir) {
   const server = http.createServer(
     { maxHeaderSize: 1024 * 1024 },

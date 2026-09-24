@@ -11,7 +11,7 @@ page prints for each entry.
 `data/` holds the alignments, trees and annotation files the examples import
 with Vite's `?raw`. The same bytes feed the live examples, the screenshot specs
 and the SVG figures, and `scripts/screenshots/writeExampleData.mjs` copies them
-into the demo app for its `?data=` deep links. `scripts/examples-gen/README.md`
+into the demo app for its `#data=` deep links. `scripts/examples-gen/README.md`
 says where each file comes from and how to rebuild it.
 
 ## Adding an example

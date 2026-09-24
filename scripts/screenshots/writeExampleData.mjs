@@ -1,8 +1,8 @@
 /**
  * Publish the examples package's data files through the demo app, so a
- * `?data=` deep link can point a `msaFilehandle` / `treeFilehandle` /
+ * `#data=` deep link can point a `msaFilehandle` / `treeFilehandle` /
  * `gffFilehandle` at a hosted file instead of carrying the whole alignment in
- * the query string (the lysine Stockholm alone is ~26 KB).
+ * the link (the lysine Stockholm alone is ~26 KB).
  *
  * Every file in packages/examples/data is copied verbatim into
  * packages/app/public/data, which the app serves at its root and gmod.org

@@ -3,7 +3,7 @@
 // coordinates, with the tree built from TrpB beside them.
 //
 // Every figure loads the hosted copies of the files the tutorial's build script
-// writes (data/neighborhoods/*), so a figure and the ?data= link under it open
+// writes (data/neighborhoods/*), so a figure and the #data= link under it open
 // the same view. The first and the last figure carry the TrpB alignment; the
 // three between them have no msa at all, and the features panel is the only
 // thing on the column scale.
@@ -16,7 +16,7 @@ const gff = {
 }
 const msa = { msaFilehandle: { uri: 'data/neighborhoods/trpB.afa' } }
 
-// One color per trp gene name, the map the tutorial's ?data= links carry. Key
+// One color per trp gene name, the map the tutorial's #data= links carry. Key
 // order is legend order, and a gene the map leaves out draws grey.
 const nameColors = {
   trpL: '#76b7b2',

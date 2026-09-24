@@ -53,9 +53,9 @@ regenerate without the jbrowse checkout.
 ## `app` phase: demo-app screenshots
 
 A browser (`puppeteer-core` with the system Chrome) drives this phase. The app
-reads a `?data=` URL param as a JSON model snapshot, so each spec deep-links a
-loaded alignment instead of clicking through the import form. Specs that capture
-menus or dialogs run a few `click`/`waitFor` actions first.
+reads a `#data=` URL fragment as a JSON model snapshot, so each spec deep-links
+a loaded alignment instead of clicking through the import form. Specs that
+capture menus or dialogs run a few `click`/`waitFor` actions first.
 
 ```sh
 node scripts/screenshots/generate.mjs --filter=colorscheme,domains   # subset

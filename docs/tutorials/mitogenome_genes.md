@@ -91,7 +91,7 @@ All eight have 37 genes. The lengths run 720 bp apart, from 16,299 in Mouse to
 The viewer opens the genomes as they come, once every row is the same length.
 Right-pad the shorter ones to 17,019 and the eight load as a block.
 
-[![](../media/mitogenome_genes-1.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-unaligned.afa%22%7D%7D%7D)
+[![](../media/mitogenome_genes-1.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-unaligned.afa%22%7D%7D%7D)
 
 The eight genomes before alignment, one row each, colored by base. Every row
 starts at position 1 and stops at its own length, which is the ragged right
@@ -123,7 +123,7 @@ Platypus has the longest branch in the tree, 0.17510 where the rest run 0.04 to
 0.11, and neighbor joining draws it next to the rodents. The tree here orders
 the rows.
 
-[![](../media/mitogenome_genes-2.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%7D%7D)
+[![](../media/mitogenome_genes-2.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%7D%7D)
 
 The alignment at 17,966 columns with the ClustalW tree beside it. The white
 block at the left is columns 1 to 578, where only Human and Cow have sequence,
@@ -198,7 +198,7 @@ and what it holds:
 Positions are 1-based in each genome's own sequence, and the viewer projects
 them through that row's gaps.
 
-[![](../media/mitogenome_genes-3.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22showDomainLegend%22%3Afalse%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-3.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22showDomainLegend%22%3Afalse%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 The three files open, with the overlay coloring each span by its accession: the
 38 names in the file each take a color off the palette, and one band of color
@@ -231,7 +231,7 @@ map has six entries:
 ]
 ```
 
-[![](../media/mitogenome_genes-4.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-4.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 All 17,966 columns in the frame, each gene an arrow. The two orange rRNAs open
 every row, the blue complex I genes and the red COX genes alternate across the
@@ -252,7 +252,7 @@ a value the data never takes would draw nothing.
 label wherever the text fits inside the arrow's body, so how many labels appear
 follows the column width.
 
-[![](../media/mitogenome_genes-5.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.38%2C%22scrollX%22%3A-2318%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-5.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.38%2C%22scrollX%22%3A-2318%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 From column 6,100 at 0.38 pixels per column: COX1, COX2, ATP8 and ATP6 read
 their names off the arrows in all eight rows. The three grey tRNAs between them
@@ -314,7 +314,7 @@ columns where no gene's exceeds 31, and the eight right edges land on eight
 different columns: Human at 16,875, Cow at 16,876, Mouse at 17,366, Rat at
 17,373, Chimp at 17,490, Horse at 17,756, Dog at 17,765 and Platypus at 17,966.
 
-[![](../media/mitogenome_genes-6.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.363%2C%22scrollX%22%3A-5176%2C%22showDomainLegend%22%3Afalse%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-6.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.363%2C%22scrollX%22%3A-5176%2C%22showDomainLegend%22%3Afalse%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 The last 3,700 columns. ND6 carries its arrowhead on the left in all eight rows,
 CYTB starts and ends on one column in all eight, and the gold control regions
@@ -357,11 +357,11 @@ snapshot:
 }
 ```
 
-URL-encode that and append it to the app as `?data=`. The link carries the
+URL-encode that and append it to the app as `#data=`. The link carries the
 addresses of the files, so it works at any size. `highlights` takes 1-based
 inclusive columns, and the COX1 span above is the one the projection printed.
 
-[![](../media/mitogenome_genes-7.png)](https://gmod.org/JBrowseMSA/demo/?data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22highlights%22%3A%5B%7B%22start%22%3A6134%2C%22end%22%3A7679%2C%22label%22%3A%22COX1%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-7.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22I%22%3A%22%234e79a7%22%2C%22III%22%3A%22%2359a14f%22%2C%22IV%22%3A%22%23e15759%22%2C%22V%22%3A%22%23b07aa1%22%2C%22rRNA%22%3A%22%23f28e2b%22%2C%22tRNA%22%3A%22%23bab0ac%22%7D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22highlights%22%3A%5B%7B%22start%22%3A6134%2C%22end%22%3A7679%2C%22label%22%3A%22COX1%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 What that link opens: the three hosted files, the arrows filled by complex and
 labeled by name, and columns 6,134 to 7,679 banded and labeled COX1 across all

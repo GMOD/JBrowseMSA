@@ -19,5 +19,5 @@ cp /tmp/tem/tem.afa /tmp/tem/tem.nwk /tmp/tem/tem-rowdata.json /tmp/tem/tem-alle
 | `tem-rowdata.json` | 46   | JSON object     | The row table: the catalog's phenotype and subclass per allele, plus the residue it carries at Ambler 104, 164, 238, 240, 69, 244, 276 and 265    |
 
 The viewer loads all three of the alignment, the tree and the row table by URL,
-the last through `treeMetadataFilehandle`, since the table is 11 kB and a
-`?data=` link fits 8,192 characters.
+the last through `treeMetadataFilehandle`, since the table is 11 kB and the
+filehandle keeps the link short.

@@ -3,7 +3,7 @@
 //
 // Every figure loads the hosted copies of the three files the tutorial's build
 // script writes (data/nlrp1.aln, data/nlrp1.nh, data/nlrp1-domains.gff), so a
-// figure and the ?data= link under it open the same view. Callouts anchor on
+// figure and the #data= link under it open the same view. Callouts anchor on
 // alignment columns and row labels, never pixels.
 
 import { fileSnap } from '../snap.mjs'
@@ -378,7 +378,7 @@ export const specs = [
   },
   {
     name: 'protein-family-link',
-    // What the ?data= link at the end of the page opens: the three hosted files
+    // What the #data= link at the end of the page opens: the three hosted files
     // plus a labeled highlight over the PYD columns, set in the snapshot.
     // Highlight coordinates are 1-based inclusive.
     viewportWidth: 1600,

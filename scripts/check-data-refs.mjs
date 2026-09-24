@@ -6,7 +6,7 @@
  *   node scripts/check-data-refs.mjs
  *
  * `pnpm check:media` watches the figures; nothing watched the data under them.
- * A tutorial's `?data=` links carry `data/<topic>/<file>` rather than the file
+ * A tutorial's `#data=` links carry `data/<topic>/<file>` rather than the file
  * itself, so renaming or deleting one leaves the page building, the committed
  * PNG unchanged and the live link 404ing, with nothing to notice. The figure is
  * a picture of a view the reader can no longer open.
@@ -28,7 +28,7 @@ const publicDir = path.join(repoRoot, 'packages', 'app', 'public')
 const dataDir = path.join(publicDir, 'data')
 const dataReadme = path.join(dataDir, 'README.md')
 
-// Where a ?data= link can appear.
+// Where a data= link can appear, in the query or the fragment.
 const LINK_DIRS = ['docs', 'website/src']
 const LINK_EXT = new Set(['.md', '.astro', '.ts', '.tsx'])
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.astro'])
@@ -53,13 +53,13 @@ function walk(rel, out = []) {
 
 const problems = []
 
-// 1. every hosted file a ?data= link names exists. The snapshot is percent
+// 1. every hosted file a data= link names exists. The snapshot is percent
 // encoded in the href, so decode it and read the *Filehandle uris out of the
 // parsed JSON rather than pattern-matching the encoded text.
 let linkCount = 0
 for (const rel of LINK_DIRS.flatMap(dir => walk(dir))) {
   const text = fs.readFileSync(path.join(repoRoot, rel), 'utf8')
-  for (const match of text.matchAll(/\?data=([^\s)>'"`]+)/g)) {
+  for (const match of text.matchAll(/[?#]data=([^\s)>'"`]+)/g)) {
     let snap
     try {
       snap = JSON.parse(decodeURIComponent(match[1]))
@@ -74,7 +74,7 @@ for (const rel of LINK_DIRS.flatMap(dir => walk(dir))) {
       linkCount += 1
       if (!fs.existsSync(path.join(publicDir, uri))) {
         problems.push(
-          `${rel}: a ?data= link loads ${uri}, which is not in packages/app/public`,
+          `${rel}: a data= link loads ${uri}, which is not in packages/app/public`,
         )
       }
     }
@@ -174,7 +174,7 @@ if (unique.length > 0) {
 }
 
 console.log(
-  `hosted data: ${linkCount} ?data= file references resolve, ` +
+  `hosted data: ${linkCount} data= file references resolve, ` +
     `${folders.length} folders in the provenance table, ` +
     `${fileCount} files named by their folder README`,
 )

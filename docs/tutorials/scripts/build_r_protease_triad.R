@@ -202,7 +202,7 @@ snapshot <- list(msaview = c(
 ))
 json <- as.character(jsonlite::toJSON(snapshot, auto_unbox = TRUE, digits = 3))
 link <- paste0(
-  "https://gmod.org/JBrowseMSA/demo/?data=",
+  "https://gmod.org/JBrowseMSA/demo/#data=",
   URLencode(json, reserved = TRUE)
 )
 writeLines(link, file.path(out, "proteases-link.url"))

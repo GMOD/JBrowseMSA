@@ -26,7 +26,7 @@ Output goes to `packages/examples/data/` as plain files: `<name>.aln` for the
 alignment, `<name>.nh` for the tree and `<name>-domains.gff` for the domain
 overlay. The examples import them with Vite's `?raw`, the screenshot specs read
 them, and `scripts/screenshots/writeExampleData.mjs` copies them into the demo
-app so a `?data=` link can fetch one. The script generates these files, so edit
+app so a `#data=` link can fetch one. The script generates these files, so edit
 the inputs here and re-run.
 
 ## What a dataset is

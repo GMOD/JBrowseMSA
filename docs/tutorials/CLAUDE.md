@@ -9,7 +9,7 @@ prose stays short. Use no em-dashes anywhere, including code comments. Follow
 ## The shape
 
 A tutorial is **one continuous line of work**: sequences to alignment to tree to
-the layers an analysis produces, ending on a `?data=` link that opens the
+the layers an analysis produces, ending on a `#data=` link that opens the
 result. Each step consumes what the step before produced. One dataset is the
 default; a second only where the first raised the question it answers.
 
@@ -44,7 +44,7 @@ A figure is a linked image followed by its caption paragraph; `wrapFigures` in
 `website/astro.config.mjs` turns the pair into a `<figure>`:
 
 ```md
-[![](../media/<topic>-<step>.png)](https://gmod.org/JBrowseMSA/demo/?data=...)
+[![](../media/<topic>-<step>.png)](https://gmod.org/JBrowseMSA/demo/#data=...)
 
 Caption: what the frame shows, in the frame's own terms.
 ```

@@ -205,7 +205,7 @@ snapshot = {
         "highlights": layers["highlights"],
     }
 }
-link = "https://gmod.org/JBrowseMSA/demo/?data=" + urllib.parse.quote(
+link = "https://gmod.org/JBrowseMSA/demo/#data=" + urllib.parse.quote(
     json.dumps(snapshot, separators=(",", ":")), safe=""
 )
 (out / "h3n2-link.url").write_text(link + "\n")

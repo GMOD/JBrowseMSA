@@ -132,7 +132,7 @@ agent produces one that does not.
 ## The contract
 
 - Every layer is a snapshot field. The standalone app writes the snapshot to
-  `?data=`, the plugin takes the same fields through a session spec and through
+  `#data=`, the plugin takes the same fields through a session spec and through
   `run_javascript` on the live `MsaView` model, and `export-svg --spec` in the
   CLI takes a whole snapshot.
 - A layer that names a row uses row-residue coordinates, 1-based inclusive as

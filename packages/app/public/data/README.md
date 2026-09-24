@@ -1,7 +1,7 @@
 # Hosted example data
 
 The demo app serves these files at `gmod.org/JBrowseMSA/demo/data/*` (and at
-the app root in local dev). A `?data=` deep-link can point a `msaFilehandle`,
+the app root in local dev). A `#data=` deep link can point a `msaFilehandle`,
 `treeFilehandle` or `gffFilehandle` at a hosted file instead of inlining the
 whole alignment in the URL. The user-guide figures link to live views this way,
 which keeps those links small; the lysine Stockholm alone is ~26 KB inline.
@@ -51,7 +51,7 @@ page, built by `scripts/braf-protein-link/` and `scripts/tp53-protein-link/`
 Each folder below backs one tutorial, and the folder's own README names its
 files and the step that writes each. `pnpm check:data` (CI runs it) fails on a
 folder missing from this table, a row naming a page or a script that does not
-exist, a file its folder README does not name, and a `?data=` link anywhere in
+exist, a file its folder README does not name, and a `data=` link anywhere in
 the docs that loads a file no longer here.
 
 | Folder           | Tutorial                                                                                     | Built by                                                                                                    |

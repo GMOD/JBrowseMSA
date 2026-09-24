@@ -1,7 +1,7 @@
 /**
  * Rewrite the markdown reference-link block at the bottom of each doc in DOCS so
  * every figure links to the live demo app loaded into that exact state via the
- * `?data=` URL-param API. The screenshot specs are the single source of truth,
+ * `#data=` URL API. The screenshot specs are the single source of truth,
  * so the live links stay in lockstep with the figures.
  *
  * A doc gets definitions only for the `[live-*]` refs it uses (the specs are a

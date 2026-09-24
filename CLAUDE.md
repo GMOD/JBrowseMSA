@@ -40,7 +40,7 @@ them, and follow it in this file too: agents copy the prose here as house voice.
 
 `docs/tutorials/*.md` are reader-facing walkthroughs of the data preparation
 done outside the viewer: sequences to alignment to tree to annotations, ending
-on a `?data=` URL that opens the result. Each step of a tutorial consumes what
+on a `#data=` URL that opens the result. Each step of a tutorial consumes what
 the step before produced. Every command in it has been run, and the prose quotes
 the numbers it printed. `docs/tutorials/scripts/build_<topic>.sh` runs the whole
 pipeline, and the `## Reproduce it end to end` section curls it.

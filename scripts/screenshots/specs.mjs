@@ -3,7 +3,7 @@
 // either the viewer container (clip: 'viewer') or the whole viewport (for menus
 // and dialogs that render in portals outside the viewer).
 //
-// The app reads a `?data=` URL param as a JSON model snapshot, so a spec can
+// The app reads a `#data=` URL fragment as a JSON model snapshot, so a spec can
 // deep-link a loaded alignment without driving the import form.
 
 import fs from 'node:fs'
@@ -34,7 +34,7 @@ function data(extra) {
       ...extra,
     },
   }
-  return `?data=${encodeURIComponent(JSON.stringify(snap))}`
+  return `#data=${encodeURIComponent(JSON.stringify(snap))}`
 }
 
 export const specs = [

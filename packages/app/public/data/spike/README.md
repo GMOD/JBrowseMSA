@@ -13,6 +13,6 @@ number the page quotes.
 | `spike-domains.gff` | GFF3 (domains)         | 5    | InterPro 110.0 precomputed Pfam matches (`react-msaview-cli interpro`) for the 8 rows whose UniProt entry is the same sequence as the row                                                                    |
 | `spike-layers.json` | JSON (snapshot layers) | 6-7  | `highlights` from the P0DTC2 feature table (step 6), `residueMappings` from SIFTS plus PDBe polymer coverage for 6VXX chain A and the coverage text track derived from it (step 7)                            |
 
-No filehandle loads `spike-layers.json`. The figures' `?data=` links carry its
+No filehandle loads `spike-layers.json`. The figures' `#data=` links carry its
 three layers inline, and the file is hosted so the page can cite it and
 `scripts/screenshots/tutorial-specs/spike_structure.mjs` can read it.

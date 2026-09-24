@@ -24,6 +24,11 @@ const root = RootModel.create({})
 root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
 ```
 
+`maxInlineSnapshotBytes` is the largest pasted or local document, and the
+largest data track, the snapshot keeps; a larger one stays in the live model and
+`unshareableData` names it. The standalone app, whose links carry the snapshot
+in the URL fragment, raises it.
+
 ## Overview
 
 The main MSAView state model. Holds the loaded alignment, tree, and optional
@@ -141,7 +146,7 @@ data from the loaded tree/msa/treeMetadata, generally loaded by autorun
 // type signature
 IOptionalIType<IModelType<{ tree: IMaybe<ISimpleType<string>>; msa: IMaybe<ISimpleType<string>>; treeMetadata: IMaybe<ISimpleType<string>>; gff: IMaybe<...>; }, { ...; }, _NotCustomized, { ...; }>, [...]>
 // code
-data: types.optional(DataModelF(), {})
+data: types.optional(DataModelF(maxInlineSnapshotBytes), {})
 ```
 
 #### property: drawMsaLetters
@@ -1817,10 +1822,11 @@ loaded documents left out of the snapshot, largest first. A file opened from
 disk or pasted in becomes inline text, and DataModel drops an inline document
 past `maxInlineSnapshotBytes`.
 
-The header lists these, and the standalone app drops `?data=` from the address
-bar while the list is non-empty or the encoded link would pass 8,000 characters,
-so a copied link never opens an empty viewer unannounced. A document fetched
-from a URL never appears here, since the snapshot keeps its filehandle.
+The header lists these, and the standalone app drops `#data=` from the address
+bar while the list is non-empty or the encoded link would pass its
+`maxLinkLength`, so a copied link never opens an empty viewer unannounced. A
+document fetched from a URL never appears here, since the snapshot keeps its
+filehandle.
 
 Empty when `hostCarriesData` is true.
 

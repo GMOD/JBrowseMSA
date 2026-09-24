@@ -354,7 +354,7 @@ Build the
 [`residueMappings` layer](https://github.com/GMOD/JBrowseMSA/blob/main/docs/layers.md#residuemappings),
 which tells the viewer which residue of a PDB chain or an AlphaFold model each
 residue of a row is. The output is `{"residueMappings": [...]}`, ready for the
-`residueMappings` prop, a `?data=` link, or the R and Python widgets.
+`residueMappings` prop, a `#data=` link, or the R and Python widgets.
 
 ```bash
 react-msaview-cli residue-mappings --msa <file> --row <name> --accession <acc> \

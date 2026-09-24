@@ -4,7 +4,7 @@ Served at `gmod.org/JBrowseMSA/demo/data/trim5/*`. Built by
 [`docs/tutorials/scripts/build_codon_selection.sh`](../../../../../docs/tutorials/scripts/build_codon_selection.sh);
 see [`docs/tutorials/codon_selection.md`](../../../../../docs/tutorials/codon_selection.md)
 for what each step does. The dN/dS bar track and the labeled highlights are
-small enough to inline in the `?data=` snapshot, so only the alignment and the
+small enough to inline in the `#data=` snapshot, so only the alignment and the
 exon structure load from a file. The snapshots inline the values in
 `trim5-dnds-values.json`, which is hosted here so readers can inspect them.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the p53 variant-effect layers in docs/tutorials/p53_variant_effects.md:
 # a vertebrate p53 alignment and tree from NCBI, plus three per-residue tracks
-# over the Human row (ClinVar, AlphaMissense, MaveDB), and the ?data= link that
+# over the Human row (ClinVar, AlphaMissense, MaveDB), and the #data= link that
 # opens all of it.
 #
 #   bash build_p53_variant_effects.sh [outdir]
@@ -307,7 +307,7 @@ jq -rj \
       columnTracks: .columnTracks
     }
   } | @uri' p53-layers.json > p53-link.txt
-printf 'https://gmod.org/JBrowseMSA/demo/?data=%s\n' "$(cat p53-link.txt)" \
+printf 'https://gmod.org/JBrowseMSA/demo/#data=%s\n' "$(cat p53-link.txt)" \
   > p53-link.url
 
 echo

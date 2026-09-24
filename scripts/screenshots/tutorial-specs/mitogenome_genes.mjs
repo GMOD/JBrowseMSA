@@ -3,7 +3,7 @@
 // by respiratory complex.
 //
 // Every figure loads the hosted copies of the files the tutorial's build script
-// writes (data/mitogenome/*), so a figure and the ?data= link under it open the
+// writes (data/mitogenome/*), so a figure and the #data= link under it open the
 // same view. Callouts anchor on alignment columns and row labels, never pixels.
 
 import { fileSnap } from '../snap.mjs'
@@ -14,7 +14,7 @@ const files = {
   gffFilehandle: { uri: 'data/mitogenome/mito-genes.gff' },
 }
 
-// One color per respiratory complex, the map the tutorial's ?data= links carry.
+// One color per respiratory complex, the map the tutorial's #data= links carry.
 // Key order is legend order, and a value the features never take draws nothing.
 const complexFill = {
   channel: 'featureFill',
@@ -250,7 +250,7 @@ export const specs = [
   },
   {
     name: 'mitogenome_genes-7',
-    // What the ?data= link at the end of the page opens: the three hosted
+    // What the #data= link at the end of the page opens: the three hosted
     // files, the two encodings, and a labeled band over the COX1 columns.
     viewportWidth: 1600,
     url: fileSnap({

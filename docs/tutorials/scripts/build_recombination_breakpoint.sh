@@ -292,9 +292,8 @@ if not crossed[CHILD]:
                      f'{RBD_END}, so that window holds no breakpoint to draw')
 
 # 7. the receptor-binding domain, cut out of the alignment. A bar track holds
-# one value per alignment column and a ?data= link holds several hundred of
-# them, so the two curves travel over this window, and the tree file serves
-# both alignments.
+# one value per alignment column, so the two curves travel over this window,
+# which keeps the link short, and the tree file serves both alignments.
 with open(rbd_out, 'w') as fh:
     for row, seq in seqs.items():
         fh.write(f'>{row}\n{seq[lo:hi]}\n')
