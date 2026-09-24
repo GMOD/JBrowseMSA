@@ -13,6 +13,7 @@ import HeaderStatusArea from './HeaderStatusArea.tsx'
 import LoadWarnings from './LoadWarnings.tsx'
 import MSASettingsMenu from './MSASettingsMenu.tsx'
 import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
+import RowSearch from './RowSearch.tsx'
 import TreeSettingsMenu from './TreeSettingsMenu.tsx'
 import UnshareableDataWarning from './UnshareableDataWarning.tsx'
 import ZoomControls from './ZoomControls.tsx'
@@ -42,6 +43,7 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <ZoomControls model={model} />
       <ZoomMenu model={model} />
       <GappynessSlider model={model} />
+      <RowSearch model={model} />
       <div style={{ paddingLeft: 20, margin: 'auto' }}>
         <MultiAlignmentSelector model={model} />
       </div>

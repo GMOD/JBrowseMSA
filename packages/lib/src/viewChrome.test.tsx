@@ -117,6 +117,12 @@ test('the view mounts with both scrollbars', () => {
   expect(byCursor('ns-resize')).toHaveLength(2)
 })
 
+test('the header offers a row search', () => {
+  expect(
+    container.querySelector('input[placeholder="Find row"]'),
+  ).toBeTruthy()
+})
+
 test('dragging the tree divider widens the tree area', async () => {
   const before = model.treeAreaWidth
   await drag(byCursor('ew-resize')[0]!, { x: 60 })
