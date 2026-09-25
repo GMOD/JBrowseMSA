@@ -63,7 +63,7 @@ async function pfam(accession: string, signal: AbortSignal) {
 // in octal at byte 124, then the file padded to a multiple of 512 bytes. The
 // archive is ASCII, so a string offset is a byte offset.
 function seedTree(tar: string, accession: string) {
-  for (let at = 0; at < tar.length; ) {
+  for (let at = 0; at < tar.length;) {
     const size = Number.parseInt(tar.slice(at + 124, at + 136), 8)
     if (Number.isNaN(size)) {
       return undefined
@@ -142,7 +142,10 @@ function fetchFamily(
   signal: AbortSignal,
   onProgress: (text: string) => void,
 ): Promise<Family> {
-  const accession = input.trim().toUpperCase().replace(/\.\d+$/, '')
+  const accession = input
+    .trim()
+    .toUpperCase()
+    .replace(/\.\d+$/, '')
   return /^PF\d{5}$/.test(accession)
     ? pfam(accession, signal)
     : /^RF\d{5}$/.test(accession)
