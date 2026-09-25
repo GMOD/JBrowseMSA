@@ -376,6 +376,20 @@ scrollZoomAxis: stripDefault(
         )
 ```
 
+#### property: selection
+
+the block the reader selected: `{start, end}` columns of the file, 1-based
+inclusive like a column highlight, and `rows` by name, every row where absent.
+Undefined until something is selected, so a view without one adds nothing to the
+shared URL.
+
+```js
+// type signature
+IType<MsaSelection | undefined, MsaSelection | undefined, MsaSelection | undefined>
+// code
+selection: types.frozen<MsaSelection | undefined>()
+```
+
 #### property: showDomainLegend
 
 whether the domain legend is expanded. The legend floats over the top-right of
@@ -1469,6 +1483,17 @@ per change of those inputs, never per block per frame.
 ResolvedRowPanel[]
 ```
 
+#### getter: resolvedSelection
+
+`selection` projected onto what is on screen, the way `resolvedHighlights`
+projects a column span and a row set. A selection whose columns are all hidden,
+or whose rows are all collapsed away or unknown, resolves to undefined.
+
+```js
+// type
+ResolvedSelection | undefined
+```
+
 #### getter: root
 
 ```js
@@ -1621,6 +1646,36 @@ feature name ("exon-3" -> "3"), else its 1-based position
 ```js
 // type
 Map<string, string>
+```
+
+#### getter: selectionFasta
+
+the selected block as FASTA: the selected rows on screen, top to bottom, each
+with its letters across the file's columns from `start` to `end`, gaps included
+
+```js
+// type
+string
+```
+
+#### getter: selectionFileSpan
+
+`selection`'s columns clamped to the file's
+
+```js
+// type
+{ start: number; end: number; } | undefined
+```
+
+#### getter: selectionSize
+
+the columns and rows the selection covers, for the header's readout. Columns
+count the file's columns from `start` to `end`, hidden ones included, as
+`selectionFasta` copies them.
+
+```js
+// type
+{ columns: number; rows: number; } | undefined
 ```
 
 #### getter: sequenceType
@@ -2167,6 +2222,13 @@ clearHighlight: (owner: string) => void
 clearRotated: () => void
 ```
 
+#### action: clearSelection
+
+```js
+// type signature
+clearSelection: () => void
+```
+
 #### action: clearWarnings
 
 ```js
@@ -2275,6 +2337,18 @@ restore the default column width and row height
 ```js
 // type signature
 resetZoom: () => void
+```
+
+#### action: selectBlock
+
+select the block between two cells given as visible column and row indices, the
+coordinates a drag reports, clamped to the alignment. A cell with no `row`
+selects the columns across every row, and so does a block spanning every row on
+screen.
+
+```js
+// type signature
+selectBlock: (anchor: { col: number; row?: number | undefined; }, head: { col: number; row?: number | undefined; }) => void
 ```
 
 #### action: setAllowedGappyness
@@ -2610,6 +2684,16 @@ setScrollZoom: (arg: boolean) => void
 setScrollZoomAxis: (arg: "both" | "horizontal" | "vertical") => void
 ```
 
+#### action: setSelection
+
+select a block, in `selection` coordinates. `start` and `end` may come in either
+order.
+
+```js
+// type signature
+setSelection: (selection?: MsaSelection | undefined) => void
+```
+
 #### action: setShowDomainLegend
 
 expand or collapse the domain legend that floats over the alignment
@@ -2817,4 +2901,14 @@ that resolves to no visible column.
 ```js
 // type signature
 zoomToRegion: (region: Region) => void
+```
+
+#### action: zoomToSelection
+
+zoom and scroll so the selected columns fill the alignment's width, and, where
+the selection names its rows, so those rows fill its height
+
+```js
+// type signature
+zoomToSelection: () => void
 ```
