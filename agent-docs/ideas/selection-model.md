@@ -1,21 +1,26 @@
 # A selection model
 
-The MsaView model tracks `mouseCol` and `mouseClickPos` but has no notion of a
-selected column range or row set. Without one, the MSA editor sketched in
-`../dna-msa-comparative-genomics.md` (the grant) cannot start, since a user has
-to select an exon boundary before dragging it.
+**The selection shipped 2026-09-25. Trim, selective export and the editor
+remain.**
 
-Sketch: `selectedColumns: {start, end} | undefined` and `selectedRows` on the
-model, a drag-to-select gesture on the alignment canvas using the hit-testing
-that already exists in `useMsaBlockMouse.ts`, and a band drawn by the same
-overlay code `highlightColumns` uses. Persist both in the snapshot so a
-selection is shareable, exactly as `highlightColumns` already is.
+The MsaView model holds `selection`: columns `start` to `end` of the file,
+1-based and inclusive like a column highlight, and `rows` by name, every row
+where `rows` is absent. The property persists in the snapshot and the `#data=`
+link, and `docs/layers.md` documents it as a layer. A shift-drag on the
+alignment selects a block, and a drag along any track selects columns across
+every row. The header then shows the block's size as a button whose menu copies
+the block as FASTA, zooms to it or clears it. `MSAViewer` takes a `selection`
+prop and reports changes through `onSelectionChange`, R takes `selection =` and
+`geom_msa_selection()`, and Python has a two-way `selection` trait.
 
-## Features that build on it, cheapest first
+The MSA editor sketched in `../dna-msa-comparative-genomics.md` (the grant)
+needs this selection first, since a user has to select an exon boundary before
+dragging it.
 
-- Copy the selected block as FASTA. `SequenceTextArea.tsx` already renders
-  sequence text and `getUngappedSequence` already exists.
-- Zoom-to-selection, and trim-to-selection as a view filter.
+## What builds on it next, cheapest first
+
+- Trim-to-selection as a view filter: hide every column outside the selection
+  the way `hideGaps` hides gappy ones.
 - Export only the selected columns. The SVG export already takes an
   `exportType`, so this would be a third mode.
 - Then the editor: drag a boundary, recompute through the columns, and write the

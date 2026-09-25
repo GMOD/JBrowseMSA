@@ -115,7 +115,8 @@ callers should migrate.
 ## What it unlocks
 
 [Conservation on 3D structure](conservation-on-structure.md) becomes wiring with
-no lookup step on a page that holds both viewers.
+no lookup step on a page that holds both viewers. `/tutorials/structure_link`
+has that wiring behind a checkbox.
 
 A **multi-structure overlay** becomes possible without a structural aligner.
 Take the columns where two rows both map to observed residues, feed those

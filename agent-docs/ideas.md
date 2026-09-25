@@ -13,22 +13,19 @@ nobody has to work it out again.
   target. `columnTracks`, `highlights`, GFF `color=`, row strips, `rowTint`,
   `export-svg --spec` and the `customColorScheme` letter map shipped; a JSON
   `features` field remains.
-- [A selection model](ideas/selection-model.md): the model has no selected
-  column range or row set, and the MSA editor needs one before anything else.
-  Copy, zoom-to-selection and selective export all build on it.
-- [Conservation on 3D structure](ideas/conservation-on-structure.md): color a
-  structure by column conservation. The standalone structure page is the cheap
-  first step; in JBrowse the hop goes through the genome, as protein3d's hover
-  does.
-- [Demo: load by accession](ideas/load-by-accession-demo.md): a Pfam/Rfam box
-  that loads a family alignment from EBI with no file handling.
-- [Demo: codon-aware DNA view](ideas/codon-aware-dna-view.md): translate a row,
-  color synonymous and non-synonymous changes, and step the ruler by 3.
+- [A selection model](ideas/selection-model.md): the selection, its gestures,
+  copy and zoom shipped. Trim-to-selection, selective export and the MSA editor
+  build on it next.
 - [Neighbor joining past ~400 sequences](ideas/neighbor-joining-scaling.md): the
   join loop is cubic. The file explains why `@gmod/hclust`'s fix for the same
   loop does not port, and what does.
 
 ## Shipped, kept for the reasoning
+
+- [Conservation on 3D structure](ideas/conservation-on-structure.md): the
+  checkbox on `/tutorials/structure_link` paints mapped chains by column
+  conservation. The JBrowse route goes through the genome and belongs to
+  protein3d.
 
 - [Panels and marks](ideas/panels-and-marks.md): the row and column scales, the
   marks, channels and scales vocabulary, and the eleven steps behind `rowData`,
@@ -71,4 +68,7 @@ data-layers), row-group coloring (now the `rowTint` encoding), InterPro sub-row
 boxes overflowing the row (the lanes now share out the row height), and the four
 protein-link generators (`jbrowseLinks.ts` now writes the SRC, BRAF, TP53 and
 TP53 3D sessions by hand, naming the transcript in `connectedTranscript` and
-protein3d's `transcriptId`).
+protein3d's `transcriptId`), the codon-aware DNA demo (the `CodonView` example
+translates a reference row of the F12 alignment and colors synonymous and
+non-synonymous codons) and the load-by-accession demo (the `LoadByAccession`
+example fetches a Pfam or Rfam seed from EBI).
