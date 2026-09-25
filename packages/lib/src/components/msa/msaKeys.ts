@@ -33,6 +33,12 @@ export function onMsaKey(
     case 'End':
       model.setScrollX(model.maxScrollX)
       return true
+    case 'Escape':
+      if (model.selection) {
+        model.clearSelection()
+        return true
+      }
+      return false
     default:
       return false
   }

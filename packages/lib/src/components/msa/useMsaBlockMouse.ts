@@ -1,33 +1,11 @@
 import { useRef } from 'react'
 
+import { dragSelection, maxClickTravel } from '../selectionDrag.ts'
 import { useHoverAnchor } from '../useHoverAnchor.ts'
 
 import type { MsaViewModel } from '../../model.ts'
+import type { ClientPoint } from '../selectionDrag.ts'
 import type React from 'react'
-
-const maxClickTravel = 3
-
-function eventToColRow({
-  event,
-  el,
-  offsetX,
-  offsetY,
-  colWidth,
-  rowHeight,
-}: {
-  event: React.MouseEvent
-  el: HTMLElement
-  offsetX: number
-  offsetY: number
-  colWidth: number
-  rowHeight: number
-}) {
-  const { left, top } = el.getBoundingClientRect()
-  return {
-    col: Math.floor((event.clientX - left + offsetX) / colWidth),
-    row: Math.floor((event.clientY - top + offsetY) / rowHeight),
-  }
-}
 
 /**
  * Translates pointer events over one MSA block into model column/row hover and
@@ -51,9 +29,23 @@ export function useMsaBlockMouse({
   const { anchor, hoverAt, clearAnchor } = useHoverAnchor<true>()
   const downAt = useRef<{ x: number; y: number }>(undefined)
 
+  // The block's rect places its cells on the page. A drag keeps the mapping
+  // it started with, so each point subtracts the scroll since then.
+  function cellMapper(el: HTMLElement) {
+    const { left, top } = el.getBoundingClientRect()
+    const { scrollX, scrollY } = model
+    return ({ clientX, clientY }: ClientPoint) => ({
+      col: Math.floor(
+        (clientX - left + offsetX - (model.scrollX - scrollX)) / model.colWidth,
+      ),
+      row: Math.floor(
+        (clientY - top + offsetY - (model.scrollY - scrollY)) / model.rowHeight,
+      ),
+    })
+  }
+
   function colRow(event: React.MouseEvent, el: HTMLElement) {
-    const { colWidth, rowHeight } = model
-    return eventToColRow({ event, el, offsetX, offsetY, colWidth, rowHeight })
+    return cellMapper(el)(event)
   }
 
   // a block can extend past the alignment (the last block is a full tile wide,
@@ -73,8 +65,13 @@ export function useMsaBlockMouse({
     hoverAt(event, hasTooltip || undefined)
   }
 
-  function onMouseDown(event: React.MouseEvent) {
+  // shift+drag selects a block; MSACanvas leaves a shifted press out of its
+  // pan
+  function onMouseDown(event: React.MouseEvent, el: HTMLElement) {
     downAt.current = { x: event.clientX, y: event.clientY }
+    if (event.shiftKey && event.button === 0) {
+      dragSelection(model, event, cellMapper(el))
+    }
   }
 
   function onClick(event: React.MouseEvent, el: HTMLElement) {

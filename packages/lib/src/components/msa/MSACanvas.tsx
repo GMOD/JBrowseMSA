@@ -54,13 +54,23 @@ const MSACanvas = observer(function ({ model }: { model: MsaViewModel }) {
       // col*colWidth + scrollX, row*rowHeight + scrollY
       data-testid="msa_canvas"
       tabIndex={0}
-      aria-label="Alignment. Arrow keys scroll, shift pages, + and - zoom, Home and End jump to the first and last column."
+      aria-label="Alignment. Arrow keys scroll, shift pages, + and - zoom, Home and End jump to the first and last column. Shift-drag selects cells, and Escape clears the selection."
       onKeyDown={event => {
         if (onMsaKey(model, event)) {
           event.preventDefault()
         }
       }}
-      onMouseDown={onMouseDown}
+      onMouseDown={event => {
+        // a shifted press selects cells (useMsaBlockMouse), so it takes the
+        // focus Escape clears from, and leaves out the pan and the page's own
+        // text selection
+        if (event.shiftKey) {
+          event.preventDefault()
+          ref.current?.focus({ preventScroll: true })
+        } else {
+          onMouseDown(event)
+        }
+      }}
       onMouseUp={onMouseUp}
       style={{
         position: 'relative',

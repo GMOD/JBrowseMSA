@@ -319,3 +319,134 @@ test('the tree gutter carries a scale bar, and the ruler track draws', async () 
   })
   expect(container.textContent).toContain('Position')
 })
+
+function dragOver(
+  el: Element,
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  shiftKey: boolean,
+) {
+  act(() => {
+    el.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        clientX: from.x,
+        clientY: from.y,
+        shiftKey,
+      }),
+    )
+  })
+  act(() => {
+    window.dispatchEvent(
+      new MouseEvent('mousemove', { clientX: to.x, clientY: to.y, shiftKey }),
+    )
+  })
+  act(() => {
+    window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }))
+  })
+}
+
+function msaBlock() {
+  return container.querySelector('[data-testid="msa_canvas"] canvas')!
+}
+
+test('a shift-drag selects the cells it covers, and Escape clears them', () => {
+  const { colWidth, rowHeight } = model
+  dragOver(
+    msaBlock(),
+    { x: colWidth * 2.5, y: rowHeight * 1.5 },
+    { x: colWidth * 5.5, y: rowHeight * 3.5 },
+    true,
+  )
+  expect(model.selection).toEqual({
+    start: 3,
+    end: 6,
+    rows: ['seq1', 'seq2', 'seq3'],
+  })
+  expect([model.scrollX, model.scrollY]).toEqual([0, 0])
+  expect(
+    container.querySelector('[aria-label="Selection: 4 columns × 3 rows"]'),
+  ).toBeTruthy()
+
+  press('Escape')
+  expect(model.selection).toBeUndefined()
+  expect(container.querySelector('[aria-label^="Selection"]')).toBeNull()
+})
+
+test('a shift-press that stays put pins the crosshair and selects nothing', () => {
+  const block = msaBlock()
+  act(() => {
+    block.dispatchEvent(
+      new MouseEvent('mousedown', {
+        bubbles: true,
+        clientX: 30,
+        clientY: 30,
+        shiftKey: true,
+      }),
+    )
+    block.dispatchEvent(
+      new MouseEvent('click', {
+        bubbles: true,
+        clientX: 31,
+        clientY: 30,
+        shiftKey: true,
+      }),
+    )
+  })
+  expect(model.selection).toBeUndefined()
+  expect(model.mouseClickCol).toBe(Math.floor(31 / model.colWidth))
+})
+
+test('a plain drag pans and selects nothing', async () => {
+  dragOver(msaBlock(), { x: 200, y: 50 }, { x: 150, y: 50 }, false)
+  await act(async () => {
+    await new Promise(resolve => {
+      requestAnimationFrame(resolve)
+    })
+  })
+  expect(model.selection).toBeUndefined()
+  expect(model.scrollX).toBe(-50)
+})
+
+test('a drag along a track selects its columns across every row', () => {
+  const track = container.querySelector('[data-testid^="track_"] canvas')!
+  const { colWidth } = model
+  dragOver(
+    track,
+    { x: colWidth * 7.5, y: 5 },
+    { x: colWidth * 3.5, y: 5 },
+    false,
+  )
+  expect(model.selection).toEqual({ start: 4, end: 8 })
+  expect(model.resolvedSelection?.rowRuns).toEqual([[0, 19]])
+})
+
+test('the selection menu zooms to the block and clears it', () => {
+  act(() => {
+    model.setSelection({ start: 11, end: 20, rows: ['seq4', 'seq5'] })
+  })
+  const button = container.querySelector<HTMLElement>(
+    '[aria-label="Selection: 10 columns × 2 rows"]',
+  )!
+  act(() => {
+    button.click()
+  })
+  const item = (text: string) =>
+    [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+      el => el.textContent === text,
+    )!
+  expect(item('Copy as FASTA')).toBeTruthy()
+  act(() => {
+    item('Zoom to selection').click()
+  })
+  expect(model.colWidth * 10).toBeCloseTo(model.msaCanvasWidth)
+  expect(model.rowHeight * 2).toBeCloseTo(model.msaAreaHeight)
+
+  act(() => {
+    button.click()
+  })
+  act(() => {
+    item('Clear selection').click()
+  })
+  expect(model.selection).toBeUndefined()
+})

@@ -11,7 +11,7 @@ import VerticalScrollbar from './VerticalScrollbar.tsx'
 import Header from './header/Header.tsx'
 import Minimap from './minimap/Minimap.tsx'
 import MSAPanel from './msa/MSAPanel.tsx'
-import { clickColor, hoverColor } from './overlayColors.ts'
+import { clickColor, hoverColor, selectionFill } from './overlayColors.ts'
 import RowPanelHeaders from './rowpanels/RowPanelHeaders.tsx'
 import RowPanels from './rowpanels/RowPanels.tsx'
 import TreeOverview from './tree/TreeOverview.tsx'
@@ -53,12 +53,19 @@ const TrackColumnIndicator = observer(function ({
     resizeHandleWidth,
     totalTrackAreaHeight,
     msaCanvasWidth,
+    resolvedSelection,
   } = model
 
-  // hovered column, then the pinned one, matching the alignment's own overlay
+  // the selected columns, the hovered column, then the pinned one, matching
+  // the alignment's own overlay
   const bands = [
-    { col: mouseCol, color: hoverColor },
-    { col: mouseClickCol, color: clickColor },
+    {
+      start: resolvedSelection?.startCol,
+      end: resolvedSelection?.endCol,
+      color: selectionFill,
+    },
+    { start: mouseCol, end: mouseCol, color: hoverColor },
+    { start: mouseClickCol, end: mouseClickCol, color: clickColor },
   ]
 
   return (
@@ -73,15 +80,15 @@ const TrackColumnIndicator = observer(function ({
         pointerEvents: 'none',
       }}
     >
-      {bands.map(({ col, color }) =>
-        col === undefined ? null : (
+      {bands.map(({ start, end, color }) =>
+        start === undefined || end === undefined ? null : (
           <div
             key={color}
             style={{
               position: 'absolute',
-              left: col * colWidth + scrollX,
+              left: start * colWidth + scrollX,
               top: 0,
-              width: colWidth,
+              width: (end - start + 1) * colWidth,
               height: totalTrackAreaHeight,
               backgroundColor: color,
               zIndex: 100,

@@ -14,6 +14,7 @@ import HeaderInfoArea from './HeaderInfoArea.tsx'
 import LoadWarnings from './LoadWarnings.tsx'
 import MSASettingsMenu from './MSASettingsMenu.tsx'
 import MultiAlignmentSelector from './MultiAlignmentSelector.tsx'
+import SelectionMenu from './SelectionMenu.tsx'
 import TreeSettingsMenu from './TreeSettingsMenu.tsx'
 import UnshareableDataWarning from './UnshareableDataWarning.tsx'
 import ZoomControls from './ZoomControls.tsx'
@@ -47,7 +48,10 @@ const Header = observer(function ({ model }: { model: MsaViewModel }) {
       <div style={{ paddingLeft: 20, margin: 'auto' }}>
         <MultiAlignmentSelector model={model} />
       </div>
+      {/* zero flex-basis, so what appears here on a selection or a hover
+      shrinks into the header's spare width and never wraps it */}
       <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex' }}>
+        <SelectionMenu model={model} />
         <HeaderInfoArea model={model} />
       </div>
       <LoadWarnings model={model} />

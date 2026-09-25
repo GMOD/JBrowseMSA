@@ -71,7 +71,11 @@ const MSACanvasBlock = observer(function ({
             onMouseMove(event, ref.current)
           }
         }}
-        onMouseDown={onMouseDown}
+        onMouseDown={event => {
+          if (ref.current) {
+            onMouseDown(event, ref.current)
+          }
+        }}
         onClick={event => {
           if (ref.current) {
             onClick(event, ref.current)

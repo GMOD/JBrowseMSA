@@ -7,6 +7,7 @@ import { IconButton, Menu, MenuItem } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { useWheelScroll } from '../useWheelScroll.ts'
+import { onMsaKey } from './msa/msaKeys.ts'
 import TrackTooltipContent from './tracks/TrackTooltipContent.tsx'
 import { useTrackHover } from './tracks/useTrackHover.ts'
 
@@ -146,7 +147,7 @@ const Track = observer(function ({
   )
   useWheelScroll({ ref, onScrollX })
   const { classes } = useStyles()
-  const { anchor, onMouseMove, onMouseLeave } = useTrackHover({
+  const { anchor, onMouseMove, onMouseDown, onMouseLeave } = useTrackHover({
     model,
     tooltip: showColumnStats,
   })
@@ -162,9 +163,21 @@ const Track = observer(function ({
       <div
         ref={ref}
         data-testid={`track_${track.model.id}`}
+        tabIndex={-1}
+        style={{ outline: 'none' }}
+        onKeyDown={event => {
+          if (onMsaKey(model, event)) {
+            event.preventDefault()
+          }
+        }}
         onMouseMove={event => {
           if (ref.current) {
             onMouseMove(event, ref.current)
+          }
+        }}
+        onMouseDown={event => {
+          if (ref.current) {
+            onMouseDown(event, ref.current)
           }
         }}
         onMouseLeave={() => {
