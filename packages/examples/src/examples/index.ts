@@ -4,6 +4,8 @@ import Ace2 from './Ace2'
 import Ace2Src from './Ace2.tsx?raw'
 import Aquaporin from './Aquaporin'
 import AquaporinSrc from './Aquaporin.tsx?raw'
+import CodonView from './CodonView'
+import CodonViewSrc from './CodonView.tsx?raw'
 import ColorSchemes from './ColorSchemes'
 import ColorSchemesSrc from './ColorSchemes.tsx?raw'
 import ColumnTracks from './ColumnTracks'
@@ -83,6 +85,7 @@ const components: Record<string, [ComponentType, string]> = {
   A3m: [A3m, A3mSrc],
   Ace2: [Ace2, Ace2Src],
   Aquaporin: [Aquaporin, AquaporinSrc],
+  CodonView: [CodonView, CodonViewSrc],
   ColorSchemes: [ColorSchemes, ColorSchemesSrc],
   ColumnTracks: [ColumnTracks, ColumnTracksSrc],
   CoronaFse: [CoronaFse, CoronaFseSrc],

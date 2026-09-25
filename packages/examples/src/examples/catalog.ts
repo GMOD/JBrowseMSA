@@ -366,6 +366,22 @@ export const catalog: CatalogEntry[] = [
       'stops show only in a nucleotide alignment.',
   },
   {
+    id: 'CodonView',
+    name: 'Codons against a reference (F12)',
+    category: 'Genes & DNA',
+    description:
+      'The F12 coding alignment read codon by codon against a row the reader ' +
+      'picks. The example translates that row with the standard genetic code ' +
+      'and compares the bases every other row has at the same three columns. ' +
+      'A synonymous change fills the codon blue, a non-synonymous one orange, ' +
+      'a premature stop black and a codon missing a base grey. Two bar tracks ' +
+      'count the rows of each kind per codon, and a text track numbers every ' +
+      'tenth codon. Against human, the four cetaceans share the 1-bp deletion ' +
+      'at codon 69 and stop codons at codons 391 and 521. With dolphin as the ' +
+      'reference, the translation reaches a stop at codon 94, 25 codons past ' +
+      'the deletion.',
+  },
+  {
     id: 'GeneCluster',
     name: 'Gene arrow map (gggenes-style)',
     category: 'Genes & DNA',
