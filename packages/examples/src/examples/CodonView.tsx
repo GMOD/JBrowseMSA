@@ -69,7 +69,7 @@ function codonTracks(
     const first = 3 * (number - 1)
     translation[first + 1] = aminoAcid
     if (number % codonStep === 0) {
-      const label = [...String(number)]
+      const label = String(number).split('')
       numbers.splice(first, label.length, ...label)
     }
     const count = (change: Change) =>

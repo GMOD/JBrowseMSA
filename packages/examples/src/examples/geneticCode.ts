@@ -7,10 +7,12 @@ const aminoAcids =
   'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
 
 export const geneticCode: Record<string, string> = Object.fromEntries(
-  [...aminoAcids].map((aminoAcid, i) => [
-    bases[i >> 4]! + bases[(i >> 2) & 3]! + bases[i & 3]!,
-    aminoAcid,
-  ]),
+  aminoAcids
+    .split('')
+    .map((aminoAcid, i) => [
+      bases[i >> 4]! + bases[(i >> 2) & 3]! + bases[i & 3]!,
+      aminoAcid,
+    ]),
 )
 
 export type Change = 'synonymous' | 'non-synonymous' | 'stop' | 'gapped'
@@ -73,7 +75,7 @@ export function readingFrame(row: string) {
  * a frameshift shows at the codon it starts in.
  */
 export function classify(reference: string, other: string): Change | undefined {
-  const gaps = [...other].filter(isGap).length
+  const gaps = other.split('').filter(isGap).length
   if (gaps === 3) {
     return undefined
   }
@@ -93,7 +95,7 @@ export function classify(reference: string, other: string): Change | undefined {
 
 function residueNumbers(row: string) {
   let n = 0
-  return [...row].map(base => (isGap(base) ? undefined : ++n))
+  return row.split('').map(base => (isGap(base) ? undefined : ++n))
 }
 
 /**
