@@ -448,18 +448,23 @@ function featurePanelSpans({
   )
 }
 
-// a scale over the values a field takes across the features drawn
+// a scale over the values a field takes across every feature loaded, so hiding
+// a type in the filter dialog leaves the rest in their colors, and a legend of
+// the values the features drawn carry
 function resolveFeatureScale(
   field: string,
   scale: ScaleSpec | undefined,
   annotations: Annotation[],
+  drawn: Annotation[],
 ) {
+  const valuesOf = (list: Annotation[]) =>
+    list.map(a => featureField(a, field)).filter(notEmpty)
+  const resolved = resolveScale(scale, valuesOf(annotations))
+  const shown = new Set(valuesOf(drawn))
   return {
     field,
-    ...resolveScale(
-      scale,
-      annotations.map(a => featureField(a, field)).filter(notEmpty),
-    ),
+    ...resolved,
+    legend: resolved.legend.filter(entry => shown.has(entry.id)),
   }
 }
 
@@ -4210,23 +4215,25 @@ function stateModelFactory({
       /**
        * #getter
        * each encoding with its scale resolved against the values its field
-       * takes: a feature channel reads them across the features drawn, every
+       * takes: a feature channel reads them across every feature loaded, every
        * other channel across the row table. Resolved once per change of that
        * table or the encodings, never per row per frame.
        */
       get resolvedEncodings(): ResolvedEncoding[] {
         const rows = Object.values(self.rowData)
-        const features = self.filteredAnnotations
         return self.encodings.map(encoding => ({
           ...encoding,
-          ...resolveScale(
-            encoding.scale,
-            featureChannels.has(encoding.channel)
-              ? features
-                  .map(a => featureField(a, encoding.field))
-                  .filter(notEmpty)
-              : rows.map(row => row?.[encoding.field]).filter(notEmpty),
-          ),
+          ...(featureChannels.has(encoding.channel)
+            ? resolveFeatureScale(
+                encoding.field,
+                encoding.scale,
+                self.allAnnotations,
+                self.filteredAnnotations,
+              )
+            : resolveScale(
+                encoding.scale,
+                rows.map(row => row?.[encoding.field]).filter(notEmpty),
+              )),
         }))
       },
 
@@ -4244,7 +4251,12 @@ function stateModelFactory({
           if (panel.kind === 'features') {
             const color = panel.encoding?.color
             const encoding = color
-              ? resolveFeatureScale(color.field, color.scale, annotations)
+              ? resolveFeatureScale(
+                  color.field,
+                  color.scale,
+                  self.allAnnotations,
+                  annotations,
+                )
               : featureFillEncoding
             const label = panel.encoding?.label
             return {

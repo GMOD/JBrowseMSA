@@ -142,6 +142,23 @@ test('the panel colors its spans by its own field, and lists that scale', () => 
   ])
 })
 
+test('hiding a feature type leaves the panel colors of the rest as they were', () => {
+  const { model } = featurePanel([
+    {
+      kind: 'features',
+      x: 'position',
+      encoding: { color: { field: 'class' } },
+    },
+  ])
+  model.setFilter('genA', false)
+
+  const panel = model.resolvedRowPanels[0] as ResolvedFeaturePanel
+  expect(panel.colors.get(span(panel, 'g1', 'genE').annotation)!.fill).toBe(
+    '#00BFC4',
+  )
+  expect(panel.legend.map(e => e.id)).toEqual(['core'])
+})
+
 test('a panel taking the overlay colors lists them under the domain key', () => {
   const { model } = featurePanel([{ kind: 'features', x: 'position' }])
   expect(

@@ -97,6 +97,14 @@ test('the domain legend lists the values of the field featureFill reads', () => 
   ])
 })
 
+test('hiding a feature type leaves the rest in the colors they had', () => {
+  const model = makeModel([{ channel: 'featureFill', field: 'group' }])
+  model.setFilter('myb', false)
+
+  expect(fillOf(model, 'kinase')).toBe('#00BFC4')
+  expect(model.legends[0]!.entries.map(e => e.id)).toEqual(['enzyme'])
+})
+
 test('the domain legend keeps the accessions when no encoding names the channel', () => {
   const { title, entries } = makeModel().legends[0]!
 

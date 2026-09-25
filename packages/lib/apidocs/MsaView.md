@@ -1473,9 +1473,9 @@ ResolvedClade[]
 #### getter: resolvedEncodings
 
 each encoding with its scale resolved against the values its field takes: a
-feature channel reads them across the features drawn, every other channel across
-the row table. Resolved once per change of that table or the encodings, never
-per row per frame.
+feature channel reads them across every feature loaded, every other channel
+across the row table. Resolved once per change of that table or the encodings,
+never per row per frame.
 
 ```js
 // type
