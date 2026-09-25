@@ -58,14 +58,19 @@ msaview(
   \item A \code{ggtree} plot object (tree is extracted automatically)
 }}
 
-\item{gff}{Domain annotation data. Can be:
+\item{gff}{Features on the rows, such as domains or genes. Can be:
 \itemize{
   \item A file path to a GFF3 file
   \item An http(s) URL, which the viewer fetches itself
   \item A character string containing GFF3 text
-  \item A data frame with columns \code{seqname}, \code{start}, \code{end},
-    and optionally \code{name}, \code{description}, \code{signature_desc}
-    and \code{color}, the fill the viewer draws that span with
+  \item A data frame with one feature per row: \code{row} (or
+    \code{seqname}) naming the alignment row, \code{start} and
+    \code{end} in residues of that row, and optionally \code{name}, the
+    key the legend and the palette group by, \code{description},
+    \code{type}, \code{strand} (\code{"+"} or \code{"-"}, which draws
+    an arrow) and \code{color}. Every other column is a field an
+    encoding can read. The viewer takes the frame as its \code{features}
+    layer.
 }}
 
 \item{color_scheme}{Color scheme name. Options include \code{"maeditor"}
@@ -214,8 +219,8 @@ both alignments and phylogenetic trees.
 }
 \details{
 \code{msaview} replaces whitespace and the Newick grammar characters in row
-names with underscores, in the alignment, the tree, a GFF data frame's
-\code{seqname}, and the row a highlight or column track names. Without that,
+names with underscores, in the alignment, the tree, the row a features data
+frame names, and the row a highlight or column track names. Without that,
 ape writes \code{Homo sapiens} as \code{Homo_sapiens}, the FASTA header keeps
 the space, the viewer reads that row as \code{Homo}, and no tree tip matches
 it.

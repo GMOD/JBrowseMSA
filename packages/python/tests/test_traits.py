@@ -29,6 +29,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "row_height": None,
         "allowed_gappyness": None,
         "highlights": [],
+        "features": [],
         "highlight_columns": [],
         "clades": [],
         "column_tracks": [],

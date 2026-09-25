@@ -27,7 +27,8 @@ gff <- paste(
 msaview(msa = seqs, gff = gff, color_scheme = "clustalx_protein_dynamic")
 
 # ── 3. Domains as a data frame ──────────────────────────────────────
-# Columns: seqname, start, end, and optionally name/description
+# Columns: row (or seqname), start, end, and any fields such as name,
+# description, strand, color or a column an encoding reads
 domains <- data.frame(
   seqname     = names(seqs),
   start       = 6,

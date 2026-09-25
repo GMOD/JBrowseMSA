@@ -264,8 +264,10 @@ slug <- function(name) {
 #'
 #' Draws each annotation as a box across the columns it covers, in a color per
 #' feature type, with a legend. Takes a GFF3 file, a URL the viewer fetches,
-#' GFF3 text, or a data frame with \code{seqname}, \code{start} and \code{end}
-#' columns.
+#' GFF3 text, or a data frame of features with \code{row} (or
+#' \code{seqname}), \code{start} and \code{end} columns, whose other
+#' columns are fields an encoding can read. See the \code{gff} argument of
+#' \code{\link{msaview}}.
 #'
 #' \code{react-msaview-cli interpro} builds the file from InterPro's
 #' precomputed matches.
@@ -284,6 +286,9 @@ geom_msa_domains <- function(gff) {
   }
   if (is_url(gff)) {
     return(msa_layer(set = list(gffFilehandle = uri_location(gff))))
+  }
+  if (is.data.frame(gff)) {
+    return(msa_layer(set = list(features = convert_features(gff))))
   }
   msa_layer(set = list(gff = convert_gff(gff)))
 }

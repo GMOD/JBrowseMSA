@@ -15,8 +15,10 @@ A layer to add to a viewer with \code{+}.
 \description{
 Draws each annotation as a box across the columns it covers, in a color per
 feature type, with a legend. Takes a GFF3 file, a URL the viewer fetches,
-GFF3 text, or a data frame with \code{seqname}, \code{start} and \code{end}
-columns.
+GFF3 text, or a data frame of features with \code{row} (or
+\code{seqname}), \code{start} and \code{end} columns, whose other
+columns are fields an encoding can read. See the \code{gff} argument of
+\code{\link{msaview}}.
 }
 \details{
 \code{react-msaview-cli interpro} builds the file from InterPro's

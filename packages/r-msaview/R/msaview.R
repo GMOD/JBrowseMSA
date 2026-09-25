@@ -5,8 +5,8 @@
 #' both alignments and phylogenetic trees.
 #'
 #' \code{msaview} replaces whitespace and the Newick grammar characters in row
-#' names with underscores, in the alignment, the tree, a GFF data frame's
-#' \code{seqname}, and the row a highlight or column track names. Without that,
+#' names with underscores, in the alignment, the tree, the row a features data
+#' frame names, and the row a highlight or column track names. Without that,
 #' ape writes \code{Homo sapiens} as \code{Homo_sapiens}, the FASTA header keeps
 #' the space, the viewer reads that row as \code{Homo}, and no tree tip matches
 #' it.
@@ -29,14 +29,19 @@
 #'     \item A \code{treeio::treedata} object
 #'     \item A \code{ggtree} plot object (tree is extracted automatically)
 #'   }
-#' @param gff Domain annotation data. Can be:
+#' @param gff Features on the rows, such as domains or genes. Can be:
 #'   \itemize{
 #'     \item A file path to a GFF3 file
 #'     \item An http(s) URL, which the viewer fetches itself
 #'     \item A character string containing GFF3 text
-#'     \item A data frame with columns \code{seqname}, \code{start}, \code{end},
-#'       and optionally \code{name}, \code{description}, \code{signature_desc}
-#'       and \code{color}, the fill the viewer draws that span with
+#'     \item A data frame with one feature per row: \code{row} (or
+#'       \code{seqname}) naming the alignment row, \code{start} and
+#'       \code{end} in residues of that row, and optionally \code{name}, the
+#'       key the legend and the palette group by, \code{description},
+#'       \code{type}, \code{strand} (\code{"+"} or \code{"-"}, which draws
+#'       an arrow) and \code{color}. Every other column is a field an
+#'       encoding can read. The viewer takes the frame as its \code{features}
+#'       layer.
 #'   }
 #' @param color_scheme Color scheme name. Options include \code{"maeditor"}
 #'   (default), \code{"clustal"}, \code{"lesk"}, \code{"cinema"}, \code{"flower"},
@@ -270,7 +275,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   # one-row alignment named after it
   msa_text <- if (is_url(msa)) NULL else convert_msa(msa)
   tree_text <- if (is_url(tree)) NULL else convert_tree(tree)
-  gff_text <- if (is_url(gff)) NULL else convert_gff(gff)
+  gff_text <- if (is_url(gff) || is.data.frame(gff)) NULL else convert_gff(gff)
 
   # MSAViewer props; a NULL assigned with $<- drops the field, where a NULL in
   # list() would serialize as JSON null
@@ -281,6 +286,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$msaFilehandle <- uri_location(msa)
   props$treeFilehandle <- uri_location(tree)
   props$gffFilehandle <- uri_location(gff)
+  props$features <- convert_features(gff)
   props$colorScheme <- convert_color_scheme(color_scheme)
   props$columnTracks <- convert_column_tracks(column_tracks)
   props$showBranchLen <- show_branch_len
@@ -757,50 +763,42 @@ convert_gff <- function(gff) {
   text <- read_text(gff)
   if (!is.null(text)) return(text)
 
-  if (is.data.frame(gff)) {
-    return(df_to_gff3(gff))
-  }
-
   stop("Unsupported gff input type: ", class(gff)[1],
-       ". Expected a file path, GFF3 string, or data frame.")
+       ". Expected a file path, GFF3 string, URL, or data frame.")
 }
 
-df_to_gff3 <- function(df) {
-  if (!("seqname" %in% names(df))) {
-    stop("GFF data frame must have a 'seqname' column")
+# A data frame of features as the viewer's `features` layer: one object per
+# row with `row`, `start` and `end`, and every other column as a field. `row`
+# may come as `seqname` or `seqnames`, the names a GFF-shaped frame from
+# rtracklayer or an older msaview call carries, and `type` as `feature`. A
+# missing value leaves the field out of that feature, and a strand other than
+# + or - (GFF's "." or Bioconductor's "*") draws no arrow.
+convert_features <- function(df) {
+  if (!is.data.frame(df)) return(NULL)
+  aliases <- c(seqname = "row", seqnames = "row", feature = "type")
+  for (from in intersect(names(aliases), names(df))) {
+    if (!(aliases[[from]] %in% names(df))) {
+      names(df)[names(df) == from] <- aliases[[from]]
+    }
+  }
+  if (!("row" %in% names(df))) {
+    stop("a features data frame needs a 'row' (or 'seqname') column, got ",
+         paste(names(df), collapse = ", "))
   }
   if (!all(c("start", "end") %in% names(df))) {
-    stop("GFF data frame must have 'start' and 'end' columns")
+    stop("a features data frame needs 'start' and 'end' columns")
   }
-
-  column <- function(name, default) {
-    if (name %in% names(df)) as.character(df[[name]]) else rep(default, nrow(df))
+  df$row <- sanitize_names(df$row)
+  if ("strand" %in% names(df)) {
+    df$strand <- ifelse(df$strand %in% c("+", "-"), as.character(df$strand), NA)
   }
-  # paste() renders 100000 as "1e+05", which no GFF parser reads as a position
-  coord <- function(name) format(df[[name]], scientific = FALSE, trim = TRUE)
-
-  attr_keys <- c(name = "Name", signature_desc = "signature_desc",
-                 description = "description", color = "color")
-  attr_keys <- attr_keys[names(attr_keys) %in% names(df)]
-  attributes <- if (length(attr_keys) > 0) {
-    encoded <- lapply(names(attr_keys), function(col) {
-      paste0(attr_keys[[col]], "=",
-             utils::URLencode(as.character(df[[col]]), reserved = TRUE))
-    })
-    do.call(paste, c(encoded, list(sep = ";")))
-  } else {
-    rep(".", nrow(df))
-  }
-
-  rows <- paste(
-    sanitize_names(df$seqname), column("source", "."),
-    column("feature", "protein_match"),
-    coord("start"), coord("end"),
-    column("score", "."), column("strand", "."), column("phase", "."),
-    attributes,
-    sep = "\t"
-  )
-  paste(c("##gff-version 3", rows), collapse = "\n")
+  columns <- lapply(df, function(col) {
+    if (is.factor(col)) as.character(col) else col
+  })
+  I(lapply(seq_len(nrow(df)), function(i) {
+    feature <- lapply(columns, function(col) col[[i]])
+    feature[!vapply(feature, is.na, logical(1))]
+  }))
 }
 
 # ggtree keeps the tree it drew: get.tree() reads it back from the plot, and

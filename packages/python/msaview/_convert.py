@@ -109,6 +109,25 @@ def _json_number(x: Any) -> float | int | None:
     return None if isinstance(x, float) and math.isnan(x) else x
 
 
+def features(value: Any) -> list[dict[str, Any]]:
+    """Features from a list of dicts or a pandas DataFrame, one per row.
+
+    Each needs `row`, `start` and `end`; every other key is a field. JSON has
+    no NaN, so a missing value in a DataFrame leaves that field out of the
+    feature.
+    """
+    if hasattr(value, "to_dict"):
+        value = value.to_dict("records")
+    return [
+        {
+            key: v
+            for key, v in dict(feature).items()
+            if v is not None and _json_number(v) is not None
+        }
+        for feature in value
+    ]
+
+
 def column_track(track: Mapping[str, Any]) -> dict[str, Any]:
     """A column track with a numpy array or pandas Series `values` as a list.
 

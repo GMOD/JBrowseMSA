@@ -18,11 +18,11 @@ test_that("an alignment and a tree agree on a name with a space", {
   expect_false(any(grepl("[[:space:]]", rows)))
 })
 
-test_that("a GFF data frame, a highlight and a track name the same row", {
-  gff <- msaviewr:::convert_gff(
+test_that("a features data frame, a highlight and a track name the same row", {
+  features <- msaviewr:::convert_features(
     data.frame(seqname = "Homo sapiens", start = 1, end = 10, name = "PF1")
   )
-  expect_match(gff, "Homo_sapiens\t")
+  expect_equal(features[[1]]$row, "Homo_sapiens")
 
   highlights <- msaviewr:::convert_highlights(list(
     list(row = "Homo sapiens", start = 1, end = 2),

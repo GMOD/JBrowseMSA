@@ -207,7 +207,8 @@ seqs <- c(
 # from a CLI-generated GFF file
 msaview(msa = seqs, gff = "domains.gff")
 
-# or from a data frame (columns: seqname, start, end, name, description)
+# or from a data frame: row (or seqname), start, end, and any fields,
+# such as a name, a description, a strand or a column an encoding reads
 domains <- data.frame(
   seqname     = names(seqs),
   start       = 6,

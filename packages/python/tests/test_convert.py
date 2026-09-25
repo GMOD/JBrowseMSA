@@ -109,3 +109,25 @@ def test_a_float_list_keeps_its_values_and_drops_nan():
         column_tracks=[{"id": "a", "name": "A", "kind": "bar", "values": [1.5, math.nan]}]
     )
     assert view.column_tracks[0]["values"] == [1.5, None]
+
+
+def test_features_take_dicts_as_they_are():
+    feature = {"row": "human", "start": 2, "end": 9, "name": "SH3", "group": "a"}
+    assert MSAView(features=[feature]).features == [feature]
+
+
+def test_features_take_a_dataframe_and_leave_out_missing_values():
+    pd = pytest.importorskip("pandas")
+    frame = pd.DataFrame(
+        {
+            "row": ["human", "mouse"],
+            "start": [2, 5],
+            "end": [9, 12],
+            "color": ["#c0392b", None],
+            "score": [0.5, math.nan],
+        }
+    )
+    assert MSAView(features=frame).features == [
+        {"row": "human", "start": 2, "end": 9, "color": "#c0392b", "score": 0.5},
+        {"row": "mouse", "start": 5, "end": 12},
+    ]

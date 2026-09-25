@@ -120,7 +120,7 @@ test_that("convert_gff reads file", {
   unlink(tmp)
 })
 
-test_that("df_to_gff3 emits one row per domain with its own attributes", {
+test_that("a features data frame becomes one object per row", {
   df <- data.frame(
     seqname = c("s1", "s1", "s2"),
     start = c(1, 50, 10),
@@ -128,36 +128,58 @@ test_that("df_to_gff3 emits one row per domain with its own attributes", {
     name = c("Kinase", "Zinc finger", "SH3"),
     stringsAsFactors = FALSE
   )
-  lines <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]]
+  features <- msaviewr:::convert_features(df)
 
-  expect_equal(lines[1], "##gff-version 3")
-  expect_length(lines, 4)
-  # each row keeps its own name, and a space is percent-encoded rather than
-  # ending the attribute
-  expect_match(lines[2], "Name=Kinase$")
-  expect_match(lines[3], "Name=Zinc%20finger$")
-  expect_match(lines[4], "Name=SH3$")
-  # positions land in the GFF start/end columns
-  expect_equal(strsplit(lines[3], "\t")[[1]][4:5], c("50", "80"))
+  expect_length(features, 3)
+  expect_equal(features[[2]], list(row = "s1", start = 50, end = 80,
+                                   name = "Zinc finger"))
+  expect_equal(features[[3]]$row, "s2")
 })
 
-test_that("df_to_gff3 writes a color column as the span's fill", {
-  df <- data.frame(seqname = "s1", start = 1, end = 20, name = "Kinase",
-                   color = "#c0392b", stringsAsFactors = FALSE)
-  lines <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]]
-  expect_match(lines[2], "Name=Kinase;color=%23c0392b$")
+test_that("every other column travels as a field, and NA leaves it out", {
+  df <- data.frame(row = c("s1", "s2"), start = 1, end = 20,
+                   color = c("#c0392b", NA), group = factor(c("a", "b")),
+                   stringsAsFactors = FALSE)
+  features <- msaviewr:::convert_features(df)
+  expect_equal(features[[1]]$color, "#c0392b")
+  expect_false("color" %in% names(features[[2]]))
+  expect_equal(features[[2]]$group, "b")
 })
 
-test_that("df_to_gff3 requires the columns it reads", {
-  expect_error(msaviewr:::df_to_gff3(data.frame(start = 1, end = 2)), "seqname")
-  expect_error(msaviewr:::df_to_gff3(data.frame(seqname = "s1")), "start")
+test_that("a strand other than + or - draws no arrow", {
+  df <- data.frame(row = "s1", start = 1:3, end = 5:7,
+                   strand = c("+", "*", "."), feature = "gene",
+                   stringsAsFactors = FALSE)
+  features <- msaviewr:::convert_features(df)
+  expect_equal(features[[1]]$strand, "+")
+  expect_false("strand" %in% names(features[[2]]))
+  expect_false("strand" %in% names(features[[3]]))
+  expect_equal(features[[1]]$type, "gene")
 })
 
-test_that("msaview passes gff through to the props", {
+test_that("a features data frame needs its placement columns", {
+  expect_error(msaviewr:::convert_features(data.frame(start = 1, end = 2)),
+               "row")
+  expect_error(msaviewr:::convert_features(data.frame(row = "s1")), "start")
+})
+
+test_that("a gff data frame reaches the viewer as features, not GFF text", {
   df <- data.frame(seqname = "s1", start = 1, end = 4, name = "Dom",
                    stringsAsFactors = FALSE)
   w <- msaview(msa = ">s1\nACGT", gff = df)
+  expect_false("gff" %in% names(w$x$props))
+  expect_equal(w$x$props$features[[1]]$name, "Dom")
+  expect_match(
+    as.character(htmlwidgets:::toJSON(w$x$props$features)),
+    '[{"row":"s1","start":1,"end":4,"name":"Dom"}]', fixed = TRUE
+  )
+})
+
+test_that("GFF text reaches the viewer as gff", {
+  gff <- "##gff-version 3\ns1\t.\tprotein_match\t1\t4\t.\t.\t.\tName=Dom"
+  w <- msaview(msa = ">s1\nACGT", gff = gff)
   expect_match(w$x$props$gff, "Name=Dom")
+  expect_false("features" %in% names(w$x$props))
 })
 
 test_that("an absent gff is absent from the props, not null", {
@@ -211,10 +233,12 @@ test_that("convert_msa handles Biostrings multiple alignments", {
   expect_equal(msaviewr:::convert_msa(aln), ">a\nAC-T\n>b\nACGT")
 })
 
-test_that("df_to_gff3 writes large coordinates in full", {
-  df <- data.frame(seqname = "s1", start = 100000, end = 1234567)
-  line <- strsplit(msaviewr:::df_to_gff3(df), "\n")[[1]][2]
-  expect_equal(strsplit(line, "\t")[[1]][4:5], c("100000", "1234567"))
+test_that("a feature keeps large coordinates as numbers", {
+  features <- msaviewr:::convert_features(
+    data.frame(row = "s1", start = 100000, end = 1234567)
+  )
+  expect_match(as.character(htmlwidgets:::toJSON(features)),
+               '"start":100000,"end":1234567', fixed = TRUE)
 })
 
 test_that("convert_column_tracks handles NULL", {

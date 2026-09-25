@@ -6,6 +6,7 @@ import type {
   Clade,
   ColumnTrackSpec,
   Encoding,
+  Feature,
   Highlight,
   MSAViewerProps,
   MountedViewer,
@@ -33,6 +34,7 @@ export interface Traits {
   row_height: number | null
   allowed_gappyness: number | null
   highlights: Highlight[]
+  features: Feature[]
   highlight_columns: number[]
   clades: Clade[]
   column_tracks: ColumnTrackSpec[]
@@ -71,6 +73,7 @@ export const INPUT_TRAITS = [
   'row_height',
   'allowed_gappyness',
   'highlights',
+  'features',
   'highlight_columns',
   'clades',
   'column_tracks',
@@ -134,6 +137,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     rowHeight: optional(model.get('row_height')),
     allowedGappyness: optional(model.get('allowed_gappyness')),
     highlights: model.get('highlights'),
+    features: model.get('features'),
     highlightColumns: model.get('highlight_columns'),
     clades: model.get('clades'),
     columnTracks: model.get('column_tracks'),

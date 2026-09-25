@@ -39,7 +39,7 @@ from typing import Any, Callable
 import anywidget
 import traitlets
 
-from ._convert import column_track, gff_text, msa_text, tree_text
+from ._convert import column_track, features, gff_text, msa_text, tree_text
 
 __all__ = ["MSAView"]
 
@@ -58,6 +58,11 @@ class _Document(traitlets.Unicode):
 class _ColumnTracks(traitlets.List):
     def validate(self, obj: Any, value: Any) -> list[dict[str, Any]]:
         return super().validate(obj, [column_track(t) for t in value])
+
+
+class _Features(traitlets.List):
+    def validate(self, obj: Any, value: Any) -> list[dict[str, Any]]:
+        return super().validate(obj, features(value))
 
 
 class MSAView(anywidget.AnyWidget):
@@ -82,6 +87,9 @@ class MSAView(anywidget.AnyWidget):
     row_height = traitlets.Float(None, allow_none=True).tag(sync=True)
     allowed_gappyness = traitlets.Float(None, allow_none=True).tag(sync=True)
     highlights = traitlets.List(traitlets.Dict()).tag(sync=True)
+    # features on the rows as data, drawn with the GFF's: a list of
+    # {row, start, end, ...} dicts or a DataFrame with those columns
+    features = _Features(traitlets.Dict()).tag(sync=True)
     highlight_columns = traitlets.List(traitlets.Int()).tag(sync=True)
     # clades of the tree with a mark over them, keyed by tip names
     clades = traitlets.List(traitlets.Dict()).tag(sync=True)
