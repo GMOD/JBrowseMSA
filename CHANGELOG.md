@@ -4,6 +4,65 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [8.4.0](https://github.com/GMOD/JBrowseMSA/compare/v8.3.0...v8.4.0) (2026-09-25)
+
+### Bug Fixes
+
+- Refuse a structure_link capture that lost its hover ([6313327](https://github.com/GMOD/JBrowseMSA/commit/6313327a18daaeb4a7eb799a94694ec35ccd8871))
+- Unbreak the CLI build and the docs deploy ([5d49acd](https://github.com/GMOD/JBrowseMSA/commit/5d49acd70d4d50dc549d3ebf79b2d898888df8e5))
+- Clip the viewer to its height so focus cannot scroll it ([e80fd4a](https://github.com/GMOD/JBrowseMSA/commit/e80fd4af24091c75e66328d0cd46f634d9ae6305))
+- Filter Go to suggestions without createFilterOptions, which JBrowse hosts do not re-export ([07c366f](https://github.com/GMOD/JBrowseMSA/commit/07c366f7a90fa8722c1aa1a5492845635f6c86b7))
+- A number in the row table reads as its string ([364b8eb](https://github.com/GMOD/JBrowseMSA/commit/364b8eb6b9bd0bdda076b3954b04f1578597547e))
+- Hiding a feature type leaves the rest in their colors ([fbf6b01](https://github.com/GMOD/JBrowseMSA/commit/fbf6b0173cff263d8664595fa5893c01aa86b26c))
+
+### Chores
+
+- Delete the four protein-link generators ([fa56abb](https://github.com/GMOD/JBrowseMSA/commit/fa56abbfa6ab0a0146bd4fe9073d1bceb1c0f2d6))
+- Drop the utils import only df_to_gff3 used ([3dabce2](https://github.com/GMOD/JBrowseMSA/commit/3dabce2fda38cc25df131254246c000ba28cc191))
+
+### Documentation
+
+- Protein3d dropped the sequence-matching bridge ([447134b](https://github.com/GMOD/JBrowseMSA/commit/447134b83e922f94b34c480a0cbfc282c17f4257))
+- Document customColorScheme and mark the letter map shipped ([e881ee7](https://github.com/GMOD/JBrowseMSA/commit/e881ee75f55240143ef9a8bda624b1bc27344365))
+- Name the {map} rule customColorScheme shares with encodings ([3f2ff09](https://github.com/GMOD/JBrowseMSA/commit/3f2ff09a7fe74674e8784243939dc12d0cfe4a95))
+- Write the four gene sessions as short-form specs ([8dd8b8a](https://github.com/GMOD/JBrowseMSA/commit/8dd8b8ae2c3570107c69a8a3856a62ca61950160))
+- Close out the protein-link generator consolidation ([76cbe3e](https://github.com/GMOD/JBrowseMSA/commit/76cbe3e3910b8b596c6ecce639d6aebd3e038626))
+- Regenerate the figures for the Go to box ([acaa5ba](https://github.com/GMOD/JBrowseMSA/commit/acaa5baea62460b62416f15d047e01126bf55c7e))
+- Write every demo link as #data= ([7f76d2a](https://github.com/GMOD/JBrowseMSA/commit/7f76d2a38d2e1ab5ca5599397dd39abe5c361fc6))
+- Document the selection layer and the shift-drag gesture ([0391648](https://github.com/GMOD/JBrowseMSA/commit/03916485b9a5f2dd4e9cd0003215c855f1b92ab2))
+- Describe the Rfam download by what the page shows ([f6e99f4](https://github.com/GMOD/JBrowseMSA/commit/f6e99f475657a7884ffefc20f0c24575121fb58a))
+- Mark the selection, the two demos and structure conservation shipped ([f137546](https://github.com/GMOD/JBrowseMSA/commit/f137546b461c2a1dbfa3194c624c653618630c33))
+- Regenerate the model API docs for the selection ([8c84233](https://github.com/GMOD/JBrowseMSA/commit/8c84233281bacb093e238a568f99121dcd7713c3))
+- Document the features layer; the codon example uses it ([2934ec7](https://github.com/GMOD/JBrowseMSA/commit/2934ec7887650b7739e3553acbd5ea8038b28718))
+
+### Features
+
+- Go to a column or a row's residue from the header box ([a6c2a74](https://github.com/GMOD/JBrowseMSA/commit/a6c2a74ab98b408de7673c08fd951c7f5c5e2e03))
+- List the renderer commits since the last full regen ([5ac745f](https://github.com/GMOD/JBrowseMSA/commit/5ac745fc2dc0c9a3d203964282542c0d673313a0))
+- Color residues from a customColorScheme letter map ([0eef7dd](https://github.com/GMOD/JBrowseMSA/commit/0eef7dde28e32c1fbf5c1b0eab4f50d035714912))
+- ColorScheme prop takes a {map} of letter colors ([e4c4e12](https://github.com/GMOD/JBrowseMSA/commit/e4c4e12e35d87cbd4e7f6acf00257b4fcb71eb41))
+- A letter color map through color_scheme ([d2f213d](https://github.com/GMOD/JBrowseMSA/commit/d2f213d1ac12bbdee6c52908ee5aeb6adc7ca7f4))
+- Carry the shared view in #data=, which reaches no server ([ba71ac2](https://github.com/GMOD/JBrowseMSA/commit/ba71ac202e97889d5ede4deecd5103ed6874cafb))
+- Compare an alignment's codons against a reference row ([082eb0b](https://github.com/GMOD/JBrowseMSA/commit/082eb0beb2219959f83708d585e126bd72fc3837))
+- Read the F12 coding alignment as codons ([b5da778](https://github.com/GMOD/JBrowseMSA/commit/b5da778a7dc4e3ba5431cd4d6e882de50e3686fa))
+- A persisted selection of columns and rows ([6f824f9](https://github.com/GMOD/JBrowseMSA/commit/6f824f94de121782d4db9f95f4ae63bf0b23e81d))
+- Shift-drag selects a block, with a header menu to act on it ([ce71105](https://github.com/GMOD/JBrowseMSA/commit/ce71105b432c2678115d09a505f48909b437e476))
+- A selection prop and change event in React, R and Python ([4c4b5b0](https://github.com/GMOD/JBrowseMSA/commit/4c4b5b03304e4c5bc01ff6062e513105a35ff013))
+- Load a Pfam or Rfam family by accession ([8b94b55](https://github.com/GMOD/JBrowseMSA/commit/8b94b5594da1db25a71dfb6e8d4752ff751d6bde))
+- Color the linked structure by column conservation ([e9448ef](https://github.com/GMOD/JBrowseMSA/commit/e9448ef2fad197aa8daf79950cb69e2ba346fea5))
+- A new gff or gffFilehandle keeps the model ([ff61e64](https://github.com/GMOD/JBrowseMSA/commit/ff61e64fa5a190186b826eb5f050eefb358871f9))
+- A features layer takes the rows' spans as JSON ([cedd39a](https://github.com/GMOD/JBrowseMSA/commit/cedd39ab1fb15bd643273b3e3262197fedc0c941))
+- Features as a data frame or a list of dicts ([85e87b6](https://github.com/GMOD/JBrowseMSA/commit/85e87b68b30ea8258c301198cc865356802fb4b1))
+
+### Refactoring
+
+- Render metadata with a local table, not core's BaseFeatureDetail ([e19ba99](https://github.com/GMOD/JBrowseMSA/commit/e19ba9956674578447487337edccdd3c6d8271d6))
+
+### Styling
+
+- Split strings instead of spreading them ([cfa5de2](https://github.com/GMOD/JBrowseMSA/commit/cfa5de2940886f611cd06cc523c788646a1f818a))
+- Format LoadByAccession ([6bbbb2a](https://github.com/GMOD/JBrowseMSA/commit/6bbbb2a8a86b652dc4f3c8322c2adbc6c8366b0b))
+
 ## [8.3.0](https://github.com/GMOD/JBrowseMSA/compare/v8.2.0...v8.3.0) (2026-09-24)
 
 ### Bug Fixes
