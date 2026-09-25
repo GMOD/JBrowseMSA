@@ -13,8 +13,7 @@ License: MIT + file LICENSE
 URL: https://github.com/GMOD/JBrowseMSA
 BugReports: https://github.com/GMOD/JBrowseMSA/issues
 Imports:
-    htmlwidgets (>= 1.5.0),
-    utils
+    htmlwidgets (>= 1.5.0)
 Suggests:
     ape,
     treeio,
