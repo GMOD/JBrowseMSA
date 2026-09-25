@@ -6,8 +6,25 @@ import { observer } from 'mobx-react'
 import { findableRowNames, goTo, rowNameSuggestions } from './goTo.ts'
 
 import type { MsaViewModel } from '../../model.ts'
+import type { AutocompleteRenderInputParams } from '@mui/material'
 
 const label = 'Go to row or column'
+
+// MUI 9 hands renderInput `slotProps`; MUI 7, which every released JBrowse host
+// serves, hands it `inputProps` and no `slotProps` at all
+export function labelledInput(params: AutocompleteRenderInputParams) {
+  const { slotProps, inputProps } = params as Partial<
+    AutocompleteRenderInputParams & { inputProps: object }
+  >
+  return slotProps
+    ? {
+        slotProps: {
+          ...slotProps,
+          htmlInput: { ...slotProps.htmlInput, 'aria-label': label },
+        },
+      }
+    : { inputProps: { ...inputProps, 'aria-label': label } }
+}
 
 const GoToBox = observer(function ({ model }: { model: MsaViewModel }) {
   const [missed, setMissed] = useState(false)
@@ -37,10 +54,7 @@ const GoToBox = observer(function ({ model }: { model: MsaViewModel }) {
           error={missed}
           placeholder={label}
           title="A row name, a column number, or name:residue"
-          slotProps={{
-            ...params.slotProps,
-            htmlInput: { ...params.slotProps.htmlInput, 'aria-label': label },
-          }}
+          {...labelledInput(params)}
         />
       )}
     />
