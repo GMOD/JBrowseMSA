@@ -505,9 +505,9 @@ export const specs = [
   },
 ]
 
-// The Shorthand and rowData sections of docs/layers.md link these states in the
-// app and show no figure, so generate.mjs never captures them and only
-// genGuideLinks reads the list.
+// The Shorthand, rowData, customColorScheme and selection sections of
+// docs/layers.md link these states in the app and show no figure, so
+// generate.mjs never captures them and only genGuideLinks reads the list.
 export const linkSpecs = [
   {
     name: 'layers-shorthand',
@@ -555,6 +555,14 @@ export const linkSpecs = [
         D: '#d62728',
         E: '#d62728',
       },
+    }),
+  },
+  {
+    name: 'layers-selection',
+    // the selection section's inline snapshot
+    url: fileSnap({
+      data: { msa: '>human\nMKAANSE\n>mouse\nMKA-NSE\n>chicken\nMKSANSE' },
+      selection: { start: 2, end: 5, rows: ['human', 'mouse'] },
     }),
   },
 ]

@@ -66,6 +66,12 @@ you can read one site down the whole family.
 - **Keyboard**: click the alignment, then the arrow keys move one cell (a page
   with shift), `+` and `-` zoom, and Home and End jump to the first and last
   column.
+- **Select** a block of cells by holding shift and dragging across the
+  alignment, or a range of columns across every row by dragging along a track,
+  such as the Position ruler. The header then shows the block's size, such as
+  "12 columns × 3 rows", as a button whose menu copies the block as FASTA, zooms
+  to it, or clears it. Escape clears it too. The selection travels in the
+  `#data=` link.
 - **Zoom** with the magnifier buttons in the header. Ctrl+wheel zooms at the
   cursor whatever the wheel is set to do.
 - **Mouse wheel**: the mouse button in the header opens a menu with the four

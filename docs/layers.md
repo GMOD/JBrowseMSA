@@ -196,6 +196,37 @@ alignment and any tree file have loaded. The viewer then clears it, so a
 reloaded session keeps the reader's own scroll. `model.zoomToRegion(region)`
 does the same at runtime.
 
+## selection
+
+A block of the alignment, selected: columns `start` to `end` of the file,
+1-based and inclusive, across the rows `rows` names, or across every row where
+`rows` is absent. The viewer draws it as a bordered blue band, and a shift-drag
+in the viewer replaces it, so a link can open on a block and a script can read
+back the block a person chose.
+
+```json
+{
+  "type": "MsaView",
+  "data": { "msa": ">human\nMKAANSE\n>mouse\nMKA-NSE\n>chicken\nMKSANSE" },
+  "selection": { "start": 2, "end": 5, "rows": ["human", "mouse"] }
+}
+```
+
+[Open this snapshot in the app][live-layers-selection].
+
+`start` and `end` count every column of the file, hidden gappy ones included,
+the way a column highlight does, so hiding gaps leaves the band on the same
+residues. A selection that lies entirely on hidden columns draws nothing. The
+header's selection menu copies the block as FASTA across those columns, gaps
+kept, and zooms to it.
+
+React: the `selection` prop on `MSAViewer`, with `onSelectionChange` reporting
+each change the reader makes, or `model.setSelection(block)`. R:
+`msaview(selection = list(start = 2, end = 5, rows = c("human", "mouse")))` or
+`geom_msa_selection(2, 5, rows = c("human", "mouse"))`, with
+`input$<id>_selection` in Shiny. Python: the `selection` trait, which the widget
+also writes back.
+
 ## clades
 
 A clade of the tree with a mark over it. `mark` takes one of five values:
@@ -774,6 +805,8 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A12%2C%22rowHeight%22%3A18%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22conservation%22%3Atrue%2C%22property-conservation%22%3Atrue%7D%2C%22columnTracks%22%3A%5B%7B%22id%22%3A%22hydropathy%22%2C%22name%22%3A%22Hydropathy%22%2C%22kind%22%3A%22bar%22%2C%22values%22%3A%5B6.4%2C6.3%2C8.3%2C3.6%2C6.4%2C0%2C8.3%2C8.3%2C2.9%2C8.3%2C8.3%2C6.3%2C8.3%2C8.3%2C6.3%2C8.3%2C3.6%2C4.1%2C2.9%2C1%2C2.9%2C6.3%2C6.3%2C6.3%2C7.3%2C8.7%2C1%2C1%2C1.2999999999999998%2C8.3%2C7%2C4.1%2C3.7%2C1.2999999999999998%2C8.3%2C8.7%2C1%2C6.3%2C8.3%2C3.2%2C8.3%2C8.7%2C7%2C4.1%2C1%2C0%2C4.1%2C7.3%2C7.3%2C3.2%2C3.8%2C2.9%2C0.6000000000000001%2C3.8%2C0%2C0%2C1%2C6.3%2C1%2C1%2C8.3%2C1%2C8.7%2C4.1%2C1%2C8.7%2C1%2C8.3%2C4.1%2C4.1%2C4.1%2C2.9%2C4.1%2C6.3%2C4.1%2C3.7%2C8.3%2C1%2C2.9%2C8.3%2C6.3%2C8.3%2C1%2C4.1%2C3.7%2C8.3%2C1%2C0.6000000000000001%2C0%2C4.1%2C9%2C8.7%2C1%2C1%2C7%2C7%2C3.8%2C3.7%2C9%2C7%2C3.7%2C8.3%2C3.2%2C1%2C8.3%2C1%2C1%2C3.2%2C7%2C1%5D%2C%22max%22%3A9%2C%22color%22%3A%22%236a51a3%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A55%7D%2C%7B%22id%22%3A%22chain%22%2C%22name%22%3A%22Chain%22%2C%22kind%22%3A%22text%22%2C%22data%22%3A%22SSSSSSSSSSSSSSSSSSSSSSSSBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB..CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC..AAAAAAAAAAAAAAAAAAAAA%22%2C%22colors%22%3A%7B%22S%22%3A%22%23bdbdbd%22%2C%22B%22%3A%22%234e79a7%22%2C%22C%22%3A%22%23e8e8e8%22%2C%22A%22%3A%22%23e15759%22%2C%22.%22%3A%22%23fafafa%22%7D%2C%22row%22%3A%22Human%22%7D%2C%7B%22id%22%3A%22disulfides%22%2C%22name%22%3A%22Disulfide%20bonds%22%2C%22kind%22%3A%22arc%22%2C%22arcs%22%3A%5B%7B%22start%22%3A31%2C%22end%22%3A96%7D%2C%7B%22start%22%3A43%2C%22end%22%3A109%7D%2C%7B%22start%22%3A95%2C%22end%22%3A100%7D%5D%2C%22color%22%3A%22%23b8860b%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A70%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.nh%22%7D%7D%7D
 [live-layers-highlights]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A140%2C%22colWidth%22%3A2.4%2C%22rowHeight%22%3A18%2C%22relativeTo%22%3A%22Human%22%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22highlights%22%3A%5B%7B%22row%22%3A%22Human%22%2C%22start%22%3A102%2C%22end%22%3A292%2C%22label%22%3A%22DNA-binding%22%2C%22color%22%3A%22rgba(255%2C140%2C0%2C0.15)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A325%2C%22end%22%3A356%2C%22label%22%3A%22Oligomerization%22%2C%22color%22%3A%22rgba(255%2C140%2C0%2C0.15)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A175%2C%22end%22%3A175%2C%22label%22%3A%22175%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A245%2C%22end%22%3A245%2C%22label%22%3A%22245%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A248%2C%22end%22%3A248%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A249%2C%22end%22%3A249%2C%22label%22%3A%22248%2F249%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A273%2C%22end%22%3A273%2C%22label%22%3A%22273%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A282%2C%22end%22%3A282%2C%22label%22%3A%22282%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22rows%22%3A%5B%22Chicken%22%2C%22Turtle%22%2C%22Anole%22%2C%22Frog%22%2C%22Zebrafish%22%5D%2C%22label%22%3A%22non-mammals%22%2C%22color%22%3A%22rgba(78%2C121%2C167%2C0.22)%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fp53%2Fp53-vertebrates.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fp53%2Fp53-vertebrates.nh%22%7D%7D%7D
+[live-layers-selection]:
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSE%5Cn%3Emouse%5CnMKA-NSE%5Cn%3Echicken%5CnMKSANSE%22%7D%2C%22selection%22%3A%7B%22start%22%3A2%2C%22end%22%3A5%2C%22rows%22%3A%5B%22human%22%2C%22mouse%22%5D%7D%7D%7D
 [live-layers-clades]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A700%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%5D%2C%22clades%22%3A%5B%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22highlight%22%2C%22color%22%3A%22%23fff3c4%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22bracket%22%2C%22color%22%3A%22%23b45309%22%2C%22label%22%3A%22cephalosporin%2C%207%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-3%22%2C%22TEM-7%22%5D%2C%22tips%22%3A6%2C%22mark%22%3A%22collapse%22%7D%5D%7D%7D
 [live-layers-rowdata]:
