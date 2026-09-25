@@ -91,6 +91,7 @@ msaview(msa = "p53.aln", tree = "p53.nh") +
 | `scale_residue_color()` | the color scheme, and the channel it paints             |
 | `stat_msa_diff()`       | draws every row as its differences from one row         |
 | `coord_msa()`           | the span the viewer opens on                            |
+| `geom_msa_selection()`  | a block of columns and rows, selected                   |
 | `coord_tree()`          | the tree's child order (ladderize) and its root         |
 | `theme_msa()`           | cell size, tree gutter, toolbar, light or dark          |
 
@@ -317,13 +318,16 @@ msaview(msa = seqs, tree = td)
 
 ### In Shiny
 
-The widget sets two inputs named after its output id. `input$<id>_click` holds
+The widget sets three inputs named after its output id. `input$<id>_click` holds
 the cell a click pinned: `column` is the 1-based column of the file, `row` the
 row name, `residue` the 1-based position in that row's sequence (absent on a
 gap), and `letter` the character. It is `NULL` after a click clears it.
 `input$<id>_viewport` holds the columns on screen as `startColumn` and
-`endColumn`. A re-render that keeps the same alignment keeps the reader's scroll
-and zoom, so changing `color_scheme` below restyles the view in place.
+`endColumn`. `input$<id>_selection` holds the block a shift-drag selects:
+`start` and `end` columns of the file, and `rows`, the selected row names,
+absent when the block spans every row. It is `NULL` after Escape clears it. A
+re-render that keeps the same alignment keeps the reader's scroll and zoom, so
+changing `color_scheme` below restyles the view in place.
 
 ```r
 library(shiny)

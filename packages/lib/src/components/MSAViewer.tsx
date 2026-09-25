@@ -17,6 +17,7 @@ import type {
   ColumnTrackSpec,
   Encoding,
   Highlight,
+  MsaSelection,
   Region,
   ResidueEncoding,
   ResidueMapping,
@@ -125,6 +126,11 @@ export interface MSAViewerProps {
    * in columns, 1-based and inclusive
    */
   region?: Region
+  /**
+   * the selected block: `{start, end}` columns of the file, 1-based and
+   * inclusive, and `rows` by name, every row where absent
+   */
+  selection?: MsaSelection
   /** leave out the toolbar, for a page drawing its own controls */
   hideHeader?: boolean
   /**
@@ -138,6 +144,11 @@ export interface MSAViewerProps {
   onCellClick?: (cell: Cell | undefined) => void
   /** the alignment columns on screen, after every scroll, zoom and resize */
   onViewportChange?: (viewport: Viewport | undefined) => void
+  /**
+   * the selected block, after each change a drag, the header menu, Escape or
+   * the `selection` prop makes, or undefined when it clears
+   */
+  onSelectionChange?: (selection: MsaSelection | undefined) => void
   /**
    * the model the viewer built, for the model API; called again with the new
    * model when msa, tree, gff or a filehandle changes
@@ -190,7 +201,9 @@ export default function MSAViewer(props: MSAViewerProps) {
   return <Viewer key={shown.generation} {...props} />
 }
 
-function useModelReaction<K extends 'hoveredCell' | 'clickedCell' | 'viewport'>(
+function useModelReaction<
+  K extends 'hoveredCell' | 'clickedCell' | 'viewport' | 'selection',
+>(
   model: MsaViewModel,
   key: K,
   handler: ((value: MsaViewModel[K]) => void) | undefined,
@@ -244,11 +257,13 @@ function Viewer({
   treeOrder,
   treeRoot,
   region,
+  selection,
   hideHeader,
   theme,
   onCellHover,
   onCellClick,
   onViewportChange,
+  onSelectionChange,
   onModel,
 }: MSAViewerProps) {
   const [model] = useState(() =>
@@ -276,6 +291,7 @@ function Viewer({
       ...(allowedGappyness !== undefined ? { allowedGappyness } : {}),
       ...(highlightColumns ? { highlightColumns } : {}),
       ...(highlights ? { highlights } : {}),
+      ...(selection ? { selection } : {}),
       ...(clades ? { clades } : {}),
       ...(relativeTo ? { relativeTo } : {}),
       ...(columnTracks ? { columnTracks } : {}),
@@ -375,6 +391,10 @@ function Viewer({
   useEffect(() => {
     model.setHighlights(JSON.parse(highlightsKey))
   }, [model, highlightsKey])
+  const selectionKey = JSON.stringify(selection ?? null)
+  useEffect(() => {
+    model.setSelection(JSON.parse(selectionKey) ?? undefined)
+  }, [model, selectionKey])
   const treeRootKey = JSON.stringify(treeRoot ?? null)
   useEffect(() => {
     model.setTreeRoot(JSON.parse(treeRootKey) ?? undefined)
@@ -428,6 +448,7 @@ function Viewer({
   useModelReaction(model, 'hoveredCell', onCellHover)
   useModelReaction(model, 'clickedCell', onCellClick)
   useModelReaction(model, 'viewport', onViewportChange)
+  useModelReaction(model, 'selection', onSelectionChange)
 
   const latestOnModel = useRef(onModel)
   useEffect(() => {

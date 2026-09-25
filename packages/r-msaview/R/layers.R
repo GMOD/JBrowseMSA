@@ -11,8 +11,8 @@
 #'   \code{\link{geom_msa_rowdata}}, \code{\link{geom_msa_strip}},
 #'   \code{\link{geom_msa_features}},
 #'   \code{\link{scale_residue_color}},
-#'   \code{\link{scale_row_color}}, \code{\link{theme_msa}} or
-#'   \code{\link{coord_msa}}.
+#'   \code{\link{scale_row_color}}, \code{\link{theme_msa}},
+#'   \code{\link{coord_msa}} or \code{\link{geom_msa_selection}}.
 #' @return The viewer, carrying the layer.
 #'
 #' @examples
@@ -392,6 +392,31 @@ coord_tree <- function(order = NULL, root = NULL) {
 coord_msa <- function(start, end, row = NULL) {
   msa_layer(set = list(
     region = convert_region(drop_null(list(start = start, end = end, row = row)))
+  ))
+}
+
+#' A block of the alignment, selected
+#'
+#' Selects alignment columns \code{start} to \code{end} across the rows
+#' \code{rows} names, or across every row without it, and draws the block as
+#' a blue band. A shift-drag in the viewer replaces it, and in Shiny
+#' \code{input$<output id>_selection} holds the block the reader selected.
+#'
+#' @param start,end The columns, 1-based and inclusive.
+#' @param rows A character vector of row names, or NULL for every row.
+#' @return A layer to add to a viewer with \code{+}.
+#'
+#' @examples
+#' \dontrun{
+#' msaview(msa = "p53.aln") +
+#'   geom_msa_selection(100, 120, rows = c("Human", "Mouse"))
+#' }
+#' @export
+geom_msa_selection <- function(start, end, rows = NULL) {
+  msa_layer(set = list(
+    selection = convert_selection(
+      drop_null(list(start = start, end = end, rows = rows))
+    )
   ))
 }
 

@@ -96,6 +96,9 @@ class MSAView(anywidget.AnyWidget):
     row_panels = traitlets.List(traitlets.Dict()).tag(sync=True)
     relative_to = traitlets.Unicode(None, allow_none=True).tag(sync=True)
     region = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
+    # the selected block, {"start", "end"} columns and "rows" by name: set it
+    # from Python, and read back what the person selected in the viewer
+    selection = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
     draw_tree = traitlets.Bool(True).tag(sync=True)
     tree_area_width = traitlets.Float(None, allow_none=True).tag(sync=True)
     auto_tree_area_width = traitlets.Bool(False).tag(sync=True)

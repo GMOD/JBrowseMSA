@@ -137,6 +137,26 @@ test_that("the branch channel reaches the props", {
   expect_equal(w$x$props$encodings[[1]]$channel, "branch")
 })
 
+test_that("a selection keeps one row name an array, sanitized", {
+  w <- msaview(msa = msa) + geom_msa_selection(2, 5, rows = "Homo sapiens")
+  expect_equal(w$x$props$selection$start, 2L)
+  expect_equal(w$x$props$selection$end, 5L)
+  expect_equal(as.character(w$x$props$selection$rows), "Homo_sapiens")
+  expect_match(
+    as.character(htmlwidgets:::toJSON(w$x$props$selection)),
+    '"rows":["Homo_sapiens"]', fixed = TRUE
+  )
+})
+
+test_that("a selection with no rows carries none", {
+  w <- msaview(msa = msa, selection = list(start = 1, end = 3))
+  expect_null(w$x$props$selection$rows)
+})
+
+test_that("a selection needs its columns", {
+  expect_error(msaview(msa = msa, selection = list(rows = "Mouse")), "start")
+})
+
 test_that("the diff layer names the row to compare against", {
   w <- msaview(msa = msa) + stat_msa_diff("Homo sapiens")
   expect_equal(w$x$props$relativeTo, "Homo_sapiens")
@@ -161,6 +181,7 @@ test_that("every prop-carrying msaview argument has a layer", {
     scale_row_color("clade", palette = "set1"),
     scale_residue_color("clustal", encoding = "color"),
     coord_msa(1, 2),
+    geom_msa_selection(1, 2),
     coord_tree(order = "ladderize", root = "midpoint"),
     stat_msa_diff("a"),
     theme_msa("dark", col_width = 1, row_height = 1, draw_tree = TRUE,
@@ -186,7 +207,8 @@ test_that("every prop-carrying msaview argument has a layer", {
     row_data = data.frame(label = "a", clade = "x"),
     encodings = list(list(channel = "tipLabel", field = "clade")),
     row_panels = list(list(kind = "strip", field = "clade")),
-    relative_to = "a", region = list(start = 1, end = 2), col_width = 1,
+    relative_to = "a", region = list(start = 1, end = 2),
+    selection = list(start = 1, end = 2), col_width = 1,
     row_height = 1, allowed_gappyness = 1, draw_tree = TRUE,
     tree_area_width = 1, auto_tree_area_width = TRUE,
     residue_encoding = "color", theme = "dark", hide_header = TRUE

@@ -15,8 +15,8 @@
 \code{\link{geom_msa_rowdata}}, \code{\link{geom_msa_strip}},
 \code{\link{geom_msa_features}},
 \code{\link{scale_residue_color}},
-\code{\link{scale_row_color}}, \code{\link{theme_msa}} or
-\code{\link{coord_msa}}.}
+\code{\link{scale_row_color}}, \code{\link{theme_msa}},
+\code{\link{coord_msa}} or \code{\link{geom_msa_selection}}.}
 }
 \value{
 The viewer, carrying the layer.

@@ -38,6 +38,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "row_panels": [],
         "relative_to": None,
         "region": None,
+        "selection": None,
         "draw_tree": True,
         "tree_area_width": None,
         "auto_tree_area_width": False,
@@ -60,13 +61,20 @@ def test_the_front_end_reads_the_traits_python_declares():
     reported = set(re.findall(r"report\(model, '([a-z_]+)'", source))
     assert inputs == synced_traits() - {"clicked", "viewport"}
     assert read <= inputs
-    assert reported == {"clicked", "viewport"}
+    assert reported == {"clicked", "viewport", "selection"}
 
 
 def test_read_back_traits_refuse_assignment_from_python():
     view = MSAView()
     with pytest.raises(traitlets.TraitError):
         view.clicked = {"column": 1}
+
+
+def test_selection_is_set_from_python_and_cleared_with_none():
+    view = MSAView(selection={"start": 3, "end": 9, "rows": ["a", "b"]})
+    assert view.selection == {"start": 3, "end": 9, "rows": ["a", "b"]}
+    view.selection = None
+    assert view.selection is None
 
 
 def test_theme_takes_a_mode_or_theme_options():

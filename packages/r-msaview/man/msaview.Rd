@@ -22,6 +22,7 @@ msaview(
   row_panels = NULL,
   relative_to = NULL,
   region = NULL,
+  selection = NULL,
   col_width = NULL,
   row_height = NULL,
   allowed_gappyness = NULL,
@@ -165,6 +166,12 @@ that row, with matching residues as \code{.}.}
 \code{list(start, end)} in alignment columns or
 \code{list(row, start, end)} in residues of that row, 1-based inclusive.}
 
+\item{selection}{A block of the alignment to select, as
+\code{list(start, end)} in alignment columns, 1-based inclusive, plus an
+optional \code{rows}, a character vector naming the selected rows, which
+defaults to every row. Drawn as a blue band that a shift-drag in the
+viewer replaces.}
+
 \item{col_width}{Width of one alignment column in pixels (horizontal zoom).}
 
 \item{row_height}{Height of one row in pixels (vertical zoom).}
@@ -300,8 +307,9 @@ msaview(msa = "alignment.fa",
         color_scheme = c(K = "#1f77b4", R = "#1f77b4", D = "#d62728"))
 
 # --- In Shiny ---
-# input$<output id>_click holds the clicked cell, and
-# input$<output id>_viewport the columns on screen
+# input$<output id>_click holds the clicked cell,
+# input$<output id>_viewport the columns on screen, and
+# input$<output id>_selection the block a shift-drag selects
 library(shiny)
 ui <- fluidPage(msaviewOutput("msa", height = "600px"), verbatimTextOutput("cell"))
 server <- function(input, output) {

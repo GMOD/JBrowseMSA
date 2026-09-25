@@ -58,6 +58,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `row_panels`                     | `strip` and `features` panels drawn beside the tree                                       |
 | `relative_to`                    | a row name; other rows draw as their differences from it                                  |
 | `region`                         | `{start, end}` columns or `{row, start, end}` residues                                    |
+| `selection`                      | the selected block, `{start, end}` columns and optional `rows` names (see below)          |
 | `allowed_gappyness`              | hide columns at least this percent gaps (default 100)                                     |
 | `draw_tree`, `show_branch_len`   | booleans, default `True`                                                                  |
 | `tree_order`                     | `"branchLength"` (default), `"input"`, `"ladderize"` or `"ladderizeReverse"`              |
@@ -71,16 +72,22 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 attribute, then VS Code's `data-vscode-theme-kind`, then the browser's
 `prefers-color-scheme`, and switches when the host does.
 
-The widget sets two traits from the browser:
+The widget sets three traits from the browser:
 
 - `clicked`: the cell a click pinned, `{column, row, residue, letter}`, or
   `None` after a click clears it
 - `viewport`: the columns on screen, `{startColumn, endColumn}`, once a scroll
   or zoom settles
+- `selection`: the block the person selected, `{start, end, rows}`, once a drag
+  settles, or `None` after Escape clears it
 
-Both are 1-based. `column` counts every column of the alignment, and `residue`
-counts the clicked row's own letters. The widget keeps hover in the browser,
-since a comm message per pointer move would flood the kernel.
+All three are 1-based. `column`, `start` and `end` count every column of the
+alignment, `residue` counts the clicked row's own letters, and `rows` names the
+selected rows, absent when the block spans every row. A shift-drag on the
+alignment selects a block, and a drag along a track selects columns across every
+row. `selection` is also an input: assigning it selects that block in the
+viewer. The widget keeps hover in the browser, since a comm message per pointer
+move would flood the kernel.
 
 ```python
 view.observe(lambda change: print(change["new"]), "clicked")

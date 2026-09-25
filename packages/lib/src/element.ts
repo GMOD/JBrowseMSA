@@ -10,6 +10,7 @@ import type {
   ColorScheme,
   ColumnTrackSpec,
   Highlight,
+  MsaSelection,
   ResidueMapping,
   Viewport,
 } from './types.ts'
@@ -23,6 +24,7 @@ type ElementData = Pick<
   | 'highlights'
   | 'columnTracks'
   | 'residueMappings'
+  | 'selection'
 >
 
 interface NightingaleManager extends HTMLElement {
@@ -86,10 +88,11 @@ function residueRange(model: MsaViewModel, row: string, viewport: Viewport) {
  * Registers a custom element that renders MSAViewer, for pages with no React.
  * Attributes: msa-url, tree-url, gff-url, color-scheme, height, hide-header,
  * theme, tree-area-width and reference-row. Properties: msa, tree and gff text,
- * colorScheme, highlights, columnTracks and residueMappings. The colorScheme
- * property takes a `{map}` the color-scheme attribute cannot hold, and wins
- * over the attribute while set. Events: cell-hover, cell-click and
- * viewport-change, each with the MSAViewer callback's value as detail.
+ * colorScheme, highlights, columnTracks, residueMappings and selection. The
+ * colorScheme property takes a `{map}` the color-scheme attribute cannot hold,
+ * and wins over the attribute while set. Events: cell-hover, cell-click,
+ * viewport-change and selection-change, each with the MSAViewer callback's
+ * value as detail.
  *
  * Inside a <nightingale-manager>, the element registers with it and speaks its
  * protocol: it follows the display-start, display-end and highlight attributes
@@ -155,6 +158,13 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
     set residueMappings(value: ResidueMapping[] | undefined) {
       this.#setData({ residueMappings: value })
     }
+    // the viewer's selection, which the reader's drags change
+    get selection() {
+      return this.#model ? this.#model.selection : this.#data.selection
+    }
+    set selection(value: MsaSelection | undefined) {
+      this.#setData({ selection: value })
+    }
 
     get #referenceRow() {
       return this.getAttribute('reference-row') ?? undefined
@@ -190,6 +200,9 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
         onViewportChange: viewport => {
           this.#emit('viewport-change', viewport)
           this.#reportRange(viewport)
+        },
+        onSelectionChange: selection => {
+          this.#emit('selection-change', selection)
         },
         onModel: model => {
           this.#model = model

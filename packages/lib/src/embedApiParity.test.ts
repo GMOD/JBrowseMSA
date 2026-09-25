@@ -49,6 +49,7 @@ const notExposed: Record<string, string> = {
 const asEvents: Record<string, { r: string; py: string }> = {
   onCellClick: { r: '_click', py: 'clicked' },
   onViewportChange: { r: '_viewport', py: 'viewport' },
+  onSelectionChange: { r: '_selection', py: 'selection' },
 }
 
 function msaViewerProps() {

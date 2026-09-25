@@ -73,11 +73,13 @@ Props:
 | `treeRoot`          | `TreeRoot`               | Reroot: `'midpoint'`, or `{outgroup: [tip names]}`                                  |
 | `residueEncoding`   | `'fill' \| 'color'`      | Which channel `colorScheme` paints: the cell (default) or the letter                |
 | `region`            | `Region`                 | Zoom to `{row, start, end}` residues, or `{start, end}` columns                     |
+| `selection`         | `MsaSelection`           | The selected block: `{start, end}` columns and optional `rows` names                |
 | `hideHeader`        | `boolean`                | Leave out the toolbar, for a page drawing its own controls                          |
 | `theme`             | `string \| ThemeOptions` | `'light'` (default), `'dark'`, or MUI theme options merged over JBrowse's           |
 | `onCellHover`       | `(cell) => void`         | The cell under the pointer (see below)                                              |
 | `onCellClick`       | `(cell) => void`         | The cell a click pinned, or `undefined` when a click clears it                      |
 | `onViewportChange`  | `(viewport) => void`     | The alignment columns on screen                                                     |
+| `onSelectionChange` | `(selection) => void`    | The selected block after each change, or `undefined` when it clears                 |
 | `onModel`           | `(model) => void`        | The model the viewer built, for the model API below                                 |
 
 The viewer applies a changed prop to the mounted model, so a host can put a
@@ -85,10 +87,11 @@ control on one without re-fetching the alignment. Each prop updates only its own
 setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `clades`, `columnTracks`, `residueMappings`,
-`rowData`, `encodings`, `rowPanels`, `highlightColumns`), `treeRoot` and the
-filehandles by content, so passing a freshly computed array or location object
-on every render costs nothing. A new `msa`, `tree` or `gff` string, or a
-filehandle pointing somewhere else, builds a new model and resets the view.
+`rowData`, `encodings`, `rowPanels`, `highlightColumns`), `selection`,
+`treeRoot` and the filehandles by content, so passing a freshly computed array
+or location object on every render costs nothing. A new `msa`, `tree` or `gff`
+string, or a filehandle pointing somewhere else, builds a new model and resets
+the view.
 
 ### Events
 
@@ -111,6 +114,22 @@ return (
       </p>
     ) : null}
   </>
+)
+```
+
+`onSelectionChange` receives the block the reader selected, in the coordinates
+of the `selection` prop: `start` and `end` count the file's columns, hidden
+gappy ones included, and `rows` names the selected rows, absent when the block
+spans every row. A shift-drag on the alignment selects a block, a drag along a
+track selects columns across every row, and Escape clears it. Pass the value
+back as `selection` to keep it in the host's state. The viewer compares the prop
+by content, so passing back the value it reported leaves the view as it is.
+
+```tsx
+const [selection, setSelection] = useState<MsaSelection>()
+
+return (
+  <MSAViewer msa={msa} selection={selection} onSelectionChange={setSelection} />
 )
 ```
 
@@ -300,11 +319,12 @@ components.
 
 Attributes: `msa-url`, `tree-url`, `gff-url`, `color-scheme`, `height`,
 `hide-header`, `theme`, `tree-area-width` and `reference-row`. Properties:
-`msa`, `tree` and `gff` text, `colorScheme`, `highlights`, `columnTracks` and
-`residueMappings`. The `colorScheme` property takes the `{map}` form the
-attribute cannot hold, and while set it wins over the attribute. The element
-dispatches `cell-hover`, `cell-click` and `viewport-change` events whose
-`detail` is the value the matching `MSAViewer` callback receives.
+`msa`, `tree` and `gff` text, `colorScheme`, `highlights`, `columnTracks`,
+`residueMappings` and `selection`. The `colorScheme` property takes the `{map}`
+form the attribute cannot hold, and while set it wins over the attribute.
+Reading `selection` gives the block the reader selected. The element dispatches
+`cell-hover`, `cell-click`, `viewport-change` and `selection-change` events
+whose `detail` is the value the matching `MSAViewer` callback receives.
 
 Inside a [Nightingale](https://github.com/ebi-webcomponents/nightingale)
 `<nightingale-manager>`, the element registers with the manager like a

@@ -45,6 +45,7 @@ const defaults: Traits = {
   row_panels: [],
   relative_to: null,
   region: null,
+  selection: null,
   draw_tree: true,
   tree_area_width: null,
   auto_tree_area_width: false,
@@ -68,7 +69,11 @@ function fakeModel(traits: Partial<Traits>) {
       store[k] = v
     },
     save_changes: () => {
-      saved.push({ clicked: store.clicked, viewport: store.viewport })
+      saved.push({
+        clicked: store.clicked,
+        viewport: store.viewport,
+        selection: store.selection,
+      })
     },
     on: (event: string, cb: () => void) => {
       handlers.set(event, [...(handlers.get(event) ?? []), cb])
@@ -195,6 +200,30 @@ test('the viewport reports once scrolling settles', () => {
   expect(model.saved.map(s => s.viewport)).toEqual([
     { startColumn: 19, endColumn: 49 },
   ])
+  vi.useRealTimers()
+})
+
+test('the selection reports once a drag settles, and the trait sets it', () => {
+  vi.useFakeTimers()
+  const model = fakeModel({ selection: { start: 2, end: 4 } })
+  renderWidget(model)
+  expect(mounted.props[0]?.selection).toEqual({ start: 2, end: 4 })
+
+  for (let end = 5; end < 9; end++) {
+    mounted.props[0]!.onSelectionChange!({ start: 2, end, rows: ['a'] })
+  }
+  expect(model.saved).toEqual([])
+  vi.runAllTimers()
+  expect(model.saved.map(s => s.selection)).toEqual([
+    { start: 2, end: 8, rows: ['a'] },
+  ])
+
+  mounted.props[0]!.onSelectionChange!(undefined)
+  vi.runAllTimers()
+  expect(model.saved.at(-1)?.selection).toBeNull()
+
+  model.change('selection', { start: 1, end: 1 })
+  expect(mounted.props.at(-1)?.selection).toEqual({ start: 1, end: 1 })
   vi.useRealTimers()
 })
 

@@ -122,6 +122,11 @@
 #' @param region A span to zoom and scroll to once the alignment loads, as
 #'   \code{list(start, end)} in alignment columns or
 #'   \code{list(row, start, end)} in residues of that row, 1-based inclusive.
+#' @param selection A block of the alignment to select, as
+#'   \code{list(start, end)} in alignment columns, 1-based inclusive, plus an
+#'   optional \code{rows}, a character vector naming the selected rows, which
+#'   defaults to every row. Drawn as a blue band that a shift-drag in the
+#'   viewer replaces.
 #' @param col_width Width of one alignment column in pixels (horizontal zoom).
 #' @param row_height Height of one row in pixels (vertical zoom).
 #' @param allowed_gappyness Hide columns that are at least this percent gaps.
@@ -231,8 +236,9 @@
 #'         color_scheme = c(K = "#1f77b4", R = "#1f77b4", D = "#d62728"))
 #'
 #' # --- In Shiny ---
-#' # input$<output id>_click holds the clicked cell, and
-#' # input$<output id>_viewport the columns on screen
+#' # input$<output id>_click holds the clicked cell,
+#' # input$<output id>_viewport the columns on screen, and
+#' # input$<output id>_selection the block a shift-drag selects
 #' library(shiny)
 #' ui <- fluidPage(msaviewOutput("msa", height = "600px"), verbatimTextOutput("cell"))
 #' server <- function(input, output) {
@@ -252,7 +258,8 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
                     clades = NULL,
                     residue_mappings = NULL, row_data = NULL,
                     encodings = NULL, row_panels = NULL, relative_to = NULL,
-                    region = NULL, col_width = NULL, row_height = NULL,
+                    region = NULL, selection = NULL,
+                    col_width = NULL, row_height = NULL,
                     allowed_gappyness = NULL, draw_tree = NULL,
                     tree_area_width = NULL, auto_tree_area_width = NULL,
                     residue_encoding = NULL, theme = NULL, hide_header = NULL,
@@ -288,6 +295,7 @@ msaview <- function(msa = NULL, tree = NULL, gff = NULL, color_scheme = NULL,
   props$rowPanels <- convert_row_panels(row_panels)
   props$relativeTo <- sanitize_names_or_null(relative_to)
   props$region <- convert_region(region)
+  props$selection <- convert_selection(selection)
   props$colWidth <- col_width
   props$rowHeight <- row_height
   props$allowedGappyness <- allowed_gappyness
@@ -595,6 +603,21 @@ convert_region <- function(region) {
   region$end <- as.integer(region$end)
   if (!is.null(region$row)) region$row <- sanitize_names(region$row)
   region
+}
+
+# One object, like a region, with `rows` kept an array when it names one row
+convert_selection <- function(selection) {
+  if (is.null(selection)) return(NULL)
+  if (!is.list(selection) || is.null(selection$start) ||
+      is.null(selection$end)) {
+    stop("selection must be a list with start and end, and optional rows")
+  }
+  selection$start <- as.integer(selection$start)
+  selection$end <- as.integer(selection$end)
+  if (!is.null(selection$rows)) {
+    selection$rows <- I(sanitize_names(selection$rows))
+  }
+  selection
 }
 
 # A scheme name passes through, and a named vector or list of colors becomes

@@ -9,6 +9,7 @@ import type {
   Highlight,
   MSAViewerProps,
   MountedViewer,
+  MsaSelection,
   Region,
   ResidueMapping,
   RowPanelSpec,
@@ -41,6 +42,7 @@ export interface Traits {
   row_panels: RowPanelSpec[]
   relative_to: string | null
   region: Region | null
+  selection: MsaSelection | null
   draw_tree: boolean
   tree_area_width: number | null
   auto_tree_area_width: boolean
@@ -78,6 +80,7 @@ export const INPUT_TRAITS = [
   'row_panels',
   'relative_to',
   'region',
+  'selection',
   'draw_tree',
   'tree_area_width',
   'auto_tree_area_width',
@@ -140,6 +143,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     rowPanels: model.get('row_panels'),
     relativeTo: optional(model.get('relative_to')),
     region: optional(model.get('region')),
+    selection: optional(model.get('selection')),
     drawTree: model.get('draw_tree'),
     treeAreaWidth: optional(model.get('tree_area_width')),
     autoTreeAreaWidth: model.get('auto_tree_area_width'),
@@ -152,7 +156,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
   }
 }
 
-function report<K extends 'clicked' | 'viewport'>(
+function report<K extends 'clicked' | 'viewport' | 'selection'>(
   model: Model,
   trait: K,
   value: Traits[K] | undefined,
@@ -161,9 +165,10 @@ function report<K extends 'clicked' | 'viewport'>(
   model.save_changes()
 }
 
-// a drag scrolls through many column ranges a second, and each report is a
-// comm message to the kernel, so the viewport goes out once the view settles
-const VIEWPORT_SETTLE_MS = 150
+// a drag passes through many column ranges a second, scrolling or selecting,
+// and each report is a comm message to the kernel, so the viewport and the
+// selection go out once the drag settles
+const SETTLE_MS = 150
 
 function showError(el: HTMLElement, e: unknown) {
   const box = document.createElement('pre')
@@ -178,6 +183,7 @@ export const createRender =
   (mountViewer: typeof mount): Render<Traits> =>
   ({ model, el }) => {
     let settle: ReturnType<typeof setTimeout> | undefined
+    let settleSelection: ReturnType<typeof setTimeout> | undefined
     let viewer: MountedViewer
     try {
       viewer = mountViewer(el, {
@@ -189,7 +195,15 @@ export const createRender =
           clearTimeout(settle)
           settle = setTimeout(() => {
             report(model, 'viewport', viewport)
-          }, VIEWPORT_SETTLE_MS)
+          }, SETTLE_MS)
+        },
+        // selection is also an input trait, so the report comes back as the
+        // prop, which the viewer compares by content and leaves in place
+        onSelectionChange: selection => {
+          clearTimeout(settleSelection)
+          settleSelection = setTimeout(() => {
+            report(model, 'selection', selection)
+          }, SETTLE_MS)
         },
       })
     } catch (e) {
@@ -212,6 +226,7 @@ export const createRender =
 
     return () => {
       clearTimeout(settle)
+      clearTimeout(settleSelection)
       stopWatchingTheme()
       for (const trait of INPUT_TRAITS) {
         model.off(`change:${trait}`, update)

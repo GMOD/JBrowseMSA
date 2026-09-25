@@ -160,3 +160,25 @@ test('the colorScheme property carries a letter map past the attribute', async (
   expect(model.customColorScheme).toBeUndefined()
   expect(model.colorSchemeName).toBe('lesk')
 })
+
+test('the selection property sets the block, and a change dispatches an event', async () => {
+  const { element, model } = await setup()
+  const el = element as HTMLElement & { selection?: unknown }
+  const events: unknown[] = []
+  element.addEventListener('selection-change', event => {
+    events.push((event as CustomEvent).detail)
+  })
+  act(() => {
+    el.selection = { start: 3, end: 5, rows: ['ref'] }
+  })
+  expect(model.selection).toEqual({ start: 3, end: 5, rows: ['ref'] })
+
+  act(() => {
+    model.selectBlock({ col: 0 }, { col: 1 })
+  })
+  expect(el.selection).toEqual({ start: 1, end: 2 })
+  expect(events).toEqual([
+    { start: 3, end: 5, rows: ['ref'] },
+    { start: 1, end: 2 },
+  ])
+})

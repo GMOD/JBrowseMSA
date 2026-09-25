@@ -183,6 +183,33 @@ test('the data layers follow their props', () => {
   expect(model.highlightedColumns).toEqual([1, 2])
 })
 
+test('selection follows its prop and reports the changes made inside the viewer', () => {
+  const reported: unknown[] = []
+  const onSelectionChange = (selection: unknown) => reported.push(selection)
+  const block = { start: 2, end: 4, rows: ['mouse'] }
+  const model = show({ selection: block, onSelectionChange })
+  expect(model.selection).toEqual(block)
+  expect(model.selectionFasta).toBe('>mouse\nKA-\n')
+
+  act(() => {
+    model.selectBlock({ col: 0 }, { col: 1 })
+  })
+  // the host's next render passes the selection it passed before, which
+  // leaves the reader's in place
+  show({ selection: { ...block }, onSelectionChange })
+  expect(model.selection).toEqual({ start: 1, end: 2 })
+
+  show({ selection: { start: 5, end: 6 }, onSelectionChange })
+  act(() => {
+    model.clearSelection()
+  })
+  expect(reported).toEqual([
+    { start: 1, end: 2 },
+    { start: 5, end: 6 },
+    undefined,
+  ])
+})
+
 test('a layer passed as a fresh array each render is not replaced each render', () => {
   const model = show({ height: 300, highlights: [{ start: 2, end: 4 }] })
   const before = model.highlights[0]
