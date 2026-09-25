@@ -48,6 +48,19 @@ export const catalog: CatalogEntry[] = [
       'Fetch a remote Stockholm alignment plus an InterProScan domain GFF.',
   },
   {
+    id: 'LoadByAccession',
+    name: 'Load a family by accession',
+    category: 'Getting started',
+    description:
+      'Type a Pfam or Rfam accession and the page fetches that family’s seed ' +
+      'alignment from EBI. A Pfam seed comes from the InterPro API in under a ' +
+      'second. An Rfam seed comes with its tree from the Rfam release files, ' +
+      '8.5 MB for every family together, so the first Rfam accession takes ' +
+      'several seconds and the next ones come from the browser cache. Its ' +
+      'consensus structure (#=GC SS_cons) draws as the secondary-structure ' +
+      'track over the alignment.',
+  },
+  {
     id: 'ModelApi',
     name: 'Model API',
     category: 'API & control',

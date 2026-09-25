@@ -36,6 +36,8 @@ import KinaseContacts from './KinaseContacts'
 import KinaseContactsSrc from './KinaseContacts.tsx?raw'
 import LargeTree from './LargeTree'
 import LargeTreeSrc from './LargeTree.tsx?raw'
+import LoadByAccession from './LoadByAccession'
+import LoadByAccessionSrc from './LoadByAccession.tsx?raw'
 import LoadFromUrl from './LoadFromUrl'
 import LoadFromUrlSrc from './LoadFromUrl.tsx?raw'
 import ModelApi from './ModelApi'
@@ -101,6 +103,7 @@ const components: Record<string, [ComponentType, string]> = {
   Insulin: [Insulin, InsulinSrc],
   KinaseContacts: [KinaseContacts, KinaseContactsSrc],
   LargeTree: [LargeTree, LargeTreeSrc],
+  LoadByAccession: [LoadByAccession, LoadByAccessionSrc],
   LoadFromUrl: [LoadFromUrl, LoadFromUrlSrc],
   ModelApi: [ModelApi, ModelApiSrc],
   Myd88: [Myd88, Myd88Src],
