@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 
+import { compareStructural, reaction } from 'mobx'
 import { observer } from 'mobx-react'
 
 import type { Loci } from 'molstar/lib/mol-model/loci'
@@ -35,8 +36,10 @@ function importMolstar() {
     import('molstar/lib/mol-plugin/config'),
     import('molstar/lib/mol-model/structure'),
     import('molstar/lib/mol-script/script'),
+    import('molstar/lib/mol-plugin-state/helpers/structure-overpaint'),
+    import('molstar/lib/mol-util/color'),
     import('molstar/build/viewer/molstar.css'),
-  ]).then(([ui, react18, spec, config, structure, script]) => ({
+  ]).then(([ui, react18, spec, config, structure, script, overpaint, color]) => ({
     createPluginUI: ui.createPluginUI,
     renderReact18: react18.renderReact18,
     DefaultPluginUISpec: spec.DefaultPluginUISpec,
@@ -45,6 +48,9 @@ function importMolstar() {
     StructureProperties: structure.StructureProperties,
     StructureSelection: structure.StructureSelection,
     Script: script.Script,
+    setStructureOverpaint: overpaint.setStructureOverpaint,
+    clearStructureOverpaint: overpaint.clearStructureOverpaint,
+    Color: color.Color,
   }))
 }
 
@@ -95,7 +101,7 @@ function loadedStructure(plugin: PluginUIContext) {
 function residueLoci(
   molstar: Molstar,
   structure: Structure,
-  labelSeqId: number,
+  labelSeqIds: number[],
   asymId?: string,
 ) {
   const selection = molstar.Script.getStructureSelection(
@@ -109,14 +115,93 @@ function residueLoci(
               ]),
             }
           : {}),
-        'residue-test': Q.core.rel.eq([
+        'residue-test': Q.core.set.has([
+          Q.core.type.set(labelSeqIds),
           Q.struct.atomProperty.macromolecular.label_seq_id(),
-          labelSeqId,
         ]),
       }),
     structure,
   )
   return molstar.StructureSelection.toLociWithSourceUnits(selection)
+}
+
+const conservationRamp = [
+  '#c8c8c8',
+  '#a0a0a0',
+  '#787878',
+  '#505050',
+  '#282828',
+]
+
+type ChainResidues = [asymId: string, labelSeqIds: number[]][]
+
+function polymerResidues(molstar: Molstar, structure: Structure) {
+  const SP = molstar.StructureProperties
+  const residues = new Map<string, { asymId: string; labelSeqId: number }>()
+  molstar.StructureElement.Loci.forEachLocation(
+    molstar.StructureElement.Loci.all(structure),
+    loc => {
+      if (SP.entity.type(loc) === 'polymer') {
+        const asymId = SP.chain.label_asym_id(loc)
+        const labelSeqId = SP.residue.label_seq_id(loc)
+        residues.set(`${asymId}:${labelSeqId}`, { asymId, labelSeqId })
+      }
+    },
+  )
+  return [...residues.values()]
+}
+
+function conservationBins(
+  model: MsaViewModel,
+  structureId: string,
+  residues: { asymId: string; labelSeqId: number }[],
+): ChainResidues[] {
+  const bins = conservationRamp.map(() => new Map<string, number[]>())
+  for (const { asymId, labelSeqId } of residues) {
+    const hit = model.rowResidue(structureId, labelSeqId, asymId)
+    const col = hit
+      ? model.seqPosToVisibleCol(hit.rowName, hit.seqPos - 1)
+      : undefined
+    const value = col === undefined ? undefined : model.conservation[col]
+    if (value !== undefined) {
+      const bin = Math.min(
+        conservationRamp.length - 1,
+        Math.floor(value * conservationRamp.length),
+      )
+      const chains = bins[bin]!
+      const ids = chains.get(asymId) ?? []
+      ids.push(labelSeqId)
+      chains.set(asymId, ids)
+    }
+  }
+  return bins.map(chains => [...chains])
+}
+
+async function paintConservation(
+  plugin: PluginUIContext,
+  molstar: Molstar,
+  bins: ChainResidues[],
+) {
+  const components =
+    plugin.managers.structure.hierarchy.current.structures[0]?.components ?? []
+  await molstar.clearStructureOverpaint(plugin, components)
+  for (const [bin, chains] of bins.entries()) {
+    if (chains.length) {
+      await molstar.setStructureOverpaint(
+        plugin,
+        components,
+        molstar.Color.fromHexStyle(conservationRamp[bin]!),
+        structure =>
+          Promise.resolve(
+            chains
+              .map(([asymId, ids]) =>
+                residueLoci(molstar, structure, ids, asymId),
+              )
+              .reduce((a, b) => molstar.StructureElement.Loci.union(a, b)),
+          ),
+      )
+    }
+  }
 }
 
 function describeCell(
@@ -180,6 +265,24 @@ const MappingNotes = observer(function MappingNotes({
   )
 })
 
+function ConservationLegend() {
+  return (
+    <div className="structure-link-legend">
+      <div>Conservation of the column</div>
+      <div className="structure-link-ramp">
+        {conservationRamp.map(color => (
+          <span key={color} style={{ background: color }} />
+        ))}
+      </div>
+      <div className="structure-link-ramp-labels">
+        <span>0 variable</span>
+        <span>1 conserved</span>
+      </div>
+      <div>Unmapped residues keep their chain color.</div>
+    </div>
+  )
+}
+
 export function StructureLinkedViewer({
   msaUrl,
   treeUrl,
@@ -190,15 +293,18 @@ export function StructureLinkedViewer({
   focus,
   stops,
   height = 360,
-}: StructureLinkedViewerProps) {
+  colorByConservation,
+}: StructureLinkedViewerProps & { colorByConservation: boolean }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const pluginRef = useRef<PluginUIContext | undefined>(undefined)
   const molstarRef = useRef<Molstar | undefined>(undefined)
   const modelRef = useRef<MsaViewModel | undefined>(undefined)
+  const overpaintQueue = useRef(Promise.resolve())
   const [model, setModel] = useState<MsaViewModel>()
   const [layers, setLayers] = useState<Layers>({})
   const [status, setStatus] = useState(idle)
   const [structureState, setStructureState] = useState('Loading structure')
+  const structureLoaded = structureState === ''
 
   useEffect(() => {
     const controller = new AbortController()
@@ -356,6 +462,41 @@ export function StructureLinkedViewer({
     }
   }, [structureUrl, structureId])
 
+  useEffect(() => {
+    const plugin = pluginRef.current
+    const molstar = molstarRef.current
+    const structure = plugin ? loadedStructure(plugin) : undefined
+    if (
+      !colorByConservation ||
+      !structureLoaded ||
+      !model ||
+      !plugin ||
+      !molstar ||
+      !structure
+    ) {
+      return
+    }
+    const enqueue = (step: () => Promise<void>) => {
+      overpaintQueue.current = overpaintQueue.current
+        .then(() => (pluginRef.current === plugin ? step() : undefined))
+        .catch((e: unknown) => {
+          console.error(e)
+        })
+    }
+    const residues = polymerResidues(molstar, structure)
+    const dispose = reaction(
+      () => conservationBins(model, structureId, residues),
+      bins => {
+        enqueue(() => paintConservation(plugin, molstar, bins))
+      },
+      { fireImmediately: true, equals: compareStructural },
+    )
+    return () => {
+      dispose()
+      enqueue(() => paintConservation(plugin, molstar, []))
+    }
+  }, [colorByConservation, structureLoaded, model, structureId])
+
   const withStructure = (
     cell: Cell | undefined,
     act: (
@@ -377,7 +518,7 @@ export function StructureLinkedViewer({
     const structure = loadedStructure(plugin)
     const loci =
       hit && structure
-        ? residueLoci(molstar, structure, hit.position, hit.structure.asymId)
+        ? residueLoci(molstar, structure, [hit.position], hit.structure.asymId)
         : undefined
     act(plugin, loci, molstar)
   }
@@ -451,6 +592,7 @@ export function StructureLinkedViewer({
         {structureState ? (
           <p className="structure-link-loading">{structureState}</p>
         ) : null}
+        {colorByConservation && structureLoaded ? <ConservationLegend /> : null}
       </div>
       <p className="structure-link-status" aria-live="polite">
         {status}
@@ -488,6 +630,7 @@ export default function StructureLinkedDatasets({
     () => false,
   )
   const [chosen, setChosen] = useState(datasets[0]?.id)
+  const [colorByConservation, setColorByConservation] = useState(false)
   const dataset = datasets.find(d => d.id === chosen) ?? datasets[0]
   if (!desktop) {
     return (
@@ -514,8 +657,22 @@ export default function StructureLinkedDatasets({
             {d.label}
           </button>
         ))}
+        <label className="structure-link-toggle">
+          <input
+            type="checkbox"
+            checked={colorByConservation}
+            onChange={e => {
+              setColorByConservation(e.target.checked)
+            }}
+          />
+          Color the structure by conservation
+        </label>
       </div>
-      <StructureLinkedViewer key={dataset.id} {...dataset} />
+      <StructureLinkedViewer
+        key={dataset.id}
+        {...dataset}
+        colorByConservation={colorByConservation}
+      />
     </>
   ) : null
 }

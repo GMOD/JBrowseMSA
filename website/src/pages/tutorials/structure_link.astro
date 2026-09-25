@@ -261,6 +261,43 @@ plugin.behaviors.interaction.hover.subscribe(({ current }) => {
     border-color: var(--accent);
     color: var(--bg);
   }
+  .structure-link-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .structure-link-legend {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    pointer-events: none;
+  }
+  .structure-link-ramp {
+    display: flex;
+    gap: 2px;
+    margin: 4px 0 2px;
+  }
+  .structure-link-ramp span {
+    width: 32px;
+    height: 12px;
+    border-radius: 2px;
+  }
+  .structure-link-ramp-labels {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+  }
   .structure-link {
     border: 1px solid var(--border);
     padding: 8px;

@@ -55,10 +55,11 @@ export const catalog: CatalogEntry[] = [
       'Type a Pfam or Rfam accession and the page fetches that family’s seed ' +
       'alignment from EBI. A Pfam seed comes from the InterPro API in under a ' +
       'second. An Rfam seed comes with its tree from the Rfam release files, ' +
-      '8.5 MB for every family together, so the first Rfam accession takes ' +
-      'several seconds and the next ones come from the browser cache. Its ' +
-      'consensus structure (#=GC SS_cons) draws as the secondary-structure ' +
-      'track over the alignment.',
+      '8.5 MB for every family together. The first Rfam accession waits on ' +
+      'that download, with a progress line in megabytes, and the next ones ' +
+      'come from the browser cache. An Rfam seed’s consensus structure ' +
+      '(#=GC SS_cons) draws as the secondary-structure track over the ' +
+      'alignment.',
   },
   {
     id: 'ModelApi',
