@@ -188,7 +188,7 @@ filehandle object for a GFF file of overlay annotations
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
 // code
 gffFilehandle: types.maybe(FileLocation)
 ```
@@ -259,7 +259,7 @@ files)
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
 // code
 msaFilehandle: types.maybe(FileLocation)
 ```
@@ -464,7 +464,7 @@ filehandle object for the tree
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
 // code
 treeFilehandle: types.maybe(FileLocation)
 ```
@@ -475,7 +475,7 @@ filehandle object for tree metadata
 
 ```js
 // type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ({ ...; } & Par...
+IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
 // code
 treeMetadataFilehandle: types.maybe(FileLocation)
 ```
