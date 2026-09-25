@@ -21,16 +21,16 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
+    "@jbrowse/core": "^5.0.0-beta.9",
     "@types/jsdom": "^30.0.0",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.2",
     "esbuild": "^0.28.2",
     "mobx-react": "^10.0.2",
     "msa-parsers": "workspace:*",
     "react-msaview": "workspace:*"
   },
   "dependencies": {
-    "jsdom": "^30.0.1"
+    "jsdom": "^30.1.1"
   },
   "optionalDependencies": {
     "@napi-rs/canvas": "^1.0.9"

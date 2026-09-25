@@ -107,15 +107,6 @@ lockfile, and a `preinstall` guard
 `npm install` or `yarn` from producing a second, unvetted dependency tree. Get
 pnpm with `corepack enable`.
 
-`overrides` in [pnpm-workspace.yaml](pnpm-workspace.yaml) resolve
-`@jbrowse/core` and `@jbrowse/render-core` from tarballs in `vendor-jbrowse/`.
-The overrides are a **temporary stopgap**: the workspace is on MUI v9 and npm
-has no MUI-v9-compatible `@jbrowse/core` yet.
-[scripts/pack-local-jbrowse.mjs](scripts/pack-local-jbrowse.mjs) builds the
-tarballs from a local jbrowse-components checkout, and the repo checks them in
-so `main` stays installable. We remove the override block and the tarballs once
-a compatible version is published.
-
 [CLAUDE.md](CLAUDE.md) has the architecture notes; the core state model is
 `packages/lib/src/model.ts` (MobX-state-tree), and `observer`-wrapped components
 re-render when observed model properties change.

@@ -1,43 +1,18 @@
 packages:
   - 'packages/*'
   - 'website'
-# Only install package versions published at least 3 days ago (in minutes),
-# as a supply-chain safeguard against freshly compromised releases.
+# Only install releases at least 3 days old (in minutes), as a guard against
+# freshly compromised packages. Our own scopes are exempt, since we bump them
+# minutes after releasing them. The rest are fresh bumps the lockfile already
+# vetted; drop each once it ages past the window.
 minimumReleaseAge: 4320
-# Exempt families that a recent dep bump pinned to releases newer than the
-# window (build toolchain + platform-binary packages, not runtime app deps), so
-# a fresh `pnpm install` isn't blocked by the lockfile the bump already vetted.
-# Our own scopes are exempt for a different reason: a bump there is normally
-# made minutes after the dependency's own release, from source in the next
-# directory over, and the quarantine exists to catch a compromised third-party
-# release rather than to delay that. Same exemption jbrowse-components carries.
 minimumReleaseAgeExclude:
-  - '@astrojs/*'
-  - '@bruits/*'
-  - '@eslint-react/*'
   - '@gmod/*'
   - '@jbrowse/*'
-  - '@rolldown/*'
-  - '@types/node'
-  - 'eslint-plugin-react-*'
+  - '@astrojs/*'
   - astro
-  - brace-expansion
-  - caniuse-lite
-  - electron-to-chromium
-  - lru-cache
-  - rolldown
-  - satteri
-  - shiki
-  - std-env
   - tldts
   - tldts-core
-  - tough-cookie
-# Temporary: consume a local MUI-v9 @jbrowse/core built from a
-# jbrowse-components checkout (see scripts/pack-local-jbrowse.mjs). Remove this
-# block once a MUI-v9-compatible @jbrowse/core is published to npm.
-overrides:
-  '@jbrowse/core': file:./vendor-jbrowse/jbrowse-core.tgz
-  '@jbrowse/render-core': file:./vendor-jbrowse/jbrowse-render-core.tgz
 allowBuilds:
   '@scarf/scarf': false
   core-js-pure: false

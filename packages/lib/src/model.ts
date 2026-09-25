@@ -1588,28 +1588,28 @@ function stateModelFactory({
        * #action
        */
       setMSAFilehandle(msaFilehandle?: FileLocationType) {
-        self.msaFilehandle = msaFilehandle
+        self.msaFilehandle = cast(msaFilehandle)
       },
 
       /**
        * #action
        */
       setTreeFilehandle(treeFilehandle?: FileLocationType) {
-        self.treeFilehandle = treeFilehandle
+        self.treeFilehandle = cast(treeFilehandle)
       },
 
       /**
        * #action
        */
       setTreeMetadataFilehandle(treeMetadataFilehandle?: FileLocationType) {
-        self.treeMetadataFilehandle = treeMetadataFilehandle
+        self.treeMetadataFilehandle = cast(treeMetadataFilehandle)
       },
 
       /**
        * #action
        */
       setGFFFilehandle(gffFilehandle?: FileLocationType) {
-        self.gffFilehandle = gffFilehandle
+        self.gffFilehandle = cast(gffFilehandle)
       },
 
       /**

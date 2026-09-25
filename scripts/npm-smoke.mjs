@@ -7,9 +7,8 @@
  *   2. `react-msaview-cli --help` and `export-svg` from a global-style install
  *
  * Both were broken on npm while CI was green, because everything CI builds
- * resolves through the workspace: one hoisted mobx, and @jbrowse/core coming
- * from vendor-jbrowse/ rather than the registry. The published tree is a
- * different tree, and this is the only job that installs it.
+ * resolves through the workspace, with one hoisted mobx. The published tree is
+ * a different tree, and this is the only job that installs it.
  *
  * The quick start pins the majors @jbrowse/core depends on. That pinning is the
  * point of the test: a second copy of MUI makes the viewer throw on a theme from

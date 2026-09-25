@@ -48,8 +48,8 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@emotion/react": "^11.14.0",
-    "@jbrowse/core": "file:vendor-jbrowse/jbrowse-core.tgz",
-    "@jbrowse/mobx-state-tree": "^6.5.1",
+    "@jbrowse/core": "^5.0.0-beta.9",
+    "@jbrowse/mobx-state-tree": "^6.6.1",
     "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.4.0",
     "@mui/system": "^9.4.0",
@@ -57,16 +57,16 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "flatbush": "^4.6.2",
-    "git-cliff": "^2.13.1",
-    "jsdom": "^30.0.1",
+    "git-cliff": "^2.14.2",
+    "jsdom": "^30.1.1",
     "mobx": "^7.0.3",
     "mobx-react": "^10.0.2",
-    "oxfmt": "0.67.0",
-    "oxlint": "1.82.0",
-    "oxlint-tsgolint": "7.0.2001",
-    "prettier": "^3.9.6",
+    "oxfmt": "0.70.0",
+    "oxlint": "1.85.0",
+    "oxlint-tsgolint": "7.0.2002",
+    "prettier": "^3.9.8",
     "prettier-plugin-astro": "^1.0.0",
-    "puppeteer-core": "^25.10.0",
+    "puppeteer-core": "^25.11.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "rimraf": "^6.1.3",
@@ -76,6 +76,6 @@
     "typescript": "^7.0.2",
     "typescript6": "npm:typescript@^6.0.3",
     "vite": "^8.3.0",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   }
 }
