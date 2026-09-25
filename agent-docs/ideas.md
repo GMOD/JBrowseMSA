@@ -11,8 +11,8 @@ nobody has to work it out again.
 
 - [Layers that take data](ideas/data-layers.md): the viewer as an agent's render
   target. `columnTracks`, `highlights`, GFF `color=`, row strips, `rowTint`,
-  `export-svg --spec` and the `customColorScheme` letter map shipped; a JSON
-  `features` field remains.
+  `export-svg --spec`, the `customColorScheme` letter map and the JSON
+  `features` layer shipped.
 - [A selection model](ideas/selection-model.md): the selection, its gestures,
   copy and zoom shipped. Trim-to-selection, selective export and the MSA editor
   build on it next.

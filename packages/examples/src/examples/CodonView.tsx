@@ -11,7 +11,7 @@ import { f12CdsMSA } from './data'
 import { compareCodons, translate } from './geneticCode'
 
 import type { Change, CodonComparison, Row } from './geneticCode'
-import type { ColumnTrackSpec } from 'react-msaview'
+import type { ColumnTrackSpec, Feature } from 'react-msaview'
 
 // The example reads the F12 coding alignment as codons of the row the reader
 // picks. It translates that row with the standard genetic code and compares
@@ -24,8 +24,8 @@ import type { ColumnTrackSpec } from 'react-msaview'
 // The translation puts each amino acid over the middle base of its codon, and
 // the codon track writes every tenth codon's number from its first base.
 // `region` opens the view on codons 61 to 80, around the cetaceans' shared
-// 1-bp deletion. Switching the reference swaps the gff and the tracks on the
-// same model, so the view keeps the reader's place.
+// 1-bp deletion. Switching the reference swaps the features and the tracks
+// on the same model, so the view keeps the reader's place.
 const rows: Row[] = f12CdsMSA
   .split('\n')
   .filter(line => line && !line.startsWith('#') && !line.startsWith('//'))
@@ -121,15 +121,20 @@ function codonTracks(
 }
 
 // one feature per changed codon, in the row's own residue numbers
-function changesGFF(codons: CodonComparison[]) {
-  const lines = codons.flatMap(({ number, codon, aminoAcid, changes }) =>
+function changedCodons(codons: CodonComparison[]): Feature[] {
+  return codons.flatMap(({ number, codon, aminoAcid, changes }) =>
     changes.map(({ row, change, codon: theirs, start, end }) => {
       const theirAminoAcid = translate(theirs)
-      const note = `codon ${number}: ${codon}>${theirs}${theirAminoAcid ? ` (${aminoAcid}>${theirAminoAcid})` : ''}`
-      return `${row}\tcodons\tcodon\t${start}\t${end}\t.\t.\t.\tName=${change};change=${change};Note=${note}`
+      return {
+        row,
+        start,
+        end,
+        name: change,
+        description: `codon ${number}: ${codon}>${theirs}${theirAminoAcid ? ` (${aminoAcid}>${theirAminoAcid})` : ''}`,
+        change,
+      }
     }),
   )
-  return ['##gff-version 3', ...lines].join('\n')
 }
 
 export default function CodonView() {
@@ -140,11 +145,11 @@ export default function CodonView() {
     counts: true,
     features: true,
   })
-  const { tracks, gff } = useMemo(() => {
+  const { tracks, features } = useMemo(() => {
     const codons = compareCodons(rows, reference)
     return {
       tracks: codonTracks(codons, reference),
-      gff: changesGFF(codons),
+      features: changedCodons(codons),
     }
   }, [reference])
 
@@ -189,7 +194,7 @@ export default function CodonView() {
       </Stack>
       <MSAViewer
         msa={f12CdsMSA}
-        gff={shown.features ? gff : undefined}
+        features={shown.features ? features : undefined}
         colorScheme="nucleotide"
         relativeTo={reference}
         region={{ row: 'human', start: 181, end: 240 }}

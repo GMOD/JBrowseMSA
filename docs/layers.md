@@ -402,6 +402,43 @@ table at startup:
 }
 ```
 
+## features
+
+Features on the rows as JSON, the form a GFF line takes once parsed: `row`,
+`start` and `end` in residues of that row, 1-based and inclusive, with an
+optional `name`, `description`, `type`, `strand` and `color`. The viewer draws
+them in the annotation overlay beside the GFF's, under the same legend, filter
+dialog and feature channels.
+
+```json
+{
+  "type": "MsaView",
+  "data": { "msa": ">human\nMKAANSEMKAANSE\n>mouse\nMKA-NSEMKA-NSE" },
+  "features": [
+    { "row": "human", "start": 2, "end": 7, "name": "SH3", "source": "pfam" },
+    { "row": "mouse", "start": 3, "end": 9, "name": "SH2", "source": "smart" }
+  ],
+  "encodings": [{ "channel": "featureFill", "field": "source" }]
+}
+```
+
+[Open this snapshot in the app][live-layers-features].
+
+`name` is the key the legend, the accession palette and the filter dialog group
+features by, and an unnamed feature takes `row:start-end`. `color` overrides the
+palette and any scale, as a GFF `color=` attribute does. A `strand` of `+` or
+`-` draws the span as an arrow whatever its `type`, and a `type` of `exon`,
+`CDS` or a UTR draws it as a numbered segment. Every other field, such as
+`source` above, is a column the `featureFill` and `featureLabel` channels read
+the way they read a GFF attribute.
+
+A host that computes its spans passes them here, and a file of them loads
+through `data.gff` or `gffFilehandle`. React: the `features` prop on
+`MSAViewer`, or `model.setFeatures(features)`. R: a data frame given to
+`msaview(gff = )` or `geom_msa_domains()`, with a `row` (or `seqname`) column
+and every other column a field. Python: the `features` trait, which takes a list
+of dicts or a DataFrame.
+
 ## encodings
 
 What the viewer's own marks read from a table. Each entry names a `channel`, the
@@ -469,7 +506,8 @@ Two channels over one field list that field once.
 ### The feature channels
 
 A feature channel reads any field of the feature table: `accession`, `name`,
-`featureType`, or any GFF attribute of column 9, such as `Name` or `gene`.
+`featureType`, any GFF attribute of column 9, such as `Name` or `gene`, or any
+field of a `features` record.
 
 [![](media/layers-featurechannels.png)][live-layers-featurechannels]
 
@@ -811,6 +849,8 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A700%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%5D%2C%22clades%22%3A%5B%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22highlight%22%2C%22color%22%3A%22%23fff3c4%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22bracket%22%2C%22color%22%3A%22%23b45309%22%2C%22label%22%3A%22cephalosporin%2C%207%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-3%22%2C%22TEM-7%22%5D%2C%22tips%22%3A6%2C%22mark%22%3A%22collapse%22%7D%5D%7D%7D
 [live-layers-rowdata]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Educk%5CnMKAANSE%5Cn%3Echicken%5CnMKA-NSE%22%2C%22treeMetadata%22%3A%22%7B%5C%22duck%5C%22%3A%7B%5C%22clade%5C%22%3A%5C%222.3.4.4b%5C%22%7D%2C%5C%22chicken%5C%22%3A%7B%5C%22clade%5C%22%3A%5C%222.3.2.1c%5C%22%7D%7D%22%7D%7D%7D
+[live-layers-features]:
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSEMKAANSE%5Cn%3Emouse%5CnMKA-NSEMKA-NSE%22%7D%2C%22features%22%3A%5B%7B%22row%22%3A%22human%22%2C%22start%22%3A2%2C%22end%22%3A7%2C%22name%22%3A%22SH3%22%2C%22source%22%3A%22pfam%22%7D%2C%7B%22row%22%3A%22mouse%22%2C%22start%22%3A3%2C%22end%22%3A9%2C%22name%22%3A%22SH2%22%2C%22source%22%3A%22smart%22%7D%5D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22source%22%7D%5D%7D%7D
 [live-layers-encodings]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A760%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%2C%7B%22channel%22%3A%22branch%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22broad-spectrum%22%3A%22%234e79a7%22%2C%22extended-spectrum%22%3A%22%23e15759%22%2C%22inhibitor-resistant%20broad-spectrum%22%3A%22%2359a14f%22%2C%22inhibitor-resistant%20extended-spectrum%22%3A%22%23b07aa1%22%7D%7D%7D%2C%7B%22channel%22%3A%22rowTint%22%2C%22field%22%3A%22subclass%22%2C%22scale%22%3A%7B%22map%22%3A%7B%22CEPHALOSPORIN%22%3A%22%23e15759%22%7D%7D%7D%5D%7D%7D
 [live-layers-featurechannels]:

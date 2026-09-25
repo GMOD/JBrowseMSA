@@ -152,7 +152,9 @@ agent produces one that does not.
 2. Highlights in residue coordinates with labels. Shipped 2026-09-01 as
    `highlights`; `highlightColumns` stays as the legacy 0-based column case.
 3. GFF `color`, then JSON features. `color=` shipped 2026-09-16 with the
-   `featureFill` encoding; the JSON `features` field is still open.
+   `featureFill` encoding, and the JSON `features` layer on 2026-09-25. A
+   features record persists in the snapshot as JSON, so a host that computes its
+   spans never writes GFF text; GFF stays the format for files.
 4. Row strips and tint. Shipped 2026-09-16 as the `strip` row panel and the
    `rowTint` encoding.
 5. `export-svg` from a snapshot, so an agent can render what it wrote. Shipped

@@ -48,6 +48,7 @@ Props:
 | `msa`               | `string`                 | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                                |
 | `tree`              | `string`                 | Newick tree text                                                                    |
 | `gff`               | `string`                 | Annotations to overlay (GFF3 text)                                                  |
+| `features`          | `Feature[]`              | Annotations as JSON: `{row, start, end, name, ...}`, drawn with the GFF's           |
 | `msaFilehandle`     | `FileLocation`           | Remote file location for alignment                                                  |
 | `treeFilehandle`    | `FileLocation`           | Remote file location for tree                                                       |
 | `gffFilehandle`     | `FileLocation`           | Remote file location for domain GFF                                                 |
@@ -86,13 +87,13 @@ The viewer applies a changed prop to the mounted model, so a host can put a
 control on one without re-fetching the alignment. Each prop updates only its own
 setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
-the data layers (`highlights`, `clades`, `columnTracks`, `residueMappings`,
-`rowData`, `encodings`, `rowPanels`, `highlightColumns`), `selection`,
-`treeRoot` and the filehandles by content, so passing a freshly computed array
-or location object on every render costs nothing. A new `msa` or `tree` string,
-or an `msaFilehandle` or `treeFilehandle` pointing somewhere else, builds a new
-model and resets the view. A new `gff` or `gffFilehandle` replaces the
-annotations and keeps the view.
+the data layers (`highlights`, `features`, `clades`, `columnTracks`,
+`residueMappings`, `rowData`, `encodings`, `rowPanels`, `highlightColumns`),
+`selection`, `treeRoot` and the filehandles by content, so passing a freshly
+computed array or location object on every render costs nothing. A new `msa` or
+`tree` string, or an `msaFilehandle` or `treeFilehandle` pointing somewhere
+else, builds a new model and resets the view. A new `gff` or `gffFilehandle`
+replaces the annotations and keeps the view.
 
 ### Events
 
@@ -320,12 +321,12 @@ components.
 
 Attributes: `msa-url`, `tree-url`, `gff-url`, `color-scheme`, `height`,
 `hide-header`, `theme`, `tree-area-width` and `reference-row`. Properties:
-`msa`, `tree` and `gff` text, `colorScheme`, `highlights`, `columnTracks`,
-`residueMappings` and `selection`. The `colorScheme` property takes the `{map}`
-form the attribute cannot hold, and while set it wins over the attribute.
-Reading `selection` gives the block the reader selected. The element dispatches
-`cell-hover`, `cell-click`, `viewport-change` and `selection-change` events
-whose `detail` is the value the matching `MSAViewer` callback receives.
+`msa`, `tree` and `gff` text, `features`, `colorScheme`, `highlights`,
+`columnTracks`, `residueMappings` and `selection`. The `colorScheme` property
+takes the `{map}` form the attribute cannot hold, and while set it wins over the
+attribute. Reading `selection` gives the block the reader selected. The element
+dispatches `cell-hover`, `cell-click`, `viewport-change` and `selection-change`
+events whose `detail` is the value the matching `MSAViewer` callback receives.
 
 Inside a [Nightingale](https://github.com/ebi-webcomponents/nightingale)
 `<nightingale-manager>`, the element registers with the manager like a
