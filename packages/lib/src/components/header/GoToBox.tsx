@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 
-import { Autocomplete, TextField, createFilterOptions } from '@mui/material'
+import { Autocomplete, TextField } from '@mui/material'
 import { observer } from 'mobx-react'
 
-import { findableRowNames, goTo } from './goTo.ts'
+import { findableRowNames, goTo, rowNameSuggestions } from './goTo.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
-const filterOptions = createFilterOptions<string>({ limit: 50 })
 const label = 'Go to row or column'
 
 const GoToBox = observer(function ({ model }: { model: MsaViewModel }) {
@@ -18,7 +17,9 @@ const GoToBox = observer(function ({ model }: { model: MsaViewModel }) {
       freeSolo
       size="small"
       options={names}
-      filterOptions={filterOptions}
+      filterOptions={(options, { inputValue }) =>
+        rowNameSuggestions(options, inputValue)
+      }
       value={null}
       blurOnSelect
       onInputChange={() => {

@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 
 import MSAModelF from '../../model.ts'
-import { findableRowNames, goTo } from './goTo.ts'
+import { findableRowNames, goTo, rowNameSuggestions } from './goTo.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -105,4 +105,16 @@ test('a collapsed clade offers its named tips and not its path id', () => {
   expect(found).not.toContain(clade)
   expect(found).toContain('seq2')
   expect(found).not.toContain('seq0')
+})
+
+test('suggestions match anywhere in the name, ignoring case, capped at 50', () => {
+  expect(rowNameSuggestions(['Human', 'mouse', 'chimp'], 'M')).toEqual([
+    'Human',
+    'mouse',
+    'chimp',
+  ])
+  expect(rowNameSuggestions(['Human', 'mouse', 'chimp'], 'hu')).toEqual([
+    'Human',
+  ])
+  expect(rowNameSuggestions(names, 'seq')).toHaveLength(50)
 })

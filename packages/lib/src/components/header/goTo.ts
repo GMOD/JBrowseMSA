@@ -7,6 +7,15 @@ export function findableRowNames(model: MsaViewModel) {
     .map(leaf => leaf.data.name)
 }
 
+// not MUI's createFilterOptions: JBrowse hosts do not re-export it, so
+// jbrowse-plugin-msaview would fail to load
+export function rowNameSuggestions(names: string[], input: string, limit = 50) {
+  const query = input.toLowerCase()
+  return names
+    .filter(name => name.toLowerCase().includes(query))
+    .slice(0, limit)
+}
+
 /**
  * The visible row and column a "Go to" entry names: a row by its name, the
  * column the ruler numbers N, or residue N of a row written `name:N`. A name
