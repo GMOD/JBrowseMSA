@@ -92,12 +92,123 @@ function describeSymbol(checker: ts.TypeChecker, node: ts.Node) {
   const decl = symbol?.valueDeclaration
   return {
     name: symbol?.getName() ?? '',
-    signature:
-      symbol && decl
-        ? checker.typeToString(checker.getTypeOfSymbolAtLocation(symbol, decl))
-        : '',
+    signature: symbol && decl ? typeSignature(checker, symbol, decl) : '',
     declId: symbolDeclId(checker, symbol),
   }
+}
+
+// typeToString truncates past ~340 characters mid-token, leaving unbalanced
+// brackets and half a word. Print the whole type and shorten it structurally
+// instead, so what is left still reads as a type.
+function typeSignature(
+  checker: ts.TypeChecker,
+  symbol: ts.Symbol,
+  decl: ts.Declaration,
+) {
+  return elideSignature(
+    sortStringLiteralUnions(
+      checker.typeToString(
+        checker.getTypeOfSymbolAtLocation(symbol, decl),
+        undefined,
+        ts.TypeFormatFlags.NoTruncation,
+      ),
+    ),
+  )
+}
+
+// The checker prints a union in the order the program met its members, which
+// moves when an unrelated file changes. Sorting runs of string literals keeps a
+// stringEnum's choices from churning the docs.
+const STRING_LITERAL_UNION = /"(?:[^"\\]|\\.)*"(?:\s*\|\s*"(?:[^"\\]|\\.)*")+/g
+
+export function sortStringLiteralUnions(sig: string) {
+  return sig.replaceAll(STRING_LITERAL_UNION, run =>
+    run
+      .split('|')
+      .map(m => m.trim())
+      .toSorted()
+      .join(' | '),
+  )
+}
+
+const MAX_SIGNATURE = 180
+
+// Collapse `<...>` or `{...}` groups innermost first until the string fits. The
+// `>` of a `=>` is not a bracket.
+function elideGroups(sig: string, open: string, close: string, max: number) {
+  let length = sig.length
+  const enclosing: string[] = []
+  let out = ''
+  for (let i = 0; i < sig.length; i++) {
+    const c = sig[i]!
+    if (c === open) {
+      enclosing.push(out)
+      out = ''
+    } else if (
+      c === close &&
+      enclosing.length &&
+      !(close === '>' && sig[i - 1] === '=')
+    ) {
+      const inner = out
+      out = enclosing.pop()!
+      if (length > max) {
+        length -= inner.length - 1
+        out += `${open}…${close}`
+      } else {
+        out += `${open}${inner}${close}`
+      }
+    } else {
+      out += c
+    }
+  }
+  while (enclosing.length) {
+    out = `${enclosing.pop()!}${open}${out}`
+  }
+  return out
+}
+
+function topLevelUnion(sig: string) {
+  const parts: string[] = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i < sig.length; i++) {
+    const c = sig[i]!
+    if ('<{(['.includes(c)) {
+      depth++
+    } else if ('>})]'.includes(c)) {
+      if (!(c === '>' && sig[i - 1] === '=')) {
+        depth--
+      }
+    } else if (c === '|' && depth === 0) {
+      parts.push(sig.slice(start, i).trim())
+      start = i + 1
+    }
+  }
+  parts.push(sig.slice(start).trim())
+  return parts
+}
+
+// Generic arguments collapse first, then object types, then a top-level union
+// drops its trailing alternatives. A type that resists all three stays whole:
+// an honest long signature beats one cut off mid-parameter.
+export function elideSignature(sig: string, max = MAX_SIGNATURE) {
+  let out = sig.replaceAll(/\s+/g, ' ')
+  for (const [open, close] of [
+    ['<', '>'],
+    ['{', '}'],
+  ] as const) {
+    if (out.length > max) {
+      out = elideGroups(out, open, close, max)
+    }
+  }
+  if (out.length > max) {
+    const parts = topLevelUnion(out)
+    const kept = parts.filter(
+      (_, i) => i === 0 || parts.slice(0, i + 1).join(' | ').length + 4 <= max,
+    )
+    out = kept.length < parts.length ? `${kept.join(' | ')} | …` : out
+  }
+  return out
 }
 
 // Follow import aliases to the original symbol so two references to the same
@@ -251,8 +362,13 @@ function identifierRef(
 }
 
 function hasTag(comment: string, tag: TagType) {
-  // word boundary so #getter doesn't also match #getterById
-  return new RegExp(`#${tag}(?![A-Za-z0-9_])`).test(comment)
+  return comment.split('\n').some(line => startsWithTag(line, tag))
+}
+
+// A tag counts only where it heads its line, so prose that mentions `#getter`
+// is not parsed as one, and `#getter` does not match `#getterById`
+function startsWithTag(line: string, tag: string) {
+  return new RegExp(`^\\s*\\*?\\s*#${tag}(?![A-Za-z0-9_])`).test(line)
 }
 
 function getNameNode(node: ts.Node): ts.Node | undefined {
@@ -303,21 +419,19 @@ export function parseTaggedComment(
   const examples: Example[] = []
   let current: { label: string; lines: string[] } | undefined
   for (const line of lines) {
-    if (line.includes('#example')) {
+    if (startsWithTag(line, 'example')) {
       if (current) {
         examples.push({
           label: current.label,
           content: current.lines.join('\n').trim(),
         })
       }
-      current = { label: line.replace(/.*#example\s*/, '').trim(), lines: [] }
-    } else if (line.includes(tag)) {
-      const fromTag = line.replace(tag, '').trim()
+      current = { label: line.replace(/^.*?#example\s*/, '').trim(), lines: [] }
+    } else if (startsWithTag(line, type)) {
+      const fromTag = line.replace(new RegExp(`^.*?${tag}\\s*`), '').trim()
       if (fromTag) {
         name = fromTag
       }
-    } else if (line.includes('#category')) {
-      // skip
     } else if (current) {
       current.lines.push(line)
     } else {
@@ -355,7 +469,17 @@ export function removeComments(string: string) {
       out += scanner.getTokenText()
     }
   }
-  return out.trim()
+  return dedentContinuation(out.trim())
+}
+
+// A member's first line starts at the extracted node, and the lines after it
+// keep the indentation of the file they came from. Shift them to sit one level
+// under the first.
+function dedentContinuation(code: string) {
+  const [first, ...rest] = code.split('\n')
+  const indents = rest.filter(l => l.trim()).map(l => /^ */.exec(l)![0].length)
+  const shift = indents.length ? Math.max(Math.min(...indents) - 2, 0) : 0
+  return [first, ...rest.map(l => l.slice(shift))].join('\n')
 }
 
 export function codeBlock(...lines: string[]) {
@@ -382,7 +506,7 @@ export function exampleSection(
   }
   const levelMatch = /^(#+)/.exec(heading)
   const subPrefix = levelMatch
-    ? '#'.repeat(levelMatch[1].length + 1)
+    ? '#'.repeat(levelMatch[1]!.length + 1)
     : undefined
   const labelHeading = (label: string) =>
     label ? (subPrefix ? `${subPrefix} Example: ${label}` : `_${label}_`) : ''

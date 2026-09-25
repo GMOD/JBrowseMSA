@@ -38,7 +38,7 @@
     "screenshots": "pnpm media:pull && node scripts/screenshots/writeExampleData.mjs && pnpm --filter app exec vite build && node scripts/screenshots/generate.mjs",
     "screenshots:all": "pnpm media:pull && node scripts/screenshots/generate-screenshots.mjs",
     "screenshots:jbrowse": "node scripts/screenshots/jbrowse-figures.mjs",
-    "typecheck": "pnpm -r --filter=!website exec tsc --noEmit && pnpm --filter website exec astro sync && pnpm --filter website exec tsc --noEmit",
+    "typecheck": "pnpm -r --filter=!website exec tsc --noEmit && tsc -p packages/lib/docgen && pnpm --filter website exec astro sync && pnpm --filter website exec tsc --noEmit",
     "release": "node scripts/release.js",
     "release:patch": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",

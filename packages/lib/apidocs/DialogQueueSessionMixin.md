@@ -8,7 +8,7 @@ objects in our source code.
 
 ## Links
 
-- [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model/DialogQueue.ts)
+- [Source code](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/src/model/DialogQueue.ts)
 - [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this
   model in React, HTML, and R
 - [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
@@ -20,15 +20,13 @@ objects in our source code.
 #### getter: DialogComponent
 
 ```js
-// type
-DialogComponentType
+DialogComponent: DialogComponentType
 ```
 
 #### getter: DialogProps
 
 ```js
-// type
-any
+DialogProps: any
 ```
 
 ### DialogQueueSessionMixin - Actions
@@ -36,13 +34,11 @@ any
 #### action: queueDialog
 
 ```js
-// type signature
 queueDialog: (cb: (doneCallback: () => void) => [DialogComponentType, unknown]) => void
 ```
 
 #### action: removeActiveDialog
 
 ```js
-// type signature
 removeActiveDialog: () => void
 ```

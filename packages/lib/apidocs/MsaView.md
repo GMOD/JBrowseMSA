@@ -8,7 +8,7 @@ objects in our source code.
 
 ## Links
 
-- [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/src/model.ts)
+- [Source code](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/src/model.ts)
 - [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this
   model in React, HTML, and R
 - [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
@@ -40,41 +40,66 @@ directly with `setData`. Most state is persisted into the shareable URL.
 
 ## Inherited members
 
-Available on this model via composition. Follow each link for full signatures
-and docs.
+This model composes the ones below. Each member links to its docs on the page
+that declares it.
 
-### Available via [DialogQueueSessionMixin](../dialogqueuesessionmixin)
+### From [DialogQueueSessionMixin](./DialogQueueSessionMixin.md)
 
-**Getters:** DialogComponent, DialogProps
+**Getters:**
+[DialogComponent](./DialogQueueSessionMixin.md#getter-dialogcomponent),
+[DialogProps](./DialogQueueSessionMixin.md#getter-dialogprops)
 
-**Actions:** removeActiveDialog, queueDialog
+**Actions:**
+[removeActiveDialog](./DialogQueueSessionMixin.md#action-removeactivedialog),
+[queueDialog](./DialogQueueSessionMixin.md#action-queuedialog)
 
-### Available via [Tree](../tree)
+### From [Tree](./Tree.md)
 
-**Properties:** drawLabels, labelsAlignRight, treeAreaWidth, treeWidth,
-showBranchLen, treeOrder, drawTree, drawNodeBubbles, drawNodeLabels,
-showTreeOverview, overviewHeight, autoTreeAreaWidth
+**Properties:** [drawLabels](./Tree.md#property-drawlabels),
+[labelsAlignRight](./Tree.md#property-labelsalignright),
+[treeAreaWidth](./Tree.md#property-treeareawidth),
+[treeWidth](./Tree.md#property-treewidth),
+[showBranchLen](./Tree.md#property-showbranchlen),
+[treeOrder](./Tree.md#property-treeorder),
+[drawTree](./Tree.md#property-drawtree),
+[drawNodeBubbles](./Tree.md#property-drawnodebubbles),
+[drawNodeLabels](./Tree.md#property-drawnodelabels),
+[showTreeOverview](./Tree.md#property-showtreeoverview),
+[overviewHeight](./Tree.md#property-overviewheight),
+[autoTreeAreaWidth](./Tree.md#property-autotreeareawidth)
 
-**Actions:** setTreeAreaWidth, setTreeWidth, setLabelsAlignRight, setDrawTree,
-setAutoTreeAreaWidth, setShowBranchLen, setTreeOrder, setDrawNodeBubbles,
-setDrawNodeLabels, setShowTreeOverview, setOverviewHeight, setDrawLabels
+**Actions:** [setTreeAreaWidth](./Tree.md#action-settreeareawidth),
+[setTreeWidth](./Tree.md#action-settreewidth),
+[setLabelsAlignRight](./Tree.md#action-setlabelsalignright),
+[setDrawTree](./Tree.md#action-setdrawtree),
+[setAutoTreeAreaWidth](./Tree.md#action-setautotreeareawidth),
+[setShowBranchLen](./Tree.md#action-setshowbranchlen),
+[setTreeOrder](./Tree.md#action-settreeorder),
+[setDrawNodeBubbles](./Tree.md#action-setdrawnodebubbles),
+[setDrawNodeLabels](./Tree.md#action-setdrawnodelabels),
+[setShowTreeOverview](./Tree.md#action-setshowtreeoverview),
+[setOverviewHeight](./Tree.md#action-setoverviewheight),
+[setDrawLabels](./Tree.md#action-setdrawlabels)
 
-### Available via [MSAModel](../msamodel)
+### From [MSAModel](./MSAModel.md)
 
-**Properties:** bgColor, colorSchemeName, customColorScheme, showColumnStats,
-msaFormat
+**Properties:** [bgColor](./MSAModel.md#property-bgcolor),
+[colorSchemeName](./MSAModel.md#property-colorschemename),
+[customColorScheme](./MSAModel.md#property-customcolorscheme),
+[showColumnStats](./MSAModel.md#property-showcolumnstats),
+[msaFormat](./MSAModel.md#property-msaformat)
 
-**Actions:** setColorSchemeName, setCustomColorScheme, setBgColor,
-setShowColumnStats, setMSAFormat
+**Actions:** [setColorSchemeName](./MSAModel.md#action-setcolorschemename),
+[setCustomColorScheme](./MSAModel.md#action-setcustomcolorscheme),
+[setBgColor](./MSAModel.md#action-setbgcolor),
+[setShowColumnStats](./MSAModel.md#action-setshowcolumnstats),
+[setMSAFormat](./MSAModel.md#action-setmsaformat)
 
 ### MsaView - Properties
 
 #### property: allowedGappyness
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
-// code
 allowedGappyness: stripDefault(types.number, defaultAllowedGappyness)
 ```
 
@@ -86,9 +111,6 @@ ancestor is the clade, or `range` its first and last tip in display order, and
 `bracket`, `collapse`, `focus` or `rotate`. See docs/layers.md
 
 ```js
-// type signature
-IOptionalIType<IArrayType<IType<Clade, Clade, Clade>>, [undefined]>
-// code
 clades: stripDefault(types.array(types.frozen<Clade>()), [])
 ```
 
@@ -97,9 +119,6 @@ clades: stripDefault(types.array(types.frozen<Clade>()), [])
 array of tree parent nodes that are 'collapsed' (all children are hidden)
 
 ```js
-// type signature
-IOptionalIType<IArrayType<ISimpleType<string>>, [undefined]>
-// code
 collapsed: stripDefault(types.array(types.string), [])
 ```
 
@@ -109,13 +128,10 @@ tracks supplied as data: per-column values drawn as bars, or a per-column string
 drawn as a text track. See docs/layers.md
 
 ```js
-// type signature
-IOptionalIType<IArrayType<IType<ColumnTrackSpec, ColumnTrackSpec, ColumnTrackSpec>>, [undefined]>
-// code
 columnTracks: stripDefault(
-          types.array(types.frozen<ColumnTrackSpec>()),
-          [],
-        )
+    types.array(types.frozen<ColumnTrackSpec>()),
+    [],
+  )
 ```
 
 #### property: colWidth
@@ -123,18 +139,12 @@ columnTracks: stripDefault(
 width of columns, px
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
-// code
 colWidth: stripDefault(types.number, defaultColWidth)
 ```
 
 #### property: currentAlignment
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
-// code
 currentAlignment: stripDefault(types.number, defaultCurrentAlignment)
 ```
 
@@ -143,18 +153,12 @@ currentAlignment: stripDefault(types.number, defaultCurrentAlignment)
 data from the loaded tree/msa/treeMetadata, generally loaded by autorun
 
 ```js
-// type signature
-IOptionalIType<IModelType<{ tree: IMaybe<ISimpleType<string>>; msa: IMaybe<ISimpleType<string>>; treeMetadata: IMaybe<ISimpleType<string>>; gff: IMaybe<...>; }, { ...; }, _NotCustomized, { ...; }>, [...]>
-// code
 data: types.optional(DataModelF(maxInlineSnapshotBytes), {})
 ```
 
 #### property: drawMsaLetters
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<boolean>, [undefined]>
-// code
 drawMsaLetters: stripDefault(types.boolean, defaultDrawMsaLetters)
 ```
 
@@ -164,9 +168,6 @@ what the viewer's own marks read from `rowData`: `{channel, field, scale?}` per
 channel, where `channel` is `tipLabel` or `rowTint`. See docs/layers.md
 
 ```js
-// type signature
-IOptionalIType<IArrayType<IType<Encoding, Encoding, Encoding>>, [undefined]>
-// code
 encodings: stripDefault(types.array(types.frozen<Encoding>()), [])
 ```
 
@@ -176,9 +177,6 @@ features on the rows as data, `{row, start, end, name, ...}` in residues of each
 row, drawn with the GFF's annotations. Persists in the snapshot and the URL.
 
 ```js
-// type signature
-IOptionalIType<IArrayType<IType<Feature, Feature, Feature>>, [undefined]>
-// code
 features: stripDefault(types.array(types.frozen<Feature>()), [])
 ```
 
@@ -187,9 +185,6 @@ features: stripDefault(types.array(types.frozen<Feature>()), [])
 filehandle object for a GFF file of overlay annotations
 
 ```js
-// type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
-// code
 gffFilehandle: types.maybe(FileLocation)
 ```
 
@@ -198,18 +193,12 @@ gffFilehandle: types.maybe(FileLocation)
 height of the div containing the view, px
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
-// code
 height: stripDefault(types.number, defaultHeight)
 ```
 
 #### property: hideGaps
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<boolean>, [undefined]>
-// code
 hideGaps: stripDefault(types.boolean, defaultHideGaps)
 ```
 
@@ -221,9 +210,6 @@ sync), this persists in the snapshot/URL so a shared link can open with specific
 columns highlighted. Applied once in afterCreate.
 
 ```js
-// type signature
-IType<number[] | undefined, number[] | undefined, number[] | undefined>
-// code
 highlightColumns: types.frozen<number[] | undefined>()
 ```
 
@@ -235,9 +221,6 @@ labeled highlights in 1-based inclusive coordinates: a column span
 and the URL.
 
 ```js
-// type signature
-IOptionalIType<IArrayType<IType<Highlight, Highlight, Highlight>>, [undefined]>
-// code
 highlights: stripDefault(types.array(types.frozen<Highlight>()), [])
 ```
 
@@ -246,9 +229,6 @@ highlights: stripDefault(types.array(types.frozen<Highlight>()), [])
 id of view, randomly generated if not provided
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<string>, [undefined]>
-// code
 id: ElementId
 ```
 
@@ -258,9 +238,6 @@ filehandle object for the MSA (which could contain a tree e.g. with stockholm
 files)
 
 ```js
-// type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
-// code
 msaFilehandle: types.maybe(FileLocation)
 ```
 
@@ -272,18 +249,12 @@ the alignment and any tree file have loaded, then cleared, so a reloaded session
 keeps the reader's own scroll.
 
 ```js
-// type signature
-IType<Region | undefined, Region | undefined, Region | undefined>
-// code
 region: types.frozen<Region | undefined>()
 ```
 
 #### property: relativeTo
 
 ```js
-// type signature
-IMaybe<ISimpleType<string>>
-// code
 relativeTo: types.maybe(types.string)
 ```
 
@@ -294,13 +265,10 @@ SIFTS). Matching by sequence equality places a tagged construct, a truncation or
 a subsequence row on the wrong residue. See docs/layers.md
 
 ```js
-// type signature
-IOptionalIType<IArrayType<IType<ResidueMapping, ResidueMapping, ResidueMapping>>, [undefined]>
-// code
 residueMappings: stripDefault(
-          types.array(types.frozen<ResidueMapping>()),
-          [],
-        )
+    types.array(types.frozen<ResidueMapping>()),
+    [],
+  )
 ```
 
 #### property: rotated
@@ -309,9 +277,6 @@ tree nodes whose children draw in reverse order, which is ggtree's `rotate`: the
 same tree, with the clades on either side of the node swapped
 
 ```js
-// type signature
-IOptionalIType<IArrayType<ISimpleType<string>>, [undefined]>
-// code
 rotated: stripDefault(types.array(types.string), [])
 ```
 
@@ -320,9 +285,6 @@ rotated: stripDefault(types.array(types.string), [])
 height of each row, px
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
-// code
 rowHeight: stripDefault(types.number, defaultRowHeight)
 ```
 
@@ -335,9 +297,6 @@ panels drawn between the tree and the alignment:
 the GFF carries. See docs/layers.md
 
 ```js
-// type signature
-IOptionalIType<IArrayType<IType<RowPanelSpec, RowPanelSpec, RowPanelSpec>>, [undefined]>
-// code
 rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), [])
 ```
 
@@ -346,9 +305,6 @@ rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), [])
 scroll position, X-offset, px
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
-// code
 scrollX: stripDefault(types.number, defaultScrollX)
 ```
 
@@ -357,9 +313,6 @@ scrollX: stripDefault(types.number, defaultScrollX)
 scroll position, Y-offset, px
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<number>, [undefined]>
-// code
 scrollY: stripDefault(types.number, defaultScrollY)
 ```
 
@@ -368,9 +321,6 @@ scrollY: stripDefault(types.number, defaultScrollY)
 zoom in/out on plain mouse-wheel without holding ctrl
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<boolean>, [undefined]>
-// code
 scrollZoom: stripDefault(types.boolean, defaultScrollZoom)
 ```
 
@@ -379,13 +329,10 @@ scrollZoom: stripDefault(types.boolean, defaultScrollZoom)
 which cell dimensions a wheel zoom scales, while `scrollZoom` is on
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<"both" | "horizontal" | "vertical">, [undefined]>
-// code
 scrollZoomAxis: stripDefault(
-          types.enumeration('ScrollZoomAxis', [...scrollZoomAxes]),
-          defaultScrollZoomAxis,
-        )
+  types.enumeration('ScrollZoomAxis', [...scrollZoomAxes]),
+  defaultScrollZoomAxis,
+)
 ```
 
 #### property: selection
@@ -396,9 +343,6 @@ Undefined until something is selected, so a view without one adds nothing to the
 shared URL.
 
 ```js
-// type signature
-IType<MsaSelection | undefined, MsaSelection | undefined, MsaSelection | undefined>
-// code
 selection: types.frozen<MsaSelection | undefined>()
 ```
 
@@ -409,18 +353,12 @@ the alignment and covers residues, so a session or figure can open with it
 collapsed.
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<boolean>, [undefined]>
-// code
 showDomainLegend: stripDefault(types.boolean, defaultShowDomainLegend)
 ```
 
 #### property: showDomains
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<boolean>, [undefined]>
-// code
 showDomains: stripDefault(types.boolean, defaultShowDomains)
 ```
 
@@ -429,18 +367,12 @@ showDomains: stripDefault(types.boolean, defaultShowDomains)
 focus on particular subtree
 
 ```js
-// type signature
-IMaybe<ISimpleType<string>>
-// code
 showOnly: types.maybe(types.string)
 ```
 
 #### property: subFeatureRows
 
 ```js
-// type signature
-IOptionalIType<ISimpleType<boolean>, [undefined]>
-// code
 subFeatureRows: stripDefault(types.boolean, defaultSubFeatureRows)
 ```
 
@@ -452,9 +384,6 @@ user drags that divider, and `defaultTrackHeights` answers for it until then, so
 an untouched viewer adds nothing to the shared URL.
 
 ```js
-// type signature
-IOptionalIType<IMapType<ISimpleType<number>>, [undefined]>
-// code
 trackHeights: stripDefault(types.map(types.number), {})
 ```
 
@@ -463,9 +392,6 @@ trackHeights: stripDefault(types.map(types.number), {})
 filehandle object for the tree
 
 ```js
-// type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
-// code
 treeFilehandle: types.maybe(FileLocation)
 ```
 
@@ -474,9 +400,6 @@ treeFilehandle: types.maybe(FileLocation)
 filehandle object for tree metadata
 
 ```js
-// type signature
-IMaybe<ISnapshotProcessor<ITypeUnion<ModelCreationType<{ locationType: "LocalPathLocation"; localPath: string; }> | ModelCreationType<{ locationType: "BlobLocation"; name: string; blobId: string; }> | ModelCreationType<...> | ModelCreationType<...>, ModelSnapshotType<...> | ... 2 more ... | { ...; }, ModelInstanceTy...
-// code
 treeMetadataFilehandle: types.maybe(FileLocation)
 ```
 
@@ -487,9 +410,6 @@ between two tips, `{outgroup}` on the branch above the tips named, and undefined
 keeps the file's root
 
 ```js
-// type signature
-IType<TreeRoot | undefined, TreeRoot | undefined, TreeRoot | undefined>
-// code
 treeRoot: types.frozen<TreeRoot | undefined>()
 ```
 
@@ -500,9 +420,6 @@ with the value meaning "off", like `turnedOffTracks`. An untouched accession is
 absent and drawn, so the shared URL grows only with the user's filters
 
 ```js
-// type signature
-IOptionalIType<IMapType<ISimpleType<boolean>>, [undefined]>
-// code
 turnedOffFeatures: stripDefault(types.map(types.boolean), {})
 ```
 
@@ -514,9 +431,6 @@ its own default (see `defaultOffTracks`), so a hidden-by-default track adds
 nothing to the shared URL.
 
 ```js
-// type signature
-IOptionalIType<IMapType<ISimpleType<boolean>>, [undefined]>
-// code
 turnedOffTracks: stripDefault(types.map(types.boolean), {})
 ```
 
@@ -525,9 +439,6 @@ turnedOffTracks: stripDefault(types.map(types.boolean), {})
 hardcoded view type
 
 ```js
-// type signature
-ILiteralType<"MsaView">
-// code
 type: types.literal('MsaView')
 ```
 
@@ -539,9 +450,6 @@ overlay annotations drawn on the alignment. InterProScan JSON, GFF and user
 uploads all convert to this flat list
 
 ```js
-// type signature
-Annotation[]
-// code
 annotations: [] as Annotation[]
 ```
 
@@ -550,9 +458,6 @@ annotations: [] as Annotation[]
 size of blocks of content to be drawn, px
 
 ```js
-// type signature
-number
-// code
 blockSize: 500
 ```
 
@@ -562,27 +467,18 @@ derived warnings the user dismissed, which stay hidden while the data behind
 them holds
 
 ```js
-// type signature
-string[]
-// code
 dismissedWarnings: [] as string[]
 ```
 
 #### volatile: error
 
 ```js
-// type signature
-unknown
-// code
 error: undefined as unknown
 ```
 
 #### volatile: headerHeight
 
 ```js
-// type signature
-number
-// code
 headerHeight: 0
 ```
 
@@ -592,9 +488,6 @@ leaves the toolbar out, for a host drawing its own controls. Kept out of the
 snapshot so a link opened in the full app shows the toolbar.
 
 ```js
-// type signature
-false
-// code
 hideHeader: false
 ```
 
@@ -603,9 +496,6 @@ hideHeader: false
 array of column indices to highlight
 
 ```js
-// type signature
-number[] | undefined
-// code
 highlightedColumns: undefined as number[] | undefined
 ```
 
@@ -614,9 +504,6 @@ highlightedColumns: undefined as number[] | undefined
 canvas scale factor, from the device pixel ratio
 
 ```js
-// type signature
-number
-// code
 highResScaleFactor: typeof window === 'undefined' ? 1 : window.devicePixelRatio
 ```
 
@@ -626,9 +513,6 @@ set by a host that restores the loaded documents itself, such as a jbrowse
 session or a page that refetches them. `unshareableData` then reports nothing
 
 ```js
-// type signature
-false
-// code
 hostCarriesData: false
 ```
 
@@ -637,29 +521,20 @@ hostCarriesData: false
 the currently hovered tree node ID and its descendant leaf names
 
 ```js
-// type signature
-{ nodeId: string; descendantNames: string[]; } | undefined
-// code
 hoveredTreeNode: undefined as
-        | { nodeId: string; descendantNames: string[] }
-        | undefined
+  | { nodeId: string; descendantNames: string[] }
+  | undefined
 ```
 
 #### volatile: loadingMSA
 
 ```js
-// type signature
-false
-// code
 loadingMSA: false
 ```
 
 #### volatile: loadingTree
 
 ```js
-// type signature
-false
-// code
 loadingTree: false
 ```
 
@@ -670,27 +545,18 @@ failed to parse. `error` replaces the view and is for the alignment itself.
 `warnings` adds the ones derived from the data
 
 ```js
-// type signature
-string[]
-// code
 loadWarnings: [] as string[]
 ```
 
 #### volatile: marginLeft
 
 ```js
-// type signature
-number
-// code
 marginLeft: 20
 ```
 
 #### volatile: minimapHeight
 
 ```js
-// type signature
-number
-// code
 minimapHeight: 56
 ```
 
@@ -699,9 +565,6 @@ minimapHeight: 56
 the currently mouse-click column
 
 ```js
-// type signature
-number | undefined
-// code
 mouseClickCol: undefined as number | undefined
 ```
 
@@ -710,9 +573,6 @@ mouseClickCol: undefined as number | undefined
 the currently mouse-click row
 
 ```js
-// type signature
-number | undefined
-// code
 mouseClickRow: undefined as number | undefined
 ```
 
@@ -721,9 +581,6 @@ mouseClickRow: undefined as number | undefined
 the currently mouse-hovered column
 
 ```js
-// type signature
-number | undefined
-// code
 mouseCol: undefined as number | undefined
 ```
 
@@ -732,9 +589,6 @@ mouseCol: undefined as number | undefined
 the currently mouse-hovered row
 
 ```js
-// type signature
-number | undefined
-// code
 mouseRow: undefined as number | undefined
 ```
 
@@ -744,9 +598,6 @@ bumped by reset(). The error boundary above the view uses it as its key, since
 the boundary keeps its caught error until remounted
 
 ```js
-// type signature
-number
-// code
 resetCount: 0
 ```
 
@@ -755,18 +606,12 @@ resetCount: 0
 resize handle width between tree and msa area, px
 
 ```js
-// type signature
-number
-// code
 resizeHandleWidth: 5
 ```
 
 #### volatile: status
 
 ```js
-// type signature
-{ msg: string; onCancel?: (() => void) | undefined; } | undefined
-// code
 status: undefined as { msg: string; onCancel?: () => void } | undefined
 ```
 
@@ -776,18 +621,12 @@ transient highlights keyed by owner, so a structure viewer's hover and a genome
 view's hover each clear only their own. Not persisted.
 
 ```js
-// type signature
-Record<string, Highlight[]>
-// code
 transientHighlights: {} as Record<string, Highlight[]>
 ```
 
 #### volatile: volatileWidth
 
 ```js
-// type signature
-number | undefined
-// code
 volatileWidth: undefined as number | undefined
 ```
 
@@ -796,22 +635,19 @@ volatileWidth: undefined as number | undefined
 #### getter: actuallyShowDomains
 
 ```js
-// type
-boolean
+actuallyShowDomains: boolean
 ```
 
 #### getter: adapterTrackModels
 
 ```js
-// type
-BasicTrack[]
+adapterTrackModels: BasicTrack[]
 ```
 
 #### getter: alignmentNames
 
 ```js
-// type
-string[]
+alignmentNames: string[]
 ```
 
 #### getter: allAnnotations
@@ -820,15 +656,13 @@ the annotations the overlay, the legend and the encodings draw: the GFF's, then
 the `features` layer's
 
 ```js
-// type
-Annotation[]
+allAnnotations: Annotation[]
 ```
 
 #### getter: allBranchesLength0
 
 ```js
-// type
-boolean
+allBranchesLength0: boolean
 ```
 
 #### getter: alphabetMaxBits
@@ -838,8 +672,7 @@ the alphabet. Both the entropy ceiling `conservation` normalizes against and the
 y-axis ceiling of the sequence logo track.
 
 ```js
-// type
-number
+alphabetMaxBits: number
 ```
 
 #### getter: basePairTrackModels
@@ -848,36 +681,31 @@ the consensus secondary structure as a track, when there is one. A separate
 getter keeps the object stable across zoom, so its canvas does not redraw
 
 ```js
-// type
-BasicTrack[]
+basePairTrackModels: BasicTrack[]
 ```
 
 #### getter: blanks
 
 ```js
-// type
-number[]
+blanks: number[]
 ```
 
 #### getter: blocks2d
 
 ```js
-// type
-(readonly [number, number])[]
+blocks2d: (readonly [number, number])[]
 ```
 
 #### getter: blocksX
 
 ```js
-// type
-number[]
+blocksX: number[]
 ```
 
 #### getter: blocksY
 
 ```js
-// type
-number[]
+blocksY: number[]
 ```
 
 #### getter: branchColors
@@ -892,8 +720,7 @@ The pass runs over the whole tree, never `root`, so a collapsed or focused clade
 keeps the color the full tree gives it.
 
 ```js
-// type
-Map<string, string> | undefined
+branchColors: Map<string, string> | undefined
 ```
 
 #### getter: categoricalDomainTypes
@@ -902,8 +729,7 @@ categorical feature types (InterPro domains and the like) that each get their
 own color and a legend entry
 
 ```js
-// type
-Annotation[]
+categoricalDomainTypes: Annotation[]
 ```
 
 #### getter: cladeGutterWidth
@@ -913,8 +739,7 @@ which the tip labels and the tree itself stay clear of. Zero where no clade
 draws a bar or a label.
 
 ```js
-// type
-number
+cladeGutterWidth: number
 ```
 
 #### getter: clickedCell
@@ -922,8 +747,7 @@ number
 the cell a click pinned. Public API: MSAViewer's onCellClick reports it.
 
 ```js
-// type
-Cell | undefined
+clickedCell: Cell | undefined
 ```
 
 #### getter: colClustalX
@@ -932,8 +756,7 @@ Pre-computed ClustalX colors per column. Returns a map of letter -> color for
 each column. ref http://www.jalview.org/help/html/colourSchemes/clustal.html
 
 ```js
-// type
-;(Record < string, string > [])
+colClustalX: (Record < string, string > [])
 ```
 
 #### getter: colConsensus
@@ -942,8 +765,7 @@ Pre-computed consensus letter and percent identity color per column. Used by
 percent_identity_dynamic color scheme.
 
 ```js
-// type
-{
+colConsensus: {
   letter: string
   color: string | undefined
 }
@@ -953,29 +775,25 @@ percent_identity_dynamic color scheme.
 #### getter: colorScheme
 
 ```js
-// type
-Record<string, string>
+colorScheme: Record<string, string>
 ```
 
 #### getter: colStats
 
 ```js
-// type
-ColumnCounts
+colStats: ColumnCounts
 ```
 
 #### getter: columns
 
 ```js
-// type
-Map<string, string>
+columns: Map<string, string>
 ```
 
 #### getter: columns2d
 
 ```js
-// type
-string[]
+columns2d: string[]
 ```
 
 #### getter: columnTrackContent
@@ -984,15 +802,13 @@ a data track's values or string, projected from its row's residues onto
 alignment columns when it names a row
 
 ```js
-// type
-Map<string, { values?: number[] | undefined; data?: string | undefined; arcs?: Arc[] | undefined; }>
+columnTrackContent: Map<string, { values?: number[] | undefined; data?: string | undefined; arcs?: Arc[] | undefined; }>
 ```
 
 #### getter: columnTrackModels
 
 ```js
-// type
-BasicTrack[]
+columnTrackModels: BasicTrack[]
 ```
 
 #### getter: computedTrackModels
@@ -1001,8 +817,7 @@ the tracks computed from the alignment; they depend on their heights and the
 alphabet, not on zoom
 
 ```js
-// type
-BasicTrack[]
+computedTrackModels: BasicTrack[]
 ```
 
 #### getter: conservation
@@ -1012,15 +827,13 @@ Conservation = (1 - H/Hmax) * (1 - gapFraction) Returns values 0-1 where 1 =
 fully conserved, 0 = no conservation.
 
 ```js
-// type
-number[]
+conservation: number[]
 ```
 
 #### getter: dataInitialized
 
 ```js
-// type
-boolean
+dataInitialized: boolean
 ```
 
 #### getter: dataWarnings
@@ -1030,8 +843,7 @@ first column names rows of some other alignment parses without error and draws
 nothing
 
 ```js
-// type
-string[]
+dataWarnings: string[]
 ```
 
 #### getter: domainBands
@@ -1043,8 +855,7 @@ in. Resolved once here instead of per canvas block per redraw; the letter
 renderer also reads the band colors to pick legible letter colors.
 
 ```js
-// type
-Map<string, DomainBand[]>
+domainBands: Map<string, DomainBand[]>
 ```
 
 #### getter: domainBandsByStart
@@ -1053,8 +864,7 @@ the same bands ordered by start column, for left-to-right sweeps (the letter
 renderer walks columns and needs the band covering each one)
 
 ```js
-// type
-Map<string, DomainBand[]>
+domainBandsByStart: Map<string, DomainBand[]>
 ```
 
 #### getter: domainUnderline
@@ -1067,8 +877,7 @@ and with the letters too small to draw the filled box is the only thing left to
 read.
 
 ```js
-// type
-boolean
+domainUnderline: boolean
 ```
 
 #### getter: dynamicColorSchemeName
@@ -1078,8 +887,7 @@ the cells take a fixed color per letter, from the built-in table or from
 `customColorScheme`
 
 ```js
-// type
-string | undefined
+dynamicColorSchemeName: string | undefined
 ```
 
 #### getter: featureAlignShifts
@@ -1089,8 +897,7 @@ aligns on: the offset putting the first feature of that name at zero. A row
 carrying no such feature is absent, and keeps its own origin.
 
 ```js
-// type
-Map<string, Map<string, number>>
+featureAlignShifts: Map<string, Map<string, number>>
 ```
 
 #### getter: featureColors
@@ -1100,8 +907,7 @@ the `featureFill` scale, then the accession palette. Computed once per change of
 the features, the encodings or the palette
 
 ```js
-// type
-Map<Annotation, { fill: string; stroke: string; }>
+featureColors: Map<Annotation, { fill: string; stroke: string; }>
 ```
 
 #### getter: featureFillEncoding
@@ -1110,8 +916,7 @@ the encoding coloring the overlay's spans, undefined when none does, which
 leaves each span the color its accession takes in `fillPalette`
 
 ```js
-// type
-ResolvedEncoding | undefined
+featureFillEncoding: ResolvedEncoding | undefined
 ```
 
 #### getter: featureLabels
@@ -1121,22 +926,19 @@ encoding names the channel. A data channel, so it draws whether or not the
 residue letters do
 
 ```js
-// type
-Map<Annotation, string> | undefined
+featureLabels: Map<Annotation, string> | undefined
 ```
 
 #### getter: fontSize
 
 ```js
-// type
-number
+fontSize: number
 ```
 
 #### getter: header
 
 ```js
-// type
-Record<string, unknown> | { info: string; version: string | undefined; } | { General: Record<string, string[]>; Accessions: { [k: string]: string; }; Dbxref: { [k: string]: string; }; }
+header: Record<…> | { info: string; version: string | undefined; } | { General: Record<string, string[]>; Accessions: { [k: string]: string; }; Dbxref: { [k: string]: string; }; }
 ```
 
 #### getter: hideGapsEffective
@@ -1144,8 +946,7 @@ Record<string, unknown> | { info: string; version: string | undefined; } | { Gen
 hideGaps takes effect when there are collapsed rows or allowedGappyness < 100
 
 ```js
-// type
-boolean
+hideGapsEffective: boolean
 ```
 
 #### getter: hierarchy
@@ -1153,8 +954,7 @@ boolean
 the laid-out tree, with pixel positions on every node
 
 ```js
-// type
-HierarchyNode<NodeWithIds>
+hierarchy: HierarchyNode<NodeWithIds>
 ```
 
 #### getter: highlightedColumnRuns
@@ -1164,8 +964,7 @@ as one bordered band. Memoized because the overlay canvas redraws on every mouse
 move.
 
 ```js
-// type
-{
+highlightedColumnRuns: {
   start: number
   end: number
 }
@@ -1184,8 +983,7 @@ holds, while its data-store views do not. `unshareableData` reads it off `self`,
 so an override takes effect.
 
 ```js
-// type
-boolean
+hostRestoresData: boolean
 ```
 
 #### getter: hoveredCell
@@ -1193,8 +991,7 @@ boolean
 the cell under the pointer. Public API: MSAViewer's onCellHover reports it.
 
 ```js
-// type
-Cell | undefined
+hoveredCell: Cell | undefined
 ```
 
 #### getter: hoveredInsertion
@@ -1202,8 +999,7 @@ Cell | undefined
 Returns insertion info if mouse is hovering over an insertion indicator
 
 ```js
-// type
-{ rowName: string; col: number; letters: string; } | undefined
+hoveredInsertion: { rowName: string; col: number; letters: string; } | undefined
 ```
 
 #### getter: hoveredRowIndices
@@ -1213,8 +1009,7 @@ highlights every tip below it). Shared by the tree and MSA overlay canvases, via
 the memoized name->index map.
 
 ```js
-// type
-number[]
+hoveredRowIndices: number[]
 ```
 
 #### getter: inputTree
@@ -1222,8 +1017,7 @@ number[]
 the tree the file or the alignment gives, before `treeRoot`
 
 ```js
-// type
-NodeWithIds
+inputTree: NodeWithIds
 ```
 
 #### getter: insertionPositions
@@ -1232,22 +1026,19 @@ Returns a map of row name to array of insertions with display position and
 letters
 
 ```js
-// type
-Map<string, { pos: number; letters: string; }[]>
+insertionPositions: Map<string, { pos: number; letters: string; }[]>
 ```
 
 #### getter: isLoading
 
 ```js
-// type
-boolean
+isLoading: boolean
 ```
 
 #### getter: labelWidthMap
 
 ```js
-// type
-Map<string, number>
+labelWidthMap: Map<string, number>
 ```
 
 #### getter: labelWidthScale
@@ -1255,15 +1046,13 @@ Map<string, number>
 factor turning a labelWidthMap entry into its width at the current font size
 
 ```js
-// type
-number
+labelWidthScale: number
 ```
 
 #### getter: leaves
 
 ```js
-// type
-HierarchyNode < NodeWithIds > []
+leaves: HierarchyNode < NodeWithIds > []
 ```
 
 #### getter: legends
@@ -1277,8 +1066,7 @@ names the title it lists under, so strips over eight fields with one set of
 colors list one legend between them
 
 ```js
-// type
-Legend[]
+legends: Legend[]
 ```
 
 #### getter: mappedStructures
@@ -1287,8 +1075,7 @@ the structures with usable mappings. A row can map onto several, such as an
 experimental entry and a predicted model.
 
 ```js
-// type
-{
+mappedStructures: {
   row: string
   structure: MappedStructure
 }
@@ -1301,8 +1088,7 @@ x-position of the farthest tip in a phylogram, px: treeWidth, or 0 for a tree
 with no branch lengths (drawn as a cladogram)
 
 ```js
-// type
-number
+maxBranchLength: number
 ```
 
 #### getter: maxDepthToLeaf
@@ -1310,8 +1096,7 @@ number
 max topological depth to a tip, used to scale cladogram x-positions
 
 ```js
-// type
-number
+maxDepthToLeaf: number
 ```
 
 #### getter: maxScrollX
@@ -1319,8 +1104,7 @@ number
 most-negative allowed scrollX, which keeps the last column in view
 
 ```js
-// type
-number
+maxScrollX: number
 ```
 
 #### getter: maxScrollY
@@ -1328,8 +1112,7 @@ number
 most-negative allowed scrollY, which keeps the last row in view
 
 ```js
-// type
-number
+maxScrollY: number
 ```
 
 #### getter: mouseOverDomains
@@ -1338,22 +1121,19 @@ domain annotations under the mouse, hit-tested against the exact visible column
 span each box is drawn at (so it matches the overlay across gaps)
 
 ```js
-// type
-Annotation[]
+mouseOverDomains: Annotation[]
 ```
 
 #### getter: mouseOverRowName
 
 ```js
-// type
-string | undefined
+mouseOverRowName: string | undefined
 ```
 
 #### getter: MSA
 
 ```js
-// type
-MSAParserType | null
+MSA: MSAParserType | null
 ```
 
 #### getter: msaAreaHeight
@@ -1363,8 +1143,7 @@ top band and the tracks. Shared by blocksY, maxScrollY, the vertical scrollbar
 and fitVertically.
 
 ```js
-// type
-number
+msaAreaHeight: number
 ```
 
 #### getter: msaAreaWidth
@@ -1372,8 +1151,7 @@ number
 widget width minus the tree area and the row panels gives the space for the MSA
 
 ```js
-// type
-number
+msaAreaWidth: number
 ```
 
 #### getter: msaCanvasWidth
@@ -1383,22 +1161,19 @@ showHorizontalScrollbar must not read it, since that feeds msaAreaHeight ->
 showVerticalScrollbar and would form a cycle
 
 ```js
-// type
-number
+msaCanvasWidth: number
 ```
 
 #### getter: noTree
 
 ```js
-// type
-boolean
+noTree: boolean
 ```
 
 #### getter: numColumns
 
 ```js
-// type
-number
+numColumns: number
 ```
 
 #### getter: numRows
@@ -1407,8 +1182,7 @@ number of rows on screen: the leaf count, which includes tree leaves with no
 matching MSA row (drawn blank), unlike `rows.length`.
 
 ```js
-// type
-number
+numRows: number
 ```
 
 #### getter: propertyConservation
@@ -1418,8 +1192,7 @@ Surfaces conservative-substitution sites that identity-based conservation
 misses. Empty for nucleotide alignments.
 
 ```js
-// type
-number[]
+propertyConservation: number[]
 ```
 
 #### getter: pxPerBranchLength
@@ -1428,15 +1201,13 @@ pixels per unit of branch length in the phylogram layout, 0 in cladogram mode.
 The tree's scale bar uses it.
 
 ```js
-// type
-number
+pxPerBranchLength: number
 ```
 
 #### getter: realAllowedGappyness
 
 ```js
-// type
-number
+realAllowedGappyness: number
 ```
 
 #### getter: referenceRowIndex
@@ -1444,8 +1215,7 @@ number
 row index of the reference row (`relativeTo`), undefined when unset
 
 ```js
-// type
-number | undefined
+referenceRowIndex: number | undefined
 ```
 
 #### getter: residueMappingProblems
@@ -1454,8 +1224,7 @@ why each ignored residue mapping is ignored, so a host can tell a missing
 structure from a mapping made against a different alignment.
 
 ```js
-// type
-ResidueMappingProblem[]
+residueMappingProblems: ResidueMappingProblem[]
 ```
 
 #### getter: resolvedClades
@@ -1466,8 +1235,7 @@ its rows. One leaf pass over the tree serves every clade. A `range` record names
 no node, so `collapse`, `focus` and `rotate`, which need one, drop it.
 
 ```js
-// type
-ResolvedClade[]
+resolvedClades: ResolvedClade[]
 ```
 
 #### getter: resolvedEncodings
@@ -1478,8 +1246,7 @@ across the row table. Resolved once per change of that table or the encodings,
 never per row per frame.
 
 ```js
-// type
-ResolvedEncoding[]
+resolvedEncodings: ResolvedEncoding[]
 ```
 
 #### getter: resolvedHighlights
@@ -1490,8 +1257,7 @@ span that lands entirely on hidden columns is dropped. Row names that match no
 row are ignored.
 
 ```js
-// type
-ResolvedHighlight[]
+resolvedHighlights: ResolvedHighlight[]
 ```
 
 #### getter: resolvedRowPanels
@@ -1501,8 +1267,7 @@ column it draws in and, for a features panel, the spans per row. Resolved once
 per change of those inputs, never per block per frame.
 
 ```js
-// type
-ResolvedRowPanel[]
+resolvedRowPanels: ResolvedRowPanel[]
 ```
 
 #### getter: resolvedSelection
@@ -1512,15 +1277,13 @@ projects a column span and a row set. A selection whose columns are all hidden,
 or whose rows are all collapsed away or unknown, resolves to undefined.
 
 ```js
-// type
-ResolvedSelection | undefined
+resolvedSelection: ResolvedSelection | undefined
 ```
 
 #### getter: root
 
 ```js
-// type
-HierarchyNode<NodeWithIds>
+root: HierarchyNode<NodeWithIds>
 ```
 
 #### getter: rootToTipLength
@@ -1529,8 +1292,7 @@ branch-length extent of the displayed tree, root to farthest tip, in the tree's
 own units
 
 ```js
-// type
-number
+rootToTipLength: number
 ```
 
 #### getter: rowData
@@ -1543,8 +1305,7 @@ malformed user-supplied file returns {} instead of throwing out of rendering,
 and every field is a string by the time a scale sorts it.
 
 ```js
-// type
-Record<string, Record<string, string> | undefined>
+rowData: Record<string, Record<string, string> | undefined>
 ```
 
 #### getter: rowFields
@@ -1553,8 +1314,7 @@ the field names the row table carries, sorted, for a producer or a UI choosing
 one to encode
 
 ```js
-// type
-string[]
+rowFields: string[]
 ```
 
 #### getter: rowMap
@@ -1563,8 +1323,7 @@ every sequence in the alignment, keyed by row name, including rows a collapsed
 clade hides. `rows` holds only the rows on screen; lookups by row name use this
 
 ```js
-// type
-Map<string, string>
+rowMap: Map<string, string>
 ```
 
 #### getter: rowNames
@@ -1573,15 +1332,13 @@ Returns the list of row (sequence) names in display order. Part of the public
 API used by downstream consumers (e.g. jbrowse plugins).
 
 ```js
-// type
-string[]
+rowNames: string[]
 ```
 
 #### getter: rowNamesSet
 
 ```js
-// type
-Map<string, number>
+rowNamesSet: Map<string, number>
 ```
 
 #### getter: rowPanelScales
@@ -1591,8 +1348,7 @@ colors, labels and legend entries. Reads no cell size, so a zoom reuses it and
 the legends built from it.
 
 ```js
-// type
-(StripPanelScale | FeaturePanelScale)[]
+rowPanelScales: (StripPanelScale | FeaturePanelScale)[]
 ```
 
 #### getter: rowPanelsHeaderHeight
@@ -1601,8 +1357,7 @@ height of the band the row panel headers draw in, which is zero with no row
 panels and leaves the top area as it was
 
 ```js
-// type
-0 | 56
+rowPanelsHeaderHeight: 0 | 56
 ```
 
 #### getter: rowPanelsWidth
@@ -1611,15 +1366,13 @@ the pixel column the row panels occupy between the tree and the alignment, the
 sum of each record's width
 
 ```js
-// type
-number
+rowPanelsWidth: number
 ```
 
 #### getter: rows
 
 ```js
-// type
-[string, string][]
+rows: [string, string][]
 ```
 
 #### getter: rowTints
@@ -1629,8 +1382,7 @@ when no encoding names the channel. The overlay draws these, so a tint stays out
 of the raster tile cache and its keys.
 
 ```js
-// type
-(string | undefined)[] | undefined
+rowTints: (string | undefined)[] | undefined
 ```
 
 #### getter: secondaryStructureArcs
@@ -1639,15 +1391,13 @@ the base pairs of the consensus secondary structure, as arcs, in visible column
 space (hidden columns are removed before parsing)
 
 ```js
-// type
-Arc[] | undefined
+secondaryStructureArcs: Arc[] | undefined
 ```
 
 #### getter: secondaryStructureConsensus
 
 ```js
-// type
-string | undefined
+secondaryStructureConsensus: string | undefined
 ```
 
 #### getter: segmentDomainTypes
@@ -1657,8 +1407,7 @@ exon-1..exon-14 run left-to-right; colored by alternating shade and labeled by
 number, with no legend row
 
 ```js
-// type
-Annotation[]
+segmentDomainTypes: Annotation[]
 ```
 
 #### getter: segmentLabels
@@ -1667,8 +1416,7 @@ accession -> number drawn on each segment band: the trailing number of the
 feature name ("exon-3" -> "3"), else its 1-based position
 
 ```js
-// type
-Map<string, string>
+segmentLabels: Map<string, string>
 ```
 
 #### getter: selectionFasta
@@ -1677,8 +1425,7 @@ the selected block as FASTA: the selected rows on screen, top to bottom, each
 with its letters across the file's columns from `start` to `end`, gaps included
 
 ```js
-// type
-string
+selectionFasta: string
 ```
 
 #### getter: selectionFileSpan
@@ -1686,8 +1433,7 @@ string
 `selection`'s columns clamped to the file's
 
 ```js
-// type
-{ start: number; end: number; } | undefined
+selectionFileSpan: { start: number; end: number; } | undefined
 ```
 
 #### getter: selectionSize
@@ -1697,8 +1443,7 @@ count the file's columns from `start` to `end`, hidden ones included, as
 `selectionFasta` copies them.
 
 ```js
-// type
-{ columns: number; rows: number; } | undefined
+selectionSize: { columns: number; rows: number; } | undefined
 ```
 
 #### getter: sequenceType
@@ -1707,8 +1452,7 @@ Detects sequence type based on letters present in the alignment. Returns 'dna',
 'rna', or 'amino'.
 
 ```js
-// type
-;'dna' | 'rna' | 'amino'
+sequenceType: 'amino' | 'dna' | 'rna'
 ```
 
 #### getter: showBranchLenEffective
@@ -1716,36 +1460,31 @@ Detects sequence type based on letters present in the alignment. Returns 'dna',
 effective showBranchLen accounting for allBranchesLength0
 
 ```js
-// type
-boolean
+showBranchLenEffective: boolean
 ```
 
 #### getter: showHorizontalScrollbar
 
 ```js
-// type
-boolean
+showHorizontalScrollbar: boolean
 ```
 
 #### getter: showMsaLetters
 
 ```js
-// type
-boolean
+showMsaLetters: boolean
 ```
 
 #### getter: showTreeText
 
 ```js
-// type
-boolean
+showTreeText: boolean
 ```
 
 #### getter: showVerticalScrollbar
 
 ```js
-// type
-boolean
+showVerticalScrollbar: boolean
 ```
 
 #### getter: tipLabelColors
@@ -1754,8 +1493,7 @@ the color the `tipLabel` channel gives each row, by row name. Undefined when no
 encoding names the channel, which leaves the labels the theme's text color.
 
 ```js
-// type
-Map<string, string> | undefined
+tipLabelColors: Map<string, string> | undefined
 ```
 
 #### getter: topBandHeight
@@ -1765,15 +1503,13 @@ and the tree overview stacked on the scale bar, as tall as the tallest of the
 three
 
 ```js
-// type
-number
+topBandHeight: number
 ```
 
 #### getter: totalHeight
 
 ```js
-// type
-number
+totalHeight: number
 ```
 
 #### getter: totalTrackAreaHeight
@@ -1781,15 +1517,13 @@ number
 total height of track area (px)
 
 ```js
-// type
-number
+totalTrackAreaHeight: number
 ```
 
 #### getter: totalWidth
 
 ```js
-// type
-number
+totalWidth: number
 ```
 
 #### getter: tree
@@ -1799,8 +1533,7 @@ Every node id, and so `collapsed`, `rotated` and `showOnly`, refers to this
 tree.
 
 ```js
-// type
-NodeWithIds
+tree: NodeWithIds
 ```
 
 #### getter: treeAreaWidthMinusMargin
@@ -1809,8 +1542,7 @@ the right edge the tip labels end at, which is the tree area less the margin and
 the bracket gutter
 
 ```js
-// type
-number
+treeAreaWidthMinusMargin: number
 ```
 
 #### getter: treeLayout
@@ -1821,8 +1553,7 @@ they are, and an observer reading a node's `x` or `len` observes the size it
 scales by.
 
 ```js
-// type
-{ root: LaidOutNode<NodeWithIds>; leaves: LaidOutNode<NodeWithIds>[]; rootToTipLength: number; }
+treeLayout: { root: LaidOutNode<NodeWithIds>; leaves: LaidOutNode<NodeWithIds>[]; rootToTipLength: number; }
 ```
 
 #### getter: treeNewick
@@ -1831,8 +1562,7 @@ the tree as Newick in the order and with the root it is drawn, with every clade,
 collapsed or out of focus
 
 ```js
-// type
-string
+treeNewick: string
 ```
 
 #### getter: treeOverviewClades
@@ -1841,8 +1571,7 @@ the `clades` highlights in the overview's own row space, which the focus does
 not narrow
 
 ```js
-// type
-ResolvedClade[]
+treeOverviewClades: ResolvedClade[]
 ```
 
 #### getter: treeOverviewFocusRows
@@ -1851,8 +1580,7 @@ the inclusive tip rows the focused subtree covers in the overview, which is the
 box drawn on it. undefined with no focus
 
 ```js
-// type
-;[number, number] | undefined
+treeOverviewFocusRows: [number, number] | undefined
 ```
 
 #### getter: treeOverviewHeight
@@ -1860,8 +1588,7 @@ box drawn on it. undefined with no focus
 height of the band the tree overview draws in, zero when it is off
 
 ```js
-// type
-number
+treeOverviewHeight: number
 ```
 
 #### getter: treeOverviewLayout
@@ -1873,8 +1600,7 @@ the collapsed clades are folded, since those are rows the view no longer has.
 one layout serves any band size.
 
 ```js
-// type
-{ root: HierarchyNode<NodeWithIds>; numTips: number; maxDepthToLeaf: number; showBranchLen: boolean; } | undefined
+treeOverviewLayout: { root: HierarchyNode<NodeWithIds>; numTips: number; maxDepthToLeaf: number; showBranchLen: boolean; } | undefined
 ```
 
 #### getter: treeScaleBar
@@ -1883,15 +1609,13 @@ the branch-length scale bar over the tree, undefined in cladogram mode or when
 the tree area is too narrow for one
 
 ```js
-// type
-{ step: number; px: number; label: string; } | undefined
+treeScaleBar: { step: number; px: number; label: string; } | undefined
 ```
 
 #### getter: turnedOnTracks
 
 ```js
-// type
-BasicTrack[]
+turnedOnTracks: BasicTrack[]
 ```
 
 #### getter: unshareableData
@@ -1909,8 +1633,7 @@ filehandle.
 Empty when `hostCarriesData` is true.
 
 ```js
-// type
-UnshareableData[]
+unshareableData: UnshareableData[]
 ```
 
 #### getter: usableResidueMappings
@@ -1919,15 +1642,13 @@ the mappings that fit the loaded alignment. A row-level problem drops the whole
 mapping; a malformed segment drops only that segment.
 
 ```js
-// type
-ResidueMapping[]
+usableResidueMappings: ResidueMapping[]
 ```
 
 #### getter: verticalScrollbarWidth
 
 ```js
-// type
-0 | 20
+verticalScrollbarWidth: 0 | 20
 ```
 
 #### getter: viewport
@@ -1935,8 +1656,7 @@ ResidueMapping[]
 the columns on screen. Public API: MSAViewer's onViewportChange reports it.
 
 ```js
-// type
-Viewport | undefined
+viewport: Viewport | undefined
 ```
 
 #### getter: visibleDomainTypes
@@ -1946,8 +1666,7 @@ on-screen legend and the SVG export legend: the categorical types ordered by
 sequence position. Ordinal segments (exons) are numbered on the band instead
 
 ```js
-// type
-Annotation[]
+visibleDomainTypes: Annotation[]
 ```
 
 #### getter: warnings
@@ -1955,8 +1674,7 @@ Annotation[]
 the load warnings and the undismissed data warnings, for the header
 
 ```js
-// type
-string[]
+warnings: string[]
 ```
 
 #### getter: wheelZoomAxis
@@ -1965,15 +1683,13 @@ axis a wheel zoom scales, for ctrl+wheel as much as for scroll-zoom. With
 scroll-zoom off the toolbar shows no axis, so ctrl+wheel takes both.
 
 ```js
-// type
-;'both' | 'horizontal' | 'vertical'
+wheelZoomAxis: 'both' | 'horizontal' | 'vertical'
 ```
 
 #### getter: width
 
 ```js
-// type
-number
+width: number
 ```
 
 ### MsaView - Methods
@@ -1984,7 +1700,6 @@ the cell at a visible column and row index, in the coordinates a host writes
 highlights in. On a gap `residue` is undefined and `letter` is the gap character
 
 ```js
-// type signature
 cellAt: (visibleCol: number, rowIndex?: number | undefined) => Cell
 ```
 
@@ -1995,7 +1710,6 @@ conservation scores, gap fraction, and the sorted non-gap residue distribution.
 undefined past the end of the alignment or for an all-gap column.
 
 ```js
-// type signature
 columnStatsAt: (col: number) => ColumnStats | undefined
 ```
 
@@ -2006,7 +1720,6 @@ height falls through to rowHeight, and its own computed confines the vertical
 zoom to it, so a sibling keeps its object and its canvas skips the redraw
 
 ```js
-// type signature
 columnTrackModel: (track: ColumnTrackSpec) => BasicTrack
 ```
 
@@ -2016,14 +1729,12 @@ a highlight label with `{residue}` and `{position}` filled in from the row's
 letter at `start`, which is how the `175` shorthand draws "R175"
 
 ```js
-// type signature
 fillHighlightLabel: (label: string, row?: string | undefined, start?: number | undefined) => string
 ```
 
 #### method: getRowData
 
 ```js
-// type signature
 getRowData: (name: string) => { data: { name?: string | undefined; accession?: string | undefined; dbxref?: string | undefined; } | undefined; rowData: Record<string, string> | undefined; }
 ```
 
@@ -2033,7 +1744,6 @@ Convert a global column index to a visible column index. Returns undefined if
 the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 
 ```js
-// type signature
 globalColToVisibleCol: (globalCol: number) => number | undefined
 ```
 
@@ -2042,7 +1752,6 @@ globalColToVisibleCol: (globalCol: number) => number | undefined
 one row's fields, the single reader of the row table
 
 ```js
-// type signature
 rowDataOf: (name: string) => Record<string, string> | undefined
 ```
 
@@ -2053,7 +1762,6 @@ returning undefined in the same cases. `asymId` picks a chain when several
 mappings share an entry id, as in a homodimer.
 
 ```js
-// type signature
 rowResidue: (structureId: string, position: number, asymId?: string | undefined) => RowResidue | undefined
 ```
 
@@ -2064,7 +1772,6 @@ the row to its last residue. Undefined for a row name the alignment does not
 have, or a row with no residues.
 
 ```js
-// type signature
 seqEndToGlobalCol: (rowName: string, seqPos: number) => number | undefined
 ```
 
@@ -2075,7 +1782,6 @@ domain overlay resolves thousands of these per redraw. Built lazily per row and
 cached on the parse.
 
 ```js
-// type signature
 seqPosIndex: (rowName: string) => Int32Array<ArrayBufferLike> | undefined
 ```
 
@@ -2085,7 +1791,6 @@ Convert a sequence position (ungapped) to a global column index. Returns
 undefined for a row name the alignment does not have.
 
 ```js
-// type signature
 seqPosToGlobalCol: (rowName: string, seqPos: number) => number | undefined
 ```
 
@@ -2095,7 +1800,6 @@ Convert a sequence position (ungapped) directly to a visible column index. This
 combines seqPosToGlobalCol and globalColToVisibleCol.
 
 ```js
-// type signature
 seqPosToVisibleCol: (rowName: string, seqPos: number) => number | undefined
 ```
 
@@ -2109,7 +1813,6 @@ Positions are 1-based, like `residueMappings` and `highlights`; the column
 helpers above are 0-based.
 
 ```js
-// type signature
 structureResidue: (rowName: string, seqPos: number, structureId?: string | undefined) => StructureResidue | undefined
 ```
 
@@ -2120,7 +1823,6 @@ height its snapshot asked for, then its kind's default. Only a text track falls
 through to rowHeight
 
 ```js
-// type signature
 trackHeight: (kind: TrackKind, heightKey?: string, given?: number | undefined) => number
 ```
 
@@ -2133,7 +1835,6 @@ the individual tips. undefined when the overview is off or the point picks the
 whole tree.
 
 ```js
-// type signature
 treeOverviewHit: (y: number) => { id: string; rows: [number, number]; } | undefined
 ```
 
@@ -2144,7 +1845,6 @@ full alignment. A host indexing its own per-column data needs this when columns
 are hidden.
 
 ```js
-// type signature
 visibleColToGlobalCol: (visibleCol: number) => number
 ```
 
@@ -2155,7 +1855,6 @@ character (`-` or `.`) on a gap. Undefined for a row name the alignment does not
 have or a column past the row's end.
 
 ```js
-// type signature
 visibleColToRowLetter: (rowName: string, visibleCol: number) => string | undefined
 ```
 
@@ -2169,7 +1868,6 @@ seqPosToVisibleCol, globalColToVisibleCol, seqPosToGlobalCol) hosts use to
 translate between columns and residue positions. Keep them stable.
 
 ```js
-// type signature
 visibleColToSeqPos: (rowName: string, visibleCol: number) => number | undefined
 ```
 
@@ -2179,7 +1877,6 @@ Convert a visible column to a row-specific sequence position (1-based). Returns
 undefined if the position is a gap in the sequence.
 
 ```js
-// type signature
 visibleColToSeqPosOneBased: (rowName: string, visibleCol: number) => number | undefined
 ```
 
@@ -2192,7 +1889,6 @@ it falls in. A span entirely on hidden columns, or naming a row the alignment
 lacks, gives undefined.
 
 ```js
-// type signature
 visibleSpan: ({ row, start: rawStart, end: rawEnd }: Region) => { startCol: number; endCol: number; } | undefined
 ```
 
@@ -2204,7 +1900,6 @@ record a non-fatal load problem: a layer that failed to load, a file that failed
 to parse. A message already on the list is not added again
 
 ```js
-// type signature
 addWarning: (warning: string) => void
 ```
 
@@ -2214,7 +1909,6 @@ show `highlights` for `owner`, replacing that owner's previous ones and leaving
 other owners' in place
 
 ```js
-// type signature
 applyHighlight: (owner: string, highlights: Highlight[]) => void
 ```
 
@@ -2225,7 +1919,6 @@ Throws above `maxNeighborJoiningRows`: the join loop is cubic and runs on the
 main thread, and 800 rows freeze the tab for ten seconds with no cancel.
 
 ```js
-// type signature
 calculateNeighborJoiningTreeFromMSA: () => void
 ```
 
@@ -2234,42 +1927,36 @@ calculateNeighborJoiningTreeFromMSA: () => void
 remove `owner`'s highlights, leaving other owners' in place
 
 ```js
-// type signature
 clearHighlight: (owner: string) => void
 ```
 
 #### action: clearRotated
 
 ```js
-// type signature
 clearRotated: () => void
 ```
 
 #### action: clearSelection
 
 ```js
-// type signature
 clearSelection: () => void
 ```
 
 #### action: clearWarnings
 
 ```js
-// type signature
 clearWarnings: () => void
 ```
 
 #### action: doScrollX
 
 ```js
-// type signature
 doScrollX: (deltaX: number) => void
 ```
 
 #### action: doScrollY
 
 ```js
-// type signature
 doScrollY: (deltaY: number) => void
 ```
 
@@ -2279,7 +1966,6 @@ draw the alignment with positions numbered relative to the given row's sequence
 (its node id), instead of in raw MSA-column coordinates
 
 ```js
-// type signature
 drawRelativeTo: (id: string | undefined) => void
 ```
 
@@ -2288,35 +1974,30 @@ drawRelativeTo: (id: string | undefined) => void
 save `treeNewick` as a file
 
 ```js
-// type signature
 exportNewick: () => void
 ```
 
 #### action: exportSVG
 
 ```js
-// type signature
 exportSVG: (opts: ExportSvgOptions) => Promise<void>
 ```
 
 #### action: fit
 
 ```js
-// type signature
 fit: () => void
 ```
 
 #### action: fitHorizontally
 
 ```js
-// type signature
 fitHorizontally: () => void
 ```
 
 #### action: fitVertically
 
 ```js
-// type signature
 fitVertically: () => void
 ```
 
@@ -2327,7 +2008,6 @@ and `showOnly`, since path-derived node ids (node-0-0-1) from the old tree would
 match unrelated nodes in the new one.
 
 ```js
-// type signature
 replaceTree: (newick: string) => void
 ```
 
@@ -2339,7 +2019,6 @@ stands for it as an outgroup, by its first and last tip, so the root survives
 the path ids changing under it
 
 ```js
-// type signature
 rerootAt: (nodeId: string) => void
 ```
 
@@ -2349,7 +2028,6 @@ Return to the import form: reset every property not in `preservedOnReset` to its
 default, then clear the file-derived volatiles applySnapshot does not touch.
 
 ```js
-// type signature
 reset: () => void
 ```
 
@@ -2358,7 +2036,6 @@ reset: () => void
 restore the default column width and row height
 
 ```js
-// type signature
 resetZoom: () => void
 ```
 
@@ -2370,14 +2047,12 @@ selects the columns across every row, and so does a block spanning every row on
 screen.
 
 ```js
-// type signature
 selectBlock: (anchor: { col: number; row?: number | undefined; }, head: { col: number; row?: number | undefined; }) => void
 ```
 
 #### action: setAllowedGappyness
 
 ```js
-// type signature
 setAllowedGappyness: (arg: number) => void
 ```
 
@@ -2390,7 +2065,6 @@ Leaves `showDomains` alone, because a restored snapshot reloads its GFF and must
 keep a hidden overlay hidden.
 
 ```js
-// type signature
 setAnnotations: (annotations: Annotation[]) => void
 ```
 
@@ -2399,14 +2073,12 @@ setAnnotations: (annotations: Annotation[]) => void
 replace the clades the viewer marks (see docs/layers.md)
 
 ```js
-// type signature
 setClades: (clades: Clade[]) => void
 ```
 
 #### action: setColumnTracks
 
 ```js
-// type signature
 setColumnTracks: (tracks: ColumnTrackSpec[]) => void
 ```
 
@@ -2415,7 +2087,6 @@ setColumnTracks: (tracks: ColumnTrackSpec[]) => void
 set col width (px)
 
 ```js
-// type signature
 setColWidth: (n: number) => void
 ```
 
@@ -2426,7 +2097,6 @@ collapsed and rotated node ids, the subtree in focus, the reference row and the
 scroll position, which all refer to the previous alignment
 
 ```js
-// type signature
 setCurrentAlignment: (n: number) => void
 ```
 
@@ -2436,7 +2106,6 @@ set the alignment/tree/metadata/domain data directly from strings, bypassing the
 filehandle loaders
 
 ```js
-// type signature
 setData: (data: { msa?: string | undefined; tree?: string | undefined; treeMetadata?: string | undefined; gff?: string | undefined; }) => void
 ```
 
@@ -2447,14 +2116,12 @@ downstream plugins that hold the EBI wire format; new code should adapt to
 Annotation[] and call setAnnotations.
 
 ```js
-// type signature
 setDomains: (data?: Record<string, InterProScanResults> | undefined) => void
 ```
 
 #### action: setDrawMsaLetters
 
 ```js
-// type signature
 setDrawMsaLetters: (arg: boolean) => void
 ```
 
@@ -2463,7 +2130,6 @@ setDrawMsaLetters: (arg: boolean) => void
 replace what the viewer's marks read from the row table
 
 ```js
-// type signature
 setEncodings: (encodings: Encoding[]) => void
 ```
 
@@ -2472,14 +2138,12 @@ setEncodings: (encodings: Encoding[]) => void
 set error state
 
 ```js
-// type signature
 setError: (error?: unknown) => void
 ```
 
 #### action: setFeatures
 
 ```js
-// type signature
 setFeatures: (features: Feature[]) => void
 ```
 
@@ -2489,7 +2153,6 @@ show or hide an annotation type. Only hidden types are recorded; see
 `turnedOffFeatures`
 
 ```js
-// type signature
 setFilter: (accession: string, shown: boolean) => void
 ```
 
@@ -2501,21 +2164,18 @@ is the only persisted copy. An autorun parses it into annotations, and clears
 the ones it drew when the text goes.
 
 ```js
-// type signature
 setGFF: (result?: string | undefined) => void
 ```
 
 #### action: setGFFFilehandle
 
 ```js
-// type signature
 setGFFFilehandle: (gffFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setHeaderHeight
 
 ```js
-// type signature
 setHeaderHeight: (arg: number) => void
 ```
 
@@ -2524,7 +2184,6 @@ setHeaderHeight: (arg: number) => void
 set the height of the view in px
 
 ```js
-// type signature
 setHeight: (height: number) => void
 ```
 
@@ -2533,14 +2192,12 @@ setHeight: (height: number) => void
 hide columns that are entirely (or mostly, see allowedGappyness) gaps
 
 ```js
-// type signature
 setHideGaps: (arg: boolean) => void
 ```
 
 #### action: setHideHeader
 
 ```js
-// type signature
 setHideHeader: (arg: boolean) => void
 ```
 
@@ -2552,14 +2209,12 @@ Public API: jbrowse-plugin-msaview calls this from its afterCreateAutoruns, and
 MSAViewer passes its `highlightColumns` prop through it.
 
 ```js
-// type signature
 setHighlightedColumns: (columns?: number[] | undefined) => void
 ```
 
 #### action: setHighlights
 
 ```js
-// type signature
 setHighlights: (highlights: Highlight[]) => void
 ```
 
@@ -2569,7 +2224,6 @@ update the canvas scale factor when the device pixel ratio changes (moving
 between monitors, browser zoom)
 
 ```js
-// type signature
 setHighResScaleFactor: (arg: number) => void
 ```
 
@@ -2579,7 +2233,6 @@ declare that this host restores the loaded documents itself, which hides the
 "Not in the link" warning. See `hostCarriesData`
 
 ```js
-// type signature
 setHostCarriesData: (arg: boolean) => void
 ```
 
@@ -2588,21 +2241,18 @@ setHostCarriesData: (arg: boolean) => void
 set hovered tree node and its descendants
 
 ```js
-// type signature
 setHoveredTreeNode: (nodeId?: string | undefined) => void
 ```
 
 #### action: setLoadingMSA
 
 ```js
-// type signature
 setLoadingMSA: (arg: boolean) => void
 ```
 
 #### action: setLoadingTree
 
 ```js
-// type signature
 setLoadingTree: (arg: boolean) => void
 ```
 
@@ -2611,7 +2261,6 @@ setLoadingTree: (arg: boolean) => void
 set mouse click position (row, column) in the MSA
 
 ```js
-// type signature
 setMouseClickPos: (col?: number | undefined, row?: number | undefined) => void
 ```
 
@@ -2623,28 +2272,24 @@ Public API: a host calls this (and reads `mouseCol`) to sync hover with its own
 view, such as a genome view or 3D structure. Keep the name and signature stable.
 
 ```js
-// type signature
 setMousePos: (col?: number | undefined, row?: number | undefined) => void
 ```
 
 #### action: setMSA
 
 ```js
-// type signature
 setMSA: (result: string) => void
 ```
 
 #### action: setMSAFilehandle
 
 ```js
-// type signature
 setMSAFilehandle: (msaFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setRegion
 
 ```js
-// type signature
 setRegion: (region?: Region | undefined) => void
 ```
 
@@ -2653,7 +2298,6 @@ setRegion: (region?: Region | undefined) => void
 replace the alignment<->structure correspondence (see docs/layers.md)
 
 ```js
-// type signature
 setResidueMappings: (mappings: ResidueMapping[]) => void
 ```
 
@@ -2663,7 +2307,6 @@ replace the row table, which the model keeps as the JSON string
 `data.treeMetadata` (see docs/layers.md)
 
 ```js
-// type signature
 setRowData: (rowData: RowDataInput) => void
 ```
 
@@ -2672,7 +2315,6 @@ setRowData: (rowData: RowDataInput) => void
 set row height (px)
 
 ```js
-// type signature
 setRowHeight: (n: number) => void
 ```
 
@@ -2681,14 +2323,12 @@ setRowHeight: (n: number) => void
 replace the panels drawn between the tree and the alignment
 
 ```js
-// type signature
 setRowPanels: (panels: RowPanelSpec[]) => void
 ```
 
 #### action: setScrollX
 
 ```js
-// type signature
 setScrollX: (n: number) => void
 ```
 
@@ -2697,21 +2337,18 @@ setScrollX: (n: number) => void
 set scroll Y-offset (px), clamped to keep the alignment in view
 
 ```js
-// type signature
 setScrollY: (n: number) => void
 ```
 
 #### action: setScrollZoom
 
 ```js
-// type signature
 setScrollZoom: (arg: boolean) => void
 ```
 
 #### action: setScrollZoomAxis
 
 ```js
-// type signature
 setScrollZoomAxis: (arg: "both" | "horizontal" | "vertical") => void
 ```
 
@@ -2721,7 +2358,6 @@ select a block, in `selection` coordinates. `start` and `end` may come in either
 order.
 
 ```js
-// type signature
 setSelection: (selection?: MsaSelection | undefined) => void
 ```
 
@@ -2730,7 +2366,6 @@ setSelection: (selection?: MsaSelection | undefined) => void
 expand or collapse the domain legend that floats over the alignment
 
 ```js
-// type signature
 setShowDomainLegend: (arg: boolean) => void
 ```
 
@@ -2739,7 +2374,6 @@ setShowDomainLegend: (arg: boolean) => void
 toggle the annotation overlay on the alignment
 
 ```js
-// type signature
 setShowDomains: (arg: boolean) => void
 ```
 
@@ -2749,21 +2383,18 @@ show only the subtree rooted at the given node id (pass undefined to show the
 whole tree again)
 
 ```js
-// type signature
 setShowOnly: (node?: string | undefined) => void
 ```
 
 #### action: setStatus
 
 ```js
-// type signature
 setStatus: (status?: { msg: string; onCancel?: (() => void) | undefined; } | undefined) => void
 ```
 
 #### action: setSubFeatureRows
 
 ```js
-// type signature
 setSubFeatureRows: (arg: boolean) => void
 ```
 
@@ -2772,35 +2403,30 @@ setSubFeatureRows: (arg: boolean) => void
 resize every track sharing a `heightKey`; see `trackHeights`
 
 ```js
-// type signature
 setTrackHeight: (heightKey: string, height: number) => void
 ```
 
 #### action: setTree
 
 ```js
-// type signature
 setTree: (result: string) => void
 ```
 
 #### action: setTreeFilehandle
 
 ```js
-// type signature
 setTreeFilehandle: (treeFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setTreeMetadata
 
 ```js
-// type signature
 setTreeMetadata: (result: string) => void
 ```
 
 #### action: setTreeMetadataFilehandle
 
 ```js
-// type signature
 setTreeMetadataFilehandle: (treeMetadataFilehandle?: FileLocation | undefined) => void
 ```
 
@@ -2810,14 +2436,12 @@ reroot the tree. Clears `collapsed`, `rotated` and `showOnly`, whose
 path-derived node ids name other nodes in the rerooted tree
 
 ```js
-// type signature
 setTreeRoot: (treeRoot?: TreeRoot | undefined) => void
 ```
 
 #### action: setWidth
 
 ```js
-// type signature
 setWidth: (arg: number) => void
 ```
 
@@ -2826,7 +2450,6 @@ setWidth: (arg: number) => void
 collapse or un-collapse the subtree rooted at the given tree node id
 
 ```js
-// type signature
 toggleCollapsed: (node: string) => void
 ```
 
@@ -2835,14 +2458,12 @@ toggleCollapsed: (node: string) => void
 reverse the order of the given node's children, or restore it
 
 ```js
-// type signature
 toggleRotated: (node: string) => void
 ```
 
 #### action: toggleTrack
 
 ```js
-// type signature
 toggleTrack: (id: string) => void
 ```
 
@@ -2853,7 +2474,6 @@ inside the box already drawn there clears the focus, the way clicking the
 focused branch again does.
 
 ```js
-// type signature
 treeOverviewClick: (y: number) => void
 ```
 
@@ -2862,49 +2482,42 @@ treeOverviewClick: (y: number) => void
 zoom by `scaleFactor` about the center of the alignment area
 
 ```js
-// type signature
 zoomAtCenter: (scaleFactor: number, axis?: "both" | "horizontal" | "vertical") => void
 ```
 
 #### action: zoomIn
 
 ```js
-// type signature
 zoomIn: () => void
 ```
 
 #### action: zoomInHorizontal
 
 ```js
-// type signature
 zoomInHorizontal: () => void
 ```
 
 #### action: zoomInVertical
 
 ```js
-// type signature
 zoomInVertical: () => void
 ```
 
 #### action: zoomOut
 
 ```js
-// type signature
 zoomOut: () => void
 ```
 
 #### action: zoomOutHorizontal
 
 ```js
-// type signature
 zoomOutHorizontal: () => void
 ```
 
 #### action: zoomOutVertical
 
 ```js
-// type signature
 zoomOutVertical: () => void
 ```
 
@@ -2919,7 +2532,6 @@ fixed; the held axis still re-anchors its scroll offset, since the other one can
 change how much of the alignment fits.
 
 ```js
-// type signature
 zoomToPos: (scaleFactor: number, offsetX: number, offsetY: number, axis?: "both" | "horizontal" | "vertical") => void
 ```
 
@@ -2930,7 +2542,6 @@ zoom and scroll so a span fills the alignment's width, in highlight coordinates
 that resolves to no visible column.
 
 ```js
-// type signature
 zoomToRegion: (region: Region) => void
 ```
 
@@ -2940,6 +2551,5 @@ zoom and scroll so the selected columns fill the alignment's width, and, where
 the selection names its rows, so those rows fill its height
 
 ```js
-// type signature
 zoomToSelection: () => void
 ```

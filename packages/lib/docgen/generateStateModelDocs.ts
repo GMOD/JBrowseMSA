@@ -81,6 +81,11 @@ function generateStateModelDocs(files: string[]) {
     const member = buildMember(obj)
 
     if (obj.type === 'stateModel') {
+      if (file.header && member.name && member.name !== file.header.name) {
+        throw new Error(
+          `${file.filename}: #stateModel ${file.header.name} and ${member.name} share a file, and the page for one would overwrite the other. Move ${member.name} into its own file.`,
+        )
+      }
       file.header = {
         name: member.name,
         docs: stripComposedBlock(member.docs),
@@ -128,25 +133,52 @@ function collectAncestors(
   return out
 }
 
-function memberLine(label: string, members: Member[]) {
-  return members.length
-    ? `**${label}:** ${members.map(m => m.name).join(', ')}`
-    : ''
+const MEMBER_KINDS = [
+  { key: 'properties', kind: 'property', label: 'Properties' },
+  { key: 'volatiles', kind: 'volatile', label: 'Volatiles' },
+  { key: 'getters', kind: 'getter', label: 'Getters' },
+  { key: 'methods', kind: 'method', label: 'Methods' },
+  { key: 'actions', kind: 'action', label: 'Actions' },
+] as const
+
+// GitHub renders these pages, and it slugs `#### getter: fooBar` to
+// `getter-foobar`
+function memberAnchor(kind: string, name: string) {
+  return `${kind}-${name.toLowerCase()}`
 }
 
-function inheritedSection(ancestors: Ancestor[]) {
-  const blocks = ancestors.flatMap(({ model }) => {
-    const lines = [
-      memberLine('Properties', model.properties),
-      memberLine('Volatiles', model.volatiles),
-      memberLine('Getters', model.getters),
-      memberLine('Methods', model.methods),
-      memberLine('Actions', model.actions),
-    ].filter(Boolean)
+function pageLink(model: ModelWithHeader, anchor?: string) {
+  return `./${model.header.name}.md${anchor ? `#${anchor}` : ''}`
+}
+
+// A member the model or a nearer ancestor redeclares is listed once, where it
+// is most specific
+function inheritedSection(model: ModelWithHeader, ancestors: Ancestor[]) {
+  const seen = new Map(
+    MEMBER_KINDS.map(({ key }) => [key, new Set(model[key].map(m => m.name))]),
+  )
+  const blocks = ancestors.flatMap(({ model: ancestor }) => {
+    const lines = MEMBER_KINDS.flatMap(({ key, kind, label }) => {
+      const names = seen.get(key)!
+      const members = ancestor[key].filter(m => !names.has(m.name))
+      for (const m of members) {
+        names.add(m.name)
+      }
+      return members.length
+        ? [
+            `**${label}:** ${members
+              .map(
+                m =>
+                  `[${m.name}](${pageLink(ancestor, memberAnchor(kind, m.name))})`,
+              )
+              .join(', ')}`,
+          ]
+        : []
+    })
     return lines.length
       ? [
           section(
-            `### Available via [${model.header.name}](../${model.header.id})`,
+            `### From [${ancestor.header.name}](${pageLink(ancestor)})`,
             ...lines,
           ),
         ]
@@ -155,7 +187,7 @@ function inheritedSection(ancestors: Ancestor[]) {
   return blocks.length
     ? section(
         '## Inherited members',
-        'Available on this model via composition. Follow each link for full signatures and docs.',
+        'This model composes the ones below. Each member links to its docs on the page that declares it.',
         ...blocks,
       )
     : ''
@@ -163,11 +195,10 @@ function inheritedSection(ancestors: Ancestor[]) {
 
 function memberSection(
   modelName: string,
-  label: string,
+  { kind, label }: (typeof MEMBER_KINDS)[number],
   members: Member[],
   renderBody: (m: Member) => string,
 ) {
-  const kind = label.toLowerCase().replace(/ies$/, 'y').replace(/s$/, '')
   return members.length
     ? section(
         `### ${modelName} - ${label}`,
@@ -185,33 +216,25 @@ function memberSection(
     : ''
 }
 
-function renderModel(
-  {
-    header,
-    properties,
-    volatiles,
-    getters,
-    methods,
-    actions,
-    filename,
-  }: ModelWithHeader,
-  ancestors: Ancestor[],
-): string {
+// A property or volatile reads best as the line that declares it:
+// `stripDefault(types.number, 1)` says more than `IOptionalIType<ISimpleType<
+// number>, [undefined]>`, and it does not change when @jbrowse/core does
+const MEMBER_BODY: Record<
+  (typeof MEMBER_KINDS)[number]['key'],
+  (m: Member) => string
+> = {
+  properties: m => codeBlock(m.code),
+  volatiles: m => codeBlock(m.code),
+  getters: m => codeBlock(`${m.name}: ${m.signature}`),
+  methods: m => codeBlock(`${m.name}: ${m.signature}`),
+  actions: m => codeBlock(`${m.name}: ${m.signature}`),
+}
+
+function renderModel(model: ModelWithHeader, ancestors: Ancestor[]): string {
+  const { header, filename } = model
   const sections = section(
-    memberSection(header.name, 'Properties', properties, p =>
-      codeBlock('// type signature', p.signature, '// code', p.code),
-    ),
-    memberSection(header.name, 'Volatiles', volatiles, v =>
-      codeBlock('// type signature', v.signature, '// code', v.code),
-    ),
-    memberSection(header.name, 'Getters', getters, g =>
-      codeBlock('// type', g.signature),
-    ),
-    memberSection(header.name, 'Methods', methods, m =>
-      codeBlock('// type signature', `${m.name}: ${m.signature}`),
-    ),
-    memberSection(header.name, 'Actions', actions, a =>
-      codeBlock('// type signature', `${a.name}: ${a.signature}`),
+    ...MEMBER_KINDS.map(k =>
+      memberSection(header.name, k, model[k.key], MEMBER_BODY[k.key]),
     ),
   )
 
@@ -225,11 +248,11 @@ objects in our source code.
 
 ## Links
 
-- [Source code](https://github.com/GMOD/react-msaview/blob/main/packages/lib/${filename})
+- [Source code](https://github.com/GMOD/JBrowseMSA/blob/main/packages/lib/${filename})
 - [Embedding guide](https://gmod.org/JBrowseMSA/embedding) — how to use this model in React, HTML, and R
 - [User guide](https://gmod.org/JBrowseMSA/guide) — a tour of the viewer
 
-${section(exampleSection(header.examples), overviewSection(header.docs, inheritedSection(ancestors), sections))}
+${section(exampleSection(header.examples), overviewSection(header.docs, inheritedSection(model, ancestors), sections))}
 `
 }
 
