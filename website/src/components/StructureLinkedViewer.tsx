@@ -39,19 +39,21 @@ function importMolstar() {
     import('molstar/lib/mol-plugin-state/helpers/structure-overpaint'),
     import('molstar/lib/mol-util/color'),
     import('molstar/build/viewer/molstar.css'),
-  ]).then(([ui, react18, spec, config, structure, script, overpaint, color]) => ({
-    createPluginUI: ui.createPluginUI,
-    renderReact18: react18.renderReact18,
-    DefaultPluginUISpec: spec.DefaultPluginUISpec,
-    PluginConfig: config.PluginConfig,
-    StructureElement: structure.StructureElement,
-    StructureProperties: structure.StructureProperties,
-    StructureSelection: structure.StructureSelection,
-    Script: script.Script,
-    setStructureOverpaint: overpaint.setStructureOverpaint,
-    clearStructureOverpaint: overpaint.clearStructureOverpaint,
-    Color: color.Color,
-  }))
+  ]).then(
+    ([ui, react18, spec, config, structure, script, overpaint, color]) => ({
+      createPluginUI: ui.createPluginUI,
+      renderReact18: react18.renderReact18,
+      DefaultPluginUISpec: spec.DefaultPluginUISpec,
+      PluginConfig: config.PluginConfig,
+      StructureElement: structure.StructureElement,
+      StructureProperties: structure.StructureProperties,
+      StructureSelection: structure.StructureSelection,
+      Script: script.Script,
+      setStructureOverpaint: overpaint.setStructureOverpaint,
+      clearStructureOverpaint: overpaint.clearStructureOverpaint,
+      Color: color.Color,
+    }),
+  )
 }
 
 function loadMolstar() {
@@ -125,13 +127,9 @@ function residueLoci(
   return molstar.StructureSelection.toLociWithSourceUnits(selection)
 }
 
-const conservationRamp = [
-  '#c8c8c8',
-  '#a0a0a0',
-  '#787878',
-  '#505050',
-  '#282828',
-]
+const conservationRamp = ['#86b6ef', '#5598e7', '#2a78d6', '#1c5cab', '#104281']
+const noColumnColor = '#c9c9c4'
+const paintColors = [...conservationRamp, noColumnColor]
 
 type ChainResidues = [asymId: string, labelSeqIds: number[]][]
 
@@ -156,23 +154,24 @@ function conservationBins(
   structureId: string,
   residues: { asymId: string; labelSeqId: number }[],
 ): ChainResidues[] {
-  const bins = conservationRamp.map(() => new Map<string, number[]>())
+  const bins = paintColors.map(() => new Map<string, number[]>())
   for (const { asymId, labelSeqId } of residues) {
     const hit = model.rowResidue(structureId, labelSeqId, asymId)
     const col = hit
       ? model.seqPosToVisibleCol(hit.rowName, hit.seqPos - 1)
       : undefined
     const value = col === undefined ? undefined : model.conservation[col]
-    if (value !== undefined) {
-      const bin = Math.min(
-        conservationRamp.length - 1,
-        Math.floor(value * conservationRamp.length),
-      )
-      const chains = bins[bin]!
-      const ids = chains.get(asymId) ?? []
-      ids.push(labelSeqId)
-      chains.set(asymId, ids)
-    }
+    const bin =
+      value === undefined
+        ? conservationRamp.length
+        : Math.min(
+            conservationRamp.length - 1,
+            Math.floor(value * conservationRamp.length),
+          )
+    const chains = bins[bin]
+    const ids = chains.get(asymId) ?? []
+    ids.push(labelSeqId)
+    chains.set(asymId, ids)
   }
   return bins.map(chains => [...chains])
 }
@@ -190,7 +189,7 @@ async function paintConservation(
       await molstar.setStructureOverpaint(
         plugin,
         components,
-        molstar.Color.fromHexStyle(conservationRamp[bin]!),
+        molstar.Color.fromHexStyle(paintColors[bin]),
         structure =>
           Promise.resolve(
             chains
@@ -278,7 +277,10 @@ function ConservationLegend() {
         <span>0 variable</span>
         <span>1 conserved</span>
       </div>
-      <div>Unmapped residues keep their chain color.</div>
+      <div className="structure-link-no-column">
+        <span style={{ background: noColumnColor }} />
+        No alignment column
+      </div>
     </div>
   )
 }

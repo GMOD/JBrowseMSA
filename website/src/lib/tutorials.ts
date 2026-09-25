@@ -114,7 +114,7 @@ export const tutorials: Tutorial[] = [
     slug: 'structure_link',
     title: 'An alignment linked to its structure',
     blurb:
-      'The spike and hemoglobin alignments beside PDB 6VXX and 2HHB in Mol*, joined by the residueMappings layers the two tutorials above build. A residue hovered in either view lights in the other; the PRRA insert reports no coordinates, and a chain no mapping names reports no row.',
+      'The spike and hemoglobin alignments beside PDB 6VXX and 2HHB in Mol*, joined by the residueMappings layers the two tutorials above build. A residue hovered in either view lights in the other; the PRRA insert reports no coordinates, and a chain no mapping names reports no row. A checkbox colors each mapped chain by the conservation of its columns.',
     thumb: structureLinkThumb,
     thumbAlt:
       'The spike alignment on the PRRA insert above PDB 6VXX in Mol*, one SARS-CoV-2 residue shown as sticks on chain A',

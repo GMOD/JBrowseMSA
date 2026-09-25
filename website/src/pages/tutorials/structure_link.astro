@@ -119,7 +119,7 @@ plugin.behaviors.interaction.hover.subscribe(({ current }) => {
 
 <Base
   title="An alignment linked to its structure | JBrowseMSA"
-  description="The spike and hemoglobin alignments beside PDB 6VXX and 2HHB in Mol*, where hovering a residue in either view lights the same residue in the other through the residueMappings layer."
+  description="The spike and hemoglobin alignments beside PDB 6VXX and 2HHB in Mol*, where hovering a residue in either view lights the same residue in the other through the residueMappings layer, and a checkbox colors the structure by column conservation."
 >
   <article class="prose">
     <h1>An alignment linked to its structure</h1>
@@ -177,6 +177,24 @@ plugin.behaviors.interaction.hover.subscribe(({ current }) => {
       The viewer also checks each mapping against the loaded row and ignores one
       computed against a different sequence. This page prints each ignored
       mapping under the status line, and both sets print none.
+    </p>
+
+    <h2>Color the structure by conservation</h2>
+    <p>
+      The <strong>Color the structure by conservation</strong> checkbox paints
+      each residue of a mapped chain with the conservation of the alignment
+      column it falls in, the number the Conservation track draws. Five blue
+      steps run from variable to conserved. A residue with no column is grey:
+      the chains no mapping names, the residues outside a mapped region, and a
+      residue in a column that <em>Hide columns</em> has hidden.
+    </p>
+    <p>
+      The conservation of a column counts the rows on screen. Collapse a clade
+      in the tree, or show one subtree, and the page repaints the structure from
+      the rows left. The page walks each residue of the structure through
+      <code>rowResidue</code> to its row residue, then through
+      <code>seqPosToVisibleCol</code> to a column, and reads
+      <code>model.conservation</code> there.
     </p>
 
     <h2>Put it on your own page</h2>
@@ -288,10 +306,17 @@ plugin.behaviors.interaction.hover.subscribe(({ current }) => {
     gap: 2px;
     margin: 4px 0 2px;
   }
-  .structure-link-ramp span {
+  .structure-link-ramp span,
+  .structure-link-no-column span {
     width: 32px;
     height: 12px;
     border-radius: 2px;
+  }
+  .structure-link-no-column {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
   }
   .structure-link-ramp-labels {
     display: flex;
