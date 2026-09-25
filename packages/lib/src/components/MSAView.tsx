@@ -147,7 +147,7 @@ const MSAView = observer(function ({ model }: { model: MsaViewModel }) {
     <div>
       {viewInitialized ? (
         <>
-          <div style={{ height, overflow: 'hidden' }}>
+          <div style={{ height, overflow: 'clip' }}>
             {hideHeader ? null : <Header model={model} />}
             <View model={model} />
           </div>
