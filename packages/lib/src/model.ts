@@ -1600,9 +1600,9 @@ function stateModelFactory({
        * store the GFF text in the snapshot like the alignment and tree. The
        * parsed annotations are volatile and a blob filehandle is cleared once
        * read, so the text is the only persisted copy. An autorun parses it
-       * into annotations.
+       * into annotations, and clears the ones it drew when the text goes.
        */
-      setGFF(result: string) {
+      setGFF(result?: string) {
         self.data.setGFF(result)
       },
     }))

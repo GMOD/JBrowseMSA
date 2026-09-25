@@ -2467,11 +2467,12 @@ setFilter: (accession: string, shown: boolean) => void
 
 store the GFF text in the snapshot like the alignment and tree. The parsed
 annotations are volatile and a blob filehandle is cleared once read, so the text
-is the only persisted copy. An autorun parses it into annotations.
+is the only persisted copy. An autorun parses it into annotations, and clears
+the ones it drew when the text goes.
 
 ```js
 // type signature
-setGFF: (result: string) => void
+setGFF: (result?: string | undefined) => void
 ```
 
 #### action: setGFFFilehandle

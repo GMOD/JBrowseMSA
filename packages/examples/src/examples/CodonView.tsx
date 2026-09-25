@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -11,7 +11,7 @@ import { f12CdsMSA } from './data'
 import { compareCodons, translate } from './geneticCode'
 
 import type { Change, CodonComparison, Row } from './geneticCode'
-import type { ColumnTrackSpec, MsaViewModel } from 'react-msaview'
+import type { ColumnTrackSpec } from 'react-msaview'
 
 // The example reads the F12 coding alignment as codons of the row the reader
 // picks. It translates that row with the standard genetic code and compares
@@ -24,11 +24,8 @@ import type { ColumnTrackSpec, MsaViewModel } from 'react-msaview'
 // The translation puts each amino acid over the middle base of its codon, and
 // the codon track writes every tenth codon's number from its first base.
 // `region` opens the view on codons 61 to 80, around the cetaceans' shared
-// 1-bp deletion.
-//
-// MSAViewer builds a new model when its gff prop changes, which resets the
-// zoom. The example hands the row features to the model it gets from onModel,
-// so switching the reference keeps the reader's place.
+// 1-bp deletion. Switching the reference swaps the gff and the tracks on the
+// same model, so the view keeps the reader's place.
 const rows: Row[] = f12CdsMSA
   .split('\n')
   .filter(line => line && !line.startsWith('#') && !line.startsWith('//'))
@@ -143,8 +140,6 @@ export default function CodonView() {
     counts: true,
     features: true,
   })
-  const [model, setModel] = useState<MsaViewModel>()
-
   const { tracks, gff } = useMemo(() => {
     const codons = compareCodons(rows, reference)
     return {
@@ -152,10 +147,6 @@ export default function CodonView() {
       gff: changesGFF(codons),
     }
   }, [reference])
-
-  useEffect(() => {
-    model?.setGFF(shown.features ? gff : '')
-  }, [model, gff, shown.features])
 
   return (
     <div>
@@ -198,6 +189,7 @@ export default function CodonView() {
       </Stack>
       <MSAViewer
         msa={f12CdsMSA}
+        gff={shown.features ? gff : undefined}
         colorScheme="nucleotide"
         relativeTo={reference}
         region={{ row: 'human', start: 181, end: 240 }}
@@ -212,7 +204,6 @@ export default function CodonView() {
             scale: { map: changeColors },
           },
         ]}
-        onModel={setModel}
       />
     </div>
   )

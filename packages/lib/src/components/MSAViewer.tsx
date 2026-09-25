@@ -151,7 +151,7 @@ export interface MSAViewerProps {
   onSelectionChange?: (selection: MsaSelection | undefined) => void
   /**
    * the model the viewer built, for the model API; called again with the new
-   * model when msa, tree, gff or a filehandle changes
+   * model when msa, tree, msaFilehandle or treeFilehandle changes
    */
   onModel?: (model: MsaViewModel) => void
 }
@@ -166,34 +166,26 @@ function colorSchemeSnapshot(scheme: ColorScheme | undefined) {
 
 type DataSource = Pick<
   MSAViewerProps,
-  'msa' | 'tree' | 'gff' | 'msaFilehandle' | 'treeFilehandle' | 'gffFilehandle'
+  'msa' | 'tree' | 'msaFilehandle' | 'treeFilehandle'
 >
 
 function sameSource(a: DataSource, b: DataSource) {
   return (
     a.msa === b.msa &&
     a.tree === b.tree &&
-    a.gff === b.gff &&
-    JSON.stringify([a.msaFilehandle, a.treeFilehandle, a.gffFilehandle]) ===
-      JSON.stringify([b.msaFilehandle, b.treeFilehandle, b.gffFilehandle])
+    JSON.stringify([a.msaFilehandle, a.treeFilehandle]) ===
+      JSON.stringify([b.msaFilehandle, b.treeFilehandle])
   )
 }
 
 /**
- * A new alignment, tree or annotation file needs a new model, so the viewer
- * remounts when one of those props changes and keeps its model across every
- * other change.
+ * A new alignment or tree needs a new model, so the viewer remounts when one
+ * of those props changes and keeps its model across every other change,
+ * including a new annotation file.
  */
 export default function MSAViewer(props: MSAViewerProps) {
-  const { msa, tree, gff, msaFilehandle, treeFilehandle, gffFilehandle } = props
-  const source = {
-    msa,
-    tree,
-    gff,
-    msaFilehandle,
-    treeFilehandle,
-    gffFilehandle,
-  }
+  const { msa, tree, msaFilehandle, treeFilehandle } = props
+  const source = { msa, tree, msaFilehandle, treeFilehandle }
   const [shown, setShown] = useState({ source, generation: 0 })
   if (!sameSource(shown.source, source)) {
     setShown({ source, generation: shown.generation + 1 })
@@ -375,6 +367,30 @@ function Viewer({
   useEffect(() => {
     model.drawRelativeTo(relativeTo)
   }, [model, relativeTo])
+
+  // The snapshot already holds the first gff and gffFilehandle, so these
+  // effects apply only a later change. Removing either one sets the text back
+  // to the gff prop, which clears the annotations when that is absent too.
+  const appliedGff = useRef(gff)
+  const gffFilehandleKey = JSON.stringify(gffFilehandle ?? null)
+  const appliedGffFilehandle = useRef(gffFilehandleKey)
+  useEffect(() => {
+    if (appliedGffFilehandle.current !== gffFilehandleKey) {
+      appliedGffFilehandle.current = gffFilehandleKey
+      const location = JSON.parse(gffFilehandleKey) as FileLocationType | null
+      if (location) {
+        model.setGFFFilehandle(location)
+      } else {
+        model.setGFF(appliedGff.current)
+      }
+    }
+  }, [model, gffFilehandleKey])
+  useEffect(() => {
+    if (appliedGff.current !== gff) {
+      appliedGff.current = gff
+      model.setGFF(gff)
+    }
+  }, [model, gff])
 
   // keyed by content, since a host computing a layer inline passes a new array
   // on every render

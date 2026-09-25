@@ -89,9 +89,10 @@ as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `clades`, `columnTracks`, `residueMappings`,
 `rowData`, `encodings`, `rowPanels`, `highlightColumns`), `selection`,
 `treeRoot` and the filehandles by content, so passing a freshly computed array
-or location object on every render costs nothing. A new `msa`, `tree` or `gff`
-string, or a filehandle pointing somewhere else, builds a new model and resets
-the view.
+or location object on every render costs nothing. A new `msa` or `tree` string,
+or an `msaFilehandle` or `treeFilehandle` pointing somewhere else, builds a new
+model and resets the view. A new `gff` or `gffFilehandle` replaces the
+annotations and keeps the view.
 
 ### Events
 

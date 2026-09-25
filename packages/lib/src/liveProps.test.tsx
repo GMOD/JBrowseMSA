@@ -262,6 +262,33 @@ test('a new alignment builds a new model', () => {
   expect(captured!.rowNames).toEqual(['a', 'b'])
 })
 
+test('a new gff keeps the model and its view, and removing it clears the annotations', () => {
+  const gff = (end: number) =>
+    `##gff-version 3\nhuman\tpfam\tdomain\t2\t${end}\t.\t.\t.\tName=d`
+  const model = show({ gff: gff(4), colWidth: 20 })
+  expect(model.annotations.map(a => a.end)).toEqual([4])
+  model.setColWidth(30)
+  model.setSelection({ start: 2, end: 3 })
+
+  show({ gff: gff(6), colWidth: 20 })
+  expect(captured).toBe(model)
+  expect(model.annotations.map(a => a.end)).toEqual([6])
+  expect(model.colWidth).toBe(30)
+  expect(model.selection).toEqual({ start: 2, end: 3 })
+
+  show({ colWidth: 20 })
+  expect(captured).toBe(model)
+  expect(model.annotations).toEqual([])
+  expect(model.data.gff).toBeUndefined()
+})
+
+test('a gff opened inside the viewer survives the host re-rendering', () => {
+  const model = show({ height: 300 })
+  model.setGFF('##gff-version 3\nhuman\tpfam\tdomain\t2\t4\t.\t.\t.\tName=d')
+  show({ height: 301 })
+  expect(model.annotations).toHaveLength(1)
+})
+
 test('an inline filehandle equal to the last one keeps the model', () => {
   const location = () => ({
     uri: 'https://example.com/a.fa',

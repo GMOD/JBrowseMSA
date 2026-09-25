@@ -140,7 +140,7 @@ A short balanced sentence that sounds like a conclusion and carries no fact.
 Each relative clause relabels the one before it. Split into sentences.
 
 > a different alignment, which is a new model, which React spells `key` → A new
-> `msa`, `tree` or `gff` needs a new model, so change the component's `key`.
+> `msa` or `tree` needs a new model, so change the component's `key`.
 
 ## Density and padding
 
