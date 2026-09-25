@@ -1,6 +1,6 @@
 Package: msaviewr
 Title: Interactive Multiple Sequence Alignment Viewer
-Version: 8.4.0
+Version: 8.4.1
 Authors@R: person("Colin", "Diesh", role = c("aut", "cre"),
     email = "colin.diesh@gmail.com")
 Description: Interactive viewer for multiple sequence alignments and

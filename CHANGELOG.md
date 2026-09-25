@@ -4,6 +4,20 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [8.4.1](https://github.com/GMOD/JBrowseMSA/compare/v8.4.0...v8.4.1) (2026-09-25)
+
+### Bug Fixes
+
+- Label the Go to input through inputProps on MUI 7, which JBrowse hosts serve ([d04a382](https://github.com/GMOD/JBrowseMSA/commit/d04a3820c1bd06af2d03979e9bb73b52f1c90700))
+
+### Documentation
+
+- Regenerate MsaView apidocs for @jbrowse/core 5.0.0-beta.9 ([3465ff6](https://github.com/GMOD/JBrowseMSA/commit/3465ff6993ffdca5130b65f3f1a1a0c3b3119d6f))
+
+### Other Changes
+
+- @jbrowse/core 5.0.0-beta.9 from npm, drop vendored tarballs ([7cfa523](https://github.com/GMOD/JBrowseMSA/commit/7cfa523a2ee76d9b9b1236f847d7107813b97a30))
+
 ## [8.4.0](https://github.com/GMOD/JBrowseMSA/compare/v8.3.0...v8.4.0) (2026-09-25)
 
 ### Bug Fixes
