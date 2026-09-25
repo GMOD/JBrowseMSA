@@ -1,11 +1,10 @@
 import React from 'react'
 
-import Attributes from '@jbrowse/core/BaseFeatureWidget/BaseFeatureDetail/Attributes'
-import BaseCard from '@jbrowse/core/BaseFeatureWidget/BaseFeatureDetail/BaseCard'
 import { Dialog } from '@jbrowse/core/ui'
-import { DialogContent } from '@mui/material'
+import { DialogContent, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import MetadataTable from '../../MetadataTable.tsx'
 import SequenceTextArea from '../../SequenceTextArea.tsx'
 
 import type { MsaViewModel } from '../../../model.ts'
@@ -34,20 +33,19 @@ const TreeNodeInfoDialog = observer(function ({
       maxWidth="xl"
     >
       <DialogContent>
-        <BaseCard title="Attributes">
-          <Attributes attributes={{ nodeName, ...info }} />
-        </BaseCard>
-        <BaseCard title="Sequence">
-          {res ? (
-            <SequenceTextArea str={[res]} />
-          ) : (
-            <div>Sequence not found</div>
-          )}
-        </BaseCard>
+        <Typography variant="h6">Attributes</Typography>
+        <MetadataTable record={{ nodeName, ...info }} />
+        <Typography variant="h6">Sequence</Typography>
+        {res ? (
+          <SequenceTextArea str={[res]} />
+        ) : (
+          <Typography>Sequence not found</Typography>
+        )}
         {metadata ? (
-          <BaseCard title="Extra metadata">
-            <Attributes attributes={metadata} />
-          </BaseCard>
+          <>
+            <Typography variant="h6">Extra metadata</Typography>
+            <MetadataTable record={metadata} />
+          </>
         ) : null}
       </DialogContent>
     </Dialog>
