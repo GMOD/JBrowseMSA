@@ -470,6 +470,16 @@ export interface Viewport {
 }
 
 /**
+ * A row table as a host passes it: fields per row name. A number or a boolean
+ * reads as its string, the way a GFF value does, and the viewer leaves out any
+ * other value. See docs/layers.md
+ */
+export type RowDataInput = Record<
+  string,
+  Record<string, string | number | boolean | null>
+>
+
+/**
  * A channel of a mark the viewer always draws. `tipLabel` colors each tip label
  * in the tree, `rowTint` washes the row across the tree gutter and the
  * alignment, and `branch` colors a tree edge whose tips all share one value;

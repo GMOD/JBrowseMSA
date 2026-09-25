@@ -74,6 +74,31 @@ test('a non-object row table degrades to empty', () => {
   expect(() => model.getRowData('seq1')).not.toThrow()
 })
 
+// Python's row_data, an R named list and a #data= link all carry numbers
+test('a number or a boolean in the row table reads as its string', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    data: {
+      msa,
+      treeMetadata: JSON.stringify({
+        seq1: { year: 2015, vaccinated: true, host: null, loc: { lat: 1 } },
+        seq2: { year: 2019 },
+      }),
+    },
+    encodings: [{ channel: 'tipLabel', field: 'year' }],
+    rowPanels: [{ kind: 'strip', field: 'year' }],
+  })
+
+  expect(model.rowDataOf('seq1')).toEqual({ year: '2015', vaccinated: 'true' })
+  expect(model.tipLabelColors?.get('seq2')).toBe('#00BFC4')
+  expect(model.legends.map(l => l.entries.map(e => e.label))).toEqual([
+    ['2015', '2019'],
+  ])
+
+  model.setRowData({ seq1: { year: 1999 }, seq2: { year: 2004 } })
+  expect(model.rowDataOf('seq2')).toEqual({ year: '2004' })
+})
+
 test('resolvedEncodings resolves each scale over the values in the table', () => {
   const model = MsaView.create({ type: 'MsaView', data: { msa } })
   model.setRowData({

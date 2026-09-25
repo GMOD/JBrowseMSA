@@ -84,6 +84,7 @@ export type {
   ResolvedHighlight,
   ResolvedRowPanel,
   ResolvedSelection,
+  RowDataInput,
   RowPanelSpec,
   RowResidue,
   StructureResidue,

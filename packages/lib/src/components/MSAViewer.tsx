@@ -22,6 +22,7 @@ import type {
   Region,
   ResidueEncoding,
   ResidueMapping,
+  RowDataInput,
   RowPanelSpec,
   TreeOrder,
   TreeRoot,
@@ -89,7 +90,7 @@ export interface MSAViewerProps {
   /** which residue of which structure each row's residues are (see docs/layers.md) */
   residueMappings?: ResidueMapping[]
   /** extra fields per row name, such as a lineage or a host (see docs/layers.md) */
-  rowData?: Record<string, Record<string, string>>
+  rowData?: RowDataInput
   /**
    * what the viewer's marks read from a table: `{channel, field, scale?}`,
    * where `channel` is `tipLabel`, `rowTint` or `branch` over `rowData`, or

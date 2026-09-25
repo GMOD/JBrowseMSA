@@ -164,6 +164,7 @@ import type {
   ResolvedStripPanel,
   RowFeaturesSpec,
   RowPanelSpan,
+  RowDataInput,
   RowPanelSpec,
   RowResidue,
   StructureResidue,
@@ -228,6 +229,23 @@ function rowPanelWidth(panel: RowPanelSpec, view: { rowHeight: number }) {
     panel.width ??
     (panel.kind === 'features' ? defaultFeaturePanelWidth : view.rowHeight)
   )
+}
+
+// one row of the row table as the channels read it. A number or a boolean
+// reads as its string, the way a GFF value does, and null or an object drops
+function stringFields(row: unknown) {
+  if (typeof row !== 'object' || row === null) {
+    return undefined
+  }
+  const fields: Record<string, string> = {}
+  for (const [field, value] of Object.entries(row)) {
+    if (typeof value === 'string') {
+      fields[field] = value
+    } else if (typeof value === 'number' || typeof value === 'boolean') {
+      fields[field] = String(value)
+    }
+  }
+  return fields
 }
 
 // the color each row takes from a field of the row table under a scale
@@ -1783,7 +1801,8 @@ function stateModelFactory({
        * `data.treeMetadata`, the name that travels in existing links, so the
        * inline size limit and `treeMetadataFilehandle` cover it. labelWidthMap
        * reads it on every layout, so a malformed user-supplied file returns {}
-       * instead of throwing out of rendering.
+       * instead of throwing out of rendering, and every field is a string by
+       * the time a scale sorts it.
        */
       get rowData(): Record<string, Record<string, string> | undefined> {
         const text = self.data.treeMetadata
@@ -1793,7 +1812,12 @@ function stateModelFactory({
         try {
           const parsed: unknown = JSON.parse(text)
           return typeof parsed === 'object' && parsed !== null
-            ? (parsed as Record<string, Record<string, string> | undefined>)
+            ? Object.fromEntries(
+                Object.entries(parsed).map(([name, row]) => [
+                  name,
+                  stringFields(row),
+                ]),
+              )
             : {}
         } catch (e) {
           console.error('failed to parse rowData', e)
@@ -3627,7 +3651,7 @@ function stateModelFactory({
        * replace the row table, which the model keeps as the JSON string
        * `data.treeMetadata` (see docs/layers.md)
        */
-      setRowData(rowData: Record<string, Record<string, string>>) {
+      setRowData(rowData: RowDataInput) {
         self.data.setTreeMetadata(JSON.stringify(rowData))
       },
       /**

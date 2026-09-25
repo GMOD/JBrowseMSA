@@ -1539,7 +1539,8 @@ the row table: extra fields per row, keyed by row name, which the `encodings`
 channels read. It is stored as the JSON string `data.treeMetadata`, the name
 that travels in existing links, so the inline size limit and
 `treeMetadataFilehandle` cover it. labelWidthMap reads it on every layout, so a
-malformed user-supplied file returns {} instead of throwing out of rendering.
+malformed user-supplied file returns {} instead of throwing out of rendering,
+and every field is a string by the time a scale sorts it.
 
 ```js
 // type
@@ -2663,7 +2664,7 @@ replace the row table, which the model keeps as the JSON string
 
 ```js
 // type signature
-setRowData: (rowData: Record<string, Record<string, string>>) => void
+setRowData: (rowData: RowDataInput) => void
 ```
 
 #### action: setRowHeight

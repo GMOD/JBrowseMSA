@@ -388,6 +388,10 @@ in Python. R takes a data frame whose `label` or `row` column names each row and
 whose other columns are the fields, the shape a ggtree
 `tibble(label = , trait = )` has.
 
+A field's value can be a string, a number or a boolean. The viewer reads a
+number or a boolean as its string, `2015` as `"2015"`, the way it reads a GFF
+attribute, and leaves out a null or a nested object.
+
 A real metadata table needs the filehandle. Five thousand rows with eight fields
 run to roughly 700 kB, far past the 50 kB inline limit a jbrowse session keeps,
 so the snapshot drops the table and `unshareableData` reports the drop. Host the

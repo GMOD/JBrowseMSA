@@ -13,6 +13,7 @@ import type {
   MsaSelection,
   Region,
   ResidueMapping,
+  RowDataInput,
   RowPanelSpec,
   TreeOrder,
   TreeRoot,
@@ -39,7 +40,7 @@ export interface Traits {
   clades: Clade[]
   column_tracks: ColumnTrackSpec[]
   residue_mappings: ResidueMapping[]
-  row_data: Record<string, Record<string, string>>
+  row_data: RowDataInput
   encodings: Encoding[]
   row_panels: RowPanelSpec[]
   relative_to: string | null
