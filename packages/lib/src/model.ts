@@ -75,6 +75,7 @@ import {
 import { createPaletteMap } from './createPaletteMap.ts'
 import { exportFileName } from './exportFileName.ts'
 import { featureField, featureName } from './featureFields.ts'
+import { featuresToAnnotations } from './featuresLayer.ts'
 import { fetchTextWithProgress, isAbortError } from './fetchUtils.ts'
 import { flatToTree } from './flatToTree.ts'
 import {
@@ -143,6 +144,7 @@ import type {
   DomainBand,
   Encoding,
   EncodingChannel,
+  Feature,
   Highlight,
   Legend,
   LegendEntry,
@@ -1052,6 +1054,13 @@ function stateModelFactory({
         highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
         /**
          * #property
+         * features on the rows as data, `{row, start, end, name, ...}` in
+         * residues of each row, drawn with the GFF's annotations. Persists in
+         * the snapshot and the URL.
+         */
+        features: stripDefault(types.array(types.frozen<Feature>()), []),
+        /**
+         * #property
          * the block the reader selected: `{start, end}` columns of the file,
          * 1-based inclusive like a column highlight, and `rows` by name, every
          * row where absent. Undefined until something is selected, so a view
@@ -1360,6 +1369,12 @@ function stateModelFactory({
       },
       /**
        * #action
+       */
+      setFeatures(features: Feature[]) {
+        self.features.replace(features)
+      },
+      /**
+       * #action
        * select a block, in `selection` coordinates. `start` and `end` may come
        * in either order.
        */
@@ -1626,9 +1641,19 @@ function stateModelFactory({
       },
       /**
        * #getter
+       * the annotations the overlay, the legend and the encodings draw: the
+       * GFF's, then the `features` layer's
+       */
+      get allAnnotations(): Annotation[] {
+        return self.features.length > 0
+          ? [...self.annotations, ...featuresToAnnotations(self.features)]
+          : self.annotations
+      },
+      /**
+       * #getter
        */
       get actuallyShowDomains() {
-        return self.showDomains && self.annotations.length > 0
+        return self.showDomains && this.allAnnotations.length > 0
       },
       /**
        * #getter
@@ -1704,7 +1729,7 @@ function stateModelFactory({
         return !!this.tree.noTree
       },
       get noDomains() {
-        return self.annotations.length === 0
+        return self.allAnnotations.length === 0
       },
 
       /**
@@ -3172,7 +3197,7 @@ function stateModelFactory({
         // first occurrence wins; only name, description and segment start are
         // read from it
         const types = new Map<string, Annotation>()
-        for (const annot of self.annotations) {
+        for (const annot of self.allAnnotations) {
           if (!types.has(annot.accession)) {
             types.set(annot.accession, annot)
           }
@@ -3180,7 +3205,7 @@ function stateModelFactory({
         return types
       },
       get filteredAnnotations() {
-        return self.annotations.filter(
+        return self.allAnnotations.filter(
           r => !self.turnedOffFeatures.get(r.accession),
         )
       },

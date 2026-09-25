@@ -170,6 +170,18 @@ IOptionalIType<IArrayType<IType<Encoding, Encoding, Encoding>>, [undefined]>
 encodings: stripDefault(types.array(types.frozen<Encoding>()), [])
 ```
 
+#### property: features
+
+features on the rows as data, `{row, start, end, name, ...}` in residues of each
+row, drawn with the GFF's annotations. Persists in the snapshot and the URL.
+
+```js
+// type signature
+IOptionalIType<IArrayType<IType<Feature, Feature, Feature>>, [undefined]>
+// code
+features: stripDefault(types.array(types.frozen<Feature>()), [])
+```
+
 #### property: gffFilehandle
 
 filehandle object for a GFF file of overlay annotations
@@ -800,6 +812,16 @@ BasicTrack[]
 ```js
 // type
 string[]
+```
+
+#### getter: allAnnotations
+
+the annotations the overlay, the legend and the encodings draw: the GFF's, then
+the `features` layer's
+
+```js
+// type
+Annotation[]
 ```
 
 #### getter: allBranchesLength0
@@ -2451,6 +2473,13 @@ set error state
 ```js
 // type signature
 setError: (error?: unknown) => void
+```
+
+#### action: setFeatures
+
+```js
+// type signature
+setFeatures: (features: Feature[]) => void
 ```
 
 #### action: setFilter

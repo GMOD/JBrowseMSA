@@ -332,6 +332,26 @@ export interface Highlight {
 }
 
 /**
+ * A feature on one row as data, the JSON form of a GFF line: `start` and `end`
+ * are residues of `row`, 1-based and inclusive. `name` is the key the legend,
+ * the palette and the filter dialog group features by, `color` overrides the
+ * palette and any scale, and a `strand` draws the span as an arrow. Every other
+ * field is a column the `featureFill` and `featureLabel` encodings can read.
+ */
+export interface Feature {
+  row: string
+  start: number
+  end: number
+  name?: string
+  description?: string
+  /** a GFF feature type; `exon`, `CDS` and the UTRs draw as numbered segments */
+  type?: string
+  strand?: '+' | '-'
+  color?: string
+  [field: string]: string | number | undefined
+}
+
+/**
  * What the viewer draws over a clade. `highlight` fills the rows behind it,
  * across the tree and the alignment. `bracket` draws a bar and the clade's
  * `label` in the gutter right of the tip labels. `collapse`, `focus` and

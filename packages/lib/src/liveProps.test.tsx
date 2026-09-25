@@ -282,6 +282,55 @@ test('a new gff keeps the model and its view, and removing it clears the annotat
   expect(model.data.gff).toBeUndefined()
 })
 
+test('a new gffFilehandle loads into the same model, and removing it clears', async () => {
+  const served: Record<string, string> = {
+    'https://example.com/a.gff': `##gff-version 3\nhuman\tpfam\tdomain\t2\t4\t.\t.\t.\tName=d`,
+    'https://example.com/b.gff': `##gff-version 3\nhuman\tpfam\tdomain\t2\t6\t.\t.\t.\tName=d`,
+  }
+  vi.stubGlobal(
+    'fetch',
+    vi.fn((input: RequestInfo | URL) => {
+      const url = input instanceof Request ? input.url : String(input)
+      return Promise.resolve(new Response(served[url]))
+    }),
+  )
+  const at = (name: string) => ({
+    uri: `https://example.com/${name}.gff`,
+    locationType: 'UriLocation' as const,
+  })
+  try {
+    const model = show({ gffFilehandle: at('a') })
+    await vi.waitFor(() => {
+      expect(model.annotations.map(a => a.end)).toEqual([4])
+    })
+
+    show({ gffFilehandle: at('b') })
+    expect(captured).toBe(model)
+    await vi.waitFor(() => {
+      expect(model.annotations.map(a => a.end)).toEqual([6])
+    })
+
+    show({})
+    expect(model.annotations).toEqual([])
+  } finally {
+    vi.unstubAllGlobals()
+  }
+})
+
+test('features follow their prop on the same model', () => {
+  const model = show({
+    features: [{ row: 'human', start: 2, end: 4, name: 'd' }],
+  })
+  expect(model.filteredAnnotations.map(a => a.end)).toEqual([4])
+
+  show({ features: [{ row: 'mouse', start: 1, end: 3, name: 'e' }] })
+  expect(captured).toBe(model)
+  expect(model.filteredAnnotations.map(a => a.id)).toEqual(['mouse'])
+
+  show({})
+  expect(model.noDomains).toBe(true)
+})
+
 test('a gff opened inside the viewer survives the host re-rendering', () => {
   const model = show({ height: 300 })
   model.setGFF('##gff-version 3\nhuman\tpfam\tdomain\t2\t4\t.\t.\t.\tName=d')

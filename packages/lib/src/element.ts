@@ -9,6 +9,7 @@ import type {
   Cell,
   ColorScheme,
   ColumnTrackSpec,
+  Feature,
   Highlight,
   MsaSelection,
   ResidueMapping,
@@ -20,6 +21,7 @@ type ElementData = Pick<
   | 'msa'
   | 'tree'
   | 'gff'
+  | 'features'
   | 'colorScheme'
   | 'highlights'
   | 'columnTracks'
@@ -88,7 +90,8 @@ function residueRange(model: MsaViewModel, row: string, viewport: Viewport) {
  * Registers a custom element that renders MSAViewer, for pages with no React.
  * Attributes: msa-url, tree-url, gff-url, color-scheme, height, hide-header,
  * theme, tree-area-width and reference-row. Properties: msa, tree and gff text,
- * colorScheme, highlights, columnTracks, residueMappings and selection. The
+ * features, colorScheme, highlights, columnTracks, residueMappings and
+ * selection. The
  * colorScheme property takes a `{map}` the color-scheme attribute cannot hold,
  * and wins over the attribute while set. Events: cell-hover, cell-click,
  * viewport-change and selection-change, each with the MSAViewer callback's
@@ -133,6 +136,12 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
     }
     set gff(value: string | undefined) {
       this.#setData({ gff: value })
+    }
+    get features() {
+      return this.#data.features
+    }
+    set features(value: Feature[] | undefined) {
+      this.#setData({ features: value })
     }
     get colorScheme() {
       return this.#data.colorScheme

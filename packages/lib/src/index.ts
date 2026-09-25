@@ -65,6 +65,7 @@ export type {
   DomainBand,
   Encoding,
   EncodingChannel,
+  Feature,
   Highlight,
   Legend,
   LegendEntry,

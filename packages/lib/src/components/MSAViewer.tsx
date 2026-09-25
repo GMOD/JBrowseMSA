@@ -16,6 +16,7 @@ import type {
   ColorScheme,
   ColumnTrackSpec,
   Encoding,
+  Feature,
   Highlight,
   MsaSelection,
   Region,
@@ -68,6 +69,13 @@ export interface MSAViewerProps {
    * for whole rows, each with an optional `label` and `color`
    */
   highlights?: Highlight[]
+  /**
+   * features on the rows as data, drawn with the GFF's: `{row, start, end}` in
+   * residues of that row, 1-based and inclusive, with an optional `name`,
+   * `description`, `type`, `strand` and `color`, and any other field an
+   * encoding reads (see docs/layers.md)
+   */
+  features?: Feature[]
   /**
    * clades of the tree with a mark drawn over them: `{mrca, tips, mark}` or
    * `{range, tips, mark}`, where `mark` is `highlight`, `bracket`, `collapse`
@@ -234,6 +242,7 @@ function Viewer({
   allowedGappyness,
   highlightColumns,
   highlights,
+  features,
   clades,
   relativeTo,
   columnTracks,
@@ -283,6 +292,7 @@ function Viewer({
       ...(allowedGappyness !== undefined ? { allowedGappyness } : {}),
       ...(highlightColumns ? { highlightColumns } : {}),
       ...(highlights ? { highlights } : {}),
+      ...(features ? { features } : {}),
       ...(selection ? { selection } : {}),
       ...(clades ? { clades } : {}),
       ...(relativeTo ? { relativeTo } : {}),
@@ -407,6 +417,10 @@ function Viewer({
   useEffect(() => {
     model.setHighlights(JSON.parse(highlightsKey))
   }, [model, highlightsKey])
+  const featuresKey = JSON.stringify(features ?? [])
+  useEffect(() => {
+    model.setFeatures(JSON.parse(featuresKey))
+  }, [model, featuresKey])
   const selectionKey = JSON.stringify(selection ?? null)
   useEffect(() => {
     model.setSelection(JSON.parse(selectionKey) ?? undefined)
