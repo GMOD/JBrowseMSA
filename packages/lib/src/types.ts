@@ -409,6 +409,27 @@ export interface Region {
 }
 
 /**
+ * A block of the alignment the reader selected: columns `start` to `end` of the
+ * file, 1-based and inclusive like a Highlight without a row, across the rows
+ * `rows` names, or across every row where `rows` is absent.
+ */
+export interface MsaSelection {
+  start: number
+  end: number
+  rows?: string[]
+}
+
+/**
+ * An MsaSelection resolved to what is on screen: the visible columns it covers
+ * and its rows as runs of consecutive row indices, top to bottom
+ */
+export interface ResolvedSelection {
+  startCol: number
+  endCol: number
+  rowRuns: [number, number][]
+}
+
+/**
  * A cell of the alignment in the host's coordinates, 1-based like Highlight:
  * `column` counts every column of the file, hidden gappy ones included, and
  * `residue` counts the row's own letters, absent on a gap. `letter` is the

@@ -1,5 +1,9 @@
 import { setFontSize } from '../../setFontSize.ts'
-import { referenceColor } from '../overlayColors.ts'
+import {
+  referenceColor,
+  selectionBorder,
+  selectionFill,
+} from '../overlayColors.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
@@ -173,10 +177,47 @@ export function renderHighlights({
 }
 
 /**
+ * The selected block, a bordered band per run of consecutive selected rows,
+ * culled to the rows this block covers
+ */
+export function renderSelection({
+  ctx,
+  model,
+  offsetX,
+  offsetY,
+  height,
+}: {
+  ctx: RenderCtx
+  model: MsaViewModel
+  offsetX: number
+  offsetY: number
+  height: number
+}) {
+  const { resolvedSelection, colWidth, rowHeight } = model
+  if (!resolvedSelection) {
+    return
+  }
+  const { startCol, endCol, rowRuns } = resolvedSelection
+  const x = startCol * colWidth - offsetX
+  const w = (endCol - startCol + 1) * colWidth
+  ctx.lineWidth = 1
+  for (const [first, last] of rowRuns) {
+    const y = first * rowHeight - offsetY
+    const h = (last - first + 1) * rowHeight
+    if (y < height && y + h > 0) {
+      ctx.fillStyle = selectionFill
+      ctx.fillRect(x, y, w, h)
+      ctx.strokeStyle = selectionBorder
+      ctx.strokeRect(x, y, w, h)
+    }
+  }
+}
+
+/**
  * The overlay parts that come from the snapshot: the reference row's tint, a
- * bordered band per run of highlighted columns, and the `highlights` layer. The
- * live overlay draws these under its hover and click bands; the SVG export
- * draws only these.
+ * bordered band per run of highlighted columns, the `highlights` layer and the
+ * selected block. The live overlay draws these under its hover and click
+ * bands; the SVG export draws only these.
  */
 export function renderPersistentHighlights({
   ctx,
@@ -214,4 +255,5 @@ export function renderPersistentHighlights({
   }
 
   renderHighlights({ ctx, model, theme, offsetX, offsetY, width, height })
+  renderSelection({ ctx, model, offsetX, offsetY, height })
 }

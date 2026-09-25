@@ -26,6 +26,7 @@ import {
   parseNewick,
 } from 'msa-parsers'
 
+import { blockFasta } from './blockFasta.ts'
 import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes, { letterColorTable } from './colorSchemes.ts'
@@ -145,6 +146,7 @@ import type {
   Highlight,
   Legend,
   LegendEntry,
+  MsaSelection,
   NodeWithIds,
   Region,
   ResidueMapping,
@@ -153,6 +155,7 @@ import type {
   ResolvedEncoding,
   ResolvedFeaturePanel,
   ResolvedHighlight,
+  ResolvedSelection,
   TreeOrder,
   TreeRoot,
   ResolvedRowPanel,
@@ -756,6 +759,20 @@ function inRanges(ranges: [number, number][] | undefined, position: number) {
   return !!ranges?.some(([start, end]) => position >= start && position <= end)
 }
 
+// sorted integers as inclusive [first, last] runs of consecutive values
+function consecutiveRuns(sorted: number[]) {
+  const runs: [number, number][] = []
+  for (const n of sorted) {
+    const last = runs.at(-1)
+    if (last && n <= last[1] + 1) {
+      last[1] = Math.max(last[1], n)
+    } else {
+      runs.push([n, n])
+    }
+  }
+  return runs
+}
+
 // the value every one of a node's children reports, or undefined where one of
 // them has no value or they disagree
 function sharedValue(values: (string | undefined)[]) {
@@ -1033,6 +1050,14 @@ function stateModelFactory({
          * Persists in the snapshot and the URL.
          */
         highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
+        /**
+         * #property
+         * the block the reader selected: `{start, end}` columns of the file,
+         * 1-based inclusive like a column highlight, and `rows` by name, every
+         * row where absent. Undefined until something is selected, so a view
+         * without one adds nothing to the shared URL.
+         */
+        selection: types.frozen<MsaSelection | undefined>(),
         /**
          * #property
          * where the view opens, in `highlights` coordinates: `{row, start,
@@ -1332,6 +1357,27 @@ function stateModelFactory({
        */
       setHighlights(highlights: Highlight[]) {
         self.highlights.replace(highlights)
+      },
+      /**
+       * #action
+       * select a block, in `selection` coordinates. `start` and `end` may come
+       * in either order.
+       */
+      setSelection(selection?: MsaSelection) {
+        const next = selection && {
+          start: Math.min(selection.start, selection.end),
+          end: Math.max(selection.start, selection.end),
+          ...(selection.rows ? { rows: selection.rows } : {}),
+        }
+        if (!compareStructural(next, self.selection)) {
+          self.selection = next
+        }
+      },
+      /**
+       * #action
+       */
+      clearSelection() {
+        this.setSelection(undefined)
       },
 
       /**
@@ -3948,19 +3994,9 @@ function stateModelFactory({
        * on every mouse move.
        */
       get highlightedColumnRuns() {
-        const { highlightedColumns } = self
-        const runs: { start: number; end: number }[] = []
-        for (const col of [...(highlightedColumns ?? [])].sort(
-          (a, b) => a - b,
-        )) {
-          const last = runs.at(-1)
-          if (last && col === last.end + 1) {
-            last.end = col
-          } else {
-            runs.push({ start: col, end: col })
-          }
-        }
-        return runs
+        return consecutiveRuns(
+          [...(self.highlightedColumns ?? [])].sort((a, b) => a - b),
+        ).map(([start, end]) => ({ start, end }))
       },
 
       /**
@@ -4014,6 +4050,85 @@ function stateModelFactory({
           const span = self.visibleSpan({ row, start, end })
           return span ? [{ ...base, ...span, rowIndices: [] }] : []
         })
+      },
+
+      /**
+       * #getter
+       * `selection` projected onto what is on screen, the way
+       * `resolvedHighlights` projects a column span and a row set. A
+       * selection whose columns are all hidden, or whose rows are all
+       * collapsed away or unknown, resolves to undefined.
+       */
+      get resolvedSelection(): ResolvedSelection | undefined {
+        const { selection, rowNamesSet, numRows } = self
+        const span =
+          selection &&
+          self.visibleSpan({ start: selection.start, end: selection.end })
+        if (!selection || !span) {
+          return undefined
+        }
+        const rowRuns = selection.rows
+          ? consecutiveRuns(
+              selection.rows
+                .map(name => rowNamesSet.get(name))
+                .filter(notEmpty)
+                .sort((a, b) => a - b),
+            )
+          : numRows > 0
+            ? [[0, numRows - 1] as [number, number]]
+            : []
+        return rowRuns.length > 0 ? { ...span, rowRuns } : undefined
+      },
+
+      /**
+       * #getter
+       * the columns and rows the selection covers, for the header's readout.
+       * Columns count the file's columns from `start` to `end`, hidden ones
+       * included, as `selectionFasta` copies them.
+       */
+      get selectionSize() {
+        const resolved = this.resolvedSelection
+        const span = this.selectionFileSpan
+        return resolved && span
+          ? {
+              columns: span.end - span.start + 1,
+              rows: sum(resolved.rowRuns.map(([a, b]) => b - a + 1)),
+            }
+          : undefined
+      },
+
+      /**
+       * #getter
+       * `selection`'s columns clamped to the file's
+       */
+      get selectionFileSpan() {
+        const { selection } = self
+        const width = self.MSA?.getWidth() ?? 0
+        const start = Math.max(1, Math.floor(selection?.start ?? 0))
+        const end = Math.min(width, Math.ceil(selection?.end ?? 0))
+        return selection && start <= end ? { start, end } : undefined
+      },
+
+      /**
+       * #getter
+       * the selected block as FASTA: the selected rows on screen, top to
+       * bottom, each with its letters across the file's columns from `start`
+       * to `end`, gaps included
+       */
+      get selectionFasta() {
+        const { rowNames, rowMap } = self
+        const resolved = this.resolvedSelection
+        const span = this.selectionFileSpan
+        if (!resolved || !span) {
+          return ''
+        }
+        const rows = resolved.rowRuns
+          .flatMap(([first, last]) => rowNames.slice(first, last + 1))
+          .flatMap(name => {
+            const seq = rowMap.get(name)
+            return seq === undefined ? [] : [[name, seq] as const]
+          })
+        return blockFasta(rows, span.start, span.end)
       },
 
       /**
@@ -4409,6 +4524,63 @@ function stateModelFactory({
             self.maxScrollX,
             0,
           )
+        })
+      },
+      /**
+       * #action
+       * zoom and scroll so the selected columns fill the alignment's width,
+       * and, where the selection names its rows, so those rows fill its height
+       */
+      zoomToSelection() {
+        const { selection, resolvedSelection } = self
+        if (!selection || !resolvedSelection) {
+          return
+        }
+        transaction(() => {
+          this.zoomToRegion({ start: selection.start, end: selection.end })
+          if (selection.rows && self.viewInitialized) {
+            const { rowRuns } = resolvedSelection
+            const first = rowRuns[0]![0]
+            const last = rowRuns.at(-1)![1]
+            self.rowHeight = clamp(
+              self.msaAreaHeight / (last - first + 1),
+              minRowHeight,
+              maxCellSize,
+            )
+            self.scrollY = clamp(-first * self.rowHeight, self.maxScrollY, 0)
+          }
+        })
+      },
+      /**
+       * #action
+       * select the block between two cells given as visible column and row
+       * indices, the coordinates a drag reports, clamped to the alignment. A
+       * cell with no `row` selects the columns across every row, and so does a
+       * block spanning every row on screen.
+       */
+      selectBlock(
+        anchor: { col: number; row?: number },
+        head: { col: number; row?: number },
+      ) {
+        const { numColumns, numRows, rowNames } = self
+        if (numColumns === 0 || numRows === 0) {
+          return
+        }
+        const ordered = (a: number, b: number, last: number) =>
+          [clamp(a, 0, last), clamp(b, 0, last)].sort((x, y) => x - y) as [
+            number,
+            number,
+          ]
+        const [startCol, endCol] = ordered(anchor.col, head.col, numColumns - 1)
+        const [firstRow, lastRow] =
+          anchor.row === undefined || head.row === undefined
+            ? [0, numRows - 1]
+            : ordered(anchor.row, head.row, numRows - 1)
+        const everyRow = firstRow === 0 && lastRow === numRows - 1
+        self.setSelection({
+          start: self.visibleColToGlobalCol(startCol) + 1,
+          end: self.visibleColToGlobalCol(endCol) + 1,
+          ...(everyRow ? {} : { rows: rowNames.slice(firstRow, lastRow + 1) }),
         })
       },
       /**

@@ -16,3 +16,7 @@ export const multiRowHoverColor = 'rgba(255,165,0,0.15)'
 // match or the crosshair appears to change color as it crosses the tracks.
 export const hoverColor = 'rgba(0,0,0,0.15)'
 export const clickColor = 'rgba(128,128,0,0.2)'
+
+// the selected block, a blue that reads apart from the orange highlights
+export const selectionFill = 'rgba(25,118,210,0.22)'
+export const selectionBorder = 'rgba(25,118,210,0.95)'
