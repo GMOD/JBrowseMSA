@@ -83,14 +83,28 @@ export function drawHighlightLabel({
   ctx.fillText(label, left + labelPad, top + labelPad + labelFontSize - 2)
 }
 
+export function renderReferenceRow(area: RowBandArea, model: MsaViewModel) {
+  const { referenceRowIndex } = model
+  if (referenceRowIndex !== undefined) {
+    area.ctx.fillStyle = referenceColor
+    fillRowRuns(area, [[referenceRowIndex, referenceRowIndex]])
+  }
+}
+
 /**
  * The washes across whole rows of a panel: the `rowTint` encoding, the
  * reference row and the row sets of `highlights`. The alignment and the tree
  * area each pass their own extent, and only the rows the area shows are drawn.
+ * The alignment draws its reference row first, under the column bands, so it
+ * passes `reference: false`.
  */
-export function renderRowWashes(area: RowBandArea, model: MsaViewModel) {
+export function renderRowWashes(
+  area: RowBandArea,
+  model: MsaViewModel,
+  { reference = true } = {},
+) {
   const { ctx } = area
-  const { rowTints, referenceRowIndex, resolvedHighlights } = model
+  const { rowTints, resolvedHighlights } = model
   if (rowTints) {
     const [first, last] = visibleRowRange(area)
     for (
@@ -105,9 +119,8 @@ export function renderRowWashes(area: RowBandArea, model: MsaViewModel) {
       }
     }
   }
-  if (referenceRowIndex !== undefined) {
-    ctx.fillStyle = referenceColor
-    fillRowRuns(area, [[referenceRowIndex, referenceRowIndex]])
+  if (reference) {
+    renderReferenceRow(area, model)
   }
   for (const { rowIndices, color } of resolvedHighlights) {
     ctx.fillStyle = color ?? highlightRowFill
@@ -155,7 +168,7 @@ export function renderHighlights({
       fillRowRuns(area, [rows])
     }
   }
-  renderRowWashes(area, model)
+  renderRowWashes(area, model, { reference: false })
   const placed: LabelBox[] = []
   ctx.lineWidth = 2
   for (const { startCol, endCol, label, color } of resolvedHighlights) {
@@ -246,7 +259,11 @@ export function renderPersistentHighlights({
   width: number
   height: number
 }) {
-  const { colWidth, highlightedColumnRuns } = model
+  const { colWidth, rowHeight, highlightedColumnRuns } = model
+  renderReferenceRow(
+    { ctx, rowHeight, top: -offsetY, x: 0, width, yMin: 0, yMax: height },
+    model,
+  )
   ctx.lineWidth = 2
   for (const { start, end } of highlightedColumnRuns) {
     const x = start * colWidth - offsetX

@@ -268,14 +268,16 @@ export function readEncoding(encoding: LegacyEncoding): Encoding {
   return encoding.channel === 'featureLabel' ? encoding : readColor(encoding)
 }
 
-/** a strip whose `encoding.fill` may be in an earlier spelling */
-export type LegacyEncodedStrip = Omit<RowStripSpec, 'encoding'> & {
-  encoding: { fill: LegacyColor<ColorChannel> | string }
-}
-
-/** a strip in its earliest spelling, the color members on the record */
+/**
+ * A strip in any spelling it has had: `encoding.fill` as a color object in
+ * any spelling or a bare field name, or the color members on the record
+ * itself, which a missing `encoding.fill` falls back to
+ */
 export type LegacyStrip = Omit<RowStripSpec, 'encoding'> &
-  LegacyColor<ColorChannel>
+  LegacyColorMembers & {
+    field?: string
+    encoding?: { fill?: LegacyColor<ColorChannel> | string } | null
+  }
 
 /**
  * A features panel's channels in any spelling they have had: `color` for the
@@ -292,11 +294,7 @@ export type LegacyFeatures = Omit<RowFeaturesSpec, 'encoding'> & {
   encoding?: LegacyFeatureEncoding
 }
 
-export type LegacyRowPanel =
-  | RowPanelSpec
-  | LegacyEncodedStrip
-  | LegacyStrip
-  | LegacyFeatures
+export type LegacyRowPanel = RowFeaturesSpec | LegacyStrip | LegacyFeatures
 
 function readFeatureEncoding({
   fill,
@@ -314,24 +312,24 @@ function readFeatureEncoding({
   }
 }
 
-function liftStrip({
+function readStrip({
   kind,
   width,
   header,
-  ...color
+  encoding,
+  field = '',
+  ...members
 }: LegacyStrip): RowStripSpec {
   return {
     kind,
     ...(width === undefined ? {} : { width }),
     ...(header === undefined ? {} : { header }),
-    encoding: { fill: readColor(color) },
+    encoding: {
+      fill: encoding?.fill
+        ? readChannel(encoding.fill)
+        : readColor({ field, ...members }),
+    },
   }
-}
-
-function readStrip(strip: LegacyEncodedStrip | LegacyStrip): RowStripSpec {
-  return 'encoding' in strip
-    ? { ...strip, encoding: { fill: readChannel(strip.encoding.fill) } }
-    : liftStrip(strip)
 }
 
 /**

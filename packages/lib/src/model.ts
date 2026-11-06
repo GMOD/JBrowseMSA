@@ -128,6 +128,7 @@ import {
   parseTreeText,
   resolveClades,
   rootTree,
+  seedingMarks,
   tipRange,
 } from './treeDisplay.ts'
 import {
@@ -2486,7 +2487,8 @@ function stateModelFactory({
        * the base pairs of the consensus secondary structure, as arcs, in
        * visible column space. The full string is parsed so hidden columns keep
        * their partners, and an end in a hidden column moves to its visible
-       * neighbor, as a column track's arc does
+       * neighbor, as a column track's arc does. A pair whose ends meet once
+       * the columns between them are hidden draws nothing
        */
       get secondaryStructureArcs(): Arc[] | undefined {
         const { blanks, hideGapsEffective } = self
@@ -2496,11 +2498,14 @@ function stateModelFactory({
         }
         const visible = (col: number) =>
           hideGapsEffective ? visibleColsBefore(blanks, col) : col
-        return parseWuss(ss).map(({ start, end, pseudoknot }) => ({
-          start: visible(start),
-          end: visible(end),
-          color: pseudoknot ? PSEUDOKNOT_ARC : HELIX_ARC,
-        }))
+        const width = self.numColumns
+        return parseWuss(ss)
+          .map(({ start, end, pseudoknot }) => ({
+            start: visible(start),
+            end: visible(end),
+            color: pseudoknot ? PSEUDOKNOT_ARC : HELIX_ARC,
+          }))
+          .filter(arc => arc.start < arc.end && arc.end < width)
       },
 
       /**
@@ -3326,11 +3331,13 @@ function stateModelFactory({
       /**
        * #action
        * apply the `collapse`, `focus` and `rotate` clade marks to the node
-       * state
+       * state. A mark that resolves to no node, as against the flat stub
+       * before a tree loads, leaves the marks to seed again
        */
       seedCladeMarks() {
-        self.cladesSeeded = true
-        for (const { mark, nodeId } of self.resolvedClades) {
+        const { resolvedClades } = self
+        self.cladesSeeded = resolvedClades.some(c => seedingMarks.has(c.mark))
+        for (const { mark, nodeId } of resolvedClades) {
           if (nodeId !== undefined) {
             if (mark === 'collapse' && !self.collapsed.includes(nodeId)) {
               self.collapsed.push(nodeId)

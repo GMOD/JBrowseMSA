@@ -8,6 +8,7 @@ import {
   letterColors,
   readColor,
   readColumnTrack,
+  readRowPanel,
   resolveScale,
   resolveShared,
 } from './scales.ts'
@@ -209,6 +210,31 @@ test('the flat members nest under scale and legend', () => {
   expect(readColor({ field: 'f', range: ['#111111'] })).toEqual({
     field: 'f',
     scale: { range: ['#111111'] },
+  })
+})
+
+test('a strip whose encoding is empty or null reads its flat members', () => {
+  expect(
+    readRowPanel({ kind: 'strip', field: 'HA', encoding: null, width: 12 }),
+  ).toEqual({ kind: 'strip', width: 12, encoding: { fill: { field: 'HA' } } })
+  expect(
+    readRowPanel({ kind: 'strip', field: 'HA', range: 'set1', encoding: {} }),
+  ).toEqual({
+    kind: 'strip',
+    encoding: { fill: { field: 'HA', scale: { scheme: 'set1' } } },
+  })
+  expect(
+    readRowPanel({
+      kind: 'strip',
+      encoding: { fill: { field: 'HA', scale: { palette: 'set1' } } },
+    }),
+  ).toEqual({
+    kind: 'strip',
+    encoding: { fill: { field: 'HA', scale: { scheme: 'set1' } } },
+  })
+  expect(readRowPanel({ kind: 'strip', encoding: { fill: 'HA' } })).toEqual({
+    kind: 'strip',
+    encoding: { fill: { field: 'HA' } },
   })
 })
 

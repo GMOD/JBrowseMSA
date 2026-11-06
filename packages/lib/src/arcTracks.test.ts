@@ -152,3 +152,25 @@ c  ACGTAC
     [1, 3],
   ])
 })
+
+test('a base pair whose ends meet once its columns are hidden draws nothing', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    msaFormat: 'stockholm',
+    data: {
+      msa: `# STOCKHOLM 1.0
+a  A---C
+b  A---C
+c  AGGGC
+#=GC SS_cons .<.>.
+//
+`,
+      tree: '((a:1,b:1)ab:1,c:1);',
+    },
+    hideGaps: true,
+  })
+  const ab = model.leaves.find(l => l.data.name === 'a')!.parent!.data.id
+  model.setShowOnly(ab)
+  expect(model.blanks).toEqual([1, 2, 3])
+  expect(model.secondaryStructureArcs).toEqual([])
+})

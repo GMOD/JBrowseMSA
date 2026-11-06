@@ -224,6 +224,23 @@ test('a collapse mark waits for a tree filehandle that lands after the MSA', asy
   expect(model.rowNames).toEqual(['node-0-0-1', 'C', 'D'])
 })
 
+test('a collapse mark waits for a tree filehandle set after the alignment loaded', async () => {
+  const model = MSAModelF().create({
+    id: 'clades-late-tree-test',
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa },
+    clades: [{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }],
+  })
+  model.setWidth(800)
+  expect(model.cladesSeeded).toBe(false)
+  model.setTreeFilehandle({ locationType: 'UriLocation', uri: 'late.nh' })
+  await flush()
+  inFlight.get('late.nh')!(tree)
+  await flush()
+  expect(model.collapsed).toEqual(['node-0-0-1'])
+})
+
 test('a collapse seeded at load rebuilds the raster tile cache', () => {
   // `leaves` is one of the rasterKeys (msaRaster.ts), so the tiles built for
   // four rows are dropped for the three the collapse leaves

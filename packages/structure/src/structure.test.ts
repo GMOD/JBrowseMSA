@@ -16,12 +16,11 @@ describe('accessionOfRowName', () => {
     ['Q9Y6K9-2 isoform 2', 'Q9Y6K9-2'],
     ['Q6YDQ7_9VIRU/46-492', 'Q6YDQ7'],
     ['P04637.2/94-292', 'P04637'],
-    ['p04637', 'P04637'],
   ])('%s -> %s', (name, accession) => {
     expect(accessionOfRowName(name)).toBe(accession)
   })
 
-  test.each(['HBA_HUMAN', 'NP_000549.1', 'SARS-CoV-2', 'Human'])(
+  test.each(['HBA_HUMAN', 'NP_000549.1', 'SARS-CoV-2', 'Human', 'c2orf3'])(
     '%s names no accession',
     name => {
       expect(accessionOfRowName(name)).toBeUndefined()

@@ -1581,7 +1581,8 @@ rowTints: (string | undefined)[] | undefined
 the base pairs of the consensus secondary structure, as arcs, in visible column
 space. The full string is parsed so hidden columns keep their partners, and an
 end in a hidden column moves to its visible neighbor, as a column track's arc
-does
+does. A pair whose ends meet once the columns between them are hidden draws
+nothing
 
 ```js
 secondaryStructureArcs: Arc[] | undefined
@@ -2332,7 +2333,9 @@ revealRegion: (region: Region) => void
 
 #### action: seedCladeMarks
 
-apply the `collapse`, `focus` and `rotate` clade marks to the node state
+apply the `collapse`, `focus` and `rotate` clade marks to the node state. A mark
+that resolves to no node, as against the flat stub before a tree loads, leaves
+the marks to seed again
 
 ```js
 seedCladeMarks: () => void
@@ -2649,7 +2652,7 @@ setRowHeight: (n: number) => void
 replace the panels drawn between the tree and the alignment
 
 ```js
-setRowPanels: (panels: (RowStripSpec | RowFeaturesSpec | LegacyEncodedStrip | LegacyStrip | LegacyFeatures)[]) => void
+setRowPanels: (panels: (RowStripSpec | RowFeaturesSpec | LegacyStrip | LegacyFeatures)[]) => void
 ```
 
 #### action: setScrollX

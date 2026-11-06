@@ -198,7 +198,7 @@ export async function findStructures({
       accession: protein,
       ...from,
       candidates: [],
-      problem: `AlphaFold DB has no model for ${protein}, and UniProt could not be reached for its sequence: ${e instanceof Error ? e.message : String(e)}`,
+      problem: `AlphaFold DB has no model for ${protein}, and its UniProt sequence did not load: ${e instanceof Error ? e.message : String(e)}`,
     }
   }
 

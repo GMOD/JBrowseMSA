@@ -1,9 +1,18 @@
 import { parseUniProtAccession } from 'msa-parsers'
 import { getUniprotIdFromAlphaFoldTarget } from 'p2s_mapper'
 
+// a lowercase token such as a gene symbol (`c2orf3`) matches the pattern too,
+// so only a token that spells the accession in capitals counts
+function capitalAccession(token: string) {
+  const parsed = parseUniProtAccession(token)
+  return parsed && token.trim().startsWith(parsed.accession)
+    ? parsed
+    : undefined
+}
+
 function accessionOfToken(token: string) {
   const parsed =
-    parseUniProtAccession(token) ?? parseUniProtAccession(token.split('_')[0]!)
+    capitalAccession(token) ?? capitalAccession(token.split('_')[0]!)
   return parsed?.suffix?.startsWith('-')
     ? `${parsed.accession}${parsed.suffix}`
     : parsed?.accession

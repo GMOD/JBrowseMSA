@@ -36,7 +36,7 @@ export function parseTreeText(text: string) {
 }
 
 // the marks that set tree state from a node rather than drawing
-const seedingMarks = new Set<CladeMark>(['collapse', 'focus', 'rotate'])
+export const seedingMarks = new Set<CladeMark>(['collapse', 'focus', 'rotate'])
 
 /**
  * Each tip of the full tree in the order the tree draws it, with the on-screen
