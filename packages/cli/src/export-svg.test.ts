@@ -74,7 +74,7 @@ test('--spec draws the columnTracks example from docs/layers.md', async () => {
           name: 'dN/dS',
           kind: 'bar',
           values: [0.1, 0.4, 1.8, 0.2, 0.3, 0.1],
-          scales: { y: { domainMax: 2 } },
+          encoding: { y: { scale: { domainMax: 2 } } },
           color: '#6a51a3',
           row: 'human',
         },
@@ -84,7 +84,9 @@ test('--spec draws the columnTracks example from docs/layers.md', async () => {
           kind: 'text',
           data: '1231231',
           encoding: {
-            color: { domain: ['1', '2', '3'], range: ['#ddd', '#bbb', '#999'] },
+            color: {
+              scale: { domain: ['1', '2', '3'], range: ['#ddd', '#bbb', '#999'] },
+            },
           },
         },
       ],
