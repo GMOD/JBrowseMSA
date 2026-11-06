@@ -24,7 +24,7 @@ accession, we:
 ## The data
 
 Twelve NLRP1 orthologs as UniProtKB holds them, with Pfam matches from InterPro
-release 110.0. Nothing to download: the commands below fetch these.
+release 111.0. Nothing to download: the commands below fetch these.
 
 | What it is                                          | File                                                                            |
 | --------------------------------------------------- | ------------------------------------------------------------------------------- |
@@ -170,7 +170,7 @@ react-msaview-cli interpro accessions.tsv -o family-domains.gff
 ```
 
 ```
-InterPro release 110.0; reading precomputed pfam matches...
+InterPro release 111.0; reading precomputed pfam matches...
   [1/12] Q9C000: 9 pfam entries
   ...
 12 fetched, 0 from /home/you/.cache/react-msaview-cli/interpro
@@ -181,18 +181,18 @@ submits the sequences to the EBI job queue and waits about fifteen minutes.
 Count what came back:
 
 ```bash
-grep IPR004020 family-domains.gff | cut -f1
+grep PF02758 family-domains.gff | cut -f1,4,5
 ```
 
 ```
-Human
-Chimp
-Rhesus
-Dog
-Hedgehog
+Human	9	84
+Chimp	9	83
+Rhesus	9	83
+Dog	9	83
+Hedgehog	9	83
 ```
 
-Five rows out of twelve have the PYD, at residues 9-83 in each.
+Five rows out of twelve have the PYD, at residues 9-83, or 9-84 in Human.
 
 ## 6. Open the three files
 
@@ -210,14 +210,13 @@ repeats fall through the middle, and the two FIIND blocks and the CARD sit at
 the right. The PYD at the far left is drawn on five rows, and the other seven
 are blank there.
 
-**Settings → Annotations** lists each InterPro accession in the GFF with a
-checkbox.
+**Settings → Annotations** lists each Pfam accession in the GFF with a checkbox.
 
 [![](../media/protein-family-filter.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A370%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A0.7%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D)
 
-The Settings panel, one checkbox per InterPro accession with its match count.
-IPR004020, the pyrin domain, has 5, and IPR025307 has 24 because it matches
-twice in every row, as FIIND and as the UPA-FIIND block beside it.
+The Settings panel, one checkbox per Pfam accession with its match count.
+PF02758, the pyrin domain, has 5, and the FIIND block is two accessions with 12
+each, PF13553 and the UPA-FIIND beside it, PF23679.
 
 <!-- usage: r -->
 
@@ -248,9 +247,9 @@ domain name. The PYD at the far left covers five rows.
 
 ## 7. Filter to the pyrin domain
 
-Uncheck every accession but IPR004020, and the overlay draws the PYD alone.
+Uncheck every accession but PF02758, and the overlay draws the PYD alone.
 
-[![](../media/protein-family-pyd-only.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A370%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A0.7%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffFeatures%22%3A%7B%22IPR001315%22%3Atrue%2C%22IPR001611%22%3Atrue%2C%22IPR007111%22%3Atrue%2C%22IPR025307%22%3Atrue%2C%22IPR041075%22%3Atrue%2C%22IPR041267%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D)
+[![](../media/protein-family-pyd-only.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A370%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A0.7%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffFeatures%22%3A%7B%22PF00560%22%3Atrue%2C%22PF00619%22%3Atrue%2C%22PF05729%22%3Atrue%2C%22PF13516%22%3Atrue%2C%22PF13553%22%3Atrue%2C%22PF17776%22%3Atrue%2C%22PF17779%22%3Atrue%2C%22PF23679%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D)
 
 The overlay with only the pyrin domain turned on. The three primates and Dog
 have it in four adjacent rows, Hedgehog in the last row of the frame, and Cow,
@@ -261,7 +260,7 @@ Pig and Horse, between them, lack it.
 InterPro reports NACHT at a different residue in each of the twelve rows:
 
 ```bash
-grep IPR007111 family-domains.gff | cut -f1,4,5
+grep PF05729 family-domains.gff | cut -f1,4,5
 ```
 
 ```
@@ -286,14 +285,15 @@ gaps in that row before drawing.
 
 ## 9. Look for missing annotations
 
-Cow, Hedgehog and Zebrafish have no leucine-rich repeats called at all:
+Pfam calls the leucine-rich repeats with two families, PF00560 and PF13516, and
+Cow, Hedgehog and Zebrafish have neither:
 
 ```bash
-grep IPR001611 family-domains.gff | cut -f1 | sort | uniq -c
+grep -E "PF00560|PF13516" family-domains.gff | cut -f1 | sort | uniq -c
 ```
 
 ```
-      2 Chimp
+      3 Chimp
       2 Dog
       1 Hamster
       2 Horse

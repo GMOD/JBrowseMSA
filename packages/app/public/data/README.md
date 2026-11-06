@@ -26,7 +26,7 @@ it does not cover:
 | `il2ra.aln` / `il2ra.nh`  | IL2RA/IL2RB/IL2RG across mammals, the small protein alignment the Getting started examples and the homepage viewer show                        |
 | `nlrp1.aln`               | Twelve NLRP1 orthologs from UniProt, ClustalW, 1666 columns, which step 3 of [protein_family](../../../../docs/tutorials/protein_family.md) writes |
 | `nlrp1.nh`                | ClustalW neighbor-joining tree of `nlrp1.aln`, step 4 of the same page                                                                         |
-| `nlrp1-domains.gff`       | InterPro 110.0 precomputed Pfam matches for the twelve accessions (`react-msaview-cli interpro`), step 5 of the same page                      |
+| `nlrp1-domains.gff`       | InterPro 111.0 precomputed Pfam matches for the twelve accessions (`react-msaview-cli interpro`), step 5 of the same page                      |
 | `nlrp1-unaligned.aln`     | The aligner's own input, right-padded to a common width, so the unaligned half of `docs/media/column-lock.png` is the same sequences unaligned |
 | `lysine.stock`            | Rfam Lysine riboswitch [RF00168](https://rfam.org/family/RF00168) seed alignment: 60 bacterial sequences, tree (`#=GF NH`) and SS embedded     |
 | `f12-cetacean-cds.stock`  | Coagulation factor XII coding alignment across mammals (UCSC cactus 241-way), tree embedded; built by `scripts/f12-cetacean`                   |

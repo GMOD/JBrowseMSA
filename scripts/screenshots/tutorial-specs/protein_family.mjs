@@ -24,12 +24,14 @@ const files = {
 // Every accession in nlrp1-domains.gff except the pyrin domain, so a snapshot
 // can open with the overlay reduced to the one domain the page is about.
 const NON_PYD = [
-  'IPR001315',
-  'IPR001611',
-  'IPR007111',
-  'IPR025307',
-  'IPR041075',
-  'IPR041267',
+  'PF00560',
+  'PF00619',
+  'PF05729',
+  'PF13516',
+  'PF13553',
+  'PF17776',
+  'PF17779',
+  'PF23679',
 ]
 
 export const specs = [

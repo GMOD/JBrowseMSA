@@ -217,7 +217,9 @@ an isoform (`P04637-2`) or versioned (`P04637.4`) accession as the canonical one
 and warns, and stops before any request on an entry name (`P53_HUMAN`), a RefSeq
 id or anything else InterPro does not key by; run `interproscan` on those. It
 writes through the same GFF writer as `interproscan`, and adds a `#` header line
-naming the InterPro release the coordinates came from.
+naming the InterPro release the coordinates came from. Each line carries the
+member database's accession and name, so two Pfam families InterPro integrates
+into one entry stay two legend entries.
 
 <!-- options:interpro -->
 

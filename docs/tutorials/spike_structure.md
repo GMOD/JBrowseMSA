@@ -22,7 +22,7 @@ cryo-EM structure of the trimer. For eleven coronavirus spikes, we:
 ## The data
 
 Eleven spike glycoproteins as NCBI holds them, the UniProtKB entry for the
-SARS-CoV-2 one, InterPro release 110.0 for the domains, and PDBe for everything
+SARS-CoV-2 one, InterPro release 111.0 for the domains, and PDBe for everything
 about the structure. Nothing to download: the commands below fetch these.
 
 | What it is                                                                                     | File                                                                                                                              |
@@ -178,7 +178,7 @@ react-msaview-cli interpro spike-uniprot.tsv -o spike-domains.gff
 ```
 
 ```
-InterPro release 110.0; reading precomputed pfam matches...
+InterPro release 111.0; reading precomputed pfam matches...
   [1/8] P0DTC2: 4 pfam entries
   ...
 8 fetched, 0 from /home/you/.cache/react-msaview-cli/interpro
@@ -188,7 +188,8 @@ InterPro release 110.0; reading precomputed pfam matches...
 
 Pfam domains on eight rows. The betacoronavirus rows share an S1 N-terminal
 domain, S1 receptor-binding and S1 C-terminal domains, then S2, while 229E and
-NL63 have one alphacoronavirus S1 box. The three rows the arrows mark are empty.
+NL63 have one alphacoronavirus S1 box and an S1/S2 linker. The three rows the
+arrows mark are empty.
 
 ## 5. Mark the PRRA insert
 

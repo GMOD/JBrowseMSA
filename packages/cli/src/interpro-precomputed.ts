@@ -25,7 +25,9 @@ import type { MSAFormat } from 'msa-parsers'
 // Input: one accession per line, optional whitespace-separated row label
 // (`<accession>\t<label>`); lines starting with # are ignored. The format matches
 // scripts/examples-gen datasets/<name>.tsv. The output GFF is keyed by label and
-// written by the same annotationsToGFF as the interproscan command.
+// written by the same annotationsToGFF as the interproscan command. Each line
+// names the member database entry, so two Pfam families InterPro integrates
+// into one entry stay two accessions with their own names.
 
 const API = 'https://www.ebi.ac.uk/interpro/api'
 
@@ -256,7 +258,7 @@ export async function runInterProPrecomputed(
               ? [
                   {
                     id: label,
-                    accession: metadata.integrated ?? metadata.accession,
+                    accession: metadata.accession,
                     name: metadata.name,
                     description: metadata.name,
                     start: span.start,

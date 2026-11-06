@@ -22,7 +22,7 @@ builds, we:
 
 ## The data
 
-The twelve NLRP1 orthologs, their ClustalW tree and their InterPro 110.0 domain
+The twelve NLRP1 orthologs, their ClustalW tree and their InterPro 111.0 domain
 matches, as the protein family tutorial writes them. Nothing to download: the
 CLI and the viewer fetch these by URL from the props file of step 1.
 
@@ -30,7 +30,7 @@ CLI and the viewer fetch these by URL from the props file of step 1.
 | ---------------------------------------- | ---------------------------------------------------------------------------- |
 | The alignment, 12 rows over 1666 columns | [nlrp1.aln](https://gmod.org/JBrowseMSA/demo/data/nlrp1.aln)                 |
 | Its tree                                 | [nlrp1.nh](https://gmod.org/JBrowseMSA/demo/data/nlrp1.nh)                   |
-| Its domains, InterPro 110.0 Pfam matches | [nlrp1-domains.gff](https://gmod.org/JBrowseMSA/demo/data/nlrp1-domains.gff) |
+| Its domains, InterPro 111.0 Pfam matches | [nlrp1-domains.gff](https://gmod.org/JBrowseMSA/demo/data/nlrp1-domains.gff) |
 
 <details>
 <summary>The files this page writes, hosted for the figure links</summary>

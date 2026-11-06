@@ -76,7 +76,7 @@ test('a 404 is retried, since the API gives one to accessions that have matches'
   vi.stubGlobal('fetch', fetchMock)
 
   const gff = await run('P00001\tHuman\n')
-  expect(gff).toContain('IPR000001')
+  expect(gff).toContain('PF00001')
   expect(cacheFiles()).toEqual(['P00001.json'])
 })
 
@@ -88,8 +88,50 @@ test('an accession the API never resolves stays out of the cache', async () => {
   vi.stubGlobal('fetch', fetchMock)
 
   const gff = await run('P00002\tHuman\n')
-  expect(gff).not.toContain('IPR')
+  expect(gff).not.toContain('PF00001')
   expect(cacheFiles()).toEqual([])
+})
+
+test('two families InterPro integrates into one entry keep their own accession and name', async () => {
+  const fragment = (start: number, end: number) => [
+    { entry_protein_locations: [{ fragments: [{ start, end }] }] },
+  ]
+  const lobes = {
+    results: [
+      {
+        metadata: {
+          accession: 'PF00011',
+          name: 'Kinase N-lobe',
+          integrated: 'IPR000011',
+        },
+        proteins: fragment(1000, 1100),
+      },
+      {
+        metadata: {
+          accession: 'PF00012',
+          name: 'Kinase C-lobe',
+          integrated: 'IPR000011',
+        },
+        proteins: fragment(1100, 1200),
+      },
+    ],
+    next: null,
+  }
+  vi.stubGlobal(
+    'fetch',
+    vi
+      .fn()
+      .mockResolvedValueOnce(json(RELEASE))
+      .mockResolvedValueOnce(json(lobes)),
+  )
+  const attributes = (await run('P00011\tHuman\n'))
+    .split('\n')
+    .filter(line => line && !line.startsWith('#'))
+    .map(line => line.split('\t')[8]?.split(';').slice(0, 2).join(';'))
+  expect(attributes).toEqual([
+    'Name=PF00011;signature_desc=Kinase%20N-lobe',
+    'Name=PF00012;signature_desc=Kinase%20C-lobe',
+  ])
 })
 
 test('a 204 means no matches, which is an answer worth caching', async () => {
@@ -116,7 +158,7 @@ test('a failed release lookup reads the newest cached release', async () => {
   const gff = await run('P00001\tHuman\n')
   expect(fetchMock).toHaveBeenCalledTimes(1)
   expect(gff).toContain('InterPro 110.0')
-  expect(gff).toContain('IPR000001')
+  expect(gff).toContain('PF00001')
   expect(console.warn).toHaveBeenCalledWith(
     expect.stringContaining('release 110.0'),
   )
