@@ -81,6 +81,7 @@ test('a full-length row maps through SIFTS, offset by the construct', async () =
       id: '6VXX',
       kind: 'experimental',
       asymId: 'A',
+      asymIdKind: 'label',
       url: 'https://files.rcsb.org/download/6VXX.cif',
     },
     segments: [
@@ -182,6 +183,33 @@ test('a fragment that SIFTS covers only in part is clipped to the mapped run', a
   ])
 })
 
+test('a SIFTS mapping with no struct_asym_id names the author chain as such', async () => {
+  const withoutLabel = fixture('pdbe-mappings-6vxx.json').replaceAll(
+    /"struct_asym_id": "[A-Z]+",/g,
+    '',
+  )
+  fetchMock.mockImplementation(async (url: string) => {
+    const file = ROUTES[url]
+    return url.endsWith('/mappings/uniprot/6vxx')
+      ? new Response(withoutLabel, { status: 200 })
+      : file
+        ? new Response(fixture(file), { status: 200 })
+        : new Response('', { status: 404 })
+  })
+  const [mapping] = await buildResidueMappings({
+    msaText: msa({ 'SARS-CoV-2': gapped(SPIKE) }),
+    rows: [
+      {
+        row: 'SARS-CoV-2',
+        accession: 'P0DTC2',
+        structure: { pdb: '6VXX', chain: 'A' },
+      },
+    ],
+    date: DATE,
+  })
+  expect(mapping?.structure).toMatchObject({ asymId: 'A', asymIdKind: 'auth' })
+})
+
 test('the AlphaFold model maps by identity, with no unobserved', async () => {
   const [mapping] = await buildResidueMappings({
     msaText: msa({ 'SARS-CoV-2': gapped(SPIKE) }),
@@ -195,6 +223,7 @@ test('the AlphaFold model maps by identity, with no unobserved', async () => {
       id: 'AF-0000000365840314',
       kind: 'predicted',
       asymId: 'A',
+      asymIdKind: 'label',
       url: 'https://alphafold.ebi.ac.uk/files/AF-0000000365840314-model_v1.cif',
     },
     segments: [{ rowStart: 1, rowEnd: 1273, structStart: 1, structEnd: 1273 }],

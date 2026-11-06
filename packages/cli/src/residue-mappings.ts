@@ -327,7 +327,7 @@ async function siftsMapping(
   }
   segments.sort((a, b) => a.rowStart - b.rowStart)
 
-  const entityId = mappings[0]!.entity_id
+  const { entity_id: entityId, struct_asym_id: labelChain } = mappings[0]!
   const entity = (await sources.molecules(pdb))[pdb.toLowerCase()]?.find(
     e => e.entity_id === entityId,
   )
@@ -347,7 +347,8 @@ async function siftsMapping(
     structure: {
       id: pdb,
       kind: 'experimental' as const,
-      asymId: mappings[0]!.struct_asym_id ?? chain,
+      asymId: labelChain ?? chain,
+      asymIdKind: labelChain ? ('label' as const) : ('auth' as const),
       url: `https://files.rcsb.org/download/${pdb}.cif`,
     },
     segments,
@@ -384,6 +385,7 @@ async function alphafoldMapping(
       id: entry.entryId ?? `AF-${accession}-F1`,
       kind: 'predicted' as const,
       asymId: 'A',
+      asymIdKind: 'label' as const,
       url: entry.cifUrl,
     },
     segments: [segment],
