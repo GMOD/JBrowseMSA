@@ -210,13 +210,13 @@ repeats fall through the middle, and the two FIIND blocks and the CARD sit at
 the right. The PYD at the far left is drawn on five rows, and the other seven
 are blank there.
 
-**Settings → Annotations** lists each Pfam accession in the GFF with a checkbox.
+**Settings → Annotations** lists each domain in the GFF by name with a checkbox.
 
 [![](../media/protein-family-filter.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A370%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A0.7%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D)
 
-The Settings panel, one checkbox per Pfam accession with its match count.
-PF02758, the pyrin domain, has 5, and the FIIND block is two accessions with 12
-each, PF13553 and the UPA-FIIND beside it, PF23679.
+The Settings panel, one checkbox per Pfam entry. The FIIND block is two of them,
+Function to find (PF13553) and the UPA-FIIND beside it (PF23679), and the
+leucine-rich repeats are two more, PF00560 and PF13516.
 
 <!-- usage: r -->
 
@@ -247,7 +247,8 @@ domain name. The PYD at the far left covers five rows.
 
 ## 7. Filter to the pyrin domain
 
-Uncheck every accession but PF02758, and the overlay draws the PYD alone.
+Uncheck every domain but PAAD/DAPIN/Pyrin (PF02758), and the overlay draws the
+PYD alone.
 
 [![](../media/protein-family-pyd-only.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A370%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A0.7%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffFeatures%22%3A%7B%22PF00560%22%3Atrue%2C%22PF00619%22%3Atrue%2C%22PF05729%22%3Atrue%2C%22PF13516%22%3Atrue%2C%22PF13553%22%3Atrue%2C%22PF17776%22%3Atrue%2C%22PF17779%22%3Atrue%2C%22PF23679%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fnlrp1-domains.gff%22%7D%7D%7D)
 
