@@ -127,7 +127,8 @@ jobs:
 
   python:
     name: Python widget (${{ matrix.python }})
-    runs-on: ubuntu-latest
+    # setup-python ships no 3.9 for Ubuntu 26.04, which ubuntu-latest became
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         # the floor pyproject.toml declares, and the newest release
