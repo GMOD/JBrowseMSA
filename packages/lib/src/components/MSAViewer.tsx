@@ -92,13 +92,16 @@ export interface MSAViewerProps {
   features?: Feature[]
   /**
    * clades of the tree with a mark drawn over them: `{mrca, tips, mark}` or
-   * `{range, tips, mark}`, where `mark` is `highlight`, `bracket`, `collapse`
-   * or `focus` (see docs/layers.md)
+   * `{range, tips, mark}`, where `mark` is `highlight`, `bracket`, `collapse`,
+   * `focus` or `rotate` (see docs/layers.md)
    */
   clades?: Clade[]
   /** row name to diff every other row against (matches render as ".") */
   relativeTo?: string
-  /** tracks supplied as data: per-column bar values or a text row (see docs/layers.md) */
+  /**
+   * tracks supplied as data: per-column bar values, a text row, or arcs
+   * joining pairs of columns (see docs/layers.md)
+   */
   columnTracks?: ColumnTrackSpec[]
   /** which residue of which structure each row's residues are (see docs/layers.md) */
   residueMappings?: ResidueMapping[]
@@ -107,14 +110,17 @@ export interface MSAViewerProps {
   /**
    * what the viewer's marks read from a table:
    * `{channel, field, range?, domain?, title?}`, where `channel` is
-   * `tipLabel`, `rowTint` or `branch` over `rowData`, or `featureFill` or
-   * `featureLabel` over the annotations (see docs/layers.md)
+   * `tipLabel`, `rowTint` or `branch` over `rowData`, or `featureFill` over
+   * the annotations, and `{channel: 'featureLabel', field}` (see
+   * docs/layers.md)
    */
   encodings?: Encoding[]
   /**
-   * panels between the tree and the alignment, one cell per row:
-   * `{kind: 'strip', field, range?, domain?, title?, width?, header?}` colors
-   * each row by a `rowData` field (see docs/layers.md)
+   * panels between the tree and the alignment:
+   * `{kind: 'strip', encoding: {fill: {field, range?, domain?, title?}}}`
+   * fills one cell per row from a `rowData` field, and
+   * `{kind: 'features', x, encoding?: {fill?, label?}}` draws the annotation
+   * spans per row (see docs/layers.md)
    */
   rowPanels?: RowPanelSpec[]
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */

@@ -125,8 +125,8 @@ test('the panel colors its spans by its own field, and lists that scale', () => 
       kind: 'features',
       x: 'position',
       encoding: {
-        color: { field: 'class', domain: ['core'], range: ['#e41a1c'] },
-        label: 'Name',
+        fill: { field: 'class', domain: ['core'], range: ['#e41a1c'] },
+        label: { field: 'Name' },
       },
     },
   ])
@@ -147,7 +147,7 @@ test('hiding a feature type leaves the panel colors of the rest as they were', (
     {
       kind: 'features',
       x: 'position',
-      encoding: { color: { field: 'class' } },
+      encoding: { fill: { field: 'class' } },
     },
   ])
   model.setFilter('genA', false)

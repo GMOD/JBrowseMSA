@@ -58,7 +58,7 @@ test('the same alignment behind a URL is shareable at any size', () => {
     msaFormat: 'fasta',
     msaFilehandle: { locationType: 'UriLocation', uri: 'http://x/aln.fa' },
   })
-  model.setMSA(bigMsa)
+  model.data.setMSA(bigMsa)
   expect(model.rows.length).toBe(400)
   // the text is dropped, but the filehandle that refetches it is not
   expect(snapshotOf(model).data?.msa).toBeUndefined()

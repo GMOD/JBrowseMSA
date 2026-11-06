@@ -32,7 +32,7 @@ export default function P53ClinVar() {
           name: 'ClinVar pathogenic',
           kind: 'bar',
           values: clinvar.counts,
-          scales: { y: { domainMax: clinvar.max } },
+          encoding: { y: { domainMax: clinvar.max } },
           color: '#c0392b',
           row: clinvar.row,
         },

@@ -5,11 +5,16 @@ import { paletteNamed } from './ggplotPalettes.ts'
 import { compareGroupKeys } from './groupKeys.ts'
 
 import type {
+  ColorEncoding,
   ColorScheme,
   ColumnTrackSpec,
   Encoding,
+  FieldChannel,
+  LabelEncoding,
   LegendEntry,
+  RowFeaturesSpec,
   RowPanelSpec,
+  RowStripSpec,
 } from './types.ts'
 
 /**
@@ -181,10 +186,26 @@ export interface LegacyScale {
   map?: Record<string, string>
 }
 
-/** a record as an older snapshot, R or Python may write it */
-export type LegacyColor<T extends ColorSpec> = Omit<T, 'scale'> & {
+/** the members an older color object may carry in place of today's */
+export interface LegacyColorMembers {
   scale?: ColorSpec['scale'] | LegacyScale
   legend?: string
+}
+
+/** a record as an older snapshot, R or Python may write it */
+export type LegacyColor<T extends ColorSpec> = Omit<T, 'scale'> &
+  LegacyColorMembers
+
+function liftScale(scale: LegacyColorMembers['scale']): ColorSpec {
+  return typeof scale !== 'object'
+    ? scale === undefined
+      ? {}
+      : { scale }
+    : scale.map
+      ? { domain: Object.keys(scale.map), range: Object.values(scale.map) }
+      : scale.palette === undefined
+        ? {}
+        : { range: scale.palette }
 }
 
 /**
@@ -192,83 +213,116 @@ export type LegacyColor<T extends ColorSpec> = Omit<T, 'scale'> & {
  * `{range: p}`, `{map: m}` as `{domain: keys(m), range: values(m)}`, and a
  * strip's `legend` as `title`. A member written in the new spelling wins.
  */
-export function readColor<T extends ColorSpec>(record: LegacyColor<T>): T {
-  const { scale, legend, ...rest } = record
-  if (typeof scale !== 'object' && legend === undefined) {
-    return record as T
-  }
-  const lifted: ColorSpec =
-    typeof scale !== 'object'
-      ? scale === undefined
-        ? {}
-        : { scale }
-      : scale.map
-        ? { domain: Object.keys(scale.map), range: Object.values(scale.map) }
-        : scale.palette === undefined
-          ? {}
-          : { range: scale.palette }
+export function readColor<T extends LegacyColorMembers>({
+  scale,
+  legend,
+  ...rest
+}: T) {
   return {
     ...(legend === undefined ? {} : { title: legend }),
-    ...lifted,
+    ...liftScale(scale),
     ...rest,
-  } as unknown as T
-}
-
-export type LegacyEncoding = LegacyColor<Encoding>
-
-export function readEncoding(encoding: Encoding | LegacyEncoding) {
-  return readColor<Encoding>(encoding)
-}
-
-export type LegacyRowPanel =
-  | LegacyColor<Extract<RowPanelSpec, { kind: 'strip' }>>
-  | (Omit<Extract<RowPanelSpec, { kind: 'features' }>, 'encoding'> & {
-      encoding?: {
-        color?: LegacyColor<ColorChannel>
-        label?: string
-      }
-    })
-
-export function readRowPanel(panel: RowPanelSpec | LegacyRowPanel) {
-  if (panel.kind === 'strip') {
-    return readColor<Extract<RowPanelSpec, { kind: 'strip' }>>(panel)
   }
-  const color = panel.encoding?.color
-  return (
-    color
-      ? { ...panel, encoding: { ...panel.encoding, color: readColor(color) } }
-      : panel
-  ) as RowPanelSpec
+}
+
+export type LegacyEncoding = LegacyColor<ColorEncoding> | LabelEncoding
+
+export function readEncoding(encoding: LegacyEncoding): Encoding {
+  return encoding.channel === 'featureLabel' ? encoding : readColor(encoding)
+}
+
+/** a strip in its earlier spelling, the color object's members on the record */
+export type LegacyStrip = Omit<RowStripSpec, 'encoding'> &
+  LegacyColor<ColorChannel>
+
+/**
+ * A features panel's channels in their earlier spelling: `color` for the
+ * span's `fill`, and `label` as the bare field name
+ */
+export interface LegacyFeatureEncoding {
+  fill?: ColorChannel
+  color?: LegacyColor<ColorChannel>
+  label?: string | FieldChannel
+}
+
+export type LegacyFeatures = Omit<RowFeaturesSpec, 'encoding'> & {
+  encoding?: LegacyFeatureEncoding
+}
+
+export type LegacyRowPanel = RowPanelSpec | LegacyStrip | LegacyFeatures
+
+function readFeatureEncoding({ fill, color, label }: LegacyFeatureEncoding) {
+  const lifted = fill ?? (color ? readColor(color) : undefined)
+  return {
+    ...(lifted ? { fill: lifted } : {}),
+    ...(label === undefined
+      ? {}
+      : { label: typeof label === 'string' ? { field: label } : label }),
+  }
+}
+
+function readStrip(strip: RowStripSpec | LegacyStrip) {
+  return 'encoding' in strip ? strip : liftStrip(strip)
+}
+
+function liftStrip({
+  kind,
+  width,
+  header,
+  ...color
+}: LegacyStrip): RowStripSpec {
+  return {
+    kind,
+    ...(width === undefined ? {} : { width }),
+    ...(header === undefined ? {} : { header }),
+    encoding: { fill: readColor(color) },
+  }
+}
+
+/**
+ * Lifts a strip's flat color members into `encoding.fill`, and a features
+ * panel's `encoding.color` into `encoding.fill` and a bare `label` field into
+ * `{field}`
+ */
+export function readRowPanel(panel: LegacyRowPanel): RowPanelSpec {
+  return panel.kind === 'features'
+    ? panel.encoding
+      ? { ...panel, encoding: readFeatureEncoding(panel.encoding) }
+      : { ...panel, encoding: undefined }
+    : readStrip(panel)
 }
 
 export type LegacyColumnTrack = ColumnTrackSpec & {
   max?: number
   colors?: Record<string, string>
+  scales?: { y?: { domainMax?: number } }
 }
 
 /**
- * Lifts a column track's `colors` onto `encoding.color` and its `max` onto
- * `scales.y.domainMax`
+ * Lifts a column track's `colors` onto `encoding.color`, and its `max` and
+ * `scales.y.domainMax` onto `encoding.y.domainMax`
  */
-export function readColumnTrack(track: LegacyColumnTrack): ColumnTrackSpec {
-  const { max, colors, ...rest } = track
-  if (max === undefined && colors === undefined) {
-    return track
-  }
-  return {
-    ...(colors
-      ? {
-          encoding: {
-            color: {
-              domain: Object.keys(colors),
-              range: Object.values(colors),
-            },
-          },
-        }
-      : {}),
-    ...(max === undefined ? {} : { scales: { y: { domainMax: max } } }),
-    ...rest,
-  }
+export function readColumnTrack({
+  max,
+  colors,
+  scales,
+  ...track
+}: LegacyColumnTrack): ColumnTrackSpec {
+  const color =
+    track.encoding?.color ??
+    (colors
+      ? { domain: Object.keys(colors), range: Object.values(colors) }
+      : undefined)
+  const domainMax = track.encoding?.y?.domainMax ?? scales?.y?.domainMax ?? max
+  return color || domainMax !== undefined
+    ? {
+        ...track,
+        encoding: {
+          ...(color ? { color } : {}),
+          ...(domainMax === undefined ? {} : { y: { domainMax } }),
+        },
+      }
+    : track
 }
 
 /**

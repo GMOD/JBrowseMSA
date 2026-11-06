@@ -48,8 +48,8 @@ function mount(rowPanels: RowPanelSpec[]) {
 
 test('one column per record, each as wide as the record says', () => {
   const { panels } = mount([
-    { kind: 'strip', field: 'HA', width: 12 },
-    { kind: 'strip', field: 'HA', width: 30 },
+    { kind: 'strip', encoding: { fill: { field: 'HA' } }, width: 12 },
+    { kind: 'strip', encoding: { fill: { field: 'HA' } }, width: 30 },
   ])
   const columns = [
     ...panels.matchAll(/data-testid="rowpanel_([^"]+)"[^>]*style="([^"]*)"/g),
@@ -62,7 +62,9 @@ test('one column per record, each as wide as the record says', () => {
 })
 
 test('the columns scroll with the alignment', () => {
-  const { model } = mount([{ kind: 'strip', field: 'HA' }])
+  const { model } = mount([
+    { kind: 'strip', encoding: { fill: { field: 'HA' } } },
+  ])
   model.setScrollY(-40)
   const scrolled = renderToStaticMarkup(
     <ThemeProvider theme={createJBrowseTheme()}>
@@ -80,8 +82,12 @@ test('no records mounts nothing', () => {
 
 test('each header names its column, and defaults to the field', () => {
   const { headers } = mount([
-    { kind: 'strip', field: 'HA' },
-    { kind: 'strip', field: 'HA', header: 'HA segment' },
+    { kind: 'strip', encoding: { fill: { field: 'HA' } } },
+    {
+      kind: 'strip',
+      encoding: { fill: { field: 'HA' } },
+      header: 'HA segment',
+    },
   ])
   expect(headers).toContain('vertical-rl')
   expect([...headers.matchAll(/>([^<>]+)<\/div>/g)].map(m => m[1])).toEqual([

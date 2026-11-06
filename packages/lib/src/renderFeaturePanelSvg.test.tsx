@@ -26,12 +26,12 @@ const panels: RowPanelSpec[] = [
     width: 216,
     header: 'neighborhood',
     encoding: {
-      color: {
+      fill: {
         field: 'class',
         domain: ['core', 'accessory'],
         range: ['#e41a1c', '#377eb8'],
       },
-      label: 'Name',
+      label: { field: 'Name' },
     },
     transform: [{ type: 'align', on: 'genE' }],
   },

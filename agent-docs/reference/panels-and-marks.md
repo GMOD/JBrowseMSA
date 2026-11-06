@@ -70,8 +70,9 @@ What the layout gives the API:
   `columnTracks` record today. A `bar` of one value per row, such as genome
   size, is a `rowPanels` record reading a `rowData` field. `text` and `strip`
   work the same way, `features` and `arc` index positions along the axis, and
-  the record fields match across the two lists: `kind`, `id`, `name`, `scale`,
-  `color`, and `height` or `width` for the extent across the shared axis.
+  the record fields match across the two lists: `kind`, `id`, `name`, `encoding`
+  keyed by channel, and `height` or `width` for the extent across the shared
+  axis.
 - **`side` for the other two sides.** `side: "right"` on a row panel puts it
   past the alignment, where `gheatmap` places its matrix beside the tip labels,
   and `side: "bottom"` on a track puts a ruler or a logo under the alignment.
@@ -108,14 +109,22 @@ What the layout gives the API:
 
 ```json
 "rowPanels": [
-  { "kind": "strip", "field": "HA", "range": "ggplot", "width": 12 },
-  { "kind": "strip", "field": "NA", "header": "NA segment" },
+  {
+    "kind": "strip",
+    "encoding": { "fill": { "field": "HA", "range": "ggplot" } },
+    "width": 12
+  },
+  {
+    "kind": "strip",
+    "encoding": { "fill": { "field": "NA" } },
+    "header": "NA segment"
+  },
   {
     "kind": "features",
     "x": "position",
     "encoding": {
-      "color": { "field": "Name", "range": "ggplot" },
-      "label": "Name"
+      "fill": { "field": "Name", "range": "ggplot" },
+      "label": { "field": "Name" }
     },
     "transform": [{ "type": "align", "on": "genE" }]
   }
@@ -126,11 +135,16 @@ What the layout gives the API:
 `rowPanels` is its counterpart on the row scale. Eight `strip` records reproduce
 a `gheatmap`, and one `features` record reproduces the gene figure. Each record
 carries its own `encoding`, the way each mark in `LinearMarkDisplay` does, so a
-panel's channels sit beside the panel they color. A strip's `width` is in pixels
-and defaults to the row height, and `header` defaults to the field, covering
-`gheatmap`'s `width` and `custom_column_labels`. A strip over a field every row
-shares one scale, so eight strips of segment lineages share one legend when they
-declare the same members and `title`.
+panel's channels sit beside the panel they color. A channel is named for the
+part of the mark it paints, as `residueEncoding` names it: `fill` for a strip's
+cell and a span's body, `color` for ink, and `y` for a bar's height, whose
+`domainMax` sits on the channel beside it as `domain` and `range` sit on a color
+channel. `label` takes `{field}` like the color channels, which is Vega-Lite's
+`text: {field}`. A strip's `width` is in pixels and defaults to the row height,
+and `header` defaults to the field, covering `gheatmap`'s `width` and
+`custom_column_labels`. A strip over a field every row shares one scale, so
+eight strips of segment lineages share one legend when they declare the same
+members and `title`.
 
 The top-level `encodings` array covers channels on the marks the viewer always
 draws:

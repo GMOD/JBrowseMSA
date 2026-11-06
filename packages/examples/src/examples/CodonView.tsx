@@ -76,7 +76,7 @@ function codonTracks(
   }
   const bar = {
     kind: 'bar' as const,
-    scales: { y: { domainMax: rows.length - 1 } },
+    encoding: { y: { domainMax: rows.length - 1 } },
     height: 30,
     row: reference,
   }

@@ -194,9 +194,9 @@ embeddedMode: stripDefault(types.boolean, false)
 #### property: encodings
 
 what the viewer's own marks read from `rowData` or the feature table:
-`{channel, field, range?, domain?, title?}` per channel. The earlier
-`scale: {palette}` and `scale: {map}` read as `range` and `domain`. See
-docs/layers.md
+`{channel, field, range?, domain?, title?}` per color channel, and
+`{channel: "featureLabel", field}`. The earlier `scale: {palette}` and
+`scale: {map}` read as `range` and `domain`. See docs/layers.md
 
 ```js
 encodings: stripDefault(
@@ -329,10 +329,11 @@ rowHeight: stripDefault(types.number, 16)
 #### property: rowPanels
 
 panels drawn between the tree and the alignment:
-`{kind: "strip", field, range?, domain?, title?, width?, header?}` colors one
-cell per row from a `rowData` field, and
+`{kind: "strip", encoding: {fill}, width?, header?}` fills one cell per row from
+a `rowData` field, and
 `{kind: "features", x, encoding?, transform?, width?, header?}` draws the spans
-the GFF carries. See docs/layers.md
+the GFF carries. A strip's earlier flat color members and a features panel's
+`encoding.color` read as `encoding.fill`. See docs/layers.md
 
 ```js
 rowPanels: stripDefault(
@@ -874,6 +875,14 @@ colConsensus: {
   color: string | undefined
 }
 ;[]
+```
+
+#### getter: colorEncodings
+
+the encodings feeding a color channel, each read through a scale
+
+```js
+colorEncodings: ColorEncoding[]
 ```
 
 #### getter: colorScheme
@@ -1944,7 +1953,7 @@ columnTrackModel: (track: ColumnTrackSpec) => BasicTrack
 the encoding feeding a channel, undefined when none does
 
 ```js
-encodingFor: (channel: EncodingChannel) => ResolvedEncoding | undefined
+encodingFor: (channel: ColorEncodingChannel) => ResolvedEncoding | undefined
 ```
 
 #### method: featureOff
@@ -2436,7 +2445,7 @@ setEmbeddedMode: (arg: boolean) => void
 replace what the viewer's marks read from the row table
 
 ```js
-setEncodings: (encodings: (Encoding | LegacyEncoding)[]) => void
+setEncodings: (encodings: (ColorEncoding | LabelEncoding | LegacyColor<ColorEncoding>)[]) => void
 ```
 
 #### action: setError
@@ -2639,7 +2648,7 @@ setRowHeight: (n: number) => void
 replace the panels drawn between the tree and the alignment
 
 ```js
-setRowPanels: (panels: (RowPanelSpec | LegacyRowPanel)[]) => void
+setRowPanels: (panels: (RowStripSpec | RowFeaturesSpec | LegacyStrip | LegacyFeatures)[]) => void
 ```
 
 #### action: setScrollX

@@ -86,7 +86,7 @@ test('a number or a boolean in the row table reads as its string', () => {
       }),
     },
     encodings: [{ channel: 'tipLabel', field: 'year' }],
-    rowPanels: [{ kind: 'strip', field: 'year' }],
+    rowPanels: [{ kind: 'strip', encoding: { fill: { field: 'year' } } }],
   })
 
   expect(model.rowDataOf('seq1')).toEqual({ year: '2015', vaccinated: 'true' })

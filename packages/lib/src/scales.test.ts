@@ -160,27 +160,25 @@ test('a title stands in for the field in the declaration', () => {
 })
 
 test('palette reads as range, map as domain and range, legend as title', () => {
-  expect(
-    readColor<ColorChannel>({ field: 'f', scale: { palette: 'set1' } }),
-  ).toEqual({
+  expect(readColor({ field: 'f', scale: { palette: 'set1' } })).toEqual({
     field: 'f',
     range: 'set1',
   })
   expect(
-    readColor<ColorChannel>({
+    readColor({
       field: 'f',
       scale: { map: { a: '#111111', b: '#222222' } },
     }),
   ).toEqual({ field: 'f', domain: ['a', 'b'], range: ['#111111', '#222222'] })
-  expect(readColor<ColorChannel>({ field: 'f', legend: 'lineage' })).toEqual({
+  expect(readColor({ field: 'f', legend: 'lineage' })).toEqual({
     field: 'f',
     title: 'lineage',
   })
-  expect(readColor<ColorChannel>({ field: 'f', scale: {} })).toEqual({
+  expect(readColor({ field: 'f', scale: {} })).toEqual({
     field: 'f',
   })
   const current = { field: 'f', scale: 'categorical' as const, range: 'set1' }
-  expect(readColor(current)).toBe(current)
+  expect(readColor(current)).toEqual(current)
 })
 
 test('a column track reads colors as encoding.color and max as domainMax', () => {
@@ -198,9 +196,25 @@ test('a column track reads colors as encoding.color and max as domainMax', () =>
     name: 'T',
     kind: 'text',
     data: '12',
-    encoding: { color: { domain: ['1'], range: ['#111111'] } },
-    scales: { y: { domainMax: 2 } },
+    encoding: {
+      color: { domain: ['1'], range: ['#111111'] },
+      y: { domainMax: 2 },
+    },
   })
+})
+
+test('a column track in the new spelling wins over its earlier members', () => {
+  expect(
+    readColumnTrack({
+      id: 't',
+      name: 'T',
+      kind: 'bar',
+      values: [1],
+      max: 2,
+      scales: { y: { domainMax: 3 } },
+      encoding: { y: { domainMax: 4 } },
+    }).encoding,
+  ).toEqual({ y: { domainMax: 4 } })
 })
 
 test('a scheme object reads in either spelling', () => {

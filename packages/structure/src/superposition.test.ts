@@ -333,7 +333,7 @@ describe('distanceTrack', () => {
       id: 'ca-distance',
       kind: 'bar',
       row: 'HBA_HUMAN',
-      scales: { y: { domainMax: 8 } },
+      encoding: { y: { domainMax: 8 } },
       name: 'CA distance to HBA_HUMAN (0–8 Å)',
     })
   })

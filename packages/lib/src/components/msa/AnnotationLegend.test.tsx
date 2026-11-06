@@ -19,7 +19,7 @@ function mount() {
   const model = createTestModel({
     id: 'legend-zindex-test',
     data: { msa, treeMetadata: JSON.stringify(rowData) },
-    rowPanels: [{ kind: 'strip', field: 'HA' }],
+    rowPanels: [{ kind: 'strip', encoding: { fill: { field: 'HA' } } }],
   })
   const markup = (node: React.ReactElement) =>
     renderToStaticMarkup(

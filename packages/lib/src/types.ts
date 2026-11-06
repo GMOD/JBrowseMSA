@@ -78,11 +78,20 @@ export interface ArcSpec {
   color?: string
 }
 
+/**
+ * The channels a column track reads. `y.domainMax` is the bar value drawn at
+ * full height, and a text track's `color` maps its characters onto colors,
+ * painted the way `residueEncoding` paints the residues.
+ */
+export interface ColumnTrackEncoding {
+  color?: ColorSpec
+  y?: { domainMax?: number }
+}
+
 // a track supplied as data in the snapshot rather than computed from the
 // alignment. `values` (bar) or `data` (text) index alignment columns, or the
 // 1-based residues of `row` when it names one; `arcs` (arc) name two such
-// positions each. `scales.y.domainMax` is the bar value drawn at full height,
-// and a text track's `encoding.color` colors its characters
+// positions each. `color` is one color for every bar or arc.
 export interface ColumnTrackSpec {
   id: string
   name: string
@@ -91,29 +100,37 @@ export interface ColumnTrackSpec {
   data?: string
   arcs?: ArcSpec[]
   color?: string
-  encoding?: { color?: ColorSpec }
-  scales?: { y?: { domainMax?: number } }
+  encoding?: ColumnTrackEncoding
   row?: string
   height?: number
 }
 
+/** a channel fed by a field, with no scale between them */
+export interface FieldChannel {
+  field: string
+}
+
 /**
- * A strip panel: one cell per row, colored from a `rowData` field through the
- * color object's members, which is ggtree's `gheatmap`. `width` is in pixels
- * and defaults to the row height, and `header` labels the column and defaults
- * to the field. Strips declaring the same members and `title` share one scale
- * and one legend.
+ * A strip panel: one cell per row, its `fill` read from a `rowData` field
+ * through the color object's members, which is ggtree's `gheatmap`. `width` is
+ * in pixels and defaults to the row height, and `header` labels the column and
+ * defaults to the field. Strips declaring the same members and `title` share
+ * one scale and one legend.
  */
-export interface RowStripSpec extends ColorChannel {
+export interface RowStripSpec {
   kind: 'strip'
+  encoding: { fill: ColorChannel }
   width?: number
   header?: string
 }
 
-/** the channels a `features` panel reads off the feature table */
+/**
+ * The channels a `features` panel reads off the feature table: the `fill` of
+ * each span and the `label` drawn inside it
+ */
 export interface FeatureEncodingSpec {
-  color?: ColorChannel
-  label?: string
+  fill?: ColorChannel
+  label?: FieldChannel
 }
 
 /**
@@ -487,30 +504,41 @@ export type RowDataInput = Record<
 >
 
 /**
- * A channel of a mark the viewer always draws. `tipLabel` colors each tip label
- * in the tree, `rowTint` washes the row across the tree gutter and the
+ * A color channel of a mark the viewer always draws. `tipLabel` colors each tip
+ * label in the tree, `rowTint` washes the row across the tree gutter and the
  * alignment, and `branch` colors a tree edge whose tips all share one value;
  * all three read a field of `rowData`. `featureFill` colors each span of the
- * annotation overlay and `featureLabel` names the field drawn inside a span,
- * both from a field of the feature table.
+ * annotation overlay from a field of the feature table.
  */
-export type EncodingChannel =
+export type ColorEncodingChannel =
   | 'tipLabel'
   | 'rowTint'
   | 'branch'
   | 'featureFill'
-  | 'featureLabel'
 
 /**
- * A channel, the field feeding it, and the color object's members it reads
- * that field through. See docs/layers.md
+ * A channel of a mark the viewer always draws: a color channel, or
+ * `featureLabel`, the field of the feature table drawn inside each span
  */
-export interface Encoding extends ColorChannel {
-  channel: EncodingChannel
+export type EncodingChannel = ColorEncodingChannel | 'featureLabel'
+
+/**
+ * A color channel, the field feeding it, and the color object's members it
+ * reads that field through. See docs/layers.md
+ */
+export interface ColorEncoding extends ColorChannel {
+  channel: ColorEncodingChannel
 }
 
-/** an Encoding with its scale resolved against the values in the table */
-export type ResolvedEncoding = Encoding & SharedScale
+/** the `featureLabel` channel and the field it draws */
+export interface LabelEncoding extends FieldChannel {
+  channel: 'featureLabel'
+}
+
+export type Encoding = ColorEncoding | LabelEncoding
+
+/** a ColorEncoding with its scale resolved against the values in the table */
+export type ResolvedEncoding = ColorEncoding & SharedScale
 
 /** a Highlight resolved to visible column indices and row indices */
 export interface ResolvedHighlight {

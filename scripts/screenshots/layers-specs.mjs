@@ -83,7 +83,7 @@ const insulinTracks = [
     name: 'Hydropathy',
     kind: 'bar',
     values: [...insulinHuman].map(aa => (HYDROPATHY[aa] ?? 0) + 4.5),
-    scales: { y: { domainMax: 9 } },
+    encoding: { y: { domainMax: 9 } },
     color: '#6a51a3',
     row: 'Human',
     height: 55,
@@ -265,14 +265,18 @@ const RESIDUE_COLORS = {
 }
 
 const temMatrix = [
-  { kind: 'strip', field: 'phenotype', ...PHENOTYPE_COLORS, width: 14 },
+  {
+    kind: 'strip',
+    encoding: { fill: { field: 'phenotype', ...PHENOTYPE_COLORS } },
+    width: 14,
+  },
   ...temAmblerPositions.map(p => ({
     kind: 'strip',
-    field: `Ambler ${p}`,
-    ...RESIDUE_COLORS,
+    encoding: {
+      fill: { field: `Ambler ${p}`, ...RESIDUE_COLORS, title: 'residue' },
+    },
     width: 12,
     header: p,
-    title: 'residue',
   })),
 ]
 
@@ -314,7 +318,10 @@ const trpPanel = extra => ({
   x: 'position',
   width: 1080,
   header: 'trp neighborhood',
-  encoding: { color: { field: 'role', ...ROLE_COLORS }, label: 'Name' },
+  encoding: {
+    fill: { field: 'role', ...ROLE_COLORS },
+    label: { field: 'Name' },
+  },
   transform: [{ type: 'align', on: 'trpB' }],
   ...extra,
 })
@@ -519,7 +526,7 @@ export const linkSpecs = [
         {
           name: 'ClinVar',
           color: '#c0392b',
-          scales: { y: { domainMax: 8 } },
+          encoding: { y: { domainMax: 8 } },
           start: 104,
           values: [2, 1, 0, 0, 2, 4],
         },

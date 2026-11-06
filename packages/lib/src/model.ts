@@ -164,9 +164,10 @@ import type {
   Clade,
   ResidueMappingProblem,
   ColumnTrackSpec,
+  ColorEncoding,
+  ColorEncodingChannel,
   DomainBand,
   Encoding,
-  EncodingChannel,
   Feature,
   Highlight,
   Legend,
@@ -308,11 +309,11 @@ function trackIsOff(
 const noDomains: Annotation[] = []
 const noClades: ResolvedClade[] = []
 
-// the channels reading the feature table; every other channel reads rowData
-const featureChannels = new Set<EncodingChannel>([
-  'featureFill',
-  'featureLabel',
-])
+// `featureFill` reads the feature table; every other color channel reads
+// rowData
+function encodingTable({ channel }: ColorEncoding): ScaleTable {
+  return channel === 'featureFill' ? 'features' : 'rows'
+}
 
 // seqPos -> column indexes per row, keyed on the parse so they are garbage
 // collected with it. A computed would rebuild every row's index when read
@@ -730,9 +731,10 @@ function stateModelFactory({
         /**
          * #property
          * what the viewer's own marks read from `rowData` or the feature
-         * table: `{channel, field, range?, domain?, title?}` per channel. The
-         * earlier `scale: {palette}` and `scale: {map}` read as `range` and
-         * `domain`. See docs/layers.md
+         * table: `{channel, field, range?, domain?, title?}` per color
+         * channel, and `{channel: "featureLabel", field}`. The earlier
+         * `scale: {palette}` and `scale: {map}` read as `range` and `domain`.
+         * See docs/layers.md
          */
         encodings: stripDefault(
           types.array(
@@ -745,10 +747,12 @@ function stateModelFactory({
         /**
          * #property
          * panels drawn between the tree and the alignment:
-         * `{kind: "strip", field, range?, domain?, title?, width?, header?}`
-         * colors one cell per row from a `rowData` field, and
+         * `{kind: "strip", encoding: {fill}, width?, header?}` fills one cell
+         * per row from a `rowData` field, and
          * `{kind: "features", x, encoding?, transform?, width?, header?}`
-         * draws the spans the GFF carries. See docs/layers.md
+         * draws the spans the GFF carries. A strip's earlier flat color
+         * members and a features panel's `encoding.color` read as
+         * `encoding.fill`. See docs/layers.md
          */
         rowPanels: stripDefault(
           types.array(
@@ -2408,7 +2412,7 @@ function stateModelFactory({
                 return [track.id, { arcs }] as const
               }
               if (track.kind === 'bar') {
-                const max = track.scales?.y?.domainMax ?? 1
+                const max = track.encoding?.y?.domainMax ?? 1
                 const values = skip(project(track, track.values ?? [], 0)).map(
                   v => Math.min(1, Math.max(0, v / max)),
                 )
@@ -3747,7 +3751,7 @@ function stateModelFactory({
        * whether or not the residue letters do
        */
       get featureLabels(): Map<Annotation, string> | undefined {
-        const encoding = this.encodingFor('featureLabel')
+        const encoding = self.encodings.find(e => e.channel === 'featureLabel')
         return encoding
           ? featureLabelMap(self.filteredAnnotations, encoding.field)
           : undefined
@@ -3827,7 +3831,7 @@ function stateModelFactory({
           )
         }
         for (const { channel, key, title, legend } of this.resolvedEncodings) {
-          if (!featureChannels.has(channel)) {
+          if (channel !== 'featureFill') {
             add(key, title, legend)
           }
         }
@@ -4138,20 +4142,27 @@ function stateModelFactory({
        * table or the encodings, never per row per frame.
        */
       get resolvedEncodings(): ResolvedEncoding[] {
-        return self.encodings.map(encoding => ({
+        return this.colorEncodings.map(encoding => ({
           ...encoding,
-          ...this.scaleOf(
-            encoding,
-            featureChannels.has(encoding.channel) ? 'features' : 'rows',
-          ),
+          ...this.scaleOf(encoding, encodingTable(encoding)),
         }))
+      },
+
+      /**
+       * #getter
+       * the encodings feeding a color channel, each read through a scale
+       */
+      get colorEncodings() {
+        return self.encodings.filter(
+          (e): e is ColorEncoding => e.channel !== 'featureLabel',
+        )
       },
 
       /**
        * #method
        * the encoding feeding a channel, undefined when none does
        */
-      encodingFor(channel: EncodingChannel) {
+      encodingFor(channel: ColorEncodingChannel) {
         return this.resolvedEncodings.find(e => e.channel === channel)
       },
 
@@ -4182,17 +4193,14 @@ function stateModelFactory({
               }),
         })
         return resolveShared([
-          ...self.encodings.map(encoding =>
-            use(
-              encoding,
-              featureChannels.has(encoding.channel) ? 'features' : 'rows',
-            ),
+          ...this.colorEncodings.map(encoding =>
+            use(encoding, encodingTable(encoding)),
           ),
           ...self.rowPanels.flatMap(panel =>
             panel.kind === 'strip'
-              ? [use(panel, 'rows')]
-              : panel.encoding?.color
-                ? [use(panel.encoding.color, 'features')]
+              ? [use(panel.encoding.fill, 'rows')]
+              : panel.encoding?.fill
+                ? [use(panel.encoding.fill, 'features')]
                 : [],
           ),
         ])
@@ -4220,11 +4228,11 @@ function stateModelFactory({
         const annotations = self.filteredAnnotations
         return self.rowPanels.map(panel => {
           if (panel.kind === 'features') {
-            const color = panel.encoding?.color
-            const encoding = color
-              ? { field: color.field, ...this.scaleOf(color, 'features') }
+            const fill = panel.encoding?.fill
+            const encoding = fill
+              ? { field: fill.field, ...this.scaleOf(fill, 'features') }
               : featureFillEncoding
-            const label = panel.encoding?.label
+            const label = panel.encoding?.label?.field
             return {
               kind: panel.kind,
               x: panel.x,
@@ -4232,7 +4240,7 @@ function stateModelFactory({
               field: encoding?.field,
               legendKey: encoding?.key,
               legendTitle: encoding?.title,
-              colors: color
+              colors: fill
                 ? featureColorMap(annotations, encoding, fillPalette)
                 : this.featureColors,
               labels: label
@@ -4241,14 +4249,15 @@ function stateModelFactory({
               legend: encoding?.legend ?? this.domainLegendEntries,
             }
           }
-          const { colorOf, legend, key, title } = this.scaleOf(panel, 'rows')
+          const { fill } = panel.encoding
+          const { colorOf, legend, key, title } = this.scaleOf(fill, 'rows')
           return {
             kind: panel.kind,
-            field: panel.field,
-            header: panel.header ?? panel.field,
+            field: fill.field,
+            header: panel.header ?? fill.field,
             legendKey: key,
             legendTitle: title,
-            colors: colorByRow(rowData, panel.field, colorOf),
+            colors: colorByRow(rowData, fill.field, colorOf),
             legend,
           }
         })

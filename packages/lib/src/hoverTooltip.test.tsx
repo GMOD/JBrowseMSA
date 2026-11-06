@@ -68,7 +68,7 @@ beforeEach(() => {
         c: { HA: 'H7' },
       }),
     },
-    rowPanels: [{ kind: 'strip', field: 'HA' }],
+    rowPanels: [{ kind: 'strip', encoding: { fill: { field: 'HA' } } }],
   })
   model.setWidth(800)
   act(() => {

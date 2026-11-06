@@ -34,7 +34,10 @@ function makeModel(rowPanels: RowPanelSpec[], width = 800) {
 
 test('a strip colors each row by its field', () => {
   const model = makeModel([
-    { kind: 'strip', field: 'HA', domain: ['H5'], range: ['#e41a1c'] },
+    {
+      kind: 'strip',
+      encoding: { fill: { field: 'HA', domain: ['H5'], range: ['#e41a1c'] } },
+    },
   ])
   const [panel] = model.resolvedRowPanels
   expect(panel!.header).toBe('HA')
@@ -47,8 +50,8 @@ test('a strip colors each row by its field', () => {
 
 test('a strip is as wide as a row is tall until it says otherwise', () => {
   const model = makeModel([
-    { kind: 'strip', field: 'HA' },
-    { kind: 'strip', field: 'NA', width: 30 },
+    { kind: 'strip', encoding: { fill: { field: 'HA' } } },
+    { kind: 'strip', encoding: { fill: { field: 'NA' } }, width: 30 },
   ])
   expect(model.rowHeight).toBe(16)
   expect(model.resolvedRowPanels.map(p => [p.width, p.offsetX])).toEqual([
@@ -60,7 +63,11 @@ test('a strip is as wide as a row is tall until it says otherwise', () => {
 
 test('a header names the column, defaulting to the field', () => {
   const model = makeModel([
-    { kind: 'strip', field: 'NA', header: 'NA segment' },
+    {
+      kind: 'strip',
+      encoding: { fill: { field: 'NA' } },
+      header: 'NA segment',
+    },
   ])
   expect(model.resolvedRowPanels[0]!.header).toBe('NA segment')
 })
@@ -68,15 +75,17 @@ test('a header names the column, defaulting to the field', () => {
 test('the panels come out of the width the alignment gets', () => {
   const bare = makeModel([])
   const striped = makeModel([
-    { kind: 'strip', field: 'HA', width: 12 },
-    { kind: 'strip', field: 'NA', width: 12 },
+    { kind: 'strip', encoding: { fill: { field: 'HA' } }, width: 12 },
+    { kind: 'strip', encoding: { fill: { field: 'NA' } }, width: 12 },
   ])
   expect(striped.msaAreaWidth).toBe(bare.msaAreaWidth - 24)
   expect(striped.msaCanvasWidth).toBe(bare.msaCanvasWidth - 24)
 })
 
 test('a strip and an encoding over one field share one legend', () => {
-  const model = makeModel([{ kind: 'strip', field: 'HA' }])
+  const model = makeModel([
+    { kind: 'strip', encoding: { fill: { field: 'HA' } } },
+  ])
   model.setEncodings([{ channel: 'tipLabel', field: 'HA' }])
   expect(model.legends).toHaveLength(1)
   expect(model.legends[0]!.title).toBe('HA')
@@ -85,17 +94,17 @@ test('a strip and an encoding over one field share one legend', () => {
 
 test('two strips declaring one scale over one field list it once', () => {
   const model = makeModel([
-    { kind: 'strip', field: 'HA', range: 'set1' },
-    { kind: 'strip', field: 'HA', range: 'set1' },
-    { kind: 'strip', field: 'NA' },
+    { kind: 'strip', encoding: { fill: { field: 'HA', range: 'set1' } } },
+    { kind: 'strip', encoding: { fill: { field: 'HA', range: 'set1' } } },
+    { kind: 'strip', encoding: { fill: { field: 'NA' } } },
   ])
   expect(model.legends.map(l => l.title)).toEqual(['HA', 'NA'])
 })
 
 test('two scales over one field list two legends', () => {
   const model = makeModel([
-    { kind: 'strip', field: 'HA' },
-    { kind: 'strip', field: 'HA', range: 'set1' },
+    { kind: 'strip', encoding: { fill: { field: 'HA' } } },
+    { kind: 'strip', encoding: { fill: { field: 'HA', range: 'set1' } } },
   ])
   expect(model.legends.map(l => l.title)).toEqual(['HA', 'HA'])
   expect(new Set(model.legends.map(l => l.id)).size).toBe(2)
@@ -108,8 +117,8 @@ test('strips naming one title list their values under it once', () => {
     title: 'lineage',
   }
   const model = makeModel([
-    { kind: 'strip', field: 'HA', ...colors },
-    { kind: 'strip', field: 'NA', ...colors },
+    { kind: 'strip', encoding: { fill: { field: 'HA', ...colors } } },
+    { kind: 'strip', encoding: { fill: { field: 'NA', ...colors } } },
   ])
   expect(model.legends.map(l => l.title)).toEqual(['lineage'])
   expect(model.legends[0]!.entries.map(e => e.id)).toEqual(['H5', 'H7', 'N1'])
@@ -129,8 +138,18 @@ test('two strips over one palette and title color a shared value alike', () => {
       }),
     },
     rowPanels: [
-      { kind: 'strip', field: 'PB2', range: 'set1', title: 'segment lineage' },
-      { kind: 'strip', field: 'PB1', range: 'set1', title: 'segment lineage' },
+      {
+        kind: 'strip',
+        encoding: {
+          fill: { field: 'PB2', range: 'set1', title: 'segment lineage' },
+        },
+      },
+      {
+        kind: 'strip',
+        encoding: {
+          fill: { field: 'PB1', range: 'set1', title: 'segment lineage' },
+        },
+      },
     ],
   })
   const [pb2, pb1] = model.resolvedRowPanels as ResolvedStripPanel[]
@@ -157,26 +176,38 @@ test('a snapshot in the earlier spelling reads as the color object', () => {
         field: 'HA',
         scale: { map: { H7: '#377eb8' } },
         legend: 'lineage',
+        width: 12,
       },
       {
         kind: 'features',
         x: 'column',
-        encoding: { color: { field: 'Name', scale: { palette: 'set1' } } },
+        encoding: {
+          color: { field: 'Name', scale: { palette: 'set1' } },
+          label: 'Name',
+        },
       },
     ],
   })
   expect(getSnapshot(model).rowPanels).toEqual([
     {
       kind: 'strip',
-      field: 'HA',
-      domain: ['H7'],
-      range: ['#377eb8'],
-      title: 'lineage',
+      width: 12,
+      encoding: {
+        fill: {
+          field: 'HA',
+          domain: ['H7'],
+          range: ['#377eb8'],
+          title: 'lineage',
+        },
+      },
     },
     {
       kind: 'features',
       x: 'column',
-      encoding: { color: { field: 'Name', range: 'set1' } },
+      encoding: {
+        fill: { field: 'Name', range: 'set1' },
+        label: { field: 'Name' },
+      },
     },
   ])
   expect(model.legends[0]!.title).toBe('lineage')
@@ -187,14 +218,14 @@ test('setRowPanels replaces the layer', () => {
   const model = makeModel([])
   expect(model.resolvedRowPanels).toEqual([])
   expect(model.rowPanelsHeaderHeight).toBe(0)
-  model.setRowPanels([{ kind: 'strip', field: 'NA' }])
+  model.setRowPanels([{ kind: 'strip', encoding: { fill: { field: 'NA' } } }])
   expect(model.resolvedRowPanels[0]!.field).toBe('NA')
   expect(model.rowPanelsHeaderHeight).toBeGreaterThan(0)
 })
 
 test('a zoom reuses the legends and the panel scales', () => {
   const model = makeModel([
-    { kind: 'strip', field: 'HA' },
+    { kind: 'strip', encoding: { fill: { field: 'HA' } } },
     { kind: 'features', x: 'column' },
   ])
   model.applyGFFText(`##gff-version 3
@@ -228,7 +259,9 @@ duck\tPfam\tprotein_match\t1\t3\t.\t+\t.\tName=PF00001`)
 })
 
 test('a field the table lacks colors nothing and lists nothing', () => {
-  const model = makeModel([{ kind: 'strip', field: 'host' }])
+  const model = makeModel([
+    { kind: 'strip', encoding: { fill: { field: 'host' } } },
+  ])
   expect(model.resolvedRowPanels[0]!.colors.size).toBe(0)
   expect(model.legends).toEqual([])
 })
@@ -240,12 +273,20 @@ test('a setter lifts the earlier spelling too', () => {
   ])
   model.setColumnTracks([
     { id: 't', name: 'T', kind: 'bar', values: [1, 2], max: 2 },
+    {
+      id: 'u',
+      name: 'U',
+      kind: 'bar',
+      values: [1, 2],
+      scales: { y: { domainMax: 4 } },
+    },
   ])
   expect(model.encodings[0]).toEqual({
     channel: 'tipLabel',
     field: 'HA',
     range: 'set1',
   })
-  expect(model.columnTracks[0]!.scales).toEqual({ y: { domainMax: 2 } })
+  expect(model.columnTracks[0]!.encoding).toEqual({ y: { domainMax: 2 } })
   expect(model.columnTrackContent.get('t')?.values).toEqual([0.5, 1])
+  expect(model.columnTracks[1]!.encoding).toEqual({ y: { domainMax: 4 } })
 })

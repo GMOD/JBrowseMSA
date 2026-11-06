@@ -28,12 +28,21 @@ const rowData = {
 const panels: RowPanelSpec[] = [
   {
     kind: 'strip',
-    field: 'HA',
-    domain: ['H5', 'H7'],
-    range: ['#e41a1c', '#377eb8'],
+    encoding: {
+      fill: {
+        field: 'HA',
+        domain: ['H5', 'H7'],
+        range: ['#e41a1c', '#377eb8'],
+      },
+    },
     width: 12,
   },
-  { kind: 'strip', field: 'NA', header: 'NA segment', width: 12 },
+  {
+    kind: 'strip',
+    encoding: { fill: { field: 'NA' } },
+    header: 'NA segment',
+    width: 12,
+  },
 ]
 
 async function exportWith(rowPanels: RowPanelSpec[]) {
@@ -92,7 +101,12 @@ test('each header draws over its column, turned on its side', async () => {
 
 test('a panel wider than the header band writes its header across', async () => {
   const { svg } = await exportWith([
-    { kind: 'strip', field: 'NA', header: 'neighborhood', width: 200 },
+    {
+      kind: 'strip',
+      encoding: { fill: { field: 'NA' } },
+      header: 'neighborhood',
+      width: 200,
+    },
   ])
   const header = /<text([^>]*)>neighborhood<\/text>/.exec(svg)
   expect(header, 'header clipped or missing').toBeTruthy()
