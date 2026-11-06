@@ -1,6 +1,6 @@
 import * as fs from 'node:fs'
 
-import { annotationsToGFF, parseMSA } from 'msa-parsers'
+import { parseMSA } from 'msa-parsers'
 
 import { fetchJsonWithRetry } from './fetchWithRetry.ts'
 
@@ -328,28 +328,24 @@ export async function runGeneStructure(
   }))
 
   const source = chosen.accession_version
-  const annotations = projectExonsOntoRows({
+  const lines = [
+    '##gff-version 3',
+    `# gene-structure overlay: ${gene ?? `gene ${geneId}`} ${source} ` +
+      `(${exons.length} coding exons) projected from reference row "${ref}" ` +
+      `— react-msaview-cli genestructure`,
+  ]
+  for (const { name, exon, start, end } of projectExonsOntoRows({
     names,
     getRow: name => msa.getRow(name),
     cols,
-  }).map(({ name, exon, start, end }) => ({
-    id: name,
-    accession: `exon-${exon}`,
-    name: `exon-${exon}`,
-    description: `exon-${exon}`,
-    featureType: 'exon',
-    start,
-    end,
-  }))
-  const gff = annotationsToGFF(
-    annotations,
-    [
-      `gene-structure overlay: ${gene ?? `gene ${geneId}`} ${source} ` +
-        `(${exons.length} coding exons) projected from reference row "${ref}" ` +
-        `— react-msaview-cli genestructure`,
-    ],
-    source,
-  )
-  fs.writeFileSync(outputFile, `${gff}\n`, 'utf8')
+  })) {
+    lines.push(
+      `${name.replaceAll(/[%\t\n\r]/g, encodeURIComponent)}\t${source}\texon\t` +
+        `${start}\t${end}\t.\t.\t.\t` +
+        `ID=${encodeURIComponent(name)}.exon${exon};Name=exon-${exon}`,
+    )
+  }
+
+  fs.writeFileSync(outputFile, `${lines.join('\n')}\n`, 'utf8')
   console.log(`Wrote ${outputFile}`)
 }

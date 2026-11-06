@@ -5,14 +5,13 @@ import type { Annotation } from '../types.ts'
  * optional `#` comment lines after the version directive saying where they came
  * from.
  *
- * An Annotation records no source of its own, so every line takes `source`,
- * `InterProScan` by default, since the viewer reads a precomputed-lookup GFF
- * by the same rules it reads a real InterProScan run's.
+ * The source column is always `InterProScan`: an Annotation records no source
+ * of its own, and the viewer reads a precomputed-lookup GFF by the same rules
+ * it reads a real InterProScan run's.
  */
 export function annotationsToGFF(
   annotations: Annotation[],
   header: string[] = [],
-  source = 'InterProScan',
 ): string {
   return [
     '##gff-version 3',
@@ -22,7 +21,7 @@ export function annotationsToGFF(
       const { id, start, end, strand } = annotation
       return [
         id.replaceAll(/[%\t\n\r]/g, encodeURIComponent),
-        source.replaceAll(/[%\t\n\r]/g, encodeURIComponent),
+        'InterProScan',
         // GFF-sourced annotations carry their original type; writing every
         // feature back out as protein_match would turn an exon overlay into
         // generic domains on the next read, losing the numbered-segment
