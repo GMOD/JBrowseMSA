@@ -7,8 +7,8 @@ import { headerRunsAcross } from './headerLayout.ts'
 import type { MsaViewModel } from '../../model.ts'
 
 /**
- * The row panel headers, in a band above the panels beside the tree ruler and
- * the minimap. A narrow strip's name is DOM text turned on its side, since the
+ * The row panel headers, at the foot of the band above the panels beside the
+ * tree ruler and the minimap, where the export draws them. A narrow strip's name is DOM text turned on its side, since the
  * canvas layer has no rotation, and the SVG export draws it with a
  * `rotate(-90)`. A panel wider than the band is tall writes its name across.
  */
@@ -21,6 +21,7 @@ const RowPanelHeaders = observer(function ({ model }: { model: MsaViewModel }) {
         flexShrink: 0,
         height: rowPanelsHeaderHeight,
         alignItems: 'flex-end',
+        alignSelf: 'flex-end',
       }}
     >
       {resolvedRowPanels.map(panel => {
