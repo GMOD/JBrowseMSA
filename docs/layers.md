@@ -561,9 +561,9 @@ default color, and a collapsed clade's triangle takes the color of the value its
 tips agree on. This is ggtree's `groupClade` followed by `aes(color = group)`,
 with the group read from the table.
 
-Every scale an encoding reads carries a legend, titled by `legend.title` or else the
-field name, drawn by the overlay on screen and reserved as a column in the SVG
-export. Two channels declaring the same members over one field list it once.
+Every scale an encoding reads carries a legend, titled by `legend.title` or else
+the field name, drawn by the overlay on screen and reserved as a column in the
+SVG export. Two channels declaring the same members over one field list it once.
 
 ### The feature channels
 

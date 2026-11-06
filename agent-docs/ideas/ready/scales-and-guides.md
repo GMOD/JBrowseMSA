@@ -35,16 +35,16 @@ Two target figures, in order of work:
 ## Vocabulary
 
 - **Color object.** The members a channel declares to read a field into a color:
-  `field`, `scale: {type, domain, range, scheme, domainMin, domainMax,
-  domainMid, domainQuantile, reverse}` and `legend: {title, labels,
-  missingLabel}`. jbrowse-components spells it this way on every display
-  (`packages/core/src/util/colorScale.ts` there, its
+  `field`,
+  `scale: {type, domain, range, scheme, domainMin, domainMax, domainMid, domainQuantile, reverse}`
+  and `legend: {title, labels, missingLabel}`. jbrowse-components spells it this
+  way on every display (`packages/core/src/util/colorScale.ts` there, its
   `config_guides/mark_display.md`, and its ADR-238 and ADR-240).
-- **Scale kind.** `scale.type`: `ordinal`, `linear`, `log` or `threshold`.
-  An ordinal scale hands a `range` color to each distinct value.
-  A linear or log scale samples a ramp between `domainMin` and `domainMax`. A
-  threshold scale cuts the number line at the values `domain` lists and hands
-  `range` one color per interval, so `range` is one longer than `domain`.
+- **Scale kind.** `scale.type`: `ordinal`, `linear`, `log` or `threshold`. An
+  ordinal scale hands a `range` color to each distinct value. A linear or log
+  scale samples a ramp between `domainMin` and `domainMax`. A threshold scale
+  cuts the number line at the values `domain` lists and hands `range` one color
+  per interval, so `range` is one longer than `domain`.
 - **Value scale.** The scale a bar or point mark reads its value through into a
   length: `{type, domainMin, domainMax, domainQuantile}`, spelled
   `encoding.y.scale` on a column track and `encoding.x.scale` on a row panel,
@@ -59,9 +59,9 @@ Two target figures, in order of work:
 
 ## What the color object lacks
 
-| Today                 | Target                                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------------------- |
-| a bar track's `color` | `encoding.color.value`, with `color` kept as the shorthand                                              |
+| Today                 | Target                                                                                              |
+| --------------------- | --------------------------------------------------------------------------------------------------- |
+| a bar track's `color` | `encoding.color.value`, with `color` kept as the shorthand                                          |
 | absent                | `linear`, `log`, `threshold`, a ramp `scheme`, the domain ends, `reverse`, `labels`, `missingLabel` |
 
 `range` takes a list of colors, and `scheme` a palette name. The names stay
@@ -77,11 +77,10 @@ table jbrowse-components bakes: `viridis`, `magma`, `inferno`, `cividis`,
 ### One color object on every channel
 
 The object above is the type of every color channel: an `encodings` entry, a
-strip's `encoding.fill`, a `features` panel's `encoding.fill`, a column
-track's `encoding.color` and a `bar` or `point` row panel's
-`encoding.color`. A channel nests its `scale` and its `legend`, as
-jbrowse-components' ADR-238 and ADR-240 do, so `encoding.fill` is
-`{field, scale: {scheme: "set1"}}`.
+strip's `encoding.fill`, a `features` panel's `encoding.fill`, a column track's
+`encoding.color` and a `bar` or `point` row panel's `encoding.color`. A channel
+nests its `scale` and its `legend`, as jbrowse-components' ADR-238 and ADR-240
+do, so `encoding.fill` is `{field, scale: {scheme: "set1"}}`.
 
 `scale.type` left unset is `ordinal`, which is what every record written so far
 means. A field whose every value parses as a number still takes ordinal colors
@@ -113,10 +112,9 @@ once over the union of its fields' values, and hands each record the group's
 `colorOf`. Two strips over
 `{scale: {scheme: "set1"}, legend: {title: "segment lineage"}}` color `am4`
 alike, and two strips over `{scale: {scheme: "set1"}}` with no title are two
-fields,
-two legends and two scales, which is what their two legends say. `domain` on the
-object lists values in legend order and spends `range` from the first entry, so
-a producer who wants a fixed order writes it once.
+fields, two legends and two scales, which is what their two legends say.
+`domain` on the object lists values in legend order and spends `range` from the
+first entry, so a producer who wants a fixed order writes it once.
 
 A top-level `scales` map with named entries, Vega-Lite's shared scale by name,
 was considered and declined. jbrowse-components refused a display-level
@@ -129,9 +127,9 @@ A linear or log scale with an end unset takes that end from the record's own
 values, clipped at `domainQuantile`, and a ramp whose domain follows its own
 data cannot share a legend with another record's. A ramp pinned at both ends is
 its declaration, so two strips over
-`{scale: {type: "linear", scheme: "viridis", domainMin: 2019, domainMax: 2023}}` share
-one gradient legend. This is jbrowse-components' rule in ADR-136 as amended
-2026-09-23, and it means a figure pins both ends.
+`{scale: {type: "linear", scheme: "viridis", domainMin: 2019, domainMax: 2023}}`
+share one gradient legend. This is jbrowse-components' rule in ADR-136 as
+amended 2026-09-23, and it means a figure pins both ends.
 
 `domainQuantile` defaults to 1, the loaded values' extremes. Below 1 each end
 clips its own tail, the value past the clip draws at the end color, and the
@@ -197,10 +195,9 @@ left edge over the label gutter, where `TrackLabelsSVG` puts the name. The tree
 scale bar and the position ruler stay as they are; they are the axes of the
 branch-length and column scales and already derive from them.
 
-`encoding.y.scale` on a column track and `encoding.x.scale` on a row panel
-carry `type` (`linear` or `log`), `domainMin`, `domainMax` and
-`domainQuantile`. A bar with no `domainMax` draws `values` as fractions of 1,
-as today.
+`encoding.y.scale` on a column track and `encoding.x.scale` on a row panel carry
+`type` (`linear` or `log`), `domainMin`, `domainMax` and `domainQuantile`. A bar
+with no `domainMax` draws `values` as fractions of 1, as today.
 
 ### New marks on both axes
 
@@ -210,10 +207,9 @@ axis has `strip` and `features` where the column axis has `bar`, `text`, `arc`,
 
 - **`bar` and `point` row panels** over a numeric `rowData` field, the value
   along the panel width through `encoding.x.scale`, with an optional
-  `encoding.color`
-  over the same or another field. This is ggtree's `geom_facet(geom_col)` and
-  `geom_facet(geom_point)`: genome size, sampling date, a trait. `width`
-  defaults to 80.
+  `encoding.color` over the same or another field. This is ggtree's
+  `geom_facet(geom_col)` and `geom_facet(geom_point)`: genome size, sampling
+  date, a trait. `width` defaults to 80.
 - **A `text` row panel** prints a `rowData` field beside the tips, the way a
   tip-aligned table does, in the panel's width.
 - **A `strip` column track**: one cell per column colored from `values` through
@@ -267,13 +263,12 @@ commit.
 
 ### 1. The color object, the shared domain and the comparator
 
-Built: `ColorSpec` in `scales.ts` has `scale: {type, domain, range, scheme}`
-and `legend: {title}`, and step 2 adds the domain members with their kinds.
+Built: `ColorSpec` in `scales.ts` has `scale: {type, domain, range, scheme}` and
+`legend: {title}`, and step 2 adds the domain members with their kinds.
 
 `scales.ts`: the color object type, `resolveScale` over `ordinal` with `range`
 as a list and `scheme` as a name, and `domain` order then `compareGroupKeys`.
-`model.ts`:
-`resolvedScales` keyed by declaration, read by `resolvedEncodings`,
+`model.ts`: `resolvedScales` keyed by declaration, read by `resolvedEncodings`,
 `rowPanelScales` and `featureColorMap`. `types.ts`: `Encoding`, `RowStripSpec`,
 `FeatureEncodingSpec` and `ColumnTrackSpec` on the new type. Parity:
 `MSAViewer.tsx`, `USAGE.md`, `msaview.R` with a `layers.R` entry,
@@ -311,9 +306,9 @@ takes a color per bar; `drawTextTrackContent` reads the resolved scale; the
 
 `components/axis.ts` with `drawAxis`; the axis on the `features` panel under
 `x: "position"`, in the header band; `bar`, `point` and `text` row panels in
-`renderRowPanel.ts` with `encoding.x.scale`, their `resolvedRowPanels` geometry and
-their SVG export. The header band draws the axis where a header would go, so a
-panel with an axis takes its header as the axis title. Two days.
+`renderRowPanel.ts` with `encoding.x.scale`, their `resolvedRowPanels` geometry
+and their SVG export. The header band draws the axis where a header would go, so
+a panel with an axis takes its header as the axis title. Two days.
 
 ### 6. Tree channels
 

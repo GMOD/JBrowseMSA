@@ -85,7 +85,10 @@ test('--spec draws the columnTracks example from docs/layers.md', async () => {
           data: '1231231',
           encoding: {
             color: {
-              scale: { domain: ['1', '2', '3'], range: ['#ddd', '#bbb', '#999'] },
+              scale: {
+                domain: ['1', '2', '3'],
+                range: ['#ddd', '#bbb', '#999'],
+              },
             },
           },
         },

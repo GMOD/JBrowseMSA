@@ -53,13 +53,13 @@ own conservation has nowhere to put it.
 
 `values` index alignment columns unless `row` is given, in which case they index
 that row's residues and `seqPosToGlobalCol` projects them, the same rule GFF
-features follow. `encoding.y.scale.domainMax` normalizes; without it, the viewer treats
-the values as 0 to 1. The `text` kind is the existing Stockholm track with its
-data supplied inline. The work is a `columnTracks` property, a getter that
-merges them into `tracks`, one lookup in `barTrackValues`, and the `hideGaps`
-skip that text tracks already do. A 30 kb genome alignment gives a 30k-element
-array, so the same 50 kb snapshot rule as `DataModel` applies, with a
-`columnTracksFilehandle` for anything bigger.
+features follow. `encoding.y.scale.domainMax` normalizes; without it, the viewer
+treats the values as 0 to 1. The `text` kind is the existing Stockholm track
+with its data supplied inline. The work is a `columnTracks` property, a getter
+that merges them into `tracks`, one lookup in `barTrackValues`, and the
+`hideGaps` skip that text tracks already do. A 30 kb genome alignment gives a
+30k-element array, so the same 50 kb snapshot rule as `DataModel` applies, with
+a `columnTracksFilehandle` for anything bigger.
 
 ### 2. Row features with their own color and glyph
 

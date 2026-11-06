@@ -11,5 +11,7 @@ export function fileSnap(msaview) {
 // A color per value as the color object spells it: a `scale` with the values as
 // `domain`, in key order, which is legend order, and their colors as `range`
 export function domainRange(colors) {
-  return { scale: { domain: Object.keys(colors), range: Object.values(colors) } }
+  return {
+    scale: { domain: Object.keys(colors), range: Object.values(colors) },
+  }
 }

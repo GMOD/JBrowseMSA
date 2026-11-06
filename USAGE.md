@@ -264,8 +264,8 @@ viewer's one bar:
 <MSAView model={model} toolbarEnd={<Button onClick={share}>Share</Button>} />
 ```
 
-`MSAView` also takes `examples`, which renders your own node on the empty
-screen where the file inputs are. It sits above the inputs by default, and
+`MSAView` also takes `examples`, which renders your own node on the empty screen
+where the file inputs are. It sits above the inputs by default, and
 `examplesBelow` moves it under them. Without `examples`, the viewer lists its
 built-in examples:
 
