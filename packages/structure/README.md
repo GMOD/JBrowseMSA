@@ -124,8 +124,8 @@ const facets = facetsByRowField(model, 'group')
 />
 ```
 
-- A facet is a group of rows, from a field of the row table or from your own
-  grouping with `facetsOfGroups`, with the structures those rows map onto
+- A facet is the group of rows sharing a value of a row-table field, with the
+  structures those rows map onto
 - Each facet is its own Mol\* view, so a grid suits a handful of groups
 - Pass the matrices of one `superposeRows` fit over every facet's structures, so
   all facets share a frame, and the cameras are tied so turning one turns all

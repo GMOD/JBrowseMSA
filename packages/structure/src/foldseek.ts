@@ -1,3 +1,4 @@
+import { getUngappedSequence } from 'msa-parsers'
 import {
   FOLDSEEK_MAX_RESIDUES,
   caCoordsToPdb,
@@ -22,7 +23,6 @@ import type { FoldseekHit } from 'p2s_mapper'
 // the client, the query and the hit alignment live in p2s_mapper, shared with
 // the protein3d plugin
 export { FOLDSEEK_MAX_RESIDUES, foldseekQuery, searchFoldseek }
-export type { FoldseekHit }
 
 function dataUrl(pdb: string) {
   return `data:chemical/x-pdb;charset=utf-8,${encodeURIComponent(pdb)}`
@@ -120,7 +120,7 @@ export async function foldseekCandidates({
   fetchText?: FetchText
 }): Promise<StructureCandidate[]> {
   const query = foldseekQuery(rowSequence)
-  const rowLength = rowSequence.replaceAll(/[-.]/g, '').length
+  const rowLength = getUngappedSequence(rowSequence).length
   const taken = new Map<string, number>()
   const chosen = hits.flatMap(hit => {
     if ((taken.get(hit.db) ?? 0) >= perDatabase) {

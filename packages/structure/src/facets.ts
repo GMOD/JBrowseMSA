@@ -17,7 +17,7 @@ export interface Facet {
  *
  * `groups` maps a label to row names, in the order the facets lay out.
  */
-export function facetsOfGroups(
+function facetsOfGroups(
   model: MsaViewModel,
   groups: Record<string, string[]>,
   colors: Record<string, string> = {},
