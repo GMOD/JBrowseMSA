@@ -551,20 +551,6 @@ length color the values they name, and a value they leave out keeps the plain
 mark: an uncolored tip label draws in the theme's text color, an uncolored row
 takes no tint, and an uncolored span draws grey.
 
-A snapshot in an earlier spelling reads the same:
-
-- `domain` and `range` on the channel itself read as `scale.domain` and
-  `scale.range`, a palette name in `range` as `scale.scheme`, and `title` as
-  `legend.title`
-- `scale: {palette}` reads as `scale.scheme`, and `scale: {map}` as
-  `scale.domain` and `scale.range`
-- a strip's `legend` string reads as `legend.title`
-- a column track's `colors` reads as `encoding.color.scale`, and its `max` and
-  `scales.y.domainMax` as `encoding.y.scale.domainMax`
-- a strip's color members on the record itself read as `encoding.fill`
-- a features panel's `encoding.color` reads as `encoding.fill`, its `label` as
-  `encoding.text`, and a bare field name in either as `{field}`
-
 A tint draws at 25% opacity so the residues under it stay readable. A color
 carrying its own alpha, such as `rgba(228,26,28,0.5)`, draws at that alpha.
 
@@ -575,7 +561,7 @@ default color, and a collapsed clade's triangle takes the color of the value its
 tips agree on. This is ggtree's `groupClade` followed by `aes(color = group)`,
 with the group read from the table.
 
-Every scale an encoding reads carries a legend, titled by `title` or else the
+Every scale an encoding reads carries a legend, titled by `legend.title` or else the
 field name, drawn by the overlay on screen and reserved as a column in the SVG
 export. Two channels declaring the same members over one field list it once.
 
@@ -742,7 +728,7 @@ key.
 
 React: the `rowPanels` prop on `MSAViewer`, or `model.setRowPanels(list)`. R:
 `geom_msa_strip("HA", range = "set1", width = 12, title = "amino acid")` and
-`geom_msa_features(color = "Name", label = "Name", align = "genE")`. Python: the
+`geom_msa_features(fill = "Name", label = "Name", align = "genE")`. Python: the
 `row_panels` trait.
 
 ### The features panel

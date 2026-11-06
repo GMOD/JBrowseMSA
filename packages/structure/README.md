@@ -94,8 +94,8 @@ const fit = await superposeRows({
   `transforms`, and each fit reports its RMSD and the CA pairs it used
 - `distanceValues` is the mean CA distance per residue of the reference row
   after the fit. `distanceTrack(fit)` turns it into a `columnTracks` bar on that
-  row, with `max` set to the largest distance, since the distances are in Å and
-  a bar's `max` is 1 by default
+  row, with `encoding.y.scale.domainMax` set to the largest distance, since the
+  distances are in Å and a bar's `domainMax` is 1 by default
 - Fitting a pocket and reading the distances elsewhere shows where the rest of
   the fold departs from it
 - A fit sets aside the pairs that sit more than twice the RMSD from it and fits

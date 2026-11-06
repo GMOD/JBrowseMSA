@@ -126,7 +126,7 @@ What the layout gives the API:
     "x": "position",
     "encoding": {
       "fill": { "field": "Name", "scale": { "scheme": "ggplot" } },
-      "label": { "field": "Name" }
+      "text": { "field": "Name" }
     },
     "transform": [{ "type": "align", "on": "genE" }]
   }
@@ -403,8 +403,7 @@ the shared path (`renderToSvg.tsx:299`). Half a day. Shipped 2026-09-16 as
 The gate for steps 5 through 11.
 
 - `packages/lib/src/scales.ts`, new: `resolveScale(spec, values)` returning
-  `{ colorOf, legend, kind }`, handling `{palette}` and `{map}`. Continuous
-  scales wait for a caller.
+  `{ colorOf, legend, kind }`. Continuous scales wait for a caller.
 - `ggplotPalettes.ts`: export the palettes by name, keeping the default export
   that `createPaletteMap.ts:3` consumes. Give `createPaletteMap` an optional
   palette argument so the domain palette and a named palette share one

@@ -157,7 +157,7 @@ SVG export draws it.
       name: 'dN/dS',
       kind: 'bar',
       values: dnds,
-      scales: { y: { domainMax: 2 } },
+      encoding: { y: { scale: { domainMax: 2 } } },
       row: 'human',
     },
   ]}
@@ -441,8 +441,7 @@ expect, so a listed letter matches in either case: `k` or `K` colors every
 lysine, whether the file writes it `k` or `K`. Every letter `domain` leaves out
 is uncolored, gaps included; list `-` and `.` to color them. The model stores
 the letters and colors as the map `customColorScheme`, and picking a scheme
-under **Settings → Color** clears it. The earlier `{map: {K: '#1f77b4'}}` form
-still reads.
+under **Settings → Color** clears it.
 
 ### Painting another view with the scheme
 

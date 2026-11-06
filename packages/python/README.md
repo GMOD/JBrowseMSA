@@ -55,7 +55,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `residue_mappings`                                    | which structure residue each row residue is                                                              |
 | `column_tracks`                                       | list of bar, text or arc tracks                                                                          |
 | `row_data`                                            | extra fields per row name, such as a lineage or a host                                                   |
-| `encodings`                                           | `{channel, field, range, domain, title}`: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
+| `encodings`                                           | `{channel, field, scale, legend}`: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
 | `row_panels`                                          | `strip` and `features` panels drawn beside the tree                                                      |
 | `relative_to`                                         | a row name; other rows draw as their differences from it                                                 |
 | `region`                                              | `{start, end}` columns or `{row, start, end}` residues                                                   |

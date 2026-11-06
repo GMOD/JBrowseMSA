@@ -42,18 +42,18 @@ own conservation has nowhere to put it.
     "name": "dN/dS",
     "kind": "bar",
     "values": [0.1, 0.4, ...],
-    "scales": { "y": { "domainMax": 2 } },
+    "encoding": { "y": { "scale": { "domainMax": 2 } } },
     "color": "#6a51a3",
     "row": "human"
   },
   { "id": "frame", "name": "Codon frame", "kind": "text", "data": "123123...",
-    "encoding": { "color": { "domain": ["1", "2", "3"], "range": ["#ddd", "#bbb", "#999"] } } }
+    "encoding": { "color": { "scale": { "domain": ["1", "2", "3"], "range": ["#ddd", "#bbb", "#999"] } } } }
 ]
 ```
 
 `values` index alignment columns unless `row` is given, in which case they index
 that row's residues and `seqPosToGlobalCol` projects them, the same rule GFF
-features follow. `scales.y.domainMax` normalizes; without it, the viewer treats
+features follow. `encoding.y.scale.domainMax` normalizes; without it, the viewer treats
 the values as 0 to 1. The `text` kind is the existing Stockholm track with its
 data supplied inline. The work is a `columnTracks` property, a getter that
 merges them into `tracks`, one lookup in `barTrackValues`, and the `hideGaps`
@@ -162,7 +162,7 @@ agent produces one that does not.
 5. `export-svg` from a snapshot, so an agent can render what it wrote. Shipped
    2026-09-24 as `export-svg --spec`.
 6. Letter color map. Shipped 2026-09-24 as `customColorScheme`, which the
-   `colorScheme` prop sets from `{map}`.
+   `colorScheme` prop sets from `{domain, range}`.
 
 ## What it changes in the backlog
 
