@@ -193,14 +193,16 @@ region at the right is gold from its color=255,205,0.
   {
     "channel": "featureFill",
     "field": "complex",
-    "domain": ["I", "III", "IV", "V", "rRNA", "tRNA"],
-    "range": ["#4e79a7", "#59a14f", "#e15759", "#b07aa1", "#f28e2b", "#bab0ac"]
+    "scale": {
+      "domain": ["I", "III", "IV", "V", "rRNA", "tRNA"],
+      "range": ["#4e79a7", "#59a14f", "#e15759", "#b07aa1", "#f28e2b", "#bab0ac"]
+    }
   },
   { "channel": "featureLabel", "field": "Name" }
 ]
 ```
 
-[![](../media/mitogenome_genes-4.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-4.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 All 17,966 columns, with each gene an arrow filled by the complex the legend
 lists. ND6 and eight tRNAs point left, the minus strand in column 7 of the GFF.
@@ -214,7 +216,7 @@ subunits and no line in the file has `complex=II`.
 `featureLabel` names the field the viewer draws inside each arrow wherever the
 text fits, so the column width decides how many labels appear.
 
-[![](../media/mitogenome_genes-5.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.38%2C%22scrollX%22%3A-2318%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-5.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.38%2C%22scrollX%22%3A-2318%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 The view from column 6,100 at 0.38 pixels per column, with COX1, COX2, ATP8 and
 ATP6 labeled in all eight rows. The three grey tRNAs between them are 69 to 70
@@ -268,7 +270,7 @@ because the alignment puts the first base of the Mouse and Rat copies in column
 No gene's end spreads more than 31 columns, and the control region's spreads
 1,091, from Human at 16,875 to Platypus at 17,966.
 
-[![](../media/mitogenome_genes-6.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.363%2C%22scrollX%22%3A-5176%2C%22showDomainLegend%22%3Afalse%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-6.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A26%2C%22colWidth%22%3A0.363%2C%22scrollX%22%3A-5176%2C%22showDomainLegend%22%3Afalse%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 The last 3,700 columns, where CYTB starts and ends on one column in all eight
 rows and the gold control regions end on eight different columns.
@@ -294,15 +296,17 @@ the encodings to the snapshot:
       {
         "channel": "featureFill",
         "field": "complex",
-        "domain": ["I", "III", "IV", "V", "rRNA", "tRNA"],
-        "range": [
-          "#4e79a7",
-          "#59a14f",
-          "#e15759",
-          "#b07aa1",
-          "#f28e2b",
-          "#bab0ac"
-        ]
+        "scale": {
+          "domain": ["I", "III", "IV", "V", "rRNA", "tRNA"],
+          "range": [
+            "#4e79a7",
+            "#59a14f",
+            "#e15759",
+            "#b07aa1",
+            "#f28e2b",
+            "#bab0ac"
+          ]
+        }
       },
       { "channel": "featureLabel", "field": "Name" }
     ],
@@ -314,7 +318,7 @@ the encodings to the snapshot:
 URL-encode that and append it to the app as `#data=`. `highlights` takes 1-based
 inclusive columns, here the COX1 span the projection printed.
 
-[![](../media/mitogenome_genes-7.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22highlights%22%3A%5B%7B%22start%22%3A6134%2C%22end%22%3A7679%2C%22label%22%3A%22COX1%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
+[![](../media/mitogenome_genes-7.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A300%2C%22treeAreaWidth%22%3A190%2C%22rowHeight%22%3A18%2C%22colWidth%22%3A0.065%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22complex%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22I%22%2C%22III%22%2C%22IV%22%2C%22V%22%2C%22rRNA%22%2C%22tRNA%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%2359a14f%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%23f28e2b%22%2C%22%23bab0ac%22%5D%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22Name%22%7D%5D%2C%22highlights%22%3A%5B%7B%22start%22%3A6134%2C%22end%22%3A7679%2C%22label%22%3A%22COX1%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fmitogenome%2Fmito-genes.gff%22%7D%7D%7D)
 
 The view the link opens, with the arrows filled by complex and labeled by name
 and a band labeled COX1 over columns 6,134 to 7,679.

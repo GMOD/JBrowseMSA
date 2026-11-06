@@ -79,16 +79,15 @@ const SEGMENT_FIELDS = [
 ]
 const hostStrip = {
   kind: 'strip',
-  field: 'host',
-  ...HOST_COLORS,
+  encoding: { fill: { field: 'host', ...HOST_COLORS } },
   width: 12,
 }
 const segmentStrips = SEGMENT_FIELDS.map(field => ({
   kind: 'strip',
-  field,
-  ...RESIDUE_COLORS,
+  encoding: {
+    fill: { field, ...RESIDUE_COLORS, legend: { title: 'amino acid' } },
+  },
   width: 11,
-  title: 'amino acid',
 }))
 const MATRIX = [hostStrip, ...segmentStrips]
 
@@ -233,7 +232,11 @@ export const specs = [
     url: fileSnap({
       ...WHOLE,
       rowPanels: [
-        { kind: 'strip', field: 'NP 119', ...RESIDUE_COLORS, width: 16 },
+        {
+          kind: 'strip',
+          encoding: { fill: { field: 'NP 119', ...RESIDUE_COLORS } },
+          width: 16,
+        },
         { ...hostStrip, width: 16 },
       ],
       ...FILES,

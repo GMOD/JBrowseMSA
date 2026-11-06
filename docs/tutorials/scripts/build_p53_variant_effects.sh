@@ -273,17 +273,17 @@ jq -n \
       {
         id: "clinvar", name: "ClinVar pathogenic missense", kind: "bar",
         row: "Human", color: "#c0392b", height: 60,
-        scales: { y: { domainMax: $clinvarMax } }, values: ($clinvar | split(",") | map(tonumber))
+        encoding: { y: { scale: { domainMax: $clinvarMax } } }, values: ($clinvar | split(",") | map(tonumber))
       },
       {
         id: "alphamissense", name: "AlphaMissense mean (x100)", kind: "bar",
         row: "Human", color: "#1565c0", height: 60,
-        scales: { y: { domainMax: 100 } }, values: ($am | split(",") | map(tonumber * 100 | round))
+        encoding: { y: { scale: { domainMax: 100 } } }, values: ($am | split(",") | map(tonumber * 100 | round))
       },
       {
         id: "mavedb", name: "MaveDB nutlin-3, p53WT", kind: "bar",
         row: "Human", color: "#2e7d32", height: 60,
-        scales: { y: { domainMax: 2 } }, values: ($mave | split(",") | map(tonumber))
+        encoding: { y: { scale: { domainMax: 2 } } }, values: ($mave | split(",") | map(tonumber))
       }
     ]
   }' > p53-layers.json

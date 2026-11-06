@@ -437,9 +437,11 @@
     52,
     46
    ],
-   "scales": {
+   "encoding": {
     "y": {
-     "domainMax": 100
+     "scale": {
+      "domainMax": 100
+     }
     }
    },
    "color": "#4e79a7",
@@ -452,18 +454,20 @@
    "data": "DLLCCCCCCCCLLCCCCCCCCCCCCCCCCCCCCCCCCCCCCVCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCLDDDDDDDDDDDDDDDDDDDDDDDDDDDLLCCCCCCCCCCCCCCCVVVVVCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCLLDDDDDDDDDDDLLLCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCLLDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDLLLLLDLLLLDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDLD",
    "encoding": {
     "color": {
-     "domain": [
-      "V",
-      "C",
-      "L",
-      "D"
-     ],
-     "range": [
-      "#0053d6",
-      "#65cbf3",
-      "#ffdb13",
-      "#ff7d45"
-     ]
+     "scale": {
+      "domain": [
+       "V",
+       "C",
+       "L",
+       "D"
+      ],
+      "range": [
+       "#0053d6",
+       "#65cbf3",
+       "#ffdb13",
+       "#ff7d45"
+      ]
+     }
     }
    },
    "height": 16
@@ -502,78 +506,110 @@
  "rowPanels": [
   {
    "kind": "strip",
-   "field": "TDP43_N",
+   "encoding": {
+    "fill": {
+     "field": "TDP43_N",
+     "legend": {
+      "title": "pLDDT band"
+     },
+     "scale": {
+      "domain": [
+       "very high",
+       "confident",
+       "low",
+       "very low"
+      ],
+      "range": [
+       "#0053d6",
+       "#65cbf3",
+       "#ffdb13",
+       "#ff7d45"
+      ]
+     }
+    }
+   },
    "header": "TDP43_N",
-   "title": "pLDDT band",
-   "domain": [
-    "very high",
-    "confident",
-    "low",
-    "very low"
-   ],
-   "range": [
-    "#0053d6",
-    "#65cbf3",
-    "#ffdb13",
-    "#ff7d45"
-   ],
    "width": 14
   },
   {
    "kind": "strip",
-   "field": "RRM1",
+   "encoding": {
+    "fill": {
+     "field": "RRM1",
+     "legend": {
+      "title": "pLDDT band"
+     },
+     "scale": {
+      "domain": [
+       "very high",
+       "confident",
+       "low",
+       "very low"
+      ],
+      "range": [
+       "#0053d6",
+       "#65cbf3",
+       "#ffdb13",
+       "#ff7d45"
+      ]
+     }
+    }
+   },
    "header": "RRM1",
-   "title": "pLDDT band",
-   "domain": [
-    "very high",
-    "confident",
-    "low",
-    "very low"
-   ],
-   "range": [
-    "#0053d6",
-    "#65cbf3",
-    "#ffdb13",
-    "#ff7d45"
-   ],
    "width": 14
   },
   {
    "kind": "strip",
-   "field": "RRM2",
+   "encoding": {
+    "fill": {
+     "field": "RRM2",
+     "legend": {
+      "title": "pLDDT band"
+     },
+     "scale": {
+      "domain": [
+       "very high",
+       "confident",
+       "low",
+       "very low"
+      ],
+      "range": [
+       "#0053d6",
+       "#65cbf3",
+       "#ffdb13",
+       "#ff7d45"
+      ]
+     }
+    }
+   },
    "header": "RRM2",
-   "title": "pLDDT band",
-   "domain": [
-    "very high",
-    "confident",
-    "low",
-    "very low"
-   ],
-   "range": [
-    "#0053d6",
-    "#65cbf3",
-    "#ffdb13",
-    "#ff7d45"
-   ],
    "width": 14
   },
   {
    "kind": "strip",
-   "field": "TDP43_C",
+   "encoding": {
+    "fill": {
+     "field": "TDP43_C",
+     "legend": {
+      "title": "pLDDT band"
+     },
+     "scale": {
+      "domain": [
+       "very high",
+       "confident",
+       "low",
+       "very low"
+      ],
+      "range": [
+       "#0053d6",
+       "#65cbf3",
+       "#ffdb13",
+       "#ff7d45"
+      ]
+     }
+    }
+   },
    "header": "TDP43_C",
-   "title": "pLDDT band",
-   "domain": [
-    "very high",
-    "confident",
-    "low",
-    "very low"
-   ],
-   "range": [
-    "#0053d6",
-    "#65cbf3",
-    "#ffdb13",
-    "#ff7d45"
-   ],
    "width": 14
   }
  ]

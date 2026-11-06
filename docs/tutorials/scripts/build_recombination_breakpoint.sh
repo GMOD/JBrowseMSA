@@ -310,7 +310,7 @@ def track(query, parent):
         'name': f'{query} vs {parent}',
         'kind': 'bar',
         'values': scans[(query, parent)][lo:hi],
-        'scales': {'y': {'domainMax': ceiling(query)}},
+        'encoding': {'y': {'scale': {'domainMax': ceiling(query)}}},
         'color': COLORS[parent],
         'height': 70,
     }

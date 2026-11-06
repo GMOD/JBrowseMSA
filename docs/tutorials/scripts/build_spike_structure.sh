@@ -332,7 +332,9 @@ track = {
     'row': ROW,
     'data': state,
     'encoding': {
-        'color': {'domain': ['O', 'U', 'N'], 'range': ['#2e7d32', '#e65100', '#cfd8dc']}
+        'color': {
+            'scale': {'domain': ['O', 'U', 'N'], 'range': ['#2e7d32', '#e65100', '#cfd8dc']}
+        }
     },
     'height': 16,
 }

@@ -104,26 +104,31 @@ const letters = [
   ),
 ].sort((a, b) => a.localeCompare(b))
 const RESIDUE_COLORS = {
-  domain: letters,
-  range: letters.map((_, i) => PALETTE[i % PALETTE.length]),
+  scale: {
+    domain: letters,
+    range: letters.map((_, i) => PALETTE[i % PALETTE.length]),
+  },
 }
 
 const phenotypeStrip = {
   kind: 'strip',
-  field: 'phenotype',
-  ...PHENOTYPE_COLORS,
+  encoding: { fill: { field: 'phenotype', ...PHENOTYPE_COLORS } },
   width: 14,
   header: 'phenotype',
 }
 const positionStrips = positions.map(p => ({
   kind: 'strip',
-  field: `Ambler ${p}`,
-  ...RESIDUE_COLORS,
+  encoding: {
+    fill: {
+      field: `Ambler ${p}`,
+      ...RESIDUE_COLORS,
+      legend: { title: 'residue' },
+    },
+  },
   width: 12,
   // the header band is as tall as the minimap, so a header longer than the
   // Ambler number is cut off in it
   header: String(p),
-  title: 'residue',
 }))
 const MATRIX = [phenotypeStrip, ...positionStrips]
 

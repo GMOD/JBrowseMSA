@@ -159,20 +159,23 @@ packs the spans into lanes per row:
     "width": 1120,
     "header": "trp neighborhood",
     "encoding": {
-      "color": { "field": "Name", "domain": ["trpE"], "range": ["#4e79a7"] },
-      "label": "Name"
+      "fill": {
+        "field": "Name",
+        "scale": { "domain": ["trpE"], "range": ["#4e79a7"] }
+      },
+      "text": { "field": "Name" }
     }
   }
 ]
 ```
 
 A gene the `domain` leaves out draws grey, so a `domain` of ten trp names colors
-66 of the 176 genes. `label` writes the name inside each arrow wherever it fits.
+66 of the 176 genes. `text` writes the name inside each arrow wherever it fits.
 
 With no alignment loaded, the alignment panel is zero columns wide, and the
 conservation, logo and ruler tracks draw nothing.
 
-[![](../media/gene_neighborhoods-2.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A430%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1120%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22field%22%3A%22Name%22%2C%22domain%22%3A%5B%22trpL%22%2C%22trpE%22%2C%22trpG%22%2C%22trpD%22%2C%22trpC%22%2C%22trpCF%22%2C%22trpF%22%2C%22trpB%22%2C%22trpA%22%2C%22trpI%22%5D%2C%22range%22%3A%5B%22%2376b7b2%22%2C%22%234e79a7%22%2C%22%23a0cbe8%22%2C%22%23f28e2b%22%2C%22%2359a14f%22%2C%22%238cd17d%22%2C%22%23b6992d%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%239c755f%22%5D%7D%2C%22label%22%3A%22Name%22%7D%7D%5D%7D%7D)
+[![](../media/gene_neighborhoods-2.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A430%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1120%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Name%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trpL%22%2C%22trpE%22%2C%22trpG%22%2C%22trpD%22%2C%22trpC%22%2C%22trpCF%22%2C%22trpF%22%2C%22trpB%22%2C%22trpA%22%2C%22trpI%22%5D%2C%22range%22%3A%5B%22%2376b7b2%22%2C%22%234e79a7%22%2C%22%23a0cbe8%22%2C%22%23f28e2b%22%2C%22%2359a14f%22%2C%22%238cd17d%22%2C%22%23b6992d%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%239c755f%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%7D%5D%7D%7D)
 
 Twelve rows of gene arrows in window coordinates beside the TrpB tree, each
 window turned so that trpB points right. E_coli starts trpE at 1,773 and
@@ -205,7 +208,7 @@ it:
   B_thetaiotaomicron  trpE at 8644, shift -8643: trpD starts at 2046 (genes between: trpG)
 ```
 
-[![](../media/gene_neighborhoods-3.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A430%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1120%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22field%22%3A%22Name%22%2C%22domain%22%3A%5B%22trpL%22%2C%22trpE%22%2C%22trpG%22%2C%22trpD%22%2C%22trpC%22%2C%22trpCF%22%2C%22trpF%22%2C%22trpB%22%2C%22trpA%22%2C%22trpI%22%5D%2C%22range%22%3A%5B%22%2376b7b2%22%2C%22%234e79a7%22%2C%22%23a0cbe8%22%2C%22%23f28e2b%22%2C%22%2359a14f%22%2C%22%238cd17d%22%2C%22%23b6992d%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%239c755f%22%5D%7D%2C%22label%22%3A%22Name%22%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpE%22%7D%5D%7D%5D%7D%7D)
+[![](../media/gene_neighborhoods-3.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A430%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1120%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Name%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trpL%22%2C%22trpE%22%2C%22trpG%22%2C%22trpD%22%2C%22trpC%22%2C%22trpCF%22%2C%22trpF%22%2C%22trpB%22%2C%22trpA%22%2C%22trpI%22%5D%2C%22range%22%3A%5B%22%2376b7b2%22%2C%22%234e79a7%22%2C%22%23a0cbe8%22%2C%22%23f28e2b%22%2C%22%2359a14f%22%2C%22%238cd17d%22%2C%22%23b6992d%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%239c755f%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpE%22%7D%5D%7D%5D%7D%7D)
 
 The twelve neighborhoods aligned on trpE, so every trpE arrow starts at one x.
 trpD starts flush against trpE in E_coli and Y_pestis, and one trpG further
@@ -220,12 +223,15 @@ by role:
 
 ```json
 "encoding": {
-  "color": { "field": "role", "domain": ["trp"], "range": ["#4e79a7"] },
-  "label": "Name"
+  "fill": {
+    "field": "role",
+    "scale": { "domain": ["trp"], "range": ["#4e79a7"] }
+  },
+  "text": { "field": "Name" }
 }
 ```
 
-[![](../media/gene_neighborhoods-4.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A430%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1120%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22field%22%3A%22role%22%2C%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%2C%22label%22%3A%22Name%22%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpE%22%7D%5D%7D%5D%7D%7D)
+[![](../media/gene_neighborhoods-4.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A430%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1120%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22role%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpE%22%7D%5D%7D%5D%7D%7D)
 
 The neighborhoods aligned on trpE and colored by role: blue for the 63 trp
 genes, red for the four regulators, orange for the six genes RefSeq annotates as
@@ -254,7 +260,7 @@ width out of the alignment's:
 residues of the row, and a window position such as 1,562 would land far past the
 423rd column.
 
-[![](../media/gene_neighborhoods-5.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A480%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22colWidth%22%3A0.9%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22showDomains%22%3Afalse%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A760%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22field%22%3A%22Name%22%2C%22domain%22%3A%5B%22trpL%22%2C%22trpE%22%2C%22trpG%22%2C%22trpD%22%2C%22trpC%22%2C%22trpCF%22%2C%22trpF%22%2C%22trpB%22%2C%22trpA%22%2C%22trpI%22%5D%2C%22range%22%3A%5B%22%2376b7b2%22%2C%22%234e79a7%22%2C%22%23a0cbe8%22%2C%22%23f28e2b%22%2C%22%2359a14f%22%2C%22%238cd17d%22%2C%22%23b6992d%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%239c755f%22%5D%7D%2C%22label%22%3A%22Name%22%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpE%22%7D%5D%7D%5D%7D%7D)
+[![](../media/gene_neighborhoods-5.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A480%2C%22treeAreaWidth%22%3A250%2C%22rowHeight%22%3A26%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22colWidth%22%3A0.9%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22showDomains%22%3Afalse%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A760%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Name%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trpL%22%2C%22trpE%22%2C%22trpG%22%2C%22trpD%22%2C%22trpC%22%2C%22trpCF%22%2C%22trpF%22%2C%22trpB%22%2C%22trpA%22%2C%22trpI%22%5D%2C%22range%22%3A%5B%22%2376b7b2%22%2C%22%234e79a7%22%2C%22%23a0cbe8%22%2C%22%23f28e2b%22%2C%22%2359a14f%22%2C%22%238cd17d%22%2C%22%23b6992d%22%2C%22%23e15759%22%2C%22%23b07aa1%22%2C%22%239c755f%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpE%22%7D%5D%7D%5D%7D%7D)
 
 The trp neighborhood panel between the TrpB tree and the 423 alignment columns,
 with the two conservation tracks drawn over the alignment.
@@ -280,7 +286,7 @@ w <- msaview(
   tree = file.path(data, "trpB.nwk"),
   gff = file.path(data, "trp-neighborhoods.gff")
 ) +
-  geom_msa_features(x = "position", color = "Name", range = trp,
+  geom_msa_features(x = "position", fill = "Name", range = trp,
     label = "Name", align = "trpE", width = 760, header = "trp neighborhood")
 w
 ggsave("gene_neighborhoods-5-r.png",

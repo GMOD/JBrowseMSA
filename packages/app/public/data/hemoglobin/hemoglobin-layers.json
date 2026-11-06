@@ -307,20 +307,22 @@
       "data": "OEOEEEBOEOBEEBOEEBEEEBOEBBOOBBO1BB11122B222O2EOEEEEEBEEBEEOBEEOBEOBEEBBEEBEEBEEOBEEEBEEOBEE22O2222OEOOO1BBB1BB11EB1EO111EO1OBB1OBBEOBOEOOEEE22OEEOEEEOEEOBEEBBEEOEOEEBBBOBBB1BB12222B22EB2EOEEOEEEEOB1EBEEBEEEBEEEBOOOOEBOEEOEEBEEEBOEEBEEOBEEE2O222BOE2OB1BB11BB11EO1EE111EO11BB1EBBEBBBEBBEEE22",
       "encoding": {
         "color": {
-          "domain": [
-            "1",
-            "2",
-            "B",
-            "E",
-            "O"
-          ],
-          "range": [
-            "#4e79a7",
-            "#e15759",
-            "#8c8c8c",
-            "#f1ce63",
-            "#ffffff"
-          ]
+          "scale": {
+            "domain": [
+              "1",
+              "2",
+              "B",
+              "E",
+              "O"
+            ],
+            "range": [
+              "#4e79a7",
+              "#e15759",
+              "#8c8c8c",
+              "#f1ce63",
+              "#ffffff"
+            ]
+          }
         }
       },
       "height": 16

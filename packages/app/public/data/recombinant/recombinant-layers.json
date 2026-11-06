@@ -600,9 +600,11 @@
         1,
         1
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 7
+          "scale": {
+            "domainMax": 7
+          }
         }
       },
       "color": "#4e79a7",
@@ -1208,9 +1210,11 @@
         0,
         0
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 7
+          "scale": {
+            "domainMax": 7
+          }
         }
       },
       "color": "#e15759",
@@ -1818,9 +1822,11 @@
         1,
         1
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 11
+          "scale": {
+            "domainMax": 11
+          }
         }
       },
       "color": "#4e79a7",
@@ -2426,9 +2432,11 @@
         0,
         0
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 11
+          "scale": {
+            "domainMax": 11
+          }
         }
       },
       "color": "#e15759",

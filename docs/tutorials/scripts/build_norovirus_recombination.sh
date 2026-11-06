@@ -346,7 +346,7 @@ for row, tag in ((QUERY, 'query'), (CONTROL, 'control')):
             'name': f'to {subject}',
             'kind': 'bar',
             'values': track_values(row, subject),
-            'scales': {'y': {'domainMax': 100}},
+            'encoding': {'y': {'scale': {'domainMax': 100}}},
             'color': color,
             'height': 60,
         })

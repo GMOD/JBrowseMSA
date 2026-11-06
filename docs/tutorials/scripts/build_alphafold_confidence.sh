@@ -322,7 +322,7 @@ layers = {
             'name': 'Mean pLDDT',
             'kind': 'bar',
             'values': means,
-            'scales': {'y': {'domainMax': 100}},
+            'encoding': {'y': {'scale': {'domainMax': 100}}},
             'color': '#4e79a7',
             'height': 60,
         },
@@ -333,8 +333,10 @@ layers = {
             'data': bands,
             'encoding': {
                 'color': {
-                    'domain': [code for _, code, _ in BANDS],
-                    'range': [color for _, _, color in BANDS],
+                    'scale': {
+                        'domain': [code for _, code, _ in BANDS],
+                        'range': [color for _, _, color in BANDS],
+                    }
                 }
             },
             'height': 16,
@@ -344,11 +346,17 @@ layers = {
     'rowPanels': [
         {
             'kind': 'strip',
-            'field': short,
+            'encoding': {
+                'fill': {
+                    'field': short,
+                    'legend': {'title': 'pLDDT band'},
+                    'scale': {
+                        'domain': list(band_colors),
+                        'range': list(band_colors.values()),
+                    },
+                }
+            },
             'header': short,
-            'title': 'pLDDT band',
-            'domain': list(band_colors),
-            'range': list(band_colors.values()),
             'width': 14,
         }
         for short in spans

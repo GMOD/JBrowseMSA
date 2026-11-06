@@ -574,9 +574,11 @@
     0,
     0
    ],
-   "scales": {
+   "encoding": {
     "y": {
-     "domainMax": 11
+     "scale": {
+      "domainMax": 11
+     }
     }
    },
    "color": "#c0392b",

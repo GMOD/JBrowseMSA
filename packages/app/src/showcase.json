@@ -46,8 +46,10 @@
           "data": "NNNNNNNNNNNNNUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUOOOOOOOOUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUOOOOOOOOUUUUUUUOOOOOOOUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUUUUUUOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN",
           "encoding": {
             "color": {
-              "domain": ["O", "U", "N"],
-              "range": ["#2e7d32", "#e65100", "#cfd8dc"]
+              "scale": {
+                "domain": ["O", "U", "N"],
+                "range": ["#2e7d32", "#e65100", "#cfd8dc"]
+              }
             }
           },
           "height": 16
@@ -165,34 +167,38 @@
           "width": 760,
           "header": "trp neighborhood",
           "encoding": {
-            "color": {
+            "fill": {
               "field": "Name",
-              "domain": [
-                "trpL",
-                "trpE",
-                "trpG",
-                "trpD",
-                "trpC",
-                "trpCF",
-                "trpF",
-                "trpB",
-                "trpA",
-                "trpI"
-              ],
-              "range": [
-                "#76b7b2",
-                "#4e79a7",
-                "#a0cbe8",
-                "#f28e2b",
-                "#59a14f",
-                "#8cd17d",
-                "#b6992d",
-                "#e15759",
-                "#b07aa1",
-                "#9c755f"
-              ]
+              "scale": {
+                "domain": [
+                  "trpL",
+                  "trpE",
+                  "trpG",
+                  "trpD",
+                  "trpC",
+                  "trpCF",
+                  "trpF",
+                  "trpB",
+                  "trpA",
+                  "trpI"
+                ],
+                "range": [
+                  "#76b7b2",
+                  "#4e79a7",
+                  "#a0cbe8",
+                  "#f28e2b",
+                  "#59a14f",
+                  "#8cd17d",
+                  "#b6992d",
+                  "#e15759",
+                  "#b07aa1",
+                  "#9c755f"
+                ]
+              }
             },
-            "label": "Name"
+            "text": {
+              "field": "Name"
+            }
           },
           "transform": [
             {

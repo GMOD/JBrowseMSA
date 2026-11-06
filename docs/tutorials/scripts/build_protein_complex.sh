@@ -281,8 +281,10 @@ layers = {
             'data': classes,
             'encoding': {
                 'color': {
-                    'domain': list(CLASS_COLORS),
-                    'range': list(CLASS_COLORS.values()),
+                    'scale': {
+                        'domain': list(CLASS_COLORS),
+                        'range': list(CLASS_COLORS.values()),
+                    }
                 }
             },
             'height': 16,

@@ -40,8 +40,8 @@ const roleColors = {
 }
 
 const byName = {
-  color: { field: 'Name', ...domainRange(nameColors) },
-  label: 'Name',
+  fill: { field: 'Name', ...domainRange(nameColors) },
+  text: { field: 'Name' },
 }
 const alignOnTrpE = [{ type: 'align', on: 'trpE' }]
 
@@ -112,8 +112,8 @@ export const specs = [
       rowPanels: [
         panel(1120, {
           encoding: {
-            color: { field: 'role', ...domainRange(roleColors) },
-            label: 'Name',
+            fill: { field: 'role', ...domainRange(roleColors) },
+            text: { field: 'Name' },
           },
           transform: alignOnTrpE,
         }),

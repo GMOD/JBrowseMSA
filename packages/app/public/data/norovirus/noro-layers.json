@@ -627,9 +627,11 @@
         78,
         79
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 100
+          "scale": {
+            "domainMax": 100
+          }
         }
       },
       "color": "#4e79a7",
@@ -1241,9 +1243,11 @@
         99,
         99
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 100
+          "scale": {
+            "domainMax": 100
+          }
         }
       },
       "color": "#e15759",
@@ -1855,9 +1859,11 @@
         78,
         79
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 100
+          "scale": {
+            "domainMax": 100
+          }
         }
       },
       "color": "#4e79a7",
@@ -2469,9 +2475,11 @@
         100,
         100
       ],
-      "scales": {
+      "encoding": {
         "y": {
-          "domainMax": 100
+          "scale": {
+            "domainMax": 100
+          }
         }
       },
       "color": "#e15759",
