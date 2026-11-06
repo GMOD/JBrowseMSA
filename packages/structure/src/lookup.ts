@@ -1,3 +1,4 @@
+import { getUngappedSequence } from 'msa-parsers'
 import {
   alignmentQuality,
   describeAlignmentQuality,
@@ -9,9 +10,11 @@ import {
   isLowSimilarity,
   makeUniProtPositionMap,
   pickAlphaFoldModel,
+  uniprotFastaUrl,
 } from 'p2s_mapper'
 
 import { accessionOfRowName } from './accession.ts'
+import { fetchText } from './fetchText.ts'
 import { identifiersOfRowName, searchAccession } from './identifiers.ts'
 import { alignToReference, composePairs, segmentsOfPairs } from './segments.ts'
 
@@ -47,6 +50,8 @@ export interface Lookups {
   alphaFoldModels: (accession: string) => Promise<AlphaFoldModel[]>
   experimental: (accession: string) => Promise<ExperimentalStructure[]>
   pdbEntry: (pdbId: string) => Promise<PdbEntry>
+  /** the UniProt entry's canonical sequence */
+  canonicalSequence: (accession: string) => Promise<string>
   /** the accession of an entry name or RefSeq id, undefined when UniProt has none */
   resolveAccession: (identifier: RowIdentifier) => Promise<string | undefined>
   /** the `label_asym_id` of an author chain, undefined when RCSB has none */
@@ -98,6 +103,8 @@ export function networkLookups(signal?: AbortSignal): Lookups {
     alphaFoldModels: accession => fetchAlphaFoldModels(accession, opts),
     experimental: accession => fetchExperimentalStructures(accession, opts),
     pdbEntry: pdbId => fetchPdbEntry(pdbId, opts),
+    canonicalSequence: async accession =>
+      sequenceOfFasta(await fetchText(uniprotFastaUrl(accession), signal)),
     labelChain: async (pdbId, authChain) =>
       (await fetchLabelChains(pdbId, opts)).get(authChain),
   }
@@ -110,8 +117,12 @@ export function generated(detail: string) {
   }
 }
 
-function ungapped(sequence: string) {
-  return sequence.replaceAll(/[-.]/g, '').toUpperCase()
+function sequenceOfFasta(text: string) {
+  return text
+    .split('\n')
+    .filter(line => !line.startsWith('>'))
+    .join('')
+    .trim()
 }
 
 function methodLabel({ method, resolution }: ExperimentalStructure) {
@@ -125,7 +136,9 @@ function methodLabel({ method, resolution }: ExperimentalStructure) {
  * each. The row names its UniProt entry, or the caller passes the accession.
  * The row is aligned once, to the entry's canonical sequence; AlphaFold models
  * and PDB entries are numbered on that sequence, so every correspondence below
- * composes that alignment with the entry's own.
+ * composes that alignment with the entry's own. The AlphaFold model carries
+ * the sequence, and an entry AlphaFold DB has no model of has it read from
+ * UniProt.
  *
  * `rowSequence` may carry gaps. A row that does not match its entry
  * (`isLowSimilarity`) gets no candidates and a problem, since a mapping
@@ -177,17 +190,20 @@ export async function findStructures({
   const from = resolvedFrom === undefined ? {} : { resolvedFrom }
   const models = await lookups.alphaFoldModels(protein)
   const model = pickAlphaFoldModel(models, undefined)
-  if (!model) {
+  let reference: string
+  try {
+    reference = model?.sequence ?? (await lookups.canonicalSequence(protein))
+  } catch (e) {
     return {
       accession: protein,
       ...from,
       candidates: [],
-      problem: `AlphaFold DB has no model for ${protein}.`,
+      problem: `AlphaFold DB has no model for ${protein}, and UniProt could not be reached for its sequence: ${e instanceof Error ? e.message : String(e)}`,
     }
   }
 
-  const row = ungapped(rowSequence)
-  const { alignment, pairs } = alignToReference(row, model.sequence)
+  const row = getUngappedSequence(rowSequence).toUpperCase()
+  const { alignment, pairs } = alignToReference(row, reference)
   const quality = alignmentQuality(alignment)
   const identity = describeAlignmentQuality(quality)
   if (isLowSimilarity(quality)) {
@@ -199,29 +215,32 @@ export async function findStructures({
     }
   }
 
-  const candidates: StructureCandidate[] = []
   const base = { row: rowName, accession: protein, rowLength: row.length }
-  candidates.push({
-    kind: 'predicted',
-    identity,
-    label: `AlphaFold model${model.meanPlddt === undefined ? '' : ` · pLDDT ${Math.round(model.meanPlddt)}`}`,
-    mapping: {
-      ...base,
-      structure: {
-        id: model.entity ?? `AF-${protein}-F1`,
-        kind: 'predicted',
-        asymId: 'A',
-        asymIdKind: 'label',
-        url: model.url,
-      },
-      segments: segmentsOfPairs(pairs),
-      generated: generated(`AlphaFold DB ${protein}, ${identity}`),
-    },
-  })
+  const candidates: StructureCandidate[] = model
+    ? [
+        {
+          kind: 'predicted',
+          identity,
+          label: `AlphaFold model${model.meanPlddt === undefined ? '' : ` · pLDDT ${Math.round(model.meanPlddt)}`}`,
+          mapping: {
+            ...base,
+            structure: {
+              id: model.entity ?? `AF-${protein}-F1`,
+              kind: 'predicted',
+              asymId: 'A',
+              asymIdKind: 'label',
+              url: model.url,
+            },
+            segments: segmentsOfPairs(pairs),
+            generated: generated(`AlphaFold DB ${protein}, ${identity}`),
+          },
+        },
+      ]
+    : []
 
   // PDB entries are numbered on the canonical sequence, and a row aligned
   // to an isoform model has positions on that isoform instead
-  if (model.accession.includes('-')) {
+  if (model?.accession.includes('-')) {
     return {
       accession: protein,
       ...from,
@@ -301,5 +320,14 @@ export async function findStructures({
       },
     })
   }
-  return { accession: protein, ...from, candidates }
+  return {
+    accession: protein,
+    ...from,
+    candidates,
+    ...(candidates.length === 0
+      ? {
+          problem: `AlphaFold DB has no model for ${protein}, and no PDB entry maps onto it.`,
+        }
+      : {}),
+  }
 }

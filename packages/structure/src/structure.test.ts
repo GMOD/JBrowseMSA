@@ -93,6 +93,7 @@ function lookups(overrides: Partial<Lookups> = {}): Lookups {
           },
         ],
       }),
+    canonicalSequence: () => Promise.reject(new Error('no request expected')),
     resolveAccession: () => Promise.resolve(undefined),
     // 1TUP: author chain A is label chain A; the second entry swaps them
     labelChain: (pdbId, chain) =>
@@ -155,6 +156,7 @@ describe('findStructures', () => {
         alphaFoldModels: never,
         experimental: never,
         pdbEntry: never,
+        canonicalSequence: never,
         labelChain: never,
         resolveAccession: never,
       },
@@ -218,6 +220,49 @@ describe('findStructures', () => {
     })
     expect(found.candidates.map(c => c.kind)).toEqual(['predicted'])
     expect(found.problem).toContain('RCSB 503')
+  })
+
+  test('maps the PDB entries through the UniProt sequence when AlphaFold DB has no model', async () => {
+    const found = await findStructures({
+      rowName: 'P04637',
+      rowSequence: unp,
+      lookups: lookups({
+        alphaFoldModels: () => Promise.resolve([]),
+        canonicalSequence: () => Promise.resolve(unp),
+      }),
+    })
+    expect(found.problem).toBeUndefined()
+    expect(found.candidates.map(c => c.mapping.structure.id)).toEqual(['1TUP'])
+    expect(found.candidates[0]?.mapping.segments).toEqual([
+      { rowStart: 94, rowEnd: 312, structStart: 1, structEnd: 219 },
+    ])
+  })
+
+  test('says why when AlphaFold DB has no model and UniProt cannot be reached', async () => {
+    const found = await findStructures({
+      rowName: 'P04637',
+      rowSequence: unp,
+      lookups: lookups({
+        alphaFoldModels: () => Promise.resolve([]),
+        canonicalSequence: () => Promise.reject(new Error('UniProt 503')),
+      }),
+    })
+    expect(found.candidates).toEqual([])
+    expect(found.problem).toContain('UniProt 503')
+  })
+
+  test('says so when neither AlphaFold DB nor the PDB has a structure', async () => {
+    const found = await findStructures({
+      rowName: 'P04637',
+      rowSequence: unp,
+      lookups: lookups({
+        alphaFoldModels: () => Promise.resolve([]),
+        canonicalSequence: () => Promise.resolve(unp),
+        experimental: () => Promise.resolve([]),
+      }),
+    })
+    expect(found.candidates).toEqual([])
+    expect(found.problem).toContain('no PDB entry')
   })
 
   test('a failed PDB entry drops that entry and keeps the others', async () => {

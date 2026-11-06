@@ -29,7 +29,8 @@ model.setResidueMappings([...model.residueMappings, candidates[0].mapping])
 - AlphaFold DB and RCSB answer the lookups, both from the browser
 - The row is aligned once to the entry's canonical sequence, and each
   candidate's `segments` compose that alignment with the structure's own
-  numbering (`label_seq_id`)
+  numbering (`label_seq_id`). The canonical sequence comes from the AlphaFold
+  model, or from UniProt for an entry AlphaFold DB has no model of
 - A row that does not match its entry gets no candidates and a `problem`
 - A generated mapping names its chain by the author id RCSB reports
 

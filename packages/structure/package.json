@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "msa-parsers": "workspace:*",
     "p2s_mapper": "^2.4.0"
   },
   "peerDependencies": {

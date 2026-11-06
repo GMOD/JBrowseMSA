@@ -313,6 +313,9 @@ importers:
 
   packages/structure:
     dependencies:
+      msa-parsers:
+        specifier: workspace:*
+        version: link:../msa-parsers
       p2s_mapper:
         specifier: ^2.4.0
         version: 2.4.0
