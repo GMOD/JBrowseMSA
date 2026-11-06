@@ -294,6 +294,16 @@ describe('superposeRows', () => {
     expect(result.distanceValues).toHaveLength(backbone.length)
   })
 
+  test('fits on the 1-based columns of a selection, the last three here', async () => {
+    const result = await superposeRows({
+      model: fakeModel({ ref: 'ref.cif', other: 'moved.cif' }),
+      targets: targets(['ref', 'other']),
+      selection: { start: 22, end: 24 },
+      fetchText,
+    })
+    expect(result.fits[0]?.considered).toBe(3)
+  })
+
   test('skips a row whose file fails to load and fits the rest', async () => {
     const model = fakeModel({
       ref: 'ref.cif',

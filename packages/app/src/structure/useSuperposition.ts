@@ -103,13 +103,10 @@ export function useSuperposition(model: MsaViewModel) {
         return
       }
       working('Fitting')
-      const { selection } = model
       const result = await superposeRows({
         model,
         targets,
-        columns: selection
-          ? { start: selection.start - 1, end: selection.end - 1 }
-          : undefined,
+        selection: model.selection,
         fetchText: url => fetchText(url, signal),
       })
       if (signal.aborted) {

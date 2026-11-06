@@ -92,10 +92,10 @@ const KinaseLobeFit = observer(function KinaseLobeFit() {
           const result = await superposeRows({
             model,
             targets,
-            columns:
+            selection:
               start === undefined || end === undefined
                 ? undefined
-                : { start: start - 1, end: end - 1 },
+                : { start, end },
           })
           if (run !== latest) {
             return

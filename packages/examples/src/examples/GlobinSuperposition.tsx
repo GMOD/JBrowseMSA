@@ -92,10 +92,7 @@ const GlobinSuperposition = observer(function GlobinSuperposition() {
       const result = await superposeRows({
         model,
         targets,
-        columns:
-          kind === 'pocket'
-            ? { start: pocket.start - 1, end: pocket.end - 1 }
-            : undefined,
+        selection: kind === 'pocket' ? pocket : undefined,
       })
       model.setColumnTracks([
         ...model.columnTracks.filter(t => t.id !== track),

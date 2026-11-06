@@ -87,10 +87,7 @@ const AdenylateKinaseHinge = observer(function AdenylateKinaseHinge() {
       const result = await superposeRows({
         model,
         targets,
-        columns:
-          kind === 'core'
-            ? { start: core.start - 1, end: core.end - 1 }
-            : undefined,
+        selection: kind === 'core' ? core : undefined,
         refine: kind === 'every-pair' ? false : undefined,
       })
       model.setColumnTracks([

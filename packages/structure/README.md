@@ -83,12 +83,13 @@ const fit = await superposeRows({
     { row: 'HBA_HUMAN', structureId: 'AF-P69905-F1' },
     { row: 'HBB_HUMAN', structureId: 'AF-P68871-F1' },
   ],
-  columns: { start: 30, end: 60 },
+  selection: model.selection,
 })
 ```
 
 - The alignment says which residues correspond: each other row's CA atoms fit
-  the first row's where both rows have one, in `columns` when given
+  the first row's where both rows have one, in `selection` when given. Its
+  `start` and `end` are 1-based file columns, as `model.selection` holds them
 - `matrices` moves each structure into the reference's frame, for the panel's
   `transforms`, and each fit reports its RMSD and the CA pairs it used
 - `distanceValues` is the mean CA distance per residue of the reference row

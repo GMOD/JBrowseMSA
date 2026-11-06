@@ -65,7 +65,7 @@ function rowCoordinates(
 /**
  * Superposes the structures of several rows by the alignment. The first target
  * is the reference. Each other row's structure is fitted on the columns where
- * both rows have a CA, limited to `columns` when given, and the CA distance per
+ * both rows have a CA, limited to `selection` when given, and the CA distance per
  * residue of the reference row comes back as the values of a bar track.
  *
  * Structure files are read as mmCIF or PDB format. A row whose file cannot be
@@ -75,14 +75,17 @@ function rowCoordinates(
 export async function superposeRows({
   model,
   targets,
-  columns,
+  selection,
   refine,
   fetchText: read = fetchText,
 }: {
   model: MsaViewModel
   targets: SuperposeTarget[]
-  /** file columns, 0-based, inclusive; every column when unset */
-  columns?: { start: number; end: number }
+  /**
+   * file columns, 1-based and inclusive as `model.selection` holds them; every
+   * column when unset
+   */
+  selection?: { start: number; end: number }
   /** set aside poorly fitting pairs and fit again; on by default */
   refine?: false
   fetchText?: FetchText
@@ -151,8 +154,8 @@ export async function superposeRows({
     referenceRow,
     others,
     column =>
-      columns === undefined ||
-      (column >= columns.start && column <= columns.end),
+      selection === undefined ||
+      (column + 1 >= selection.start && column + 1 <= selection.end),
     refine === false ? false : undefined,
   )
   const fits = result.fits.map(fit => ({
