@@ -161,6 +161,29 @@ describe('interProToGFF', () => {
     ])
   })
 
+  test('writes the given source in column 2', () => {
+    const gff = annotationsToGFF(
+      [
+        {
+          id: 'human\tF12',
+          accession: 'exon-1',
+          name: 'exon-1',
+          description: 'exon-1',
+          featureType: 'exon',
+          start: 1,
+          end: 30,
+        },
+      ],
+      [],
+      'NM_000505.4',
+    )
+    expect(gff.split('\n')[1]?.split('\t').slice(0, 3)).toEqual([
+      'human%09F12',
+      'NM_000505.4',
+      'exon',
+    ])
+  })
+
   test('skips a match whose signature has no accession', () => {
     const results: Record<string, InterProScanResults> = {
       seq1: {
