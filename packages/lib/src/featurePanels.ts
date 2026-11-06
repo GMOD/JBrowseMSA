@@ -120,6 +120,10 @@ type Unlaned = Omit<RowPanelSpan, 'lane' | 'laneCount'> & {
   endCol: number
 }
 
+function deepestLane(rows: { laneCount: number }[][]) {
+  return rows.reduce((depth, row) => Math.max(depth, row[0]?.laneCount ?? 0), 0)
+}
+
 /**
  * Lanes for `position: "strandpile"`, gggenomes' `position_strandpile`: the
  * forward features stack above the line and the reverse below it, each strand
@@ -139,8 +143,8 @@ function strandpileLanes(
     )
     return { name, forward, reverse }
   })
-  const up = Math.max(0, ...piled.map(p => p.forward[0]?.laneCount ?? 0))
-  const down = Math.max(0, ...piled.map(p => p.reverse[0]?.laneCount ?? 0))
+  const up = deepestLane(piled.map(p => p.forward))
+  const down = deepestLane(piled.map(p => p.reverse))
   const laneCount = up + down
   return new Map(
     piled.map(({ name, forward, reverse }) => [

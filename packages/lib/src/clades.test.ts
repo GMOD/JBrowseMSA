@@ -240,6 +240,19 @@ test('expanding a seeded clade sticks until the next load', () => {
   expect(model.rowNames).toEqual(['A', 'B', 'C', 'D'])
 })
 
+test('a clade the reader expanded stays expanded in a restored snapshot', () => {
+  const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  model.toggleCollapsed('node-0-0-1')
+  const restored = MSAModelF().create(JSON.parse(JSON.stringify(model)))
+  expect(restored.collapsed).toEqual([])
+})
+
+test('a replaced tree takes the collapse mark again', () => {
+  const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
+  model.replaceTree(tree)
+  expect(model.collapsed).toEqual(['node-0-0-1'])
+})
+
 test('clades set after load seed their collapse', () => {
   const model = makeModel([])
   model.setClades([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])

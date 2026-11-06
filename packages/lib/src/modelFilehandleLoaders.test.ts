@@ -161,3 +161,29 @@ test('a gff read from a local file keeps its text after the filehandle clears', 
   expect(model.data.gff).toContain('PF00069')
   expect(model.actuallyShowDomains).toBe(true)
 })
+
+test('a row table set by hand replaces the file and discards its pending fetch', async () => {
+  const model = makeModel()
+  model.setTreeMetadataFilehandle(uri('meta.json'))
+  model.setRowData({ a: { host: 'human' } })
+  inFlight.get('meta.json')!.resolve('{"a":{"host":"duck"}}')
+  await flush()
+
+  expect(model.treeMetadataFilehandle).toBeUndefined()
+  expect(model.rowDataOf('a')?.host).toBe('human')
+  expect(JSON.parse(JSON.stringify(model)).data.treeMetadata).toContain('human')
+})
+
+test('a row table read from a local file keeps its text after the filehandle clears', async () => {
+  const model = makeModel()
+  model.setTreeMetadataFilehandle({
+    locationType: 'BlobLocation',
+    blobId: 'b1',
+    name: 'meta.json',
+  })
+  inFlight.get('meta.json')!.resolve('{"a":{"host":"duck"}}')
+  await flush()
+
+  expect(model.treeMetadataFilehandle).toBeUndefined()
+  expect(JSON.parse(JSON.stringify(model)).data.treeMetadata).toContain('duck')
+})

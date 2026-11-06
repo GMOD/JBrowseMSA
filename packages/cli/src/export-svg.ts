@@ -2,7 +2,6 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 
 import { enableStaticRendering } from 'mobx-react'
-import { annotationTextToGFF } from 'msa-parsers'
 
 import { fetchWithRetry } from './fetchWithRetry.ts'
 import { loadJsdom } from './loadJsdom.ts'
@@ -178,9 +177,6 @@ export async function exportSvg({
   }
   if (gffFile) {
     data.gff = fs.readFileSync(gffFile, 'utf8')
-  }
-  if (data.gff) {
-    data.gff = annotationTextToGFF(data.gff)
   }
   if (!data.msa && !data.tree) {
     throw new Error(

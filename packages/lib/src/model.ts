@@ -15,6 +15,7 @@ import {
   transaction,
 } from 'mobx'
 import {
+  annotationTextToGFF,
   generateNodeIds,
   gffToAnnotations,
   parseGFF,
@@ -318,7 +319,10 @@ const featureChannels = new Set<EncodingChannel>([
 // outside a reactive context.
 // Newick tools write a colon in a name as an underscore, so a tree's row
 // `chr1_100-200` is the GFF's `chr1:100-200`, as FastaMSA.getRow resolves it
-function annotationRowName(id: string, rowNames: Map<string, number>) {
+function annotationRowName(
+  id: string,
+  rowNames: ReadonlySet<string> | ReadonlyMap<string, unknown>,
+) {
   if (rowNames.has(id)) {
     return id
   }
@@ -327,6 +331,14 @@ function annotationRowName(id: string, rowNames: Map<string, number>) {
 }
 
 const seqPosIndexCache = new WeakMap<object, Map<string, Int32Array>>()
+
+const inlineAnnotationCache = new WeakMap<object, Annotation[]>()
+
+function inlineAnnotations(msa: { annotations: Annotation[] }) {
+  const annotations = inlineAnnotationCache.get(msa) ?? msa.annotations
+  inlineAnnotationCache.set(msa, annotations)
+  return annotations
+}
 
 // A segment is a 1:1 run. A segment whose sides differ in length is malformed,
 // and the lookups treat it like an uncovered position.
@@ -594,6 +606,13 @@ function stateModelFactory({
          * focus on particular subtree
          */
         showOnly: types.maybe(types.string),
+        /**
+         * #property
+         * whether the `collapse`, `focus` and `rotate` clade marks have
+         * seeded `collapsed`, `showOnly` and `rotated`, so a restored snapshot
+         * keeps what the reader changed after the seeding
+         */
+        cladesSeeded: stripDefault(types.boolean, false),
         /**
          * #property
          * the user's explicit show/hide choice per track id, keyed by id with
@@ -1084,6 +1103,7 @@ function stateModelFactory({
        */
       setClades(clades: Clade[]) {
         self.clades.replace(clades)
+        self.cladesSeeded = false
       },
       /**
        * #action
@@ -1183,9 +1203,7 @@ function stateModelFactory({
         }
         transaction(() => {
           self.currentAlignment = n
-          self.collapsed.clear()
-          self.rotated.clear()
-          this.setShowOnly(undefined)
+          this.clearNodeState()
           this.drawRelativeTo(undefined)
           self.scrollX = 0
           self.scrollY = 0
@@ -1225,8 +1243,20 @@ function stateModelFactory({
 
       /**
        * #action
-       * reroot the tree. Clears `collapsed`, `rotated` and `showOnly`, whose
-       * path-derived node ids name other nodes in the rerooted tree
+       * forget `collapsed`, `rotated` and `showOnly`, whose path-derived node
+       * ids name other nodes once the tree changes shape, and let the clade
+       * marks seed them again
+       */
+      clearNodeState() {
+        self.collapsed.clear()
+        self.rotated.clear()
+        self.showOnly = undefined
+        self.cladesSeeded = false
+      },
+
+      /**
+       * #action
+       * reroot the tree, which clears the node state (`clearNodeState`)
        */
       setTreeRoot(treeRoot?: TreeRoot) {
         if (compareStructural(self.treeRoot, treeRoot)) {
@@ -1234,9 +1264,7 @@ function stateModelFactory({
         }
         transaction(() => {
           self.treeRoot = treeRoot
-          self.collapsed.clear()
-          self.rotated.clear()
-          this.setShowOnly(undefined)
+          this.clearNodeState()
         })
       },
 
@@ -1293,22 +1321,30 @@ function stateModelFactory({
 
       /**
        * #action
+       * replace the alignment text and drop its filehandle, so the snapshot
+       * carries the new text
        */
       setMSA(result: string) {
+        self.msaFilehandle = undefined
         self.data.setMSA(result)
       },
 
       /**
        * #action
+       * replace the tree text and drop its filehandle, as setMSA does
        */
       setTree(result: string) {
+        self.treeFilehandle = undefined
         self.data.setTree(result)
       },
 
       /**
        * #action
+       * replace the row table's JSON text and drop its filehandle, as setMSA
+       * does
        */
       setTreeMetadata(result: string) {
+        self.treeMetadataFilehandle = undefined
         self.data.setTreeMetadata(result)
       },
 
@@ -1318,8 +1354,12 @@ function stateModelFactory({
        * parsed annotations are volatile and a blob filehandle is cleared once
        * read, so the text is the only persisted copy. An autorun parses it
        * into annotations, and clears the ones it drew when the text goes.
+       * New text drops the filehandle, as setMSA does
        */
       setGFF(result?: string) {
+        if (result !== undefined) {
+          self.gffFilehandle = undefined
+        }
         self.data.setGFF(result)
       },
     }))
@@ -1529,7 +1569,7 @@ function stateModelFactory({
        * GFF's, the `features` layer's, then the file's own per-row lines
        */
       get allAnnotations(): Annotation[] {
-        const inline = this.MSA?.annotations ?? []
+        const inline = this.MSA ? inlineAnnotations(this.MSA) : []
         return self.features.length > 0 || inline.length > 0
           ? [
               ...self.annotations,
@@ -1608,11 +1648,7 @@ function stateModelFactory({
         if (self.clades.length === 0) {
           return noClades
         }
-        return resolveClades(
-          self.clades,
-          hierarchy(this.tree, d => d.children),
-          this.root,
-        )
+        return resolveClades(self.clades, this.treeHierarchy, this.root)
       },
       /**
        * #getter
@@ -1638,6 +1674,14 @@ function stateModelFactory({
        */
       get treeTips() {
         return treeTips(this.tree)
+      },
+      /**
+       * #getter
+       * the whole tree as a hierarchy, every clade expanded and none in focus,
+       * which the clade marks resolve against
+       */
+      get treeHierarchy() {
+        return hierarchy(this.tree, d => d.children)
       },
       /**
        * #getter
@@ -1833,11 +1877,7 @@ function stateModelFactory({
         if (!layout || self.clades.length === 0) {
           return noClades
         }
-        return resolveClades(
-          self.clades,
-          hierarchy(this.tree, d => d.children),
-          layout.root,
-        )
+        return resolveClades(self.clades, this.treeHierarchy, layout.root)
       },
 
       /**
@@ -2453,7 +2493,9 @@ function stateModelFactory({
       /**
        * #getter
        * the base pairs of the consensus secondary structure, as arcs, in
-       * visible column space (hidden columns are removed before parsing)
+       * visible column space. The full string is parsed so hidden columns keep
+       * their partners, and an end in a hidden column moves to its visible
+       * neighbor, as a column track's arc does
        */
       get secondaryStructureArcs(): Arc[] | undefined {
         const { blanks, hideGapsEffective } = self
@@ -2461,13 +2503,13 @@ function stateModelFactory({
         if (!ss) {
           return undefined
         }
-        return parseWuss(hideGapsEffective ? skipBlanks(blanks, ss) : ss).map(
-          ({ start, end, pseudoknot }) => ({
-            start,
-            end,
-            color: pseudoknot ? PSEUDOKNOT_ARC : HELIX_ARC,
-          }),
-        )
+        const visible = (col: number) =>
+          hideGapsEffective ? visibleColsBefore(blanks, col) : col
+        return parseWuss(ss).map(({ start, end, pseudoknot }) => ({
+          start: visible(start),
+          end: visible(end),
+          color: pseudoknot ? PSEUDOKNOT_ARC : HELIX_ARC,
+        }))
       },
 
       /**
@@ -3151,12 +3193,13 @@ function stateModelFactory({
        * without error and draws nothing
        */
       get dataWarnings(): string[] {
-        const { annotations, rowNamesSet } = self
-        return self.dataInitialized &&
-          annotations.length > 0 &&
-          !annotations.some(a =>
-            rowNamesSet.has(annotationRowName(a.id, rowNamesSet)),
-          )
+        const { annotations, dataInitialized } = self
+        const tips =
+          dataInitialized && annotations.length > 0
+            ? new Set(self.treeTips.names)
+            : undefined
+        return tips &&
+          !annotations.some(a => tips.has(annotationRowName(a.id, tips)))
           ? [
               `0 of ${annotations.length} annotations name a row in this alignment`,
             ]
@@ -3271,10 +3314,7 @@ function stateModelFactory({
        * last tip, so the root survives the path ids changing under it
        */
       rerootAt(nodeId: string) {
-        const shown = find(
-          hierarchy(self.tree, d => d.children),
-          n => n.data.id === nodeId,
-        )
+        const shown = find(self.treeHierarchy, n => n.data.id === nodeId)
         if (!shown?.parent) {
           return
         }
@@ -3294,18 +3334,32 @@ function stateModelFactory({
 
       /**
        * #action
-       * swap in a different tree over the same alignment. Clears `collapsed`,
-       * `rotated` and `showOnly`, since path-derived node ids (node-0-0-1) from the old
-       * tree would match unrelated nodes in the new one, and the tree's
-       * filehandle, which the snapshot would otherwise reopen in place of
-       * the new tree
+       * apply the `collapse`, `focus` and `rotate` clade marks to the node
+       * state
+       */
+      seedCladeMarks() {
+        self.cladesSeeded = true
+        for (const { mark, nodeId } of self.resolvedClades) {
+          if (nodeId !== undefined) {
+            if (mark === 'collapse' && !self.collapsed.includes(nodeId)) {
+              self.collapsed.push(nodeId)
+            } else if (mark === 'focus') {
+              self.showOnly = nodeId
+            } else if (mark === 'rotate' && !self.rotated.includes(nodeId)) {
+              self.rotated.push(nodeId)
+            }
+          }
+        }
+      },
+
+      /**
+       * #action
+       * swap in a different tree over the same alignment, clearing the node
+       * state (`clearNodeState`) and the tree's filehandle
        */
       replaceTree(newick: string) {
         transaction(() => {
-          self.setTreeFilehandle(undefined)
-          self.collapsed.clear()
-          self.rotated.clear()
-          self.setShowOnly(undefined)
+          self.clearNodeState()
           self.setTree(newick)
         })
       },
@@ -3457,8 +3511,14 @@ function stateModelFactory({
         self.annotations = annotations
       },
 
+      /**
+       * #action
+       * parse GFF3, or an InterProScan JSON response, into the annotations
+       */
       applyGFFText(gffText: string) {
-        this.setAnnotations(gffToAnnotations(parseGFF(gffText)))
+        this.setAnnotations(
+          gffToAnnotations(parseGFF(annotationTextToGFF(gffText))),
+        )
       },
 
       /**
@@ -3487,7 +3547,7 @@ function stateModelFactory({
        * `data.treeMetadata` (see docs/layers.md)
        */
       setRowData(rowData: RowDataInput) {
-        self.data.setTreeMetadata(JSON.stringify(rowData))
+        self.setTreeMetadata(JSON.stringify(rowData))
       },
       /**
        * #action
@@ -3514,7 +3574,7 @@ function stateModelFactory({
        * #action
        */
       toggleTrack(id: string) {
-        self.turnedOffTracks.set(id, !trackIsOff(self.turnedOffTracks, id))
+        this.setTracksShown([id], trackIsOff(self.turnedOffTracks, id))
       },
       /**
        * #action
@@ -3611,6 +3671,19 @@ function stateModelFactory({
           .filter(d => segmentFeatureTypes.has(d.featureType ?? ''))
           .toSorted((a, b) => a.start - b.start)
       },
+
+      /**
+       * #getter
+       * the legend entries of the accession palette, for the overlay and a
+       * features panel that names no color scale
+       */
+      get domainLegendEntries(): LegendEntry[] {
+        return this.visibleDomainTypes.map(d => ({
+          id: d.accession,
+          label: d.name,
+          color: d.color ?? this.fillPalette[d.accession]!,
+        }))
+      },
       /**
        * #getter
        * categorical feature types (InterPro domains and the like) that each get
@@ -3649,8 +3722,8 @@ function stateModelFactory({
        * the encoding coloring the overlay's spans, undefined when none does,
        * which leaves each span the color its accession takes in `fillPalette`
        */
-      get featureFillEncoding(): ResolvedEncoding | undefined {
-        return this.resolvedEncodings.find(e => e.channel === 'featureFill')
+      get featureFillEncoding() {
+        return this.encodingFor('featureFill')
       },
 
       /**
@@ -3674,9 +3747,7 @@ function stateModelFactory({
        * whether or not the residue letters do
        */
       get featureLabels(): Map<Annotation, string> | undefined {
-        const encoding = this.resolvedEncodings.find(
-          e => e.channel === 'featureLabel',
-        )
+        const encoding = this.encodingFor('featureLabel')
         return encoding
           ? featureLabelMap(self.filteredAnnotations, encoding.field)
           : undefined
@@ -3720,7 +3791,7 @@ function stateModelFactory({
        * naming one `title` list one legend between them
        */
       get legends(): Legend[] {
-        const { featureFillEncoding, fillPalette, visibleDomainTypes } = this
+        const { featureFillEncoding } = this
         const byKey = new Map<string, Legend>()
         const ids = new Set<string>()
         // the accession palette keys on no field, so it takes a key of its own
@@ -3751,11 +3822,7 @@ function stateModelFactory({
             featureFillEncoding?.title,
             featureFillEncoding
               ? featureFillEncoding.legend
-              : visibleDomainTypes.map(d => ({
-                  id: d.accession,
-                  label: d.name,
-                  color: d.color ?? fillPalette[d.accession]!,
-                })),
+              : this.domainLegendEntries,
             true,
           )
         }
@@ -4081,6 +4148,14 @@ function stateModelFactory({
       },
 
       /**
+       * #method
+       * the encoding feeding a channel, undefined when none does
+       */
+      encodingFor(channel: EncodingChannel) {
+        return this.resolvedEncodings.find(e => e.channel === channel)
+      },
+
+      /**
        * #getter
        * every color object the encodings and the row panels declare, keyed
        * by declaration (`declarationKey`) and resolved once over the union
@@ -4163,13 +4238,7 @@ function stateModelFactory({
               labels: label
                 ? featureLabelMap(annotations, label)
                 : featureLabels,
-              legend:
-                encoding?.legend ??
-                this.visibleDomainTypes.map(d => ({
-                  id: d.accession,
-                  label: d.name,
-                  color: d.color ?? fillPalette[d.accession]!,
-                })),
+              legend: encoding?.legend ?? this.domainLegendEntries,
             }
           }
           const { colorOf, legend, key, title } = this.scaleOf(panel, 'rows')
@@ -4259,9 +4328,7 @@ function stateModelFactory({
        * text color.
        */
       get tipLabelColors(): Map<string, string> | undefined {
-        const encoding = this.resolvedEncodings.find(
-          e => e.channel === 'tipLabel',
-        )
+        const encoding = this.encodingFor('tipLabel')
         return encoding
           ? colorByRow(self.rowData, encoding.field, encoding.colorOf)
           : undefined
@@ -4274,9 +4341,7 @@ function stateModelFactory({
        * so a tint stays out of the raster tile cache and its keys.
        */
       get rowTints(): (string | undefined)[] | undefined {
-        const encoding = this.resolvedEncodings.find(
-          e => e.channel === 'rowTint',
-        )
+        const encoding = this.encodingFor('rowTint')
         if (!encoding) {
           return undefined
         }
@@ -4303,9 +4368,7 @@ function stateModelFactory({
        * focused clade keeps the color the full tree gives it.
        */
       get branchColors(): Map<string, string> | undefined {
-        const encoding = this.resolvedEncodings.find(
-          e => e.channel === 'branch',
-        )
+        const encoding = this.encodingFor('branch')
         if (!encoding) {
           return undefined
         }
@@ -4600,35 +4663,20 @@ function stateModelFactory({
         const awaitingTree = () => !!self.treeFilehandle && !self.data.tree
 
         // `collapse`, `focus` and `rotate` marks seed `collapsed`, `showOnly`
-        // and `rotated`. Seeding runs once per data load, `clades` change and
-        // reroot, so expanding a seeded clade sticks until one of those. A tree
+        // and `rotated` once, and again after `setClades` or `clearNodeState`,
+        // so expanding a seeded clade sticks, in a shared link too. A tree
         // filehandle holds it back, since `dataInitialized` is true while the
         // tree is still the flat stub.
         addDisposer(
           self,
           reaction(
             () =>
-              self.dataInitialized && !awaitingTree()
-                ? { clades: getSnapshot(self.clades), treeRoot: self.treeRoot }
+              self.dataInitialized && !awaitingTree() && !self.cladesSeeded
+                ? getSnapshot(self.clades)
                 : undefined,
-            seed => {
-              if (!seed?.clades.length) {
-                return
-              }
-              for (const { mark, nodeId } of self.resolvedClades) {
-                if (nodeId === undefined) {
-                  continue
-                }
-                if (mark === 'collapse' && !self.collapsed.includes(nodeId)) {
-                  self.toggleCollapsed(nodeId)
-                } else if (mark === 'focus') {
-                  self.setShowOnly(nodeId)
-                } else if (
-                  mark === 'rotate' &&
-                  !self.rotated.includes(nodeId)
-                ) {
-                  self.toggleRotated(nodeId)
-                }
+            clades => {
+              if (clades?.length) {
+                self.seedCladeMarks()
               }
             },
             { fireImmediately: true, equals: compareStructural },
@@ -4679,7 +4727,7 @@ function stateModelFactory({
           what: 'tree',
           getFilehandle: () => self.treeFilehandle,
           onLoad: text => {
-            self.setTree(text)
+            self.data.setTree(text)
           },
           setLoading: arg => {
             self.setLoadingTree(arg)
@@ -4695,7 +4743,10 @@ function stateModelFactory({
           optional: true,
           getFilehandle: () => self.treeMetadataFilehandle,
           onLoad: text => {
-            self.setTreeMetadata(text)
+            self.data.setTreeMetadata(text)
+          },
+          clearFilehandle: () => {
+            self.setTreeMetadataFilehandle(undefined)
           },
         })
 
@@ -4727,7 +4778,7 @@ function stateModelFactory({
           optional: true,
           getFilehandle: () => self.gffFilehandle,
           onLoad: text => {
-            self.setGFF(text)
+            self.data.setGFF(text)
           },
           clearFilehandle: () => {
             self.setGFFFilehandle(undefined)
@@ -4738,7 +4789,7 @@ function stateModelFactory({
           what: 'alignment',
           getFilehandle: () => self.msaFilehandle,
           onLoad: text => {
-            self.setMSA(text)
+            self.data.setMSA(text)
           },
           setLoading: arg => {
             self.setLoadingMSA(arg)

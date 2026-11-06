@@ -90,6 +90,57 @@ test('a GFF naming no row of the alignment warns', () => {
   expect(makeModel().warnings).toEqual([])
 })
 
+test('an InterProScan JSON response in place of the GFF draws its domains', () => {
+  const scan = {
+    results: [
+      {
+        xref: [{ id: 'a' }],
+        matches: [
+          {
+            signature: {
+              entry: { accession: 'IPR999999', name: 'Testdomain' },
+            },
+            locations: [{ start: 2, end: 5 }],
+          },
+        ],
+      },
+    ],
+  }
+  const model = makeModel({ msa, gff: JSON.stringify(scan) })
+  expect(model.annotations.map(a => [a.id, a.start, a.end])).toEqual([
+    ['a', 2, 5],
+  ])
+})
+
+test('a GFF on a row outside the focused clade does not warn', () => {
+  const model = makeModel({
+    msa: '>a\nACGT\n>b\nACGT\n>c\nACGT\n>d\nACGT\n',
+    tree: '((a:1,b:1):1,(c:1,d:1):1);',
+    gff: 'a\t.\tdomain\t1\t3\t.\t.\t.\tName=x\n',
+  })
+  const cd = model.leaves.find(l => l.data.name === 'c')!.parent!.data.id
+  model.setShowOnly(cd)
+  expect(model.warnings).toEqual([])
+})
+
+test('Stockholm #=GR spans keep one identity between reads', () => {
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    data: {
+      msa: `# STOCKHOLM 1.0
+#=GR a pAS   ..*...
+a  ACGTAC
+b  ACGTAC
+//
+`,
+    },
+  })
+  model.setFilter('pAS', true)
+  const [band] = model.domainBands.get('a')!
+  expect(model.allAnnotations[0]).toBe(model.allAnnotations[0])
+  expect(model.featureColors.get(band!.annotation)).toBeDefined()
+})
+
 test('a GFF that lands before the alignment does not warn', () => {
   const model = makeModel({ gff })
   expect(model.warnings).toEqual([])

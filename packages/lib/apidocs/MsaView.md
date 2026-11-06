@@ -111,6 +111,16 @@ ancestor is the clade, or `range` its first and last tip in display order, and
 clades: stripDefault(types.array(types.frozen<Clade>()), [])
 ```
 
+#### property: cladesSeeded
+
+whether the `collapse`, `focus` and `rotate` clade marks have seeded
+`collapsed`, `showOnly` and `rotated`, so a restored snapshot keeps what the
+reader changed after the seeding
+
+```js
+cladesSeeded: stripDefault(types.boolean, false)
+```
+
 #### property: collapsed
 
 array of tree parent nodes that are 'collapsed' (all children are hidden)
@@ -972,6 +982,15 @@ renderer walks columns and needs the band covering each one)
 domainBandsByStart: Map<string, DomainBand[]>
 ```
 
+#### getter: domainLegendEntries
+
+the legend entries of the accession palette, for the overlay and a features
+panel that names no color scale
+
+```js
+domainLegendEntries: LegendEntry[]
+```
+
 #### getter: domainUnderline
 
 whether the overlay marks each domain with a bar under its row instead of
@@ -1550,7 +1569,9 @@ rowTints: (string | undefined)[] | undefined
 #### getter: secondaryStructureArcs
 
 the base pairs of the consensus secondary structure, as arcs, in visible column
-space (hidden columns are removed before parsing)
+space. The full string is parsed so hidden columns keep their partners, and an
+end in a hidden column moves to its visible neighbor, as a column track's arc
+does
 
 ```js
 secondaryStructureArcs: Arc[] | undefined
@@ -1716,6 +1737,15 @@ drawTree off
 treeDrawn: boolean
 ```
 
+#### getter: treeHierarchy
+
+the whole tree as a hierarchy, every clade expanded and none in focus, which the
+clade marks resolve against
+
+```js
+treeHierarchy: HierarchyNode<NodeWithIds>
+```
+
 #### getter: treeLayout
 
 `root` laid out on new nodes in row and branch-length units, read in pixels
@@ -1805,11 +1835,10 @@ loaded documents left out of the snapshot, largest first. A file opened from
 disk or pasted in becomes inline text, and DataModel drops an inline document
 past `maxInlineSnapshotBytes`.
 
-The header lists these, and the standalone app drops `#data=` from the address
-bar while the list is non-empty or the encoded link would pass its
-`maxLinkLength`, so a copied link never opens an empty viewer unannounced. A
-document fetched from a URL never appears here, since the snapshot keeps its
-filehandle.
+The standalone app drops `#data=` from the address bar while the list is
+non-empty or the encoded link would pass its `maxLinkLength`, so a copied link
+never opens an empty viewer unannounced. A document fetched from a URL never
+appears here, since the snapshot keeps its filehandle.
 
 Empty when `hostCarriesData` is true.
 
@@ -1908,6 +1937,14 @@ zoom to it, so a sibling keeps its object and its canvas skips the redraw
 
 ```js
 columnTrackModel: (track: ColumnTrackSpec) => BasicTrack
+```
+
+#### method: encodingFor
+
+the encoding feeding a channel, undefined when none does
+
+```js
+encodingFor: (channel: EncodingChannel) => ResolvedEncoding | undefined
 ```
 
 #### method: featureOff
@@ -2114,6 +2151,14 @@ to parse. A message already on the list is not added again
 addWarning: (warning: string) => void
 ```
 
+#### action: applyGFFText
+
+parse GFF3, or an InterProScan JSON response, into the annotations
+
+```js
+applyGFFText: (gffText: string) => void
+```
+
 #### action: applyHighlight
 
 show `highlights` for `owner`, replacing that owner's previous ones and leaving
@@ -2139,6 +2184,15 @@ remove `owner`'s highlights, leaving other owners' in place
 
 ```js
 clearHighlight: (owner: string) => void
+```
+
+#### action: clearNodeState
+
+forget `collapsed`, `rotated` and `showOnly`, whose path-derived node ids name
+other nodes once the tree changes shape, and let the clade marks seed them again
+
+```js
+clearNodeState: () => void
 ```
 
 #### action: clearRotated
@@ -2220,10 +2274,8 @@ fitVertically: (maxRowHeight?: any) => void
 
 #### action: replaceTree
 
-swap in a different tree over the same alignment. Clears `collapsed`, `rotated`
-and `showOnly`, since path-derived node ids (node-0-0-1) from the old tree would
-match unrelated nodes in the new one, and the tree's filehandle, which the
-snapshot would otherwise reopen in place of the new tree
+swap in a different tree over the same alignment, clearing the node state
+(`clearNodeState`) and the tree's filehandle
 
 ```js
 replaceTree: (newick: string) => void
@@ -2266,6 +2318,14 @@ scroll where they put it.
 
 ```js
 revealRegion: (region: Region) => void
+```
+
+#### action: seedCladeMarks
+
+apply the `collapse`, `focus` and `rotate` clade marks to the node state
+
+```js
+seedCladeMarks: () => void
 ```
 
 #### action: selectBlock
@@ -2407,7 +2467,8 @@ setFilter: (accession: string, shown: boolean) => void
 store the GFF text in the snapshot like the alignment and tree. The parsed
 annotations are volatile and a blob filehandle is cleared once read, so the text
 is the only persisted copy. An autorun parses it into annotations, and clears
-the ones it drew when the text goes.
+the ones it drew when the text goes. New text drops the filehandle, as setMSA
+does
 
 ```js
 setGFF: (result?: string | undefined) => void
@@ -2475,8 +2536,8 @@ setHighResScaleFactor: (arg: number) => void
 
 #### action: setHostCarriesData
 
-declare that this host restores the loaded documents itself, which hides the
-"Not in the link" warning. See `hostCarriesData`
+declare that this host restores the loaded documents itself, which keeps
+`unshareableData` empty. See `hostCarriesData`
 
 ```js
 setHostCarriesData: (arg: boolean) => void
@@ -2528,6 +2589,9 @@ setMousePos: (col?: number | undefined, row?: number | undefined) => void
 ```
 
 #### action: setMSA
+
+replace the alignment text and drop its filehandle, so the snapshot carries the
+new text
 
 ```js
 setMSA: (result: string) => void
@@ -2676,6 +2740,8 @@ setTracksShown: (ids: string[], shown: boolean) => void
 
 #### action: setTree
 
+replace the tree text and drop its filehandle, as setMSA does
+
 ```js
 setTree: (result: string) => void
 ```
@@ -2687,6 +2753,8 @@ setTreeFilehandle: (treeFilehandle?: FileLocation | undefined) => void
 ```
 
 #### action: setTreeMetadata
+
+replace the row table's JSON text and drop its filehandle, as setMSA does
 
 ```js
 setTreeMetadata: (result: string) => void
@@ -2700,8 +2768,7 @@ setTreeMetadataFilehandle: (treeMetadataFilehandle?: FileLocation | undefined) =
 
 #### action: setTreeRoot
 
-reroot the tree. Clears `collapsed`, `rotated` and `showOnly`, whose
-path-derived node ids name other nodes in the rerooted tree
+reroot the tree, which clears the node state (`clearNodeState`)
 
 ```js
 setTreeRoot: (treeRoot?: TreeRoot | undefined) => void

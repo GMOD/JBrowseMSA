@@ -91,6 +91,15 @@ test('closing a track hands its space to the rows', () => {
   expect(model.msaAreaHeight).toBe(before + track.model.height)
 })
 
+test('toggling a track back to its default leaves nothing in the snapshot', () => {
+  const model = makeModel()
+  model.toggleTrack('sequence-logo')
+  model.toggleTrack('sequence-logo')
+  model.toggleTrack('conservation')
+  model.toggleTrack('conservation')
+  expect(JSON.parse(JSON.stringify(model)).turnedOffTracks).toBeUndefined()
+})
+
 test('a zoom does not rebuild the track objects', () => {
   const model = makeModel()
   // observed the way the track area observes them, so the computeds cache

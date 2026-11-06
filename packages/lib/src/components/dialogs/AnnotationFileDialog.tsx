@@ -131,9 +131,7 @@ const AnnotationFileDialog = observer(function ({
                   ? file.text()
                   : fetchText(url))
                 // through the model's own GFF text, so the annotations travel
-                // in the snapshot and the shared URL like every other layer. A
-                // filehandle left set would make the snapshot drop that text
-                model.setGFFFilehandle(undefined)
+                // in the snapshot and the shared URL like every other layer
                 model.setGFF(annotationTextToGFF(text))
                 model.setShowDomains(true)
                 model.setCellFill('domain')

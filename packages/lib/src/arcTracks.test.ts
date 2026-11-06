@@ -127,3 +127,28 @@ test('an alignment with no SS_cons has no base-pair track', () => {
   expect(model.secondaryStructureArcs).toBeUndefined()
   expect(model.tracks.map(t => t.model.id)).not.toContain('base-pairs')
 })
+
+test('a base pair keeps its partner when the gappy columns hide one end', () => {
+  const model = MsaView.create({
+    type: 'MsaView',
+    msaFormat: 'stockholm',
+    data: {
+      msa: `# STOCKHOLM 1.0
+a  A-GTAC
+b  A-GTAC
+c  ACGTAC
+#=GC SS_cons <<..>>
+//
+`,
+      tree: '((a:1,b:1)ab:1,c:1);',
+    },
+    hideGaps: true,
+  })
+  const ab = model.leaves.find(l => l.data.name === 'a')!.parent!.data.id
+  model.setShowOnly(ab)
+  expect(model.blanks).toEqual([1])
+  expect(model.secondaryStructureArcs!.map(a => [a.start, a.end])).toEqual([
+    [0, 4],
+    [1, 3],
+  ])
+})

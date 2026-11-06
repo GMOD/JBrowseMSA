@@ -339,9 +339,8 @@ const syncedProps = [
   synced(
     p => p.gffFilehandle,
     (m, location, { gff }) => {
-      if (location) {
-        m.setGFFFilehandle(location)
-      } else {
+      m.setGFFFilehandle(location)
+      if (!location) {
         m.setGFF(gff)
       }
     },
