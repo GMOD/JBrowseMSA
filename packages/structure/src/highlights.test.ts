@@ -78,6 +78,15 @@ describe('highlightGroups', () => {
     expect(idsOf(groups)['#009e73']).toHaveLength(10)
   })
 
+  test('a rows highlight that also names columns marks the whole row, as the alignment draws it', () => {
+    const groups = highlightGroups(
+      fakeModel([{ rows: ['r'], start: 3, end: 4, color: '#009e73' }]),
+      'S',
+      residues,
+    )
+    expect(idsOf(groups)['#009e73']).toHaveLength(10)
+  })
+
   test('a later highlight wins where two overlap', () => {
     const groups = highlightGroups(
       fakeModel([

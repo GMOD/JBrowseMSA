@@ -2,7 +2,7 @@ import { componentsOfStructure, residueLoci } from './molstar.ts'
 
 import type { Molstar, PolymerResidue } from './molstar.ts'
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context'
-import type { MsaViewModel } from 'react-msaview'
+import type { Highlight, MsaViewModel } from 'react-msaview'
 
 export type StructureColor = 'none' | 'conservation' | 'scheme'
 
@@ -120,13 +120,31 @@ export function solidHex(css: string | undefined) {
   return highlightDefault
 }
 
+function highlightCovers(
+  model: MsaViewModel,
+  { row, rows, start, end }: Highlight,
+  { rowName, seqPos }: { rowName: string; seqPos: number },
+) {
+  if (rows) {
+    return rows.includes(rowName)
+  } else if (start === undefined || end === undefined) {
+    return false
+  } else if (row === undefined) {
+    const column = model.seqPosToGlobalCol(rowName, seqPos - 1)
+    return column !== undefined && column + 1 >= start && column + 1 <= end
+  } else {
+    return row === rowName && seqPos >= start && seqPos <= end
+  }
+}
+
 /**
  * The residues of a structure the alignment's `highlights` layer marks, one
  * group per highlight color, to overpaint on top of the base paint. A highlight
  * names residues of a row (`row`, `start`, `end`), file columns (`start`, `end`
- * alone) or whole rows (`rows`), and each reaches the structure through the
- * row residue its residues map to, so a row that maps onto this structure is
- * the only way in. A later highlight wins where two overlap.
+ * alone) or whole rows (`rows`, which wins over `start` and `end` as it does in
+ * the alignment), and each reaches the structure through the row residue its
+ * residues map to, so a row that maps onto this structure is the only way in.
+ * A later highlight wins where two overlap.
  */
 export function highlightGroups(
   model: MsaViewModel,
@@ -147,26 +165,7 @@ export function highlightGroups(
     }
     let color: string | undefined
     for (const mark of marks) {
-      const { row, rows, start, end } = mark
-      const inRow =
-        rows !== undefined && start === undefined
-          ? rows.includes(hit.rowName)
-          : start !== undefined &&
-            end !== undefined &&
-            (row === undefined
-              ? (() => {
-                  const column = model.seqPosToGlobalCol(
-                    hit.rowName,
-                    hit.seqPos - 1,
-                  )
-                  return (
-                    column !== undefined &&
-                    column + 1 >= start &&
-                    column + 1 <= end
-                  )
-                })()
-              : row === hit.rowName && hit.seqPos >= start && hit.seqPos <= end)
-      if (inRow) {
+      if (highlightCovers(model, mark, hit)) {
         color = solidHex(mark.color)
       }
     }
