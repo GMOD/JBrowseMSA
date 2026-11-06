@@ -83,3 +83,23 @@ test('the minimap draws each domain where the alignment does', () => {
   model.setShowDomains(false)
   expect(minimapDomainRects(model, 200, 60)).toEqual([])
 })
+
+test('rows past the bar height share lanes, each drawing a span once', () => {
+  const rows = 5000
+  const msa = Array.from({ length: rows }, (_, i) => `>s${i}\n${'A'.repeat(40)}`)
+  const model = MSAModelF().create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: msa.join('\n') },
+  })
+  model.setWidth(1000)
+  model.applyGFFText(
+    Array.from(
+      { length: rows },
+      (_, i) => `s${i}\t.\tdomain\t11\t30\t.\t+\t.\tName=d1`,
+    ).join('\n'),
+  )
+  const rects = minimapDomainRects(model, 200, 12)
+  expect(rects).toHaveLength(12)
+  expect(rects.map(r => r.y)).toEqual(Array.from({ length: 12 }, (_, i) => i))
+})

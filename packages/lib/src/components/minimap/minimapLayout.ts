@@ -21,9 +21,13 @@ export function getMinimapLayout(model: MsaViewModel) {
 }
 
 /**
- * The domain overlay's boxes scaled onto the minimap bar, one per row's band,
- * in the colors the alignment draws them, so the overview shows the domains
- * the alignment does. Empty unless the domains fill the cells.
+ * The domain overlay's boxes scaled onto the minimap bar, in the colors the
+ * alignment draws them, so the overview shows the domains the alignment does.
+ * Empty unless the domains fill the cells.
+ *
+ * The rows share the bar's height in lanes at least a pixel tall, and a lane
+ * keeps one rect per distinct pixel span and color, so an alignment of 200k
+ * rows with the same domains draws a few rects per lane.
  */
 export function minimapDomainRects(
   model: MsaViewModel,
@@ -35,14 +39,23 @@ export function minimapDomainRects(
     return []
   }
   const colUnit = width / numColumns
-  const rowUnit = height / leaves.length
-  return leaves.flatMap((leaf, row) =>
-    (domainBands.get(leaf.data.name) ?? []).map(band => ({
-      x: band.startCol * colUnit,
-      y: row * rowUnit,
-      w: Math.max(1, (band.endCol - band.startCol) * colUnit),
-      h: Math.max(1, rowUnit),
-      fill: featureColors.get(band.annotation)?.fill ?? 'grey',
-    })),
-  )
+  const laneCount = Math.min(leaves.length, Math.max(1, Math.floor(height)))
+  const laneHeight = height / laneCount
+  const lanes = Array.from({ length: laneCount }, () => new Set<string>())
+  const rects: { x: number; y: number; w: number; h: number; fill: string }[] =
+    []
+  leaves.forEach((leaf, row) => {
+    const lane = Math.floor((row * laneCount) / leaves.length)
+    for (const band of domainBands.get(leaf.data.name) ?? []) {
+      const x = Math.round(band.startCol * colUnit)
+      const w = Math.max(1, Math.round(band.endCol * colUnit) - x)
+      const fill = featureColors.get(band.annotation)?.fill ?? 'grey'
+      const key = `${x},${w},${fill}`
+      if (!lanes[lane]!.has(key)) {
+        lanes[lane]!.add(key)
+        rects.push({ x, y: lane * laneHeight, w, h: laneHeight, fill })
+      }
+    }
+  })
+  return rects
 }
