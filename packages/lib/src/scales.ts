@@ -18,25 +18,36 @@ import type {
 } from './types.ts'
 
 /**
- * The color object: the scale a channel reads its field through, the members
- * jbrowse-components' displays declare (its ADR-151). The values the field
- * takes are the scale's domain, `range` holds the colors they map onto, and
- * the legend is the guide listing each value with its color.
+ * How a channel turns a field's values into colors, spelt as Vega-Lite and
+ * jbrowse-components' displays spell a scale (jbrowse-components' ADR-238 and
+ * ADR-240).
  *
- * - `scale`: the kind, `categorical` when unset and the only kind so far
+ * - `type`: `ordinal`, the only type so far
  * - `domain`: values in legend order, each taking the `range` color at its own
  *   index; the field's other values follow in natural order
- * - `range`: a palette name (`ggplot`, `set1`, `dark2`, `okabeito`, `tableau`)
- *   or a list of colors, which colors as many values as it holds
- * - `title`: the legend's title, the field when unset
- *
- * Records declaring the same members, `title` included, share one scale.
+ * - `range`: a list of colors, which colors as many values as it holds
+ * - `scheme`: a palette (`ggplot`, `set1`, `dark2`, `okabeito`, `tableau`)
+ *   that colors every value, read where `range` is unset
+ */
+export interface ColorScale {
+  type?: 'ordinal'
+  domain?: string[]
+  range?: string[]
+  scheme?: string
+}
+
+/** the guide a color scale draws: `title` is the field when unset */
+export interface LegendSpec {
+  title?: string
+}
+
+/**
+ * The color object: a channel's `scale` and its `legend`. Records declaring
+ * the same scale and legend title over one table share one scale.
  */
 export interface ColorSpec {
-  scale?: 'categorical'
-  domain?: string[]
-  range?: string | string[]
-  title?: string
+  scale?: ColorScale
+  legend?: LegendSpec
 }
 
 /** a channel record: a field read through a color object */
@@ -50,33 +61,12 @@ export interface ResolvedScale {
   legend: LegendEntry[]
 }
 
-/**
- * The colors a `range` lists, read the way jbrowse-components'
- * `paletteFromSpec` reads a string: a palette name gives undefined here, and a
- * comma-separated list of colors gives the list
- */
-function rangeList(range: ColorSpec['range']) {
-  if (typeof range !== 'string') {
-    return range
-  }
-  if (paletteNamed(range)) {
-    return undefined
-  }
-  const colors = range.split(/,(?![^(]*\))/).map(c => c.trim())
-  return colors.every(c => colord(c).isValid()) ? colors : undefined
-}
-
-function rangeColors(range: ColorSpec['range'], order: string[]) {
-  const list = rangeList(range)
+function scaleColors(scale: ColorScale | undefined, order: string[]) {
+  const list = scale?.range
   return list
     ? new Map(order.slice(0, list.length).map((value, i) => [value, list[i]!]))
     : new Map(
-        Object.entries(
-          createPaletteMap(
-            order,
-            paletteNamed(typeof range === 'string' ? range : undefined),
-          ),
-        ),
+        Object.entries(createPaletteMap(order, paletteNamed(scale?.scheme))),
       )
 }
 
@@ -86,22 +76,21 @@ function rangeColors(range: ColorSpec['range'], order: string[]) {
  * names first, then the rest in natural order, so a value keeps its color when
  * rows are re-ordered, collapsed or filtered.
  *
- * A palette name, or no `range` at all, colors every value: past the end of
- * the palette each takes an evenly spaced hue. A list of colors leaves the
- * values past its end uncolored, so `{domain, range}` colors the values it
- * names and no others.
+ * A `scheme`, or no `range` at all, colors every value: past the end of the
+ * palette each takes an evenly spaced hue. A `range` leaves the values past its
+ * end uncolored, so `{domain, range}` colors the values it names and no others.
  */
 export function resolveScale(
-  spec: ColorSpec | undefined,
+  scale: ColorScale | undefined,
   values: Iterable<string>,
 ): ResolvedScale {
   const present = new Set(values)
-  const listed = new Set(spec?.domain)
+  const listed = new Set(scale?.domain)
   const order = [
     ...listed,
     ...[...present].filter(v => !listed.has(v)).sort(compareGroupKeys),
   ]
-  const colors = rangeColors(spec?.range, order)
+  const colors = scaleColors(scale, order)
   return {
     kind: 'categorical',
     colorOf: (value: string) => colors.get(value),
@@ -133,18 +122,19 @@ export interface SharedScale extends ResolvedScale {
 }
 
 /**
- * The key records share a scale under: the table and the members as declared,
- * with `title` standing in for the field. Two strips over one palette with no
- * title read two fields and list two legends; naming one title gives them one
- * scale and one legend.
+ * The key records share a scale under: the table, the scale as declared and
+ * the legend's title, which stands in for the field. Two strips over one
+ * scheme with no title read two fields and list two legends; naming one title
+ * gives them one scale and one legend.
  */
 export function declarationKey({
   spec,
   field,
   table,
 }: Pick<ScaleUse, 'spec' | 'field' | 'table'>) {
-  const { scale = 'categorical', domain, range, title = field } = spec
-  return JSON.stringify([table, scale, domain, range, title])
+  const { type = 'ordinal', domain, range, scheme } = spec.scale ?? {}
+  const title = spec.legend?.title ?? field
+  return JSON.stringify([table, type, domain, range, scheme, title])
 }
 
 /**
@@ -161,7 +151,7 @@ export function resolveShared(uses: ScaleUse[]) {
     [...groups].map(([key, group]) => {
       const { spec, field } = group[0]!
       const resolved = resolveScale(
-        spec,
+        spec.scale,
         group.flatMap(u => u.values),
       )
       const shown = group[0]!.shown
@@ -170,7 +160,7 @@ export function resolveShared(uses: ScaleUse[]) {
       const scale: SharedScale = {
         ...resolved,
         key,
-        title: spec.title ?? field,
+        title: spec.legend?.title ?? field,
         legend: shown
           ? resolved.legend.filter(entry => shown.has(entry.id))
           : resolved.legend,
@@ -180,49 +170,96 @@ export function resolveShared(uses: ScaleUse[]) {
   )
 }
 
-/** the spelling a color object had before ADR-151's: `{palette}` or `{map}` */
-export interface LegacyScale {
+/**
+ * A scale object in any spelling it has had: today's, and the `{palette}` or
+ * `{map}` written before jbrowse-components' ADR-151
+ */
+export interface LegacyScale extends ColorScale {
   palette?: string
   map?: Record<string, string>
 }
 
-/** the members an older color object may carry in place of today's */
+/**
+ * The color members a record has carried: today's nested `scale` and `legend`,
+ * ADR-151's flat `scale` kind, `domain`, `range` (a list, a palette name or a
+ * comma-separated string of colors) and `title`, and a strip's earlier
+ * `legend` string
+ */
 export interface LegacyColorMembers {
-  scale?: ColorSpec['scale'] | LegacyScale
-  legend?: string
+  scale?: 'categorical' | LegacyScale
+  domain?: string[]
+  range?: string | string[]
+  title?: string
+  legend?: string | LegendSpec
 }
 
 /** a record as an older snapshot, R or Python may write it */
-export type LegacyColor<T extends ColorSpec> = Omit<T, 'scale'> &
+export type LegacyColor<T extends ColorSpec> = Omit<T, keyof ColorSpec> &
   LegacyColorMembers
 
-function liftScale(scale: LegacyColorMembers['scale']): ColorSpec {
-  return typeof scale !== 'object'
-    ? scale === undefined
-      ? {}
-      : { scale }
-    : scale.map
-      ? { domain: Object.keys(scale.map), range: Object.values(scale.map) }
-      : scale.palette === undefined
-        ? {}
-        : { range: scale.palette }
+function flatRange(range: LegacyColorMembers['range']): ColorScale {
+  const colors =
+    typeof range === 'string' && !paletteNamed(range)
+      ? range.split(/,(?![^(]*\))/).map(c => c.trim())
+      : undefined
+  return range === undefined
+    ? {}
+    : typeof range !== 'string'
+      ? { range }
+      : colors?.every(c => colord(c).isValid())
+        ? { range: colors }
+        : { scheme: range }
+}
+
+function liftScale({
+  scale,
+  domain,
+  range,
+}: LegacyColorMembers): ColorScale | undefined {
+  const { palette, map, ...current } = typeof scale === 'object' ? scale : {}
+  const lifted: ColorScale = {
+    ...(domain ? { domain } : {}),
+    ...flatRange(range),
+    ...(palette === undefined ? {} : { scheme: palette }),
+    ...(map ? { domain: Object.keys(map), range: Object.values(map) } : {}),
+    ...current,
+  }
+  return Object.keys(lifted).length > 0 ? lifted : undefined
+}
+
+function liftLegend({
+  title,
+  legend,
+}: LegacyColorMembers): LegendSpec | undefined {
+  const flat = typeof legend === 'string' ? legend : title
+  return typeof legend === 'object'
+    ? legend
+    : flat === undefined
+      ? undefined
+      : { title: flat }
 }
 
 /**
- * Lifts the earlier spelling onto the color object: `{palette: p}` reads as
- * `{range: p}`, `{map: m}` as `{domain: keys(m), range: values(m)}`, and a
- * strip's `legend` as `title`. A member written in the new spelling wins.
+ * Lifts every earlier spelling onto the color object: flat `domain` and
+ * `range` into `scale`, a palette name in `range` or `{palette}` into
+ * `scale.scheme`, `{map}` into `scale.domain` and `scale.range`, and `title` or
+ * a `legend` string into `legend.title`. A member written in today's spelling
+ * wins.
  */
-export function readColor<T extends LegacyColorMembers>({
-  scale,
-  legend,
-  ...rest
-}: T) {
+export function readColor<T extends LegacyColorMembers>(record: T) {
+  const { scale, domain, range, title, legend, ...rest } = record
+  const lifted = liftScale(record)
+  const guide = liftLegend(record)
   return {
-    ...(legend === undefined ? {} : { title: legend }),
-    ...liftScale(scale),
     ...rest,
+    ...(lifted ? { scale: lifted } : {}),
+    ...(guide ? { legend: guide } : {}),
   }
+}
+
+/** a channel written as a bare field name, jbrowse-components' shorthand */
+function readChannel(channel: LegacyColor<ColorChannel> | string) {
+  return typeof channel === 'string' ? { field: channel } : readColor(channel)
 }
 
 export type LegacyEncoding = LegacyColor<ColorEncoding> | LabelEncoding
@@ -231,38 +268,50 @@ export function readEncoding(encoding: LegacyEncoding): Encoding {
   return encoding.channel === 'featureLabel' ? encoding : readColor(encoding)
 }
 
-/** a strip in its earlier spelling, the color object's members on the record */
+/** a strip whose `encoding.fill` may be in an earlier spelling */
+export type LegacyEncodedStrip = Omit<RowStripSpec, 'encoding'> & {
+  encoding: { fill: LegacyColor<ColorChannel> | string }
+}
+
+/** a strip in its earliest spelling, the color members on the record */
 export type LegacyStrip = Omit<RowStripSpec, 'encoding'> &
   LegacyColor<ColorChannel>
 
 /**
- * A features panel's channels in their earlier spelling: `color` for the
- * span's `fill`, and `label` as the bare field name
+ * A features panel's channels in any spelling they have had: `color` for the
+ * span's `fill`, `label` for its `text`, and either as a bare field name
  */
 export interface LegacyFeatureEncoding {
-  fill?: ColorChannel
-  color?: LegacyColor<ColorChannel>
-  label?: string | FieldChannel
+  fill?: LegacyColor<ColorChannel> | string
+  color?: LegacyColor<ColorChannel> | string
+  text?: FieldChannel | string
+  label?: FieldChannel | string
 }
 
 export type LegacyFeatures = Omit<RowFeaturesSpec, 'encoding'> & {
   encoding?: LegacyFeatureEncoding
 }
 
-export type LegacyRowPanel = RowPanelSpec | LegacyStrip | LegacyFeatures
+export type LegacyRowPanel =
+  | RowPanelSpec
+  | LegacyEncodedStrip
+  | LegacyStrip
+  | LegacyFeatures
 
-function readFeatureEncoding({ fill, color, label }: LegacyFeatureEncoding) {
-  const lifted = fill ?? (color ? readColor(color) : undefined)
+function readFeatureEncoding({
+  fill,
+  color,
+  text,
+  label,
+}: LegacyFeatureEncoding) {
+  const body = fill ?? color
+  const words = text ?? label
   return {
-    ...(lifted ? { fill: lifted } : {}),
-    ...(label === undefined
+    ...(body === undefined ? {} : { fill: readChannel(body) }),
+    ...(words === undefined
       ? {}
-      : { label: typeof label === 'string' ? { field: label } : label }),
+      : { text: typeof words === 'string' ? { field: words } : words }),
   }
-}
-
-function readStrip(strip: RowStripSpec | LegacyStrip) {
-  return 'encoding' in strip ? strip : liftStrip(strip)
 }
 
 function liftStrip({
@@ -279,10 +328,16 @@ function liftStrip({
   }
 }
 
+function readStrip(strip: LegacyEncodedStrip | LegacyStrip): RowStripSpec {
+  return 'encoding' in strip
+    ? { ...strip, encoding: { fill: readChannel(strip.encoding.fill) } }
+    : liftStrip(strip)
+}
+
 /**
- * Lifts a strip's flat color members into `encoding.fill`, and a features
- * panel's `encoding.color` into `encoding.fill` and a bare `label` field into
- * `{field}`
+ * Lifts a strip's color members into `encoding.fill`, a features panel's
+ * `encoding.color` into `encoding.fill` and its `label` into `encoding.text`,
+ * and each color object through `readColor`
  */
 export function readRowPanel(panel: LegacyRowPanel): RowPanelSpec {
   return panel.kind === 'features'
@@ -292,52 +347,63 @@ export function readRowPanel(panel: LegacyRowPanel): RowPanelSpec {
     : readStrip(panel)
 }
 
-export type LegacyColumnTrack = ColumnTrackSpec & {
+export type LegacyColumnTrack = Omit<ColumnTrackSpec, 'encoding'> & {
+  encoding?: {
+    color?: LegacyColor<ColorSpec>
+    y?: { scale?: { domainMax?: number } }
+  }
   max?: number
   colors?: Record<string, string>
   scales?: { y?: { domainMax?: number } }
 }
 
 /**
- * Lifts a column track's `colors` onto `encoding.color`, and its `max` and
- * `scales.y.domainMax` onto `encoding.y.domainMax`
+ * Lifts a column track's `colors` and a flat `encoding.color` onto
+ * `encoding.color.scale`, and its `max` and `scales.y.domainMax` onto
+ * `encoding.y.scale.domainMax`
  */
 export function readColumnTrack({
   max,
   colors,
   scales,
+  encoding,
   ...track
 }: LegacyColumnTrack): ColumnTrackSpec {
-  const color =
-    track.encoding?.color ??
-    (colors
-      ? { domain: Object.keys(colors), range: Object.values(colors) }
-      : undefined)
-  const domainMax = track.encoding?.y?.domainMax ?? scales?.y?.domainMax ?? max
+  const color = encoding?.color
+    ? readColor(encoding.color)
+    : colors
+      ? {
+          scale: { domain: Object.keys(colors), range: Object.values(colors) },
+        }
+      : undefined
+  const domainMax = encoding?.y?.scale?.domainMax ?? scales?.y?.domainMax ?? max
   return color || domainMax !== undefined
     ? {
         ...track,
         encoding: {
           ...(color ? { color } : {}),
-          ...(domainMax === undefined ? {} : { y: { domainMax } }),
+          ...(domainMax === undefined ? {} : { y: { scale: { domainMax } } }),
         },
       }
     : track
 }
 
 /**
- * The color a color object gives each value listed, for a reader that keys
- * colors by value, such as the residue letters of a scheme or a text track
+ * The color a scale gives each value listed, for a reader that keys colors by
+ * value, such as the residue letters of a scheme or a text track
  */
-export function colorTable(spec: ColorSpec, values: Iterable<string>) {
+export function colorTable(
+  scale: ColorScale | undefined,
+  values: Iterable<string>,
+) {
   return Object.fromEntries(
-    resolveScale(spec, values).legend.map(e => [e.id, e.color]),
+    resolveScale(scale, values).legend.map(e => [e.id, e.color]),
   )
 }
 
 /**
- * The letter-to-color table an object `colorScheme` gives, `{domain, range}`
- * or the earlier `{map}`
+ * The letter-to-color table an object `colorScheme` gives, a `{domain, range}`
+ * scale or the earlier `{map}`
  */
 export function letterColors(scheme: Exclude<ColorScheme, string>) {
   return 'map' in scheme ? scheme.map : colorTable(scheme, scheme.domain ?? [])

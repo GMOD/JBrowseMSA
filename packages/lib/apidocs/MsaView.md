@@ -194,9 +194,9 @@ embeddedMode: stripDefault(types.boolean, false)
 #### property: encodings
 
 what the viewer's own marks read from `rowData` or the feature table:
-`{channel, field, range?, domain?, title?}` per color channel, and
-`{channel: "featureLabel", field}`. The earlier `scale: {palette}` and
-`scale: {map}` read as `range` and `domain`. See docs/layers.md
+`{channel, field, scale?, legend?}` per color channel, and
+`{channel: "featureLabel", field}`. Every earlier spelling of the color object
+reads through `readColor`. See docs/layers.md
 
 ```js
 encodings: stripDefault(
@@ -333,7 +333,8 @@ panels drawn between the tree and the alignment:
 a `rowData` field, and
 `{kind: "features", x, encoding?, transform?, width?, header?}` draws the spans
 the GFF carries. A strip's earlier flat color members and a features panel's
-`encoding.color` read as `encoding.fill`. See docs/layers.md
+`encoding.color` read as `encoding.fill`, and its `label` as `encoding.text`.
+See docs/layers.md
 
 ```js
 rowPanels: stripDefault(
@@ -1237,7 +1238,7 @@ overlay and the SVG export's reserved column. The domain overlay produces the
 first, listing the `featureFill` scale where an encoding names one. Every scale
 a row-table encoding or a row panel reads produces one more, keyed by its
 declaration, so two channels or two strips declaring one scale list it once, and
-strips over eight fields naming one `title` list one legend between them
+strips over eight fields naming one `legend.title` list one legend between them
 
 ```js
 legends: Legend[]
@@ -2648,7 +2649,7 @@ setRowHeight: (n: number) => void
 replace the panels drawn between the tree and the alignment
 
 ```js
-setRowPanels: (panels: (RowStripSpec | RowFeaturesSpec | LegacyStrip | LegacyFeatures)[]) => void
+setRowPanels: (panels: (RowStripSpec | RowFeaturesSpec | LegacyEncodedStrip | LegacyStrip | LegacyFeatures)[]) => void
 ```
 
 #### action: setScrollX

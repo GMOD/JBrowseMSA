@@ -92,7 +92,7 @@ test('a text track letter contrasts against its own color, not the alignment sch
       kind: 'text',
       data: '1122',
       encoding: {
-        color: { domain: ['1', '2'], range: ['#000080', '#ffff00'] },
+        color: { scale: { domain: ['1', '2'], range: ['#000080', '#ffff00'] } },
       },
     },
   ]

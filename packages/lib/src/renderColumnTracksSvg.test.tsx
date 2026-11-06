@@ -84,8 +84,10 @@ test('a text track from data exports its letters and its own colors', async () =
       data: '1231',
       encoding: {
         color: {
-          domain: ['1', '2', '3'],
-          range: ['#aaaaaa', '#bbbbbb', '#cccccc'],
+          scale: {
+            domain: ['1', '2', '3'],
+            range: ['#aaaaaa', '#bbbbbb', '#cccccc'],
+          },
         },
       },
     },

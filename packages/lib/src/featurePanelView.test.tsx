@@ -68,7 +68,7 @@ beforeEach(() => {
         kind: 'features',
         x: 'position',
         width: 216,
-        encoding: { label: { field: 'Name' } },
+        encoding: { text: { field: 'Name' } },
         transform: [{ type: 'align', on: 'genE' }],
       },
     ],

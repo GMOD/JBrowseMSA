@@ -109,7 +109,7 @@ export interface MSAViewerProps {
   rowData?: RowDataInput
   /**
    * what the viewer's marks read from a table:
-   * `{channel, field, range?, domain?, title?}`, where `channel` is
+   * `{channel, field, scale?, legend?}`, where `channel` is
    * `tipLabel`, `rowTint` or `branch` over `rowData`, or `featureFill` over
    * the annotations, and `{channel: 'featureLabel', field}` (see
    * docs/layers.md)
@@ -117,9 +117,9 @@ export interface MSAViewerProps {
   encodings?: Encoding[]
   /**
    * panels between the tree and the alignment:
-   * `{kind: 'strip', encoding: {fill: {field, range?, domain?, title?}}}`
+   * `{kind: 'strip', encoding: {fill: {field, scale?, legend?}}}`
    * fills one cell per row from a `rowData` field, and
-   * `{kind: 'features', x, encoding?: {fill?, label?}}` draws the annotation
+   * `{kind: 'features', x, encoding?: {fill?, text?}}` draws the annotation
    * spans per row (see docs/layers.md)
    */
   rowPanels?: RowPanelSpec[]

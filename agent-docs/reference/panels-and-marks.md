@@ -30,9 +30,11 @@ Two target figures, in order of work:
   one is a draw function.
 - **Channel.** A visual property of a mark that a field feeds: `color`, `label`,
   `glyph`, `x`, `x2`.
-- **Scale.** How a channel reads a field: the color object's `scale`, `domain`,
-  `range` and `title`, `scales.ts`. A categorical scale takes a palette name or
-  a color list as its `range` and produces a legend; the continuous kinds are in
+- **Scale.** How a channel reads a field: the color object's
+  `scale: {type, domain, range, scheme}` and `legend: {title}`, `scales.ts`,
+  spelt as Vega-Lite and jbrowse-components' ADR-238 and ADR-240 spell them. An
+  ordinal scale takes a palette name as its `scheme` or a color list as its
+  `range` and produces a legend; the continuous kinds are in
   `ideas/ready/scales-and-guides.md`.
 - **Transform.** A change of coordinates before drawing. The viewer has one
   today, the projection of residue positions through gaps, and gains one more,
@@ -111,7 +113,7 @@ What the layout gives the API:
 "rowPanels": [
   {
     "kind": "strip",
-    "encoding": { "fill": { "field": "HA", "range": "ggplot" } },
+    "encoding": { "fill": { "field": "HA", "scale": { "scheme": "ggplot" } } },
     "width": 12
   },
   {
@@ -123,7 +125,7 @@ What the layout gives the API:
     "kind": "features",
     "x": "position",
     "encoding": {
-      "fill": { "field": "Name", "range": "ggplot" },
+      "fill": { "field": "Name", "scale": { "scheme": "ggplot" } },
       "label": { "field": "Name" }
     },
     "transform": [{ "type": "align", "on": "genE" }]
@@ -137,22 +139,28 @@ a `gheatmap`, and one `features` record reproduces the gene figure. Each record
 carries its own `encoding`, the way each mark in `LinearMarkDisplay` does, so a
 panel's channels sit beside the panel they color. A channel is named for the
 part of the mark it paints, as `residueEncoding` names it: `fill` for a strip's
-cell and a span's body, `color` for ink, and `y` for a bar's height, whose
-`domainMax` sits on the channel beside it as `domain` and `range` sit on a color
-channel. `label` takes `{field}` like the color channels, which is Vega-Lite's
-`text: {field}`. A strip's `width` is in pixels and defaults to the row height,
-and `header` defaults to the field, covering `gheatmap`'s `width` and
-`custom_column_labels`. A strip over a field every row shares one scale, so
-eight strips of segment lineages share one legend when they declare the same
-members and `title`.
+cell and a span's body, `color` for ink, `text` for a span's label, and `y` for
+a bar's height. Each channel nests its `scale` and `legend` the way
+jbrowse-components' displays do, so a bar's top is `y.scale.domainMax` and a
+color channel's palette is `scale.scheme`. jbrowse-components paints every body
+with `color`; `fill` stays here because a cell carries a letter, a second paint
+its marks lack, and Vega-Lite takes `fill` as the explicit body channel. A
+strip's `width` is in pixels and defaults to the row height, and `header`
+defaults to the field, covering `gheatmap`'s `width` and `custom_column_labels`.
+A strip over a field every row shares one scale, so eight strips of segment
+lineages share one legend when they declare the same scale and `legend.title`.
 
 The top-level `encodings` array covers channels on the marks the viewer always
 draws:
 
 ```json
 "encodings": [
-  { "channel": "tipLabel", "field": "lineage", "range": "ggplot" },
-  { "channel": "rowTint", "field": "clade", "domain": ["19B"], "range": ["#e41a1c"] },
+  { "channel": "tipLabel", "field": "lineage", "scale": { "scheme": "ggplot" } },
+  {
+    "channel": "rowTint",
+    "field": "clade",
+    "scale": { "domain": ["19B"], "range": ["#e41a1c"] }
+  },
   { "channel": "branch", "field": "clade" },
   { "channel": "featureFill", "field": "Name" }
 ]

@@ -31,8 +31,7 @@ const panels: RowPanelSpec[] = [
     encoding: {
       fill: {
         field: 'HA',
-        domain: ['H5', 'H7'],
-        range: ['#e41a1c', '#377eb8'],
+        scale: { domain: ['H5', 'H7'], range: ['#e41a1c', '#377eb8'] },
       },
     },
     width: 12,

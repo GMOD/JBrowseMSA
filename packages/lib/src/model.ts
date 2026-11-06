@@ -718,10 +718,9 @@ function stateModelFactory({
         /**
          * #property
          * what the viewer's own marks read from `rowData` or the feature
-         * table: `{channel, field, range?, domain?, title?}` per color
-         * channel, and `{channel: "featureLabel", field}`. The earlier
-         * `scale: {palette}` and `scale: {map}` read as `range` and `domain`.
-         * See docs/layers.md
+         * table: `{channel, field, scale?, legend?}` per color channel, and
+         * `{channel: "featureLabel", field}`. Every earlier spelling of the
+         * color object reads through `readColor`. See docs/layers.md
          */
         encodings: stripDefault(
           types.array(
@@ -739,7 +738,8 @@ function stateModelFactory({
          * `{kind: "features", x, encoding?, transform?, width?, header?}`
          * draws the spans the GFF carries. A strip's earlier flat color
          * members and a features panel's `encoding.color` read as
-         * `encoding.fill`. See docs/layers.md
+         * `encoding.fill`, and its `label` as `encoding.text`. See
+         * docs/layers.md
          */
         rowPanels: stripDefault(
           types.array(
@@ -2399,7 +2399,7 @@ function stateModelFactory({
                 return [track.id, { arcs }] as const
               }
               if (track.kind === 'bar') {
-                const max = track.encoding?.y?.domainMax ?? 1
+                const max = track.encoding?.y?.scale?.domainMax ?? 1
                 const values = skip(project(track, track.values ?? [], 0)).map(
                   v => Math.min(1, Math.max(0, v / max)),
                 )
@@ -2451,8 +2451,8 @@ function stateModelFactory({
                   barColor: track.color,
                   arcColor: track.color,
                   customColorScheme: track.encoding?.color
-                    ? colorTable(track.encoding.color, [
-                        ...(track.encoding.color.domain ?? []),
+                    ? colorTable(track.encoding.color.scale, [
+                        ...(track.encoding.color.scale?.domain ?? []),
                         ...new Set(track.data),
                       ])
                     : undefined,
@@ -3779,7 +3779,7 @@ function stateModelFactory({
        * names one. Every scale a row-table encoding or a row panel reads
        * produces one more, keyed by its declaration, so two channels or two
        * strips declaring one scale list it once, and strips over eight fields
-       * naming one `title` list one legend between them
+       * naming one `legend.title` list one legend between them
        */
       get legends(): Legend[] {
         const { featureFillEncoding } = this
@@ -4130,7 +4130,8 @@ function stateModelFactory({
        */
       get resolvedEncodings(): ResolvedEncoding[] {
         return this.colorEncodings.map(encoding => ({
-          ...encoding,
+          channel: encoding.channel,
+          field: encoding.field,
           ...this.scaleOf(encoding, encodingTable(encoding)),
         }))
       },
@@ -4219,7 +4220,7 @@ function stateModelFactory({
             const encoding = fill
               ? { field: fill.field, ...this.scaleOf(fill, 'features') }
               : featureFillEncoding
-            const label = panel.encoding?.label?.field
+            const label = panel.encoding?.text?.field
             return {
               kind: panel.kind,
               x: panel.x,

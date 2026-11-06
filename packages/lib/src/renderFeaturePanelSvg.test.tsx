@@ -28,10 +28,9 @@ const panels: RowPanelSpec[] = [
     encoding: {
       fill: {
         field: 'class',
-        domain: ['core', 'accessory'],
-        range: ['#e41a1c', '#377eb8'],
+        scale: { domain: ['core', 'accessory'], range: ['#e41a1c', '#377eb8'] },
       },
-      label: { field: 'Name' },
+      text: { field: 'Name' },
     },
     transform: [{ type: 'align', on: 'genE' }],
   },

@@ -27,29 +27,29 @@ test('a spec with no range takes the ggplot colors of its size', () => {
   ])
 })
 
-test('a named range colors the domain in its own order', () => {
-  const { colorOf } = resolveScale({ range: 'set1' }, ['clade B', 'clade A'])
+test('a scheme colors the domain in its own order', () => {
+  const { colorOf } = resolveScale({ scheme: 'set1' }, ['clade B', 'clade A'])
   expect(colorOf('clade A')).toBe(set1[0])
   expect(colorOf('clade B')).toBe(set1[1])
 })
 
 test('okabeIto and tableau10 read as the palettes they alias', () => {
-  expect(resolveScale({ range: 'okabeIto' }, ['a']).colorOf('a')).toBe(
+  expect(resolveScale({ scheme: 'okabeIto' }, ['a']).colorOf('a')).toBe(
     namedPalettes.okabeito![0],
   )
-  expect(resolveScale({ range: 'tableau10' }, ['a']).colorOf('a')).toBe(
+  expect(resolveScale({ scheme: 'tableau10' }, ['a']).colorOf('a')).toBe(
     namedPalettes.tableau![0],
   )
 })
 
 test('an unknown palette name falls back to the ggplot colors', () => {
-  const { colorOf } = resolveScale({ range: 'brewer-nine' }, ['a', 'b'])
+  const { colorOf } = resolveScale({ scheme: 'brewer-nine' }, ['a', 'b'])
   expect(colorOf('a')).toBe('#F8766D')
 })
 
 test('a domain past a named palette gets a hue of its own per value', () => {
   const values = Array.from({ length: 12 }, (_, i) => `v${i}`)
-  const { colorOf, legend } = resolveScale({ range: 'dark2' }, values)
+  const { colorOf, legend } = resolveScale({ scheme: 'dark2' }, values)
   expect(new Set(values.map(colorOf)).size).toBe(12)
   expect(legend).toHaveLength(12)
 })
@@ -79,15 +79,17 @@ test('a range list colors as many values as it holds', () => {
   ])
 })
 
-test('a comma-separated range reads as a list of colors', () => {
-  const { colorOf } = resolveScale({ range: '#111111, rgb(0,0,0)' }, ['a', 'b'])
+test('an earlier comma-separated range reads as a list of colors', () => {
+  const { scale } = readColor({ field: 'f', range: '#111111, rgb(0,0,0)' })
+  expect(scale).toEqual({ range: ['#111111', 'rgb(0,0,0)'] })
+  const { colorOf } = resolveScale(scale, ['a', 'b'])
   expect(colorOf('a')).toBe('#111111')
   expect(colorOf('b')).toBe('rgb(0,0,0)')
 })
 
-test('domain lists values first in its order, and spends range from there', () => {
+test('domain lists values first in its order, and spends the scheme from there', () => {
   const { colorOf, legend } = resolveScale(
-    { domain: ['zeta', 'alpha'], range: 'set1' },
+    { domain: ['zeta', 'alpha'], scheme: 'set1' },
     ['alpha', 'beta', 'zeta'],
   )
   expect(legend.map(e => e.id)).toEqual(['zeta', 'alpha', 'beta'])
@@ -119,20 +121,23 @@ test('the domain sorts, so row order does not move a color', () => {
 })
 
 test('an empty field gives an empty legend and no colors', () => {
-  const { colorOf, legend } = resolveScale({ range: 'set1' }, [])
+  const { colorOf, legend } = resolveScale({ scheme: 'set1' }, [])
   expect(legend).toEqual([])
   expect(colorOf('anything')).toBeUndefined()
   expect(colorOf('constructor')).toBeUndefined()
 })
 
 test('resolving two fields apart colors a shared value two ways', () => {
-  const pb2 = resolveScale({ range: 'set1' }, ['am2.2', 'am4'])
-  const pb1 = resolveScale({ range: 'set1' }, ['am4', 'eu1'])
+  const pb2 = resolveScale({ scheme: 'set1' }, ['am2.2', 'am4'])
+  const pb1 = resolveScale({ scheme: 'set1' }, ['am4', 'eu1'])
   expect(pb2.colorOf('am4')).not.toBe(pb1.colorOf('am4'))
 })
 
 test('one declaration resolves once over both fields', () => {
-  const spec = { range: 'set1', title: 'segment lineage' }
+  const spec = {
+    scale: { scheme: 'set1' },
+    legend: { title: 'segment lineage' },
+  }
   const uses = [
     { spec, field: 'PB2', table: 'rows' as const, values: ['am2.2', 'am4'] },
     { spec, field: 'PB1', table: 'rows' as const, values: ['am4', 'eu1'] },
@@ -151,33 +156,68 @@ test('one declaration resolves once over both fields', () => {
 test('a title stands in for the field in the declaration', () => {
   const key = (c: ColorChannel) =>
     declarationKey({ spec: c, field: c.field, table: 'rows' })
-  expect(key({ field: 'PB2', range: 'set1' })).not.toBe(
-    key({ field: 'PB1', range: 'set1' }),
+  const set1Scale = { scheme: 'set1' }
+  expect(key({ field: 'PB2', scale: set1Scale })).not.toBe(
+    key({ field: 'PB1', scale: set1Scale }),
   )
-  expect(key({ field: 'PB2', range: 'set1', title: 't' })).toBe(
-    key({ field: 'PB1', range: 'set1', title: 't', scale: 'categorical' }),
+  expect(key({ field: 'PB2', scale: set1Scale, legend: { title: 't' } })).toBe(
+    key({
+      field: 'PB1',
+      scale: { type: 'ordinal', scheme: 'set1' },
+      legend: { title: 't' },
+    }),
   )
 })
 
-test('palette reads as range, map as domain and range, legend as title', () => {
+test('palette reads as scheme, map as domain and range, legend as title', () => {
   expect(readColor({ field: 'f', scale: { palette: 'set1' } })).toEqual({
     field: 'f',
-    range: 'set1',
+    scale: { scheme: 'set1' },
   })
   expect(
     readColor({
       field: 'f',
       scale: { map: { a: '#111111', b: '#222222' } },
     }),
-  ).toEqual({ field: 'f', domain: ['a', 'b'], range: ['#111111', '#222222'] })
+  ).toEqual({
+    field: 'f',
+    scale: { domain: ['a', 'b'], range: ['#111111', '#222222'] },
+  })
   expect(readColor({ field: 'f', legend: 'lineage' })).toEqual({
     field: 'f',
-    title: 'lineage',
+    legend: { title: 'lineage' },
   })
   expect(readColor({ field: 'f', scale: {} })).toEqual({
     field: 'f',
   })
-  const current = { field: 'f', scale: 'categorical' as const, range: 'set1' }
+})
+
+test('the flat members nest under scale and legend', () => {
+  expect(
+    readColor({
+      field: 'f',
+      scale: 'categorical',
+      domain: ['a'],
+      range: 'set1',
+      title: 'lineage',
+    }),
+  ).toEqual({
+    field: 'f',
+    scale: { domain: ['a'], scheme: 'set1' },
+    legend: { title: 'lineage' },
+  })
+  expect(readColor({ field: 'f', range: ['#111111'] })).toEqual({
+    field: 'f',
+    scale: { range: ['#111111'] },
+  })
+})
+
+test('a color object in the current spelling reads unchanged', () => {
+  const current = {
+    field: 'f',
+    scale: { type: 'ordinal' as const, domain: ['a'], scheme: 'set1' },
+    legend: { title: 'lineage' },
+  }
   expect(readColor(current)).toEqual(current)
 })
 
@@ -197,8 +237,8 @@ test('a column track reads colors as encoding.color and max as domainMax', () =>
     kind: 'text',
     data: '12',
     encoding: {
-      color: { domain: ['1'], range: ['#111111'] },
-      y: { domainMax: 2 },
+      color: { scale: { domain: ['1'], range: ['#111111'] } },
+      y: { scale: { domainMax: 2 } },
     },
   })
 })
@@ -212,9 +252,9 @@ test('a column track in the new spelling wins over its earlier members', () => {
       values: [1],
       max: 2,
       scales: { y: { domainMax: 3 } },
-      encoding: { y: { domainMax: 4 } },
+      encoding: { y: { scale: { domainMax: 4 } } },
     }).encoding,
-  ).toEqual({ y: { domainMax: 4 } })
+  ).toEqual({ y: { scale: { domainMax: 4 } } })
 })
 
 test('a scheme object reads in either spelling', () => {

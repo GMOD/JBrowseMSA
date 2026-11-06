@@ -36,7 +36,9 @@ test('a strip colors each row by its field', () => {
   const model = makeModel([
     {
       kind: 'strip',
-      encoding: { fill: { field: 'HA', domain: ['H5'], range: ['#e41a1c'] } },
+      encoding: {
+        fill: { field: 'HA', scale: { domain: ['H5'], range: ['#e41a1c'] } },
+      },
     },
   ])
   const [panel] = model.resolvedRowPanels
@@ -94,8 +96,14 @@ test('a strip and an encoding over one field share one legend', () => {
 
 test('two strips declaring one scale over one field list it once', () => {
   const model = makeModel([
-    { kind: 'strip', encoding: { fill: { field: 'HA', range: 'set1' } } },
-    { kind: 'strip', encoding: { fill: { field: 'HA', range: 'set1' } } },
+    {
+      kind: 'strip',
+      encoding: { fill: { field: 'HA', scale: { scheme: 'set1' } } },
+    },
+    {
+      kind: 'strip',
+      encoding: { fill: { field: 'HA', scale: { scheme: 'set1' } } },
+    },
     { kind: 'strip', encoding: { fill: { field: 'NA' } } },
   ])
   expect(model.legends.map(l => l.title)).toEqual(['HA', 'NA'])
@@ -104,7 +112,10 @@ test('two strips declaring one scale over one field list it once', () => {
 test('two scales over one field list two legends', () => {
   const model = makeModel([
     { kind: 'strip', encoding: { fill: { field: 'HA' } } },
-    { kind: 'strip', encoding: { fill: { field: 'HA', range: 'set1' } } },
+    {
+      kind: 'strip',
+      encoding: { fill: { field: 'HA', scale: { scheme: 'set1' } } },
+    },
   ])
   expect(model.legends.map(l => l.title)).toEqual(['HA', 'HA'])
   expect(new Set(model.legends.map(l => l.id)).size).toBe(2)
@@ -112,9 +123,11 @@ test('two scales over one field list two legends', () => {
 
 test('strips naming one title list their values under it once', () => {
   const colors = {
-    domain: ['H5', 'H7', 'N1'],
-    range: ['#e41a1c', '#377eb8', '#4daf4a'],
-    title: 'lineage',
+    scale: {
+      domain: ['H5', 'H7', 'N1'],
+      range: ['#e41a1c', '#377eb8', '#4daf4a'],
+    },
+    legend: { title: 'lineage' },
   }
   const model = makeModel([
     { kind: 'strip', encoding: { fill: { field: 'HA', ...colors } } },
@@ -141,13 +154,21 @@ test('two strips over one palette and title color a shared value alike', () => {
       {
         kind: 'strip',
         encoding: {
-          fill: { field: 'PB2', range: 'set1', title: 'segment lineage' },
+          fill: {
+            field: 'PB2',
+            scale: { scheme: 'set1' },
+            legend: { title: 'segment lineage' },
+          },
         },
       },
       {
         kind: 'strip',
         encoding: {
-          fill: { field: 'PB1', range: 'set1', title: 'segment lineage' },
+          fill: {
+            field: 'PB1',
+            scale: { scheme: 'set1' },
+            legend: { title: 'segment lineage' },
+          },
         },
       },
     ],
@@ -195,9 +216,8 @@ test('a snapshot in the earlier spelling reads as the color object', () => {
       encoding: {
         fill: {
           field: 'HA',
-          domain: ['H7'],
-          range: ['#377eb8'],
-          title: 'lineage',
+          scale: { domain: ['H7'], range: ['#377eb8'] },
+          legend: { title: 'lineage' },
         },
       },
     },
@@ -205,8 +225,8 @@ test('a snapshot in the earlier spelling reads as the color object', () => {
       kind: 'features',
       x: 'column',
       encoding: {
-        fill: { field: 'Name', range: 'set1' },
-        label: { field: 'Name' },
+        fill: { field: 'Name', scale: { scheme: 'set1' } },
+        text: { field: 'Name' },
       },
     },
   ])
@@ -284,9 +304,13 @@ test('a setter lifts the earlier spelling too', () => {
   expect(model.encodings[0]).toEqual({
     channel: 'tipLabel',
     field: 'HA',
-    range: 'set1',
+    scale: { scheme: 'set1' },
   })
-  expect(model.columnTracks[0]!.encoding).toEqual({ y: { domainMax: 2 } })
+  expect(model.columnTracks[0]!.encoding).toEqual({
+    y: { scale: { domainMax: 2 } },
+  })
   expect(model.columnTrackContent.get('t')?.values).toEqual([0.5, 1])
-  expect(model.columnTracks[1]!.encoding).toEqual({ y: { domainMax: 4 } })
+  expect(model.columnTracks[1]!.encoding).toEqual({
+    y: { scale: { domainMax: 4 } },
+  })
 })

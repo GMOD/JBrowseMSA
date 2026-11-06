@@ -151,7 +151,7 @@ const encodingModel = (encodings: Encoding[]) =>
 
 test('an encoding legend draws in both renderings', async () => {
   const model = encodingModel([
-    { channel: 'tipLabel', field: 'clade', range: 'set1' },
+    { channel: 'tipLabel', field: 'clade', scale: { scheme: 'set1' } },
   ])
   expect(model.legends).toEqual([
     {

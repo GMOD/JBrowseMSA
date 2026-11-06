@@ -49,7 +49,7 @@ export default function ColumnTracks() {
           name: 'Hydropathy (human)',
           kind: 'bar',
           values: residues.split('').map(aa => (hydropathy[aa] ?? 0) + 4.5),
-          encoding: { y: { domainMax: 9 } },
+          encoding: { y: { scale: { domainMax: 9 } } },
           color: '#6a51a3',
           row: human,
         },

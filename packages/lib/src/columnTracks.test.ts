@@ -31,7 +31,7 @@ test('column-indexed values normalize by max and clamp to 0..1', () => {
       name: 'T',
       kind: 'bar',
       values: [1, 2, 4, -1],
-      encoding: { y: { domainMax: 2 } },
+      encoding: { y: { scale: { domainMax: 2 } } },
     },
   ])
   expect(model.columnTrackContent.get('t')?.values).toEqual([0.5, 1, 1, 0])
@@ -62,7 +62,7 @@ test('hiding gappy columns drops them from the values and the text', () => {
       name: 'T',
       kind: 'bar',
       values: [1, 2, 3, 4, 5, 6, 7],
-      encoding: { y: { domainMax: 7 } },
+      encoding: { y: { scale: { domainMax: 7 } } },
     },
     { id: 'f', name: 'F', kind: 'text', data: 'abcdefg' },
   ])
@@ -81,7 +81,7 @@ test('data tracks join the track list with their own color and height', () => {
       name: 'Frame',
       kind: 'text',
       data: '1',
-      encoding: { color: { domain: ['1'], range: ['blue'] } },
+      encoding: { color: { scale: { domain: ['1'], range: ['blue'] } } },
     },
   ])
   const ids = model.tracks.map(t => t.model.id)

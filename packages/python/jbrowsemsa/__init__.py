@@ -22,8 +22,8 @@ positions and aligned on one gene, which needs no alignment at all::
                 "width": 320,
                 "header": "neighborhood",
                 "encoding": {
-                    "fill": {"field": "Name", "range": "set1"},
-                    "label": {"field": "Name"},
+                    "fill": {"field": "Name", "scale": {"scheme": "set1"}},
+                    "text": {"field": "Name"},
                 },
                 "transform": [{"type": "align", "on": "genE"}],
             }

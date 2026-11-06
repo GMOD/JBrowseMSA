@@ -110,8 +110,7 @@ test('resolvedEncodings resolves each scale over the values in the table', () =>
     {
       channel: 'rowTint',
       field: 'clade',
-      domain: ['19B'],
-      range: ['#e41a1c'],
+      scale: { domain: ['19B'], range: ['#e41a1c'] },
     },
   ])
 
@@ -157,8 +156,7 @@ test('tip label colors and row tints follow the encodings', () => {
     {
       channel: 'rowTint',
       field: 'clade',
-      domain: ['19B'],
-      range: ['#ff0000'],
+      scale: { domain: ['19B'], range: ['#ff0000'] },
     },
   ])
 
@@ -180,8 +178,7 @@ test('a tint color that carries its own alpha keeps it', () => {
     {
       channel: 'rowTint',
       field: 'clade',
-      domain: ['19B'],
-      range: ['rgba(0,0,255,0.6)'],
+      scale: { domain: ['19B'], range: ['rgba(0,0,255,0.6)'] },
     },
   ])
   expect(model.rowTints?.[0]).toBe('rgba(0,0,255,0.6)')
@@ -209,8 +206,7 @@ test('the branch channel colors each clade whose tips agree', () => {
     {
       channel: 'branch',
       field: 'clade',
-      domain: ['left', 'right'],
-      range: ['#ff0000', '#0000ff'],
+      scale: { domain: ['left', 'right'], range: ['#ff0000', '#0000ff'] },
     },
   ])
 
@@ -234,8 +230,7 @@ test('a branch value the scale gives no color takes none', () => {
     {
       channel: 'branch',
       field: 'clade',
-      domain: ['19B'],
-      range: ['#ff0000'],
+      scale: { domain: ['19B'], range: ['#ff0000'] },
     },
   ])
 

@@ -83,7 +83,7 @@ const insulinTracks = [
     name: 'Hydropathy',
     kind: 'bar',
     values: [...insulinHuman].map(aa => (HYDROPATHY[aa] ?? 0) + 4.5),
-    encoding: { y: { domainMax: 9 } },
+    encoding: { y: { scale: { domainMax: 9 } } },
     color: '#6a51a3',
     row: 'Human',
     height: 55,
@@ -95,8 +95,10 @@ const insulinTracks = [
     data: [...insulinHuman].map((_, i) => chainOf(i + 1)).join(''),
     encoding: {
       color: {
-        domain: [...CHAINS.map(c => c.char), '.'],
-        range: [...CHAINS.map(c => c.color), '#fafafa'],
+        scale: {
+          domain: [...CHAINS.map(c => c.char), '.'],
+          range: [...CHAINS.map(c => c.color), '#fafafa'],
+        },
       },
     },
     row: 'Human',
@@ -222,13 +224,15 @@ const cladeMark = (clade, mark, extra) => ({
 const [markedClade, collapsedClade] = pureSubclassClades
 
 const PHENOTYPE_COLORS = {
-  domain: [
-    'broad-spectrum',
-    'extended-spectrum',
-    'inhibitor-resistant broad-spectrum',
-    'inhibitor-resistant extended-spectrum',
-  ],
-  range: ['#4e79a7', '#e15759', '#59a14f', '#b07aa1'],
+  scale: {
+    domain: [
+      'broad-spectrum',
+      'extended-spectrum',
+      'inhibitor-resistant broad-spectrum',
+      'inhibitor-resistant extended-spectrum',
+    ],
+    range: ['#4e79a7', '#e15759', '#59a14f', '#b07aa1'],
+  },
 }
 const temAmblerPositions = Object.keys(temRowData['TEM-1'])
   .filter(field => field.startsWith('Ambler '))
@@ -260,8 +264,10 @@ const temLetters = [
   ),
 ].sort((a, b) => a.localeCompare(b))
 const RESIDUE_COLORS = {
-  domain: temLetters,
-  range: temLetters.map((_, i) => LETTER_PALETTE[i % LETTER_PALETTE.length]),
+  scale: {
+    domain: temLetters,
+    range: temLetters.map((_, i) => LETTER_PALETTE[i % LETTER_PALETTE.length]),
+  },
 }
 
 const temMatrix = [
@@ -273,7 +279,11 @@ const temMatrix = [
   ...temAmblerPositions.map(p => ({
     kind: 'strip',
     encoding: {
-      fill: { field: `Ambler ${p}`, ...RESIDUE_COLORS, title: 'residue' },
+      fill: {
+        field: `Ambler ${p}`,
+        ...RESIDUE_COLORS,
+        legend: { title: 'residue' },
+      },
     },
     width: 12,
     header: p,
@@ -310,8 +320,10 @@ const TRP_FILES = {
 }
 // the four values the role attribute takes across trp-neighborhoods.gff
 const ROLE_COLORS = {
-  domain: ['trp', 'regulator', 'pseudogene', 'other'],
-  range: ['#4e79a7', '#e15759', '#f28e2b', '#d9d9d9'],
+  scale: {
+    domain: ['trp', 'regulator', 'pseudogene', 'other'],
+    range: ['#4e79a7', '#e15759', '#f28e2b', '#d9d9d9'],
+  },
 }
 const trpPanel = extra => ({
   kind: 'features',
@@ -320,7 +332,7 @@ const trpPanel = extra => ({
   header: 'trp neighborhood',
   encoding: {
     fill: { field: 'role', ...ROLE_COLORS },
-    label: { field: 'Name' },
+    text: { field: 'Name' },
   },
   transform: [{ type: 'align', on: 'trpB' }],
   ...extra,
@@ -397,8 +409,7 @@ export const specs = [
         {
           channel: 'rowTint',
           field: 'subclass',
-          domain: ['CEPHALOSPORIN'],
-          range: ['#e15759'],
+          scale: { domain: ['CEPHALOSPORIN'], range: ['#e15759'] },
         },
       ],
     }),
@@ -465,7 +476,7 @@ export const specs = [
         {
           channel: 'featureFill',
           field: 'description',
-          range: 'set1',
+          scale: { scheme: 'set1' },
         },
         { channel: 'featureLabel', field: 'description' },
       ],
@@ -526,7 +537,7 @@ export const linkSpecs = [
         {
           name: 'ClinVar',
           color: '#c0392b',
-          encoding: { y: { domainMax: 8 } },
+          encoding: { y: { scale: { domainMax: 8 } } },
           start: 104,
           values: [2, 1, 0, 0, 2, 4],
         },

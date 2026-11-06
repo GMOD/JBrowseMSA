@@ -53,7 +53,7 @@ export default function Globin() {
           kind: 'bar',
           row: sickle.alphaMissense.row,
           values: sickle.alphaMissense.values,
-          encoding: { y: { domainMax: sickle.alphaMissense.max } },
+          encoding: { y: { scale: { domainMax: sickle.alphaMissense.max } } },
           color: '#8e44ad',
           height: 60,
         },

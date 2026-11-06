@@ -233,12 +233,15 @@ the numbers behind it.
   both renderings stack top to bottom, giving each legend a title row once there
   is more than one. The domain overlay, the row-table encodings and the row
   panels are its producers, each keyed by its scale's declaration
-  (`resolvedScales`), so a matrix of strips naming one `title` lists one legend.
-  A `snapshotProcessor` on `encodings`, `rowPanels` and `columnTracks` lifts the
-  earlier spellings (`scale: {palette}`, `{map}`, `legend`, `colors`, `max`) on
-  the way in, so no stored record has them. The property behind the overlay's
-  collapse toggle stays `showDomainLegend`, because that name travels in the
-  shared URL.
+  (`resolvedScales`), so a matrix of strips naming one `legend.title` lists one
+  legend. A channel nests `scale: {type, domain, range, scheme}` and
+  `legend: {title}`, as jbrowse-components' displays do since its ADR-238. A
+  `snapshotProcessor` on `encodings`, `rowPanels` and `columnTracks` lifts the
+  earlier spellings (flat `domain`/`range`/`title`, a palette name in `range`,
+  `scale: {palette}`, `{map}`, `legend` strings, `colors`, `max`,
+  `scales.y.domainMax`, a features panel's `color` and `label`) on the way in,
+  so no stored record has them. The property behind the overlay's collapse
+  toggle stays `showDomainLegend`, because that name travels in the shared URL.
 - The viewer calls no remote compute queue and runs no analysis long enough to
   freeze the tab. The one exception is neighbor joining, capped at
   `maxNeighborJoiningRows`, because on a small alignment it is faster than

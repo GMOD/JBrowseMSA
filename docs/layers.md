@@ -50,7 +50,7 @@ through unchanged.
     {
       "name": "ClinVar",
       "color": "#c0392b",
-      "encoding": { "y": { "domainMax": 8 } },
+      "encoding": { "y": { "scale": { "domainMax": 8 } } },
       "start": 104,
       "values": [2, 1, 0, 0, 2, 4]
     }
@@ -104,7 +104,7 @@ B19-A20 reach across the C peptide that processing cuts out.
       "name": "dN/dS",
       "kind": "bar",
       "values": [0.1, 0.4, 1.8, 0.2, 0.3, 0.1],
-      "encoding": { "y": { "domainMax": 2 } },
+      "encoding": { "y": { "scale": { "domainMax": 2 } } },
       "color": "#6a51a3",
       "row": "human"
     },
@@ -115,8 +115,10 @@ B19-A20 reach across the C peptide that processing cuts out.
       "data": "1231231",
       "encoding": {
         "color": {
-          "domain": ["1", "2", "3"],
-          "range": ["#ddd", "#bbb", "#999"]
+          "scale": {
+            "domain": ["1", "2", "3"],
+            "range": ["#ddd", "#bbb", "#999"]
+          }
         }
       }
     },
@@ -140,10 +142,10 @@ B19-A20 reach across the C peptide that processing cuts out.
 | `id`       | both | Unique key. The Tracks menu and `turnedOffTracks` use it                                                   |
 | `name`     | both | Label beside the track                                                                                     |
 | `values`   | bar  | One number per column, or per residue of `row`                                                             |
-| `encoding` | bar  | `{y: {domainMax}}`, the value drawn at full height (default 1)                                             |
+| `encoding` | bar  | `{y: {scale: {domainMax}}}`, the value drawn at full height (default 1)                                    |
 | `color`    | bar  | Bar fill (default gray)                                                                                    |
 | `data`     | text | One character per column, or per residue of `row`                                                          |
-| `encoding` | text | `{color: {domain, range}}`, a color per upper-case character, painted as `residueEncoding` paints residues |
+| `encoding` | text | `{color: {scale: {domain, range}}}`, a color per upper-case character, painted as `residueEncoding` paints |
 | `arcs`     | arc  | `{start, end, color?}` pairs; each end is a column or a residue                                            |
 | `row`      | both | Row name whose residues the values or characters index                                                     |
 | `height`   | both | Pixel height (default 40 for a bar, 50 for an arc, the row height for text)                                |
@@ -490,9 +492,10 @@ of dicts or a DataFrame.
 ## encodings
 
 What the viewer's own marks read from a table. Each entry names a `channel`, the
-`field` feeding it, and the color object's members, the scale that turns a field
-value into a color: its `domain` of values, the `range` of colors they map onto
-and the `title` of its legend.
+`field` feeding it, and the color object: the `scale` that turns a field value
+into a color, with its `domain` of values and the `range` of colors or the
+`scheme` they map onto, and the `legend` that guides it. The spelling is
+Vega-Lite's, and jbrowse-components' displays write the same records.
 
 [![](media/layers-encodings.png)][live-layers-encodings]
 
@@ -506,25 +509,25 @@ no tint. Each field lists its own legend.
   "type": "MsaView",
   "data": { "msa": ">duck\nMKAANSE\n>chicken\nMKA-NSE" },
   "encodings": [
-    { "channel": "tipLabel", "field": "clade", "range": "set1" },
+    { "channel": "tipLabel", "field": "clade", "scale": { "scheme": "set1" } },
     {
       "channel": "rowTint",
       "field": "clade",
-      "domain": ["2.3.4.4b"],
-      "range": ["#e41a1c"]
+      "scale": { "domain": ["2.3.4.4b"], "range": ["#e41a1c"] }
     }
   ]
 }
 ```
 
-| Field     | Meaning                                                                    |
-| --------- | -------------------------------------------------------------------------- |
-| `channel` | one of the five below                                                      |
-| `field`   | the field the channel reads                                                |
-| `scale`   | the scale kind, `categorical`, the only one so far and the default         |
-| `domain`  | values in legend order, each taking the `range` color at its index         |
-| `range`   | a palette name or a list of colors; the ggplot palette when both are unset |
-| `title`   | the legend's title; records with the same members and title share a scale  |
+| Field          | Meaning                                                                       |
+| -------------- | ----------------------------------------------------------------------------- |
+| `channel`      | one of the five below                                                         |
+| `field`        | the field the channel reads                                                   |
+| `scale.type`   | `ordinal`, the only type so far and the default                               |
+| `scale.domain` | values in legend order, each taking the `range` color at its index            |
+| `scale.range`  | a list of colors                                                              |
+| `scale.scheme` | a palette name, read where `range` is unset; the ggplot palette when both are |
+| `legend.title` | the legend's title; records with the same scale and title share one scale     |
 
 | Channel        | What it sets                                                  | Reads a field of |
 | -------------- | ------------------------------------------------------------- | ---------------- |
@@ -534,30 +537,33 @@ no tint. Each field lists its own legend.
 | `featureFill`  | the fill of each span of the annotation overlay               | the `gff`        |
 | `featureLabel` | the text drawn inside a span                                  | the `gff`        |
 
-A palette name in `range` is one of `ggplot` (the default), `set1`, `dark2`,
-`okabeito` and `tableau`, with `okabeIto` and `tableau10` read as aliases. The
-scale hands its colors to the field's distinct values: the values `domain` lists
-first, in that order, then the rest in natural order, numbers by value and digit
-runs by magnitude, so `2` sorts before `10` and `2.3.2.1a` before `2.3.4.4b`. A
-value keeps its color as rows are collapsed, filtered or re-ordered. Past the
-end of a named palette every value takes an evenly spaced hue instead, which
-keeps a forty-clade field readable.
+A `scheme` is one of `ggplot` (the default), `set1`, `dark2`, `okabeito` and
+`tableau`, with `okabeIto` and `tableau10` read as aliases. The scale hands its
+colors to the field's distinct values: the values `domain` lists first, in that
+order, then the rest in natural order, numbers by value and digit runs by
+magnitude, so `2` sorts before `10` and `2.3.2.1a` before `2.3.4.4b`. A value
+keeps its color as rows are collapsed, filtered or re-ordered. Past the end of a
+named palette every value takes an evenly spaced hue instead, which keeps a
+forty-clade field readable.
 
-A list of colors in `range` colors as many values as it holds, so a `domain` and
-a `range` of one length color the values they name, and a value they leave out
-keeps the plain mark: an uncolored tip label draws in the theme's text color, an
-uncolored row takes no tint, and an uncolored span draws grey.
+A `range` colors as many values as it holds, so a `domain` and a `range` of one
+length color the values they name, and a value they leave out keeps the plain
+mark: an uncolored tip label draws in the theme's text color, an uncolored row
+takes no tint, and an uncolored span draws grey.
 
-A snapshot written before the color object reads the same:
+A snapshot in an earlier spelling reads the same:
 
-- `scale: {palette}` reads as `range`
-- `scale: {map}` reads as `domain` and `range`
-- a strip's `legend` reads as `title`
-- a column track's `colors` reads as `encoding.color`, and its `max` and
-  `scales.y.domainMax` as `encoding.y.domainMax`
+- `domain` and `range` on the channel itself read as `scale.domain` and
+  `scale.range`, a palette name in `range` as `scale.scheme`, and `title` as
+  `legend.title`
+- `scale: {palette}` reads as `scale.scheme`, and `scale: {map}` as
+  `scale.domain` and `scale.range`
+- a strip's `legend` string reads as `legend.title`
+- a column track's `colors` reads as `encoding.color.scale`, and its `max` and
+  `scales.y.domainMax` as `encoding.y.scale.domainMax`
 - a strip's color members on the record itself read as `encoding.fill`
-- a features panel's `encoding.color` reads as `encoding.fill`, and a bare
-  `label` field name as `{field}`
+- a features panel's `encoding.color` reads as `encoding.fill`, its `label` as
+  `encoding.text`, and a bare field name in either as `{field}`
 
 A tint draws at 25% opacity so the residues under it stay readable. A color
 carrying its own alpha, such as `rgba(228,26,28,0.5)`, draws at that alpha.
@@ -593,7 +599,11 @@ reading the GFF's `description` attribute: `featureFill` colors each span from a
     "gff": "##gff-version 3\nduck\tncbi\tgene\t1\t5\t.\t+\t.\tName=HA;class=surface\nchicken\tncbi\tgene\t1\t4\t.\t+\t.\tName=NP;class=internal;color=255,0,0"
   },
   "encodings": [
-    { "channel": "featureFill", "field": "class", "range": "set1" },
+    {
+      "channel": "featureFill",
+      "field": "class",
+      "scale": { "scheme": "set1" }
+    },
     { "channel": "featureLabel", "field": "Name" }
   ]
 }
@@ -643,7 +653,7 @@ React: `colorScheme={{ domain: ['K'], range: ['#1f77b4'] }}` on `MSAViewer`, or
 
 A panel beside the tree on the row scale, the counterpart of `columnTracks` on
 the column scale. Each record names a `kind`. A `strip` reads a field of
-`rowData` and colors each row's cell through its color object, and eight strips
+`rowData` and fills each row's cell through its color object, and eight strips
 make the tip-aligned matrix ggtree draws with `gheatmap`. A `features` panel
 draws the spans `gff` carries, one row per alignment row, which is gggenes.
 
@@ -662,21 +672,29 @@ residue colors.
     "treeMetadata": "{\"duck\":{\"HA\":\"H5\",\"NA\":\"N1\"},\"chicken\":{\"HA\":\"H5\",\"NA\":\"N8\"}}"
   },
   "rowPanels": [
-    { "kind": "strip", "field": "HA", "range": "set1", "width": 12 },
-    { "kind": "strip", "field": "NA", "header": "NA segment" }
+    {
+      "kind": "strip",
+      "encoding": { "fill": { "field": "HA", "scale": { "scheme": "set1" } } },
+      "width": 12
+    },
+    {
+      "kind": "strip",
+      "encoding": { "fill": { "field": "NA" } },
+      "header": "NA segment"
+    }
   ]
 }
 ```
 
-| Field    | Meaning                                                                    |
-| -------- | -------------------------------------------------------------------------- |
-| `kind`   | `strip` or `features`                                                      |
-| `field`  | the `rowData` field a strip's cells read                                   |
-| `domain` | a strip's values in legend order, as in `encodings`                        |
-| `range`  | a palette name or a list of colors; the ggplot palette when both are unset |
-| `title`  | the title a strip's values list under, defaulting to its field             |
-| `width`  | the column's pixel width: a row height for a strip, 200 for features       |
-| `header` | the name drawn above the column, defaulting to a strip's field             |
+| Field      | Meaning                                                                     |
+| ---------- | --------------------------------------------------------------------------- |
+| `kind`     | `strip` or `features`                                                       |
+| `encoding` | a strip's `{fill: {field, scale, legend}}`, the color object of `encodings` |
+| `width`    | the column's pixel width: a row height for a strip, 200 for features        |
+| `header`   | the name drawn above the column, defaulting to a strip's field              |
+
+A strip's `fill` reads a `rowData` field, and its `legend.title` names the
+legend its values list under, defaulting to the field.
 
 The panels take their width out of the alignment's, so the alignment scrolls and
 fits within what is left. A strip scrolls with the tree and the alignment, and a
@@ -689,14 +707,32 @@ so a longer header is clipped to it and the full name is the column's tooltip.
 A panel's scale carries a legend of its own, titled by the field, and every
 panel and encoding declaring the same members over one field lists it once.
 Eight columns over one set of colors read eight fields, so give them one
-`title`. The strips then share one scale over every value the eight fields take,
-a value two segments carry draws one color in both, and the figure carries one
-key for the matrix:
+`legend.title`. The strips then share one scale over every value the eight
+fields take, a value two segments carry draws one color in both, and the figure
+carries one key for the matrix:
 
 ```json
 "rowPanels": [
-  { "kind": "strip", "field": "PB2", "range": "set1", "title": "segment lineage" },
-  { "kind": "strip", "field": "PB1", "range": "set1", "title": "segment lineage" }
+  {
+    "kind": "strip",
+    "encoding": {
+      "fill": {
+        "field": "PB2",
+        "scale": { "scheme": "set1" },
+        "legend": { "title": "segment lineage" }
+      }
+    }
+  },
+  {
+    "kind": "strip",
+    "encoding": {
+      "fill": {
+        "field": "PB1",
+        "scale": { "scheme": "set1" },
+        "legend": { "title": "segment lineage" }
+      }
+    }
+  }
 ]
 ```
 
@@ -720,13 +756,13 @@ into lanes, which divide the row's height between them.
 
 Twelve bacterial genomes around `trpB`, with no alignment at all: a tree, a GFF
 and one `features` panel under `x: "position"`. The `align` transform starts
-`trpB` at one x down the panel, and `encoding.color` reads the GFF's `role`
-attribute while `encoding.label` reads `Name`.
+`trpB` at one x down the panel, and `encoding.fill` reads the GFF's `role`
+attribute while `encoding.text` reads `Name`.
 
 | Field       | Meaning                                                                                   |
 | ----------- | ----------------------------------------------------------------------------------------- |
 | `x`         | `column` draws in the alignment's columns; `position` in each row's own residue positions |
-| `encoding`  | `{color: {field, range, domain, title}, label: field}` over a field of the features       |
+| `encoding`  | `{fill: {field, scale, legend}, text: {field}}` over fields of the features               |
 | `transform` | `[{type: "align", on: <Name value>}]`, only under `x: "position"`                         |
 | `position`  | `identity` stacks overlapping features; `strandpile` splits the row by strand             |
 
@@ -739,9 +775,9 @@ alignment panel is zero columns wide, and the tree and the panel fill the view.
 row carrying no such feature keeps its own origin. An `align` under
 `x: "column"` draws nothing different, since the columns are the alignment's.
 
-`encoding.color` reads any field of the feature table, the same fields a
+`encoding.fill` reads any field of the feature table, the same fields a
 `featureFill` encoding reads. A record naming none takes the colors the overlay
-gives the same features, and `encoding.label` falls back to the `featureLabel`
+gives the same features, and `encoding.text` falls back to the `featureLabel`
 encoding the same way. A feature's own GFF `color=` wins over either.
 
 [![](media/layers-strandpile.png)][live-layers-strandpile]
@@ -769,8 +805,8 @@ with the forward ones.
       "width": 320,
       "header": "neighborhood",
       "encoding": {
-        "color": { "field": "Name", "range": "set1" },
-        "label": "Name"
+        "fill": { "field": "Name", "scale": { "scheme": "set1" } },
+        "text": { "field": "Name" }
       },
       "transform": [{ "type": "align", "on": "genE" }]
     }
@@ -907,9 +943,9 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
 <!-- live-demo links (generated by genGuideLinks.mjs) -->
 
 [live-layers-shorthand]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22msa%22%3A%22data%2Fp53%2Fp53-vertebrates.afa%22%2C%22tree%22%3A%22data%2Fp53%2Fp53-vertebrates.nh%22%2C%22query%22%3A%22Human%22%2C%22highlights%22%3A%5B%22102-292%20DNA-binding%22%2C175%2C248%2C273%5D%2C%22region%22%3A%22170-290%22%2C%22columnTracks%22%3A%5B%7B%22name%22%3A%22ClinVar%22%2C%22color%22%3A%22%23c0392b%22%2C%22encoding%22%3A%7B%22y%22%3A%7B%22domainMax%22%3A8%7D%7D%2C%22start%22%3A104%2C%22values%22%3A%5B2%2C1%2C0%2C0%2C2%2C4%5D%7D%5D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22msa%22%3A%22data%2Fp53%2Fp53-vertebrates.afa%22%2C%22tree%22%3A%22data%2Fp53%2Fp53-vertebrates.nh%22%2C%22query%22%3A%22Human%22%2C%22highlights%22%3A%5B%22102-292%20DNA-binding%22%2C175%2C248%2C273%5D%2C%22region%22%3A%22170-290%22%2C%22columnTracks%22%3A%5B%7B%22name%22%3A%22ClinVar%22%2C%22color%22%3A%22%23c0392b%22%2C%22encoding%22%3A%7B%22y%22%3A%7B%22scale%22%3A%7B%22domainMax%22%3A8%7D%7D%7D%2C%22start%22%3A104%2C%22values%22%3A%5B2%2C1%2C0%2C0%2C2%2C4%5D%7D%5D%7D%7D
 [live-layers-columntracks]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A12%2C%22rowHeight%22%3A18%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22conservation%22%3Atrue%2C%22property-conservation%22%3Atrue%7D%2C%22columnTracks%22%3A%5B%7B%22id%22%3A%22hydropathy%22%2C%22name%22%3A%22Hydropathy%22%2C%22kind%22%3A%22bar%22%2C%22values%22%3A%5B6.4%2C6.3%2C8.3%2C3.6%2C6.4%2C0%2C8.3%2C8.3%2C2.9%2C8.3%2C8.3%2C6.3%2C8.3%2C8.3%2C6.3%2C8.3%2C3.6%2C4.1%2C2.9%2C1%2C2.9%2C6.3%2C6.3%2C6.3%2C7.3%2C8.7%2C1%2C1%2C1.2999999999999998%2C8.3%2C7%2C4.1%2C3.7%2C1.2999999999999998%2C8.3%2C8.7%2C1%2C6.3%2C8.3%2C3.2%2C8.3%2C8.7%2C7%2C4.1%2C1%2C0%2C4.1%2C7.3%2C7.3%2C3.2%2C3.8%2C2.9%2C0.6000000000000001%2C3.8%2C0%2C0%2C1%2C6.3%2C1%2C1%2C8.3%2C1%2C8.7%2C4.1%2C1%2C8.7%2C1%2C8.3%2C4.1%2C4.1%2C4.1%2C2.9%2C4.1%2C6.3%2C4.1%2C3.7%2C8.3%2C1%2C2.9%2C8.3%2C6.3%2C8.3%2C1%2C4.1%2C3.7%2C8.3%2C1%2C0.6000000000000001%2C0%2C4.1%2C9%2C8.7%2C1%2C1%2C7%2C7%2C3.8%2C3.7%2C9%2C7%2C3.7%2C8.3%2C3.2%2C1%2C8.3%2C1%2C1%2C3.2%2C7%2C1%5D%2C%22encoding%22%3A%7B%22y%22%3A%7B%22domainMax%22%3A9%7D%7D%2C%22color%22%3A%22%236a51a3%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A55%7D%2C%7B%22id%22%3A%22chain%22%2C%22name%22%3A%22Chain%22%2C%22kind%22%3A%22text%22%2C%22data%22%3A%22SSSSSSSSSSSSSSSSSSSSSSSSBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB..CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC..AAAAAAAAAAAAAAAAAAAAA%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22domain%22%3A%5B%22S%22%2C%22B%22%2C%22C%22%2C%22A%22%2C%22.%22%5D%2C%22range%22%3A%5B%22%23bdbdbd%22%2C%22%234e79a7%22%2C%22%23e8e8e8%22%2C%22%23e15759%22%2C%22%23fafafa%22%5D%7D%7D%2C%22row%22%3A%22Human%22%7D%2C%7B%22id%22%3A%22disulfides%22%2C%22name%22%3A%22Disulfide%20bonds%22%2C%22kind%22%3A%22arc%22%2C%22arcs%22%3A%5B%7B%22start%22%3A31%2C%22end%22%3A96%7D%2C%7B%22start%22%3A43%2C%22end%22%3A109%7D%2C%7B%22start%22%3A95%2C%22end%22%3A100%7D%5D%2C%22color%22%3A%22%23b8860b%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A70%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.nh%22%7D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A150%2C%22colWidth%22%3A12%2C%22rowHeight%22%3A18%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22conservation%22%3Atrue%2C%22property-conservation%22%3Atrue%7D%2C%22columnTracks%22%3A%5B%7B%22id%22%3A%22hydropathy%22%2C%22name%22%3A%22Hydropathy%22%2C%22kind%22%3A%22bar%22%2C%22values%22%3A%5B6.4%2C6.3%2C8.3%2C3.6%2C6.4%2C0%2C8.3%2C8.3%2C2.9%2C8.3%2C8.3%2C6.3%2C8.3%2C8.3%2C6.3%2C8.3%2C3.6%2C4.1%2C2.9%2C1%2C2.9%2C6.3%2C6.3%2C6.3%2C7.3%2C8.7%2C1%2C1%2C1.2999999999999998%2C8.3%2C7%2C4.1%2C3.7%2C1.2999999999999998%2C8.3%2C8.7%2C1%2C6.3%2C8.3%2C3.2%2C8.3%2C8.7%2C7%2C4.1%2C1%2C0%2C4.1%2C7.3%2C7.3%2C3.2%2C3.8%2C2.9%2C0.6000000000000001%2C3.8%2C0%2C0%2C1%2C6.3%2C1%2C1%2C8.3%2C1%2C8.7%2C4.1%2C1%2C8.7%2C1%2C8.3%2C4.1%2C4.1%2C4.1%2C2.9%2C4.1%2C6.3%2C4.1%2C3.7%2C8.3%2C1%2C2.9%2C8.3%2C6.3%2C8.3%2C1%2C4.1%2C3.7%2C8.3%2C1%2C0.6000000000000001%2C0%2C4.1%2C9%2C8.7%2C1%2C1%2C7%2C7%2C3.8%2C3.7%2C9%2C7%2C3.7%2C8.3%2C3.2%2C1%2C8.3%2C1%2C1%2C3.2%2C7%2C1%5D%2C%22encoding%22%3A%7B%22y%22%3A%7B%22scale%22%3A%7B%22domainMax%22%3A9%7D%7D%7D%2C%22color%22%3A%22%236a51a3%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A55%7D%2C%7B%22id%22%3A%22chain%22%2C%22name%22%3A%22Chain%22%2C%22kind%22%3A%22text%22%2C%22data%22%3A%22SSSSSSSSSSSSSSSSSSSSSSSSBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB..CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC..AAAAAAAAAAAAAAAAAAAAA%22%2C%22encoding%22%3A%7B%22color%22%3A%7B%22scale%22%3A%7B%22domain%22%3A%5B%22S%22%2C%22B%22%2C%22C%22%2C%22A%22%2C%22.%22%5D%2C%22range%22%3A%5B%22%23bdbdbd%22%2C%22%234e79a7%22%2C%22%23e8e8e8%22%2C%22%23e15759%22%2C%22%23fafafa%22%5D%7D%7D%7D%2C%22row%22%3A%22Human%22%7D%2C%7B%22id%22%3A%22disulfides%22%2C%22name%22%3A%22Disulfide%20bonds%22%2C%22kind%22%3A%22arc%22%2C%22arcs%22%3A%5B%7B%22start%22%3A31%2C%22end%22%3A96%7D%2C%7B%22start%22%3A43%2C%22end%22%3A109%7D%2C%7B%22start%22%3A95%2C%22end%22%3A100%7D%5D%2C%22color%22%3A%22%23b8860b%22%2C%22row%22%3A%22Human%22%2C%22height%22%3A70%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Finsulin.nh%22%7D%7D%7D
 [live-layers-highlights]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A140%2C%22colWidth%22%3A2.4%2C%22rowHeight%22%3A18%2C%22relativeTo%22%3A%22Human%22%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22highlights%22%3A%5B%7B%22row%22%3A%22Human%22%2C%22start%22%3A102%2C%22end%22%3A292%2C%22label%22%3A%22DNA-binding%22%2C%22color%22%3A%22rgba(255%2C140%2C0%2C0.15)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A325%2C%22end%22%3A356%2C%22label%22%3A%22Oligomerization%22%2C%22color%22%3A%22rgba(255%2C140%2C0%2C0.15)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A175%2C%22end%22%3A175%2C%22label%22%3A%22175%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A245%2C%22end%22%3A245%2C%22label%22%3A%22245%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A248%2C%22end%22%3A248%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A249%2C%22end%22%3A249%2C%22label%22%3A%22248%2F249%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A273%2C%22end%22%3A273%2C%22label%22%3A%22273%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22row%22%3A%22Human%22%2C%22start%22%3A282%2C%22end%22%3A282%2C%22label%22%3A%22282%22%2C%22color%22%3A%22rgba(192%2C57%2C43%2C0.45)%22%7D%2C%7B%22rows%22%3A%5B%22Chicken%22%2C%22Turtle%22%2C%22Anole%22%2C%22Frog%22%2C%22Zebrafish%22%5D%2C%22label%22%3A%22non-mammals%22%2C%22color%22%3A%22rgba(78%2C121%2C167%2C0.22)%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fp53%2Fp53-vertebrates.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fp53%2Fp53-vertebrates.nh%22%7D%7D%7D
 [live-layers-selection]:
@@ -917,20 +953,20 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
 [live-layers-relative-to]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSE%5Cn%3Emouse%5CnMKA-NSE%5Cn%3Echicken%5CnMKSANSE%22%7D%2C%22relativeTo%22%3A%22human%22%7D%7D
 [live-layers-clades]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A700%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%5D%2C%22clades%22%3A%5B%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22highlight%22%2C%22color%22%3A%22%23fff3c4%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22bracket%22%2C%22color%22%3A%22%23b45309%22%2C%22label%22%3A%22cephalosporin%2C%207%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-3%22%2C%22TEM-7%22%5D%2C%22tips%22%3A6%2C%22mark%22%3A%22collapse%22%7D%5D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A700%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%5D%2C%22clades%22%3A%5B%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22highlight%22%2C%22color%22%3A%22%23fff3c4%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22bracket%22%2C%22color%22%3A%22%23b45309%22%2C%22label%22%3A%22cephalosporin%2C%207%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-3%22%2C%22TEM-7%22%5D%2C%22tips%22%3A6%2C%22mark%22%3A%22collapse%22%7D%5D%7D%7D
 [live-layers-rowdata]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Educk%5CnMKAANSE%5Cn%3Echicken%5CnMKA-NSE%22%2C%22treeMetadata%22%3A%22%7B%5C%22duck%5C%22%3A%7B%5C%22clade%5C%22%3A%5C%222.3.4.4b%5C%22%7D%2C%5C%22chicken%5C%22%3A%7B%5C%22clade%5C%22%3A%5C%222.3.2.1c%5C%22%7D%7D%22%7D%7D%7D
 [live-layers-features]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSEMKAANSE%5Cn%3Emouse%5CnMKA-NSEMKA-NSE%22%7D%2C%22features%22%3A%5B%7B%22row%22%3A%22human%22%2C%22start%22%3A2%2C%22end%22%3A7%2C%22name%22%3A%22SH3%22%2C%22source%22%3A%22pfam%22%7D%2C%7B%22row%22%3A%22mouse%22%2C%22start%22%3A3%2C%22end%22%3A9%2C%22name%22%3A%22SH2%22%2C%22source%22%3A%22smart%22%7D%5D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22source%22%7D%5D%7D%7D
 [live-layers-encodings]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A760%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%2C%7B%22channel%22%3A%22branch%22%2C%22field%22%3A%22phenotype%22%2C%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%2C%7B%22channel%22%3A%22rowTint%22%2C%22field%22%3A%22subclass%22%2C%22domain%22%3A%5B%22CEPHALOSPORIN%22%5D%2C%22range%22%3A%5B%22%23e15759%22%5D%7D%5D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A760%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%2C%7B%22channel%22%3A%22branch%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%2C%7B%22channel%22%3A%22rowTint%22%2C%22field%22%3A%22subclass%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22CEPHALOSPORIN%22%5D%2C%22range%22%3A%5B%22%23e15759%22%5D%7D%7D%5D%7D%7D
 [live-layers-featurechannels]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A215%2C%22colWidth%22%3A1.8%2C%22rowHeight%22%3A24%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22description%22%2C%22range%22%3A%22set1%22%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22description%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-domains.gff%22%7D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A215%2C%22colWidth%22%3A1.8%2C%22rowHeight%22%3A24%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22description%22%2C%22scale%22%3A%7B%22scheme%22%3A%22set1%22%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22description%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-domains.gff%22%7D%7D%7D
 [live-layers-customcolorscheme]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSE%5Cn%3Emouse%5CnMKA-NSE%22%7D%2C%22customColorScheme%22%3A%7B%22K%22%3A%22%231f77b4%22%2C%22R%22%3A%22%231f77b4%22%2C%22D%22%3A%22%23d62728%22%2C%22E%22%3A%22%23d62728%22%7D%7D%7D
 [live-layers-rowpanels]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A830%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22phenotype%22%2C%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%2C%22width%22%3A14%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20104%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22104%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20164%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22164%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20238%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22238%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20240%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22240%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%2069%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%2269%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20244%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22244%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20276%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22276%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20265%22%2C%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%2C%22title%22%3A%22residue%22%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22265%22%7D%5D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22colorSchemeName%22%3A%22clustalx_protein_dynamic%22%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A830%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%7D%2C%22width%22%3A14%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20104%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22104%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20164%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22164%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20238%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22238%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20240%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22240%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%2069%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%2269%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20244%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22244%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20276%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22276%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20265%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22265%22%7D%5D%7D%7D
 [live-layers-featurespanel]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A430%2C%22rowHeight%22%3A26%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22role%22%2C%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%2C%22label%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%7D%5D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A430%2C%22rowHeight%22%3A26%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22role%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%7D%5D%7D%7D
 [live-layers-strandpile]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A530%2C%22rowHeight%22%3A34%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22role%22%2C%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%2C%22label%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%2C%22position%22%3A%22strandpile%22%7D%5D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A530%2C%22rowHeight%22%3A34%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22role%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%2C%22position%22%3A%22strandpile%22%7D%5D%7D%7D
