@@ -11,7 +11,7 @@ import { renderPersistentHighlights } from './components/msa/renderHighlights.ts
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { headerRunsAcross } from './components/rowpanels/headerLayout.ts'
-import { renderRowPanels } from './components/rowpanels/renderRowPanel.ts'
+import { renderRowPanel } from './components/rowpanels/renderRowPanel.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import ScaleBarSVG from './components/tree/ScaleBarSVG.tsx'
 import { cladeLabelBoxes } from './components/tree/cladeBrackets.ts'
@@ -382,7 +382,8 @@ interface LayerProps {
 
 function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const { contentHeight, offsetX, offsetY, msaAreaWidth } = layout
-  const { effectiveTreeAreaWidth, rowPanelsWidth, id } = model
+  const { effectiveTreeAreaWidth, rowPanelsWidth, resolvedRowPanels, id } =
+    model
 
   const treeCtx = new Context(effectiveTreeAreaWidth, contentHeight)
   renderTreeCanvas({
@@ -394,19 +395,19 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
     highResScaleFactorOverride: 1,
   })
 
-  const rowPanelsCtx = rowPanelsWidth
-    ? new Context(rowPanelsWidth, contentHeight)
-    : undefined
-  if (rowPanelsCtx) {
-    renderRowPanels({
+  const rowPanelCtxs = resolvedRowPanels.map(panel => {
+    const ctx = new Context(panel.width, contentHeight)
+    renderRowPanel({
       model,
       theme,
-      ctx: rowPanelsCtx,
+      panel,
+      ctx,
       offsetY,
       blockSizeYOverride: contentHeight,
       highResScaleFactorOverride: 1,
     })
-  }
+    return { panel, ctx }
+  })
 
   const raster = rasterBackground({ model, theme, layout })
 
@@ -445,17 +446,18 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
         layers={layers}
       />
       <CladeLabelsSVG model={model} theme={theme} offsetY={offsetY} />
-      {rowPanelsCtx ? (
+      {rowPanelCtxs.map(({ panel, ctx }, i) => (
         <ClipGroup
-          panelId="rowpanels-panel"
-          clipId={`rowpanels-${id}`}
-          width={rowPanelsWidth}
+          key={panel.id}
+          panelId={`rowpanel-${i}`}
+          clipId={`rowpanel-${id}-${i}`}
+          width={panel.width}
           height={contentHeight}
-          transform={`translate(${effectiveTreeAreaWidth} 0)`}
-          ctx={rowPanelsCtx}
+          transform={`translate(${effectiveTreeAreaWidth + panel.offsetX} 0)`}
+          ctx={ctx}
           layers={layers}
         />
-      ) : null}
+      ))}
       <ClipGroup
         panelId="msa-panel"
         clipId={`msa-${id}`}
@@ -527,7 +529,8 @@ function rasterBackground({
 
 function TrackRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const { trackHeight, offsetX, msaAreaWidth } = layout
-  const { effectiveTreeAreaWidth, rowPanelsWidth, id } = model
+  const { effectiveTreeAreaWidth, rowPanelsWidth, resolvedRowPanels, id } =
+    model
 
   const ctx = new Context(msaAreaWidth, trackHeight)
   renderAllTracks({

@@ -29,7 +29,6 @@ export function renderFeaturePanel({
   model,
   theme,
   panel,
-  x,
   offsetY,
   blockSizeYOverride,
   highResScaleFactorOverride,
@@ -38,7 +37,6 @@ export function renderFeaturePanel({
   model: MsaViewModel
   theme: Theme
   panel: ResolvedFeaturePanel
-  x: number
   offsetY: number
   blockSizeYOverride?: number
   highResScaleFactorOverride?: number
@@ -48,7 +46,7 @@ export function renderFeaturePanel({
   const k = highResScaleFactorOverride ?? highResScaleFactor
   ctx.resetTransform()
   ctx.scale(k, k)
-  ctx.translate(x, rowHeight / 2 - offsetY)
+  ctx.translate(0, rowHeight / 2 - offsetY)
 
   drawFeatureSpans<RowPanelSpan>({
     ctx,

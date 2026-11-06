@@ -520,7 +520,7 @@ its pixel column and its legend entries, and `rowPanelsWidth` comes out of
 the strips. The headers share the top band with the tree ruler and the minimap,
 as DOM text on screen and `rotate(-90)` in the export, each clipped to the
 band's height. `renderStrip.ts` is the one draw path, and the export adds a
-`rowpanels-panel` clip group between the tree and the alignment.
+`rowpanel-<index>` clip group per panel between the tree and the alignment.
 
 ### 9. The `features` kind and the `align` transform
 

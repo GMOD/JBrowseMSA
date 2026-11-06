@@ -75,7 +75,7 @@ const RowPanelBlock = observer(function ({
     draw: ctx => {
       ctx.resetTransform()
       ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-      renderRowPanel({ ctx, model, theme, panel, x: 0, offsetY })
+      renderRowPanel({ ctx, model, theme, panel, offsetY })
     },
     width: canvasWidth,
     height: canvasHeight,

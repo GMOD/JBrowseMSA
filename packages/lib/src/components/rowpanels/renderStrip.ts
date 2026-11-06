@@ -7,16 +7,11 @@ import type { RenderCtx } from '../renderCtx.ts'
 /**
  * One cell per row of a `strip` panel, in the color its field takes through
  * the panel's scale. A row the table has no value for leaves the cell empty.
- *
- * `x` is the panel's left edge in the context: the live view gives each panel
- * a canvas of its own and passes 0, and the export packs every panel into one
- * context and passes the panel's own offset.
  */
 export function renderStrip({
   ctx,
   model,
   panel,
-  x,
   offsetY,
   blockSizeYOverride,
   highResScaleFactorOverride,
@@ -24,7 +19,6 @@ export function renderStrip({
   ctx: RenderCtx
   model: MsaViewModel
   panel: ResolvedStripPanel
-  x: number
   offsetY: number
   blockSizeYOverride?: number
   highResScaleFactorOverride?: number
@@ -34,7 +28,7 @@ export function renderStrip({
   ctx.resetTransform()
   const k = highResScaleFactorOverride ?? highResScaleFactor
   ctx.scale(k, k)
-  ctx.translate(x, -offsetY)
+  ctx.translate(0, -offsetY)
   for (const leaf of getVisibleLeaves({ model, offsetY, blockSizeY: by })) {
     const color = panel.colors.get(leaf.data.name)
     if (color) {

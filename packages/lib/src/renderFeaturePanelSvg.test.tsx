@@ -52,7 +52,7 @@ async function exportWith(rowPanels: RowPanelSpec[], msa?: string) {
 }
 
 const panelGroup = (svg: string) =>
-  /<g id="rowpanels-panel">([\s\S]*?)<\/g><\/g>/.exec(svg)?.[1] ?? ''
+  /<g id="rowpanel-0">([\s\S]*?)<\/g><\/g>/.exec(svg)?.[1] ?? ''
 
 // the x of each point of an arrow's path
 const pathXs = (path: string) =>
@@ -96,7 +96,7 @@ test('the label rides inside the span it names', async () => {
 test('a tree and a GFF with no alignment export the panel and no columns', async () => {
   const { model, svg } = await exportWith(panels)
   expect(model.numColumns).toBe(0)
-  expect(svg).toContain('<g id="rowpanels-panel">')
+  expect(svg).toContain('<g id="rowpanel-0">')
   // the alignment panel is there and empty, and the page is the tree, the
   // panel and the legend column
   expect(svg).toContain('<g id="msa-panel">')

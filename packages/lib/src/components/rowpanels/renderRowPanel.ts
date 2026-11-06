@@ -11,31 +11,19 @@ interface PanelArgs {
   model: MsaViewModel
   theme: Theme
   panel: ResolvedRowPanel
-  x: number
   offsetY: number
   blockSizeYOverride?: number
   highResScaleFactorOverride?: number
 }
 
 /**
- * One row panel, by kind. `x` is the panel's left edge in the context: the
- * live view gives each panel a canvas of its own and passes 0, and the export
- * packs every panel into one context and passes the panel's own offset.
+ * One row panel, by kind, at the left edge of its own context: a canvas per
+ * panel on screen, and a clipped group per panel in the export.
  */
 export function renderRowPanel({ panel, ...rest }: PanelArgs) {
   if (panel.kind === 'features') {
     renderFeaturePanel({ panel, ...rest })
   } else {
     renderStrip({ panel, ...rest })
-  }
-}
-
-/** every row panel side by side in one context, for the SVG export */
-export function renderRowPanels({
-  model,
-  ...rest
-}: Omit<PanelArgs, 'panel' | 'x'>) {
-  for (const panel of model.resolvedRowPanels) {
-    renderRowPanel({ model, panel, x: panel.offsetX, ...rest })
   }
 }

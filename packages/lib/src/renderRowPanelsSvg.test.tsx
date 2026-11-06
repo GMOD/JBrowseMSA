@@ -61,28 +61,39 @@ async function exportWith(rowPanels: RowPanelSpec[]) {
 
 const rects = (svg: string) => svg.match(/<rect[^>]*>/g) ?? []
 
+const panelGroup = (svg: string, i: number) =>
+  new RegExp(
+    `<clipPath id="rowpanel-rowpanels-svg-test-${i}"><rect x="0" y="0" width="(\\d+)"[^>]*></rect></clipPath></defs><g clip-path="[^"]+" transform="translate\\(([\\d.]+) 0\\)"><g id="rowpanel-${i}">([\\s\\S]*?)</g></g>`,
+  ).exec(svg)
+
 test('the strips draw a cell per row in the scale colors', async () => {
   const { model, svg } = await exportWith(panels)
   const { rowHeight } = model
 
-  const group = /<g id="rowpanels-panel">([\s\S]*?)<\/g><\/g>/.exec(svg)
-  expect(group, 'no rowpanels-panel group').toBeTruthy()
+  const groups = [0, 1].map(i => panelGroup(svg, i))
+  expect(groups.every(Boolean), 'a strip has no group of its own').toBe(true)
 
   // duck and chicken are H5, goose H7, and every cell is the strip's width
-  const cells = rects(group![1]!).map(r => ({
-    fill: /fill="([^"]+)"/.exec(r)?.[1],
-    x: /x="([^"]+)"/.exec(r)?.[1],
-    y: /y="([^"]+)"/.exec(r)?.[1],
-    width: /width="([^"]+)"/.exec(r)?.[1],
-  }))
+  const cells = groups.flatMap(g =>
+    rects(g![3]!).map(r => ({
+      fill: /fill="([^"]+)"/.exec(r)?.[1],
+      x: /x="([^"]+)"/.exec(r)?.[1],
+      y: /y="([^"]+)"/.exec(r)?.[1],
+      width: /width="([^"]+)"/.exec(r)?.[1],
+    })),
+  )
   expect(cells.filter(c => c.fill === '#e41a1c')).toHaveLength(2)
   expect(cells.filter(c => c.fill === '#377eb8')).toHaveLength(1)
-  expect(cells.every(c => c.width === '12')).toBe(true)
-
-  // the second strip sits one width to the right of the first, and the third
-  // row one row height down
-  expect(new Set(cells.map(c => c.x))).toEqual(new Set(['0', '12']))
+  expect(cells.every(c => c.width === '12' && c.x === '0')).toBe(true)
   expect(cells.map(c => c.y)).toContain(`${2 * rowHeight}`)
+
+  // each strip is clipped to its own width, and the second sits one width to
+  // the right of the first
+  expect(groups.map(g => Number(g![1]))).toEqual([12, 12])
+  expect(groups.map(g => Number(g![2]))).toEqual([
+    model.effectiveTreeAreaWidth,
+    model.effectiveTreeAreaWidth + 12,
+  ])
 })
 
 test('each header draws over its column, turned on its side', async () => {
@@ -143,6 +154,6 @@ test('the alignment moves right by the strips, and the page grows with them', as
 
 test('no row panels leaves the export as it was', async () => {
   const { svg } = await exportWith([])
-  expect(svg).not.toContain('rowpanels-panel')
+  expect(svg).not.toContain('rowpanel-0')
   expect(svg).not.toContain('rowpanel-headers')
 })
