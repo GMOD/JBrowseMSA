@@ -18,7 +18,7 @@ const light = createJBrowseTheme()
 const dark = createJBrowseTheme({ palette: { mode: 'dark' } })
 
 // letter -> the fills the export drew it in, as `color|opacity` because
-// svgcanvas splits an rgba() into a color and a fill-opacity
+// svgSafeColors splits an rgba() into a hex color and a fill-opacity
 function letterFills(svg: string) {
   const out = new Map<string, Set<string>>()
   for (const m of svg.matchAll(/<text([^>]*)>([^<]*)<\/text>/g)) {
@@ -33,7 +33,10 @@ function letterFills(svg: string) {
 // the same color as the export writes it
 function asFill(color: string) {
   const rgba = /rgba\((\d+), ?(\d+), ?(\d+), ?([\d.]+)\)/.exec(color)
-  return rgba ? `rgb(${rgba[1]},${rgba[2]},${rgba[3]})|${rgba[4]}` : `${color}|`
+  const hex = (n: string) => Number(n).toString(16).padStart(2, '0')
+  return rgba
+    ? `#${hex(rgba[1]!)}${hex(rgba[2]!)}${hex(rgba[3]!)}|${rgba[4]}`
+    : `${color}|`
 }
 
 async function exportEntire(
@@ -64,7 +67,7 @@ test('a dark theme draws uncolored letters in its own text color', async () => {
   }
   // a colored cell still takes the contrast color of the cell, not the theme's:
   // maeditor paints A light green, which wants dark letters in either theme
-  expect([...fills.get('A')!]).toEqual(['rgb(0,0,0)|0.87'])
+  expect([...fills.get('A')!]).toEqual(['#000000|0.87'])
 })
 
 test('a reference match draws its dot in the theme text color', async () => {

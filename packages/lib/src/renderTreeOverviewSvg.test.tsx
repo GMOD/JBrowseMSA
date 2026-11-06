@@ -74,5 +74,5 @@ test('a clade highlight is a rectangle on it', async () => {
   ]
   const { svg } = await exportWith({ showTreeOverview: true, clades })
   const drawn = rects(group(svg)!)
-  expect(drawn.some(rect => rect.includes('fill="rgb(1,2,3)"'))).toBe(true)
+  expect(drawn.some(rect => rect.includes('fill="#010203"'))).toBe(true)
 })

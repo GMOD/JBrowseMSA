@@ -60,7 +60,7 @@ function labels(svg: string) {
   }))
 }
 
-// svgcanvas writes a translucent fill as an opaque color plus an opacity
+// the export writes a translucent fill as a hex color plus an opacity
 function rects(svg: string, fill: string, opacity = '0.6') {
   return (svg.match(/<rect[^>]*>/g) ?? [])
     .filter(
@@ -82,7 +82,7 @@ test('a clade draws in the tree panel and across the alignment', async () => {
   const { rowHeight, effectiveTreeAreaWidth, totalWidth } = model
   expect(model.resolvedClades[0]!.rows).toEqual([2, 3])
 
-  const drawn = rects(svg, 'rgb(1,2,3)')
+  const drawn = rects(svg, '#010203')
   expect(drawn).toHaveLength(2)
   for (const rect of drawn) {
     expect(rect.y).toBe(2 * rowHeight)
@@ -103,7 +103,7 @@ test('a clade over the whole tree draws under the branches', async () => {
   const { svg } = await exportWith([
     { mrca: ['A', 'D'], tips: 4, mark: 'highlight' },
   ])
-  const drawn = rects(svg, 'rgb(255,243,196)')
+  const drawn = rects(svg, '#fff3c4')
   expect(drawn).toHaveLength(2)
   expect(drawn.every(r => r.y === 0)).toBe(true)
   expect(svg).toContain('<path')

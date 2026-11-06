@@ -95,13 +95,13 @@ test('highlighted columns and the reference row export as they draw', async () =
   })
   const { colWidth, rowHeight, totalWidth, totalHeight } = model
 
-  const band = rects(svg).find(r => r.includes('rgb(255,140,0)'))
+  const band = rects(svg).find(r => r.includes('#ff8c00'))
   expect(band).toContain(`x="${colWidth}"`)
   expect(band).toContain(`width="${2 * colWidth}"`)
   expect(band).toContain(`height="${totalHeight}"`)
 
   const referenceTint = rects(svg).find(
-    r => r.includes('rgb(0,128,255)') && r.includes(`width="${totalWidth}"`),
+    r => r.includes('#0080ff') && r.includes(`width="${totalWidth}"`),
   )
   expect(referenceTint).toContain(`y="${rowHeight}"`)
   expect(referenceTint).toContain(`height="${rowHeight}"`)
@@ -119,8 +119,8 @@ test('a band across every column keeps the letters under it', async () => {
 function labels(svg: string) {
   return [...svg.matchAll(/<text([^>]*)>([^<]*)<\/text>/g)].map(m => ({
     text: m[2]!,
-    x: Number(/x="([\d.-]+)"/.exec(m[1]!)?.[1]),
-    y: Number(/y="([\d.-]+)"/.exec(m[1]!)?.[1]),
+    x: Number(/ x="([\d.-]+)"/.exec(m[1]!)?.[1]),
+    y: Number(/ y="([\d.-]+)"/.exec(m[1]!)?.[1]),
   }))
 }
 

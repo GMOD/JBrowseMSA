@@ -70,6 +70,6 @@ test('under the color channel a mapped letter takes the color, and an unlisted o
   expect([...letters.get('K')!]).toEqual([
     `${adjustColorForContrast(blue, theme.palette.background.default)}|`,
   ])
-  expect([...letters.get('A')!]).toEqual(['rgb(0,0,0)|0.87'])
-  expect([...letters.get('R')!]).toEqual(['rgb(0,0,0)|0.87'])
+  expect([...letters.get('A')!]).toEqual(['#000000|0.87'])
+  expect([...letters.get('R')!]).toEqual(['#000000|0.87'])
 })

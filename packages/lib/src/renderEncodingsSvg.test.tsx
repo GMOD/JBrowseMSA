@@ -86,7 +86,7 @@ test('a rowTint encoding washes the row in the tree and the alignment', async ()
   // the alpha a tint draws at
   const washes = rects(svg).filter(
     r =>
-      r.includes('fill="rgb(0,0,255)"') &&
+      r.includes('fill="#0000ff"') &&
       r.includes('fill-opacity="0.25"') &&
       r.includes(`y="${2 * rowHeight}"`),
   )

@@ -90,30 +90,18 @@ const STYLES: Record<string, any> = {
   },
 }
 
-const rgbaRegex =
-  /rgba\(\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d*\.?\d+)\s*,\s*(\d?\.?\d*)\s*\)/i
-
-interface ContextOptions {
-  document?: Document
-  ctx?: CanvasRenderingContext2D
-}
-
 export class Context {
   width: number
   height: number
-  canvas: Context
 
   __document: Document
   __ctx: CanvasRenderingContext2D
-  __canvas?: HTMLCanvasElement
   __root: SVGSVGElement
+  __group: SVGElement
   __currentElement: SVGElement
-  __styleStack: any[]
-  __groupStack: SVGElement[]
+  __stateStack: { style: Record<string, any>; matrix: DOMMatrix }[]
   __currentDefaultPath: string
-  __currentPosition: { x?: number; y?: number }
   __transformMatrix: DOMMatrix
-  __transformMatrixStack?: DOMMatrix[]
   // parsed fonts keyed by `font` string; each parse costs a DOM element and a
   // CSS parse, and exports ask per glyph
   __fontCache = new Map<string, CSSStyleDeclaration>()
@@ -126,22 +114,14 @@ export class Context {
   textBaseline: any
   lineDash: any
 
-  constructor(width: number, height: number, options: ContextOptions = {}) {
+  constructor(width: number, height: number) {
     this.width = width
     this.height = height
-    this.canvas = this
-    this.__document = options.document || document
-
-    if (options.ctx) {
-      this.__ctx = options.ctx
-    } else {
-      this.__canvas = this.__document.createElement('canvas')
-      this.__ctx = this.__canvas.getContext('2d')!
-    }
+    this.__document = document
+    this.__ctx = this.__document.createElement('canvas').getContext('2d')!
 
     this.__setDefaultStyles()
-    this.__styleStack = [this.__getStyleState()]
-    this.__groupStack = []
+    this.__stateStack = []
 
     this.__root = this.__document.createElementNS(
       'http://www.w3.org/2000/svg',
@@ -152,14 +132,14 @@ export class Context {
     this.__root.setAttribute('width', String(width))
     this.__root.setAttribute('height', String(height))
 
-    this.__currentElement = this.__document.createElementNS(
+    this.__group = this.__document.createElementNS(
       'http://www.w3.org/2000/svg',
       'g',
     )
-    this.__root.appendChild(this.__currentElement)
+    this.__root.appendChild(this.__group)
+    this.__currentElement = this.__group
 
     this.__currentDefaultPath = ''
-    this.__currentPosition = {}
     this.__transformMatrix = new DOMMatrix()
 
     this.resetTransform()
@@ -247,20 +227,7 @@ export class Context {
       if (!style.apply?.includes(type) || style.svg === value) {
         continue
       }
-      const matches =
-        (style.svgAttr === 'stroke' || style.svgAttr === 'fill') &&
-        typeof value === 'string' &&
-        value.includes('rgba')
-          ? rgbaRegex.exec(value)
-          : null
-      if (matches) {
-        // SVG has no rgba(); the alpha goes in the -opacity attribute
-        currentElement.setAttribute(
-          style.svgAttr,
-          `rgb(${matches[1]},${matches[2]},${matches[3]})`,
-        )
-        currentElement.setAttribute(`${style.svgAttr}-opacity`, matches[4]!)
-      } else if (key === 'lineWidth') {
+      if (key === 'lineWidth') {
         const scale = this.__getTransformScale()
         currentElement.setAttribute(
           style.svgAttr,
@@ -278,47 +245,31 @@ export class Context {
     }
   }
 
-  __closestGroupOrSvg(node?: SVGElement): SVGElement {
-    node = node || this.__currentElement
-    if (node.nodeName === 'g' || node.nodeName === 'svg') {
-      return node
-    }
-    return this.__closestGroupOrSvg(node.parentNode as SVGElement)
-  }
-
   getSvg(): SVGSVGElement {
     return this.__root
   }
 
+  // the styles and the transform, as on a canvas; every element goes in the
+  // one group, so a save per logo glyph adds no markup
   save() {
-    const group = this.__createElement('g')
-    const parent = this.__closestGroupOrSvg()
-    this.__groupStack.push(parent)
-    parent.appendChild(group)
-    this.__currentElement = group
-    this.__styleStack.push(this.__getStyleState())
-    if (!this.__transformMatrixStack) {
-      this.__transformMatrixStack = []
-    }
-    this.__transformMatrixStack.push(this.getTransform())
+    this.__stateStack.push({
+      style: this.__getStyleState(),
+      matrix: this.getTransform(),
+    })
   }
 
   restore() {
-    this.__currentElement = this.__groupStack.pop()!
-    if (!this.__currentElement) {
-      this.__currentElement = this.__root.childNodes[0] as SVGElement
-    }
-    this.__applyStyleState(this.__styleStack.pop())
-    if (this.__transformMatrixStack && this.__transformMatrixStack.length > 0) {
-      this.setTransform(this.__transformMatrixStack.pop()!)
+    const state = this.__stateStack.pop()
+    if (state) {
+      this.__applyStyleState(state.style)
+      this.setTransform(state.matrix)
     }
   }
 
   beginPath() {
     this.__currentDefaultPath = ''
-    this.__currentPosition = {}
     const path = this.__createElement('path', {}, true)
-    this.__closestGroupOrSvg().appendChild(path)
+    this.__group.appendChild(path)
     this.__currentElement = path
   }
 
@@ -337,7 +288,6 @@ export class Context {
     if (this.__currentElement.nodeName !== 'path') {
       this.beginPath()
     }
-    this.__currentPosition = { x, y }
     const p = this.__matrixTransform(x, y)
     this.__addPathCommand(`M ${p.x} ${p.y}`)
   }
@@ -349,7 +299,6 @@ export class Context {
   }
 
   lineTo(x: number, y: number) {
-    this.__currentPosition = { x, y }
     const p = this.__matrixTransform(x, y)
     this.__addPathCommand(
       this.__currentDefaultPath.includes('M')
@@ -359,7 +308,6 @@ export class Context {
   }
 
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number) {
-    this.__currentPosition = { x, y }
     const cp = this.__matrixTransform(cpx, cpy)
     const p = this.__matrixTransform(x, y)
     this.__addPathCommand(`Q ${cp.x} ${cp.y} ${p.x} ${p.y}`)
@@ -394,7 +342,7 @@ export class Context {
   // canvas; it does not clear the drawing.
   fillRect(x: number, y: number, width: number, height: number) {
     const rect = this.__createElement('rect', { x, y, width, height }, true)
-    this.__closestGroupOrSvg().appendChild(rect)
+    this.__group.appendChild(rect)
     this.__currentElement = rect
     this.__applyTransformation(rect)
     this.__applyStyleToCurrentElement('fill')
@@ -402,7 +350,7 @@ export class Context {
 
   strokeRect(x: number, y: number, width: number, height: number) {
     const rect = this.__createElement('rect', { x, y, width, height }, true)
-    this.__closestGroupOrSvg().appendChild(rect)
+    this.__group.appendChild(rect)
     this.__currentElement = rect
     this.__applyTransformation(rect)
     this.__applyStyleToCurrentElement('stroke')
@@ -421,7 +369,6 @@ export class Context {
 
   fillText(text: string, x: number, y: number) {
     const style = this.__parsedFont()
-    const parent = this.__closestGroupOrSvg()
     const textElement = this.__createElement(
       'text',
       {
@@ -444,7 +391,7 @@ export class Context {
     this.__currentElement = textElement
     this.__applyTransformation(textElement)
     this.__applyStyleToCurrentElement('fill')
-    parent.appendChild(textElement)
+    this.__group.appendChild(textElement)
   }
 
   measureText(text: string): TextMetrics {
@@ -494,7 +441,6 @@ export class Context {
     this.__addPathCommand(
       `A ${radius * scaleX} ${radius * scaleY} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`,
     )
-    this.__currentPosition = { x: endX, y: endY }
   }
 
   setLineDash(dashArray: number[]) {

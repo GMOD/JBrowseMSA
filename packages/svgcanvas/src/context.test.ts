@@ -59,5 +59,21 @@ test('a fill covering the whole context paints over, it does not clear', () => {
   const svg = ctx.getSvg().innerHTML
   expect(svg).toContain('>A<')
   expect(svg).toContain('#123456')
-  expect(svg).toContain('fill-opacity="0.28"')
+  expect(svg).toContain('fill="rgba(255,140,0,0.28)"')
+})
+
+test('save and restore carry the style and the transform and add no markup', () => {
+  const ctx = new Context(100, 50)
+  ctx.fillStyle = '#111111'
+  ctx.save()
+  ctx.fillStyle = '#222222'
+  ctx.translate(10, 0)
+  ctx.fillRect(0, 0, 1, 1)
+  ctx.restore()
+  ctx.fillRect(0, 0, 1, 1)
+
+  expect(ctx.getSvg().innerHTML).toBe(
+    '<g><rect fill="#222222" x="10" y="0" width="1" height="1"></rect>' +
+      '<rect fill="#111111" x="0" y="0" width="1" height="1"></rect></g>',
+  )
 })
