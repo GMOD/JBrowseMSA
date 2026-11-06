@@ -25,11 +25,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      # the CLI's PNG and PDF export tests shell out to rsvg-convert, and its
-      # tree-area fit measures labels with an installed font, which the Ubuntu
-      # 26.04 image no longer brings in
-      - name: Install librsvg and a font
-        run: sudo apt-get update && sudo apt-get install -y librsvg2-bin fonts-dejavu-core
+      # the CLI's PNG and PDF export tests shell out to rsvg-convert
+      - name: Install librsvg
+        run: sudo apt-get update && sudo apt-get install -y librsvg2-bin
 
       - name: Test
         run: pnpm test

@@ -11,6 +11,20 @@ import type { MSAFormat } from 'msa-parsers'
 import type { MSAViewerProps, MsaSpec } from 'react-msaview'
 
 /**
+ * The faces `sans-serif` resolves to on macOS, Windows and Linux desktops. Skia
+ * has no fontconfig here, so the generic `sans-serif` the renderers name falls
+ * to the first family it loaded, which on a system with only DejaVu is DejaVu
+ * Sans Mono, and every label then measures alike.
+ */
+const SANS_FACES = [
+  'Helvetica',
+  'Arial',
+  'Liberation Sans',
+  'DejaVu Sans',
+  'Noto Sans',
+]
+
+/**
  * jsdom has no pixels, so without this the export draws a <rect> per cell and a
  * large alignment exhausts the heap. @napi-rs/canvas is an optional dependency
  * with prebuilt binaries; when it installed, its canvas stands in for
@@ -22,7 +36,11 @@ async function installNodeCanvas(g: Record<string, unknown>) {
   if (!napi) {
     return undefined
   }
-  const { createCanvas } = napi
+  const { createCanvas, GlobalFonts } = napi
+  const sans = SANS_FACES.find(face => GlobalFonts.has(face))
+  if (sans) {
+    GlobalFonts.setAlias(sans, 'sans-serif')
+  }
   g.OffscreenCanvas = class {
     constructor(width: number, height: number) {
       return createCanvas(width, height)
