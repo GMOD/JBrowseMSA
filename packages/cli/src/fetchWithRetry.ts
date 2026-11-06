@@ -52,6 +52,25 @@ export async function fetchWithRetry(
   )
 }
 
+/**
+ * The JSON body of `url`, fetched with retries. A 404 throws `notFound`, which
+ * names what is missing in the caller's terms.
+ */
+export async function fetchJsonWithRetry<T = unknown>(
+  url: string,
+  notFound: string,
+  headers?: Record<string, string>,
+) {
+  const res = await fetchWithRetry(url, { headers })
+  if (res.status === 404) {
+    throw new Error(notFound)
+  } else if (!res.ok) {
+    throw new Error(`${url}: HTTP ${res.status} ${res.statusText}`)
+  }
+  const body: Promise<T> = res.json()
+  return body
+}
+
 // undici throws `TypeError: fetch failed` and keeps the reason, such as
 // ENOTFOUND or ECONNREFUSED, on `cause.code`
 function describe(error: unknown) {

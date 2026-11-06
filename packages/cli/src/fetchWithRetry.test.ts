@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { fetchWithRetry } from './fetchWithRetry.ts'
+import { fetchJsonWithRetry, fetchWithRetry } from './fetchWithRetry.ts'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -71,4 +71,20 @@ test('a network-level throw is retried like a retryable status', async () => {
     (await fetchWithRetry('https://example.org/x', { baseDelayMs: 0 })).status,
   ).toBe(200)
   expect(fetchMock).toHaveBeenCalledTimes(2)
+})
+
+test('fetchJsonWithRetry reads the body and names a 404 as the caller words it', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi
+      .fn()
+      .mockResolvedValueOnce(new Response('{"a":1}', { status: 200 }))
+      .mockResolvedValueOnce(new Response('', { status: 404 })),
+  )
+  expect(await fetchJsonWithRetry('https://example.org/x', 'none')).toEqual({
+    a: 1,
+  })
+  await expect(
+    fetchJsonWithRetry('https://example.org/y', 'PDBe has no entry 1ABC'),
+  ).rejects.toThrow('PDBe has no entry 1ABC')
 })

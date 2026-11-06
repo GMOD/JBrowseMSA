@@ -6,7 +6,7 @@ import {
   parseUniProtAccession,
 } from 'msa-parsers'
 
-import { fetchWithRetry } from './fetchWithRetry.ts'
+import { fetchJsonWithRetry, fetchWithRetry } from './fetchWithRetry.ts'
 import { parseRowRange, toFragment } from './rowRange.ts'
 
 import type { RowRange } from './rowRange.ts'
@@ -115,21 +115,6 @@ export function parseRowsTsv(text: string): MappingRow[] {
     })
 }
 
-async function getJson<T>(
-  url: string,
-  notFound: string,
-  headers?: Record<string, string>,
-) {
-  const res = await fetchWithRetry(url, { headers })
-  if (res.status === 404) {
-    throw new Error(notFound)
-  }
-  if (!res.ok) {
-    throw new Error(`${url}: ${res.status} ${res.statusText}`)
-  }
-  return (await res.json()) as T
-}
-
 function memo<T>(load: (key: string) => Promise<T>) {
   const cache = new Map<string, Promise<T>>()
   return (key: string) => {
@@ -159,26 +144,26 @@ function createSources() {
   return {
     uniprotSequence: memo(fetchUniProtSequence),
     sifts: memo(pdb =>
-      getJson<SiftsResponse>(
+      fetchJsonWithRetry<SiftsResponse>(
         `${PDBE}/mappings/uniprot/${pdb.toLowerCase()}`,
         `SIFTS has no entry ${pdb}`,
       ),
     ),
     molecules: memo(pdb =>
-      getJson<MoleculesResponse>(
+      fetchJsonWithRetry<MoleculesResponse>(
         `${PDBE}/pdb/entry/molecules/${pdb.toLowerCase()}`,
         `PDBe has no entry ${pdb}`,
       ),
     ),
     coverage: memo(key => {
       const [pdb, chain] = key.split(':') as [string, string]
-      return getJson<CoverageResponse>(
+      return fetchJsonWithRetry<CoverageResponse>(
         `${PDBE}/pdb/entry/polymer_coverage/${pdb.toLowerCase()}/chain/${chain}`,
         `PDBe has no chain ${chain} in ${pdb}`,
       )
     }),
     alphafold: memo(accession =>
-      getJson<AlphaFoldEntry[]>(
+      fetchJsonWithRetry<AlphaFoldEntry[]>(
         `${ALPHAFOLD}/${accession}`,
         `AlphaFold DB has no model of ${accession}`,
         HEADERS,

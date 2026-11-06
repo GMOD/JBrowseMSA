@@ -2,7 +2,7 @@ import * as fs from 'node:fs'
 
 import { annotationsToGFF, parseMSA } from 'msa-parsers'
 
-import { fetchWithRetry } from './fetchWithRetry.ts'
+import { fetchJsonWithRetry } from './fetchWithRetry.ts'
 
 import type { MSAFormat } from 'msa-parsers'
 
@@ -46,17 +46,6 @@ interface Transcript {
   genomic_locations?: { exons: Exon[] }[]
 }
 
-async function fetchJson(url: string, notFound: string): Promise<unknown> {
-  const res = await fetchWithRetry(url)
-  if (res.status === 404) {
-    throw new Error(notFound)
-  }
-  if (!res.ok) {
-    throw new Error(`request failed (${res.status}): ${url}`)
-  }
-  return res.json()
-}
-
 function getReports(json: unknown): Record<string, unknown>[] {
   return (json as { reports?: Record<string, unknown>[] }).reports ?? []
 }
@@ -72,7 +61,7 @@ export async function resolveGeneId(
   taxon: string,
 ): Promise<string> {
   const notFound = `no gene ${gene} in taxon ${taxon}`
-  const json = await fetchJson(
+  const json = await fetchJsonWithRetry(
     `${API}/gene/symbol/${encodeURIComponent(gene)}/taxon/${encodeURIComponent(taxon)}`,
     notFound,
   )
@@ -88,7 +77,7 @@ export async function resolveGeneId(
 }
 
 async function fetchTranscripts(geneId: string): Promise<Transcript[]> {
-  const json = await fetchJson(
+  const json = await fetchJsonWithRetry(
     `${API}/gene/id/${geneId}/product_report`,
     `no gene with NCBI GeneID ${geneId}`,
   )
