@@ -3,6 +3,8 @@ export type * from './types.ts'
 
 // Utilities
 export { generateNodeIds } from './util.ts'
+export { parseUniProtAccession } from './uniprotAccession.ts'
+export type { UniProtAccession } from './uniprotAccession.ts'
 
 // MSA parsers
 export {

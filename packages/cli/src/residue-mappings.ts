@@ -1,10 +1,13 @@
 import * as fs from 'node:fs'
 
-import { getUngappedSequence, parseMSA } from 'msa-parsers'
+import {
+  getUngappedSequence,
+  parseMSA,
+  parseUniProtAccession,
+} from 'msa-parsers'
 
 import { fetchWithRetry } from './fetchWithRetry.ts'
 import { parseRowRange, toFragment } from './rowRange.ts'
-import { parseUniProtAccession } from './uniprotAccession.ts'
 
 import type { RowRange } from './rowRange.ts'
 import type { MSAFormat } from 'msa-parsers'

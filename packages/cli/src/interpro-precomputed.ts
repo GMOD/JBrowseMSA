@@ -1,6 +1,11 @@
 import * as fs from 'node:fs'
 
-import { annotationsToGFF, getUngappedSequence, parseMSA } from 'msa-parsers'
+import {
+  annotationsToGFF,
+  getUngappedSequence,
+  parseMSA,
+  parseUniProtAccession,
+} from 'msa-parsers'
 
 import { fetchWithRetry } from './fetchWithRetry.ts'
 import {
@@ -10,7 +15,6 @@ import {
   writeCached,
 } from './interpro-cache.ts'
 import { parseRowRange, toFragment } from './rowRange.ts'
-import { parseUniProtAccession } from './uniprotAccession.ts'
 
 import type { MSAFormat } from 'msa-parsers'
 
