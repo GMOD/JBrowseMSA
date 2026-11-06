@@ -97,6 +97,8 @@ test('each header names its column, and defaults to the field', () => {
 })
 
 test('the headers sit at the foot of the top band, as the export draws them', () => {
-  const { headers } = mount([{ kind: 'strip', field: 'HA' }])
+  const { headers } = mount([
+    { kind: 'strip', encoding: { fill: { field: 'HA' } } },
+  ])
   expect(headers).toMatch(/^<div style="[^"]*align-self: flex-end/)
 })

@@ -1,10 +1,10 @@
 import { setFontSize } from '../../setFontSize.ts'
-import { fillRowRuns, rowRuns, visibleRowRange } from '../rowBands.ts'
 import {
   referenceColor,
   selectionBorder,
   selectionFill,
 } from '../overlayColors.ts'
+import { fillRowRuns, rowRuns, visibleRowRange } from '../rowBands.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
