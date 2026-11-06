@@ -139,6 +139,20 @@ export function computeRowInsertions(blanks: number[], seq: string) {
   return insertions
 }
 
+/** sorted integers as inclusive [first, last] runs of consecutive values */
+export function consecutiveRuns(sorted: number[]) {
+  const runs: [number, number][] = []
+  for (const n of sorted) {
+    const last = runs.at(-1)
+    if (last && n <= last[1] + 1) {
+      last[1] = Math.max(last[1], n)
+    } else {
+      runs.push([n, n])
+    }
+  }
+  return runs
+}
+
 export function len(a: { end: number; start: number }) {
   return a.end - a.start
 }

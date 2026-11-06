@@ -4,9 +4,9 @@ import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import {
   drawHighlightLabel,
   highlightLabelHeight,
-  highlightRowFill,
+  renderRowWashes,
 } from '../msa/renderHighlights.ts'
-import { referenceColor } from '../overlayColors.ts'
+import { rowRuns } from '../rowBands.ts'
 import { bracketBarWidth, bracketGap } from './cladeBrackets.ts'
 import { ellipsize } from './ellipsize.ts'
 
@@ -471,16 +471,6 @@ function renderTreeLabels({
 // the first row of a set, as a loop: spreading into Math.min passes one
 // argument per row, and the ~125k argument limit throws RangeError on a set
 // covering the 230k-tip COVID tree
-function firstRow(rowIndices: number[]) {
-  let min = Infinity
-  for (const index of rowIndices) {
-    if (index < min) {
-      min = index
-    }
-  }
-  return min
-}
-
 // the highlight mark of the `clades` layer: a translucent rectangle from the
 // clade's common ancestor to the right edge of the tree area, under the
 // branches. A clade spanning hundreds of rows crosses several blocks, so each
@@ -582,9 +572,8 @@ function renderCladeBrackets({
   ctx.strokeStyle = theme.palette.text.primary
 }
 
-// the `rowTint` encoding, the reference row and the row sets of `highlights`,
-// washed across the tree area under the labels, with each set's label in the
-// gutter at its first row
+// the row washes across the tree area under the labels, with each highlight
+// row set's label in the gutter at its first row
 function renderRowHighlights({
   ctx,
   model,
@@ -600,8 +589,6 @@ function renderRowHighlights({
 }) {
   const {
     resolvedHighlights,
-    rowTints,
-    referenceRowIndex,
     rowHeight,
     effectiveTreeAreaWidth,
     marginLeft,
@@ -609,44 +596,24 @@ function renderRowHighlights({
   } = model
   const by = blockSizeYOverride ?? blockSize
   const pad = blockPad(model)
-  const placed: LabelBox[] = []
-  const fillRow = (index: number) => {
-    ctx.fillRect(
-      -marginLeft,
-      index * rowHeight,
-      effectiveTreeAreaWidth,
+  renderRowWashes(
+    {
+      ctx,
       rowHeight,
-    )
-  }
-  if (rowTints) {
-    const top = Math.max(0, Math.floor((offsetY - pad) / rowHeight))
-    const bottom = Math.min(
-      rowTints.length - 1,
-      Math.ceil((offsetY + by + pad) / rowHeight),
-    )
-    for (let index = top; index <= bottom; index++) {
-      const color = rowTints[index]
-      if (color) {
-        ctx.fillStyle = color
-        fillRow(index)
-      }
-    }
-  }
-  if (referenceRowIndex !== undefined) {
-    ctx.fillStyle = referenceColor
-    fillRow(referenceRowIndex)
-  }
-  for (const { rowIndices, label, color } of resolvedHighlights) {
-    ctx.fillStyle = color ?? highlightRowFill
-    for (const index of rowIndices) {
-      if (inYBlock(index * rowHeight + rowHeight / 2, offsetY, by, pad)) {
-        fillRow(index)
-      }
-    }
-    const first = firstRow(rowIndices)
+      top: 0,
+      x: -marginLeft,
+      width: effectiveTreeAreaWidth,
+      yMin: offsetY - pad,
+      yMax: offsetY + by + pad,
+    },
+    model,
+  )
+  const placed: LabelBox[] = []
+  for (const { rowIndices, label } of resolvedHighlights) {
+    const first = rowRuns(rowIndices)[0]?.[0]
     if (
       label &&
-      rowIndices.length &&
+      first !== undefined &&
       inYBlock(first * rowHeight, offsetY, by, pad)
     ) {
       drawHighlightLabel({

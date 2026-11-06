@@ -1,4 +1,5 @@
 import { setFontSize } from '../../setFontSize.ts'
+import { fillRowRuns, rowRuns, visibleRowRange } from '../rowBands.ts'
 import {
   referenceColor,
   selectionBorder,
@@ -7,13 +8,14 @@ import {
 
 import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
+import type { RowBandArea } from '../rowBands.ts'
 import type { Theme } from '@mui/material'
 
 // a fill plus a solid border; the hover wash alone is invisible over clustalx
 // coloring
 const highlightFill = 'rgba(255,140,0,0.28)'
 const highlightBorder = 'rgba(210,90,0,0.95)'
-export const highlightRowFill = 'rgba(255,140,0,0.18)'
+const highlightRowFill = 'rgba(255,140,0,0.18)'
 
 const labelFontSize = 11
 const labelPad = 3
@@ -82,16 +84,43 @@ export function drawHighlightLabel({
 }
 
 /**
+ * The washes across whole rows of a panel: the `rowTint` encoding, the
+ * reference row and the row sets of `highlights`. The alignment and the tree
+ * area each pass their own extent, and only the rows the area shows are drawn.
+ */
+export function renderRowWashes(area: RowBandArea, model: MsaViewModel) {
+  const { ctx } = area
+  const { rowTints, referenceRowIndex, resolvedHighlights } = model
+  if (rowTints) {
+    const [first, last] = visibleRowRange(area)
+    for (
+      let index = first;
+      index <= Math.min(last, rowTints.length - 1);
+      index++
+    ) {
+      const color = rowTints[index]
+      if (color) {
+        ctx.fillStyle = color
+        fillRowRuns(area, [[index, index]])
+      }
+    }
+  }
+  if (referenceRowIndex !== undefined) {
+    ctx.fillStyle = referenceColor
+    fillRowRuns(area, [[referenceRowIndex, referenceRowIndex]])
+  }
+  for (const { rowIndices, color } of resolvedHighlights) {
+    ctx.fillStyle = color ?? highlightRowFill
+    fillRowRuns(area, rowRuns(rowIndices))
+  }
+}
+
+/**
  * The persistent overlay on the alignment: the band behind each clade of
- * `clades`, the `rowTint` encoding's wash, the row tints and bordered column
- * bands of `highlights`, and a label above each band. `offsetX`/`offsetY` are
- * the content coordinates at the canvas origin, the convention renderMSABlock
- * uses, so the live overlay passes -scrollX/-scrollY and the export passes its
- * layout offsets.
- *
- * Rows are culled to the ones this block covers. A tint over every row of a
- * large alignment would otherwise draw the whole column of rects in each block,
- * and again on every pointer move through renderMouseover.
+ * `clades`, the row washes, the bordered column bands of `highlights`, and a
+ * label above each band. `offsetX`/`offsetY` are the content coordinates at the
+ * canvas origin, the convention renderMSABlock uses, so the live overlay passes
+ * -scrollX/-scrollY and the export passes its layout offsets.
  */
 export function renderHighlights({
   ctx,
@@ -110,47 +139,25 @@ export function renderHighlights({
   width: number
   height: number
 }) {
-  const { resolvedClades, resolvedHighlights, rowTints, colWidth, rowHeight } =
-    model
-  const placed: LabelBox[] = []
-  ctx.lineWidth = 2
-  const firstRow = Math.max(0, Math.floor(offsetY / rowHeight))
-  const lastRow = Math.ceil((offsetY + height) / rowHeight)
-  const fillRow = (index: number) => {
-    ctx.fillRect(0, index * rowHeight - offsetY, width, rowHeight)
+  const { resolvedClades, resolvedHighlights, colWidth, rowHeight } = model
+  const area = {
+    ctx,
+    rowHeight,
+    top: -offsetY,
+    x: 0,
+    width,
+    yMin: 0,
+    yMax: height,
   }
   for (const { rows, color, mark } of resolvedClades) {
-    if (mark === 'highlight' && rows[1] >= firstRow && rows[0] <= lastRow) {
+    if (mark === 'highlight') {
       ctx.fillStyle = color
-      ctx.fillRect(
-        0,
-        rows[0] * rowHeight - offsetY,
-        width,
-        (rows[1] - rows[0] + 1) * rowHeight,
-      )
+      fillRowRuns(area, [rows])
     }
   }
-  if (rowTints) {
-    for (
-      let index = firstRow;
-      index <= Math.min(lastRow, rowTints.length - 1);
-      index++
-    ) {
-      const color = rowTints[index]
-      if (color) {
-        ctx.fillStyle = color
-        fillRow(index)
-      }
-    }
-  }
-  for (const { rowIndices, color } of resolvedHighlights) {
-    ctx.fillStyle = color ?? highlightRowFill
-    for (const index of rowIndices) {
-      if (index >= firstRow && index <= lastRow) {
-        fillRow(index)
-      }
-    }
-  }
+  renderRowWashes(area, model)
+  const placed: LabelBox[] = []
+  ctx.lineWidth = 2
   for (const { startCol, endCol, label, color } of resolvedHighlights) {
     if (startCol === undefined || endCol === undefined) {
       continue
@@ -217,8 +224,8 @@ export function renderSelection({
 }
 
 /**
- * The overlay parts that come from the snapshot: the reference row's tint, a
- * bordered band per run of highlighted columns and the `highlights` layer. The
+ * The overlay parts that come from the snapshot: a bordered band per run of
+ * highlighted columns, then renderHighlights. The
  * live overlay draws these under the selected block and its hover and click
  * bands; the SVG export draws only these.
  */
@@ -239,14 +246,7 @@ export function renderPersistentHighlights({
   width: number
   height: number
 }) {
-  const { colWidth, rowHeight, referenceRowIndex, highlightedColumnRuns } =
-    model
-
-  if (referenceRowIndex !== undefined) {
-    ctx.fillStyle = referenceColor
-    ctx.fillRect(0, referenceRowIndex * rowHeight - offsetY, width, rowHeight)
-  }
-
+  const { colWidth, highlightedColumnRuns } = model
   ctx.lineWidth = 2
   for (const { start, end } of highlightedColumnRuns) {
     const x = start * colWidth - offsetX

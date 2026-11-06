@@ -1,4 +1,5 @@
 import { treeHoverColor } from '../overlayColors.ts'
+import { fillRowRuns, inRuns, rowRuns } from '../rowBands.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 
@@ -12,7 +13,7 @@ export function renderTreeMouseover({
   const {
     rowHeight,
     effectiveTreeAreaWidth: width,
-    effectiveHeight: height,
+    msaAreaHeight: height,
     scrollY,
     mouseRow,
     referenceRowIndex,
@@ -23,19 +24,23 @@ export function renderTreeMouseover({
   ctx.clearRect(0, 0, width * highResScaleFactor, height * highResScaleFactor)
   ctx.scale(highResScaleFactor, highResScaleFactor)
 
-  const rowBand = (index: number) => {
-    ctx.fillRect(0, index * rowHeight + scrollY, width, rowHeight)
+  const area = {
+    ctx,
+    rowHeight,
+    top: scrollY,
+    x: 0,
+    width,
+    yMin: 0,
+    yMax: height,
   }
-
+  const hovered = rowRuns(hoveredRowIndices)
   ctx.fillStyle = treeHoverColor
-  for (const index of hoveredRowIndices) {
-    rowBand(index)
-  }
+  fillRowRuns(area, hovered)
   if (
     mouseRow !== undefined &&
     mouseRow !== referenceRowIndex &&
-    !hoveredRowIndices.includes(mouseRow)
+    !inRuns(hovered, mouseRow)
   ) {
-    rowBand(mouseRow)
+    fillRowRuns(area, [[mouseRow, mouseRow]])
   }
 }

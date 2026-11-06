@@ -1,4 +1,5 @@
 import { clickColor, hoverColor, multiRowHoverColor } from '../overlayColors.ts'
+import { fillRowRuns, rowRuns } from '../rowBands.ts'
 import {
   renderPersistentHighlights,
   renderSelection,
@@ -20,7 +21,7 @@ export function renderMouseover({
     mouseCol,
     colWidth,
     msaCanvasWidth: width,
-    effectiveHeight: height,
+    msaAreaHeight: height,
     rowHeight,
     scrollX,
     scrollY,
@@ -34,10 +35,17 @@ export function renderMouseover({
   ctx.clearRect(0, 0, width * highResScaleFactor, height * highResScaleFactor)
   ctx.scale(highResScaleFactor, highResScaleFactor)
 
-  // rows and columns sit at a fixed pitch, so an index is all it takes to place
-  // a full-width or full-height band (matching fillRow in TreeCanvas)
+  const area = {
+    ctx,
+    rowHeight,
+    top: scrollY,
+    x: 0,
+    width,
+    yMin: 0,
+    yMax: height,
+  }
   const rowBand = (index: number) => {
-    ctx.fillRect(0, index * rowHeight + scrollY, width, rowHeight)
+    fillRowRuns(area, [[index, index]])
   }
   const colBand = (index: number) => {
     ctx.fillRect(index * colWidth + scrollX, 0, colWidth, height)
@@ -56,9 +64,7 @@ export function renderMouseover({
 
   // every tip under a hovered tree node stays lit
   ctx.fillStyle = multiRowHoverColor
-  for (const rowIndex of hoveredRowIndices) {
-    rowBand(rowIndex)
-  }
+  fillRowRuns(area, rowRuns(hoveredRowIndices))
 
   ctx.fillStyle = hoverColor
   if (mouseCol !== undefined) {

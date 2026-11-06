@@ -16,7 +16,7 @@ const MSAMouseoverCanvas = observer(function ({
   model: MsaViewModel
 }) {
   const {
-    effectiveHeight: height,
+    msaAreaHeight: height,
     msaCanvasWidth: width,
     highResScaleFactor,
   } = model

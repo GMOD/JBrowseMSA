@@ -113,11 +113,11 @@ test('a row tint washes each row of the block and no others', () => {
   )
 
   const drawn = drawBlock(model, { offsetY: 0, height: 200 })
-  // 200px of 20px rows, plus the row the block's bottom edge lands on
-  expect(drawn).toHaveLength(11)
+  // 200px of 20px rows
+  expect(drawn).toHaveLength(10)
   expect(new Set(drawn.map(r => r.fill))).toEqual(new Set([model.rowTints![0]]))
   expect(drawn.map(r => r.y)).toEqual(
-    Array.from({ length: 11 }, (_, i) => i * 20),
+    Array.from({ length: 10 }, (_, i) => i * 20),
   )
 
   const across = drawBlock(model, { offsetY: 300, height: 200 })

@@ -15,6 +15,7 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   const ref = useRef<HTMLDivElement>(null)
   const {
     effectiveHeight: height,
+    msaAreaHeight,
     blocksY,
     effectiveTreeAreaWidth,
     scrollY,
@@ -27,7 +28,7 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
   })
 
   const canvasWidth = effectiveTreeAreaWidth * highResScaleFactor
-  const canvasHeight = height * highResScaleFactor
+  const canvasHeight = msaAreaHeight * highResScaleFactor
   const mouseoverRef = useCanvasAutorun({
     draw: ctx => {
       if (isAlive(model)) {
@@ -75,7 +76,7 @@ const TreeCanvas = observer(function ({ model }: { model: MsaViewModel }) {
           top: 0,
           left: 0,
           width: effectiveTreeAreaWidth,
-          height,
+          height: msaAreaHeight,
           zIndex: 1000,
           pointerEvents: 'none',
         }}

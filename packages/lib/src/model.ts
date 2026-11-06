@@ -132,6 +132,7 @@ import {
 } from './treeDisplay.ts'
 import {
   computeRowInsertions,
+  consecutiveRuns,
   dropBlanks,
   len,
   readComputed,
@@ -384,20 +385,6 @@ function overflows(content: number, viewport: number) {
 
 function inRanges(ranges: [number, number][] | undefined, position: number) {
   return !!ranges?.some(([start, end]) => position >= start && position <= end)
-}
-
-// sorted integers as inclusive [first, last] runs of consecutive values
-function consecutiveRuns(sorted: number[]) {
-  const runs: [number, number][] = []
-  for (const n of sorted) {
-    const last = runs.at(-1)
-    if (last && n <= last[1] + 1) {
-      last[1] = Math.max(last[1], n)
-    } else {
-      runs.push([n, n])
-    }
-  }
-  return runs
 }
 
 // the value every one of a node's children reports, or undefined where one of
