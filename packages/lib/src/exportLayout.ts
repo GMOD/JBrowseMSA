@@ -23,7 +23,7 @@ export const LEGEND_CHAR_W = 7
 export const LEGEND_MAX_W = 360
 export const LEGEND_TEXT_X = LEGEND_PAD + LEGEND_SWATCH + 6
 
-export function getLegendWidth(rows: LegendRow[]) {
+function getLegendWidth(rows: LegendRow[]) {
   const maxLen = rows.reduce((a, r) => Math.max(a, r.label.length), 0)
   const w = LEGEND_TEXT_X + LEGEND_PAD + maxLen * LEGEND_CHAR_W
   return Math.min(LEGEND_MAX_W, Math.max(120, w))

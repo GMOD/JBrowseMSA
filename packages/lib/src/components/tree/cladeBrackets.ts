@@ -13,7 +13,7 @@ export const bracketGap = 4
 export const maxCladeGutterWidth = 140
 
 /** whether a clade draws in the gutter: a bracket, or a highlight with a label */
-export function cladeInGutter(clade: Pick<Clade, 'mark' | 'label'>) {
+function cladeInGutter(clade: Pick<Clade, 'mark' | 'label'>) {
   return (
     clade.mark === 'bracket' || (clade.mark === 'highlight' && !!clade.label)
   )

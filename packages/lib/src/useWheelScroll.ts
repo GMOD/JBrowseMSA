@@ -17,7 +17,7 @@ type Axes = 'x' | 'y' | 'xy'
  * bottom, or when every row fits, the page scrolls instead, so an embedded
  * viewer never traps the reader scrolling past it.
  */
-export function canScrollY(model: MsaViewModel, delta: number) {
+function canScrollY(model: MsaViewModel, delta: number) {
   const { scrollY, maxScrollY } = model
   return delta > 0 ? scrollY > maxScrollY : delta < 0 && scrollY < 0
 }
@@ -38,7 +38,7 @@ function withPinch(pan: string) {
  * along every axis the view cannot scroll, and pinch zoom on the page where it
  * supports that value.
  */
-export function panTouchAction(model: MsaViewModel, axes: Axes) {
+function panTouchAction(model: MsaViewModel, axes: Axes) {
   const x = axes.includes('x') && model.maxScrollX < 0
   const y = axes.includes('y') && model.maxScrollY < 0
   return x && y
