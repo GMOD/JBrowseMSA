@@ -9,7 +9,7 @@ import { visibleColRange } from './visibleColRange.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
-import type { NodeWithIdsAndLength } from '../../types.ts'
+import type { NodeWithIds } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
@@ -135,7 +135,7 @@ function drawTilesAndText({
   model: MsaViewModel
   theme: Theme
   ctx: RenderCtx
-  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
+  visibleLeaves: HierarchyNode<NodeWithIds>[]
   xStart: number
   xEnd: number
   referenceSeq: string | null | undefined
@@ -247,7 +247,7 @@ function drawInsertionIndicators({
 }: {
   model: MsaViewModel
   ctx: RenderCtx
-  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
+  visibleLeaves: HierarchyNode<NodeWithIds>[]
   xStart: number
   xEnd: number
 }) {
@@ -273,7 +273,7 @@ function drawZigZag({
 }: {
   model: MsaViewModel
   ctx: RenderCtx
-  visibleLeaves: HierarchyNode<NodeWithIdsAndLength>[]
+  visibleLeaves: HierarchyNode<NodeWithIds>[]
   xStart: number
   xEnd: number
   offset: number

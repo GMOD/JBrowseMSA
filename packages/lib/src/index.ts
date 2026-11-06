@@ -56,13 +56,9 @@ export type { ZoomSnapshot } from './zoomSnapshot.ts'
 // gives
 export type {
   ColorChannel,
+  ColorScale,
   ColorSpec,
-  LegacyColumnTrack,
-  LegacyEncoding,
-  LegacyFeatureEncoding,
-  LegacyRowPanel,
-  LegacyStrip,
-  LegacyScale,
+  LegendSpec,
   ResolvedScale,
   ScaleTable,
   SharedScale,
@@ -97,7 +93,6 @@ export type {
   Node,
   MappedStructure,
   NodeWithIds,
-  NodeWithIdsAndLength,
   Region,
   ResidueEncoding,
   ResidueMapping,

@@ -235,12 +235,12 @@ the numbers behind it.
   panels are its producers, each keyed by its scale's declaration
   (`resolvedScales`), so a matrix of strips naming one `legend.title` lists one
   legend. A channel nests `scale: {type, domain, range, scheme}` and
-  `legend: {title}`, as jbrowse-components' displays do since its ADR-238. A
-  `snapshotProcessor` on `encodings`, `rowPanels` and `columnTracks` lifts the
-  earlier spellings (flat `domain`/`range`/`title`, a palette name in `range`,
-  `scale: {palette}`, `{map}`, `legend` strings, `colors`, `max`,
-  `scales.y.domainMax`, a features panel's `color` and `label`) on the way in,
-  so no stored record has them. The property behind the overlay's collapse
+  `legend: {title}`, as jbrowse-components' displays do since its ADR-238.
+  Nothing reads an earlier spelling: the flat color object, a palette name in
+  `range`, `{palette}`, `{map}`, `scales.y`, flat strips and a features panel's
+  `color` and `label` were cut over in one change with no reader left, so a new
+  spelling change rewrites its producers (tutorials, specs, hosted data,
+  ggmsaview) in the same change. The property behind the overlay's collapse
   toggle stays `showDomainLegend`, because that name travels in the shared URL.
 - The viewer calls no remote compute queue and runs no analysis long enough to
   freeze the tab. The one exception is neighbor joining, capped at

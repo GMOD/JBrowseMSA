@@ -136,11 +136,7 @@ drawn as a text track. See docs/layers.md
 
 ```js
 columnTracks: stripDefault(
-    types.array(
-      types.snapshotProcessor(types.frozen<ColumnTrackSpec>(), {
-        preProcessor: readColumnTrack,
-      }),
-    ),
+    types.array(types.frozen<ColumnTrackSpec>()),
     [],
   )
 ```
@@ -195,18 +191,10 @@ embeddedMode: stripDefault(types.boolean, false)
 
 what the viewer's own marks read from `rowData` or the feature table:
 `{channel, field, scale?, legend?}` per color channel, and
-`{channel: "featureLabel", field}`. Every earlier spelling of the color object
-reads through `readColor`. See docs/layers.md
+`{channel: "featureLabel", field}`. See docs/layers.md
 
 ```js
-encodings: stripDefault(
-    types.array(
-      types.snapshotProcessor(types.frozen<Encoding>(), {
-        preProcessor: readEncoding,
-      }),
-    ),
-    [],
-  )
+encodings: stripDefault(types.array(types.frozen<Encoding>()), [])
 ```
 
 #### property: features
@@ -332,19 +320,10 @@ panels drawn between the tree and the alignment:
 `{kind: "strip", encoding: {fill}, width?, header?}` fills one cell per row from
 a `rowData` field, and
 `{kind: "features", x, encoding?, transform?, width?, header?}` draws the spans
-the GFF carries. A strip's earlier flat color members and a features panel's
-`encoding.color` read as `encoding.fill`, and its `label` as `encoding.text`.
-See docs/layers.md
+the GFF carries. See docs/layers.md
 
 ```js
-rowPanels: stripDefault(
-    types.array(
-      types.snapshotProcessor(types.frozen<RowPanelSpec>(), {
-        preProcessor: readRowPanel,
-      }),
-    ),
-    [],
-  )
+rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), [])
 ```
 
 #### property: scrollX
@@ -2396,7 +2375,7 @@ setClades: (clades: Clade[]) => void
 #### action: setColumnTracks
 
 ```js
-setColumnTracks: (tracks: (ColumnTrackSpec | LegacyColumnTrack)[]) => void
+setColumnTracks: (tracks: ColumnTrackSpec[]) => void
 ```
 
 #### action: setColWidth
@@ -2449,7 +2428,7 @@ setEmbeddedMode: (arg: boolean) => void
 replace what the viewer's marks read from the row table
 
 ```js
-setEncodings: (encodings: (ColorEncoding | LabelEncoding | LegacyColor<ColorEncoding>)[]) => void
+setEncodings: (encodings: Encoding[]) => void
 ```
 
 #### action: setError
@@ -2652,7 +2631,7 @@ setRowHeight: (n: number) => void
 replace the panels drawn between the tree and the alignment
 
 ```js
-setRowPanels: (panels: (RowStripSpec | RowFeaturesSpec | LegacyStrip | LegacyFeatures)[]) => void
+setRowPanels: (panels: RowPanelSpec[]) => void
 ```
 
 #### action: setScrollX

@@ -106,14 +106,7 @@ import {
   visibleColToGlobalCol,
   visibleColsBefore,
 } from './rowCoordinateCalculations.ts'
-import {
-  colorTable,
-  declarationKey,
-  readColumnTrack,
-  readEncoding,
-  readRowPanel,
-  resolveShared,
-} from './scales.ts'
+import { colorTable, declarationKey, resolveShared } from './scales.ts'
 import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import {
@@ -151,9 +144,6 @@ import type { HierarchyNode } from './hierarchy.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
 import type {
   ColorChannel,
-  LegacyColumnTrack,
-  LegacyEncoding,
-  LegacyRowPanel,
   ScaleTable,
   ScaleUse,
   SharedScale,
@@ -626,11 +616,7 @@ function stateModelFactory({
          * per-column string drawn as a text track. See docs/layers.md
          */
         columnTracks: stripDefault(
-          types.array(
-            types.snapshotProcessor(types.frozen<ColumnTrackSpec>(), {
-              preProcessor: readColumnTrack,
-            }),
-          ),
+          types.array(types.frozen<ColumnTrackSpec>()),
           [],
         ),
 
@@ -720,36 +706,18 @@ function stateModelFactory({
          * #property
          * what the viewer's own marks read from `rowData` or the feature
          * table: `{channel, field, scale?, legend?}` per color channel, and
-         * `{channel: "featureLabel", field}`. Every earlier spelling of the
-         * color object reads through `readColor`. See docs/layers.md
+         * `{channel: "featureLabel", field}`. See docs/layers.md
          */
-        encodings: stripDefault(
-          types.array(
-            types.snapshotProcessor(types.frozen<Encoding>(), {
-              preProcessor: readEncoding,
-            }),
-          ),
-          [],
-        ),
+        encodings: stripDefault(types.array(types.frozen<Encoding>()), []),
         /**
          * #property
          * panels drawn between the tree and the alignment:
          * `{kind: "strip", encoding: {fill}, width?, header?}` fills one cell
          * per row from a `rowData` field, and
          * `{kind: "features", x, encoding?, transform?, width?, header?}`
-         * draws the spans the GFF carries. A strip's earlier flat color
-         * members and a features panel's `encoding.color` read as
-         * `encoding.fill`, and its `label` as `encoding.text`. See
-         * docs/layers.md
+         * draws the spans the GFF carries. See docs/layers.md
          */
-        rowPanels: stripDefault(
-          types.array(
-            types.snapshotProcessor(types.frozen<RowPanelSpec>(), {
-              preProcessor: readRowPanel,
-            }),
-          ),
-          [],
-        ),
+        rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), []),
       }),
     )
     .volatile(() => ({
@@ -3536,8 +3504,8 @@ function stateModelFactory({
       /**
        * #action
        */
-      setColumnTracks(tracks: (ColumnTrackSpec | LegacyColumnTrack)[]) {
-        self.columnTracks.replace(tracks.map(readColumnTrack))
+      setColumnTracks(tracks: ColumnTrackSpec[]) {
+        self.columnTracks.replace(tracks)
       },
       /**
        * #action
@@ -3551,15 +3519,15 @@ function stateModelFactory({
        * #action
        * replace what the viewer's marks read from the row table
        */
-      setEncodings(encodings: (Encoding | LegacyEncoding)[]) {
-        self.encodings.replace(encodings.map(readEncoding))
+      setEncodings(encodings: Encoding[]) {
+        self.encodings.replace(encodings)
       },
       /**
        * #action
        * replace the panels drawn between the tree and the alignment
        */
-      setRowPanels(panels: (RowPanelSpec | LegacyRowPanel)[]) {
-        self.rowPanels.replace(panels.map(readRowPanel))
+      setRowPanels(panels: RowPanelSpec[]) {
+        self.rowPanels.replace(panels)
       },
       /**
        * #action

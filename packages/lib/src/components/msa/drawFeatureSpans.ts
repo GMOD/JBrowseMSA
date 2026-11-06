@@ -1,7 +1,7 @@
 import { minFeatureLabelHeight } from '../../constants.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
-import type { Annotation, NodeWithIdsAndLength } from '../../types.ts'
+import type { Annotation, NodeWithIds } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 
 /** one drawn span: a feature, the lane it sits in, and its row's depth */
@@ -75,7 +75,7 @@ export interface SpanMarkRow<T extends SpanBand> {
 
 /** the rows of `bandsByRow` that `leaves` covers, in display order */
 export function spanRows<T extends SpanBand>(
-  leaves: HierarchyNode<NodeWithIdsAndLength>[],
+  leaves: HierarchyNode<NodeWithIds>[],
   bandsByRow: Map<string, T[]>,
 ): SpanRow<T>[] {
   const rows: SpanRow<T>[] = []

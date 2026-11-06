@@ -27,13 +27,7 @@ export type ResidueEncoding = 'fill' | 'color'
  * residue letters, `{domain: ['K', 'R'], range: ['#1f77b4', '#1f77b4']}`,
  * which leaves every letter it does not list uncolored
  */
-export type ColorScheme =
-  | string
-  | Pick<ColorScale, 'domain' | 'range'>
-  | {
-      /** @deprecated the earlier spelling of `{domain, range}` */
-      map: Record<string, string>
-    }
+export type ColorScheme = string | Pick<ColorScale, 'domain' | 'range'>
 
 export interface BasicTrackModel {
   id: string
@@ -568,6 +562,3 @@ export interface NodeWithIds {
   length?: number
   noTree?: boolean
 }
-
-/** @deprecated the same type as `NodeWithIds` */
-export type NodeWithIdsAndLength = NodeWithIds

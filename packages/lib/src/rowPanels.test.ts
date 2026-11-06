@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
@@ -185,55 +184,6 @@ test('two strips over one palette and title color a shared value alike', () => {
   ])
 })
 
-test('a snapshot in the earlier spelling reads as the color object', () => {
-  const model = MSAModelF().create({
-    id: 'legacy',
-    type: 'MsaView',
-    msaFormat: 'fasta',
-    data: { msa, treeMetadata: JSON.stringify(rowData) },
-    rowPanels: [
-      {
-        kind: 'strip',
-        field: 'HA',
-        scale: { map: { H7: '#377eb8' } },
-        legend: 'lineage',
-        width: 12,
-      },
-      {
-        kind: 'features',
-        x: 'column',
-        encoding: {
-          color: { field: 'Name', scale: { palette: 'set1' } },
-          label: 'Name',
-        },
-      },
-    ],
-  })
-  expect(getSnapshot(model).rowPanels).toEqual([
-    {
-      kind: 'strip',
-      width: 12,
-      encoding: {
-        fill: {
-          field: 'HA',
-          scale: { domain: ['H7'], range: ['#377eb8'] },
-          legend: { title: 'lineage' },
-        },
-      },
-    },
-    {
-      kind: 'features',
-      x: 'column',
-      encoding: {
-        fill: { field: 'Name', scale: { scheme: 'set1' } },
-        text: { field: 'Name' },
-      },
-    },
-  ])
-  expect(model.legends[0]!.title).toBe('lineage')
-  expect(model.legends[0]!.entries.map(e => e.id)).toEqual(['H7'])
-})
-
 test('setRowPanels replaces the layer', () => {
   const model = makeModel([])
   expect(model.resolvedRowPanels).toEqual([])
@@ -284,33 +234,4 @@ test('a field the table lacks colors nothing and lists nothing', () => {
   ])
   expect(model.resolvedRowPanels[0]!.colors.size).toBe(0)
   expect(model.legends).toEqual([])
-})
-
-test('a setter lifts the earlier spelling too', () => {
-  const model = makeModel([])
-  model.setEncodings([
-    { channel: 'tipLabel', field: 'HA', scale: { palette: 'set1' } },
-  ])
-  model.setColumnTracks([
-    { id: 't', name: 'T', kind: 'bar', values: [1, 2], max: 2 },
-    {
-      id: 'u',
-      name: 'U',
-      kind: 'bar',
-      values: [1, 2],
-      scales: { y: { domainMax: 4 } },
-    },
-  ])
-  expect(model.encodings[0]).toEqual({
-    channel: 'tipLabel',
-    field: 'HA',
-    scale: { scheme: 'set1' },
-  })
-  expect(model.columnTracks[0]!.encoding).toEqual({
-    y: { scale: { domainMax: 2 } },
-  })
-  expect(model.columnTrackContent.get('t')?.values).toEqual([0.5, 1])
-  expect(model.columnTracks[1]!.encoding).toEqual({
-    y: { scale: { domainMax: 4 } },
-  })
 })

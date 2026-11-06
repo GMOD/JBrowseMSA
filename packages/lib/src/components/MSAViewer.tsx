@@ -23,14 +23,11 @@ import Loading from './Loading.tsx'
 
 import type { MsaViewModel } from '../model.ts'
 import type {
-  LegacyColumnTrack,
-  LegacyEncoding,
-  LegacyRowPanel,
-} from '../scales.ts'
-import type {
   Cell,
   Clade,
   ColorScheme,
+  ColumnTrackSpec,
+  Encoding,
   Feature,
   Highlight,
   MsaSelection,
@@ -38,6 +35,7 @@ import type {
   ResidueEncoding,
   ResidueMapping,
   RowDataInput,
+  RowPanelSpec,
   TreeOrder,
   TreeRoot,
   Viewport,
@@ -104,7 +102,7 @@ export interface MSAViewerProps {
    * tracks supplied as data: per-column bar values, a text row, or arcs
    * joining pairs of columns (see docs/layers.md)
    */
-  columnTracks?: LegacyColumnTrack[]
+  columnTracks?: ColumnTrackSpec[]
   /** which residue of which structure each row's residues are (see docs/layers.md) */
   residueMappings?: ResidueMapping[]
   /** extra fields per row name, such as a lineage or a host (see docs/layers.md) */
@@ -116,7 +114,7 @@ export interface MSAViewerProps {
    * the annotations, and `{channel: 'featureLabel', field}` (see
    * docs/layers.md)
    */
-  encodings?: LegacyEncoding[]
+  encodings?: Encoding[]
   /**
    * panels between the tree and the alignment:
    * `{kind: 'strip', encoding: {fill: {field, scale?, legend?}}}`
@@ -124,7 +122,7 @@ export interface MSAViewerProps {
    * `{kind: 'features', x, encoding?: {fill?, text?}}` draws the annotation
    * spans per row (see docs/layers.md)
    */
-  rowPanels?: LegacyRowPanel[]
+  rowPanels?: RowPanelSpec[]
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
   drawTree?: boolean
   /** fixed width (px) of the tree/label area; unset fits it to the labels and the tree */

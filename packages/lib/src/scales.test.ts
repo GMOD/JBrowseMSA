@@ -6,9 +6,6 @@ import { compareGroupKeys } from './groupKeys.ts'
 import {
   declarationKey,
   letterColors,
-  readColor,
-  readColumnTrack,
-  readRowPanel,
   resolveScale,
   resolveShared,
 } from './scales.ts'
@@ -78,14 +75,6 @@ test('a range list colors as many values as it holds', () => {
     '#222222',
     undefined,
   ])
-})
-
-test('an earlier comma-separated range reads as a list of colors', () => {
-  const { scale } = readColor({ field: 'f', range: '#111111, rgb(0,0,0)' })
-  expect(scale).toEqual({ range: ['#111111', 'rgb(0,0,0)'] })
-  const { colorOf } = resolveScale(scale, ['a', 'b'])
-  expect(colorOf('a')).toBe('#111111')
-  expect(colorOf('b')).toBe('rgb(0,0,0)')
 })
 
 test('domain lists values first in its order, and spends the scheme from there', () => {
@@ -170,122 +159,8 @@ test('a title stands in for the field in the declaration', () => {
   )
 })
 
-test('palette reads as scheme, map as domain and range, legend as title', () => {
-  expect(readColor({ field: 'f', scale: { palette: 'set1' } })).toEqual({
-    field: 'f',
-    scale: { scheme: 'set1' },
-  })
-  expect(
-    readColor({
-      field: 'f',
-      scale: { map: { a: '#111111', b: '#222222' } },
-    }),
-  ).toEqual({
-    field: 'f',
-    scale: { domain: ['a', 'b'], range: ['#111111', '#222222'] },
-  })
-  expect(readColor({ field: 'f', legend: 'lineage' })).toEqual({
-    field: 'f',
-    legend: { title: 'lineage' },
-  })
-  expect(readColor({ field: 'f', scale: {} })).toEqual({
-    field: 'f',
-  })
-})
-
-test('the flat members nest under scale and legend', () => {
-  expect(
-    readColor({
-      field: 'f',
-      scale: 'categorical',
-      domain: ['a'],
-      range: 'set1',
-      title: 'lineage',
-    }),
-  ).toEqual({
-    field: 'f',
-    scale: { domain: ['a'], scheme: 'set1' },
-    legend: { title: 'lineage' },
-  })
-  expect(readColor({ field: 'f', range: ['#111111'] })).toEqual({
-    field: 'f',
-    scale: { range: ['#111111'] },
-  })
-})
-
-test('a strip whose encoding is empty or null reads its flat members', () => {
-  expect(
-    readRowPanel({ kind: 'strip', field: 'HA', encoding: null, width: 12 }),
-  ).toEqual({ kind: 'strip', width: 12, encoding: { fill: { field: 'HA' } } })
-  expect(
-    readRowPanel({ kind: 'strip', field: 'HA', range: 'set1', encoding: {} }),
-  ).toEqual({
-    kind: 'strip',
-    encoding: { fill: { field: 'HA', scale: { scheme: 'set1' } } },
-  })
-  expect(
-    readRowPanel({
-      kind: 'strip',
-      encoding: { fill: { field: 'HA', scale: { palette: 'set1' } } },
-    }),
-  ).toEqual({
-    kind: 'strip',
-    encoding: { fill: { field: 'HA', scale: { scheme: 'set1' } } },
-  })
-  expect(readRowPanel({ kind: 'strip', encoding: { fill: 'HA' } })).toEqual({
-    kind: 'strip',
-    encoding: { fill: { field: 'HA' } },
-  })
-})
-
-test('a color object in the current spelling reads unchanged', () => {
-  const current = {
-    field: 'f',
-    scale: { type: 'ordinal' as const, domain: ['a'], scheme: 'set1' },
-    legend: { title: 'lineage' },
-  }
-  expect(readColor(current)).toEqual(current)
-})
-
-test('a column track reads colors as encoding.color and max as domainMax', () => {
-  expect(
-    readColumnTrack({
-      id: 't',
-      name: 'T',
-      kind: 'text',
-      data: '12',
-      colors: { 1: '#111111' },
-      max: 2,
-    }),
-  ).toEqual({
-    id: 't',
-    name: 'T',
-    kind: 'text',
-    data: '12',
-    encoding: {
-      color: { scale: { domain: ['1'], range: ['#111111'] } },
-      y: { scale: { domainMax: 2 } },
-    },
-  })
-})
-
-test('a column track in the new spelling wins over its earlier members', () => {
-  expect(
-    readColumnTrack({
-      id: 't',
-      name: 'T',
-      kind: 'bar',
-      values: [1],
-      max: 2,
-      scales: { y: { domainMax: 3 } },
-      encoding: { y: { scale: { domainMax: 4 } } },
-    }).encoding,
-  ).toEqual({ y: { scale: { domainMax: 4 } } })
-})
-
-test('a scheme object reads in either spelling', () => {
+test('a scheme object gives a color per letter it lists', () => {
   const table = { K: '#1f77b4', R: '#1f77b4' }
-  expect(letterColors({ map: table })).toEqual(table)
   expect(
     letterColors({ domain: ['K', 'R'], range: ['#1f77b4', '#1f77b4'] }),
   ).toEqual(table)

@@ -5,7 +5,7 @@ import { drawFeatureSpans, spanRows } from './drawFeatureSpans.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
-import type { DomainBand, NodeWithIdsAndLength } from '../../types.ts'
+import type { DomainBand, NodeWithIds } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { SpanSource } from './drawFeatureSpans.ts'
 import type { Theme } from '@mui/material'
@@ -83,7 +83,7 @@ const barHalo = 1.5
  */
 export function domainOverlaySource(
   model: MsaViewModel,
-  leaves: HierarchyNode<NodeWithIdsAndLength>[],
+  leaves: HierarchyNode<NodeWithIds>[],
 ): SpanSource<DomainBand> {
   const {
     rowHeight,
