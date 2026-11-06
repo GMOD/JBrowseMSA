@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 
 import { useCanvasTheme } from '../../darkReader.ts'
@@ -23,7 +24,12 @@ import type { MsaViewModel } from '../../model.ts'
 const TreeOverview = observer(function ({ model }: { model: MsaViewModel }) {
   const { effectiveTreeAreaWidth, overviewHeight, highResScaleFactor } = model
   const theme = useCanvasTheme()
-  const [hover, setHover] = useState<{ id: string; rows: [number, number] }>()
+  const [hover] = useState(() =>
+    observable.box<{ id: string; rows: [number, number] } | undefined>(
+      undefined,
+      { deep: false },
+    ),
+  )
   const width = Math.round(effectiveTreeAreaWidth * highResScaleFactor)
   const height = Math.round(overviewHeight * highResScaleFactor)
 
@@ -60,10 +66,11 @@ const TreeOverview = observer(function ({ model }: { model: MsaViewModel }) {
       } else {
         drawTreeOverview({ ...box, theme })
       }
-      if (hover) {
+      const hovered = hover.get()
+      if (hovered) {
         drawTreeOverviewBox({
           ...box,
-          rows: hover.rows,
+          rows: hovered.rows,
           color: theme.palette.text.secondary,
         })
       }
@@ -78,7 +85,7 @@ const TreeOverview = observer(function ({ model }: { model: MsaViewModel }) {
     },
     width,
     height,
-    deps: [model, theme, hover],
+    deps: [model, theme],
   })
 
   return (
@@ -94,13 +101,15 @@ const TreeOverview = observer(function ({ model }: { model: MsaViewModel }) {
         width: effectiveTreeAreaWidth,
         height: overviewHeight,
       }}
-      onMouseMove={event => {
+      onMouseMove={action(event => {
         const hit = model.treeOverviewHit(event.nativeEvent.offsetY)
-        setHover(prev => (prev?.id === hit?.id ? prev : hit))
-      }}
-      onMouseLeave={() => {
-        setHover(undefined)
-      }}
+        if (hover.get()?.id !== hit?.id) {
+          hover.set(hit)
+        }
+      })}
+      onMouseLeave={action(() => {
+        hover.set(undefined)
+      })}
       onClick={event => {
         model.treeOverviewClick(event.nativeEvent.offsetY)
       }}

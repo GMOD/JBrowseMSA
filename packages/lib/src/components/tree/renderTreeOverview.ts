@@ -146,10 +146,15 @@ function overviewKeys({
   scale: number
 }) {
   return [
+    model.showTreeOverview,
     model.data.tree,
     model.data.msa,
+    model.msaFormat,
     model.currentAlignment,
+    JSON.stringify(model.treeRoot),
     model.collapsed.join(','),
+    model.rotated.join(','),
+    model.treeOrder,
     JSON.stringify(model.clades),
     model.showBranchLen,
     width,

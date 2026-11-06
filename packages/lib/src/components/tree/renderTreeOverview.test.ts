@@ -80,6 +80,21 @@ test('collapsing a clade rebuilds it', () => {
   expect(treeOverviewImage({ model, ...imageArgs })).toBe(second)
 })
 
+test('rotating a node, reordering or rerooting rebuilds it', () => {
+  const model = makeModel('((A:1,B:2):1,(C:1,D:5):1);')
+  const first = treeOverviewImage({ model, ...imageArgs })
+  model.toggleRotated(model.treeOverviewHit(10)!.id)
+  const rotated = treeOverviewImage({ model, ...imageArgs })
+  expect(rotated).not.toBe(first)
+
+  model.setTreeOrder('ladderize')
+  const ordered = treeOverviewImage({ model, ...imageArgs })
+  expect(ordered).not.toBe(rotated)
+
+  model.setTreeRoot('midpoint')
+  expect(treeOverviewImage({ model, ...imageArgs })).not.toBe(ordered)
+})
+
 test('a resize rebuilds it', () => {
   const model = makeModel('((A,B),(C,D));')
   const first = treeOverviewImage({ model, ...imageArgs })
