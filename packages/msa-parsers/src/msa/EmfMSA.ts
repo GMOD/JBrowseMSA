@@ -1,9 +1,8 @@
-import { parseEmfAln } from 'emf-js'
-
 import BaseMSA from './BaseMSA.ts'
+import { parseEmfAlignment } from './emf.ts'
 
 export default class EmfMSA extends BaseMSA {
   constructor(text: string) {
-    super(parseEmfAln(text).map(aln => [aln.protein, aln.seq]))
+    super(parseEmfAlignment(text).map(aln => [aln.protein, aln.seq]))
   }
 }

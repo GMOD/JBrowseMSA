@@ -2,9 +2,10 @@ import { describe, expect, test } from 'vitest'
 
 import A3mMSA from './A3mMSA.ts'
 import ClustalMSA from './ClustalMSA.ts'
+import EmfMSA from './EmfMSA.ts'
 import FastaMSA from './FastaMSA.ts'
 import { grRuns } from './StockholmMSA.ts'
-import { getUngappedSequence, parseMSA } from './index.ts'
+import { getUngappedSequence, isEmf, parseEmfTree, parseMSA } from './index.ts'
 import parseNewick from './parseNewick.ts'
 
 import type { NewickNode } from '@gmod/newick'
@@ -471,6 +472,42 @@ YY
       )
     },
   )
+
+  test('reads an Ensembl Compara EMF dump past its ## header', () => {
+    const dump = `##FORMAT (compara)
+##DATE Sat Feb  5 23:06:39 2022
+##RELEASE 106
+# Alignments: 10 primates EPO
+
+SEQ human seqA 1 1 4 1 g1
+SEQ mouse seqB 1 1 4 1 g2
+DATA
+AA
+CC
+D-
+EE
+//
+`
+    const msa = parseMSA(dump)
+    expect(msa).toBeInstanceOf(EmfMSA)
+    expect(msa.getNames()).toEqual(['seqA', 'seqB'])
+    expect(msa.getRow('seqA')).toBe('ACDE')
+    expect(msa.getRow('seqB')).toBe('AC-E')
+  })
+
+  test('reads the tree of an EMF dump past its ## header', () => {
+    const dump = `##FORMAT (compara)
+##RELEASE 106
+
+SEQ human seqA 1 1 4 1 g1
+SEQ mouse seqB 1 1 4 1 g2
+DATA
+(seqA:0.1,seqB:0.2);
+//
+`
+    expect(isEmf(dump)).toBe(true)
+    expect(parseEmfTree(dump).tree).toBe('(seqA:0.1,seqB:0.2);')
+  })
 
   test('rejects an HTML page instead of reading it as Clustal', () => {
     const page =

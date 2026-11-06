@@ -1,4 +1,4 @@
-import { generateNodeIds, parseEmfTree, parseNewick } from 'msa-parsers'
+import { generateNodeIds, isEmf, parseEmfTree, parseNewick } from 'msa-parsers'
 
 import { cladeHighlightAlpha, cladeHighlightColor } from './constants.ts'
 import { flatToTree } from './flatToTree.ts'
@@ -32,7 +32,7 @@ export function parseTreeText(text: string) {
   if (text.startsWith('BioTreeContainer')) {
     return flatToTree(parseAsn1(text))
   }
-  return parseNewick(text.startsWith('SEQ') ? parseEmfTree(text).tree : text)
+  return parseNewick(isEmf(text) ? parseEmfTree(text).tree : text)
 }
 
 // the marks that set tree state from a node rather than drawing

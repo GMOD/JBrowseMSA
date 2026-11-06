@@ -14,10 +14,12 @@ export {
   FastaMSA,
   StockholmMSA,
   getUngappedSequence,
+  isEmf,
   parseEmfTree,
   parseMSA,
   parseNewick,
   stockholmSniff,
+  stripEmfHeader,
 } from './msa/index.ts'
 export type { MSAFormat, MSAParserType } from './msa/index.ts'
 
