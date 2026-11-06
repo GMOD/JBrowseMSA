@@ -529,8 +529,7 @@ function rasterBackground({
 
 function TrackRendering({ model, theme, layout, Context, layers }: LayerProps) {
   const { trackHeight, offsetX, msaAreaWidth } = layout
-  const { effectiveTreeAreaWidth, rowPanelsWidth, resolvedRowPanels, id } =
-    model
+  const { effectiveTreeAreaWidth, rowPanelsWidth, id } = model
 
   const ctx = new Context(msaAreaWidth, trackHeight)
   renderAllTracks({

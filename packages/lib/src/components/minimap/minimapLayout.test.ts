@@ -86,7 +86,10 @@ test('the minimap draws each domain where the alignment does', () => {
 
 test('rows past the bar height share lanes, each drawing a span once', () => {
   const rows = 5000
-  const msa = Array.from({ length: rows }, (_, i) => `>s${i}\n${'A'.repeat(40)}`)
+  const msa = Array.from(
+    { length: rows },
+    (_, i) => `>s${i}\n${'A'.repeat(40)}`,
+  )
   const model = MSAModelF().create({
     type: 'MsaView',
     msaFormat: 'fasta',

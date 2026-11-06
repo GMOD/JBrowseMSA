@@ -58,8 +58,7 @@ test('the reference row tints the tree as it does on screen', async () => {
   const { rowHeight, effectiveTreeAreaWidth } = model
   const tints = (svg.match(/<rect[^>]*>/g) ?? []).filter(
     r =>
-      r.includes('#0080ff') &&
-      r.includes(`width="${effectiveTreeAreaWidth}"`),
+      r.includes('#0080ff') && r.includes(`width="${effectiveTreeAreaWidth}"`),
   )
   expect(tints).toHaveLength(1)
   expect(tints[0]).toContain(`y="${2 * rowHeight}"`)
