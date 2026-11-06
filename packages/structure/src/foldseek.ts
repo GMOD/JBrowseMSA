@@ -10,12 +10,13 @@ import {
 } from 'p2s_mapper'
 
 import { caChain, parseCaCoordinates } from './cif.ts'
+import { fetchText } from './fetchText.ts'
 import { generated } from './lookup.ts'
 import { composePairs, segmentsOfPairs } from './segments.ts'
 
 import type { ChainCoordinates } from './cif.ts'
+import type { FetchText } from './fetchText.ts'
 import type { StructureCandidate } from './lookup.ts'
-import type { FetchText } from './superposeRows.ts'
 import type { FoldseekHit } from 'p2s_mapper'
 
 // the client, the query and the hit alignment live in p2s_mapper, shared with
@@ -25,14 +26,6 @@ export type { FoldseekHit }
 
 function dataUrl(pdb: string) {
   return `data:chemical/x-pdb;charset=utf-8,${encodeURIComponent(pdb)}`
-}
-
-const fetchText: FetchText = async url => {
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error(`${url}: HTTP ${res.status}`)
-  }
-  return res.text()
 }
 
 // a CA within this of the trace's is the same atom; an alternate location

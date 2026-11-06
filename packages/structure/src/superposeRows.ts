@@ -3,12 +3,14 @@ import {
   superposeOnColumns,
 } from './alignmentSuperposition.ts'
 import { caChain, parseCaCoordinates } from './cif.ts'
+import { fetchText } from './fetchText.ts'
 
 import type {
   RowCoordinates,
   RowSuperposition,
 } from './alignmentSuperposition.ts'
 import type { CaCoordinates, Vec3 } from './cif.ts'
+import type { FetchText } from './fetchText.ts'
 import type { Mat4 } from './superpose.ts'
 import type { ColumnTrackSpec, MsaViewModel } from 'react-msaview'
 
@@ -28,16 +30,6 @@ export interface SuperposeRowsResult {
   distanceValues: number[]
   /** rows left out, and why */
   skipped: { row: string; reason: string }[]
-}
-
-export type FetchText = (url: string) => Promise<string>
-
-const fetchText: FetchText = async url => {
-  const res = await fetch(url)
-  if (!res.ok) {
-    throw new Error(`${url}: HTTP ${res.status}`)
-  }
-  return res.text()
 }
 
 /**

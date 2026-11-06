@@ -4,16 +4,6 @@ export function messageOf(e: unknown) {
   return e instanceof Error ? e.message : String(e)
 }
 
-export function signalledFetchText(signal: AbortSignal) {
-  return async (url: string) => {
-    const res = await fetch(url, { signal })
-    if (!res.ok) {
-      throw new Error(`${url}: HTTP ${res.status}`)
-    }
-    return res.text()
-  }
-}
-
 /**
  * One abortable run at a time: `restart` aborts the run before it and hands
  * out a fresh signal, and unmounting aborts whatever is running.

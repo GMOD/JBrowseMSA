@@ -2,12 +2,13 @@ import { useState } from 'react'
 
 import {
   FOLDSEEK_MAX_RESIDUES,
+  fetchText,
   foldseekCandidates,
   foldseekQuery,
   searchFoldseek,
 } from 'react-msaview-structure'
 
-import { messageOf, signalledFetchText, useRestartable } from './restartable'
+import { messageOf, useRestartable } from './restartable'
 
 import type { MsaViewModel } from 'react-msaview'
 import type { StructureCandidate } from 'react-msaview-structure'
@@ -61,7 +62,7 @@ export function useFoldseekSearch(model: MsaViewModel) {
         rowName: row,
         rowSequence,
         hits,
-        fetchText: signalledFetchText(signal),
+        fetchText: url => fetchText(url, signal),
       })
       if (!signal.aborted) {
         setFoldseek({ state: 'done', row, candidates })

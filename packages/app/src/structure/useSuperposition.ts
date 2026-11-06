@@ -2,12 +2,13 @@ import { useState } from 'react'
 
 import {
   distanceTrack,
+  fetchText,
   findStructures,
   networkLookups,
   superposeRows,
 } from 'react-msaview-structure'
 
-import { messageOf, signalledFetchText, useRestartable } from './restartable'
+import { messageOf, useRestartable } from './restartable'
 
 import type { MsaViewModel } from 'react-msaview'
 import type { SuperposeRowsResult } from 'react-msaview-structure'
@@ -109,7 +110,7 @@ export function useSuperposition(model: MsaViewModel) {
         columns: selection
           ? { start: selection.start - 1, end: selection.end - 1 }
           : undefined,
-        fetchText: signalledFetchText(signal),
+        fetchText: url => fetchText(url, signal),
       })
       if (signal.aborted) {
         return
