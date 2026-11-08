@@ -15,8 +15,8 @@ background.
 - Canvas rendering uses a tiled block system (`calculateBlocks.ts`) so a large
   alignment never renders whole.
 - Blocks are positioned at their offsets only; `scrollX`/`scrollY` live on one
-  transformed container per panel (`MSACanvas`, `TreeCanvas`, `TrackBlocks`).
-  A transformed ancestor becomes the containing block of anything
+  transformed container per panel (`MSACanvas`, `TreeCanvas`, `TrackBlocks`). A
+  transformed ancestor becomes the containing block of anything
   `position: fixed` inside it, which is why such elements are portaled.
 
 ## Domains and features
@@ -32,8 +32,8 @@ background.
   used to submit to took fifteen minutes.
 - A host that computes its spans passes them as the `features` layer, JSON
   records `featuresLayer.ts` converts to annotations, cached per record so
-  `featureColors` can key on them outside a reaction. `allAnnotations` puts
-  them after the GFF's, and every overlay reader takes that list.
+  `featureColors` can key on them outside a reaction. `allAnnotations` puts them
+  after the GFF's, and every overlay reader takes that list.
 - A span takes its color from its own GFF `color=` attribute first, then from a
   `featureFill` encoding's scale over a field of the feature table, then from
   `fillPalette` where no encoding is set and grey where one is.
@@ -45,8 +45,8 @@ background.
 
 - The color scheme is a categorical scale over residue letters, and the public
   `residueEncoding` prop names the channel it paints: `fill` colors the cell,
-  `color` colors the letter. The MST property behind it stays `bgColor`,
-  because that name travels in the shared URL. The vocabulary is the one
+  `color` colors the letter. The MST property behind it stays `bgColor`, because
+  that name travels in the shared URL. The vocabulary is the one
   jbrowse-components uses for `LinearMarkDisplay` (marks, encodings, channels,
   scales).
 - The `colorScheme` prop takes a scheme name or a color object's
@@ -72,15 +72,15 @@ background.
 - The background on screen comes from `components/msa/msaRaster.ts`: one pixel
   per cell, built lazily in 512-pixel tiles and blitted with `drawImage`, so a
   zoom frame costs a few blits instead of a `fillRect` per visible cell.
-- The cache keys on every input to a cell's color. The tile map also keys on
-  the cells-per-pixel span, per axis: below one device pixel per cell a tile
+- The cache keys on every input to a cell's color. The tile map also keys on the
+  cells-per-pixel span, per axis: below one device pixel per cell a tile
   averages cells into a pixel, the browser's smoothing blurs both axes, and at
   fit-to-width only the columns are narrow.
 - `MSACanvasBlock` decides whether the raster applies and passes `rasterTiles`
-  to `renderMSABlock`. The SVG export draws the same background as one
-  `<image>` (`rasterImageHref`) where a canvas can be read back, and falls back
-  to per-cell rects where it cannot (jsdom). Letters stay `fillText`, since a
-  glyph sprite atlas measured 2-3x slower.
+  to `renderMSABlock`. The SVG export draws the same background as one `<image>`
+  (`rasterImageHref`) where a canvas can be read back, and falls back to
+  per-cell rects where it cannot (jsdom). Letters stay `fillText`, since a glyph
+  sprite atlas measured 2-3x slower.
 - The minimap bar draws the same raster sampled down to at most 2000 columns.
 
 ## Row panels
@@ -89,20 +89,20 @@ background.
   `components/rowpanels/RowPanels.tsx` mounts one canvas column per record
   between the tree and the alignment, tiled by `blocksY`, and
   `renderRowPanel.ts` dispatches on the record's `kind` for the live view and
-  the SVG export both. `rowPanelsWidth` comes out of `msaAreaWidth`, which
-  moves the alignment, the minimap and the tracks right by the panels; the
-  headers take their own band in `TopArea` and export as a `rotate(-90)` text
-  each. Row panels stay out of the track machinery, which is column space.
+  the SVG export both. `rowPanelsWidth` comes out of `msaAreaWidth`, which moves
+  the alignment, the minimap and the tracks right by the panels; the headers
+  take their own band in `TopArea` and export as a `rotate(-90)` text each. Row
+  panels stay out of the track machinery, which is column space.
 - `renderStrip.ts` draws the `strip` kind, a cell per row. `features` draws the
-  GFF's spans per row through `components/msa/drawFeatureSpans.ts`, the one
-  span mark: the alignment's overlay (`renderBoxFeatureCanvasBlock.ts`) and the
-  panel each hand it an x mapping, the fills, the labels and a row geometry, so
-  a strand arrow is drawn in one place.
-- The head is the last `headLength` pixels _of_ the feature, tapering to a
-  point at its end the way gggenes and gggenomes draw one, and a feature
-  shorter than the head is all head. A glyph covers its own span and nothing
-  past it, so the genes of an operon butt together. A `headRise` lifts the head
-  above a band too thin to taper, which the underline bar is.
+  GFF's spans per row through `components/msa/drawFeatureSpans.ts`, the one span
+  mark: the alignment's overlay (`renderBoxFeatureCanvasBlock.ts`) and the panel
+  each hand it an x mapping, the fills, the labels and a row geometry, so a
+  strand arrow is drawn in one place.
+- The head is the last `headLength` pixels _of_ the feature, tapering to a point
+  at its end the way gggenes and gggenomes draw one, and a feature shorter than
+  the head is all head. A glyph covers its own span and nothing past it, so the
+  genes of an operon butt together. A `headRise` lifts the head above a band too
+  thin to taper, which the underline bar is.
 - `resolvedRowPanels` resolves a panel's spans to panel pixels: `x: "column"`
   scales `domainBands` by `colWidth`, and `x: "position"` packs each row's
   features in residue positions through `packDomainLanes` (generic over
@@ -118,20 +118,20 @@ background.
 - A record's own `encoding` resolves through `resolveScale` and
   `featureFields.ts` the way the top-level `featureFill` and `featureLabel` do,
   and falls back to them.
-- A tree, a `gff` and a `features` panel make a figure with no alignment at
-  all: `dataInitialized` is `msa || tree`, `numColumns` is 0, and the alignment
-  panel is zero columns wide on screen and in the export.
+- A tree, a `gff` and a `features` panel make a figure with no alignment at all:
+  `dataInitialized` is `msa || tree`, `numColumns` is 0, and the alignment panel
+  is zero columns wide on screen and in the export.
 
 ## The tree
 
 - Node ids are path-derived from `tree`, which is `inputTree` after `treeRoot`
-  reroots it (`rerootTree.ts`). `collapsed`, `rotated` and `showOnly` hold
-  those ids, so `setTreeRoot` clears them through `clearNodeState` and the
-  seeding clade marks apply again. `treeRoot` names tips, so it survives a
-  reload of the same tree. `buildTreeRoot` sorts each node's children by
-  `treeOrder`, then reverses the `rotated` ones. `rerootTree.ts` imports
-  nothing and works on the plain `parseNewick` node, so it can move into
-  `@gmod/newick`, which the jbrowse-components tree sidebar also uses.
+  reroots it (`rerootTree.ts`). `collapsed`, `rotated` and `showOnly` hold those
+  ids, so `setTreeRoot` clears them through `clearNodeState` and the seeding
+  clade marks apply again. `treeRoot` names tips, so it survives a reload of the
+  same tree. `buildTreeRoot` sorts each node's children by `treeOrder`, then
+  reverses the `rotated` ones. `rerootTree.ts` imports nothing and works on the
+  plain `parseNewick` node, so it can move into `@gmod/newick`, which the
+  jbrowse-components tree sidebar also uses.
 - The tree overview (`components/tree/TreeOverview.tsx`,
   `renderTreeOverview.ts`) is the brush on the row scale, behind
   `showTreeOverview`. It draws `get tree()` rather than `root`, so the whole
@@ -145,8 +145,8 @@ background.
   tree, `hideGapsEffective` and the alignment all read is the one the branch
   menu writes. `cladeGutterWidth` in `components/tree/cladeBrackets.ts` is the
   column the bracket takes out of the right of the tree area. The canvas draws
-  the bar and the label is DOM text (`CladeLabels.tsx`) on screen and a
-  `<text>` in the export, since the canvas layer has no rotation.
+  the bar and the label is DOM text (`CladeLabels.tsx`) on screen and a `<text>`
+  in the export, since the canvas layer has no rotation.
 - `treeAreaWidth` and `treeWidth` are undefined until a snapshot, a prop or the
   divider sets them, and undefined fits the tree area to the labels and the
   tree. The fit measures the labels and the clade gutter at `labelFitFontSize`
@@ -158,48 +158,48 @@ background.
 - `model.legends` is the one list both legend renderings read:
   `components/msa/AnnotationLegend.tsx` on screen and `LegendSVG` in
   `renderToSvg.tsx` for the export. A producer contributes
-  `{ id, title, entries }`, and `legendRows` flattens the list into rows,
-  giving each legend a title row once there is more than one. The domain
-  overlay, the row-table encodings and the row panels are its producers, each
-  keyed by its scale's declaration (`resolvedScales`), so a matrix of strips
-  naming one `legend.title` lists one legend.
+  `{ id, title, entries }`, and `legendRows` flattens the list into rows, giving
+  each legend a title row once there is more than one. The domain overlay, the
+  row-table encodings and the row panels are its producers, each keyed by its
+  scale's declaration (`resolvedScales`), so a matrix of strips naming one
+  `legend.title` lists one legend.
 - A channel nests `scale: {type, domain, range, scheme}` and `legend: {title}`,
-  as jbrowse-components' displays do since its ADR-238. Nothing reads an
-  earlier spelling: the flat color object, a palette name in `range`,
-  `{palette}`, `{map}`, `scales.y`, flat strips and a features panel's `color`
-  and `label` were cut over in one change with no reader left. The property
-  behind the overlay's collapse toggle stays `showDomainLegend`, because that
-  name travels in the shared URL.
+  as jbrowse-components' displays do since its ADR-238. Nothing reads an earlier
+  spelling: the flat color object, a palette name in `range`, `{palette}`,
+  `{map}`, `scales.y`, flat strips and a features panel's `color` and `label`
+  were cut over in one change with no reader left. The property behind the
+  overlay's collapse toggle stays `showDomainLegend`, because that name travels
+  in the shared URL.
 
 ## Tracks
 
 - Tracks (conservation, sequence logo, the position ruler, the Stockholm text
-  tracks, the pinned copy of the `relativeTo` row) carry a `kind`
-  discriminator and share one draw module, `components/tracks/drawTracks.ts`.
-  `drawTrackBlock` applies the transform and dispatches on `kind`; the live
-  view calls it from `components/tracks/TrackBlocks.tsx` and the SVG export
-  through `renderAllTracks`.
-- Adding a track kind means a new `kind`, a draw function in that module, a
-  case in `drawTrackBlock`, and a case in
-  `components/tracks/TrackTooltipContent.tsx` for that track's reading at the
-  hovered column, with no second rendering path or component.
+  tracks, the pinned copy of the `relativeTo` row) carry a `kind` discriminator
+  and share one draw module, `components/tracks/drawTracks.ts`. `drawTrackBlock`
+  applies the transform and dispatches on `kind`; the live view calls it from
+  `components/tracks/TrackBlocks.tsx` and the SVG export through
+  `renderAllTracks`.
+- Adding a track kind means a new `kind`, a draw function in that module, a case
+  in `drawTrackBlock`, and a case in `components/tracks/TrackTooltipContent.tsx`
+  for that track's reading at the hovered column, with no second rendering path
+  or component.
 - `components/Track.tsx` hosts every kind's hover: `useTrackHover` sets the
-  model's mouse column and anchors the tooltip, so the column statistics live
-  on the tracks that draw them and the alignment's own tooltip stays about the
-  cell under the cursor.
+  model's mouse column and anchors the tooltip, so the column statistics live on
+  the tracks that draw them and the alignment's own tooltip stays about the cell
+  under the cursor.
 - A track model carries a `heightKey` naming the height its divider writes: the
-  `kind` for a computed track, so conservation and property conservation
-  resize together, and `own:<id>` for a `columnTracks` track, which resizes
-  alone. `trackHeights` holds one number per key, absent until the user drags,
-  and `defaultTrackHeights` answers until then. A track without a key (the
-  ruler, a text track) has no divider. Only the last turned-on track of a key
-  carries the handle, and the drag divides across the group. That handle
-  covers only the alignment, so `Track` draws a hairline under every track but
-  the last, which reaches across the labels too.
-- `turnedOffTracks` records only the user's explicit show/hide choices. An id
-  is absent until they touch that track, and the value then means "off", so a
-  hidden-by-default track (`defaultOffTracks` in `model.ts`) adds nothing to
-  the shared URL.
+  `kind` for a computed track, so conservation and property conservation resize
+  together, and `own:<id>` for a `columnTracks` track, which resizes alone.
+  `trackHeights` holds one number per key, absent until the user drags, and
+  `defaultTrackHeights` answers until then. A track without a key (the ruler, a
+  text track) has no divider. Only the last turned-on track of a key carries the
+  handle, and the drag divides across the group. That handle covers only the
+  alignment, so `Track` draws a hairline under every track but the last, which
+  reaches across the labels too.
+- `turnedOffTracks` records only the user's explicit show/hide choices. An id is
+  absent until they touch that track, and the value then means "off", so a
+  hidden-by-default track (`defaultOffTracks` in `model.ts`) adds nothing to the
+  shared URL.
 
 ## SVG export
 
@@ -211,10 +211,10 @@ background.
 ## Downstream: jbrowse-plugin-msaview
 
 - `@jbrowse/core` is an external in the downstream jbrowse-plugin-msaview
-  bundle, resolved at runtime against the core the host jbrowse-web ships,
-  which can be older than this workspace's. A freshly added core export
-  typechecks and passes tests here and fails the plugin's `check-host-floor`.
-  A trivial new helper gets inlined instead (`statusMessageText` in
+  bundle, resolved at runtime against the core the host jbrowse-web ships, which
+  can be older than this workspace's. A freshly added core export typechecks and
+  passes tests here and fails the plugin's `check-host-floor`. A trivial new
+  helper gets inlined instead (`statusMessageText` in
   `packages/lib/src/fetchUtils.ts`).
 - Core also drops long-established exports: it removed `renderToStaticMarkup`
   from the `@jbrowse/core/util` barrel to keep react-dom out of the RPC worker,
@@ -229,15 +229,15 @@ background.
   finds the structures in AlphaFold DB and RCSB, and writes the
   `residueMappings` record onto each. `superposeRows` fits the structures of
   several rows on the alignment's own correspondences, over a selected column
-  range if one is set, and returns the matrices for the panel's `transforms`
-  and a per-column CA distance for a `columnTracks` bar, after setting aside
-  the pairs more than twice the RMSD from the fit, as PyMOL's `align` does.
+  range if one is set, and returns the matrices for the panel's `transforms` and
+  a per-column CA distance for a `columnTracks` bar, after setting aside the
+  pairs more than twice the RMSD from the fit, as PyMOL's `align` does.
   `FacetGrid` shows one panel per group of rows with the cameras tied.
-- `searchFoldseek` is the opt-in tier for a row with no identifier: it sends
-  the sequence to search.foldseek.com and waits for a queue, so the app offers
-  it as a button and never runs it unasked. A PDB hit draws from its own CA
-  trace, because the database's chain positions skip unresolved residues and
-  are not SEQRES numbering. The lookups and the aligner come from `p2s_mapper`
+- `searchFoldseek` is the opt-in tier for a row with no identifier: it sends the
+  sequence to search.foldseek.com and waits for a queue, so the app offers it as
+  a button and never runs it unasked. A PDB hit draws from its own CA trace,
+  because the database's chain positions skip unresolved residues and are not
+  SEQRES numbering. The lookups and the aligner come from `p2s_mapper`
   (`~/src/gmod/p2s_mapper`), which the protein3d plugin shares.
 - Mol\* is a peer dependency that loads on first mount, so nothing in
   `packages/lib` imports it.
@@ -248,9 +248,8 @@ background.
   embed-API parity check, and `packages/lib/src/embedApiParity.test.ts` the
   Python half.
 - `packages/lib/docgen` parses with an aliased TypeScript 6 (`typescript6` in
-  the root devDependencies), because the native TypeScript 7 compiler exposes
-  no `createProgram`, checker or scanner. Keep the alias when bumping
-  TypeScript.
+  the root devDependencies), because the native TypeScript 7 compiler exposes no
+  `createProgram`, checker or scanner. Keep the alias when bumping TypeScript.
 
 ## The website's tutorial index
 
