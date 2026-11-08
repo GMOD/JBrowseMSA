@@ -35,19 +35,21 @@ const OPENING = ['Prerequisites', 'The data']
 const CLOSING = ['Reproduce it end to end', 'See also', 'References']
 
 function sections(text) {
-  const out = []
+  const lines = text.split('\n')
+  const starts = []
   let fenced = false
-  for (const line of text.split('\n')) {
+  for (const [i, line] of lines.entries()) {
     if (line.startsWith('```')) {
       fenced = !fenced
     }
     if (!fenced && line.startsWith('## ')) {
-      out.push({ title: line.slice(3).trim(), lines: [] })
-    } else {
-      out.at(-1)?.lines.push(line)
+      starts.push(i)
     }
   }
-  return out
+  return starts.map((start, k) => ({
+    title: lines[start].slice(3).trim(),
+    lines: lines.slice(start + 1, starts[k + 1]),
+  }))
 }
 
 function fences(text) {

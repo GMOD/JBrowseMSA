@@ -16,7 +16,7 @@ import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import { commitScreenshot, optimizePng } from './image-pipeline.mjs'
 import {
@@ -34,7 +34,7 @@ import {
 const port = numOpt('port', 8124)
 const dir = path.join(appDataDir, 'static_first')
 const server = await startStaticServer(port, dir)
-const browser = await puppeteer.launch({
+const browser = await launch({
   headless: true,
   executablePath: findChrome(),
   args: BROWSER_ARGS,

@@ -243,7 +243,7 @@ function upload(entries) {
         path.join(staging, path.basename(key)),
       )
     }
-    for (const ext of [...exts].sort(cmpStr)) {
+    for (const ext of [...exts].toSorted(cmpStr)) {
       execFileSync(
         'aws',
         [
@@ -272,7 +272,7 @@ function upload(entries) {
   }
 }
 
-async function cmdPush() {
+function cmdPush() {
   const filters = listOpt('filter')
   const dryRun = flag('dry-run')
   const local = scanLocal()
@@ -286,7 +286,7 @@ async function cmdPush() {
       : [...local.values()]
   const toPush = candidates
     .filter(e => !knownKeys.has(storeKey(e)))
-    .sort((a, b) => cmpStr(a.path, b.path))
+    .toSorted((a, b) => cmpStr(a.path, b.path))
 
   if (dryRun) {
     console.log(`${toPush.length} blob(s) would upload, and media.lock would`)
@@ -319,7 +319,9 @@ function readLockAtRef(ref) {
       encoding: 'utf8',
     })
   } catch (e) {
-    throw new Error(`git show ${ref}:media.lock failed: ${e.message}`)
+    throw new Error(`git show ${ref}:media.lock failed: ${e.message}`, {
+      cause: e,
+    })
   }
   return parseManifest(text, `${ref}:media.lock`)
 }
@@ -442,7 +444,7 @@ async function main() {
       await cmdPull()
       break
     case 'push':
-      await cmdPush()
+      cmdPush()
       break
     case 'check':
       cmdCheck()
@@ -463,7 +465,9 @@ async function main() {
   }
 }
 
-main().catch(e => {
+try {
+  await main()
+} catch (e) {
   console.error(e)
   process.exit(1)
-})
+}

@@ -28,12 +28,10 @@
  */
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { flag, listOpt, opt } from './lib.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(__dirname, '..', '..')
+const repoRoot = path.resolve(import.meta.dirname, '..', '..')
 
 const force = flag('force')
 const skipBuild = flag('skip-build')

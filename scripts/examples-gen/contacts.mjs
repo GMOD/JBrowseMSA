@@ -104,7 +104,7 @@ const regionOf = pos => {
 const residues = [...points.keys()]
   .map(seqId => ({ seqId, pos: toUniprot(seqId) }))
   .filter(r => r.pos !== undefined)
-  .sort((a, b) => a.pos - b.pos)
+  .toSorted((a, b) => a.pos - b.pos)
 
 const contacts = []
 for (let i = 0; i < residues.length; i++) {
@@ -129,7 +129,7 @@ const byPair = new Map()
 for (const c of contacts) {
   byPair.set(c.pair, (byPair.get(c.pair) ?? 0) + 1)
 }
-const summary = [...byPair].sort((a, b) => b[1] - a[1])
+const summary = [...byPair].toSorted((a, b) => b[1] - a[1])
 
 writeJson(outFile, {
   generatedBy: 'scripts/examples-gen/contacts.mjs',

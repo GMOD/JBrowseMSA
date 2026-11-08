@@ -23,7 +23,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import { pack, publishablePackages } from './check-pack.mjs'
 import {
@@ -104,7 +104,7 @@ function packAll(outDir) {
 
 async function renderQuickStart(dir) {
   const server = await startStaticServer(0, path.join(dir, 'dist'))
-  const browser = await puppeteer.launch({
+  const browser = await launch({
     executablePath: findChrome(),
     args: BROWSER_ARGS,
     defaultViewport: { width: 1000, height: 600 },

@@ -103,7 +103,7 @@ const folders = fs
   .readdirSync(dataDir, { withFileTypes: true })
   .filter(entry => entry.isDirectory())
   .map(entry => entry.name)
-  .sort()
+  .toSorted()
 
 for (const folder of folders) {
   if (!rows.has(folder)) {
@@ -149,7 +149,7 @@ for (const folder of folders) {
     continue
   }
   const text = fs.readFileSync(folderReadme, 'utf8')
-  for (const file of fs.readdirSync(path.join(dataDir, folder)).sort()) {
+  for (const file of fs.readdirSync(path.join(dataDir, folder)).toSorted()) {
     if (file === 'README.md') {
       continue
     }
@@ -164,7 +164,7 @@ for (const folder of folders) {
 
 // one missing file is named by every link that loads it, and a page links the
 // same alignment from most of its figures
-const unique = [...new Set(problems)].sort()
+const unique = [...new Set(problems)].toSorted()
 if (unique.length > 0) {
   console.error(
     `${unique.length} problem(s) with the hosted data:\n` +

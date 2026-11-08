@@ -314,7 +314,7 @@ async function tutorialSpecs() {
     ? fs
         .readdirSync(dir)
         .filter(f => f.endsWith('.mjs'))
-        .sort()
+        .toSorted()
     : []
   const modules = await Promise.all(
     files.map(f => import(new URL(f, dir).href)),

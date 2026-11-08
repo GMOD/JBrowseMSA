@@ -36,7 +36,7 @@ function rightPadToBlock(fasta) {
 
 fs.mkdirSync(appDataDir, { recursive: true })
 let copied = 0
-for (const file of fs.readdirSync(examplesDataDir).sort()) {
+for (const file of fs.readdirSync(examplesDataDir).toSorted()) {
   fs.copyFileSync(path.join(examplesDataDir, file), path.join(appDataDir, file))
   copied++
 }

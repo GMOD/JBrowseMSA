@@ -189,8 +189,11 @@ describe('mergeManifest', () => {
   })
 })
 
+function sha(c) {
+  return c.repeat(40)
+}
+
 describe('lastFullRegen', () => {
-  const sha = c => c.repeat(40)
   const log = [
     `${sha('a')} 2026-09-24`,
     '',

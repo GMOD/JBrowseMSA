@@ -66,7 +66,7 @@ export function numOpt(name, fallback) {
 
 // A comma-separated `--name=a,b,c` flag parsed into a trimmed, non-empty list.
 export const listOpt = name =>
-  (opt(name, '') || '')
+  opt(name, '')
     .split(',')
     .map(t => t.trim())
     .filter(Boolean)

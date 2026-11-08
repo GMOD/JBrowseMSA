@@ -63,7 +63,7 @@ const dims = e =>
 // gained a digit.
 export function formatManifest(entries, header) {
   const lines = [...entries]
-    .sort((a, b) => cmpStr(a.path, b.path))
+    .toSorted((a, b) => cmpStr(a.path, b.path))
     .map(e => `${e.path} ${dims(e)} ${e.bytes} ${e.sha256}`)
   return header + lines.join('\n') + '\n'
 }
@@ -136,7 +136,7 @@ export function diffManifests(before, after) {
       diffs.push({ path, kind: 'changed', before: b, after: a })
     }
   }
-  return diffs.sort((x, y) => cmpStr(x.path, y.path))
+  return diffs.toSorted((x, y) => cmpStr(x.path, y.path))
 }
 
 export function mergeManifest(existing, fresh) {

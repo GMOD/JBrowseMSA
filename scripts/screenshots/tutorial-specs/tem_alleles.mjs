@@ -102,7 +102,7 @@ const letters = [
       positions.map(p => record[`Ambler ${p}`]),
     ),
   ),
-].sort((a, b) => a.localeCompare(b))
+].toSorted((a, b) => a.localeCompare(b))
 const RESIDUE_COLORS = {
   scale: {
     domain: letters,

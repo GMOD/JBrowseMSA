@@ -44,7 +44,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import { commitScreenshot, optimizePng } from './image-pipeline.mjs'
 import {
@@ -91,7 +91,8 @@ const PROTEIN3D_PUBLISHED =
 // ---- args -----------------------------------------------------------------
 const force = flag('force')
 const jbrowseBase = (
-  opt('jbrowse-url', process.env.JBROWSE_WEB_URL) || 'http://localhost:3000'
+  String(opt('jbrowse-url', process.env.JBROWSE_WEB_URL ?? '')) ||
+  'http://localhost:3000'
 ).replace(/\/$/, '')
 const dataPort = numOpt('data-port', 8099)
 const pluginPort = numOpt('plugin-port', 9100)
@@ -194,21 +195,22 @@ async function shootAndCommit(page, outName) {
 // on the N-terminus with the highlighted column off-screen.
 function inspectAndCenter(page, { expectCol, centerCol, queryName, center }) {
   return page.evaluate(
-    (expectCol, centerCol, queryName, center) => {
+    (expectedCol, centeredCol, query, shouldCenter) => {
       const msa = window.JBrowseRootModel.session.views.find(
         v => v.type === 'MsaView',
       )
-      const queryRow = msa.rows.find(r => r[0] === queryName)?.[1]
+      const queryRow = msa.rows.find(r => r[0] === query)?.[1]
       // center on centerCol (the middle of a highlighted domain band) rather
       // than the first highlighted column, so a wide band reads centered
-      const col = centerCol ?? expectCol
-      if (center && col !== undefined) {
+      const col = centeredCol ?? expectedCol
+      if (shouldCenter && col !== undefined) {
         msa.setScrollX(msa.msaAreaWidth / 2 - col * msa.colWidth)
       }
       return {
         connected: !!msa.connectedView,
-        colChar: expectCol !== undefined ? queryRow?.[expectCol] : undefined,
-        highlightedColumns: [...(msa.highlightedColumns || [])],
+        colChar:
+          expectedCol !== undefined ? queryRow?.[expectedCol] : undefined,
+        highlightedColumns: [...(msa.highlightedColumns ?? [])],
       }
     },
     expectCol,
@@ -330,11 +332,14 @@ async function captureFigure(browser, fig, ctx, links) {
 }
 
 // ---- main -----------------------------------------------------------------
-async function main() {
-  const wants = fig =>
+function wants(fig) {
+  return (
     filterTokens.length === 0 ||
-    filterTokens.some(t => fig.out.includes(t) || fig.link.includes(t))
+    filterTokens.some(t => [fig.out, fig.link].some(s => s.includes(t)))
+  )
+}
 
+async function main() {
   // these figures need a running jbrowse-web
   const reachable = await fetch(`${jbrowseBase}/`, { method: 'HEAD' })
     .then(r => r.ok || r.status < 500)
@@ -385,7 +390,7 @@ async function main() {
     dataBase,
   }
 
-  const browser = await puppeteer.launch({
+  const browser = await launch({
     headless: true,
     executablePath,
     // jbrowse-web fetches the local config/data cross-origin and needs a webgl
@@ -431,7 +436,9 @@ async function main() {
   console.log('\nJBrowse figures done.')
 }
 
-main().catch(e => {
+try {
+  await main()
+} catch (e) {
   console.error(e)
   process.exit(1)
-})
+}

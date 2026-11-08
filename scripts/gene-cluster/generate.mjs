@@ -112,7 +112,7 @@ for (const genome of GENOMES) {
     } else if (op === 'invert') {
       const seg = row
         .slice(gene.colStart, gene.colEnd)
-        .reverse()
+        .toReversed()
         .map(b => COMPLEMENT[b])
       for (let i = 0; i < seg.length; i++) {
         row[gene.colStart + i] = seg[i]

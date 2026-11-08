@@ -51,7 +51,7 @@ const stale = [
   ...new Set([...Object.keys(committed), ...Object.keys(generated)]),
 ]
   .filter(file => committed[file] !== generated[file])
-  .sort()
+  .toSorted()
 
 if (stale.length > 0) {
   console.error(

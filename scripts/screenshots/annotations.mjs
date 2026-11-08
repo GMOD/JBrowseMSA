@@ -131,7 +131,7 @@ export function drawAnnotationOverlay(items, overlayId) {
   function resolveText(needle) {
     let best
     for (const el of document.querySelectorAll('body *')) {
-      if (el.textContent?.trim() === needle) {
+      if (el.textContent.trim() === needle) {
         const r = el.getBoundingClientRect()
         if (r.width > 0 && r.height > 0) {
           const area = r.width * r.height

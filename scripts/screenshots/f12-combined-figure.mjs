@@ -38,7 +38,7 @@ import os from 'node:os'
 import path from 'node:path'
 import zlib from 'node:zlib'
 
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import { commitScreenshot, optimizePng } from './image-pipeline.mjs'
 import {
@@ -82,12 +82,12 @@ const COMMITTED_CONFIG = path.join(
 // and fall back to the published target when absent.
 const jbrowseBuild = opt(
   'jbrowse-build',
-  process.env.JBROWSE_WEB_BUILD ||
+  (process.env.JBROWSE_WEB_BUILD ?? '') ||
     path.join(HOME, 'src/jbrowse-components/products/jbrowse-web/build'),
 )
 const pluginDist = opt(
   'plugin-dist',
-  process.env.MSAVIEW_PLUGIN_DIST ||
+  (process.env.MSAVIEW_PLUGIN_DIST ?? '') ||
     path.join(HOME, 'src/jb2plugins/jbrowse-plugin-msaview/dist'),
 )
 const useLocalJbrowse = fs.existsSync(path.join(jbrowseBuild, 'index.html'))
@@ -183,8 +183,11 @@ async function capture(browser, jbrowseBase, configUrl, variant) {
 // published jbrowse-web with no hosted files. The script writes the URLs as a
 // generated module the page imports, so the encoded session strings stay out
 // of the page source. They always target the published jbrowse and config.
+function constName(n) {
+  return `f12Combined${n[0].toUpperCase()}${n.slice(1)}Url`
+}
+
 function writeLinksModule() {
-  const constName = n => `f12Combined${n[0].toUpperCase()}${n.slice(1)}Url`
   const body = variants
     .map(
       v =>
@@ -255,7 +258,7 @@ async function main() {
     return
   }
   const { jbrowseBase, configUrl, cleanup } = await setupCaptureTarget()
-  const browser = await puppeteer.launch({
+  const browser = await launch({
     headless: true,
     executablePath: findChrome(),
     args: BROWSER_ARGS,
@@ -269,7 +272,9 @@ async function main() {
     cleanup()
   }
 }
-main().catch(e => {
+try {
+  await main()
+} catch (e) {
   console.error(e)
   process.exit(1)
-})
+}

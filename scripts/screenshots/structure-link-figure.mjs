@@ -14,7 +14,7 @@
  */
 import path from 'node:path'
 
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import { commitScreenshot, optimizePng } from './image-pipeline.mjs'
 import {
@@ -60,7 +60,7 @@ async function sweep(page, selector, rows, cols) {
   return seen
 }
 
-const browser = await puppeteer.launch({
+const browser = await launch({
   headless: true,
   executablePath: findChrome(),
   args: [...BROWSER_ARGS, '--enable-unsafe-swiftshader', '--use-gl=angle'],

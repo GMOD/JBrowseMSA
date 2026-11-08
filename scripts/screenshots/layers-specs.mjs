@@ -201,7 +201,7 @@ const pureSubclassClades = (() => {
   walk(temTree)
   const pure = nodes
     .filter(n => new Set(n.leaves.map(l => temRowData[l].subclass)).size === 1)
-    .sort((a, b) => b.leaves.length - a.leaves.length)
+    .toSorted((a, b) => b.leaves.length - a.leaves.length)
   const taken = new Set()
   return pure.filter(n => {
     if (n.leaves.some(l => taken.has(l))) {
@@ -262,7 +262,7 @@ const temLetters = [
       temAmblerPositions.map(p => record[`Ambler ${p}`]),
     ),
   ),
-].sort((a, b) => a.localeCompare(b))
+].toSorted((a, b) => a.localeCompare(b))
 const RESIDUE_COLORS = {
   scale: {
     domain: temLetters,

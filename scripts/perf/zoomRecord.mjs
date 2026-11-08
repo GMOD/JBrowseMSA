@@ -1,5 +1,5 @@
 // node scripts/perf/zoomRecord.mjs <dist> <out.webm> [large|small] [cpuRate]
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import {
   BROWSER_ARGS,
@@ -45,7 +45,7 @@ const script = [
 ]
 
 const server = await startStaticServer(PORT, dist)
-const browser = await puppeteer.launch({
+const browser = await launch({
   executablePath: findChrome(),
   headless: true,
   args: [...BROWSER_ARGS, '--window-size=1200,760'],

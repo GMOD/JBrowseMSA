@@ -34,19 +34,21 @@ const commit = execFileSync('git', ['-C', gg, 'rev-parse', 'HEAD'], {
 
 // Splits markdown into its `## ` sections, skipping `#` lines inside fences
 function sections(md) {
-  const result = [{ heading: '', lines: [] }]
+  const lines = md.split('\n')
+  const starts = [-1]
   let fenced = false
-  for (const line of md.split('\n')) {
+  for (const [i, line] of lines.entries()) {
     if (line.startsWith('```')) {
       fenced = !fenced
     }
     if (!fenced && line.startsWith('## ')) {
-      result.push({ heading: line.slice(3), lines: [] })
-    } else {
-      result.at(-1).lines.push(line)
+      starts.push(i)
     }
   }
-  return result
+  return starts.map((start, k) => ({
+    heading: start === -1 ? '' : lines[start].slice(3),
+    lines: lines.slice(start + 1, starts[k + 1]),
+  }))
 }
 
 function galleryExamples(md) {

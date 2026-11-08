@@ -135,7 +135,7 @@ function buildOne({ name }) {
   const tree = fs
     .readFileSync(path.join(dir, 'aligned.ph'), 'utf8')
     .replace(/\s+/g, '')
-  const nSeqs = (msa.match(/^>/gm) || []).length
+  const nSeqs = (msa.match(/^>/gm) ?? []).length
   const width = msa.split('\n')[1].length
   console.log(`  aligned ${nSeqs} sequences, ${width} columns`)
   return { msa, tree }

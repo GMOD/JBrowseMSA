@@ -19,7 +19,7 @@ import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 
-import puppeteer from 'puppeteer-core'
+import { launch as launchChrome } from 'puppeteer-core'
 
 import { applyAnnotations } from './annotations.mjs'
 import {
@@ -286,7 +286,7 @@ async function renderSpecToTemp(browser, spec, suffix = '') {
 }
 
 function launch(executablePath, spec) {
-  return puppeteer.launch({
+  return launchChrome({
     headless: !headed,
     executablePath,
     args: BROWSER_ARGS,
@@ -458,7 +458,9 @@ async function main() {
   }
 }
 
-main().catch(e => {
+try {
+  await main()
+} catch (e) {
   console.error(e)
   process.exit(1)
-})
+}

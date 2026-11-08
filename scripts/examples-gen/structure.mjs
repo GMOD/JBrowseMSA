@@ -184,7 +184,7 @@ export function residueMapping({
       structStart: m.start.residue_number,
       structEnd: m.end.residue_number,
     }))
-    .sort((a, b) => a.rowStart - b.rowStart)
+    .toSorted((a, b) => a.rowStart - b.rowStart)
 
   // positions the entity declares and did not resolve, as ranges, within the
   // mapped segments only; a position outside them is already unmapped
@@ -195,7 +195,7 @@ export function residueMapping({
         continue
       }
       const last = unobserved.at(-1)
-      if (last && last[1] === pos - 1) {
+      if (last?.[1] === pos - 1) {
         last[1] = pos
       } else {
         unobserved.push([pos, pos])

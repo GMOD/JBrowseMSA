@@ -12,7 +12,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import {
   BROWSER_ARGS,
@@ -158,7 +158,7 @@ const pct = (arr, p) => {
   if (!arr.length) {
     return 0
   }
-  const s = [...arr].sort((a, b) => a - b)
+  const s = [...arr].toSorted((a, b) => a - b)
   return s[Math.min(s.length - 1, Math.floor((p / 100) * s.length))]
 }
 
@@ -247,9 +247,9 @@ function mapFor(url) {
 
 function locate(cf) {
   if (!cf.url) {
-    return cf.functionName || '(native)'
+    return String(cf.functionName) || '(native)'
   }
-  const fn = cf.functionName || '(anon)'
+  const fn = String(cf.functionName) || '(anon)'
   const segs = mapFor(cf.url)?.lines[cf.lineNumber]
   let hit
   for (const s of segs ?? []) {
@@ -271,6 +271,14 @@ function locate(cf) {
 
 const ours = k => k.includes(' packages/')
 
+function addTo(m, k, dt) {
+  m.set(k, (m.get(k) ?? 0) + dt)
+}
+
+function byValueDescending(m) {
+  return [...m.entries()].toSorted((a, b) => b[1] - a[1])
+}
+
 // self and inclusive (once per sample stack) time per function, plus the
 // inclusive time of our functions inside runs of busy samples longer than
 // 50ms, which are the tasks that drop frames
@@ -289,11 +297,10 @@ function summarizeProfile(profile) {
   let program = 0
   let longTasks = 0
   let run = []
-  const add = (m, k, dt) => m.set(k, (m.get(k) ?? 0) + dt)
   const stackOf = id => {
     const seen = new Set()
     for (let cur = id; cur !== undefined; cur = parent.get(cur)) {
-      seen.add(key.get(cur))
+      seen.addTo(key.get(cur))
     }
     return seen
   }
@@ -304,7 +311,7 @@ function summarizeProfile(profile) {
       for (const [id, dt] of run) {
         for (const k of stackOf(id)) {
           if (ours(k)) {
-            add(inLong, k, dt)
+            addTo(inLong, k, dt)
           }
         }
       }
@@ -324,20 +331,19 @@ function summarizeProfile(profile) {
       return
     }
     js += dt
-    add(self, k, dt)
+    addTo(self, k, dt)
     for (const ck of stackOf(id)) {
-      add(total, ck, dt)
+      addTo(total, ck, dt)
     }
   })
   closeRun()
-  const sorted = m => [...m.entries()].sort((a, b) => b[1] - a[1])
   return {
     js,
     program,
     longTasks,
-    self: sorted(self).filter(([k]) => k !== '(root)'),
-    total: sorted(total).filter(([k]) => ours(k)),
-    inLong: sorted(inLong),
+    self: byValueDescending(self).filter(([k]) => k !== '(root)'),
+    total: byValueDescending(total).filter(([k]) => ours(k)),
+    inLong: byValueDescending(inLong),
   }
 }
 
@@ -366,20 +372,20 @@ async function benchSize(browser, sizeName, rate) {
   const y = Math.round(box.y + Math.min(box.height, 600) / 2)
 
   await page.evaluate(() => {
-    window.__frames = []
-    window.__longtasks = []
-    window.__recording = false
+    window.benchFrames = []
+    window.benchLongtasks = []
+    window.benchRecording = false
     const loop = t => {
-      if (window.__recording) {
-        window.__frames.push(t)
+      if (window.benchRecording) {
+        window.benchFrames.push(t)
       }
       requestAnimationFrame(loop)
     }
     requestAnimationFrame(loop)
     new PerformanceObserver(list => {
-      if (window.__recording) {
+      if (window.benchRecording) {
         for (const e of list.getEntries()) {
-          window.__longtasks.push(e.duration)
+          window.benchLongtasks.push(e.duration)
         }
       }
     }).observe({ type: 'longtask' })
@@ -393,9 +399,9 @@ async function benchSize(browser, sizeName, rate) {
   const profiles = []
   for (const [name, gestures] of Object.entries(scenarios)) {
     await page.evaluate(() => {
-      window.__frames = []
-      window.__longtasks = []
-      window.__recording = true
+      window.benchFrames = []
+      window.benchLongtasks = []
+      window.benchRecording = true
     })
     const before = Object.fromEntries(
       (await cdp.send('Performance.getMetrics')).metrics.map(m => [
@@ -418,11 +424,11 @@ async function benchSize(browser, sizeName, rate) {
       ]),
     )
     const { frames, longtasks, colWidth } = await page.evaluate(() => {
-      window.__recording = false
-      const f = window.__frames
+      window.benchRecording = false
+      const f = window.benchFrames
       return {
         frames: f.slice(1).map((t, i) => t - f[i]),
-        longtasks: window.__longtasks,
+        longtasks: window.benchLongtasks,
         colWidth: document.querySelector('[data-testid="msa_canvas"]')
           ?.offsetWidth,
       }
@@ -458,7 +464,7 @@ function mergeProfiles(summaries) {
         m.set(k, (m.get(k) ?? 0) + v)
       }
     }
-    return [...m.entries()].sort((a, b) => b[1] - a[1])
+    return [...m.entries()].toSorted((a, b) => b[1] - a[1])
   }
   const sum = field => summaries.reduce((a, s) => a + s[field], 0)
   return {
@@ -472,7 +478,7 @@ function mergeProfiles(summaries) {
 }
 
 const server = await startStaticServer(PORT, dist)
-const browser = await puppeteer.launch({
+const browser = await launch({
   executablePath: findChrome(),
   headless: true,
   args: [...BROWSER_ARGS, '--window-size=1400,900'],

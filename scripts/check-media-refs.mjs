@@ -100,7 +100,7 @@ const haystack = consumers.map(rel => ({
 }))
 
 const orphans = []
-for (const file of fs.readdirSync(mediaDir).sort()) {
+for (const file of fs.readdirSync(mediaDir).toSorted()) {
   const stem = file.replace(/\.[^.]+$/, '')
   // Match the stem as a whole token, so `domain-loss` is not counted as shown
   // by a page that only names `domain-loss-closeup`.

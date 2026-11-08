@@ -14,7 +14,7 @@ import http from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import puppeteer from 'puppeteer-core'
+import { launch } from 'puppeteer-core'
 
 import { BROWSER_ARGS, findChrome } from '../../../scripts/screenshots/lib.mjs'
 
@@ -33,7 +33,7 @@ const harness = `<!doctype html><html><head><meta charset="utf8">
 const esm = await (await fetch('/jbrowsemsa/static/widget.js')).text()
 const url = URL.createObjectURL(new Blob([esm], { type: 'text/javascript' }))
 const widget = (await import(url)).default
-const store = { ...window.__traits }
+const store = { ...window.widgetTraits }
 const model = {
   get: k => store[k],
   set: (k, v) => { store[k] = v },
@@ -44,7 +44,7 @@ const model = {
 widget.render({ model, el: document.getElementById('root') })
 </script></body></html>`
 
-const server = http.createServer(async (req, res) => {
+async function serve(req, res) {
   const { pathname } = new URL(req.url, 'http://localhost')
   if (pathname === '/') {
     res.setHeader('content-type', 'text/html')
@@ -58,13 +58,17 @@ const server = http.createServer(async (req, res) => {
     res.statusCode = 404
     res.end()
   }
+}
+
+const server = http.createServer((req, res) => {
+  void serve(req, res)
 })
 await new Promise(resolve => server.listen(0, resolve))
 
 const specs = JSON.parse(
   await readFile(path.join(PACKAGE, 'scripts/screenshot_specs.json'), 'utf8'),
 )
-const browser = await puppeteer.launch({
+const browser = await launch({
   executablePath: findChrome(),
   args: BROWSER_ARGS,
   defaultViewport: { width: 976, height: 700, deviceScaleFactor: 2 },
@@ -75,7 +79,7 @@ for (const [name, traits] of Object.entries(specs)) {
   const errors = []
   page.on('pageerror', e => errors.push(String(e)))
   await page.evaluateOnNewDocument(t => {
-    window.__traits = t
+    window.widgetTraits = t
   }, traits)
   await page.goto(`http://localhost:${server.address().port}/`)
   try {
