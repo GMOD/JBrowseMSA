@@ -13,6 +13,10 @@ minimumReleaseAgeExclude:
   - astro
   - tldts
   - tldts-core
+  - tsrs
+  - '@tsrs/*'
+  - oxlint
+  - '@oxlint/*'
   # our own package, bumped minutes after release; drop once the version in use ages past the window
   - p2s_mapper
 allowBuilds:
