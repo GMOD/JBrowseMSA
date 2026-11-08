@@ -1,6 +1,7 @@
 import { types } from '@jbrowse/mobx-state-tree'
 
 import type { DialogComponentType } from '@jbrowse/core/util'
+import type { ComponentProps } from 'react'
 
 /**
  * #stateModel DialogQueueSessionMixin
@@ -9,7 +10,7 @@ export function DialogQueueSessionMixin() {
   return types
     .model('DialogQueueSessionMixin', {})
     .volatile(() => ({
-      queueOfDialogs: [] as [DialogComponentType, unknown][],
+      queueOfDialogs: [] as [DialogComponentType, Record<string, unknown>][],
     }))
     .views(self => ({
       /**
@@ -22,8 +23,7 @@ export function DialogQueueSessionMixin() {
        * #getter
        */
       get DialogProps() {
-        const props = self.queueOfDialogs[0]?.[1]
-        return typeof props === 'object' && props !== null ? props : undefined
+        return self.queueOfDialogs[0]?.[1]
       },
     }))
     .actions(self => ({
@@ -36,13 +36,13 @@ export function DialogQueueSessionMixin() {
       /**
        * #action
        */
-      queueDialog(
-        cb: (doneCallback: () => void) => [DialogComponentType, unknown],
+      queueDialog<T extends DialogComponentType>(
+        cb: (doneCallback: () => void) => [T, ComponentProps<T>],
       ) {
-        const [component, props] = cb(() => {
+        const entry: [DialogComponentType, Record<string, unknown>] = cb(() => {
           this.removeActiveDialog()
         })
-        self.queueOfDialogs = [...self.queueOfDialogs, [component, props]]
+        self.queueOfDialogs = [...self.queueOfDialogs, entry]
       },
     }))
 }
