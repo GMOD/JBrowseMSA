@@ -14,10 +14,10 @@ describe('fetchTextWithProgress', () => {
   test('reports progress messages then clears status', async () => {
     const statuses: (FetchStatus | undefined)[] = []
     const result = await fetchTextWithProgress(loc, s => statuses.push(s), {
-      fetcher: async (_loc, opts) => {
+      fetcher: (_loc, opts) => {
         opts.statusCallback('Downloading file')
         opts.statusCallback('')
-        return 'GREETINGS'
+        return Promise.resolve('GREETINGS')
       },
     })
     expect(result).toBe('GREETINGS')
@@ -31,13 +31,13 @@ describe('fetchTextWithProgress', () => {
   test('reports the message from a determinate progress status', async () => {
     const statuses: (FetchStatus | undefined)[] = []
     await fetchTextWithProgress(loc, s => statuses.push(s), {
-      fetcher: async (_loc, opts) => {
+      fetcher: (_loc, opts) => {
         opts.statusCallback({
           message: 'Downloading file',
           current: 5,
           total: 10,
         })
-        return 'GREETINGS'
+        return Promise.resolve('GREETINGS')
       },
     })
     expect(statuses[0]?.msg).toBe('Downloading file')
@@ -47,9 +47,7 @@ describe('fetchTextWithProgress', () => {
     const statuses: (FetchStatus | undefined)[] = []
     await expect(
       fetchTextWithProgress(loc, s => statuses.push(s), {
-        fetcher: async () => {
-          throw new Error('network down')
-        },
+        fetcher: () => Promise.reject(new Error('network down')),
       }),
     ).rejects.toThrow('network down')
     expect(statuses.at(-1)).toBeUndefined()

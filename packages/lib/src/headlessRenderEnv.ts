@@ -88,9 +88,16 @@ export function installHeadlessRenderEnv(
   const g = globalThis as Record<string, unknown>
   g.DOMMatrix = HeadlessDOMMatrix
   g.DOMPoint = HeadlessDOMPoint
-  const canvas = (win as { HTMLCanvasElement: typeof HTMLCanvasElement })
-    .HTMLCanvasElement
-  canvas.prototype.getContext = function () {
+  const canvas: unknown =
+    typeof win === 'object' && win !== null
+      ? Reflect.get(win, 'HTMLCanvasElement')
+      : undefined
+  const prototype: unknown =
+    typeof canvas === 'function' ? Reflect.get(canvas, 'prototype') : undefined
+  if (typeof prototype !== 'object' || prototype === null) {
+    throw new Error('the window given has no HTMLCanvasElement')
+  }
+  Reflect.set(prototype, 'getContext', function getContext() {
     let font = '10px sans-serif'
     return Object.assign(
       {
@@ -112,8 +119,8 @@ export function installHeadlessRenderEnv(
         },
       },
       contextExtras,
-    ) as unknown as CanvasRenderingContext2D
-  } as unknown as typeof HTMLCanvasElement.prototype.getContext
+    )
+  })
 }
 
 export interface MeasureContext {

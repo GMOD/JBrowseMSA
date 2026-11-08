@@ -62,7 +62,7 @@ test('the button after a render error actually returns to the import form', () =
 
   boom = false
   const button = [...container.querySelectorAll('button')].find(b =>
-    b.textContent?.includes('Return to import form'),
+    b.textContent.includes('Return to import form'),
   )!
   act(() => {
     button.click()

@@ -228,7 +228,7 @@ describe('node bubble click targets', () => {
       hits
         .filter(h => h.branch)
         .map(h => h.name)
-        .sort(),
+        .toSorted(),
     ).toEqual(['95 (2 tips)', 'Clade (2 tips)', 'Clade (4 tips)'])
   })
 })
@@ -519,7 +519,10 @@ describe('internal node labels', () => {
   }
 
   it('draws the support value newick puts after each internal paren', () => {
-    expect(drawnLabels('((a,b)95,(c,d)80);', true).sort()).toEqual(['80', '95'])
+    expect(drawnLabels('((a,b)95,(c,d)80);', true).toSorted()).toEqual([
+      '80',
+      '95',
+    ])
   })
 
   it('draws none of them when the toggle is off', () => {

@@ -91,7 +91,7 @@ export function useWheelScroll({
   useEffect(() => {
     const curr = ref.current
     if (!curr) {
-      return
+      return undefined
     }
     function onWheel(event: WheelEvent) {
       // ctrlKey is also set by trackpad pinch gestures on all platforms. when
@@ -176,7 +176,7 @@ export function useWheelScroll({
 
   useEffect(() => {
     if (panPointer === undefined) {
-      return
+      return undefined
     }
     // a frame applies the distance from the last applied position to the
     // newest one, so a move landing while a frame is pending is not dropped

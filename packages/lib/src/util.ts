@@ -1,3 +1,4 @@
+import { clamp } from '@jbrowse/core/util'
 import { colord, extend } from 'colord'
 import a11yPlugin from 'colord/plugins/a11y'
 import namesPlugin from 'colord/plugins/names'
@@ -159,3 +160,21 @@ export function len(a: { end: number; start: number }) {
 
 /** reads computeds so a reaction observes them, which keeps them cached */
 export function readComputed(..._values: unknown[]) {}
+
+export function nonEmpty(text: string | undefined) {
+  return text === '' ? undefined : text
+}
+
+export function clampedSpan(
+  a: number,
+  b: number,
+  last: number,
+): [number, number] {
+  const x = clamp(a, 0, last)
+  const y = clamp(b, 0, last)
+  return x <= y ? [x, y] : [y, x]
+}
+
+export function devicePixelRatioQuery() {
+  return window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
+}

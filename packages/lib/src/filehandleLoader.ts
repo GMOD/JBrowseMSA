@@ -50,7 +50,7 @@ export function createAbortRotation(self: IStateTreeNode) {
       return {
         controller: mine.controller,
         isCurrent: () => !mine.ended && mine === current && isAlive(self),
-        end() {
+        end: () => {
           mine.ended = true
         },
       }
@@ -119,7 +119,7 @@ export function installFilehandleLoader(
           } else {
             console.error(e)
             if (optional) {
-              self.addWarning(`The ${what} did not load: ${e}`)
+              self.addWarning(`The ${what} did not load: ${String(e)}`)
             } else {
               self.setError(e)
             }

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { expect, test, vi } from 'vitest'
 
 import {
@@ -260,7 +261,7 @@ test('expanding a seeded clade sticks until the next load', () => {
 test('a clade the reader expanded stays expanded in a restored snapshot', () => {
   const model = makeModel([{ mrca: ['A', 'B'], tips: 2, mark: 'collapse' }])
   model.toggleCollapsed('node-0-0-1')
-  const restored = MSAModelF().create(JSON.parse(JSON.stringify(model)))
+  const restored = MSAModelF().create(getSnapshot(model))
   expect(restored.collapsed).toEqual([])
 })
 

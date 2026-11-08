@@ -45,8 +45,11 @@ export async function renderToSvg(model: MsaViewModel, opts: ExportSvgOptions) {
   // dataInitialized stays false while the model holds a load error, so waiting
   // on it alone would never settle
   await when(() => model.dataInitialized || !!model.error)
-  if (model.error) {
-    throw model.error
+  const { error } = model
+  if (error) {
+    throw error instanceof Error
+      ? error
+      : new Error('the view holds a load error', { cause: error })
   }
   const { Context } = await import('@jbrowse/svgcanvas')
   // Each svgcanvas layer is already serialized SVG, and React would have to
@@ -194,10 +197,10 @@ function TreeOverviewSVG({
   )
 }
 
-// The branch-length scale bar under the tree overview, where the live view puts
-// it (see TreeRuler). A phylogram whose branch lengths are drawn to a scale
-// nothing states is a figure a reader cannot measure, so the export carries the
-// bar even though it is chrome on screen.
+// The branch-length scale bar under the tree overview, where the live view
+// puts it (see TreeRuler). A phylogram whose branch lengths are drawn to a
+// scale nothing states is a figure a reader cannot measure, so the export
+// carries the bar even though it is chrome on screen.
 function TreeScaleBarSVG({
   model,
   theme,
@@ -266,11 +269,11 @@ function RowPanelHeadersSVG({
   )
 }
 
-// Each bracket's label in the gutter beside its bar, where the live view puts
-// it (see CladeLabels). The canvas layer draws the bar; a label longer than the
-// gutter or the clade is clipped, since text that overruns runs off the figure.
-// cladeGutterWidth sizes the gutter with the same measureTextCanvas, so a label
-// the gutter holds keeps every character.
+// Each bracket's label in the gutter beside its bar, where the live view
+// puts it (see CladeLabels). The canvas layer draws the bar; a label longer
+// than the gutter or the clade is clipped, since text that overruns runs off
+// the figure. cladeGutterWidth sizes the gutter with the same
+// measureTextCanvas, so a label the gutter holds keeps every character.
 function CladeLabelsSVG({
   model,
   theme,
@@ -558,9 +561,9 @@ function TrackRendering({ model, theme, layout, Context, layers }: LayerProps) {
   )
 }
 
-// Each track's name in the tree-width column beside it, where the live view puts
-// it (see TrackLabel). Without these the figure has an unlabeled bar chart and
-// an unlabeled logo, and nothing says which is which.
+// Each track's name in the tree-width column beside it, where the live view
+// puts it (see TrackLabel). Without these the figure has an unlabeled bar chart
+// and an unlabeled logo, and nothing says which is which.
 function TrackLabelsSVG({
   model,
   theme,

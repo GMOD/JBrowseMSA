@@ -54,9 +54,9 @@ const Loading = observer(function ({
     treeFilehandle,
     importForm,
   } = model
-  const hasData = !!(data.msa || data.tree)
+  const hasData = !!data.msa || !!data.tree
   // a failed load keeps its filehandle, so the error outranks the spinner
-  const loading = !error && !!(msaFilehandle || treeFilehandle || isLoading)
+  const loading = !error && (!!msaFilehandle || !!treeFilehandle || !!isLoading)
 
   return (
     <div>

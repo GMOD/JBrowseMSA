@@ -33,7 +33,7 @@ export function syntheticProteinMsa(rows: number, cols: number) {
   return Array.from({ length: rows }, (_, r) => {
     const seq = Array.from(
       { length: cols },
-      (_, c) => letters[(r * 7 + c * 3) % letters.length],
+      (_cell, c) => letters[(r * 7 + c * 3) % letters.length],
     ).join('')
     return `>seq${r}\n${seq}`
   }).join('\n')

@@ -4,11 +4,7 @@ import { drawFeatureSpans, spanRows } from '../msa/drawFeatureSpans.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
-import type {
-  NodeWithIds,
-  ResolvedFeaturePanel,
-  RowPanelSpan,
-} from '../../types.ts'
+import type { ResolvedFeaturePanel, RowPanelSpan } from '../../types.ts'
 import type { SpanSource } from '../msa/drawFeatureSpans.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
@@ -65,7 +61,7 @@ export function renderFeaturePanel({
 export function featurePanelSource(
   model: MsaViewModel,
   panel: ResolvedFeaturePanel,
-  leaves: HierarchyNode<NodeWithIds>[],
+  leaves: HierarchyNode[],
 ): SpanSource<RowPanelSpan> {
   const { rowHeight } = model
   return {

@@ -231,14 +231,19 @@ function averagePixels({
 }
 
 function usableRasterCtx(ctx: unknown): ctx is RasterCtx {
-  const c = ctx as Record<string, unknown> | null
   return (
-    !!c &&
-    typeof c.createImageData === 'function' &&
-    typeof c.putImageData === 'function' &&
-    typeof c.getImageData === 'function' &&
-    typeof c.clearRect === 'function' &&
-    typeof c.fillRect === 'function'
+    typeof ctx === 'object' &&
+    ctx !== null &&
+    'createImageData' in ctx &&
+    typeof ctx.createImageData === 'function' &&
+    'putImageData' in ctx &&
+    typeof ctx.putImageData === 'function' &&
+    'getImageData' in ctx &&
+    typeof ctx.getImageData === 'function' &&
+    'clearRect' in ctx &&
+    typeof ctx.clearRect === 'function' &&
+    'fillRect' in ctx &&
+    typeof ctx.fillRect === 'function'
   )
 }
 
@@ -259,7 +264,7 @@ export function makeOffscreenCanvas<Ctx>(
         ? Object.assign(document.createElement('canvas'), { width, height })
         : undefined
   const ctx = canvas?.getContext('2d', settings)
-  return usable(ctx) ? { canvas: canvas as RasterCanvas, ctx } : undefined
+  return canvas && usable(ctx) ? { canvas, ctx } : undefined
 }
 
 function makeRasterCanvas(width: number, height: number) {

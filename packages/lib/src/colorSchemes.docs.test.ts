@@ -10,15 +10,13 @@ import colorSchemes from './colorSchemes.ts'
 // READMEs may leave a scheme out; USAGE.md lists every one.
 
 // comma-separated bare names, after dropping the bold labels (**Protein:**, ...)
-const bare = (section: string) =>
-  section.replace(/\*\*[^*]+\*\*/g, '').match(/[a-z][a-z0-9_]+/g) ?? []
+const bare = (text: string) =>
+  text.replace(/\*\*[^*]+\*\*/g, '').match(/[a-z][a-z0-9_]+/g) ?? []
 
 // backtick-quoted names, e.g. `jalview_taylor`. A glob like `jalview_*` and a
 // suffix like `_dynamic` fall outside the pattern.
-const quoted = (section: string) =>
-  [...section.matchAll(/`([a-z][a-z0-9_]+)`/g)].flatMap(m =>
-    m[1] ? [m[1]] : [],
-  )
+const quoted = (text: string) =>
+  [...text.matchAll(/`([a-z][a-z0-9_]+)`/g)].flatMap(m => (m[1] ? [m[1]] : []))
 
 function section(file: string, heading: string) {
   const doc = readFileSync(new URL(file, import.meta.url), 'utf8')

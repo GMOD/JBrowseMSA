@@ -58,5 +58,5 @@ export function parseWuss(ss: string): BasePair[] {
       pop(ch.toUpperCase(), col, true)
     }
   }
-  return pairs.sort((a, b) => a.start - b.start)
+  return pairs.toSorted((a, b) => a.start - b.start)
 }

@@ -42,12 +42,12 @@ export default function MinimapSVG({
         />
       ) : null}
       {minimapDomainRects(model, msaCanvasWidth, MINIMAP_BAR_HEIGHT).map(
-        ({ x, y, w, h, fill }) => (
+        ({ x, y, w: rectWidth, h, fill }) => (
           <rect
-            key={`${x},${y},${w},${fill}`}
+            key={`${x},${y},${rectWidth},${fill}`}
             x={x}
             y={y}
-            width={w}
+            width={rectWidth}
             height={h}
             fill={fill}
           />

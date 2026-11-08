@@ -1,3 +1,5 @@
+import { nonEmpty } from './util.ts'
+
 import type { FileLocation } from '@jbrowse/core/util/types'
 
 /**
@@ -18,5 +20,5 @@ export function exportFileName(
     ?.split(/[/\\]/)
     .pop()
     ?.replace(/\.[^.]*$/, '')
-  return `${base || fallback}.${extension}`
+  return `${nonEmpty(base) ?? fallback}.${extension}`
 }

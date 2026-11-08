@@ -245,10 +245,42 @@ function useModelReaction<
   )
 }
 
+function isRegion(value: unknown): value is Region {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'start' in value &&
+    typeof value.start === 'number' &&
+    'end' in value &&
+    typeof value.end === 'number' &&
+    (!('row' in value) ||
+      value.row === undefined ||
+      typeof value.row === 'string')
+  )
+}
+
 interface SyncedProp {
-  read: (props: MSAViewerProps) => unknown
-  apply: (model: MsaViewModel, value: unknown, props: MSAViewerProps) => void
+  key: (props: MSAViewerProps) => string
+  apply: (model: MsaViewModel, props: MSAViewerProps) => void
   inSnapshot?: boolean
+}
+
+function plainCopy<T>(value: T): T
+function plainCopy(value: unknown): unknown {
+  return Array.isArray(value)
+    ? value.map(plainCopy)
+    : typeof value === 'object' && value !== null
+      ? Object.fromEntries(
+          Object.entries(value)
+            .filter(([, v]) => v !== undefined)
+            .map(([k, v]) => [k, plainCopy(v)]),
+        )
+      : value
+}
+
+function propCopy<T>(value: T): T
+function propCopy(value: unknown): unknown {
+  return value === null ? undefined : plainCopy(value)
 }
 
 function synced<T>(
@@ -257,8 +289,10 @@ function synced<T>(
   { inSnapshot = false } = {},
 ): SyncedProp {
   return {
-    read,
-    apply: apply as SyncedProp['apply'],
+    key: props => JSON.stringify(read(props) ?? null),
+    apply: (model, props) => {
+      apply(model, propCopy(read(props)), props)
+    },
     inSnapshot,
   }
 }
@@ -434,15 +468,13 @@ const syncedProps = [
  * Applies each prop whose content changed since the last render. Comparing
  * JSON keys lets a host pass a freshly computed array every render, and
  * applying only a changed prop keeps a change made inside the viewer across
- * the host's next render. The model receives a parsed copy, never the host's
+ * the host's next render. The model receives a copy, never the host's
  * own object.
  */
 function useSyncedProps(model: MsaViewModel, props: MSAViewerProps) {
   const applied = useRef<string[] | undefined>(undefined)
   useEffect(() => {
-    const keys = syncedProps.map(({ read }) =>
-      JSON.stringify(read(props) ?? null),
-    )
+    const keys = syncedProps.map(({ key }) => key(props))
     applied.current ??= syncedProps.map(({ inSnapshot }, i) =>
       inSnapshot ? keys[i]! : '',
     )
@@ -451,7 +483,7 @@ function useSyncedProps(model: MsaViewModel, props: MSAViewerProps) {
       const key = keys[i]!
       if (last[i] !== key) {
         last[i] = key
-        apply(model, JSON.parse(key) ?? undefined, props)
+        apply(model, props)
       }
     })
   })
@@ -471,9 +503,9 @@ function Viewer({
     onModel,
   } = props
   const [model] = useState(() => {
-    const model = MSAModelF().create(viewerSnapshot(props))
-    model.setImportForm(false)
-    return model
+    const created = MSAModelF().create(viewerSnapshot(props))
+    created.setImportForm(false)
+    return created
   })
 
   const destroyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -491,8 +523,8 @@ function Viewer({
 
   const regionKey = JSON.stringify(region ?? null)
   useEffect(() => {
-    const target = JSON.parse(regionKey) as Region | null
-    return target
+    const target: unknown = JSON.parse(regionKey)
+    return isRegion(target)
       ? when(
           () => model.viewInitialized && model.numColumns > 0,
           () => {
@@ -515,7 +547,7 @@ function Viewer({
   })
   useEffect(() => {
     latestOnModel.current?.(model)
-  }, [model])
+  }, [model, latestOnModel])
 
   // destroy releases the model's matchMedia listener and fetches. It waits a
   // tick because StrictMode remounts with the same state, and the remount's

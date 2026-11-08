@@ -17,7 +17,7 @@ function quote(name: string) {
  */
 export function writeNewick(root: HierarchyNode) {
   const written = new Map<HierarchyNode, string>()
-  for (const node of descendants(root).reverse()) {
+  for (const node of descendants(root).toReversed()) {
     const { id, name, length } = node.data
     let text = ''
     if (node.children) {

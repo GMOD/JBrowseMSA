@@ -2,6 +2,7 @@
 //
 // The tracks sit between the header and the alignment inside a fixed-height
 // widget, so the alignment viewport has to subtract their height.
+import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
@@ -97,7 +98,7 @@ test('toggling a track back to its default leaves nothing in the snapshot', () =
   model.toggleTrack('sequence-logo')
   model.toggleTrack('conservation')
   model.toggleTrack('conservation')
-  expect(JSON.parse(JSON.stringify(model)).turnedOffTracks).toBeUndefined()
+  expect(getSnapshot(model).turnedOffTracks).toBeUndefined()
 })
 
 test('a zoom does not rebuild the track objects', () => {

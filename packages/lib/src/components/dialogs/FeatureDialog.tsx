@@ -19,7 +19,7 @@ import type { Annotation } from '../../types.ts'
 
 function matches(type: Annotation, query: string) {
   return [type.accession, type.name, type.description].some(field =>
-    field?.toLowerCase().includes(query),
+    field.toLowerCase().includes(query),
   )
 }
 

@@ -1,6 +1,7 @@
 // The reactive filehandle loaders in afterCreate: each fetches when its
 // filehandle changes, and each guards against a stale response, since a user can
 // pick a second file while the first is still downloading.
+import { getSnapshot } from '@jbrowse/mobx-state-tree'
 import { beforeEach, expect, test, vi } from 'vitest'
 
 import MSAModelF from './model.ts'
@@ -171,7 +172,7 @@ test('a row table set by hand replaces the file and discards its pending fetch',
 
   expect(model.treeMetadataFilehandle).toBeUndefined()
   expect(model.rowDataOf('a')?.host).toBe('human')
-  expect(JSON.parse(JSON.stringify(model)).data.treeMetadata).toContain('human')
+  expect(getSnapshot(model).data.treeMetadata).toContain('human')
 })
 
 test('a row table read from a local file keeps its text after the filehandle clears', async () => {
@@ -185,5 +186,5 @@ test('a row table read from a local file keeps its text after the filehandle cle
   await flush()
 
   expect(model.treeMetadataFilehandle).toBeUndefined()
-  expect(JSON.parse(JSON.stringify(model)).data.treeMetadata).toContain('duck')
+  expect(getSnapshot(model).data.treeMetadata).toContain('duck')
 })

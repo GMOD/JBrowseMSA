@@ -14,7 +14,7 @@ export function rowRuns(indices: number[]) {
   if (cached) {
     return cached
   }
-  const runs = consecutiveRuns([...indices].sort((a, b) => a - b))
+  const runs = consecutiveRuns([...indices].toSorted((a, b) => a - b))
   runsByIndices.set(indices, runs)
   return runs
 }

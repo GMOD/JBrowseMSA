@@ -5,6 +5,7 @@ import {
   applySnapshot,
   cast,
   getSnapshot,
+  isStateTreeNode,
   types,
 } from '@jbrowse/mobx-state-tree'
 import {
@@ -75,7 +76,7 @@ import {
 } from './constants.ts'
 import { createPaletteMap } from './createPaletteMap.ts'
 import { exportFileName } from './exportFileName.ts'
-import { featureField, featureName } from './featureFields.ts'
+import { featureName, featureValues } from './featureFields.ts'
 import {
   colorByRow,
   featureColorMap,
@@ -126,9 +127,12 @@ import {
 } from './treeDisplay.ts'
 import {
   computeRowInsertions,
+  clampedSpan,
   consecutiveRuns,
+  devicePixelRatioQuery,
   dropBlanks,
   len,
+  nonEmpty,
   readComputed,
   skipBlanks,
   withAlpha,
@@ -367,7 +371,7 @@ function detentZoom(
     : { value: next, held: 0 }
 }
 
-// fit() divides the viewport by the row or column count and multiplies back, so
+// fitting divides the viewport by the row or column count and multiplies back, so
 // an exact fit can land a fraction of a pixel over. A plain `>` would then show
 // a scrollbar that shrinks the viewport and leaves a gap.
 function overflows(content: number, viewport: number) {
@@ -1456,7 +1460,7 @@ function stateModelFactory({
           .concat(
             trackBytes ? [{ what: 'data tracks', bytes: trackBytes }] : [],
           )
-          .sort((a, b) => b.bytes - a.bytes)
+          .toSorted((a, b) => b.bytes - a.bytes)
       },
       menuItems() {
         return []
@@ -1510,7 +1514,7 @@ function stateModelFactory({
             fields.add(field)
           }
         }
-        return [...fields].sort((a, b) => a.localeCompare(b))
+        return [...fields].toSorted((a, b) => a.localeCompare(b))
       },
       /**
        * #getter
@@ -1650,7 +1654,9 @@ function stateModelFactory({
        */
       get maxTipLabelWidth() {
         return widestLabel(
-          this.treeTips.names.map(name => this.rowDataOf(name)?.genome || name),
+          this.treeTips.names.map(
+            name => nonEmpty(this.rowDataOf(name)?.genome) ?? name,
+          ),
           labelFitFontSize,
         )
       },
@@ -1950,10 +1956,10 @@ function stateModelFactory({
         const blankCounts = new Uint32Array(numCols)
         for (let j = 0; j < numRows; j++) {
           const str = strs[j]!
-          const len = str.length
+          const rowLength = str.length
           for (let i = 0; i < numCols; i++) {
             // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
-            if (i >= len || (str.charCodeAt(i) - 45) >>> 0 <= 1) {
+            if (i >= rowLength || (str.charCodeAt(i) - 45) >>> 0 <= 1) {
               blankCounts[i]!++
             }
           }
@@ -2037,7 +2043,7 @@ function stateModelFactory({
        * colon a Newick tool wrote as an underscore, which `rowMap` does not
        */
       rowSequence(name: string) {
-        return this.MSA?.getRow(name) || undefined
+        return nonEmpty(this.MSA?.getRow(name))
       },
       /**
        * #getter
@@ -2220,7 +2226,7 @@ function stateModelFactory({
        * #getter
        * the laid-out tree, with pixel positions on every node
        */
-      get hierarchy(): HierarchyNode<NodeWithIds> {
+      get hierarchy(): HierarchyNode {
         return this.treeLayout.root
       },
 
@@ -2234,7 +2240,7 @@ function stateModelFactory({
       /**
        * #getter
        */
-      get leaves(): HierarchyNode<NodeWithIds>[] {
+      get leaves(): HierarchyNode[] {
         return this.treeLayout.leaves
       },
 
@@ -3014,13 +3020,13 @@ function stateModelFactory({
       get annotationTypes() {
         // first occurrence wins; only name, description and segment start are
         // read from it
-        const types = new Map<string, Annotation>()
+        const byAccession = new Map<string, Annotation>()
         for (const annot of self.allAnnotations) {
-          if (!types.has(annot.accession)) {
-            types.set(annot.accession, annot)
+          if (!byAccession.has(annot.accession)) {
+            byAccession.set(annot.accession, annot)
           }
         }
-        return types
+        return byAccession
       },
       /**
        * accessions hidden until the user turns them on, such as a Stockholm
@@ -3081,7 +3087,7 @@ function stateModelFactory({
       get dataInitialized() {
         // truthiness, not `!== ''`: DataModel drops an inline document over
         // 50kb from the snapshot, so a restored session can hold `undefined`
-        return !!(self.data.msa || self.data.tree) && !self.error
+        return (!!self.data.msa || !!self.data.tree) && !self.error
       },
       /**
        * #getter
@@ -3933,7 +3939,7 @@ function stateModelFactory({
        */
       get highlightedColumnRuns() {
         return consecutiveRuns(
-          [...(self.highlightedColumns ?? [])].sort((a, b) => a - b),
+          [...(self.highlightedColumns ?? [])].toSorted((a, b) => a - b),
         ).map(([start, end]) => ({ start, end }))
       },
 
@@ -4010,7 +4016,7 @@ function stateModelFactory({
               selection.rows
                 .map(name => rowNamesSet.get(name))
                 .filter(notEmpty)
-                .sort((a, b) => a - b),
+                .toSorted((a, b) => a - b),
             )
           : numRows > 0
             ? [[0, numRows - 1] as [number, number]]
@@ -4140,8 +4146,6 @@ function stateModelFactory({
        */
       get resolvedScales() {
         const rows = Object.values(self.rowData)
-        const featureValues = (list: Annotation[], field: string) =>
-          list.map(a => featureField(a, field)).filter(notEmpty)
         const use = (channel: ColorChannel, table: ScaleTable): ScaleUse => ({
           spec: channel,
           field: channel.field,
@@ -4240,11 +4244,12 @@ function stateModelFactory({
           const width = rowPanelWidth(panel, self)
           const base = { id: `rowpanel-${index}`, width, offsetX }
           offsetX += width
-          if (panel.kind === 'features') {
-            const align = panel.transform?.find(t => t.type === 'align')
+          const scale = scales[index]!
+          if (panel.kind === 'features' && scale.kind === 'features') {
+            const align = panel.transform?.[0]
             return {
               ...base,
-              ...(scales[index] as FeaturePanelScale),
+              ...scale,
               spans: featurePanelSpans({
                 panel,
                 width,
@@ -4257,7 +4262,10 @@ function stateModelFactory({
               }),
             }
           }
-          return { ...base, ...(scales[index] as StripPanelScale) }
+          if (scale.kind === 'features') {
+            throw new Error(`row panel ${index} has a features scale`)
+          }
+          return { ...base, ...scale }
         })
       },
 
@@ -4272,9 +4280,7 @@ function stateModelFactory({
         const names = new Set(
           self.rowPanels.flatMap(panel =>
             panel.kind === 'features' && panel.x === 'position'
-              ? (panel.transform ?? [])
-                  .filter(t => t.type === 'align')
-                  .map(t => t.on)
+              ? (panel.transform ?? []).map(t => t.on)
               : [],
           ),
         )
@@ -4440,9 +4446,11 @@ function stateModelFactory({
        */
       async exportSVG(opts: ExportSvgOptions) {
         const { renderToSvg } = await import('./renderToSvg.tsx')
-        const html = await renderToSvg(self as MsaViewModel, opts)
-        const blob = new Blob([html], { type: 'image/svg+xml' })
-        saveAs(blob, exportFileName(self.msaFilehandle, 'svg'))
+        if (isStateTreeNode<MsaViewStateModel>(self)) {
+          const html = await renderToSvg(self, opts)
+          const blob = new Blob([html], { type: 'image/svg+xml' })
+          saveAs(blob, exportFileName(self.msaFilehandle, 'svg'))
+        }
       },
       /**
        * #action
@@ -4492,7 +4500,7 @@ function stateModelFactory({
       /**
        * #action
        */
-      fitVertically(maxRowHeight = maxCellSize) {
+      fitVertically(maxRowHeight: number = maxCellSize) {
         if (self.numRows > 0) {
           self.setRowHeight(
             clamp(
@@ -4593,16 +4601,15 @@ function stateModelFactory({
         if (numColumns === 0 || numRows === 0) {
           return
         }
-        const ordered = (a: number, b: number, last: number) =>
-          [clamp(a, 0, last), clamp(b, 0, last)].sort((x, y) => x - y) as [
-            number,
-            number,
-          ]
-        const [startCol, endCol] = ordered(anchor.col, head.col, numColumns - 1)
+        const [startCol, endCol] = clampedSpan(
+          anchor.col,
+          head.col,
+          numColumns - 1,
+        )
         const [firstRow, lastRow] =
           anchor.row === undefined || head.row === undefined
             ? [0, numRows - 1]
-            : ordered(anchor.row, head.row, numRows - 1)
+            : clampedSpan(anchor.row, head.row, numRows - 1)
         const everyRow = firstRow === 0 && lastRow === numRows - 1
         self.setSelection({
           start: self.visibleColToGlobalCol(startCol) + 1,
@@ -4613,7 +4620,7 @@ function stateModelFactory({
       /**
        * #action
        */
-      fitHorizontally(maxColWidth = maxCellSize) {
+      fitHorizontally(maxColWidth: number = maxCellSize) {
         if (self.numColumns > 0) {
           // msaCanvasWidth excludes the vertical scrollbar's 20px
           self.setColWidth(
@@ -4680,13 +4687,11 @@ function stateModelFactory({
           typeof window !== 'undefined' &&
           typeof window.matchMedia === 'function'
         ) {
-          const query = () =>
-            window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`)
-          let mql = query()
+          let mql = devicePixelRatioQuery()
           const onChange = () => {
             self.setHighResScaleFactor(window.devicePixelRatio)
             mql.removeEventListener('change', onChange)
-            mql = query()
+            mql = devicePixelRatioQuery()
             mql.addEventListener('change', onChange)
           }
           mql.addEventListener('change', onChange)
@@ -4735,7 +4740,7 @@ function stateModelFactory({
                 appliedGFF = true
               } catch (e) {
                 console.error(e)
-                self.addWarning(`The annotations did not parse: ${e}`)
+                self.addWarning(`The annotations did not parse: ${String(e)}`)
               }
             } else if (appliedGFF) {
               appliedGFF = false

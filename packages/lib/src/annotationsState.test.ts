@@ -49,20 +49,20 @@ test('a new alignment does not keep the old annotations', () => {
 
 test('only the filtered-out types reach the snapshot', () => {
   const model = makeModel()
-  expect((getSnapshot(model) as any).turnedOffFeatures).toBeUndefined()
+  expect(getSnapshot(model).turnedOffFeatures).toBeUndefined()
   expect(model.visibleDomainTypes.map(d => d.accession)).toEqual([
     'PF00001',
     'PF00002',
   ])
 
   model.setFilter('PF00001', false)
-  expect((getSnapshot(model) as any).turnedOffFeatures).toEqual({
+  expect(getSnapshot(model).turnedOffFeatures).toEqual({
     PF00001: true,
   })
   expect(model.visibleDomainTypes.map(d => d.accession)).toEqual(['PF00002'])
 
   model.setFilter('PF00001', true)
-  expect((getSnapshot(model) as any).turnedOffFeatures).toBeUndefined()
+  expect(getSnapshot(model).turnedOffFeatures).toBeUndefined()
 })
 
 test('a type the next file does not have leaves nothing behind', () => {

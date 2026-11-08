@@ -77,9 +77,7 @@ function findBracedContent(str: string, after: number) {
   return end === -1 ? undefined : str.slice(openIdx + 1, end - 1).trim()
 }
 
-export function parseAsn1(
-  asnString: string,
-): { id: number; parent: number; name: string }[] {
+export function parseAsn1(asnString: string) {
   const normalized = asnString
     .replace(/\s+/g, ' ')
     .replace(/\s*{\s*/g, '{')
@@ -98,10 +96,10 @@ export function parseAsn1(
     )
   }
 
-  const dict = Object.fromEntries(
-    extractBracedBlocks(fdict).flatMap(block => {
+  const dict = new Map(
+    extractBracedBlocks(fdict).flatMap((block): [number, string][] => {
       const entry = parseDictEntry(block)
-      return entry ? [[entry.id, remap[entry.name] || entry.name]] : []
+      return entry ? [[entry.id, remap[entry.name] ?? entry.name]] : []
     }),
   )
 
@@ -111,14 +109,13 @@ export function parseAsn1(
       return []
     }
     const { features = [], ...rest } = node
-    return [
-      {
-        ...rest,
-        ...Object.fromEntries(
-          features.map(f => [dict[f.featureid], f.value] as const),
-        ),
-      } as { id: number; parent: number; name: string },
-    ]
+    const fields = Object.fromEntries(
+      features.flatMap((f): [string, string][] => {
+        const key = dict.get(f.featureid)
+        return key === undefined ? [] : [[key, f.value]]
+      }),
+    )
+    return [{ ...rest, ...fields }]
   })
 }
 

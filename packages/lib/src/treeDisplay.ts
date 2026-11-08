@@ -38,21 +38,19 @@ export function parseTreeText(text: string) {
 // the marks that set tree state from a node rather than drawing
 export const seedingMarks = new Set<CladeMark>(['collapse', 'focus', 'rotate'])
 
+function pushReversed(stack: HierarchyNode[], nodes: HierarchyNode[]) {
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    stack.push(nodes[i]!)
+  }
+}
+
 /**
  * Each tip of the full tree in the order the tree draws it, with the on-screen
  * row that shows it: its own, or the row of the collapsed node standing for it
  */
-function tipRows(root: HierarchyNode<NodeWithIds>) {
+function tipRows(root: HierarchyNode) {
   const rows = new Map<string, { order: number; row: number }>()
   let row = 0
-  const pushReversed = (
-    stack: HierarchyNode<NodeWithIds>[],
-    nodes: HierarchyNode<NodeWithIds>[],
-  ) => {
-    for (let i = nodes.length - 1; i >= 0; i--) {
-      stack.push(nodes[i]!)
-    }
-  }
   const stack = [root]
   while (stack.length > 0) {
     const node = stack.pop()!
@@ -84,8 +82,8 @@ function tipRows(root: HierarchyNode<NodeWithIds>) {
  */
 function cladeRows(
   clade: Clade,
-  root: HierarchyNode<NodeWithIds>,
-  index: Map<string, HierarchyNode<NodeWithIds> | undefined>,
+  root: HierarchyNode,
+  index: Map<string, HierarchyNode | undefined>,
   tips: Map<string, { order: number; row: number }>,
 ): { rows: [number, number]; nodeId?: string } | undefined {
   if (clade.range) {
@@ -131,8 +129,8 @@ function cladeRows(
  */
 export function resolveClades(
   clades: Clade[],
-  root: HierarchyNode<NodeWithIds>,
-  displayed: HierarchyNode<NodeWithIds>,
+  root: HierarchyNode,
+  displayed: HierarchyNode,
 ): ResolvedClade[] {
   const index = leafIndex(root)
   const tips = tipRows(displayed)
@@ -251,7 +249,7 @@ export function outgroupNode(root: HierarchyNode, outgroup: string[]) {
  */
 export function rootTree(tree: NodeWithIds, treeRoot: TreeRoot) {
   const plain = new Map<NodeWithIds, TreeNode>()
-  for (const node of preorder(tree).reverse()) {
+  for (const node of preorder(tree).toReversed()) {
     plain.set(node, {
       name: node.name === node.id ? undefined : node.name,
       length: node.length,

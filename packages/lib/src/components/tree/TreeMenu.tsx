@@ -46,9 +46,14 @@ const TreeMenu = observer(function ({
         <MenuItem
           dense
           onClick={() => {
-            model.queueDialog(onClose => [
+            model.queueDialog(done => [
               TreeNodeInfoDialog,
-              { info: model.getRowData(name), model, nodeName: name, onClose },
+              {
+                info: model.getRowData(name),
+                model,
+                nodeName: name,
+                onClose: done,
+              },
             ])
             onClose()
           }}

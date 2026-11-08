@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { isRecord } from '../MetadataTable.tsx'
 import { referenceFieldLabels } from './metadataLabels.ts'
 
 const referenceTags = ['RM', 'RT', 'RA', 'RL', 'RC'] as const
@@ -18,17 +19,23 @@ function pubmed(id: string) {
   )
 }
 
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(v => typeof v === 'string')
+}
+
 function groupReferences(general: Record<string, unknown>) {
   const numbers = general.RN
-  if (!Array.isArray(numbers) || numbers.length === 0) {
+  if (!isStringArray(numbers) || numbers.length === 0) {
     return general
   }
   const present = referenceTags.filter(tag => general[tag] != null)
-  const aligned = present.every(tag => {
+  const columns = present.flatMap(tag => {
     const values = general[tag]
-    return Array.isArray(values) && values.length === numbers.length
+    return isStringArray(values) && values.length === numbers.length
+      ? [{ tag, values }]
+      : []
   })
-  if (!aligned) {
+  if (columns.length !== present.length) {
     return general
   }
   const rest = Object.fromEntries(
@@ -38,11 +45,11 @@ function groupReferences(general: Record<string, unknown>) {
     ),
   )
   const references = Object.fromEntries(
-    numbers.map((number: string, i) => [
+    numbers.map((number, i) => [
       number,
       Object.fromEntries(
-        present.map(tag => {
-          const value = (general[tag] as string[])[i]!
+        columns.map(({ tag, values }) => {
+          const value = values[i]!
           return [
             referenceFieldLabels[tag],
             tag === 'RM' ? pubmed(value) : value,
@@ -55,7 +62,5 @@ function groupReferences(general: Record<string, unknown>) {
 }
 
 export function groupGeneral(general: unknown) {
-  return general && typeof general === 'object'
-    ? groupReferences(general as Record<string, unknown>)
-    : {}
+  return isRecord(general) ? groupReferences(general) : {}
 }

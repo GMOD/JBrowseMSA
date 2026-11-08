@@ -75,7 +75,7 @@ export function resolveScale(
   const listed = new Set(scale?.domain)
   const order = [
     ...listed,
-    ...[...present].filter(v => !listed.has(v)).sort(compareGroupKeys),
+    ...[...present].filter(v => !listed.has(v)).toSorted(compareGroupKeys),
   ]
   const colors = scaleColors(scale, order)
   return {

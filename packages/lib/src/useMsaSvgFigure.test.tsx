@@ -34,8 +34,8 @@ test('the figure draws the viewport and redraws after a scroll', async () => {
     600,
   )
   let figure: MsaSvgFigure = {}
-  function Figure({ model }: { model: MsaViewModel }) {
-    const drawn = useMsaSvgFigure(model, { delay: 0 })
+  function Figure({ view }: { view: MsaViewModel }) {
+    const drawn = useMsaSvgFigure(view, { delay: 0 })
     useEffect(() => {
       figure = drawn
     }, [drawn])
@@ -43,7 +43,7 @@ test('the figure draws the viewport and redraws after a scroll', async () => {
   }
   const root = createRoot(document.createElement('div'))
   act(() => {
-    root.render(<Figure model={model} />)
+    root.render(<Figure view={model} />)
   })
   await waitFor(() => !!figure.svg)
   const first = figure.svg
@@ -68,8 +68,8 @@ test('the figure redraws for a highlight a host applies', async () => {
     600,
   )
   let figure: MsaSvgFigure = {}
-  function Figure({ model }: { model: MsaViewModel }) {
-    const drawn = useMsaSvgFigure(model, { delay: 0 })
+  function Figure({ view }: { view: MsaViewModel }) {
+    const drawn = useMsaSvgFigure(view, { delay: 0 })
     useEffect(() => {
       figure = drawn
     }, [drawn])
@@ -77,7 +77,7 @@ test('the figure redraws for a highlight a host applies', async () => {
   }
   const root = createRoot(document.createElement('div'))
   act(() => {
-    root.render(<Figure model={model} />)
+    root.render(<Figure view={model} />)
   })
   await waitFor(() => !!figure.svg)
   const plain = figure.svg

@@ -83,13 +83,13 @@ export function cladeLabelBoxes(
 ) {
   const {
     resolvedClades,
-    cladeGutterWidth,
+    cladeGutterWidth: gutterWidth,
     rowHeight,
     effectiveTreeAreaWidth,
     fontSize,
   } = model
-  const gutterLeft = effectiveTreeAreaWidth - cladeGutterWidth
-  return cladeGutterWidth === 0
+  const gutterLeft = effectiveTreeAreaWidth - gutterWidth
+  return gutterWidth === 0
     ? []
     : resolvedClades.flatMap((clade, index) => {
         const { label, markColor, rows } = clade

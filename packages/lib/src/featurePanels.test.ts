@@ -243,7 +243,10 @@ g3\tncbi\tgene\t1\t500\t.\t-\t.\tName=genR`,
     Object.fromEntries(
       panel.spans
         .get(row)!
-        .map(s => [s.annotation.attributes!.Name, [s.lane, s.laneCount]]),
+        .map((s): [string, number[]] => [
+          s.annotation.attributes?.Name ?? '',
+          [s.lane, s.laneCount],
+        ]),
     )
   // one lane each side, so the line between the strands sits halfway down
   // every row of the panel, including the rows using only one side
@@ -269,7 +272,10 @@ g1\tncbi\tgene\t200\t800\t.\t-\t.\tName=genR`,
     Object.fromEntries(
       panel.spans
         .get('g1')!
-        .map(s => [s.annotation.attributes!.Name, [s.lane, s.laneCount]]),
+        .map((s): [string, number[]] => [
+          s.annotation.attributes?.Name ?? '',
+          [s.lane, s.laneCount],
+        ]),
     ),
   ).toEqual({ genA: [1, 3], genB: [0, 3], genR: [2, 3] })
 })

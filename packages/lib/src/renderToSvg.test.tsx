@@ -85,7 +85,7 @@ function idsOf(svg: string, attr: string) {
 function panelIds(svg: string) {
   return idsOf(svg, 'id')
     .filter(id => id.endsWith('-panel'))
-    .sort()
+    .toSorted()
 }
 
 function exportWithPanels(id: string) {

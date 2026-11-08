@@ -1,3 +1,5 @@
+import { notEmpty } from '@jbrowse/core/util'
+
 import type { Annotation } from './types.ts'
 
 /**
@@ -5,9 +7,13 @@ import type { Annotation } from './types.ts'
  * of the GFF attributes the parser kept.
  */
 export function featureField(annotation: Annotation, field: string) {
-  const own = (annotation as unknown as Record<string, unknown>)[field]
+  const own: unknown = Reflect.get(annotation, field)
   const value = own ?? annotation.attributes?.[field]
   return typeof value === 'string' ? value : undefined
+}
+
+export function featureValues(list: Annotation[], field: string) {
+  return list.map(a => featureField(a, field)).filter(notEmpty)
 }
 
 /**

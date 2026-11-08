@@ -1,5 +1,6 @@
 import { calcDepthToLeaf, nodeCoveringRows } from '../../hierarchy.ts'
 import { setFontSize } from '../../setFontSize.ts'
+import { nonEmpty } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import {
   drawHighlightLabel,
@@ -404,7 +405,7 @@ function renderTreeLabels({
     } = node
     const y = node.x!
 
-    const displayName = model.rowDataOf(name)?.genome || name
+    const displayName = nonEmpty(model.rowDataOf(name)?.genome) ?? name
     // a collapsed clade is drawn as a triangle + tip count; suppress its leaf
     // label when the "name" is just the auto-generated internal-node id
     const isAnonymousCollapsed = collapsedSet.has(id) && name === id

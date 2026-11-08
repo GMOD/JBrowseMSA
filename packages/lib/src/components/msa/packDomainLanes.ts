@@ -18,7 +18,7 @@ export function packDomainLanes<T extends { startCol: number; endCol: number }>(
   const lanes = new Array<number>(bands.length)
   const byStart = bands
     .map((_, i) => i)
-    .sort((a, b) => bands[a]!.startCol - bands[b]!.startCol)
+    .toSorted((a, b) => bands[a]!.startCol - bands[b]!.startCol)
 
   for (const i of byStart) {
     const { startCol, endCol } = bands[i]!

@@ -220,11 +220,11 @@ export function renderSelection({
   if (!resolvedSelection) {
     return
   }
-  const { startCol, endCol, rowRuns } = resolvedSelection
+  const { startCol, endCol, rowRuns: runs } = resolvedSelection
   const x = startCol * colWidth - offsetX
   const w = (endCol - startCol + 1) * colWidth
   ctx.lineWidth = 1
-  for (const [first, last] of rowRuns) {
+  for (const [first, last] of runs) {
     const y = first * rowHeight - offsetY
     const h = (last - first + 1) * rowHeight
     if (y < height && y + h > 0) {

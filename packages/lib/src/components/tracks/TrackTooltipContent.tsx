@@ -152,6 +152,7 @@ const TrackTooltipContent = observer(function ({
       )
     }
   }
+  return null
 })
 
 export default TrackTooltipContent

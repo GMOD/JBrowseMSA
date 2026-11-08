@@ -35,7 +35,7 @@ async function exportTicks(model: ReturnType<typeof makeModel>) {
     .filter(t => /^\d+$/.test(t))
 }
 
-test('the ruler is off until it is turned on', async () => {
+test('the ruler is off until it is turned on', () => {
   const model = createTestModel({ id: 'ruler-off', data: { msa } }, 1400)
   expect(model.turnedOnTracks.map(t => t.model.id)).not.toContain(
     'position-ruler',

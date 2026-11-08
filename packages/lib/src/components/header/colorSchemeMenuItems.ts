@@ -102,7 +102,8 @@ export function colorSchemeMenuItems(model: MsaViewModel): MenuItem[] {
     } as const
   }
   const top = (e: SchemeEntry) =>
-    (e.featured && (e.alphabet === 'any' || e.alphabet === alphabet)) ||
+    (e.featured === true &&
+      (e.alphabet === 'any' || e.alphabet === alphabet)) ||
     (!customColorScheme && e.name === colorSchemeName)
   return [
     ...(customColorScheme

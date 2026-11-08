@@ -27,7 +27,9 @@ test('setRowData round-trips through data.treeMetadata', () => {
   })
 
   // the snapshot field keeps the name that travels in existing links
-  expect(JSON.parse(model.data.treeMetadata!).seq2.host).toBe('avian')
+  expect(JSON.parse(model.data.treeMetadata!)).toMatchObject({
+    seq2: { host: 'avian' },
+  })
   expect(model.rowDataOf('seq1')?.lineage).toBe('2.3.4.4b')
   expect(model.rowFields).toEqual(['host', 'lineage'])
 

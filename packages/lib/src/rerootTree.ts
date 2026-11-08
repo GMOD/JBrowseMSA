@@ -13,13 +13,15 @@ export interface TreeNode {
   children?: TreeNode[]
 }
 
-export function preorder<N extends TreeNode>(root: N, parents?: Map<N, N>) {
+type Tree<N> = TreeNode & { children?: N[] }
+
+export function preorder<N extends Tree<N>>(root: N, parents?: Map<N, N>) {
   const order: N[] = []
   const stack = [root]
   while (stack.length > 0) {
     const node = stack.pop()!
     order.push(node)
-    for (const child of (node.children ?? []) as N[]) {
+    for (const child of node.children ?? []) {
       parents?.set(child, node)
       stack.push(child)
     }
@@ -33,9 +35,9 @@ function hasLengths(order: TreeNode[]) {
 
 // the root's two children make one branch of the unrooted tree, which is the
 // branch a rerooting at either of them splits
-function mergedSibling<N extends TreeNode>(root: N, target: N) {
+function mergedSibling<N extends Tree<N>>(root: N, target: N) {
   return root.children?.length === 2
-    ? (root.children.find(c => c !== target) as N | undefined)
+    ? root.children.find(c => c !== target)
     : undefined
 }
 
@@ -50,7 +52,7 @@ function mergedSibling<N extends TreeNode>(root: N, target: N) {
  * nothing left to split once one child leaves, so it drops out and its
  * branches join.
  */
-export function rerootTree<N extends TreeNode>(
+export function rerootTree<N extends Tree<N>>(
   root: N,
   target: N,
   offset?: number,
@@ -111,7 +113,7 @@ export function rerootTree<N extends TreeNode>(
  * FastTree, IQ-TREE or neighbor joining writes. A tree with no branch lengths
  * counts branches.
  */
-export function midpointRoot<N extends TreeNode>(root: N): TreeNode {
+export function midpointRoot<N extends Tree<N>>(root: N): TreeNode {
   const parents = new Map<N, N>()
   const order = preorder(root, parents)
   const tips = order.filter(n => !n.children?.length)
@@ -136,7 +138,7 @@ export function midpointRoot<N extends TreeNode>(root: N): TreeNode {
         via.set(parent, node)
         stack.push(parent)
       }
-      for (const child of (node.children ?? []) as N[]) {
+      for (const child of node.children ?? []) {
         if (!dist.has(child)) {
           dist.set(child, d + weight(child))
           via.set(child, node)

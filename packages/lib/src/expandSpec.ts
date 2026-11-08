@@ -166,7 +166,7 @@ function uri(location: string) {
 export function expandSpec(spec: MsaSpec): Record<string, unknown> {
   const { query, msa, tree, highlights, region, columnTracks, ...rest } = spec
   const data = {
-    ...(rest.data as Record<string, unknown> | undefined),
+    ...(typeof rest.data === 'object' && rest.data !== null ? rest.data : {}),
     ...(msa !== undefined && isInlineMsa(msa) ? { msa } : {}),
     ...(tree !== undefined && isInlineTree(tree) ? { tree } : {}),
   }

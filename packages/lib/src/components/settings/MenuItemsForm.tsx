@@ -25,6 +25,16 @@ type RadioMenuItem = Extract<MenuItem, { type: 'radio' }>
  */
 export type ChoiceDisplay = 'segmented' | 'select'
 
+function isChoiceDisplay(value: unknown): value is ChoiceDisplay {
+  return value === 'segmented' || value === 'select'
+}
+
+function labelText(label: React.ReactNode, fallback: string) {
+  return typeof label === 'string' || typeof label === 'number'
+    ? String(label)
+    : fallback
+}
+
 function radios(items: MenuItem[]) {
   return items.filter(
     (i): i is RadioMenuItem => 'type' in i && i.type === 'radio',
@@ -68,7 +78,7 @@ function Segmented({
       >
         {options.map((o, i) => (
           <ToggleButton
-            key={String(o.label)}
+            key={labelText(o.label, String(i))}
             value={i}
             disabled={o.disabled}
             title={o.helpText}
@@ -103,7 +113,7 @@ function Select({
     >
       {options.map((o, i) => (
         <MuiMenuItem
-          key={String(o.label)}
+          key={labelText(o.label, String(i))}
           value={i}
           disabled={o.disabled}
           dense
@@ -127,12 +137,14 @@ function SubSection({ item }: { item: MenuItem }) {
   if (!('subMenu' in item) || !Array.isArray(item.subMenu)) {
     return null
   }
-  const label = String(item.label)
+  const label = labelText(item.label, '')
   const display =
-    'display' in item ? (item.display as ChoiceDisplay) : undefined
+    'display' in item && isChoiceDisplay(item.display)
+      ? item.display
+      : undefined
   if (display) {
     const options = radios(item.subMenu)
-    const rest = item.subMenu.filter(i => !options.includes(i as RadioMenuItem))
+    const rest = item.subMenu.filter(i => !options.some(o => o === i))
     const Control = display === 'segmented' ? Segmented : Select
     return (
       <>
@@ -175,7 +187,8 @@ export default function MenuItemsForm({ items }: { items: MenuItem[] }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {items.map((item, i) => {
-        const key = 'label' in item ? String(item.label) : String(i)
+        const key =
+          'label' in item ? labelText(item.label, String(i)) : String(i)
         if (!('label' in item)) {
           return null
         }

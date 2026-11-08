@@ -49,8 +49,8 @@ function drawBlock(
       texts.push(text)
     },
     strokeRect() {},
-    fillRect(x: number, y: number, width: number, height: number) {
-      rects.push({ x, y, width, height, fill: fillStyle })
+    fillRect(x: number, y: number, w: number, h: number) {
+      rects.push({ x, y, width: w, height: h, fill: fillStyle })
     },
   } as unknown as RenderCtx
 

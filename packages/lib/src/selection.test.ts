@@ -38,7 +38,7 @@ test('a selection round-trips through the snapshot', () => {
   expect(model.selection).toEqual({ start: 2, end: 5, rows: ['seq2', 'seq3'] })
 
   const reopened = makeModel({
-    selection: JSON.parse(JSON.stringify(getSnapshot(model))).selection,
+    selection: getSnapshot(model).selection,
   })
   expect(reopened.selection).toEqual(model.selection)
 

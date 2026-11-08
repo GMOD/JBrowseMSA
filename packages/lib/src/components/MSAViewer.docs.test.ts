@@ -23,7 +23,7 @@ test('the USAGE.md props table lists exactly the MSAViewer props', () => {
   const documented = [...table!.matchAll(/^\| `(\w+)`/gm)].map(m => m[1])
 
   const alphabetical = (list: (string | undefined)[]) =>
-    [...list].sort((a, b) => (a ?? '').localeCompare(b ?? ''))
+    [...list].toSorted((a, b) => (a ?? '').localeCompare(b ?? ''))
   expect(alphabetical(documented)).toEqual(alphabetical(props))
 })
 

@@ -9,7 +9,7 @@ export function DialogQueueSessionMixin() {
   return types
     .model('DialogQueueSessionMixin', {})
     .volatile(() => ({
-      queueOfDialogs: [] as [DialogComponentType, any][],
+      queueOfDialogs: [] as [DialogComponentType, unknown][],
     }))
     .views(self => ({
       /**
@@ -22,7 +22,8 @@ export function DialogQueueSessionMixin() {
        * #getter
        */
       get DialogProps() {
-        return self.queueOfDialogs[0]?.[1]
+        const props = self.queueOfDialogs[0]?.[1]
+        return typeof props === 'object' && props !== null ? props : undefined
       },
     }))
     .actions(self => ({

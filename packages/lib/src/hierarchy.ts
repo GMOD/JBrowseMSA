@@ -161,7 +161,7 @@ export function layoutTree<T extends { length?: number }>(
     if (parent) {
       parent.children!.push(node)
       node.branchLength =
-        parent.branchLength + Math.max(source.data.length || 0, 0)
+        parent.branchLength + (Math.max(source.data.length ?? 0, 0) || 0)
       frame.rootToTipLength = Math.max(frame.rootToTipLength, node.branchLength)
     }
     if (source._children) {
@@ -182,17 +182,17 @@ export function layoutTree<T extends { length?: number }>(
   for (let i = nodes.length - 1; i >= 0; i--) {
     const node = nodes[i]!
     if (node.children) {
-      let sum = 0
+      let rowSum = 0
       let min = Infinity
       let max = -Infinity
       let depthToLeaf = 0
       for (const child of node.children) {
-        sum += child.row
+        rowSum += child.row
         min = Math.min(min, child.rowMin)
         max = Math.max(max, child.rowMax)
         depthToLeaf = Math.max(depthToLeaf, 1 + child.depthToLeaf)
       }
-      node.row = sum / node.children.length
+      node.row = rowSum / node.children.length
       node.rowMin = min
       node.rowMax = max
       node.depthToLeaf = depthToLeaf

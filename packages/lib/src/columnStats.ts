@@ -41,7 +41,9 @@ export function columnStats({
     return undefined
   }
   const gaps = colStats.gapCount(col)
-  const distribution = colStats.residueEntries(col).sort((a, b) => b[1] - a[1])
+  const distribution = colStats
+    .residueEntries(col)
+    .toSorted((a, b) => b[1] - a[1])
   const consensus = distribution[0]
   return {
     col,

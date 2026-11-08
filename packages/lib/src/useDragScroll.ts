@@ -44,6 +44,7 @@ export function useDragScroll(
         document.removeEventListener('pointercancel', onUp)
       }
     }
+    return undefined
   }, [axis, onScroll, mouseDown])
 
   return {

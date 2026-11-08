@@ -165,7 +165,12 @@ function overviewKeys({
 }
 
 function canStroke(ctx: unknown): ctx is CanvasRenderingContext2D {
-  return typeof (ctx as CanvasRenderingContext2D | null)?.stroke === 'function'
+  return (
+    typeof ctx === 'object' &&
+    ctx !== null &&
+    'stroke' in ctx &&
+    typeof ctx.stroke === 'function'
+  )
 }
 
 /**

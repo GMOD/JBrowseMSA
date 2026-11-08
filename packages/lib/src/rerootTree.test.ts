@@ -55,7 +55,7 @@ function pairDistances(root: TreeNode) {
       walk.push([child, d + (child.length ?? 0)])
     }
   }
-  const names = [...depth.keys()].sort()
+  const names = [...depth.keys()].toSorted()
   const out: Record<string, number> = {}
   for (const a of names) {
     for (const b of names) {

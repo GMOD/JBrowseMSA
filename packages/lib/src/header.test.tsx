@@ -73,8 +73,7 @@ afterEach(() => {
 
 function button(name: string) {
   return [...document.querySelectorAll('button')].find(
-    b =>
-      b.getAttribute('aria-label') === name || b.textContent?.trim() === name,
+    b => b.getAttribute('aria-label') === name || b.textContent.trim() === name,
   )
 }
 
@@ -88,7 +87,7 @@ async function click(el: Element | undefined) {
 
 async function waitForText(text: string) {
   for (let i = 0; i < 50; i++) {
-    if (document.body.textContent?.includes(text)) {
+    if (document.body.textContent.includes(text)) {
       return
     }
     await act(async () => {

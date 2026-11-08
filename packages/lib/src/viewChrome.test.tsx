@@ -107,8 +107,9 @@ function fire(
 // useDragScroll defers each move to an animation frame, so a drag needs one
 // flushed frame before the model has moved
 async function drag(el: HTMLElement, { x = 0, y = 0 }) {
-  await act(async () => {
+  await act(() => {
     fire(el, 'down', { clientX: 0, clientY: 0 })
+    return Promise.resolve()
   })
   await act(async () => {
     fire(document, 'move', { clientX: x, clientY: y })
@@ -116,8 +117,9 @@ async function drag(el: HTMLElement, { x = 0, y = 0 }) {
       requestAnimationFrame(resolve)
     })
   })
-  await act(async () => {
+  await act(() => {
     fire(document, 'up')
+    return Promise.resolve()
   })
 }
 
@@ -315,7 +317,7 @@ test('the dividers are separators', () => {
   expect(container.querySelectorAll('[role="separator"]')).toHaveLength(3)
 })
 
-test('the tree gutter carries a scale bar, and the ruler track draws', async () => {
+test('the tree gutter carries a scale bar, and the ruler track draws', () => {
   expect(model.pxPerBranchLength).toBeGreaterThan(0)
   // the gutter above the tree: a path for the bar, and the round length beside
   // it
@@ -512,7 +514,7 @@ test('a touch pan along an axis that fits moves the page', () => {
 
 test('a second finger neither moves nor ends the pan', async () => {
   const block = msaBlock()
-  const press = (type: string, pointerId: number, clientX: number) => {
+  const pointer = (type: string, pointerId: number, clientX: number) => {
     const target = type === 'pointerdown' ? block : window
     target.dispatchEvent(
       new PointerEvent(type, {
@@ -528,22 +530,24 @@ test('a second finger neither moves nor ends the pan', async () => {
     new Promise(resolve => {
       requestAnimationFrame(resolve)
     })
-  await act(async () => {
-    press('pointerdown', 1, 200)
+  await act(() => {
+    pointer('pointerdown', 1, 200)
+    return Promise.resolve()
   })
   await act(async () => {
-    press('pointerdown', 2, 600)
-    press('pointermove', 2, 400)
-    press('pointerup', 2, 400)
+    pointer('pointerdown', 2, 600)
+    pointer('pointermove', 2, 400)
+    pointer('pointerup', 2, 400)
     await frame()
   })
   expect(model.scrollX).toBe(0)
   await act(async () => {
-    press('pointermove', 1, 150)
+    pointer('pointermove', 1, 150)
     await frame()
   })
   expect(model.scrollX).toBe(-50)
-  await act(async () => {
-    press('pointerup', 1, 150)
+  await act(() => {
+    pointer('pointerup', 1, 150)
+    return Promise.resolve()
   })
 })

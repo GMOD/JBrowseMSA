@@ -18,7 +18,7 @@ export function colorSchemeSnapshot(scheme: ColorScheme | undefined) {
  * adjacent 1-based alignment columns
  */
 export function columnHighlights(columns: number[] = []) {
-  const sorted = [...new Set(columns)].sort((a, b) => a - b)
+  const sorted = [...new Set(columns)].toSorted((a, b) => a - b)
   const runs: { start: number; end: number }[] = []
   for (const column of sorted) {
     const last = runs.at(-1)

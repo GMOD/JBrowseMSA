@@ -24,7 +24,9 @@ const MetadataDialog = observer(function ({
   const fields = Object.fromEntries(
     entries.filter(([, value]) => !isRecord(value)),
   )
-  const sections = entries.filter(([, value]) => isRecord(value))
+  const sections = entries.filter(
+    (entry): entry is [string, Record<string, unknown>] => isRecord(entry[1]),
+  )
   return (
     <Dialog
       onClose={() => {
@@ -54,7 +56,7 @@ const MetadataDialog = observer(function ({
                     monospaceKeys={monospaceKeys}
                   />
                 ) : (
-                  <MetadataTable record={value as Record<string, unknown>} />
+                  <MetadataTable record={value} />
                 )}
               </div>
             ))}

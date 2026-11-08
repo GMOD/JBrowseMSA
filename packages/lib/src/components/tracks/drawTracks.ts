@@ -132,9 +132,9 @@ function drawTextTrackContent({
     blockWidth: blockSize,
     colWidth,
   })
-  const str = data?.slice(xStart, xEnd)
+  const str = data?.slice(xStart, xEnd) ?? ''
 
-  for (let i = 0; str && i < str.length; i++) {
+  for (let i = 0; i < str.length; i++) {
     const letter = str[i]!
     const col = xStart + i
     const fill = bgColor ? colorAt(col, letter) : undefined

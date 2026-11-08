@@ -27,7 +27,7 @@ test('a view with no map writes none into its snapshot', () => {
 test('a map travels in the snapshot and colors the letters it lists', () => {
   const model = makeModel()
   model.setCustomColorScheme({ K: '#1f77b4', R: '#1f77b4' })
-  const snap = JSON.parse(JSON.stringify(getSnapshot(model)))
+  const snap = getSnapshot(model)
   expect(snap.customColorScheme).toEqual({ K: '#1f77b4', R: '#1f77b4' })
 
   const reopened = makeModel(snap)

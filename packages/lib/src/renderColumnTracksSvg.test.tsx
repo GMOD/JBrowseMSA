@@ -61,7 +61,7 @@ test('a bar track from values exports one bar per column in its color', async ()
       color: barColor,
     },
   ])
-  const bars = rectsFilled(await exportSvg(model), barColor).sort(
+  const bars = rectsFilled(await exportSvg(model), barColor).toSorted(
     (a, b) => a.x - b.x,
   )
   const trackHeight = model.trackHeight('bar')
@@ -96,7 +96,7 @@ test('a text track from data exports its letters and its own colors', async () =
   expect(
     rectsFilled(svg, '#aaaaaa')
       .map(b => b.x)
-      .sort((a, b) => a - b),
+      .toSorted((a, b) => a - b),
   ).toEqual([0, colWidth * 3])
   expect(rectsFilled(svg, '#bbbbbb').map(b => b.x)).toEqual([colWidth])
   expect(svgNamesTrack(svg)).toContain('Codon frame')
