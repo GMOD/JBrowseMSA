@@ -13,14 +13,20 @@ export interface StockholmData {
   seqdata: Record<string, string>
 }
 
+function nullPrototypeRecord<T>() {
+  const record: Record<string, T> = {}
+  Object.setPrototypeOf(record, null)
+  return record
+}
+
 function createStockholm(): StockholmData {
   return {
-    gf: Object.create(null),
-    gc: Object.create(null),
-    gs: Object.create(null),
-    gr: Object.create(null),
+    gf: nullPrototypeRecord(),
+    gc: nullPrototypeRecord(),
+    gs: nullPrototypeRecord(),
+    gr: nullPrototypeRecord(),
     seqname: [],
-    seqdata: Object.create(null),
+    seqdata: nullPrototypeRecord(),
   }
 }
 

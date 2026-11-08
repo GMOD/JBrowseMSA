@@ -9,6 +9,8 @@ import {
   parseStructure,
 } from './residue-mappings.ts'
 
+import type { Mock } from 'vitest'
+
 const fixtures = path.join(import.meta.dirname, 'test_data')
 
 function fixture(name: string) {
@@ -32,14 +34,18 @@ const SPIKE = fixture('uniprot-P0DTC2.fasta')
   .join('')
   .trim()
 
-let fetchMock: ReturnType<typeof vi.fn>
+type Fetch = (url: string, init?: RequestInit) => Promise<Response>
+
+let fetchMock: Mock<Fetch>
 
 beforeEach(() => {
-  fetchMock = vi.fn(async (url: string) => {
+  fetchMock = vi.fn<Fetch>(url => {
     const file = ROUTES[url]
-    return file
-      ? new Response(fixture(file), { status: 200 })
-      : new Response('', { status: 404 })
+    return Promise.resolve(
+      file
+        ? new Response(fixture(file), { status: 200 })
+        : new Response('', { status: 404 }),
+    )
   })
   vi.stubGlobal('fetch', fetchMock)
   vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -188,13 +194,15 @@ test('a SIFTS mapping with no struct_asym_id names the author chain as such', as
     /"struct_asym_id": "[A-Z]+",/g,
     '',
   )
-  fetchMock.mockImplementation(async (url: string) => {
+  fetchMock.mockImplementation(url => {
     const file = ROUTES[url]
-    return url.endsWith('/mappings/uniprot/6vxx')
-      ? new Response(withoutLabel, { status: 200 })
-      : file
-        ? new Response(fixture(file), { status: 200 })
-        : new Response('', { status: 404 })
+    return Promise.resolve(
+      url.endsWith('/mappings/uniprot/6vxx')
+        ? new Response(withoutLabel, { status: 200 })
+        : file
+          ? new Response(fixture(file), { status: 200 })
+          : new Response('', { status: 404 }),
+    )
   })
   const [mapping] = await buildResidueMappings({
     msaText: msa({ 'SARS-CoV-2': gapped(SPIKE) }),
@@ -231,9 +239,11 @@ test('the AlphaFold model maps by identity, with no unobserved', async () => {
     generated: { by: 'alphafold', date: DATE },
   })
   const [, init] = fetchMock.mock.calls.find(([url]) =>
-    String(url).includes('alphafold'),
+    url.includes('alphafold'),
   )!
-  expect(init.headers['User-Agent']).toMatch(/react-msaview-cli/)
+  expect(new Headers(init?.headers).get('User-Agent')).toMatch(
+    /react-msaview-cli/,
+  )
 })
 
 test('an AlphaFold fragment row covers its own residues from the fragment start', async () => {

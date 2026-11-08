@@ -88,10 +88,9 @@ const GlobinSuperposition = observer(function GlobinSuperposition() {
         end: landmark['F helix end'].column,
       }
       model.setSelection(kind === 'pocket' ? pocket : undefined)
-      const targets = mappedTargets(model, rows)
       const result = await superposeRows({
         model,
-        targets,
+        targets: mappedTargets(model, rows),
         selection: kind === 'pocket' ? pocket : undefined,
       })
       model.setColumnTracks([

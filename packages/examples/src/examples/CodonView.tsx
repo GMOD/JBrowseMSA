@@ -50,6 +50,10 @@ const layers = {
   features: 'Changed codons in each row',
 }
 type Layer = keyof typeof layers
+
+function isLayer(name: string): name is Layer {
+  return name in layers
+}
 type TrackLayer = Exclude<Layer, 'features'>
 const trackLayers: TrackLayer[] = ['numbers', 'translation', 'counts']
 
@@ -178,21 +182,23 @@ export default function CodonView() {
             </MenuItem>
           ))}
         </TextField>
-        {Object.entries(layers).map(([layer, label]) => (
-          <FormControlLabel
-            key={layer}
-            label={label}
-            control={
-              <Checkbox
-                size="small"
-                checked={shown[layer as Layer]}
-                onChange={event => {
-                  setShown({ ...shown, [layer]: event.target.checked })
-                }}
-              />
-            }
-          />
-        ))}
+        {Object.keys(layers)
+          .filter(isLayer)
+          .map(layer => (
+            <FormControlLabel
+              key={layer}
+              label={layers[layer]}
+              control={
+                <Checkbox
+                  size="small"
+                  checked={shown[layer]}
+                  onChange={event => {
+                    setShown({ ...shown, [layer]: event.target.checked })
+                  }}
+                />
+              }
+            />
+          ))}
       </Stack>
       <MSAViewer
         msa={f12CdsMSA}

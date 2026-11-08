@@ -116,9 +116,9 @@ describe('foldseekCandidates', () => {
       rowName: 'row',
       rowSequence: 'ACDEF',
       hits: parseFoldseekResult(hits()),
-      fetchText: async url => {
+      fetchText: url => {
         read.push(url)
-        return assemblyCif()
+        return Promise.resolve(assemblyCif())
       },
     })
     const pdb = found.find(c => c.kind === 'experimental')!
@@ -140,7 +140,7 @@ describe('foldseekCandidates', () => {
       rowName: 'row',
       rowSequence: 'ACDEF',
       hits: parseFoldseekResult(hits()),
-      fetchText: async () => assemblyCif('A', 3),
+      fetchText: () => Promise.resolve(assemblyCif('A', 3)),
     })
     expect(
       found.find(c => c.kind === 'experimental')!.mapping.structure.id,

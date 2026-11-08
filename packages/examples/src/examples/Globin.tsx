@@ -2,8 +2,7 @@ import { MSAViewer } from 'react-msaview'
 
 import { globinMSA, globinTree } from './data'
 import sickle from './hemoglobinSickle.json'
-
-import type { ResidueMapping } from 'react-msaview'
+import { residueMappingsFromJson } from './residueMappingsJson'
 
 // The globin family (hemoglobin alpha/beta, myoglobin, neuroglobin and
 // cytoglobin) across a few vertebrates. The inferred tree groups sequences by
@@ -27,7 +26,7 @@ import type { ResidueMapping } from 'react-msaview'
 // benign": the prediction asks whether a substitution breaks the protein, and
 // mutant hemoglobin still folds and carries oxygen. The disease comes from the
 // polymerization that follows.
-const residueMappings = sickle.residueMappings as ResidueMapping[]
+const residueMappings = residueMappingsFromJson(sickle.residueMappings)
 
 export default function Globin() {
   return (

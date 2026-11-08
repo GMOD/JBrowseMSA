@@ -37,6 +37,7 @@ function importMolstar() {
       createRoot: reactDom.createRoot,
       DefaultPluginUISpec: spec.DefaultPluginUISpec,
       PluginConfig: config.PluginConfig,
+      Structure: structure.Structure,
       StructureElement: structure.StructureElement,
       StructureProperties: structure.StructureProperties,
       StructureSelection: structure.StructureSelection,
@@ -67,6 +68,10 @@ export function loadMolstar() {
 
 export type Molstar = Awaited<ReturnType<typeof importMolstar>>
 
+export function asStructure(molstar: Molstar, data: unknown) {
+  return data instanceof molstar.Structure ? data : undefined
+}
+
 function transformCell(plugin: PluginUIContext, molstar: Molstar, ref: string) {
   return plugin.state.data.selectQ(q =>
     q
@@ -88,9 +93,9 @@ export function drawnStructure(
   molstar: Molstar,
   ref: string,
 ) {
-  return (
+  const cell =
     transformCell(plugin, molstar, ref) ?? plugin.state.data.cells.get(ref)
-  )?.obj?.data as Structure | undefined
+  return asStructure(molstar, cell?.obj?.data)
 }
 
 /**
@@ -139,9 +144,10 @@ export async function tmAlignOnto(
   const { QueryContext, StructureSelection, StructureElement } = molstar
   const { query } = molstar.StructureSelectionQueries.trace
   const traces = refs.flatMap(ref => {
-    const root = plugin.state.data.cells.get(ref)?.obj?.data as
-      | Structure
-      | undefined
+    const root = asStructure(
+      molstar,
+      plugin.state.data.cells.get(ref)?.obj?.data,
+    )
     if (!root) {
       return []
     }

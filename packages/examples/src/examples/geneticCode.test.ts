@@ -16,7 +16,7 @@ describe('geneticCode', () => {
       Object.entries(geneticCode)
         .filter(([, aminoAcid]) => aminoAcid === '*')
         .map(([codon]) => codon)
-        .sort(),
+        .toSorted(),
     ).toEqual(['TAA', 'TAG', 'TGA'])
     expect(geneticCode.ATG).toBe('M')
     expect(geneticCode.TGG).toBe('W')

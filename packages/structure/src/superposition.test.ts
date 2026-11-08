@@ -178,10 +178,10 @@ describe('parseCaCoordinates', () => {
   })
 
   test('counts a modified residue but not a calcium ion', () => {
-    const withMse = `${cif.replace(
+    const withMse = cif.replace(
       '#\n',
       'HETATM 8 CA . MSE A 4 1.0 1.0 1.0 H 1\nHETATM 9 CA . CA B . 2.0 2.0 2.0 K 1\n#\n',
-    )}`
+    )
     const { label } = parseCaCoordinates(withMse)!
     expect(label.get('A')?.get(4)).toEqual([1, 1, 1])
     expect(label.has('B')).toBe(false)

@@ -4,11 +4,11 @@ import * as path from 'node:path'
 import { enableStaticRendering } from 'mobx-react'
 
 import { fetchWithRetry } from './fetchWithRetry.ts'
+import { isMsaSpec, isRecord, isViewerProps, readJson } from './json.ts'
 import { loadJsdom } from './loadJsdom.ts'
 import { checkConverter, figureFormat, writeFigure } from './writeFigure.ts'
 
 import type { MSAFormat } from 'msa-parsers'
-import type { MSAViewerProps, MsaSpec } from 'react-msaview'
 
 /**
  * The faces `sans-serif` resolves to on macOS, Windows and Linux desktops. Skia
@@ -62,13 +62,15 @@ const FILEHANDLES = [
   ['treeMetadataFilehandle', 'treeMetadata'],
 ] as const
 
-interface Location {
-  uri?: string
-  localPath?: string
+function locationPath(location: unknown) {
+  const where = isRecord(location)
+    ? (location.uri ?? location.localPath)
+    : undefined
+  return typeof where === 'string' ? where : undefined
 }
 
-async function readLocation(location: Location, baseDir: string) {
-  const where = location.uri ?? location.localPath
+async function readLocation(location: unknown, baseDir: string) {
+  const where = locationPath(location)
   if (!where) {
     throw new Error(`a filehandle in the spec has no uri or localPath`)
   }
@@ -90,9 +92,13 @@ async function inlineFilehandles(
   snapshot: Record<string, unknown>,
   baseDir: string,
 ) {
-  const data = { ...(snapshot.data as Record<string, string> | undefined) }
+  const data: Record<string, string> = Object.fromEntries(
+    Object.entries(isRecord(snapshot.data) ? snapshot.data : {}).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string',
+    ),
+  )
   for (const [key, field] of FILEHANDLES) {
-    const location = snapshot[key] as Location | undefined
+    const location = snapshot[key]
     if (location) {
       data[field] ??= await readLocation(location, baseDir)
       delete snapshot[key]
@@ -103,13 +109,12 @@ async function inlineFilehandles(
 
 async function readSpec(specFile: string) {
   const { expandSpec } = await import('react-msaview')
-  const json = JSON.parse(fs.readFileSync(specFile, 'utf8')) as {
-    msaview?: MsaSpec
-  } & MsaSpec
-  return inlineFilehandles(
-    expandSpec(json.msaview ?? json),
-    path.dirname(specFile),
-  )
+  const json = readJson(fs.readFileSync(specFile, 'utf8'), isRecord, specFile)
+  const spec = json.msaview ?? json
+  if (!isMsaSpec(spec)) {
+    throw new Error(`${specFile} is not a spec`)
+  }
+  return inlineFilehandles(expandSpec(spec), path.dirname(specFile))
 }
 
 /**
@@ -118,7 +123,11 @@ async function readSpec(specFile: string) {
  */
 async function readProps(propsFile: string) {
   const { viewerSnapshot } = await import('react-msaview')
-  const props = JSON.parse(fs.readFileSync(propsFile, 'utf8')) as MSAViewerProps
+  const props = readJson(
+    fs.readFileSync(propsFile, 'utf8'),
+    isViewerProps,
+    propsFile,
+  )
   const { type: _, ...snapshot } = viewerSnapshot(props)
   return {
     snapshot: await inlineFilehandles(snapshot, path.dirname(propsFile)),

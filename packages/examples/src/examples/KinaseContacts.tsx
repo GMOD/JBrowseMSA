@@ -2,8 +2,7 @@ import { MSAViewer } from 'react-msaview'
 
 import { kinaseDomainsGFF, kinaseMSA, kinaseTree } from './data'
 import structure from './kinaseStructure.json'
-
-import type { ResidueMapping } from 'react-msaview'
+import { residueMappingsFromJson } from './residueMappingsJson'
 
 // The same Src-family kinases as the domain example, with the domain boxes and
 // a contact map over them. The boxes mark the SH3, SH2 and kinase domains, and
@@ -24,8 +23,9 @@ import type { ResidueMapping } from 'react-msaview'
 // residue 443 back.
 //
 // A JSON import widens every literal to `string` and every pair to `number[]`,
-// so the cast types it. The script that writes the file verifies its numbering.
-const residueMappings = structure.residueMappings as ResidueMapping[]
+// and residueMappingsFromJson narrows them back. The script that writes the
+// file verifies its numbering.
+const residueMappings = residueMappingsFromJson(structure.residueMappings)
 
 const color = (pair: string) => {
   if (pair.includes('SH2') && pair.includes('tail')) {

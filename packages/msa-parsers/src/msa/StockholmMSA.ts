@@ -139,7 +139,7 @@ export default class StockholmMSA extends BaseMSA {
               description: `#=GR ${tag}`,
               start: run.start,
               end: run.end,
-              color: structureColors(tag)[run.mark] ?? kindColors[kind ?? ''],
+              color: structureColors(tag)[run.mark] ?? kindColors[kind],
               defaultOff: true,
             },
           ]

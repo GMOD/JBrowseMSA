@@ -43,8 +43,11 @@ function withParam(href: string, param?: string) {
   return url.href
 }
 
-async function pipe(bytes: Uint8Array, transform: GenericTransformStream) {
-  const stream = new Response(bytes as BodyInit).body!.pipeThrough(transform)
+async function pipe(
+  bytes: Uint8Array<ArrayBuffer>,
+  transform: GenericTransformStream,
+) {
+  const stream = new Response(bytes).body!.pipeThrough(transform)
   return new Uint8Array(await new Response(stream).arrayBuffer())
 }
 
@@ -112,7 +115,7 @@ export async function shareLink(
   const snapshot = getSnapshot(app)
   if (unshareableData.length > 0) {
     const what = unshareableData
-      .map(({ what, bytes }) => `${what} (${size(bytes)})`)
+      .map(item => `${item.what} (${size(item.bytes)})`)
       .join(' and the ')
     return {
       problem: `The ${what} came from this computer and is too large for a link. Open it by URL to share the view.`,
@@ -161,6 +164,22 @@ const App = AppBase.actions(self => ({
 
 const empty = { msaview: { type: 'MsaView' as const } }
 
+function holds(value: object, keys: string[], ok: (v: unknown) => boolean) {
+  return keys.every(key => !(key in value) || ok(Reflect.get(value, key)))
+}
+
+function isMsaSpec(value: object): value is MsaSpec {
+  return (
+    holds(value, ['query', 'msa', 'tree'], v => typeof v === 'string') &&
+    holds(value, ['highlights', 'columnTracks'], v => Array.isArray(v)) &&
+    holds(
+      value,
+      ['region'],
+      v => typeof v === 'string' || (typeof v === 'object' && v !== null),
+    )
+  )
+}
+
 function toSnapshot(param: string): SnapshotIn<typeof App> {
   const parsed: unknown = JSON.parse(param)
   if (parsed && typeof parsed === 'object') {
@@ -170,8 +189,11 @@ function toSnapshot(param: string): SnapshotIn<typeof App> {
         : 'type' in parsed && parsed.type === 'MsaView'
           ? parsed
           : undefined
-    if (view && typeof view === 'object') {
-      return { msaview: expandSpec(view as MsaSpec) } as SnapshotIn<typeof App>
+    if (view && typeof view === 'object' && isMsaSpec(view)) {
+      const snapshot = { msaview: expandSpec(view) }
+      if (App.is(snapshot)) {
+        return snapshot
+      }
     }
   }
   throw new Error(

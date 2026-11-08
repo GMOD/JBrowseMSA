@@ -2,7 +2,8 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "import", "react", "oxc", "vitest"],
   "categories": {
-    "correctness": "error"
+    "correctness": "error",
+    "suspicious": "error"
   },
   "env": {
     "builtin": true,
@@ -33,12 +34,9 @@
       }
     ],
     "eslint/curly": "error",
-
     "import/export": "off",
-
     "react/no-unescaped-entities": "off",
     "react/rules-of-hooks": "error",
-
     "unicorn/no-new-array": "off",
     "unicorn/no-empty-file": "off",
     "unicorn/no-useless-spread": "off",
@@ -47,50 +45,117 @@
     "unicorn/no-lonely-if": "off",
     "unicorn/no-negated-condition": "off",
     "unicorn/no-nested-ternary": "off",
-
     "oxc/erasing-op": "off",
-
-    "typescript/no-explicit-any": "off",
+    "typescript/no-explicit-any": "error",
     "typescript/no-non-null-assertion": "off",
     "typescript/ban-ts-comment": "off",
     "typescript/no-unnecessary-type-parameters": "off",
-    "typescript/no-base-to-string": "off",
-    "typescript/no-unsafe-member-access": "off",
-    "typescript/no-unsafe-argument": "off",
-    "typescript/no-unsafe-assignment": "off",
-    "typescript/no-unsafe-call": "off",
-    "typescript/no-unsafe-return": "off",
-    "typescript/restrict-plus-operands": "off",
-    "typescript/restrict-template-expressions": "off",
-    "typescript/prefer-nullish-coalescing": "off",
-    "typescript/require-await": "off",
+    "typescript/no-base-to-string": "error",
+    "typescript/no-unsafe-member-access": "error",
+    "typescript/no-unsafe-argument": "error",
+    "typescript/no-unsafe-assignment": "error",
+    "typescript/no-unsafe-call": "error",
+    "typescript/no-unsafe-return": "error",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/restrict-template-expressions": [
+      "error",
+      {
+        "allowNumber": true
+      }
+    ],
+    "typescript/prefer-nullish-coalescing": "error",
+    "typescript/require-await": "error",
     "typescript/no-empty-function": "off",
     "typescript/no-extraneous-class": "off",
-    "typescript/unbound-method": "off",
+    "typescript/unbound-method": "error",
     "typescript/no-dynamic-delete": "off",
     "typescript/no-deprecated": "off",
     "typescript/consistent-type-imports": "error",
     "typescript/consistent-type-exports": "error",
     "typescript/no-floating-promises": "error",
     "typescript/no-unnecessary-type-assertion": "error",
-
-    // Deferred: type-aware, but ~80 pre-existing hits across model.ts /
-    // renderMSABlock.ts / renderTreeCanvas.ts (mostly MST getter/view return
-    // types that widen beyond what tsgolint can narrow). Revisit incrementally
-    // rather than blocking adoption of oxlint on a repo-wide cleanup.
-    "typescript/no-unnecessary-condition": "off",
-    // Deferred: flags `-scrollX`-style negation of MST properties typed
-    // `number | undefined` after the types.optional degrade (see model.ts).
+    "typescript/no-unnecessary-condition": "error",
     "typescript/no-unsafe-unary-minus": "off",
-
     "vitest/no-conditional-expect": "off",
-    "vitest/require-mock-type-parameters": "off"
+    "vitest/require-mock-type-parameters": "off",
+    "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/switch-exhaustiveness-check": [
+      "error",
+      {
+        "considerDefaultExhaustiveForUnions": true
+      }
+    ],
+    "typescript/require-array-sort-compare": "error",
+    "typescript/dot-notation": "error",
+    "typescript/no-confusing-void-expression": [
+      "error",
+      {
+        "ignoreArrowShorthand": true
+      }
+    ],
+    "typescript/no-mixed-enums": "error",
+    "typescript/no-unnecessary-boolean-literal-compare": "error",
+    "typescript/no-unnecessary-template-expression": "error",
+    "typescript/no-unnecessary-type-arguments": "error",
+    "typescript/no-unsafe-enum-comparison": "error",
+    "typescript/non-nullable-type-assertion-style": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/prefer-find": "error",
+    "typescript/prefer-includes": "error",
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/prefer-reduce-type-parameter": "error",
+    "typescript/prefer-regexp-exec": "error",
+    "typescript/prefer-return-this-type": "error",
+    "typescript/prefer-string-starts-ends-with": "error",
+    "typescript/related-getter-setter-pairs": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/no-unnecessary-type-conversion": "off",
+    "typescript/prefer-optional-chain": "error",
+    "typescript/return-await": "off",
+    "typescript/no-unsafe-type-assertion": "error",
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css"]
+      }
+    ],
+    "eslint/no-underscore-dangle": [
+      "error",
+      {
+        "allow": ["_children"]
+      }
+    ]
   },
   "overrides": [
     {
       "files": ["packages/cli/**", "packages/python/scripts/**", "scripts/**"],
       "rules": {
         "eslint/no-console": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx"],
+      "rules": {
+        "typescript/no-unsafe-type-assertion": "off",
+        "unicorn/consistent-function-scoping": "off"
+      }
+    },
+    {
+      "files": ["**/*.js", "**/*.mjs", "**/*.cjs"],
+      "rules": {
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-return": "off"
+      }
+    },
+    {
+      "files": ["scripts/screenshots/annotations.mjs"],
+      "rules": {
+        "unicorn/consistent-function-scoping": "off"
       }
     }
   ],

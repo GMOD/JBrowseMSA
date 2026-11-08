@@ -30,6 +30,12 @@ import type { MsaViewModel } from 'react-msaview'
 import type { StructureCandidate } from 'react-msaview-structure'
 import type { StructureColor } from 'react-msaview-structure/panel'
 
+type SxList = Extract<SxProps<Theme>, readonly unknown[]>
+
+function isSxList(sx: SxProps<Theme> | undefined): sx is SxList {
+  return Array.isArray(sx)
+}
+
 // Mol* is a large chunk, so it loads when a structure first shows
 const StructurePanel = lazy(() =>
   import('react-msaview-structure/panel').then(m => ({
@@ -115,7 +121,7 @@ const StructureSection = observer(function StructureSection({
       data-testid="structure"
       sx={[
         { border: 1, borderColor: 'divider', m: 2.5, p: 1.5 },
-        ...(Array.isArray(sx) ? sx : [sx]),
+        ...(isSxList(sx) ? sx : sx === undefined ? [] : [sx]),
       ]}
     >
       <Box sx={row}>

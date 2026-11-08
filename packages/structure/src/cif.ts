@@ -111,10 +111,10 @@ export function parseCaCoordinates(cif: string): CaCoordinates | undefined {
     'Cartn_y',
     'Cartn_z',
   ].map(col)
-  if (need.some(c => c === undefined)) {
+  if (!need.every(c => c !== undefined)) {
     return undefined
   }
-  const [group, atom, asym, seq, cx, cy, cz] = need as number[]
+  const [group, atom, asym, seq, cx, cy, cz] = need
   const auth = col('auth_asym_id')
   const comp = col('label_comp_id')
   const alt = col('label_alt_id')
@@ -140,7 +140,7 @@ export function parseCaCoordinates(cif: string): CaCoordinates | undefined {
       continue
     }
     const t = line.match(TOKEN)
-    if (!t || t[atom!] !== 'CA') {
+    if (t?.[atom!] !== 'CA') {
       continue
     }
     const record = t[group!]

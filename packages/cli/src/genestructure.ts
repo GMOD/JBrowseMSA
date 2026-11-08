@@ -3,6 +3,7 @@ import * as fs from 'node:fs'
 import { parseMSA } from 'msa-parsers'
 
 import { fetchJsonWithRetry } from './fetchWithRetry.ts'
+import { isRecord, isRecordArray } from './json.ts'
 
 import type { MSAFormat } from 'msa-parsers'
 
@@ -46,14 +47,18 @@ interface Transcript {
   genomic_locations?: { exons: Exon[] }[]
 }
 
-function getReports(json: unknown): Record<string, unknown>[] {
-  return (json as { reports?: Record<string, unknown>[] }).reports ?? []
+function getReports(json: Record<string, unknown>) {
+  return isRecordArray(json.reports) ? json.reports : []
 }
 
 // NCBI Datasets answers an unknown taxon with 200 and the reason in `messages`
-function apiMessage(json: unknown) {
-  return (json as { messages?: { error?: { message?: string } }[] })
-    .messages?.[0]?.error?.message
+function apiMessage(json: Record<string, unknown>) {
+  const first: unknown = Array.isArray(json.messages)
+    ? json.messages[0]
+    : undefined
+  const error = isRecord(first) ? first.error : undefined
+  const message = isRecord(error) ? error.message : undefined
+  return typeof message === 'string' ? message : undefined
 }
 
 export async function resolveGeneId(
@@ -64,6 +69,7 @@ export async function resolveGeneId(
   const json = await fetchJsonWithRetry(
     `${API}/gene/symbol/${encodeURIComponent(gene)}/taxon/${encodeURIComponent(taxon)}`,
     notFound,
+    isRecord,
   )
   const report = getReports(json)[0] as
     | { gene?: { gene_id?: string } }
@@ -80,6 +86,7 @@ async function fetchTranscripts(geneId: string): Promise<Transcript[]> {
   const json = await fetchJsonWithRetry(
     `${API}/gene/id/${geneId}/product_report`,
     `no gene with NCBI GeneID ${geneId}`,
+    isRecord,
   )
   const transcripts: Transcript[] = []
   for (const report of getReports(json)) {
@@ -166,8 +173,8 @@ export function codingExons(t: Transcript): CodingExon[] {
     )
   }
   let tPos = 1
-  const spans = [...exons]
-    .sort((a, b) => a.order - b.order)
+  const spans = exons
+    .toSorted((a, b) => a.order - b.order)
     .map(e => {
       const tStart = tPos
       tPos += Number(e.end) - Number(e.begin) + 1
@@ -189,7 +196,9 @@ export function codingExons(t: Transcript): CodingExon[] {
     }
     cdsOffset += end - begin + 1
   }
-  const coding = [...new Set(pieces.map(p => p.index))].sort((a, b) => a - b)
+  const coding = [...new Set(pieces.map(p => p.index))].toSorted(
+    (a, b) => a - b,
+  )
   return pieces.map(({ index, cdsStart, cdsLen }) => ({
     exon: coding.indexOf(index) + 1,
     cdsStart,
@@ -336,7 +345,7 @@ export async function runGeneStructure(
   ]
   for (const { name, exon, start, end } of projectExonsOntoRows({
     names,
-    getRow: name => msa.getRow(name),
+    getRow: row => msa.getRow(row),
     cols,
   })) {
     lines.push(

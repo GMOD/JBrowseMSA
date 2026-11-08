@@ -1,6 +1,7 @@
 import { afterEach, expect, test, vi } from 'vitest'
 
 import { fetchJsonWithRetry, fetchWithRetry } from './fetchWithRetry.ts'
+import { isRecord } from './json.ts'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -81,10 +82,14 @@ test('fetchJsonWithRetry reads the body and names a 404 as the caller words it',
       .mockResolvedValueOnce(new Response('{"a":1}', { status: 200 }))
       .mockResolvedValueOnce(new Response('', { status: 404 })),
   )
-  expect(await fetchJsonWithRetry('https://example.org/x', 'none')).toEqual({
-    a: 1,
-  })
+  expect(
+    await fetchJsonWithRetry('https://example.org/x', 'none', isRecord),
+  ).toEqual({ a: 1 })
   await expect(
-    fetchJsonWithRetry('https://example.org/y', 'PDBe has no entry 1ABC'),
+    fetchJsonWithRetry(
+      'https://example.org/y',
+      'PDBe has no entry 1ABC',
+      isRecord,
+    ),
   ).rejects.toThrow('PDBe has no entry 1ABC')
 })

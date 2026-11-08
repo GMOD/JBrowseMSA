@@ -20,21 +20,19 @@ import type { HighlighterCore } from 'shiki/core'
 // output instead of every bundled language.
 let highlighterPromise: Promise<HighlighterCore> | undefined
 function getHighlighter() {
-  if (!highlighterPromise) {
-    highlighterPromise = Promise.all([
-      import('shiki/core'),
-      import('shiki/engine/oniguruma'),
-      import('shiki/wasm'),
-      import('shiki/langs/tsx.mjs'),
-      import('shiki/themes/github-light.mjs'),
-    ]).then(([core, oniguruma, wasm, tsx, githubLight]) =>
-      core.createHighlighterCore({
-        themes: [githubLight.default],
-        langs: [tsx.default],
-        engine: oniguruma.createOnigurumaEngine(wasm),
-      }),
-    )
-  }
+  highlighterPromise ??= Promise.all([
+    import('shiki/core'),
+    import('shiki/engine/oniguruma'),
+    import('shiki/wasm'),
+    import('shiki/langs/tsx.mjs'),
+    import('shiki/themes/github-light.mjs'),
+  ]).then(([core, oniguruma, wasm, tsx, githubLight]) =>
+    core.createHighlighterCore({
+      themes: [githubLight.default],
+      langs: [tsx.default],
+      engine: oniguruma.createOnigurumaEngine(wasm),
+    }),
+  )
   return highlighterPromise
 }
 
@@ -89,17 +87,18 @@ function SourceView({ source }: { source: string }) {
   )
 }
 
+function readHash() {
+  const hash =
+    typeof window === 'undefined'
+      ? ''
+      : decodeURIComponent(window.location.hash.replace(/^#/, ''))
+  return examples.some(e => slugOf(e.name) === hash) ? hash : ''
+}
+
 // Keeps the selected example in the URL hash so links deep-link to it, and
 // stays in sync when the hash changes elsewhere (back/forward, manual edits,
 // another link on the page).
 function useHashSlug() {
-  const readHash = () => {
-    const hash =
-      typeof window === 'undefined'
-        ? ''
-        : decodeURIComponent(window.location.hash.replace(/^#/, ''))
-    return examples.some(e => slugOf(e.name) === hash) ? hash : ''
-  }
   const [slug, setSlug] = useState(
     () => readHash() || slugOf(examples[0]!.name),
   )

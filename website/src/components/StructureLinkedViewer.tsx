@@ -18,8 +18,10 @@ import type {
 } from 'react-msaview'
 import type { StructureColor } from 'react-msaview-structure/panel'
 
+const defaultScheme = 'clustalx_protein_dynamic'
+
 const alignmentSchemes = [
-  { id: 'clustalx_protein_dynamic', label: 'ClustalX' },
+  { id: defaultScheme, label: 'ClustalX' },
   { id: 'jalview_hydrophobicity', label: 'Hydrophobicity' },
   { id: 'jalview_buried', label: 'Buried index' },
   { id: 'blosum62_dynamic', label: 'BLOSUM62 similarity' },
@@ -34,6 +36,20 @@ interface Layers {
   highlights?: Highlight[]
   columnTracks?: ColumnTrackSpec[]
   residueMappings?: ResidueMapping[]
+}
+
+function isLayers(value: unknown): value is Layers {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    ['highlights', 'columnTracks', 'residueMappings'].every(
+      key => !(key in value) || Array.isArray(Reflect.get(value, key)),
+    )
+  )
+}
+
+function isStructureColor(value: string): value is StructureColor {
+  return value === 'none' || value === 'conservation' || value === 'scheme'
 }
 
 export interface Stop {
@@ -134,12 +150,12 @@ export function StructureLinkedViewer({
   height = 360,
   structureColor,
   colorScheme,
-  schemePicked,
+  schemePicks,
 }: StructureLinkedViewerProps & {
   structureColor: StructureColor
   colorScheme: string
-  /** the reader has chosen an alignment scheme, so the cells show it */
-  schemePicked: boolean
+  /** each time the reader chooses an alignment scheme, the cells show it */
+  schemePicks: number
 }) {
   const [model, setModel] = useState<MsaViewModel>()
   const [layers, setLayers] = useState<Layers>({})
@@ -152,9 +168,14 @@ export function StructureLinkedViewer({
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`)
         }
-        return res.json() as Promise<Layers>
+        return res.json()
       })
-      .then(setLayers)
+      .then((body: unknown) => {
+        if (!isLayers(body)) {
+          throw new Error('not a layers file')
+        }
+        setLayers(body)
+      })
       .catch((e: unknown) => {
         if (!controller.signal.aborted) {
           setLayersError(`Could not load ${layersUrl}: ${String(e)}`)
@@ -166,10 +187,10 @@ export function StructureLinkedViewer({
   }, [layersUrl])
 
   useEffect(() => {
-    if (model && schemePicked) {
+    if (model && schemePicks > 0) {
       model.setDomainFill(false)
     }
-  }, [model, schemePicked, colorScheme])
+  }, [model, schemePicks])
 
   // a layers file written before the panel read each mapping's own file url
   // names no file, so the page's structure url stands in for it
@@ -261,8 +282,8 @@ export default function StructureLinkedDatasets({
   const desktop = useDesktop()
   const [chosen, setChosen] = useState(datasets[0]?.id)
   const [structureColor, setStructureColor] = useState<StructureColor>('none')
-  const [colorScheme, setColorScheme] = useState(alignmentSchemes[0].id)
-  const [schemePicked, setSchemePicked] = useState(false)
+  const [colorScheme, setColorScheme] = useState(defaultScheme)
+  const [schemePicks, setSchemePicks] = useState(0)
   const dataset = datasets.find(d => d.id === chosen) ?? datasets[0]
   if (!desktop) {
     return (
@@ -295,7 +316,7 @@ export default function StructureLinkedDatasets({
             value={colorScheme}
             onChange={e => {
               setColorScheme(e.target.value)
-              setSchemePicked(true)
+              setSchemePicks(n => n + 1)
             }}
           >
             {alignmentSchemes.map(scheme => (
@@ -310,7 +331,10 @@ export default function StructureLinkedDatasets({
           <select
             value={structureColor}
             onChange={e => {
-              setStructureColor(e.target.value as StructureColor)
+              const { value } = e.target
+              if (isStructureColor(value)) {
+                setStructureColor(value)
+              }
             }}
           >
             <option value="none">Nothing</option>
@@ -324,7 +348,7 @@ export default function StructureLinkedDatasets({
         {...dataset}
         structureColor={structureColor}
         colorScheme={colorScheme}
-        schemePicked={schemePicked}
+        schemePicks={schemePicks}
       />
     </>
   ) : null

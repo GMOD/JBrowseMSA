@@ -4,6 +4,7 @@ import { afterEach, expect, test, vi } from 'vitest'
 import { createRender } from './render.ts'
 
 import type { Traits } from './render.ts'
+import type { AnyModel, Experimental, Host } from '@anywidget/types'
 import type { MSAViewerProps } from 'react-msaview'
 
 const mounted = {
@@ -62,9 +63,11 @@ const defaults: Traits = {
   viewport: null,
 }
 
+type Handler = (...args: never[]) => void
+
 function fakeModel(traits: Partial<Traits>) {
   const store: Traits = { ...defaults, ...traits }
-  const handlers = new Map<string, (() => void)[]>()
+  const handlers = new Map<string, Handler[]>()
   const saved: Partial<Traits>[] = []
   const model = {
     get: <K extends keyof Traits>(k: K) => store[k],
@@ -78,15 +81,22 @@ function fakeModel(traits: Partial<Traits>) {
         selection: store.selection,
       })
     },
-    on: (event: string, cb: () => void) => {
+    on(event: string, cb: Handler) {
       handlers.set(event, [...(handlers.get(event) ?? []), cb])
     },
-    off: (event: string, cb: () => void) => {
-      handlers.set(
-        event,
-        (handlers.get(event) ?? []).filter(h => h !== cb),
-      )
+    off(event?: string | null, cb?: Handler | null) {
+      if (event) {
+        handlers.set(
+          event,
+          (handlers.get(event) ?? []).filter(h => h !== cb),
+        )
+      }
     },
+    send: () => {},
+    widget_manager: { get_model: () => Promise.reject(unavailable()) },
+  } satisfies AnyModel<Traits>
+  return {
+    ...model,
     change: <K extends keyof Traits>(k: K, v: Traits[K]) => {
       store[k] = v
       for (const cb of handlers.get(`change:${k}`) ?? []) {
@@ -96,7 +106,19 @@ function fakeModel(traits: Partial<Traits>) {
     handlers,
     saved,
   }
-  return model
+}
+
+function unavailable() {
+  return new Error('not available in this test')
+}
+
+const host: Host = {
+  getWidget: () => Promise.reject(unavailable()),
+  getModel: () => Promise.reject(unavailable()),
+}
+
+const experimental: Experimental = {
+  invoke: () => Promise.reject(unavailable()),
 }
 
 function renderWidget(
@@ -105,11 +127,11 @@ function renderWidget(
   renderer = render,
 ) {
   return renderer({
-    model: model as any,
+    model,
     el,
     signal: new AbortController().signal,
-    host: {} as any,
-    experimental: {} as any,
+    host,
+    experimental,
   }) as (() => void) | undefined
 }
 

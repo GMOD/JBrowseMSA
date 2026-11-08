@@ -93,7 +93,7 @@ export function paintGroups(
   }
   return [...groups]
     .map(([color, chains]): PaintGroup => [color, [...chains]])
-    .sort(([a], [b]) => a.localeCompare(b))
+    .toSorted(([a], [b]) => a.localeCompare(b))
 }
 
 const highlightDefault = '#ff8c00'
@@ -182,7 +182,7 @@ export function highlightGroups(
       color,
       [...chains].map(([chain, ids]) => [chain, [...ids]]),
     ])
-    .sort(([a], [b]) => a.localeCompare(b))
+    .toSorted(([a], [b]) => a.localeCompare(b))
 }
 
 const unmappedColor = '#d9d9d4'

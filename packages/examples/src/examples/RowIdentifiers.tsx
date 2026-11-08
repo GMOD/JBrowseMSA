@@ -96,7 +96,7 @@ const RowIdentifiers = observer(function RowIdentifiers() {
       if (!signal.aborted) {
         model.setResidueMappings(
           results.flatMap(found =>
-            found && 'candidates' in found && found.candidates[0]
+            'candidates' in found && found.candidates[0]
               ? [found.candidates[0].mapping]
               : [],
           ),

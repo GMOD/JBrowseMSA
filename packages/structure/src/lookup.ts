@@ -69,7 +69,8 @@ function abortable<T>(promise: Promise<T>, signal?: AbortSignal) {
   }
   return new Promise<T>((resolve, reject) => {
     const onAbort = () => {
-      reject(signal.reason)
+      const reason: unknown = signal.reason
+      reject(reason instanceof Error ? reason : new Error(String(reason)))
     }
     if (signal.aborted) {
       onAbort()

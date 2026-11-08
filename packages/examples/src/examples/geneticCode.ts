@@ -123,8 +123,8 @@ export function compareCodons(
       codon,
       aminoAcid: translate(codon) ?? 'X',
       changes: others.flatMap(({ name, sequence, numbers }) => {
-        const bases = columns.map(col => sequence[col] ?? '-').join('')
-        const change = classify(codon, bases)
+        const rowCodon = columns.map(col => sequence[col] ?? '-').join('')
+        const change = classify(codon, rowCodon)
         const covered = columns
           .map(col => numbers[col])
           .filter(n => n !== undefined)
@@ -133,7 +133,7 @@ export function compareCodons(
               {
                 row: name,
                 change,
-                codon: bases,
+                codon: rowCodon,
                 start: Math.min(...covered),
                 end: Math.max(...covered),
               },

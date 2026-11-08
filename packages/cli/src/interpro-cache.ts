@@ -34,11 +34,13 @@ export function readCached<T>(
   release: string,
   database: string,
   accession: string,
-): T | undefined {
+  isValue: (value: unknown) => value is T,
+) {
   try {
-    return JSON.parse(
+    const value: unknown = JSON.parse(
       fs.readFileSync(entryPath(release, database, accession), 'utf8'),
-    ) as T
+    )
+    return isValue(value) ? value : undefined
   } catch {
     // a missing or unreadable entry is a cache miss
     return undefined
@@ -57,7 +59,7 @@ export function writeCached(
     fs.writeFileSync(file, JSON.stringify(value), 'utf8')
   } catch (e) {
     // an unwritable cache must not fail the run
-    console.warn(`  (could not cache ${accession}: ${e})`)
+    console.warn(`  (could not cache ${accession}: ${String(e)})`)
   }
 }
 
@@ -71,7 +73,7 @@ export function newestCachedRelease() {
       .readdirSync(CACHE_DIR, { withFileTypes: true })
       .filter(e => e.isDirectory() && SAFE_SEGMENT.test(e.name))
       .map(e => e.name)
-      .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0]
+      .toSorted((a, b) => b.localeCompare(a, undefined, { numeric: true }))[0]
   } catch {
     return undefined
   }

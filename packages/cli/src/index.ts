@@ -7,6 +7,7 @@ import { exportSvg } from './export-svg.ts'
 import { runGeneStructure } from './genestructure.ts'
 import { runInterProPrecomputed } from './interpro-precomputed.ts'
 import { runInterProScan } from './interproscan-msa.ts'
+import { isRecord } from './json.ts'
 import {
   parseRowsTsv,
   parseStructure,
@@ -18,15 +19,19 @@ import type { MappingRow } from './residue-mappings.ts'
 import type { MSAFormat } from 'msa-parsers'
 import type { ParseArgsOptionsConfig } from 'node:util'
 
-const MSA_FORMATS = new Set(['stockholm', 'a3m', 'fasta', 'emf', 'clustal'])
+const MSA_FORMATS: MSAFormat[] = ['stockholm', 'a3m', 'fasta', 'emf', 'clustal']
+
+function isMsaFormat(format: string): format is MSAFormat {
+  return MSA_FORMATS.some(f => f === format)
+}
 
 function readFormat(format?: string) {
-  if (format !== undefined && !MSA_FORMATS.has(format)) {
+  if (format !== undefined && !isMsaFormat(format)) {
     throw new Error(
-      `unknown --format ${format}; one of ${[...MSA_FORMATS].join(', ')}`,
+      `unknown --format ${format}; one of ${MSA_FORMATS.join(', ')}`,
     )
   }
-  return format as MSAFormat | undefined
+  return format
 }
 
 function readNumber(name: string, value: string, integer = false) {
@@ -206,7 +211,11 @@ async function main() {
 
 main().catch((error: unknown) => {
   console.error('Error:', error instanceof Error ? error.message : error)
-  if ((error as { code?: string }).code?.startsWith('ERR_PARSE_ARGS')) {
+  if (
+    isRecord(error) &&
+    typeof error.code === 'string' &&
+    error.code.startsWith('ERR_PARSE_ARGS')
+  ) {
     console.error(
       `Run react-msaview-cli ${process.argv[2]} --help for its options`,
     )

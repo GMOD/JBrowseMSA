@@ -84,6 +84,19 @@ function seedTree(tar: string, accession: string) {
   return undefined
 }
 
+function mb(bytes: number) {
+  return (bytes / 1e6).toFixed(1)
+}
+
+function entryCount(body: unknown) {
+  return typeof body === 'object' &&
+    body !== null &&
+    'entries' in body &&
+    Array.isArray(body.entries)
+    ? body.entries.length
+    : 0
+}
+
 async function rfam(
   accession: string,
   signal: AbortSignal,
@@ -92,14 +105,12 @@ async function rfam(
   // EBI Search answers in half a second, so a mistyped accession fails before
   // the 8.5 MB download starts
   const search = await get(`${EBI_SEARCH}/${accession}?format=json`, signal)
-  const { entries } = (await search.json()) as { entries: unknown[] }
-  if (entries.length === 0) {
+  if (entryCount(await search.json()) === 0) {
     throw new Error(`Rfam has no family ${accession}`)
   }
 
   let received = 0
   let total = 0
-  const mb = (bytes: number) => (bytes / 1e6).toFixed(1)
   async function gunzip(file: string) {
     const res = await get(`${RFAM}/${file}`, signal)
     total += Number(res.headers.get('content-length'))
@@ -261,17 +272,11 @@ export default function LoadByAccession() {
         color={error ? 'error' : undefined}
         sx={{ mb: 1, minHeight: '1.5em' }}
       >
-        {outcome?.request !== request ? (
-          progress?.request === request ? (
-            progress.text
-          ) : (
-            `Fetching ${request.accession}`
-          )
-        ) : error ? (
-          error
-        ) : family ? (
-          <FamilyTitle family={family} />
-        ) : null}
+        {outcome?.request !== request
+          ? progress?.request === request
+            ? progress.text
+            : `Fetching ${request.accession}`
+          : (error ?? (family ? <FamilyTitle family={family} /> : null))}
       </Typography>
       {family ? (
         <MSAViewer

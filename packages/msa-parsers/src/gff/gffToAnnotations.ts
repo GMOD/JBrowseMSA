@@ -39,10 +39,14 @@ const GFF_COLUMNS = new Set([
   'phase',
 ])
 
+function isAttribute(
+  entry: [string, string | number],
+): entry is [string, string] {
+  return !GFF_COLUMNS.has(entry[0]) && typeof entry[1] === 'string'
+}
+
 function attributesOf(record: GFFRecord) {
-  const entries = Object.entries(record).filter(
-    ([key, value]) => !GFF_COLUMNS.has(key) && typeof value === 'string',
-  ) as [string, string][]
+  const entries = Object.entries(record).filter(isAttribute)
   return entries.length > 0 ? Object.fromEntries(entries) : undefined
 }
 
@@ -51,11 +55,17 @@ function attributesOf(record: GFFRecord) {
 // the GFF3 multi-value comma
 const RGB_TRIPLE = /^(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})$/
 
+function textAttribute(record: GFFRecord, key: string) {
+  const value = record[key]
+  return typeof value === 'string' && value !== '' ? value : undefined
+}
+
 function cssColor(record: GFFRecord) {
-  const value = (record.color ??
-    record.colour ??
-    record.Color ??
-    record.Colour) as string | undefined
+  const value =
+    textAttribute(record, 'color') ??
+    textAttribute(record, 'colour') ??
+    textAttribute(record, 'Color') ??
+    textAttribute(record, 'Colour')
   if (!value) {
     return undefined
   }
@@ -80,12 +90,12 @@ export function gffToAnnotations(gffRecords: GFFRecord[]): Annotation[] {
     .filter(record => !WHOLE_SEQUENCE_TYPES.has(record.type))
     .map(record => {
       const accession =
-        (record.Name as string) ||
-        (record.ID as string) ||
+        textAttribute(record, 'Name') ??
+        textAttribute(record, 'ID') ??
         `${record.source}_${record.start}_${record.end}`
       const name =
-        (record.signature_desc as string) ||
-        (record.Name as string) ||
+        textAttribute(record, 'signature_desc') ??
+        textAttribute(record, 'Name') ??
         accession
       return {
         id: record.seq_id,
@@ -95,9 +105,9 @@ export function gffToAnnotations(gffRecords: GFFRecord[]): Annotation[] {
         // with, not what it is, and reading it first labelled every
         // InterProScan domain "GO:0003677 GO:0006281"
         description:
-          (record.description as string) ||
-          (record.Note as string) ||
-          (record.signature_desc as string) ||
+          textAttribute(record, 'description') ??
+          textAttribute(record, 'Note') ??
+          textAttribute(record, 'signature_desc') ??
           name,
         featureType: record.type,
         start: record.start,

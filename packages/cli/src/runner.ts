@@ -3,7 +3,9 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import path from 'node:path'
 
-import type { InterProScanResponse, InterProScanResults } from 'msa-parsers'
+import { isInterProScanResponse, readJson } from './json.ts'
+
+import type { InterProScanResults } from 'msa-parsers'
 
 export interface Sequence {
   id: string
@@ -229,10 +231,11 @@ async function runInterProScanProcess({
       throw new Error('InterProScan did not produce output file')
     }
 
-    const response: InterProScanResponse = JSON.parse(
+    return readJson(
       fs.readFileSync(outputFile, 'utf8'),
-    )
-    return response.results
+      isInterProScanResponse,
+      'InterProScan output',
+    ).results
   } finally {
     try {
       fs.rmSync(tmpDir, { recursive: true })

@@ -14,6 +14,7 @@ import {
   readCached,
   writeCached,
 } from './interpro-cache.ts'
+import { isRecord, isRecordArray } from './json.ts'
 import { parseRowRange, toFragment } from './rowRange.ts'
 
 import type { MSAFormat } from 'msa-parsers'
@@ -73,6 +74,36 @@ interface ApiRootResponse {
   databases: { interpro: { version: string } }
 }
 
+function isApiResult(value: unknown): value is ApiResult {
+  return (
+    isRecord(value) &&
+    isRecord(value.metadata) &&
+    typeof value.metadata.accession === 'string' &&
+    isRecordArray(value.proteins)
+  )
+}
+
+function isApiResults(value: unknown): value is ApiResult[] {
+  return Array.isArray(value) && value.every(isApiResult)
+}
+
+function isApiEntryResponse(value: unknown): value is ApiEntryResponse {
+  return (
+    isRecord(value) &&
+    isApiResults(value.results) &&
+    (typeof value.next === 'string' || value.next === null)
+  )
+}
+
+function isApiRootResponse(value: unknown): value is ApiRootResponse {
+  return (
+    isRecord(value) &&
+    isRecord(value.databases) &&
+    isRecord(value.databases.interpro) &&
+    typeof value.databases.interpro.version === 'string'
+  )
+}
+
 function parseAccessions(text: string): Accession[] {
   const out: Accession[] = []
   const rejected: string[] = []
@@ -110,7 +141,10 @@ async function fetchRelease(): Promise<string> {
   if (!res.ok) {
     throw new Error(`InterPro release lookup failed: ${res.status}`)
   }
-  const json = (await res.json()) as ApiRootResponse
+  const json: unknown = await res.json()
+  if (!isApiRootResponse(json)) {
+    throw new Error('InterPro release lookup returned no release version')
+  }
   return json.databases.interpro.version
 }
 
@@ -124,7 +158,7 @@ async function resolveRelease() {
       throw e
     }
     console.warn(
-      `${e instanceof Error ? e.message : e}\nreading the cache of InterPro release ${cached}, the newest on disk; a newer release may exist`,
+      `${e instanceof Error ? e.message : String(e)}\nreading the cache of InterPro release ${cached}, the newest on disk; a newer release may exist`,
     )
     return cached
   }
@@ -175,7 +209,10 @@ async function fetchEntries(
     if (!res.ok) {
       throw new Error(`InterPro lookup ${accession} failed: ${res.status}`)
     }
-    const json = (await res.json()) as ApiEntryResponse
+    const json: unknown = await res.json()
+    if (!isApiEntryResponse(json)) {
+      throw new Error(`InterPro lookup ${accession} returned no results list`)
+    }
     results.push(...json.results)
     url = json.next
   }
@@ -208,7 +245,7 @@ export async function runInterProPrecomputed(
   for (const [i, accession] of distinct.entries()) {
     const hit = noCache
       ? undefined
-      : readCached<ApiResult[]>(release, database, accession)
+      : readCached(release, database, accession, isApiResults)
     let entries: ApiResult[] | undefined
     if (hit) {
       entries = hit
@@ -219,7 +256,8 @@ export async function runInterProPrecomputed(
       } catch (e) {
         // accessions resolved so far are cached, so a re-run resumes here
         throw new Error(
-          `${e}\n${i} of ${distinct.length} accessions are cached; re-run to resume from ${accession}.`,
+          `${String(e)}\n${i} of ${distinct.length} accessions are cached; re-run to resume from ${accession}.`,
+          { cause: e },
         )
       }
       if (entries) {

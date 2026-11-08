@@ -39,9 +39,9 @@ const SvgFigure = observer(function SvgFigure() {
     <div ref={ref}>
       <MSAView model={model} />
       <Typography variant="body2" sx={{ my: 1 }}>
-        {error
-          ? `The figure failed to draw: ${String(error)}`
-          : 'SVG figure of the view above. Scroll or zoom the viewer and it redraws.'}
+        {error === undefined
+          ? 'SVG figure of the view above. Scroll or zoom the viewer and it redraws.'
+          : `The figure failed to draw: ${error instanceof Error ? error.message : 'unknown error'}`}
       </Typography>
       {svg ? (
         <div

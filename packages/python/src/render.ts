@@ -218,7 +218,7 @@ export const createRender =
     } catch (e) {
       console.error(e)
       showError(el, e)
-      return
+      return undefined
     }
 
     const update = () => {

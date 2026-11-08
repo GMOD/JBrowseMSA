@@ -1,5 +1,14 @@
 import type { Node, NodeWithIds } from './types.ts'
 
+function withId(node: Node, id: string): NodeWithIds {
+  return {
+    ...node,
+    id,
+    name: node.name === undefined || node.name === '' ? id : node.name,
+    children: [],
+  }
+}
+
 /**
  * Copy a parsed tree, giving every node a stable id derived from its path, and
  * falling back to that id for an unnamed node.
@@ -15,13 +24,6 @@ export function generateNodeIds(
   parent = 'node',
   depth = 0,
 ): NodeWithIds {
-  const withId = (node: Node, id: string): NodeWithIds => ({
-    ...node,
-    id,
-    name: node.name || id,
-    children: [],
-  })
-
   const root = withId(tree, `${parent}-${depth}`)
   const stack = [{ src: tree, out: root, depth }]
   while (stack.length > 0) {

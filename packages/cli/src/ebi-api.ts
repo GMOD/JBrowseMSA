@@ -1,4 +1,5 @@
 import { fetchWithRetry } from './fetchWithRetry.ts'
+import { isInterProScanResponse } from './json.ts'
 
 import type { InterProScanResponse, InterProScanResults } from 'msa-parsers'
 
@@ -44,7 +45,11 @@ async function getResults(jobId: string): Promise<InterProScanResponse> {
   if (!response.ok) {
     throw new Error(`Failed to get results: ${response.statusText}`)
   }
-  return response.json() as Promise<InterProScanResponse>
+  const body: unknown = await response.json()
+  if (!isInterProScanResponse(body)) {
+    throw new Error(`job ${jobId} returned no InterProScan results list`)
+  }
+  return body
 }
 
 const TERMINAL_FAILURES = new Set(['FAILURE', 'ERROR', 'NOT_FOUND'])
@@ -108,7 +113,9 @@ export async function runEbiInterProScan(
       console.log(`  [${i + 1}/${sequences.length}] Done`)
     } catch (e) {
       failed.push(seq.id)
-      console.warn(`  [${i + 1}/${sequences.length}] ${seq.id} failed: ${e}`)
+      console.warn(
+        `  [${i + 1}/${sequences.length}] ${seq.id} failed: ${String(e)}`,
+      )
     }
   }
 

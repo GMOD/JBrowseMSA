@@ -14,6 +14,12 @@ import { globinMSA, globinTree } from './data'
 
 import type { Cell, Viewport } from 'react-msaview'
 
+type Mode = 'light' | 'dark'
+
+function isMode(value: unknown): value is Mode {
+  return value === 'light' || value === 'dark'
+}
+
 // hideHeader leaves the viewer's toolbar out, so the page draws the controls it
 // needs and nothing else. Every control below is a prop, and the viewer applies
 // each one to the mounted model, so a click keeps the scroll position.
@@ -22,7 +28,7 @@ import type { Cell, Viewport } from 'react-msaview'
 // take: the column of the file and the residue of that row, both 1-based. The
 // sentence under the viewer is built from them.
 export default function YourOwnControls() {
-  const [mode, setMode] = useState<'light' | 'dark'>('dark')
+  const [mode, setMode] = useState<Mode>('dark')
   const [colorScheme, setColorScheme] = useState('clustalx_protein_dynamic')
   const [colWidth, setColWidth] = useState(12)
   const [clicked, setClicked] = useState<Cell>()
@@ -47,7 +53,7 @@ export default function YourOwnControls() {
           exclusive
           value={mode}
           onChange={(_, value) => {
-            if (value) {
+            if (isMode(value)) {
               setMode(value)
             }
           }}

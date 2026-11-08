@@ -11,9 +11,11 @@ export interface LinkedCamera<V extends CameraView = CameraView> {
   stateChanged: { subscribe: (fn: () => void) => { unsubscribe: () => void } }
 }
 
+function near(x: ArrayLike<number>, y: ArrayLike<number>) {
+  return [0, 1, 2].every(i => Math.abs((x[i] ?? 0) - (y[i] ?? 0)) < 1e-3)
+}
+
 function sameView(a: CameraView, b: CameraView) {
-  const near = (x: ArrayLike<number>, y: ArrayLike<number>) =>
-    [0, 1, 2].every(i => Math.abs((x[i] ?? 0) - (y[i] ?? 0)) < 1e-3)
   return (
     near(a.position, b.position) &&
     near(a.target, b.target) &&

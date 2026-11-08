@@ -7,6 +7,7 @@ import {
 } from 'msa-parsers'
 
 import { fetchJsonWithRetry, fetchWithRetry } from './fetchWithRetry.ts'
+import { isRecord, isRecordArray } from './json.ts'
 import { parseRowRange, toFragment } from './rowRange.ts'
 
 import type { RowRange } from './rowRange.ts'
@@ -79,6 +80,30 @@ interface AlphaFoldEntry {
   cifUrl: string
 }
 
+function isSiftsResponse(value: unknown): value is SiftsResponse {
+  return isRecord(value) && Object.values(value).every(isRecord)
+}
+
+function isMoleculesResponse(value: unknown): value is MoleculesResponse {
+  return isRecord(value) && Object.values(value).every(isRecordArray)
+}
+
+function isCoverageResponse(value: unknown): value is CoverageResponse {
+  return isRecord(value) && Object.values(value).every(isRecord)
+}
+
+function isAlphaFoldEntries(value: unknown): value is AlphaFoldEntry[] {
+  return (
+    isRecordArray(value) &&
+    value.every(
+      e =>
+        typeof e.uniprotStart === 'number' &&
+        typeof e.uniprotEnd === 'number' &&
+        typeof e.cifUrl === 'string',
+    )
+  )
+}
+
 export function parseStructure(text: string): StructureRef {
   const trimmed = text.trim()
   if (trimmed.toLowerCase() === 'alphafold') {
@@ -144,28 +169,32 @@ function createSources() {
   return {
     uniprotSequence: memo(fetchUniProtSequence),
     sifts: memo(pdb =>
-      fetchJsonWithRetry<SiftsResponse>(
+      fetchJsonWithRetry(
         `${PDBE}/mappings/uniprot/${pdb.toLowerCase()}`,
         `SIFTS has no entry ${pdb}`,
+        isSiftsResponse,
       ),
     ),
     molecules: memo(pdb =>
-      fetchJsonWithRetry<MoleculesResponse>(
+      fetchJsonWithRetry(
         `${PDBE}/pdb/entry/molecules/${pdb.toLowerCase()}`,
         `PDBe has no entry ${pdb}`,
+        isMoleculesResponse,
       ),
     ),
     coverage: memo(key => {
-      const [pdb, chain] = key.split(':') as [string, string]
-      return fetchJsonWithRetry<CoverageResponse>(
+      const [pdb = '', chain = ''] = key.split(':')
+      return fetchJsonWithRetry(
         `${PDBE}/pdb/entry/polymer_coverage/${pdb.toLowerCase()}/chain/${chain}`,
         `PDBe has no chain ${chain} in ${pdb}`,
+        isCoverageResponse,
       )
     }),
     alphafold: memo(accession =>
-      fetchJsonWithRetry<AlphaFoldEntry[]>(
+      fetchJsonWithRetry(
         `${ALPHAFOLD}/${accession}`,
         `AlphaFold DB has no model of ${accession}`,
+        isAlphaFoldEntries,
         HEADERS,
       ),
     ),
@@ -233,7 +262,7 @@ function fragmentHint(
 function complement(observed: RowRange[], length: number) {
   const out: [number, number][] = []
   let next = 1
-  const sorted = [...observed].sort((a, b) => a.start - b.start)
+  const sorted = observed.toSorted((a, b) => a.start - b.start)
   for (const { start, end } of sorted) {
     if (start > next) {
       out.push([next, Math.min(start - 1, length)])

@@ -77,9 +77,7 @@ export function useSuperposition(model: MsaViewModel) {
           }
         }),
       )
-      if (signal.aborted) {
-        return
-      }
+      signal.throwIfAborted()
       const have = mappedRows()
       model.setResidueMappings([
         ...model.residueMappings,
@@ -109,9 +107,7 @@ export function useSuperposition(model: MsaViewModel) {
         selection: model.selection,
         fetchText: url => fetchText(url, signal),
       })
-      if (signal.aborted) {
-        return
-      }
+      signal.throwIfAborted()
       model.setColumnTracks([
         ...model.columnTracks.filter(t => t.id !== distanceTrackId),
         distanceTrack(result, distanceTrackId),

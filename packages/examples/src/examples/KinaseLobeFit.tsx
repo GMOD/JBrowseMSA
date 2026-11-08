@@ -77,39 +77,40 @@ const KinaseLobeFit = observer(function KinaseLobeFit() {
   const ready = mappings.state === 'ready'
 
   useEffect(() => {
-    if (!ready) {
-      return
-    }
     let latest = 0
-    return reaction(
-      () => [model.selection?.start, model.selection?.end] as const,
-      async ([start, end]) => {
-        const run = ++latest
-        const label = rangeLabel(model)
-        setFit({ state: 'fitting', label })
-        try {
-          const targets = mappedTargets(model, picked)
-          const result = await superposeRows({
-            model,
-            targets,
-            selection:
-              start === undefined || end === undefined
-                ? undefined
-                : { start, end },
-          })
-          if (run !== latest) {
-            return
-          }
+    async function fitRange(start?: number, end?: number) {
+      const run = ++latest
+      const label = rangeLabel(model)
+      setFit({ state: 'fitting', label })
+      try {
+        const targets = mappedTargets(model, picked)
+        const result = await superposeRows({
+          model,
+          targets,
+          selection:
+            start === undefined || end === undefined
+              ? undefined
+              : { start, end },
+        })
+        if (run === latest) {
           model.setColumnTracks([distanceTrack(result, track)])
           setFit({ state: 'done', label, result })
-        } catch (e) {
-          if (run === latest) {
-            setFit({ state: 'error', message: messageOf(e) })
-          }
         }
-      },
-      { fireImmediately: true, delay: 300 },
-    )
+      } catch (e) {
+        if (run === latest) {
+          setFit({ state: 'error', message: messageOf(e) })
+        }
+      }
+    }
+    return ready
+      ? reaction(
+          () => [model.selection?.start, model.selection?.end] as const,
+          ([start, end]) => {
+            void fitRange(start, end)
+          },
+          { fireImmediately: true, delay: 300 },
+        )
+      : undefined
   }, [ready, model])
 
   const structureIds = mappedTargets(model, picked).map(t => t.structureId)

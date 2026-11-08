@@ -6,6 +6,7 @@ import { isBinaryStructureUrl, structureFormatFromContent } from 'p2s_mapper'
 import { schemeResidueColor } from 'react-msaview'
 
 import {
+  asStructure,
   drawnStructure,
   loadMolstar,
   polymerResidues,
@@ -143,14 +144,14 @@ async function loadStructure(
   )
   const root = built?.structure
   const structure = root
-    ? plugin.state.data.cells.get(root.ref)?.obj?.data
+    ? asStructure(molstar, plugin.state.data.cells.get(root.ref)?.obj?.data)
     : undefined
   if (!built || !root || !structure) {
     return undefined
   }
   const residues = polymerResidues(molstar, structure)
   if (shownResidues) {
-    const props = built.structureProperties ?? root
+    const props = built.structureProperties
     const shown = shownResidues(residues)
     // a structure no row reaches is drawn whole rather than not at all
     await (shown.length > 0
@@ -274,6 +275,21 @@ function subscribeToStructure(
 }
 
 // runs after the earlier steps, and only while the session is the live one
+function isNumberArray(value: unknown): value is number[] {
+  return Array.isArray(value) && value.every(n => typeof n === 'number')
+}
+
+function parseMoves(key: string) {
+  const parsed: unknown = JSON.parse(key)
+  return typeof parsed === 'object' && parsed !== null
+    ? Object.fromEntries(
+        Object.entries(parsed).filter((entry): entry is [string, number[]] =>
+          isNumberArray(entry[1]),
+        ),
+      )
+    : {}
+}
+
 function enqueue(
   queue: { current: Promise<void> },
   live: { current: Session | undefined },
@@ -352,13 +368,13 @@ export const StructurePanel = observer(function StructurePanel({
   useEffect(() => {
     // `key` carries the entries, so the effect depends on the structures shown
     // and not on an array rebuilt every render
-    const entries = key
+    const shownEntries = key
       ? key.split('\u0001').map(part => {
           const [id = '', url = ''] = part.split('\u0000')
           return { id, url }
         })
       : []
-    if (entries.length === 0) {
+    if (shownEntries.length === 0) {
       return undefined
     }
     const life = {
@@ -367,6 +383,7 @@ export const StructurePanel = observer(function StructurePanel({
       root: undefined as { unmount: () => void } | undefined,
       stopListening: undefined as (() => void) | undefined,
     }
+    const cancelled = () => life.cancelled
     const target = document.createElement('div')
     target.style.cssText = 'position:absolute;inset:0'
     hostRef.current?.append(target)
@@ -376,14 +393,14 @@ export const StructurePanel = observer(function StructurePanel({
     void (async () => {
       try {
         const molstar = await loadMolstar()
-        if (life.cancelled) {
+        if (cancelled()) {
           return
         }
         const plugin = await createViewer(molstar, target, root => {
           life.root = root
         })
         life.plugin = plugin
-        if (life.cancelled) {
+        if (cancelled()) {
           plugin.dispose()
           life.root?.unmount()
           target.remove()
@@ -391,7 +408,7 @@ export const StructurePanel = observer(function StructurePanel({
         }
         const loaded: Loaded[] = []
         const problems: string[] = []
-        for (const { id, url } of entries) {
+        for (const { id, url } of shownEntries) {
           try {
             const found = await loadStructure(
               plugin,
@@ -412,7 +429,7 @@ export const StructurePanel = observer(function StructurePanel({
               `${id}: ${e instanceof Error ? e.message : String(e)}`,
             )
           }
-          if (life.cancelled) {
+          if (cancelled()) {
             return
           }
         }
@@ -432,7 +449,7 @@ export const StructurePanel = observer(function StructurePanel({
         setState('')
         onPluginRef.current?.(plugin)
       } catch (e) {
-        if (!life.cancelled) {
+        if (!cancelled()) {
           console.error(e)
           setState(`Could not load the structure: ${String(e)}`)
         }
@@ -488,7 +505,7 @@ export const StructurePanel = observer(function StructurePanel({
       })
       return undefined
     }
-    const moves = JSON.parse(moveKey) as Record<string, number[]>
+    const moves = parseMoves(moveKey)
     enqueue(paintQueue, sessionRef, session, async () => {
       let changed = false
       for (const { id, ref } of loaded) {

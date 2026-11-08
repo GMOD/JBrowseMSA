@@ -459,7 +459,7 @@ export function optionsTable(name: CommandName) {
 }
 
 export function readmeWithOptions(readme: string) {
-  for (const name of Object.keys(commands) as CommandName[]) {
+  for (const name of Object.keys(commands).filter(isCommand)) {
     if (!readme.includes(`<!-- options:${name} -->`)) {
       throw new Error(`the README has no <!-- options:${name} --> marker`)
     }

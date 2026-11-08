@@ -1,3 +1,5 @@
+import { isRecord } from './json.ts'
+
 const RETRYABLE = new Set([408, 425, 429, 500, 502, 503, 504])
 
 function delay(ms: number) {
@@ -56,9 +58,10 @@ export async function fetchWithRetry(
  * The JSON body of `url`, fetched with retries. A 404 throws `notFound`, which
  * names what is missing in the caller's terms.
  */
-export async function fetchJsonWithRetry<T = unknown>(
+export async function fetchJsonWithRetry<T>(
   url: string,
   notFound: string,
+  isBody: (body: unknown) => body is T,
   headers?: Record<string, string>,
 ) {
   const res = await fetchWithRetry(url, { headers })
@@ -67,14 +70,17 @@ export async function fetchJsonWithRetry<T = unknown>(
   } else if (!res.ok) {
     throw new Error(`${url}: HTTP ${res.status} ${res.statusText}`)
   }
-  const body: Promise<T> = res.json()
+  const body: unknown = await res.json()
+  if (!isBody(body)) {
+    throw new Error(`${url}: the response is not the JSON expected`)
+  }
   return body
 }
 
 // undici throws `TypeError: fetch failed` and keeps the reason, such as
 // ENOTFOUND or ECONNREFUSED, on `cause.code`
 function describe(error: unknown) {
-  const code = (error as { cause?: { code?: unknown } } | undefined)?.cause
-    ?.code
-  return typeof code === 'string' ? `${error} (${code})` : String(error)
+  const cause = isRecord(error) ? error.cause : undefined
+  const code = isRecord(cause) ? cause.code : undefined
+  return typeof code === 'string' ? `${String(error)} (${code})` : String(error)
 }

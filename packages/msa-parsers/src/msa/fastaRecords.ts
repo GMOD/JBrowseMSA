@@ -39,7 +39,7 @@ export function splitFastaRecords(text: string): FastaRecord[] {
     if (line.startsWith('>')) {
       flush()
       count++
-      const id = /^>\s*(\S*)/.exec(line)![1] || `unnamed_${count}`
+      const id = /^>\s*(\S+)/.exec(line)?.[1] ?? `unnamed_${count}`
       current = { id, lines: [] }
     } else {
       current?.lines.push(line)
