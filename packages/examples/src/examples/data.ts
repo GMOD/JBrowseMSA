@@ -4,7 +4,6 @@
 // the demo app so a deep link can fetch one, and every consumer reads the same
 // bytes.
 
-import ace2DomainsGFF from '../../data/ace2-domains.gff?raw'
 import ace2MSA from '../../data/ace2.aln?raw'
 import ace2Tree from '../../data/ace2.nh?raw'
 import aquaporinDomainsGFF from '../../data/aquaporin-domains.gff?raw'
@@ -56,7 +55,6 @@ import trnaMSA from '../../data/trna.stock?raw'
 export {
   proteinMSA,
   proteinTree,
-  ace2DomainsGFF,
   ace2MSA,
   ace2Tree,
   aquaporinDomainsGFF,

@@ -13,7 +13,7 @@ import { StructurePanel } from 'react-msaview-structure/panel'
 
 import recorded from './foldseekMyoglobin.json'
 import alignments from './structureAlignments.json'
-import { messageOf } from './structureDemo'
+import { messageOf, structureKey } from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
 import type { StructureCandidate } from 'react-msaview-structure'
@@ -62,10 +62,6 @@ const FoldseekReplay = observer(function FoldseekReplay() {
   const ref = useWidthSetter(model)
   const [found, setFound] = useState<Found>({ state: 'mapping' })
 
-  function show(candidate: StructureCandidate) {
-    model.setResidueMappings([candidate.mapping])
-  }
-
   useEffect(() => {
     const controller = new AbortController()
     const { signal } = controller
@@ -104,7 +100,7 @@ const FoldseekReplay = observer(function FoldseekReplay() {
     }
   }, [model])
 
-  const shown = model.mappedStructures[0]?.structure.id
+  const shown = model.mappedStructures[0]?.structure
   return (
     <Box>
       <Typography variant="body2" sx={{ mb: 1 }}>
@@ -122,21 +118,21 @@ const FoldseekReplay = observer(function FoldseekReplay() {
           spacing={1}
           sx={{ mb: 1, flexWrap: 'wrap', gap: 1 }}
         >
-          {found.candidates.map(candidate => (
+          {found.candidates.map(({ mapping, label, identity }) => (
             <Button
-              key={candidate.mapping.structure.id}
+              key={structureKey(mapping.structure)}
               size="small"
               variant={
-                candidate.mapping.structure.id === shown
+                shown && structureKey(mapping.structure) === structureKey(shown)
                   ? 'contained'
                   : 'outlined'
               }
-              title={candidate.identity}
+              title={identity}
               onClick={() => {
-                show(candidate)
+                model.setResidueMappings([mapping])
               }}
             >
-              {candidate.label}
+              {label}
             </Button>
           ))}
         </Stack>
@@ -156,7 +152,7 @@ const FoldseekReplay = observer(function FoldseekReplay() {
           <MSAView model={model} />
         </div>
         {shown ? (
-          <StructurePanel model={model} structureId={shown} height={420} />
+          <StructurePanel model={model} structureId={shown.id} height={420} />
         ) : null}
       </Box>
     </Box>

@@ -38,6 +38,10 @@ export interface MappingState {
   candidates: Record<string, StructureCandidate[]>
 }
 
+export function structureKey({ id, asymId }: { id: string; asymId?: string }) {
+  return `${id}:${asymId ?? ''}`
+}
+
 export function messageOf(e: unknown) {
   return e instanceof Error ? e.message : String(e)
 }

@@ -15,7 +15,7 @@ import clinvar from './p53ClinVar.json'
 //
 // The host passes the counts in precomputed. `row` puts them on the human
 // sequence's residues, so they land on the right columns whatever the gaps do,
-// and `max` sets which count draws full height. Data and provenance in
+// and `encoding.y.scale.domainMax` sets which count draws full height. Data and provenance in
 // p53ClinVar.json, built by scripts/examples-gen/clinvar.mjs.
 export default function P53ClinVar() {
   return (

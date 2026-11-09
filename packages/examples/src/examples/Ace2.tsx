@@ -2,9 +2,6 @@ import { MSAViewer } from 'react-msaview'
 
 import interface6m0j from './ace2Interface.json'
 import { ace2MSA, ace2Tree } from './data'
-import { residueMappingsFromJson } from './residueMappingsJson'
-
-import type { Highlight } from 'react-msaview'
 
 // ACE2, the SARS-CoV / SARS-CoV-2 receptor, across mammals: reservoir and
 // intermediate-host candidates (horseshoe bats, civet, pangolin) plus naturally
@@ -21,8 +18,6 @@ import type { Highlight } from 'react-msaview'
 // highlights on the human row's residues and projected through each ortholog's
 // gaps (scripts/examples-gen/ace2Interface.mjs). A dot in one of those columns
 // means the species keeps the human residue.
-const highlights = interface6m0j.highlights as Highlight[]
-const residueMappings = residueMappingsFromJson(interface6m0j.residueMappings)
 
 export default function Ace2() {
   return (
@@ -32,12 +27,13 @@ export default function Ace2() {
       relativeTo="Human"
       colorScheme="clustalx_protein_dynamic"
       height={480}
-      highlights={highlights.map((h, i) => ({
-        ...h,
+      highlights={interface6m0j.highlights.map(({ row, start, end }, i) => ({
+        row,
+        start,
+        end,
         color: 'rgba(214,39,40,0.35)',
-        ...(i === 0 ? { label: 'spike contacts (6M0J)' } : {}),
+        label: i === 0 ? 'spike contacts (6M0J)' : undefined,
       }))}
-      residueMappings={residueMappings}
     />
   )
 }

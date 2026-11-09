@@ -11,7 +11,7 @@ import { StructurePanel } from 'react-msaview-structure/panel'
 
 import { p53DomainsGFF, p53MSA, p53Tree } from './data'
 import clinvar from './p53ClinVar.json'
-import { useAccessionMappings } from './structureDemo'
+import { structureKey, useAccessionMappings } from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
 import type { StructureCandidate } from 'react-msaview-structure'
@@ -82,7 +82,7 @@ const P53Hotspots3D = observer(function P53Hotspots3D() {
   const candidates = mappings.candidates[clinvar.row] ?? []
   const mapped = model.mappedStructures[0]?.structure
   const structureId = mapped?.id
-  const shownKey = mapped && `${mapped.id}:${mapped.asymId ?? ''}`
+  const shownKey = mapped && structureKey(mapped)
 
   function show(candidate: StructureCandidate) {
     model.setResidueMappings([clipToDomain(candidate).mapping])
@@ -103,8 +103,7 @@ const P53Hotspots3D = observer(function P53Hotspots3D() {
           sx={{ mb: 1, flexWrap: 'wrap', gap: 1 }}
         >
           {candidates.slice(0, 5).map(candidate => {
-            const { id, asymId } = candidate.mapping.structure
-            const key = `${id}:${asymId ?? ''}`
+            const key = structureKey(candidate.mapping.structure)
             return (
               <Button
                 key={key}

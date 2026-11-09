@@ -37,15 +37,8 @@ export default function Nextstrain() {
         </select>
       </label>
       <MSAViewer
-        key={slug}
-        treeFilehandle={{
-          uri: `${base}/${slug}.nwk`,
-          locationType: 'UriLocation',
-        }}
-        msaFilehandle={{
-          uri: `${base}/${slug}_msa.fasta`,
-          locationType: 'UriLocation',
-        }}
+        treeUrl={`${base}/${slug}.nwk`}
+        msaUrl={`${base}/${slug}_msa.fasta`}
         colorScheme="nucleotide"
         treeAreaWidth={300}
         height={600}
