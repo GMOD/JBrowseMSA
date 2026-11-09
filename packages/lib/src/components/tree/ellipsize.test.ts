@@ -11,11 +11,21 @@ test('a label that fits is drawn whole', () => {
   })
 })
 
-test('a label that overflows keeps the prefix that fits beside the ellipsis', () => {
+test('a label that overflows keeps both ends around the ellipsis', () => {
   expect(ellipsize(measure, 'abcdefghij', 45)).toEqual({
-    text: 'abc…',
+    text: 'ab…j',
     width: 40,
   })
+})
+
+test('a UniProt name keeps its accession prefix and species suffix', () => {
+  expect(ellipsize(measure, 'UniProt|P01589|IL2RA_HUMAN', 150).text).toBe(
+    'UniProt…A_HUMAN',
+  )
+})
+
+test('the cut drops spaces next to the ellipsis', () => {
+  expect(ellipsize(measure, 'ab cdefg hi', 60).text).toBe('ab…hi')
 })
 
 test('a label with no room draws nothing', () => {

@@ -1,8 +1,18 @@
 const ellipsis = '…'
 
+function cutMiddle(text: string, kept: number) {
+  const head = Math.ceil(kept / 2)
+  return (
+    text.slice(0, head).trimEnd() +
+    ellipsis +
+    text.slice(text.length - (kept - head)).trimStart()
+  )
+}
+
 /**
- * the longest prefix of `text`, plus an ellipsis, that measures at most
- * `room` px
+ * `text` with its middle replaced by an ellipsis, keeping as many characters
+ * from both ends as measure at most `room` px, so a trailing species or gene
+ * suffix survives the cut
  */
 export function ellipsize(
   measure: (text: string) => number,
@@ -14,7 +24,7 @@ export function ellipsize(
     return { text, width }
   }
   for (let n = Math.floor((text.length * room) / width); n > 0; n--) {
-    const truncated = text.slice(0, n).trimEnd() + ellipsis
+    const truncated = cutMiddle(text, n)
     const truncatedWidth = measure(truncated)
     if (truncatedWidth <= room) {
       return { text: truncated, width: truncatedWidth }

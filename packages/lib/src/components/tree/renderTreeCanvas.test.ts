@@ -347,10 +347,12 @@ describe('leaf label truncation', () => {
 
   for (const labelsAlignRight of [false, true]) {
     const side = labelsAlignRight ? 'right' : 'left'
-    it(`ends a ${side}-aligned label that overruns the area in an ellipsis`, () => {
+    it(`cuts the middle of a ${side}-aligned label that overruns the area`, () => {
       const { model, drawn, hit } = renderNarrow(labelsAlignRight, 160)
-      const cut = drawn.find(text => text.endsWith('…'))!
-      expect(long.startsWith(cut.slice(0, -1))).toBe(true)
+      const [head, tail] = drawn.find(text => text.includes('…'))!.split('…')
+      expect(long.startsWith(head!)).toBe(true)
+      expect(long.endsWith(tail!)).toBe(true)
+      expect(tail).not.toBe('')
       expect(hit.maxX).toBeLessThanOrEqual(
         model.marginLeft + model.treeAreaWidthMinusMargin,
       )

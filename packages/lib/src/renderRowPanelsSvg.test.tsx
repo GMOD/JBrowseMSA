@@ -103,7 +103,7 @@ test('each header draws over its column, turned on its side', async () => {
   ].map(m => ({ attrs: m[1]!, text: m[2]! }))
 
   // the band is 56px, so a name longer than it is clipped to it
-  expect(headers.map(h => h.text)).toEqual(['HA', 'NA se…'])
+  expect(headers.map(h => h.text)).toEqual(['HA', 'NA…ent'])
   const x = (attrs: string) => Number(/x="([^"]+)"/.exec(attrs)?.[1])
   expect(x(headers[1]!.attrs) - x(headers[0]!.attrs)).toBe(12)
   expect(x(headers[0]!.attrs)).toBeGreaterThan(effectiveTreeAreaWidth)
