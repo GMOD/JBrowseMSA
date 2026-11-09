@@ -1,8 +1,6 @@
 import { useState } from 'react'
 
 import Box from '@mui/material/Box'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { observer } from 'mobx-react'
@@ -15,6 +13,7 @@ import {
   ChoiceButtons,
   FitSummary,
   MappingStatus,
+  StructureColorSelect,
   isSelected,
   useAccessionMappings,
   useSelectionFit,
@@ -113,18 +112,12 @@ const KinaseFacets = observer(function KinaseFacets() {
         </Typography>
       </ChoiceButtons>
       <Stack direction="row" spacing={2} sx={{ mb: 1, alignItems: 'center' }}>
-        <Typography variant="body2">Color the structures by</Typography>
-        <Select
-          size="small"
+        <StructureColorSelect
+          label="Color the structures by"
+          noneLabel="Kinase group"
           value={colorBy}
-          onChange={e => {
-            setColorBy(e.target.value)
-          }}
-        >
-          <MenuItem value="none">Kinase group</MenuItem>
-          <MenuItem value="conservation">Column conservation</MenuItem>
-          <MenuItem value="scheme">Alignment colors</MenuItem>
-        </Select>
+          onChange={setColorBy}
+        />
       </Stack>
       <MappingStatus mappings={mappings} />
       <FitSummary fit={fit} />

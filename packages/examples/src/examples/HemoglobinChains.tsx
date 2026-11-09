@@ -1,8 +1,6 @@
 import { useState } from 'react'
 
 import Box from '@mui/material/Box'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { observer } from 'mobx-react'
@@ -14,6 +12,7 @@ import alignments from './structureAlignments.json'
 import {
   MappingStatus,
   SideBySide,
+  StructureColorSelect,
   hemeHistidines,
   useAccessionMappings,
 } from './structureDemo'
@@ -87,18 +86,12 @@ const HemoglobinChains = observer(function HemoglobinChains() {
   return (
     <Box>
       <Stack direction="row" spacing={2} sx={{ mb: 1, alignItems: 'center' }}>
-        <Typography variant="body2">Color the chains by</Typography>
-        <Select
-          size="small"
+        <StructureColorSelect
+          label="Color the chains by"
+          noneLabel="Row"
           value={colorBy}
-          onChange={e => {
-            setColorBy(e.target.value)
-          }}
-        >
-          <MenuItem value="none">Row</MenuItem>
-          <MenuItem value="conservation">Column conservation</MenuItem>
-          <MenuItem value="scheme">Alignment colors</MenuItem>
-        </Select>
+          onChange={setColorBy}
+        />
         {chains.length > 0 ? (
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             {chains

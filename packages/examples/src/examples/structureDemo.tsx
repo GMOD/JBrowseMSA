@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { reaction, when } from 'mobx'
@@ -22,7 +24,7 @@ import type {
   StructureCandidate,
   SuperposeRowsResult,
 } from 'react-msaview-structure'
-import type { TmAlignment } from 'react-msaview-structure/panel'
+import type { StructureColor, TmAlignment } from 'react-msaview-structure/panel'
 
 export interface DemoProtein {
   row: string
@@ -67,7 +69,7 @@ export function mappedTargets(model: MsaViewModel, rows: string[]) {
   })
 }
 
-export function fitSummary(result: SuperposeRowsResult) {
+function fitSummary(result: SuperposeRowsResult) {
   return result.fits
     .map(
       f =>
@@ -337,6 +339,35 @@ export function ChoiceButtons({
       ))}
       {children}
     </Stack>
+  )
+}
+
+export function StructureColorSelect({
+  label,
+  noneLabel,
+  value,
+  onChange,
+}: {
+  label: string
+  noneLabel: string
+  value: StructureColor
+  onChange: (value: StructureColor) => void
+}) {
+  return (
+    <>
+      <Typography variant="body2">{label}</Typography>
+      <Select
+        size="small"
+        value={value}
+        onChange={e => {
+          onChange(e.target.value)
+        }}
+      >
+        <MenuItem value="none">{noneLabel}</MenuItem>
+        <MenuItem value="conservation">Column conservation</MenuItem>
+        <MenuItem value="scheme">Alignment colors</MenuItem>
+      </Select>
+    </>
   )
 }
 
