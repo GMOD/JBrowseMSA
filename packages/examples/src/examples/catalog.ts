@@ -52,13 +52,13 @@ export const catalog: CatalogEntry[] = [
       'track.',
   },
   {
-    id: 'LargeAlignments',
-    name: 'Large alignments (Pfam full, A3M)',
+    id: 'A3m',
+    name: 'The alignment a predictor sees (A3M)',
     category: 'Getting started',
     description:
-      'A 20,705-row Pfam family from the InterPro API and the 1,211-row A3M ' +
-      'AlphaFold2 was given for hemoglobin beta, each loaded from its URL. ' +
-      'The gappy-column slider hides the insertions.',
+      'The A3M MSA AlphaFold2 was given for hemoglobin beta: 1,211 rows whose ' +
+      'lowercase insertions spread 146 match columns across 2,086. Hiding the ' +
+      'gappy columns restores the profile.',
   },
   {
     id: 'ModelApi',
