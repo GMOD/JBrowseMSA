@@ -183,7 +183,7 @@ if entry['sequence']['value'] != row:
     )
 
 # UniProt regions, in the row's own residue coordinates, as a highlight with a
-# `row` expects
+# `row` expects, each drawn as a labeled bracket above the alignment
 wanted = {
     'Receptor-binding domain (RBD)': 'RBD',
     'Receptor-binding motif; binding to human ACE2': 'RBM',
@@ -198,14 +198,22 @@ for feature in entry['features']:
     if name:
         start = feature['location']['start']['value']
         end = feature['location']['end']['value']
-        highlights.append({'row': ROW, 'start': start, 'end': end, 'label': name})
+        highlights.append(
+            {'row': ROW, 'start': start, 'end': end, 'label': name, 'mark': 'bracket'}
+        )
 
 # the insert itself is not a UniProt feature: it is where this sequence has
 # four residues its relatives do not, so read it off the sequence
 INSERT = 'PRRA'
 at = row.find(INSERT) + 1
 highlights.append(
-    {'row': ROW, 'start': at, 'end': at + len(INSERT) - 1, 'label': f'{INSERT} insert'}
+    {
+        'row': ROW,
+        'start': at,
+        'end': at + len(INSERT) - 1,
+        'label': f'{INSERT} insert',
+        'mark': 'bracket',
+    }
 )
 highlights.sort(key=lambda h: h['start'])
 for h in highlights:
