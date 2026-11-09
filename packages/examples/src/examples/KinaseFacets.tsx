@@ -64,7 +64,7 @@ const KinaseFacets = observer(function KinaseFacets() {
   const [model] = useState(() => {
     const created = MSAModelF().create({
       type: 'MsaView',
-      height: 300,
+      height: 400,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: { msa: kinases.msa },
       highlights: marks.map(({ name, color }) => ({
