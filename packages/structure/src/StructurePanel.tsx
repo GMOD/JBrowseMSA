@@ -237,6 +237,65 @@ function locateCell(session: Session, model: MsaViewModel, cell: Cell) {
   return { found, loci }
 }
 
+interface HoveredRange {
+  row?: string
+  startCol: number
+  endCol: number
+  label?: string
+}
+
+/**
+ * The residues a hovered highlight covers on the first shown structure any of
+ * its rows map onto: the named row of a residue range, or every mapped row of
+ * a column range
+ */
+function locateRange(
+  session: Session,
+  model: MsaViewModel,
+  { row, startCol, endCol }: HoveredRange,
+) {
+  const { plugin, molstar, loaded } = session
+  for (const entry of loaded) {
+    const rows =
+      row === undefined
+        ? model.mappedStructures
+            .filter(m => m.structure.id === entry.id)
+            .map(m => m.row)
+        : [row]
+    for (const rowName of rows) {
+      const hits = []
+      for (let col = startCol; col <= endCol; col++) {
+        const seqPos = model.visibleColToSeqPosOneBased(rowName, col)
+        const hit =
+          seqPos === undefined
+            ? undefined
+            : model.structureResidue(rowName, seqPos, entry.id)
+        if (hit) {
+          hits.push(hit)
+        }
+      }
+      const first = hits[0]
+      const drawn = first
+        ? drawnStructure(plugin, molstar, entry.ref)
+        : undefined
+      if (first && drawn) {
+        return {
+          id: entry.id,
+          positions: hits.map(h => h.position),
+          loci: residueLoci(
+            molstar,
+            drawn,
+            hits.map(h => h.position),
+            first.structure.asymId,
+            first.structure.asymIdKind,
+          ),
+        }
+      }
+    }
+  }
+  return undefined
+}
+
 // hover and click in the structure drive the alignment
 function subscribeToStructure(
   session: Session,
@@ -558,9 +617,47 @@ export const StructurePanel = observer(function StructurePanel({
       },
       { equals: compareStructural },
     )
+    const stopRange = reaction(
+      (): HoveredRange | undefined => {
+        const highlight = model.resolvedHighlights.find(
+          h => h.key === model.hoveredHighlight,
+        )
+        return highlight?.startCol === undefined ||
+          highlight.endCol === undefined
+          ? undefined
+          : {
+              row: highlight.row,
+              startCol: highlight.startCol,
+              endCol: highlight.endCol,
+              label: highlight.label,
+            }
+      },
+      range => {
+        const { lociHighlights } = plugin.managers.interactivity
+        const located = range ? locateRange(session, model, range) : undefined
+        if (range && located) {
+          lociHighlights.highlightOnly({ loci: located.loci }, false)
+          setStatus(
+            `${range.label ?? 'Highlight'} · ${located.id} residues ${Math.min(...located.positions)}–${Math.max(...located.positions)}`,
+          )
+        } else {
+          lociHighlights.clearHighlights()
+          setStatus(
+            range
+              ? `${range.label ?? 'Highlight'} · no mapping onto the shown structures`
+              : idle,
+          )
+        }
+      },
+      { equals: compareStructural },
+    )
     const stopHover = reaction(
-      () => model.hoveredCell,
+      () =>
+        model.hoveredHighlight === undefined ? model.hoveredCell : undefined,
       cell => {
+        if (model.hoveredHighlight !== undefined) {
+          return
+        }
         const { found, loci } = locateCell(session, model, cell)
         const { lociHighlights } = plugin.managers.interactivity
         if (found && loci) {
@@ -581,6 +678,7 @@ export const StructurePanel = observer(function StructurePanel({
     )
     return () => {
       stopClick()
+      stopRange()
       stopHover()
     }
   }, [ready, model, key])
