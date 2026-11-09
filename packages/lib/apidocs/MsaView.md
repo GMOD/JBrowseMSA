@@ -2253,13 +2253,13 @@ fit: () => void
 #### action: fitHorizontally
 
 ```js
-fitHorizontally: (maxColWidth?: any) => void
+fitHorizontally: (maxColWidth?: number) => void
 ```
 
 #### action: fitVertically
 
 ```js
-fitVertically: (maxRowHeight?: any) => void
+fitVertically: (maxRowHeight?: number) => void
 ```
 
 #### action: replaceTree

@@ -26,7 +26,7 @@ DialogComponent: DialogComponentType
 #### getter: DialogProps
 
 ```js
-DialogProps: any
+DialogProps: Record<string, unknown>
 ```
 
 ### DialogQueueSessionMixin - Actions
@@ -34,7 +34,7 @@ DialogProps: any
 #### action: queueDialog
 
 ```js
-queueDialog: (cb: (doneCallback: () => void) => [DialogComponentType, unknown]) => void
+queueDialog: <T extends DialogComponentType>(cb: (doneCallback: () => void) => [T, ComponentProps<T>]) => void
 ```
 
 #### action: removeActiveDialog
