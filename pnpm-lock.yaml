@@ -316,6 +316,9 @@ importers:
 
   packages/structure:
     dependencies:
+      colord:
+        specifier: ^2.10.0
+        version: 2.10.0
       msa-parsers:
         specifier: workspace:*
         version: link:../msa-parsers

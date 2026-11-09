@@ -142,8 +142,14 @@ import { StructurePanel } from 'react-msaview-structure/panel'
 - Hovering the alignment lights the mapped structure residue, and hovering the
   structure lights its cell
 - Clicking either side focuses the other
-- `colorBy` paints the structure with `conservation`, or with the alignment's
-  own `scheme`
+- `colorBy` paints the structure with `conservation`, with the alignment's own
+  `scheme`, or with `track:<id>`, a column track's value at each residue's
+  column: a bar track through the conservation ramp, a text track through its
+  color scale. `paintableTracks(model)` lists the tracks `colorBy` can name, and
+  `trackColorBy(track)` spells the value for one
+- `representation` draws the polymer as `"surface"`, a molecular surface, or
+  `"cartoon"`. Unset, `chains="mapped"` draws as cartoon and `chains="all"` as
+  Mol\*'s preset picks for the structure's size
 - `structureIds` shows several structures, each in its own color unless
   `colorBy` is set, and `transforms` places them
 - `highlights` (on by default) paints the residues the alignment's `highlights`

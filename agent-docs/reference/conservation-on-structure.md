@@ -26,3 +26,24 @@ The hop has two routes, one per host:
   missing piece there, a custom Mol\* `ColorTheme` provider. Overpaint, as the
   standalone page uses it, is the cheaper alternative to a theme provider: one
   call per bin, with no registration.
+
+## Any column track, on cartoon or surface
+
+`StructurePanel` and `FacetGrid` paint from `colorBy`, which is `conservation`,
+`scheme` or `track:<id>`. `residueColor` in `packages/structure/src/paint.ts`
+colors a residue from a track:
+
+- a bar track's values, scaled by its `domainMax`, through the five-step ramp
+- a text track's letters, through its color scale, matched in upper case as the
+  track draws them
+
+`columnTrackContent` fills a column where a track's `row` has a gap with 0 or a
+space, so `residueColor` checks that row in the alignment and gives those
+residues `noColumnColor`, including when the row sits in a collapsed clade.
+
+`representation: 'surface'` draws the polymer as a Mol\* molecular surface
+through `drawPolymerAs`, with ligands as ball and stick. Unset,
+`chains="mapped"` draws as cartoon and `chains="all"` as Mol\*'s preset picks
+for the structure's size, a Gaussian surface past 30,000 residues. The preset's
+atomic-detail drawing, for a structure under 10 residues or a gappy one, has no
+polymer component, so `representation` leaves it as it is.

@@ -1,10 +1,22 @@
+import { colord, extend } from 'colord'
+import namesPlugin from 'colord/plugins/names'
+import { schemeResidueColor } from 'react-msaview'
+
 import { componentsOfStructure, residueLoci } from './molstar.ts'
 
 import type { Molstar, PolymerResidue } from './molstar.ts'
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context'
-import type { Highlight, MsaViewModel } from 'react-msaview'
+import type { ColumnTrackSpec, Highlight, MsaViewModel } from 'react-msaview'
 
-export type StructureColor = 'none' | 'conservation' | 'scheme'
+extend([namesPlugin])
+
+/**
+ * What paints a structure's residues: the column's conservation, the color the
+ * alignment gives the residue, or `track:<id>`, the value a column track holds
+ * at the residue's column
+ */
+export type StructureColor =
+  'none' | 'conservation' | 'scheme' | `track:${string}`
 
 export const conservationRamp = [
   '#86b6ef',
@@ -49,13 +61,7 @@ export function rowResidueLookup(
     (byAuth ? model.rowResidue(structureId, labelSeqId, authAsymId) : undefined)
 }
 
-export function conservationColor(
-  model: MsaViewModel,
-  rowName: string,
-  seqPos: number,
-) {
-  const col = model.seqPosToVisibleCol(rowName, seqPos - 1)
-  const value = col === undefined ? undefined : model.conservation[col]
+function rampColor(value: number | undefined) {
   return value === undefined
     ? undefined
     : conservationRamp[
@@ -64,6 +70,81 @@ export function conservationColor(
           Math.floor(value * conservationRamp.length),
         )
       ]
+}
+
+/**
+ * The column tracks a structure can be painted from: a bar track, through the
+ * ramp, and a text track whose letters a color scale names
+ */
+export function paintableTracks(model: MsaViewModel): ColumnTrackSpec[] {
+  return model.columnTracks.filter(
+    t => t.kind === 'bar' || (t.kind === 'text' && t.encoding?.color),
+  )
+}
+
+/** the `colorBy` that paints a structure from `track` */
+export function trackColorBy(track: ColumnTrackSpec) {
+  return `track:${track.id}` as const
+}
+
+/**
+ * A track's color at each visible column, read the way the track draws: a text
+ * letter through its scale in upper case, and nothing where the track's own row
+ * has a gap, which the track fills with a zero or a blank. The row is looked up
+ * in the alignment, so it need not be drawn.
+ */
+function trackColumnColor(model: MsaViewModel, track: ColumnTrackSpec) {
+  const content = model.columnTrackContent.get(track.id)
+  const { row } = track
+  const colorOf =
+    track.kind === 'bar'
+      ? (col: number) => rampColor(content?.values?.[col])
+      : letterColor(model, track, content?.data)
+  return (col: number) =>
+    row && model.visibleColToSeqPos(row, col) === undefined
+      ? undefined
+      : colorOf(col)
+}
+
+function letterColor(
+  model: MsaViewModel,
+  track: ColumnTrackSpec,
+  data: string | undefined,
+) {
+  const hexes = new Map(
+    Object.entries(
+      model.columnTrackModel(track).model.customColorScheme ?? {},
+    ).map(([letter, css]) => [letter, cssHex(css)]),
+  )
+  return (col: number) => hexes.get(data?.[col]?.toUpperCase() ?? '')
+}
+
+/**
+ * The color `colorBy` gives a row residue, or undefined where it gives none,
+ * such as a gap column or a column a track leaves blank
+ */
+export function residueColor(
+  model: MsaViewModel,
+  colorBy: Exclude<StructureColor, 'none'>,
+) {
+  if (colorBy === 'scheme') {
+    return schemeResidueColor(model)
+  } else {
+    const track =
+      colorBy === 'conservation'
+        ? undefined
+        : model.columnTracks.find(t => trackColorBy(t) === colorBy)
+    const columnColor =
+      colorBy === 'conservation'
+        ? (col: number) => rampColor(model.conservation[col])
+        : track
+          ? trackColumnColor(model, track)
+          : () => undefined
+    return (rowName: string, seqPos: number) => {
+      const col = model.seqPosToVisibleCol(rowName, seqPos - 1)
+      return col === undefined ? undefined : columnColor(col)
+    }
+  }
 }
 
 /**
@@ -98,26 +179,20 @@ export function paintGroups(
 
 const highlightDefault = '#ff8c00'
 
-/** a CSS color as the opaque hex Mol* paints with; alpha is dropped */
+/**
+ * A CSS color as the opaque hex Mol* paints with, alpha dropped, or undefined
+ * when it is not one or is fully transparent
+ */
+export function cssHex(css: string | undefined) {
+  const color = css === undefined ? undefined : colord(css)
+  return color?.isValid() && color.alpha() > 0
+    ? color.alpha(1).toHex()
+    : undefined
+}
+
+/** a highlight's CSS color as Mol* paints it, orange when it has none */
 export function solidHex(css: string | undefined) {
-  if (!css) {
-    return highlightDefault
-  }
-  const hex = /^#([0-9a-f]{6})\b/i.exec(css.trim())
-  if (hex) {
-    return `#${hex[1]!.toLowerCase()}`
-  }
-  const short = /^#([0-9a-f])([0-9a-f])([0-9a-f])$/i.exec(css.trim())
-  if (short) {
-    return `#${short[1]!}${short[1]!}${short[2]!}${short[2]!}${short[3]!}${short[3]!}`.toLowerCase()
-  }
-  const rgb = /^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/i.exec(css.trim())
-  if (rgb) {
-    return `#${[rgb[1], rgb[2], rgb[3]]
-      .map(v => Math.min(255, Number(v)).toString(16).padStart(2, '0'))
-      .join('')}`
-  }
-  return highlightDefault
+  return cssHex(css) ?? highlightDefault
 }
 
 function highlightCovers(

@@ -17,7 +17,8 @@ describe('solidHex', () => {
     ['#E69F00', '#e69f00'],
     ['#f0c', '#ff00cc'],
     [undefined, '#ff8c00'],
-    ['teal', '#ff8c00'],
+    ['teal', '#008080'],
+    ['no such color', '#ff8c00'],
   ])('%s -> %s', (css, hex) => {
     expect(solidHex(css)).toBe(hex)
   })

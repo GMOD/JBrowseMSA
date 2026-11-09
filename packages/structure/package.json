@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "colord": "^2.10.0",
     "msa-parsers": "workspace:*",
     "p2s_mapper": "^3.3.0"
   },

@@ -16,6 +16,8 @@ import {
   accessionOfRowName,
   canFindStructures,
   identifiersOfRowName,
+  paintableTracks,
+  trackColorBy,
 } from 'react-msaview-structure'
 
 import CandidateButtons, { candidateKey } from './CandidateButtons'
@@ -28,7 +30,10 @@ import type { FitBy } from './useSuperposition'
 import type { SxProps, Theme } from '@mui/material'
 import type { MsaViewModel } from 'react-msaview'
 import type { StructureCandidate } from 'react-msaview-structure'
-import type { StructureColor } from 'react-msaview-structure/panel'
+import type {
+  PolymerRepresentation,
+  StructureColor,
+} from 'react-msaview-structure/panel'
 
 type SxList = Extract<SxProps<Theme>, readonly unknown[]>
 
@@ -64,6 +69,7 @@ const StructureSection = observer(function StructureSection({
   const [accession, setAccession] = useState('')
   const [shown, setShown] = useState<string>()
   const [colorBy, setColorBy] = useState<StructureColor>('none')
+  const [representation, setRepresentation] = useState<PolymerRepresentation>()
   const [fitBy, setFitBy] = useState<FitBy>('alignment')
   const { lookup, find, reset } = useStructureLookup(model)
   const { foldseek, search } = useFoldseekSearch(model)
@@ -97,6 +103,12 @@ const StructureSection = observer(function StructureSection({
   const found = lookup.state === 'done' && lookup.row === current
   const lookupFailed = found && !!lookup.result.problem
   const showAccession = noId || lookupFailed || typed !== ''
+  const tracks = paintableTracks(model)
+  const paintBy =
+    colorBy.startsWith('track:') &&
+    !tracks.some(t => trackColorBy(t) === colorBy)
+      ? 'none'
+      : colorBy
   const fitShown =
     superposition.state === 'done' ||
     superposition.state === 'tm' ||
@@ -156,17 +168,34 @@ const StructureSection = observer(function StructureSection({
           </Select>
         ) : null}
         {structureId ? (
-          <Select
-            size="small"
-            value={colorBy}
-            onChange={e => {
-              setColorBy(e.target.value)
-            }}
-          >
-            <MenuItem value="none">No coloring</MenuItem>
-            <MenuItem value="conservation">Column conservation</MenuItem>
-            <MenuItem value="scheme">Alignment colors</MenuItem>
-          </Select>
+          <>
+            <Select
+              size="small"
+              value={paintBy}
+              onChange={e => {
+                setColorBy(e.target.value)
+              }}
+            >
+              <MenuItem value="none">No coloring</MenuItem>
+              <MenuItem value="conservation">Column conservation</MenuItem>
+              <MenuItem value="scheme">Alignment colors</MenuItem>
+              {tracks.map(t => (
+                <MenuItem key={t.id} value={trackColorBy(t)}>
+                  Track: {t.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Select
+              size="small"
+              value={representation ?? 'cartoon'}
+              onChange={e => {
+                setRepresentation(e.target.value)
+              }}
+            >
+              <MenuItem value="cartoon">Cartoon</MenuItem>
+              <MenuItem value="surface">Surface</MenuItem>
+            </Select>
+          </>
         ) : null}
       </Box>
 
@@ -337,7 +366,8 @@ const StructureSection = observer(function StructureSection({
               transforms={superposed?.matrices}
               fitBy={superposition.state === 'tm' ? 'tm-align' : 'transforms'}
               onTmAlign={setTmFits}
-              colorBy={colorBy}
+              colorBy={paintBy}
+              representation={representation}
               height={panelHeight}
             />
           </Suspense>

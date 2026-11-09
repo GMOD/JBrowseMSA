@@ -6,6 +6,7 @@ import { StructurePanel } from './StructurePanel.tsx'
 import { cameraLink } from './cameraLink.ts'
 
 import type { Facet } from './facets.ts'
+import type { PolymerRepresentation } from './molstar.ts'
 import type { StructureColor } from './paint.ts'
 import type { Camera } from 'molstar/lib/mol-canvas3d/camera'
 import type { PluginUIContext } from 'molstar/lib/mol-plugin-ui/context'
@@ -23,6 +24,7 @@ export interface FacetGridProps {
   /** height of one cell, in pixels */
   cellHeight?: number
   colorBy?: StructureColor
+  representation?: PolymerRepresentation
   highlights?: boolean
 }
 
@@ -39,6 +41,7 @@ export const FacetGrid = observer(function FacetGrid({
   columns = 3,
   cellHeight = 260,
   colorBy = 'none',
+  representation,
   highlights = true,
 }: FacetGridProps) {
   const [link] = useState(() => cameraLink<Camera.Snapshot>())
@@ -86,6 +89,7 @@ export const FacetGrid = observer(function FacetGrid({
             transforms={transforms}
             solidColor={colorBy === 'none' ? facet.color : undefined}
             colorBy={colorBy}
+            representation={representation}
             highlights={highlights}
             caption={`${facet.label} (${facet.rows.length})`}
             compact

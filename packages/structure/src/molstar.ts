@@ -124,6 +124,44 @@ export async function componentsOfStructure(
   )
 }
 
+export type PolymerRepresentation = 'cartoon' | 'surface'
+
+const polymerComponentTags = [
+  'structure-component-static-polymer',
+  'structure-component-mapped-polymer',
+]
+
+const molstarRepresentation = {
+  cartoon: 'cartoon',
+  surface: 'molecular-surface',
+} as const
+
+/**
+ * Redraws the polymer of a loaded structure as `representation`, leaving its
+ * ligands, ions and waters as they are. The new representation carries no
+ * overpaint, so a paint has to follow.
+ */
+export async function drawPolymerAs(
+  plugin: PluginUIContext,
+  ref: string,
+  representation: PolymerRepresentation,
+) {
+  const type = molstarRepresentation[representation]
+  const stale = (await componentsOfStructure(plugin, ref)).filter(
+    c =>
+      polymerComponentTags.some(tag => c.key?.split(',').includes(tag)) &&
+      (c.representations.length === 0 ||
+        c.representations.some(
+          r => r.cell.transform.params?.type.name !== type,
+        )),
+  )
+  if (stale.length > 0) {
+    const { component } = plugin.managers.structure
+    await component.removeRepresentations(stale)
+    await component.addRepresentation(stale, type)
+  }
+}
+
 export interface TmAlignment {
   ref: string
   tmScore: number

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
 import Box from '@mui/material/Box'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { observer } from 'mobx-react'
@@ -20,7 +22,10 @@ import {
 } from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
-import type { StructureColor } from 'react-msaview-structure/panel'
+import type {
+  PolymerRepresentation,
+  StructureColor,
+} from 'react-msaview-structure/panel'
 
 const { kinases } = alignments
 const { landmarks } = kinases
@@ -82,6 +87,7 @@ const KinaseFacets = observer(function KinaseFacets() {
   })
   const ref = useWidthSetter(model)
   const [colorBy, setColorBy] = useState<StructureColor>('none')
+  const [representation, setRepresentation] = useState<PolymerRepresentation>()
   const mappings = useAccessionMappings(model, kinases.proteins)
   const ready = mappings.state === 'ready'
   const fit = useSelectionFit(model, rows, { enabled: ready })
@@ -118,6 +124,17 @@ const KinaseFacets = observer(function KinaseFacets() {
           value={colorBy}
           onChange={setColorBy}
         />
+        <Typography variant="body2">as</Typography>
+        <Select
+          size="small"
+          value={representation ?? 'cartoon'}
+          onChange={e => {
+            setRepresentation(e.target.value)
+          }}
+        >
+          <MenuItem value="cartoon">Cartoon</MenuItem>
+          <MenuItem value="surface">Surface</MenuItem>
+        </Select>
       </Stack>
       <MappingStatus mappings={mappings} />
       <FitSummary fit={fit} />
@@ -132,6 +149,7 @@ const KinaseFacets = observer(function KinaseFacets() {
           columns={4}
           cellHeight={260}
           colorBy={colorBy}
+          representation={representation}
         />
       ) : null}
     </Box>

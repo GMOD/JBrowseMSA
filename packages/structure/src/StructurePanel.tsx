@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from 'react'
 import { compareStructural, reaction } from 'mobx'
 import { observer } from 'mobx-react'
 import { isBinaryStructureUrl, structureFormatFromContent } from 'p2s_mapper'
-import { schemeResidueColor } from 'react-msaview'
 
 import {
   asStructure,
+  drawPolymerAs,
   drawnStructure,
   loadMolstar,
   polymerResidues,
@@ -16,18 +16,23 @@ import {
   transformStructure,
 } from './molstar.ts'
 import {
-  conservationColor,
   highlightGroups,
   mappedResidues,
   paintGroups,
   paintStructure,
+  residueColor,
   rowResidueLookup,
   solidMappedGroups,
 } from './paint.ts'
 import { structurePalette } from './palette.ts'
 import { identityMatrix } from './superpose.ts'
 
-import type { Molstar, PolymerResidue, TmAlignment } from './molstar.ts'
+import type {
+  Molstar,
+  PolymerRepresentation,
+  PolymerResidue,
+  TmAlignment,
+} from './molstar.ts'
 import type { StructureColor } from './paint.ts'
 import type { Loci } from 'molstar/lib/mol-model/loci'
 import type { Structure } from 'molstar/lib/mol-model/structure'
@@ -53,6 +58,12 @@ export interface StructurePanelProps {
   /** what to paint the structure with; several structures take one color each
    * unless this is set */
   colorBy?: StructureColor
+  /**
+   * `cartoon`, or `surface` for Mol*'s molecular surface. Unset,
+   * `chains="mapped"` draws as cartoon and `chains="all"` as Mol*'s preset
+   * picks for the structure's size
+   */
+  representation?: PolymerRepresentation
   /** paint the residues the alignment's `highlights` mark, on top of the rest */
   highlights?: boolean
   /** one color for every residue, to tell this panel's structures apart */
@@ -318,6 +329,7 @@ export const StructurePanel = observer(function StructurePanel({
   fitBy = 'transforms',
   onTmAlign,
   colorBy = 'none',
+  representation,
   highlights = true,
   solidColor,
   caption,
@@ -573,6 +585,18 @@ export const StructurePanel = observer(function StructurePanel({
     }
   }, [ready, model, key])
 
+  // declared before the paint effect, so a repaint queues after the redraw
+  useEffect(() => {
+    const session = sessionRef.current
+    if (ready && session && representation) {
+      for (const { ref } of session.loaded) {
+        enqueue(paintQueue, sessionRef, session, () =>
+          drawPolymerAs(session.plugin, ref, representation),
+        )
+      }
+    }
+  }, [representation, ready, key])
+
   useEffect(() => {
     const session = sessionRef.current
     if (!ready || !session) {
@@ -588,14 +612,7 @@ export const StructurePanel = observer(function StructurePanel({
       () =>
         perStructure.map(s => [
           ...(colorBy !== 'none'
-            ? paintGroups(
-                model,
-                s.id,
-                s.residues,
-                colorBy === 'scheme'
-                  ? schemeResidueColor(model)
-                  : (row, pos) => conservationColor(model, row, pos),
-              )
+            ? paintGroups(model, s.id, s.residues, residueColor(model, colorBy))
             : several
               ? solidMappedGroups(
                   model,
@@ -624,7 +641,7 @@ export const StructurePanel = observer(function StructurePanel({
         )
       }
     }
-  }, [colorBy, highlights, solidColor, ready, model, key])
+  }, [colorBy, representation, highlights, solidColor, ready, model, key])
 
   if (entries.length === 0) {
     return null
