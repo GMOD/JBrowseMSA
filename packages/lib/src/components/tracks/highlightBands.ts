@@ -59,8 +59,9 @@ export function packHighlightBands(highlights: ResolvedHighlight[]) {
 /**
  * Where a band's label starts, or undefined where it does not fit. Inside the
  * bracket, held against the visible left edge while the bracket's start is
- * scrolled off; beside the marker of a single residue; and never past the
- * next bracket in the lane.
+ * scrolled off; past the end tick of a bracket narrower than its label, or
+ * past the marker of a single residue; and never past the next bracket in the
+ * lane.
  */
 export function highlightLabelX({
   band: { startCol, endCol, nextStartCol },
@@ -78,10 +79,12 @@ export function highlightLabelX({
   const x =
     startCol === endCol
       ? x0 + colWidth / 2 + highlightMarkerHalfWidth + 2
-      : Math.max(
-          x0 + labelInset,
-          Math.min(viewLeft + labelInset, x1 - labelWidth - labelInset),
-        )
+      : labelWidth + 2 * labelInset > x1 - x0
+        ? x1 + labelInset
+        : Math.max(
+            x0 + labelInset,
+            Math.min(viewLeft + labelInset, x1 - labelWidth - labelInset),
+          )
   const limit =
     nextStartCol === undefined ? Infinity : nextStartCol * colWidth - labelInset
   return x + labelWidth <= limit ? x : undefined

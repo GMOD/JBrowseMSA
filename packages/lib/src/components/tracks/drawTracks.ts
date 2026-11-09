@@ -329,7 +329,8 @@ function drawHighlightBrackets({
   for (const band of bands) {
     const { key, startCol, endCol, nextStartCol, lane, label, color } = band
     const x0 = startCol * colWidth
-    const reach = (nextStartCol ?? endCol + 1) * colWidth
+    const reach =
+      nextStartCol === undefined ? Infinity : nextStartCol * colWidth
     if (
       reach < offsetX ||
       x0 - highlightMarkerHalfWidth > offsetX + blockSize

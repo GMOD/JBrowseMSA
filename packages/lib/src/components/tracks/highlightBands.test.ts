@@ -65,6 +65,13 @@ test('a label holds to the visible left edge and stops at the bracket end', () =
   ).toBe(1000 - 30 - 4)
 })
 
+test('a label wider than its bracket starts past the end tick', () => {
+  const band = { key: 'furin', startCol: 10, endCol: 11, lane: 0 }
+  expect(
+    highlightLabelX({ band, labelWidth: 80, colWidth: 20, viewLeft: 0 }),
+  ).toBe(12 * 20 + 4)
+})
+
 test('a label that would run into the next bracket in its lane is dropped', () => {
   const band = { key: 'a', startCol: 10, endCol: 10, lane: 0, nextStartCol: 12 }
   expect(
