@@ -466,16 +466,19 @@ w <- msaview(
 )
 w
 ggplot2::ggsave("spike-structure-final-r.png",
-  msaview_plot(w, tracks = c("6vxx-coverage", "conservation")),
+  msaview_plot(w, tracks = c("6vxx-coverage", "conservation",
+    "highlight-brackets")),
   width = 12, height = 6)
 ```
 
 ![](../media/spike-structure-final-r.png)
 
 The eleven spikes over 1,660 columns, the InterPro domains keyed on the right,
-the seven SARS-CoV-2 regions as orange bands, since `msaview_plot()` draws every
-highlight as a band, and the 6VXX chain A row along the top: green where the
+the seven SARS-CoV-2 regions as brackets in the Highlights strip and outlines
+over the alignment, and the 6VXX chain A row along the top: green where the
 structure resolves a residue, orange where it does not, grey past the construct.
+`msaview_plot()` drops a label that would print over another, so the strip
+leaves the furin cleavage site and the fusion peptide unlabeled.
 The residue mapping reaches the widget `w`, which looks residues up in 6VXX, and
 draws nothing in a static figure.
 
