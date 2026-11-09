@@ -159,6 +159,7 @@ export default function ExampleBrowser({
   height: string
 }) {
   const [slug, select] = useHashSlug()
+  const [showSource, setShowSource] = useState(false)
   const example = examples.find(e => slugOf(e.name) === slug) ?? examples[0]!
   const { Component } = example
   return (
@@ -262,10 +263,18 @@ export default function ExampleBrowser({
             mb: 1,
           }}
         >
-          <Typography variant="subtitle2">Source</Typography>
-          <CopyButton text={example.source} />
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => {
+              setShowSource(shown => !shown)
+            }}
+          >
+            {showSource ? 'Hide source code' : 'Show source code'}
+          </Button>
+          {showSource ? <CopyButton text={example.source} /> : null}
         </Box>
-        <SourceView source={example.source} />
+        {showSource ? <SourceView source={example.source} /> : null}
         <Box sx={{ display: 'none', mt: 2, [narrow]: { display: 'block' } }}>
           {sidebarFooter}
         </Box>

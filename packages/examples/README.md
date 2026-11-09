@@ -2,8 +2,9 @@
 
 The live examples behind the website's
 [examples page](https://gmod.org/JBrowseMSA/examples): each one a small
-component that renders the viewer, shown beside its own source. The package has
-no app of its own; the website imports `src/ExampleBrowser.tsx` and mounts it.
+component that renders the viewer, with a button that shows its source. The
+package has no app of its own; the website imports `src/ExampleBrowser.tsx` and
+mounts it.
 
 `src/examples/catalog.ts` is the list: the name, category and blurb the examples
 page prints for each entry.
