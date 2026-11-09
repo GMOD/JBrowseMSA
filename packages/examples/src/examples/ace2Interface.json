@@ -2,7 +2,7 @@
   "generatedBy": "scripts/examples-gen/ace2Interface.mjs",
   "description": "ACE2 residues that contact the SARS-CoV-2 spike receptor-binding domain: every residue of chain A in 6M0J with a heavy atom within 4 A of a heavy atom of chain E. Positions are residues of the Human row, which is Q9BYF1 numbering, so the viewer projects them through the alignment's gaps onto every ortholog.",
   "source": "https://www.rcsb.org/structure/6M0J",
-  "retrieved": "2026-09-13",
+  "retrieved": "2026-11-09",
   "pdb": "6M0J",
   "chains": {
     "ace2": "A",
@@ -193,31 +193,6 @@
       "row": "Human",
       "start": 393,
       "end": 393
-    }
-  ],
-  "residueMappings": [
-    {
-      "row": "Human",
-      "accession": "Q9BYF1",
-      "structure": {
-        "id": "6M0J",
-        "kind": "experimental",
-        "asymId": "A",
-        "url": "https://files.rcsb.org/download/6M0J.cif"
-      },
-      "segments": [
-        {
-          "rowStart": 19,
-          "rowEnd": 615,
-          "structStart": 1,
-          "structEnd": 597
-        }
-      ],
-      "rowLength": 805,
-      "generated": {
-        "by": "sifts",
-        "date": "2026-09-13"
-      }
     }
   ]
 }

@@ -1,22 +1,16 @@
 {
   "generatedBy": "scripts/examples-gen/hemoglobin.mjs",
-  "description": "Sickle-cell layers for the globin alignment. The highlight is the HBB substitution that causes sickle-cell disease, on the row's own (UniProt) numbering; the bar track is the mean AlphaMissense pathogenicity of the 19 substitutions at each residue of HBB; the residue mappings are SIFTS, and are what turns row residue 7 into 1A3N residue 6.",
+  "description": "Sickle-cell layers for the globin alignment. The highlight is the HBB substitution that causes sickle-cell disease, on the row's own (UniProt) numbering; the bar track is the mean AlphaMissense pathogenicity of the 19 substitutions at each residue of HBB.",
   "sources": {
-    "sifts": "https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/1a3n",
     "alphaMissense": "https://alphafold.ebi.ac.uk/files/AF-P68871-F1-aa-substitutions.csv",
     "alphaFoldApi": "https://alphafold.ebi.ac.uk/api/prediction/P68871"
   },
-  "retrieved": "2026-09-13",
+  "retrieved": "2026-11-09",
   "sickle": {
-    "row": "Human_beta",
+    "row": "HBB_HUMAN",
     "seqPos": 7,
     "hgvs": "p.Glu7Val",
     "legacy": "E6V",
-    "structure": {
-      "id": "1A3N",
-      "asymId": "B",
-      "position": 6
-    },
     "alphaMissense": {
       "score": 0.2229,
       "class": "LBen"
@@ -24,7 +18,7 @@
     "label": "HBB E6V (p.Glu7Val) · sickle cell"
   },
   "alphaMissense": {
-    "row": "Human_beta",
+    "row": "HBB_HUMAN",
     "accession": "P68871",
     "name": "AlphaMissense (mean per residue)",
     "max": 1,
@@ -47,54 +41,5 @@
       0.39, 0.8373, 0.877, 0.8491, 0.3605, 0.8971, 0.9428, 0.8239, 0.5624,
       0.792, 0.9804, 0.88
     ]
-  },
-  "residueMappings": [
-    {
-      "row": "Human_beta",
-      "accession": "P68871",
-      "structure": {
-        "id": "1A3N",
-        "kind": "experimental",
-        "asymId": "B",
-        "url": "https://files.rcsb.org/download/1A3N.cif"
-      },
-      "segments": [
-        {
-          "rowStart": 2,
-          "rowEnd": 147,
-          "structStart": 1,
-          "structEnd": 146
-        }
-      ],
-      "unobserved": [[1, 1]],
-      "rowLength": 147,
-      "generated": {
-        "by": "sifts",
-        "date": "2026-09-13"
-      }
-    },
-    {
-      "row": "Human_alpha",
-      "accession": "P69905",
-      "structure": {
-        "id": "1A3N",
-        "kind": "experimental",
-        "asymId": "A",
-        "url": "https://files.rcsb.org/download/1A3N.cif"
-      },
-      "segments": [
-        {
-          "rowStart": 2,
-          "rowEnd": 142,
-          "structStart": 1,
-          "structEnd": 141
-        }
-      ],
-      "rowLength": 142,
-      "generated": {
-        "by": "sifts",
-        "date": "2026-09-13"
-      }
-    }
-  ]
+  }
 }

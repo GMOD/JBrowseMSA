@@ -174,8 +174,9 @@ node packages/cli/dist/index.js interproscan \
 4. (optional)
    `node packages/cli/dist/index.js interpro datasets/mygene.tsv -o datasets/mygene-domains.gff`
    for a `mygene-domains.gff` overlay (precomputed InterPro).
-5. Import the files in `packages/examples/src/examples/data.ts`, write a
-   component that draws them, and register both in `catalog.ts` and `index.ts`.
+5. Import the files in `packages/examples/src/examples/data.ts`, and add a
+   family to the `ProteinFamilies` picker, or write a component and give it a
+   `catalog.ts` entry (see `packages/examples/README.md`).
 
 ## RNA structural alignments (`.stock` datasets)
 
@@ -251,16 +252,14 @@ comparing the residues the entity declares against the ones with coordinates;
 `rowLength` records the row it was computed against, so the viewer can ignore
 the mapping if someone later loads it beside a different alignment.
 
-`hemoglobin.mjs` writes `hemoglobinSickle.json` for the globin example: the
-SIFTS mapping of the human alpha and beta rows onto PDB 1A3N, the AlphaMissense
-mean per residue of HBB, and the sickle-cell position. That position is row
-residue 7, `p.Glu7Val` in HGVS, and residue 6 of chain B in the structure, and
-the mapping converts between the last two. 1A3N is an α2β2 tetramer, so each
-sequence has two chains in it; the script emits one chain per row, because
-`model.structureResidue` returns nothing when one row maps onto one structure id
-twice. The script reads the AlphaMissense table from the `amAnnotationsUrl`
-field of AlphaFold's prediction record instead of building a filename by hand,
-and the API returns 403 to a request with no `User-Agent`.
+`hemoglobin.mjs` writes `hemoglobinSickle.json` for the hemoglobin chains
+example: the AlphaMissense mean per residue of HBB and the sickle-cell position
+on the `HBB_HUMAN` row of `structureAlignments.json`. That position is row
+residue 7, `p.Glu7Val` in HGVS, and E6V in the mature chain the PDB numbers; the
+example maps the row onto 4HHB in the browser, which turns one into the other.
+The script reads the AlphaMissense table from the `amAnnotationsUrl` field of
+AlphaFold's prediction record instead of building a filename by hand, and the
+API returns 403 to a request with no `User-Agent`.
 
 ```sh
 node scripts/examples-gen/hemoglobin.mjs
@@ -313,7 +312,7 @@ breaks 425 of them.
 
 ## The other example data
 
-Four files in `packages/examples/data` come from elsewhere:
+Five files in `packages/examples/data` come from elsewhere:
 
 - **`lysine.stock`**: the Rfam RF00168 seed alignment downloaded as Stockholm,
   which already embeds its own tree (`#=GF NH`) and secondary structure for the
@@ -323,6 +322,6 @@ Four files in `packages/examples/data` come from elsewhere:
 - **`gene-cluster.stock` / `gene-cluster.gff`**: synthetic, built by
   `scripts/gene-cluster`.
 
-The Pfam PF00042 example and the A3M example load no file from here. They fetch
-the alignment at view time, from the InterPro API and from OpenProteinSet,
-because each shows a file exactly as its source publishes it.
+The A3M example loads no file from here. It fetches the alignment from
+OpenProteinSet at view time, to show the file exactly as its source publishes
+it.

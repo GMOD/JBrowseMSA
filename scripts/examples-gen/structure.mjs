@@ -221,7 +221,14 @@ export function residueMapping({
 
 // An alignment row, ungapped, out of an examples data file (FASTA or CLUSTAL).
 export function readRow(file, row) {
-  const text = fs.readFileSync(path.join(dataDir, file), 'utf8')
+  return rowSequence(
+    fs.readFileSync(path.join(dataDir, file), 'utf8'),
+    row,
+    file,
+  )
+}
+
+export function rowSequence(text, row, source = 'the alignment') {
   const parts = []
   let capturing = false
   for (const line of text.split('\n')) {
@@ -237,7 +244,7 @@ export function readRow(file, row) {
   }
   const seq = parts.join('').replace(/\s/g, '').replaceAll('-', '')
   if (!seq) {
-    throw new Error(`row ${row} not found in ${file}`)
+    throw new Error(`row ${row} not found in ${source}`)
   }
   return seq
 }

@@ -14,8 +14,7 @@
  *      by residue against the Human row of the alignment.
  *
  * Writes packages/examples/src/examples/ace2Interface.json: the contact
- * residues, the contiguous runs they form as `highlights`, and the SIFTS
- * mapping they were derived through (see docs/layers.md).
+ * residues and the contiguous runs they form as `highlights`.
  *
  *   node scripts/examples-gen/ace2Interface.mjs
  */
@@ -27,10 +26,8 @@ import {
   checkRowNumbering,
   fetchSifts,
   fetchStructure,
-  observedResidues,
   readRow,
   residueAtoms,
-  residueMapping,
   residuePoints,
   sequenceToUniprot,
   writeJson,
@@ -146,17 +143,6 @@ writeJson(outFile, {
   cutoffAngstroms: CUTOFF,
   contacts,
   highlights,
-  residueMappings: [
-    residueMapping({
-      mappings: sifts,
-      chain: ACE2_CHAIN,
-      observed: observedResidues(atoms, ACE2_CHAIN),
-      row: ROW,
-      accession: ACCESSION,
-      pdb: PDB,
-      rowLength: seq.length,
-    }),
-  ],
 })
 
 console.log(
