@@ -16,7 +16,10 @@ extend([namesPlugin])
  * at the residue's column
  */
 export type StructureColor =
-  'none' | 'conservation' | 'scheme' | `track:${string}`
+  | 'none'
+  | 'conservation'
+  | 'scheme'
+  | `track:${string}`
 
 export const conservationRamp = [
   '#86b6ef',
