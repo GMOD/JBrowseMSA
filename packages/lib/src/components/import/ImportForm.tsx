@@ -66,19 +66,30 @@ const ImportForm = observer(function ({
         >
           <div>
             <Typography>MSA file or URL</Typography>
-            <FileSelector inline location={msaFile} setLocation={setMsaFile} />
+            <FileSelector
+              inline
+              rootModel={undefined}
+              location={msaFile}
+              setLocation={setMsaFile}
+            />
           </div>
           <div>
             <Typography>Tree file or URL</Typography>
             <FileSelector
               inline
+              rootModel={undefined}
               location={treeFile}
               setLocation={setTreeFile}
             />
           </div>
           <div>
             <Typography>Annotation GFF file or URL (optional)</Typography>
-            <FileSelector inline location={gffFile} setLocation={setGffFile} />
+            <FileSelector
+              inline
+              rootModel={undefined}
+              location={gffFile}
+              setLocation={setGffFile}
+            />
           </div>
         </Box>
         <div>

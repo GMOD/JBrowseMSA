@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { applySnapshot, getSnapshot } from '@jbrowse/mobx-state-tree'
-import { expect, test } from 'vitest'
+import { beforeAll, expect, test, vi } from 'vitest'
 
 import {
   labelFitFontSize,
@@ -9,8 +9,12 @@ import {
 } from './constants.ts'
 import MSAModelF from './model.ts'
 
-// jsdom has no 2d context, so measureTextCanvas estimates 0.6em per character
+// with no 2d context, measureTextCanvas estimates 0.6em per character
 const charWidth = labelFitFontSize * 0.6
+
+beforeAll(() => {
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+})
 
 const names = ['Caenorhabditis_elegans_query', 'b', 'c', 'd']
 const msa = names.map(n => `>${n}\nMKAANSE`).join('\n')
