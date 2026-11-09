@@ -16,6 +16,9 @@ says where each file comes from and how to rebuild it.
 
 ## Adding an example
 
-1. Write `src/examples/MyExample.tsx` with a default-exported component.
-2. Add an entry to `src/examples/catalog.ts` (its `id` is the component's
-   filename) and register the component in `src/examples/index.ts`.
+- Write `src/examples/MyExample.tsx` with a default-exported component. A
+  capitalized filename marks it as an example; `index.ts` finds it with
+  `import.meta.glob`.
+- Add an entry to `src/examples/catalog.ts` whose `id` is the filename.
+- Prefer a new option in an existing demo (the families pickers, the model API
+  controls) over a new entry when the demo differs only in its data.

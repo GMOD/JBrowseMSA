@@ -1,16 +1,20 @@
 import { MSAViewer } from 'react-msaview'
 
-const BASE = 'https://jbrowse.org/genomes/multiple_sequence_alignments'
+const BASE = 'https://gmod.org/JBrowseMSA/demo/data'
 
-// The viewer fetches each URL itself. This Stockholm file carries its own
-// tree, and the InterProScan GFF draws the protein domains over it.
+// The MSAViewer component is the simplest entry point: give it the URL of an
+// alignment, a Newick tree and an InterProScan GFF, and it fetches each file,
+// creates the model, measures its width and applies the JBrowse theme. The
+// files are hosted, so this example runs as-is wherever it is pasted. `msa`,
+// `tree` and `gff` take the text directly when the page already has it.
 export default function LoadFromUrl() {
   return (
     <MSAViewer
-      msaUrl={`${BASE}/pfam-cov2.stock`}
-      gffUrl={`${BASE}/pfam-cov2-domains.gff`}
-      colorScheme="maeditor"
-      height={550}
+      msaUrl={`${BASE}/p53.aln`}
+      treeUrl={`${BASE}/p53.nh`}
+      gffUrl={`${BASE}/p53-domains.gff`}
+      colorScheme="clustalx_protein_dynamic"
+      height={500}
     />
   )
 }

@@ -22,7 +22,8 @@ function isMode(value: unknown): value is Mode {
 
 // hideHeader leaves the viewer's toolbar out, so the page draws the controls it
 // needs and nothing else. Every control below is a prop, and the viewer applies
-// each one to the mounted model, so a click keeps the scroll position.
+// each one to the mounted model, so a click keeps the scroll position. With
+// `drawTree={false}`, the gutter fits the labels alone.
 //
 // onCellClick and onViewportChange report back in the coordinates highlights
 // take: the column of the file and the residue of that row, both 1-based. The
@@ -31,6 +32,8 @@ export default function YourOwnControls() {
   const [mode, setMode] = useState<Mode>('dark')
   const [colorScheme, setColorScheme] = useState('clustalx_protein_dynamic')
   const [colWidth, setColWidth] = useState(12)
+  const [diff, setDiff] = useState(false)
+  const [tree, setTree] = useState(true)
   const [clicked, setClicked] = useState<Cell>()
   const [viewport, setViewport] = useState<Viewport>()
 
@@ -95,6 +98,24 @@ export default function YourOwnControls() {
         >
           Zoom in
         </Button>
+        <Button
+          variant={diff ? 'contained' : 'outlined'}
+          size="small"
+          onClick={() => {
+            setDiff(d => !d)
+          }}
+        >
+          Diff vs human beta
+        </Button>
+        <Button
+          variant={tree ? 'contained' : 'outlined'}
+          size="small"
+          onClick={() => {
+            setTree(t => !t)
+          }}
+        >
+          Tree
+        </Button>
       </Stack>
       <MSAViewer
         msa={globinMSA}
@@ -103,6 +124,8 @@ export default function YourOwnControls() {
         theme={mode}
         colorScheme={colorScheme}
         colWidth={colWidth}
+        relativeTo={diff ? 'Human_beta' : undefined}
+        drawTree={tree}
         height={360}
         onCellClick={setClicked}
         onViewportChange={setViewport}
