@@ -162,7 +162,9 @@ export const catalog: CatalogEntry[] = [
     category: 'Protein structure',
     description:
       'Eight human kinases from four kinome groups, one structure panel per ' +
-      'group, superposed into one frame with the cameras tied.',
+      'group, superposed into one frame with the cameras tied. The fit ' +
+      'follows the selection: pick a lobe or drag along the ruler, and the ' +
+      'CA distance track follows.',
   },
   {
     id: 'P53Hotspots3D',
@@ -188,15 +190,6 @@ export const catalog: CatalogEntry[] = [
     description:
       'The alpha and beta rows map onto chains A and B of 4HHB, so a hovered ' +
       'cell lights its residue on its own row’s chain.',
-  },
-  {
-    id: 'KinaseLobeFit',
-    name: 'Fit on the columns you select (kinase lobes)',
-    category: 'Protein structure',
-    description:
-      'Four kinases superposed on the selected columns: pick the N- or ' +
-      'C-lobe, or drag along the ruler, and the fit and the CA distance ' +
-      'track follow.',
   },
   {
     id: 'RowIdentifiers',

@@ -13,13 +13,17 @@ import { StructurePanel } from 'react-msaview-structure/panel'
 
 import recorded from './foldseekMyoglobin.json'
 import alignments from './structureAlignments.json'
-import { messageOf, structureKey } from './structureDemo'
+import {
+  SideBySide,
+  hemeHistidines,
+  messageOf,
+  structureKey,
+} from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
 import type { StructureCandidate } from 'react-msaview-structure'
 
 const { globins } = alignments
-const landmark = globins.landmarks
 const row = 'sample_7'
 
 type Found =
@@ -43,20 +47,7 @@ const FoldseekReplay = observer(function FoldseekReplay() {
       height: 260,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: { msa: globins.msa.replace('>MYG_HUMAN', `>${row}`) },
-      highlights: [
-        {
-          start: landmark['distal His (E7)'].column,
-          end: landmark['distal His (E7)'].column,
-          label: 'distal His',
-          color: '#e41a1c',
-        },
-        {
-          start: landmark['proximal His (F8)'].column,
-          end: landmark['proximal His (F8)'].column,
-          label: 'proximal His',
-          color: '#ff7f00',
-        },
-      ],
+      highlights: hemeHistidines,
     }),
   )
   const ref = useWidthSetter(model)
@@ -137,24 +128,14 @@ const FoldseekReplay = observer(function FoldseekReplay() {
           ))}
         </Stack>
       ) : null}
-      <Box
-        sx={{
-          display: 'grid',
-          gap: 2,
-          gridTemplateColumns: {
-            xs: 'minmax(0, 1fr)',
-            md: 'repeat(2, minmax(0, 1fr))',
-          },
-          alignItems: 'start',
-        }}
-      >
+      <SideBySide>
         <div ref={ref}>
           <MSAView model={model} />
         </div>
         {shown ? (
           <StructurePanel model={model} structureId={shown.id} height={420} />
         ) : null}
-      </Box>
+      </SideBySide>
     </Box>
   )
 })

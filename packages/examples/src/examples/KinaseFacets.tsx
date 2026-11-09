@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
@@ -8,18 +7,25 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
-import { facetsByRowField, superposeRows } from 'react-msaview-structure'
+import { facetsByRowField } from 'react-msaview-structure'
 import { FacetGrid } from 'react-msaview-structure/panel'
 
 import alignments from './structureAlignments.json'
-import { mappedTargets, messageOf, useAccessionMappings } from './structureDemo'
+import {
+  ChoiceButtons,
+  FitSummary,
+  MappingStatus,
+  isSelected,
+  useAccessionMappings,
+  useSelectionFit,
+} from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
-import type { SuperposeRowsResult } from 'react-msaview-structure'
 import type { StructureColor } from 'react-msaview-structure/panel'
 
 const { kinases } = alignments
-const landmarks = kinases.landmarks
+const { landmarks } = kinases
+const rows = kinases.proteins.map(p => p.row)
 
 const marks = [
   { name: 'Gly-rich loop (GxGxxG)', color: '#e41a1c' },
@@ -35,11 +41,25 @@ const groupColors = {
   Other: '#6c757d',
 }
 
+// columns of CDK2's N-lobe, residues 4-85, and C-lobe, 86-286, which meet at
+// the hinge, E81-L83
+const lobes = [
+  { name: 'N-lobe', start: 1, end: 94 },
+  { name: 'C-lobe', start: 95, end: 310 },
+]
+
 // Eight human kinases from four of the kinome's groups, one panel per group.
 // The alignment decides which residues sit on which, so all eight structures
 // lie in one frame and the four panels turn together: whatever differs
 // between groups differs in place. The four colored marks are the motifs every
 // protein kinase carries, on the alignment and on each structure.
+//
+// A kinase domain is two lobes on a hinge, and the lobes move against each
+// other as a kinase switches on and off. A fit on one lobe holds that lobe
+// still, and the CA distance track shows where the rest of the domain departs
+// from it; in these AlphaFold models the activation loop departs most. The fit
+// follows the selection: pick a lobe, or drag along the Position ruler to fit
+// any range of columns.
 const KinaseFacets = observer(function KinaseFacets() {
   const [model] = useState(() => {
     const created = MSAModelF().create({
@@ -62,25 +82,36 @@ const KinaseFacets = observer(function KinaseFacets() {
     return created
   })
   const ref = useWidthSetter(model)
-  const [fit, setFit] = useState<SuperposeRowsResult>()
-  const [error, setError] = useState<string>()
   const [colorBy, setColorBy] = useState<StructureColor>('none')
-  const mappings = useAccessionMappings(model, kinases.proteins, {
-    onReady: () => {
-      const rows = kinases.proteins.map(p => p.row)
-      superposeRows({ model, targets: mappedTargets(model, rows) })
-        .then(setFit)
-        .catch((e: unknown) => {
-          setError(messageOf(e))
-        })
-    },
-  })
-
+  const mappings = useAccessionMappings(model, kinases.proteins)
   const ready = mappings.state === 'ready'
-
+  const fit = useSelectionFit(model, rows, { enabled: ready })
   const facets = ready ? facetsByRowField(model, 'group', groupColors) : []
   return (
     <Box>
+      <ChoiceButtons
+        disabled={!ready}
+        choices={[
+          {
+            label: 'Fit every column',
+            active: isSelected(model),
+            choose: () => {
+              model.setSelection(undefined)
+            },
+          },
+          ...lobes.map(({ name, start, end }) => ({
+            label: `Fit the ${name}`,
+            active: isSelected(model, { start, end }),
+            choose: () => {
+              model.setSelection({ start, end })
+            },
+          })),
+        ]}
+      >
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          or drag along the Position ruler
+        </Typography>
+      </ChoiceButtons>
       <Stack direction="row" spacing={2} sx={{ mb: 1, alignItems: 'center' }}>
         <Typography variant="body2">Color the structures by</Typography>
         <Select
@@ -95,24 +126,8 @@ const KinaseFacets = observer(function KinaseFacets() {
           <MenuItem value="scheme">Alignment colors</MenuItem>
         </Select>
       </Stack>
-      {mappings.state === 'loading' ? (
-        <Typography variant="body2">{mappings.message}…</Typography>
-      ) : null}
-      {mappings.state === 'error' ? (
-        <Alert severity="warning">{mappings.message}</Alert>
-      ) : null}
-      {error ? <Alert severity="error">{error}</Alert> : null}
-      {fit ? (
-        <Alert severity="info" sx={{ mb: 1 }}>
-          Fitted on every column the alignment shares with {fit.referenceId}:{' '}
-          {fit.fits
-            .map(
-              f =>
-                `${f.row} ${f.rmsd.toFixed(1)} Å over ${f.fitted} of ${f.considered}`,
-            )
-            .join(' · ')}
-        </Alert>
-      ) : null}
+      <MappingStatus mappings={mappings} />
+      <FitSummary fit={fit} />
       <div ref={ref} style={{ marginBottom: 12 }}>
         <MSAView model={model} />
       </div>
@@ -120,7 +135,7 @@ const KinaseFacets = observer(function KinaseFacets() {
         <FacetGrid
           model={model}
           facets={facets}
-          transforms={fit?.matrices}
+          transforms={fit.result?.matrices}
           columns={4}
           cellHeight={260}
           colorBy={colorBy}

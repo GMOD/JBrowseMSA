@@ -1,8 +1,21 @@
 import { useEffect, useState } from 'react'
 
-import { when } from 'mobx'
-import { findStructures, networkLookups } from 'react-msaview-structure'
+import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
+import { reaction, when } from 'mobx'
+import {
+  distanceTrack,
+  findStructures,
+  networkLookups,
+  superposeRows,
+} from 'react-msaview-structure'
 
+import alignments from './structureAlignments.json'
+
+import type { ReactNode } from 'react'
 import type { MsaViewModel } from 'react-msaview'
 import type {
   Lookups,
@@ -76,8 +89,7 @@ export function tmSummary(fits?: Record<string, TmAlignment>) {
 
 /**
  * Looks each row's structures up by its UniProt accession and writes the
- * AlphaFold model's mapping, or the candidate `pick` chooses, onto the model,
- * then calls `onReady`. The lookups run in the browser against AlphaFold DB and
+ * AlphaFold model's mapping, or the candidate `pick` chooses, onto the model. The lookups run in the browser against AlphaFold DB and
  * RCSB, which is the point of the demo: no structure file or mapping is bundled
  * with it.
  */
@@ -86,17 +98,15 @@ export function useAccessionMappings(
   proteins: DemoProtein[],
   {
     pick = c => c[0],
-    onReady,
   }: {
     pick?: (
       candidates: StructureCandidate[],
       row: string,
     ) => StructureCandidate | undefined
-    onReady?: () => void
   } = {},
 ) {
-  // a demo's proteins and callbacks are fixed for its life
-  const [fixed] = useState({ proteins, pick, onReady })
+  // a demo's proteins and pick are fixed for its life
+  const [fixed] = useState({ proteins, pick })
   const [mappings, setMappings] = useState<MappingState>({
     state: 'loading',
     message: 'Looking up structures',
@@ -150,9 +160,6 @@ export function useAccessionMappings(
           message: problems.join(' '),
           candidates,
         })
-        if (chosen.length > 0) {
-          fixed.onReady?.()
-        }
       } catch (e) {
         if (!signal.aborted) {
           setMappings({ state: 'error', message: messageOf(e), candidates: {} })
@@ -164,4 +171,190 @@ export function useAccessionMappings(
     }
   }, [model, fixed])
   return mappings
+}
+
+const distal = alignments.globins.landmarks['distal His (E7)'].column
+const proximal = alignments.globins.landmarks['proximal His (F8)'].column
+
+/** the heme's two histidines in the globin alignment, as column highlights */
+export const hemeHistidines = [
+  { start: distal, end: distal, label: 'distal His', color: '#e41a1c' },
+  { start: proximal, end: proximal, label: 'proximal His', color: '#ff7f00' },
+]
+
+interface Range {
+  start: number
+  end: number
+}
+
+export function isSelected(model: MsaViewModel, range?: Range) {
+  const { selection } = model
+  return range
+    ? selection?.start === range.start && selection.end === range.end
+    : selection === undefined
+}
+
+type FitStatus =
+  | { state: 'idle' }
+  | { state: 'fitting'; label: string }
+  | { state: 'done'; label: string }
+  | { state: 'error'; message: string }
+
+export interface SelectionFit {
+  status: FitStatus
+  /** the last finished fit, kept while the next one runs */
+  result?: SuperposeRowsResult
+}
+
+const distanceTrackId = 'ca-distance'
+
+/**
+ * Superposes the listed rows' structures on the selected columns, or on every
+ * column when nothing is selected, and fits again 300 ms after the selection
+ * or `refine` changes. Each fit replaces the CA distance track. While
+ * `enabled` is false the hook fits nothing and removes the track.
+ */
+export function useSelectionFit(
+  model: MsaViewModel,
+  rows: string[],
+  { enabled, refine }: { enabled: boolean; refine?: false },
+): SelectionFit {
+  const [fixedRows] = useState(rows)
+  const [fit, setFit] = useState<SelectionFit>({ status: { state: 'idle' } })
+  useEffect(() => {
+    let latest = 0
+    const otherTracks = () =>
+      model.columnTracks.filter(t => t.id !== distanceTrackId)
+    async function run(selection?: Range) {
+      const id = ++latest
+      const label = selection
+        ? `columns ${selection.start}-${selection.end}`
+        : 'every column'
+      setFit(prev => ({ ...prev, status: { state: 'fitting', label } }))
+      try {
+        const result = await superposeRows({
+          model,
+          targets: mappedTargets(model, fixedRows),
+          selection,
+          refine,
+        })
+        if (id === latest) {
+          model.setColumnTracks([
+            ...otherTracks(),
+            distanceTrack(result, distanceTrackId),
+          ])
+          setFit({ status: { state: 'done', label }, result })
+        }
+      } catch (e) {
+        if (id === latest) {
+          setFit(prev => ({
+            ...prev,
+            status: { state: 'error', message: messageOf(e) },
+          }))
+        }
+      }
+    }
+    const dispose = enabled
+      ? reaction(
+          () => [model.selection?.start, model.selection?.end] as const,
+          ([start, end]) => {
+            void run(
+              start === undefined || end === undefined
+                ? undefined
+                : { start, end },
+            )
+          },
+          { fireImmediately: true, delay: 300 },
+        )
+      : undefined
+    if (!enabled && otherTracks().length !== model.columnTracks.length) {
+      model.setColumnTracks(otherTracks())
+    }
+    return () => {
+      latest++
+      dispose?.()
+    }
+  }, [model, fixedRows, enabled, refine])
+  return enabled ? fit : { status: { state: 'idle' } }
+}
+
+export function FitSummary({ fit }: { fit: SelectionFit }) {
+  const { status, result } = fit
+  return status.state === 'fitting' ? (
+    <Typography variant="body2" sx={{ mb: 1 }}>
+      Fitting {status.label}…
+    </Typography>
+  ) : status.state === 'done' && result ? (
+    <Alert severity="info" sx={{ mb: 1 }}>
+      Fitted on {status.label}: {fitSummary(result)}
+    </Alert>
+  ) : status.state === 'error' ? (
+    <Alert severity="error" sx={{ mb: 1 }}>
+      {status.message}
+    </Alert>
+  ) : null
+}
+
+export function MappingStatus({ mappings }: { mappings: MappingState }) {
+  return mappings.state === 'loading' ? (
+    <Typography variant="body2">{mappings.message}…</Typography>
+  ) : mappings.state === 'error' ? (
+    <Alert severity="warning">{mappings.message}</Alert>
+  ) : null
+}
+
+export interface Choice {
+  label: string
+  active: boolean
+  choose: () => void
+}
+
+export function ChoiceButtons({
+  choices,
+  disabled,
+  children,
+}: {
+  choices: Choice[]
+  disabled?: boolean
+  children?: ReactNode
+}) {
+  return (
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{ mb: 1, flexWrap: 'wrap', gap: 1, alignItems: 'center' }}
+    >
+      {choices.map(({ label, active, choose }) => (
+        <Button
+          key={label}
+          size="small"
+          variant={active ? 'contained' : 'outlined'}
+          disabled={disabled}
+          onClick={choose}
+        >
+          {label}
+        </Button>
+      ))}
+      {children}
+    </Stack>
+  )
+}
+
+/** the alignment and a structure view side by side, stacked on a narrow page */
+export function SideBySide({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      sx={{
+        display: 'grid',
+        gap: 2,
+        gridTemplateColumns: {
+          xs: 'minmax(0, 1fr)',
+          md: 'repeat(2, minmax(0, 1fr))',
+        },
+        alignItems: 'start',
+      }}
+    >
+      {children}
+    </Box>
+  )
 }

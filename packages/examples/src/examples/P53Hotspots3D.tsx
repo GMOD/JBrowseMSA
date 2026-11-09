@@ -1,17 +1,20 @@
 import { useState } from 'react'
 
-import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
 import { observer } from 'mobx-react'
 import { MSAModelF, MSAView } from 'react-msaview'
 import { StructurePanel } from 'react-msaview-structure/panel'
 
 import { p53DomainsGFF, p53MSA, p53Tree } from './data'
 import clinvar from './p53ClinVar.json'
-import { structureKey, useAccessionMappings } from './structureDemo'
+import {
+  MappingStatus,
+  SideBySide,
+  structureKey,
+  useAccessionMappings,
+} from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
 import type { StructureCandidate } from 'react-msaview-structure'
@@ -90,12 +93,7 @@ const P53Hotspots3D = observer(function P53Hotspots3D() {
 
   return (
     <Box>
-      {mappings.state === 'loading' ? (
-        <Typography variant="body2">{mappings.message}…</Typography>
-      ) : null}
-      {mappings.state === 'error' ? (
-        <Alert severity="warning">{mappings.message}</Alert>
-      ) : null}
+      <MappingStatus mappings={mappings} />
       {candidates.length > 1 ? (
         <Stack
           direction="row"
@@ -119,17 +117,7 @@ const P53Hotspots3D = observer(function P53Hotspots3D() {
           })}
         </Stack>
       ) : null}
-      <Box
-        sx={{
-          display: 'grid',
-          gap: 2,
-          gridTemplateColumns: {
-            xs: 'minmax(0, 1fr)',
-            md: 'repeat(2, minmax(0, 1fr))',
-          },
-          alignItems: 'start',
-        }}
-      >
+      <SideBySide>
         <div ref={ref}>
           <MSAView model={model} />
         </div>
@@ -141,7 +129,7 @@ const P53Hotspots3D = observer(function P53Hotspots3D() {
             height={460}
           />
         ) : null}
-      </Box>
+      </SideBySide>
     </Box>
   )
 })

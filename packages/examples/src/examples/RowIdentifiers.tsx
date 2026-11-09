@@ -18,7 +18,7 @@ import {
 import { StructurePanel } from 'react-msaview-structure/panel'
 
 import { p53MSA, p53Tree } from './data'
-import { messageOf } from './structureDemo'
+import { SideBySide, messageOf } from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
 import type { StructureSearch } from 'react-msaview-structure'
@@ -158,17 +158,7 @@ const RowIdentifiers = observer(function RowIdentifiers() {
           })}
         </TableBody>
       </Table>
-      <Box
-        sx={{
-          display: 'grid',
-          gap: 2,
-          gridTemplateColumns: {
-            xs: 'minmax(0, 1fr)',
-            md: 'repeat(2, minmax(0, 1fr))',
-          },
-          alignItems: 'start',
-        }}
-      >
+      <SideBySide>
         <div ref={ref}>
           <MSAView model={model} />
         </div>
@@ -179,7 +169,7 @@ const RowIdentifiers = observer(function RowIdentifiers() {
             height={420}
           />
         ) : null}
-      </Box>
+      </SideBySide>
     </Box>
   )
 })

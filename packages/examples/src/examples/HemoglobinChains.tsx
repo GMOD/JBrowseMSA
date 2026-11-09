@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
@@ -11,13 +10,17 @@ import { MSAModelF, MSAView } from 'react-msaview'
 import { StructurePanel } from 'react-msaview-structure/panel'
 
 import alignments from './structureAlignments.json'
-import { useAccessionMappings } from './structureDemo'
+import {
+  MappingStatus,
+  SideBySide,
+  hemeHistidines,
+  useAccessionMappings,
+} from './structureDemo'
 import useWidthSetter from './useWidthSetter'
 
 import type { StructureColor } from 'react-msaview-structure/panel'
 
 const { globins } = alignments
-const landmark = globins.landmarks
 const entry = '4HHB'
 
 const proteins = globins.proteins
@@ -37,20 +40,7 @@ const HemoglobinChains = observer(function HemoglobinChains() {
       height: 260,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: { msa: globins.msa },
-      highlights: [
-        {
-          start: landmark['distal His (E7)'].column,
-          end: landmark['distal His (E7)'].column,
-          label: 'distal His',
-          color: '#e41a1c',
-        },
-        {
-          start: landmark['proximal His (F8)'].column,
-          end: landmark['proximal His (F8)'].column,
-          label: 'proximal His',
-          color: '#ff7f00',
-        },
-      ],
+      highlights: hemeHistidines,
     }),
   )
   const ref = useWidthSetter(model)
@@ -80,23 +70,8 @@ const HemoglobinChains = observer(function HemoglobinChains() {
           </Typography>
         ) : null}
       </Stack>
-      {mappings.state === 'loading' ? (
-        <Typography variant="body2">{mappings.message}…</Typography>
-      ) : null}
-      {mappings.state === 'error' ? (
-        <Alert severity="warning">{mappings.message}</Alert>
-      ) : null}
-      <Box
-        sx={{
-          display: 'grid',
-          gap: 2,
-          gridTemplateColumns: {
-            xs: 'minmax(0, 1fr)',
-            md: 'repeat(2, minmax(0, 1fr))',
-          },
-          alignItems: 'start',
-        }}
-      >
+      <MappingStatus mappings={mappings} />
+      <SideBySide>
         <div ref={ref}>
           <MSAView model={model} />
         </div>
@@ -108,7 +83,7 @@ const HemoglobinChains = observer(function HemoglobinChains() {
             height={420}
           />
         ) : null}
-      </Box>
+      </SideBySide>
     </Box>
   )
 })
