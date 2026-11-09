@@ -294,6 +294,22 @@ substituted for another, and it disables everything downstream, so it does not
 belong on a per-residue count. As a sanity check, 94% of the variants that
 remain fall inside the DNA-binding domain.
 
+`p53Predictors.py` writes `p53Predictors.json` for the machine learning example.
+ESM-2 (`esm2_t33_650M_UR50D`) scores all 7,467 substitutions of the human p53
+row by masked marginals: mask the residue, then take log P(wild type) minus log
+P(substitute). The script also reads AlphaMissense for P04637 and the Giacomelli
+2018 saturation screen from MaveDB, averages each per residue, and records the
+Spearman correlation of each model with the screen over the 7,448 substitutions
+all three score, and the six residues where the two models' per-residue ranks
+differ most. It is the one Python script here, because the model runs in
+PyTorch; `uv run` installs a CPU build of torch, and the first run downloads the
+2.5 GB weights. Scoring takes a few minutes on eight threads, and a second run
+writes the same scores.
+
+```sh
+uv run scripts/examples-gen/p53Predictors.py
+```
+
 The SIFTS lookup matters most here, because a PDB entry numbers its residues its
 own way, and a contact map placed on the alignment with the wrong offset still
 looks plausible. `https://www.ebi.ac.uk/pdbe/api/mappings/uniprot/<pdb>` gives

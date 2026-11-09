@@ -9,6 +9,7 @@ export const categoryOrder = [
   'API & control',
   'Protein domains',
   'Protein structure',
+  'Machine learning',
   'Conservation & diffing',
   'Phylogeny',
   'RNA structure',
@@ -178,6 +179,16 @@ export const catalog: CatalogEntry[] = [
     description:
       'A recorded Foldseek search for an unnamed globin, mapped in the ' +
       'browser onto AlphaFold models and the PDB assembly files it searched.',
+  },
+  {
+    id: 'P53Predictors',
+    name: 'A language model against a measured screen (p53)',
+    category: 'Machine learning',
+    description:
+      'ESM-2, a protein language model trained with no variant labels, ' +
+      'AlphaMissense and a saturation screen score every p53 substitution, ' +
+      'beside ClinVar on the same columns. The marks are the residues where ' +
+      'the two models disagree most.',
   },
   {
     id: 'Ace2',
