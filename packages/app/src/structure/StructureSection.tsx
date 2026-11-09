@@ -71,6 +71,8 @@ const StructureSection = observer(function StructureSection({
   const [colorBy, setColorBy] = useState<StructureColor>('none')
   const [representation, setRepresentation] = useState<PolymerRepresentation>()
   const [fitBy, setFitBy] = useState<FitBy>('alignment')
+  const [finding, setFinding] = useState(false)
+  const [styling, setStyling] = useState(false)
   const { lookup, find, reset } = useStructureLookup(model)
   const { foldseek, search } = useFoldseekSearch(model)
   const { superposition, superpose, clear, setTmFits } = useSuperposition(model)
@@ -94,10 +96,18 @@ const StructureSection = observer(function StructureSection({
       : structureId
         ? [structureId]
         : []
+  const shownMapping = model.mappedStructures.find(
+    m => m.structure.id === structureId,
+  )
+  const showFinder = !structureId || finding
   const withId = names.filter(n => canFindStructures(n))
   const typed = accession.trim()
+  const knownAccession = model.residueMappings.find(
+    m => m.row === current && m.accession,
+  )?.accession
   const noId =
     !typed &&
+    !knownAccession &&
     !accessionOfRowName(current) &&
     identifiersOfRowName(current).length === 0
   const found = lookup.state === 'done' && lookup.row === current
@@ -140,18 +150,19 @@ const StructureSection = observer(function StructureSection({
         <Typography component="h2" sx={{ fontSize: 16, fontWeight: 600 }}>
           Structure
         </Typography>
-        <Autocomplete
-          size="small"
-          sx={{ width: 260 }}
-          options={names}
-          value={current}
-          disableClearable
-          onChange={(_e, value) => {
-            setChosen(value)
-            reset()
-          }}
-          renderInput={params => <TextField {...params} label="Row" />}
-        />
+        {shownMapping ? (
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            {[
+              shownMapping.structure.id,
+              shownMapping.structure.asymId
+                ? `chain ${shownMapping.structure.asymId}`
+                : undefined,
+              shownMapping.row,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </Typography>
+        ) : null}
         {mapped.length > 1 ? (
           <Select
             size="small"
@@ -168,57 +179,99 @@ const StructureSection = observer(function StructureSection({
           </Select>
         ) : null}
         {structureId ? (
-          <>
-            <Select
-              size="small"
-              value={paintBy}
-              onChange={e => {
-                setColorBy(e.target.value)
-              }}
-            >
-              <MenuItem value="none">No coloring</MenuItem>
-              <MenuItem value="conservation">Column conservation</MenuItem>
-              <MenuItem value="scheme">Alignment colors</MenuItem>
-              {tracks.map(t => (
-                <MenuItem key={t.id} value={trackColorBy(t)}>
-                  Track: {t.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <Select
-              size="small"
-              value={representation ?? 'cartoon'}
-              onChange={e => {
-                setRepresentation(e.target.value)
-              }}
-            >
-              <MenuItem value="cartoon">Cartoon</MenuItem>
-              <MenuItem value="surface">Surface</MenuItem>
-            </Select>
-          </>
+          <Button
+            size="small"
+            aria-pressed={styling}
+            onClick={() => {
+              setStyling(!styling)
+            }}
+          >
+            Style
+          </Button>
+        ) : null}
+        {structureId ? (
+          <Button
+            size="small"
+            onClick={() => {
+              setFinding(!finding)
+            }}
+          >
+            {finding ? 'Hide search' : 'Find another structure…'}
+          </Button>
         ) : null}
       </Box>
 
-      {noId ? (
+      {structureId && styling ? (
+        <Box sx={{ ...row, mt: 1 }}>
+          <Select
+            size="small"
+            value={paintBy}
+            onChange={e => {
+              setColorBy(e.target.value)
+            }}
+          >
+            <MenuItem value="none">
+              {shownIds.length > 1 ? 'By structure' : 'By chain'}
+            </MenuItem>
+            <MenuItem value="conservation">Column conservation</MenuItem>
+            <MenuItem value="scheme">Alignment colors</MenuItem>
+            {tracks.map(t => (
+              <MenuItem key={t.id} value={trackColorBy(t)}>
+                Track: {t.name}
+              </MenuItem>
+            ))}
+          </Select>
+          <Select
+            size="small"
+            value={representation ?? 'cartoon'}
+            onChange={e => {
+              setRepresentation(e.target.value)
+            }}
+          >
+            <MenuItem value="cartoon">Cartoon</MenuItem>
+            <MenuItem value="surface">Surface</MenuItem>
+          </Select>
+        </Box>
+      ) : null}
+
+      {showFinder ? (
+        <Box sx={{ ...row, mt: 1 }}>
+          <Autocomplete
+            size="small"
+            sx={{ width: 260 }}
+            options={names}
+            value={current}
+            disableClearable
+            onChange={(_e, value) => {
+              setChosen(value)
+              reset()
+            }}
+            renderInput={params => <TextField {...params} label="Row" />}
+          />
+        </Box>
+      ) : null}
+      {showFinder && noId ? (
         <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
           {current} is not a database id. Type a UniProt accession, or search by
           sequence for similar folds.
         </Typography>
       ) : null}
       <Box sx={{ ...row, mt: 1 }}>
-        <Button
-          variant="contained"
-          size="small"
-          disableElevation
-          disabled={lookup.state === 'loading' || (noId && !typed)}
-          title="Looks the id up in UniProt, then finds the AlphaFold DB model and the PDB entries"
-          onClick={() => {
-            void find(current, accession)
-          }}
-        >
-          Find structure
-        </Button>
-        {showAccession ? (
+        {showFinder ? (
+          <Button
+            variant="contained"
+            size="small"
+            disableElevation
+            disabled={lookup.state === 'loading' || (noId && !typed)}
+            title="Looks the id up in UniProt, then finds the AlphaFold DB model and the PDB entries"
+            onClick={() => {
+              void find(current, typed === '' ? (knownAccession ?? '') : typed)
+            }}
+          >
+            Find structure
+          </Button>
+        ) : null}
+        {showFinder && showAccession ? (
           <TextField
             size="small"
             label="UniProt accession"
@@ -230,7 +283,7 @@ const StructureSection = observer(function StructureSection({
             sx={{ width: 170 }}
           />
         ) : null}
-        {noId ? (
+        {showFinder && noId ? (
           <Button
             variant="contained"
             color="secondary"
