@@ -164,3 +164,46 @@ test('a band scrolled off the left keeps its label in frame', async () => {
   expect(label.x).toBeGreaterThanOrEqual(0)
   expect(label.x).toBeLessThan(model.msaCanvasWidth)
 })
+
+async function exportBracket(includeTracks: boolean) {
+  const model = MSAModelF().create({
+    id: 'highlight-bracket-test',
+    type: 'MsaView',
+    height: 400,
+    msaFormat: 'fasta',
+    data: { msa },
+    highlights: [
+      {
+        start: 3,
+        end: 5,
+        label: 'motif',
+        color: 'rgba(1, 2, 3, 0.2)',
+        mark: 'bracket',
+      },
+    ],
+  })
+  model.setWidth(800)
+  model.setHoveredHighlight(model.resolvedHighlights[0]!.key)
+  const svg = await renderToSvg(model, {
+    theme: createJBrowseTheme(),
+    exportType: 'entire',
+    includeTracks,
+  })
+  return { model, svg }
+}
+
+test('a bracket exports its strip and an opaque outline, and no hover', async () => {
+  const { svg } = await exportBracket(true)
+  expect(labels(svg).filter(l => l.text === 'motif')).toHaveLength(1)
+  expect(svg).toContain('rgb(1, 2, 3)')
+  expect(svg).not.toContain('rgba(0, 0, 0, 0.08)')
+  expect(svg).not.toContain('bold 11px')
+})
+
+test('a bracket exported without its strip draws as a labeled band', async () => {
+  const { model, svg } = await exportBracket(false)
+  const band = rects(svg).find(r => r.includes('fill-opacity="0.2"'))
+  expect(band).toContain(`x="${2 * model.colWidth}"`)
+  expect(band).toContain(`width="${3 * model.colWidth}"`)
+  expect(svg).toContain('>motif<')
+})

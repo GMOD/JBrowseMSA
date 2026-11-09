@@ -3,6 +3,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 
 import { columnLogoStack } from '../../sequenceLogo.ts'
+import { HighlightReadout } from '../HighlightReadout.tsx'
 import { barTrackValues } from './drawTracks.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -115,6 +116,19 @@ function ArcTooltip({
   )
 }
 
+function HighlightTooltip({ model }: { model: MsaViewModel }) {
+  const { hoveredHighlight, resolvedHighlights } = model
+  const highlight = resolvedHighlights.find(h => h.key === hoveredHighlight)
+  return highlight ? (
+    <div>
+      <HighlightReadout highlight={highlight} />
+      <span style={{ opacity: 0.7 }}>
+        Click to select, double-click to zoom
+      </span>
+    </div>
+  ) : null
+}
+
 /**
  * One track's reading at the hovered column: a bar track's value, the logo's
  * information content and composition, the columns an arc joins, the letter on a
@@ -143,6 +157,9 @@ const TrackTooltipContent = observer(function ({
     }
     case 'arc': {
       return <ArcTooltip model={model} track={track} col={col} />
+    }
+    case 'highlights': {
+      return <HighlightTooltip model={model} />
     }
     case 'ruler': {
       return (

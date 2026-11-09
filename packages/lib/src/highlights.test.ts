@@ -27,8 +27,8 @@ function makeModel(highlights: Record<string, unknown>[]) {
 
 test('a column span is 1-based and lands on 0-based visible columns', () => {
   const model = makeModel([{ start: 2, end: 4, label: 'x' }])
-  expect(model.resolvedHighlights).toEqual([
-    { startCol: 1, endCol: 3, rowIndices: [], label: 'x', color: undefined },
+  expect(model.resolvedHighlights).toMatchObject([
+    { startCol: 1, endCol: 3, rowIndices: [], label: 'x' },
   ])
 })
 
@@ -56,7 +56,7 @@ test('hidden columns shift a span and drop one they swallow whole', () => {
 
 test('a row set resolves to row indices and ignores unknown names', () => {
   const model = makeModel([{ rows: ['seq3', 'nope', 'seq1'], color: 'red' }])
-  expect(model.resolvedHighlights).toEqual([
+  expect(model.resolvedHighlights).toMatchObject([
     { rowIndices: [2, 0], label: undefined, color: 'red' },
   ])
   expect(makeModel([{ rows: ['nope'] }]).resolvedHighlights).toEqual([])
@@ -113,4 +113,49 @@ test('a transient highlight resolves like a persisted one, and stays out of the 
     model.resolvedHighlights.map(h => [h.label, h.startCol, h.endCol]),
   ).toEqual([['residue 3', 4, 4]])
   expect(getSnapshot(model)).not.toHaveProperty('transientHighlights')
+})
+
+test('only bracket-mark highlights make a highlight strip', () => {
+  const banded = makeModel([{ start: 2, end: 4, label: 'band' }])
+  expect(banded.tracks.some(t => t.model.kind === 'highlights')).toBe(false)
+  const bracketed = makeModel([
+    { start: 2, end: 4, label: 'outer', mark: 'bracket' },
+    { start: 3, end: 3, label: 'inner', mark: 'bracket' },
+  ])
+  const strip = bracketed.tracks.find(t => t.model.kind === 'highlights')
+  expect(strip?.model.bands?.map(b => [b.label, b.lane])).toEqual([
+    ['outer', 0],
+    ['inner', 1],
+  ])
+})
+
+test('the hovered bracket follows its record when columns hide, and clears on a new list', () => {
+  const model = makeModel([
+    { start: 3, end: 3, label: 'gone', mark: 'bracket' },
+    { start: 5, end: 6, label: 'after', mark: 'bracket' },
+  ])
+  const key = model.resolvedHighlights.find(h => h.label === 'after')!.key
+  model.setHoveredHighlight(key)
+  model.setHideGaps(true)
+  model.setAllowedGappyness(50)
+  expect(
+    model.resolvedHighlights.find(h => h.key === model.hoveredHighlight)?.label,
+  ).toBe('after')
+  model.setHighlights([])
+  expect(model.hoveredHighlight).toBeUndefined()
+})
+
+test('hovering a cell lists the column spans covering it', () => {
+  const model = makeModel([
+    { start: 2, end: 5, label: 'outer' },
+    { start: 4, end: 4, label: 'inner', mark: 'bracket' },
+    { rows: ['seq1'], label: 'rows' },
+  ])
+  model.setMousePos(3, 0)
+  expect(model.mouseOverHighlights.map(h => h.label)).toEqual([
+    'outer',
+    'inner',
+  ])
+  model.setMousePos(3, undefined)
+  expect(model.mouseOverHighlights).toEqual([])
 })

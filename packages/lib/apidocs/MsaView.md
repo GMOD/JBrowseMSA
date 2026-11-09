@@ -243,8 +243,9 @@ highlightColumns: types.frozen<number[] | undefined>()
 
 labeled highlights in 1-based inclusive coordinates: a column span
 `{start, end}`, a residue span `{row, start, end}` of a named row, or a row set
-`{rows}`, each with an optional `label` and `color`. Persists in the snapshot
-and the URL.
+`{rows}`, each with an optional `label` and `color`. A span's `mark` is `band`
+(the default) or `bracket`, a labeled bracket in the strip above the alignment.
+Persists in the snapshot and the URL.
 
 ```js
 highlights: stripDefault(types.array(types.frozen<Highlight>()), [])
@@ -550,6 +551,14 @@ session or a page that refetches them. `unshareableData` then reports nothing
 
 ```js
 hostCarriesData: false
+```
+
+#### volatile: hoveredHighlight
+
+`key` of the highlight whose bracket the pointer is over
+
+```js
+hoveredHighlight: undefined as string | undefined
 ```
 
 #### volatile: hoveredTreeNode
@@ -1131,6 +1140,15 @@ highlightedColumnRuns: {
 ;[]
 ```
 
+#### getter: highlightTrackModels
+
+the column-span highlights as labeled brackets, last so they sit against the
+alignment their bands cross
+
+```js
+highlightTrackModels: BasicTrack[]
+```
+
 #### getter: hostRestoresData
 
 whether the host restores the loaded documents outside the snapshot. When true,
@@ -1276,6 +1294,14 @@ span each box is drawn at (so it matches the overlay across gaps)
 
 ```js
 mouseOverDomains: Annotation[]
+```
+
+#### getter: mouseOverHighlights
+
+the column-span highlights over the hovered cell of the alignment
+
+```js
+mouseOverHighlights: ResolvedHighlight[]
 ```
 
 #### getter: mouseOverRowName
@@ -2533,6 +2559,12 @@ declare that this host restores the loaded documents itself, which keeps
 
 ```js
 setHostCarriesData: (arg: boolean) => void
+```
+
+#### action: setHoveredHighlight
+
+```js
+setHoveredHighlight: (key?: string | undefined) => void
 ```
 
 #### action: setHoveredTreeNode

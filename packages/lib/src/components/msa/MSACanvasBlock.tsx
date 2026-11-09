@@ -5,6 +5,7 @@ import { observer } from 'mobx-react'
 
 import { useCanvasTheme } from '../../darkReader.ts'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
+import { HighlightReadout } from '../HighlightReadout.tsx'
 import { drawMsaRaster, rasterApplies } from './msaRaster.ts'
 import { renderMSABlock } from './renderMSABlock.ts'
 import { useMsaBlockMouse } from './useMsaBlockMouse.ts'
@@ -63,7 +64,7 @@ const MSACanvasBlock = observer(function ({
     deps: [model, offsetX, offsetY, theme],
   })
 
-  const { hoveredInsertion, mouseOverDomains } = model
+  const { hoveredInsertion, mouseOverDomains, mouseOverHighlights } = model
 
   return (
     <>
@@ -108,17 +109,22 @@ const MSACanvasBlock = observer(function ({
                 : hoveredInsertion.letters}
             </>
           ) : (
-            mouseOverDomains.map(d => (
-              <div key={`${d.accession}-${d.start}-${d.end}`}>
-                <b>{d.name}</b> ({d.accession}) {d.start}-{d.end}
-                {d.description ? (
-                  <>
-                    <br />
-                    {d.description}
-                  </>
-                ) : null}
-              </div>
-            ))
+            <>
+              {mouseOverHighlights.map((h, i) => (
+                <HighlightReadout key={`highlight-${i}`} highlight={h} />
+              ))}
+              {mouseOverDomains.map(d => (
+                <div key={`${d.accession}-${d.start}-${d.end}`}>
+                  <b>{d.name}</b> ({d.accession}) {d.start}-{d.end}
+                  {d.description ? (
+                    <>
+                      <br />
+                      {d.description}
+                    </>
+                  ) : null}
+                </div>
+              ))}
+            </>
           )}
         </BaseTooltip>
       ) : null}

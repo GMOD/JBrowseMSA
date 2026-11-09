@@ -60,43 +60,50 @@
           "row": "SARS-CoV-2",
           "start": 319,
           "end": 541,
-          "label": "RBD"
+          "label": "RBD",
+          "mark": "bracket"
         },
         {
           "row": "SARS-CoV-2",
           "start": 437,
           "end": 508,
-          "label": "RBM"
+          "label": "RBM",
+          "mark": "bracket"
         },
         {
           "row": "SARS-CoV-2",
           "start": 681,
           "end": 684,
-          "label": "PRRA insert"
+          "label": "PRRA insert",
+          "mark": "bracket"
         },
         {
           "row": "SARS-CoV-2",
           "start": 685,
           "end": 686,
-          "label": "Furin cleavage"
+          "label": "Furin cleavage",
+          "mark": "bracket"
         },
         {
           "row": "SARS-CoV-2",
           "start": 816,
           "end": 837,
-          "label": "Fusion peptide"
+          "label": "Fusion peptide",
+          "mark": "bracket"
         },
         {
           "row": "SARS-CoV-2",
           "start": 920,
           "end": 970,
-          "label": "HR1"
+          "label": "HR1",
+          "mark": "bracket"
         },
         {
           "row": "SARS-CoV-2",
           "start": 1163,
           "end": 1202,
-          "label": "HR2"
+          "label": "HR2",
+          "mark": "bracket"
         }
       ],
       "residueMappings": [

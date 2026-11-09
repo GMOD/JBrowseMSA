@@ -195,6 +195,22 @@ alignment. A range that lands entirely on hidden gappy columns draws nothing;
 one that straddles them shrinks to the visible part. The viewer ignores row
 names that match no row.
 
+`"mark": "bracket"` draws a range as an outline over the alignment, which keeps
+the residue and domain colors under it, plus a labeled bracket in a Highlights
+strip above the first row. Nested and overlapping brackets stack into lanes,
+and a single residue draws as a triangle. Hovering a bracket outlines its
+columns; a click selects them and a double click zooms to them. The default,
+`"band"`, fills the range and labels it at the top. Hovering a cell lists every
+range covering it, with its residues and its alignment columns, for either
+mark. Turning the Highlights strip off draws the brackets as bands.
+
+```json
+"highlights": [
+  { "row": "SARS-CoV-2", "start": 319, "end": 541, "label": "RBD", "mark": "bracket" },
+  { "row": "SARS-CoV-2", "start": 437, "end": 508, "label": "RBM", "mark": "bracket" }
+]
+```
+
 React: the `highlights` prop on `MSAViewer`, or `model.setHighlights(list)`. R:
 `msaview(highlights = list(list(row = "human", start = 248, end = 248)))`.
 

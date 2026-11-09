@@ -29,7 +29,16 @@ const TrackBlock = observer(function ({
     draw: ctx => {
       ctx.resetTransform()
       ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-      drawTrackBlock({ model, ctx, track, offsetX, theme })
+      const strip = track.model.kind === 'highlights'
+      drawTrackBlock({
+        model,
+        ctx,
+        track,
+        offsetX,
+        theme,
+        viewLeft: strip ? -model.scrollX : undefined,
+        hoveredHighlight: strip ? model.hoveredHighlight : undefined,
+      })
     },
     width: canvasWidth,
     height: canvasHeight,

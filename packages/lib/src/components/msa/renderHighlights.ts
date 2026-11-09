@@ -1,10 +1,12 @@
 import { setFontSize } from '../../setFontSize.ts'
 import {
+  highlightHoverWash,
   referenceColor,
   selectionBorder,
   selectionFill,
 } from '../overlayColors.ts'
 import { fillRowRuns, rowRuns, visibleRowRange } from '../rowBands.ts'
+import { opaqueColor } from '../tracks/highlightBands.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { RenderCtx } from '../renderCtx.ts'
@@ -83,6 +85,13 @@ export function drawHighlightLabel({
   ctx.fillText(label, left + labelPad, top + labelPad + labelFontSize - 2)
 }
 
+// whether the highlight strip draws the bracket-mark highlights' labels, so
+// their bands over the alignment need none. With the strip turned off they
+// draw as bands, so their labels still show somewhere.
+export function highlightStripShown(model: MsaViewModel) {
+  return model.turnedOnTracks.some(t => t.model.kind === 'highlights')
+}
+
 export function renderReferenceRow(area: RowBandArea, model: MsaViewModel) {
   const { referenceRowIndex } = model
   if (referenceRowIndex !== undefined) {
@@ -143,6 +152,8 @@ export function renderHighlights({
   offsetY,
   width,
   height,
+  stripShown = highlightStripShown(model),
+  hoveredHighlight,
 }: {
   ctx: RenderCtx
   model: MsaViewModel
@@ -151,8 +162,12 @@ export function renderHighlights({
   offsetY: number
   width: number
   height: number
+  stripShown?: boolean
+  // the live overlay passes the pointer's; an export passes none
+  hoveredHighlight?: string
 }) {
-  const { resolvedClades, resolvedHighlights, colWidth, rowHeight } = model
+  const { resolvedClades, resolvedHighlights, colWidth, rowHeight, numRows } =
+    model
   const area = {
     ctx,
     rowHeight,
@@ -170,8 +185,16 @@ export function renderHighlights({
   }
   renderRowWashes(area, model, { reference: false })
   const placed: LabelBox[] = []
-  ctx.lineWidth = 2
-  for (const { startCol, endCol, label, color } of resolvedHighlights) {
+  const bandHeight = Math.min(height, numRows * rowHeight - offsetY)
+  for (const {
+    startCol,
+    endCol,
+    label,
+    color,
+    mark,
+    transient,
+    key,
+  } of resolvedHighlights) {
     if (startCol === undefined || endCol === undefined) {
       continue
     }
@@ -180,6 +203,20 @@ export function renderHighlights({
     if (x + spanWidth <= 0 || x >= width) {
       continue
     }
+    if (stripShown && mark === 'bracket' && !transient) {
+      const hovered = key === hoveredHighlight
+      if (hovered) {
+        ctx.fillStyle = highlightHoverWash
+        ctx.fillRect(x, 0, spanWidth, bandHeight)
+      }
+      ctx.lineWidth = hovered ? 2.5 : 1
+      ctx.strokeStyle = color
+        ? opaqueColor(color)
+        : theme.palette.text.secondary
+      ctx.strokeRect(x, 0, spanWidth, bandHeight)
+      continue
+    }
+    ctx.lineWidth = 2
     ctx.fillStyle = color ?? highlightFill
     ctx.fillRect(x, 0, spanWidth, height)
     ctx.strokeStyle = color ?? highlightBorder
@@ -250,6 +287,8 @@ export function renderPersistentHighlights({
   offsetY,
   width,
   height,
+  stripShown = highlightStripShown(model),
+  hoveredHighlight,
 }: {
   ctx: RenderCtx
   model: MsaViewModel
@@ -258,6 +297,9 @@ export function renderPersistentHighlights({
   offsetY: number
   width: number
   height: number
+  stripShown?: boolean
+  // the live overlay passes the pointer's; an export passes none
+  hoveredHighlight?: string
 }) {
   const { colWidth, rowHeight, highlightedColumnRuns } = model
   renderReferenceRow(
@@ -274,5 +316,15 @@ export function renderPersistentHighlights({
     ctx.strokeRect(x, 0, w, height)
   }
 
-  renderHighlights({ ctx, model, theme, offsetX, offsetY, width, height })
+  renderHighlights({
+    ctx,
+    model,
+    theme,
+    offsetX,
+    offsetY,
+    width,
+    height,
+    stripShown,
+    hoveredHighlight,
+  })
 }

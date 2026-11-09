@@ -31,6 +31,10 @@ import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
 import { columnStats } from './columnStats.ts'
 import { packDomainLanes } from './components/msa/packDomainLanes.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
+import {
+  highlightTrackHeight,
+  packHighlightBands,
+} from './components/tracks/highlightBands.ts'
 import { cladeGutterWidth } from './components/tree/cladeBrackets.ts'
 import { scaleBarLength } from './components/tree/scaleBar.ts'
 import {
@@ -669,7 +673,9 @@ function stateModelFactory({
          * labeled highlights in 1-based inclusive coordinates: a column span
          * `{start, end}`, a residue span `{row, start, end}` of a named row,
          * or a row set `{rows}`, each with an optional `label` and `color`.
-         * Persists in the snapshot and the URL.
+         * A span's `mark` is `band` (the default) or `bracket`, a labeled
+         * bracket in the strip above the alignment. Persists in the snapshot
+         * and the URL.
          */
         highlights: stripDefault(types.array(types.frozen<Highlight>()), []),
         /**
@@ -813,6 +819,11 @@ function stateModelFactory({
        * the currently mouse-hovered column
        */
       mouseCol: undefined as number | undefined,
+      /**
+       * #volatile
+       * `key` of the highlight whose bracket the pointer is over
+       */
+      hoveredHighlight: undefined as string | undefined,
 
       /**
        * #volatile
@@ -1009,6 +1020,12 @@ function stateModelFactory({
         self.mouseCol = col
         self.mouseRow = row
       },
+      /**
+       * #action
+       */
+      setHoveredHighlight(key?: string) {
+        self.hoveredHighlight = key
+      },
 
       /**
        * #action
@@ -1032,6 +1049,7 @@ function stateModelFactory({
        */
       setHighlights(highlights: Highlight[]) {
         self.highlights.replace(highlights)
+        self.hoveredHighlight = undefined
       },
       /**
        * #action
@@ -2597,6 +2615,69 @@ function stateModelFactory({
             ]
       },
 
+      /**
+       * #method
+       * a highlight label with `{residue}` and `{position}` filled in from the
+       * row's letter at `start`, which is how the `175` shorthand draws "R175"
+       */
+      fillHighlightLabel(label: string, row?: string, start?: number) {
+        if (!label.includes('{')) {
+          return label
+        }
+        const col =
+          row && start !== undefined
+            ? self.seqPosIndex(row)?.[start - 1]
+            : undefined
+        const residue =
+          row && col !== undefined ? (self.MSA?.getRow(row)[col] ?? '') : ''
+        return label
+          .replaceAll('{residue}', residue)
+          .replaceAll('{position}', start === undefined ? '' : String(start))
+      },
+
+      /**
+       * #getter
+       * `highlights` projected onto what is on screen: residue spans go
+       * through the named row's gap structure, column spans through the
+       * hidden-column list, and a span that lands entirely on hidden columns
+       * is dropped. Row names that match no row are ignored.
+       */
+      get resolvedHighlights(): ResolvedHighlight[] {
+        const { rowNamesSet, transientHighlights } = self
+        // persisted highlights first, so transient ones draw on top
+        const all = [
+          ...self.highlights.map(h => ({ ...h, transient: false })),
+          ...Object.values(transientHighlights)
+            .flat()
+            .map(h => ({ ...h, transient: true })),
+        ]
+        return all.flatMap(
+          ({ row, rows, start, end, label, color, mark, transient }) => {
+            const base = {
+              label: label && this.fillHighlightLabel(label, row, start),
+              color,
+              row,
+              start,
+              end,
+              mark: mark ?? 'band',
+              transient,
+              key: JSON.stringify([row, rows, start, end, label, transient]),
+            }
+            if (rows) {
+              const rowIndices = rows
+                .map(name => rowNamesSet.get(name))
+                .filter(notEmpty)
+              return rowIndices.length ? [{ ...base, rowIndices }] : []
+            }
+            if (start === undefined || end === undefined) {
+              return []
+            }
+            const span = this.visibleSpan({ row, start, end })
+            return span ? [{ ...base, ...span, rowIndices: [] }] : []
+          },
+        )
+      },
+
       get tracks(): BasicTrack[] {
         return [
           ...this.adapterTrackModels,
@@ -2606,7 +2687,30 @@ function stateModelFactory({
           // GFF and a features panel draw a figure with none
           ...(self.numColumns > 0 ? this.computedTrackModels : []),
           ...this.referenceTrackModels,
+          ...this.highlightTrackModels,
         ]
+      },
+
+      /**
+       * #getter
+       * the column-span highlights as labeled brackets, last so they sit
+       * against the alignment their bands cross
+       */
+      get highlightTrackModels(): BasicTrack[] {
+        const bands = packHighlightBands(this.resolvedHighlights)
+        return bands.length === 0
+          ? []
+          : [
+              {
+                model: {
+                  id: 'highlight-brackets',
+                  name: 'Highlights',
+                  kind: 'highlights' as const,
+                  height: highlightTrackHeight(bands),
+                  bands,
+                },
+              },
+            ]
       },
 
       /**
@@ -3907,6 +4011,23 @@ function stateModelFactory({
 
       /**
        * #getter
+       * the column-span highlights over the hovered cell of the alignment
+       */
+      get mouseOverHighlights() {
+        const { mouseCol, mouseRow } = self
+        return mouseCol === undefined || mouseRow === undefined
+          ? []
+          : self.resolvedHighlights.filter(
+              h =>
+                h.startCol !== undefined &&
+                h.endCol !== undefined &&
+                mouseCol >= h.startCol &&
+                mouseCol <= h.endCol,
+            )
+      },
+
+      /**
+       * #getter
        * row index of the reference row (`relativeTo`), undefined when unset
        */
       get referenceRowIndex() {
@@ -3941,59 +4062,6 @@ function stateModelFactory({
         return consecutiveRuns(
           [...(self.highlightedColumns ?? [])].toSorted((a, b) => a - b),
         ).map(([start, end]) => ({ start, end }))
-      },
-
-      /**
-       * #method
-       * a highlight label with `{residue}` and `{position}` filled in from the
-       * row's letter at `start`, which is how the `175` shorthand draws "R175"
-       */
-      fillHighlightLabel(label: string, row?: string, start?: number) {
-        if (!label.includes('{')) {
-          return label
-        }
-        const col =
-          row && start !== undefined
-            ? self.seqPosIndex(row)?.[start - 1]
-            : undefined
-        const residue =
-          row && col !== undefined ? (self.MSA?.getRow(row)[col] ?? '') : ''
-        return label
-          .replaceAll('{residue}', residue)
-          .replaceAll('{position}', start === undefined ? '' : String(start))
-      },
-
-      /**
-       * #getter
-       * `highlights` projected onto what is on screen: residue spans go
-       * through the named row's gap structure, column spans through the
-       * hidden-column list, and a span that lands entirely on hidden columns
-       * is dropped. Row names that match no row are ignored.
-       */
-      get resolvedHighlights(): ResolvedHighlight[] {
-        const { rowNamesSet, transientHighlights } = self
-        // persisted highlights first, so transient ones draw on top
-        const all = [
-          ...self.highlights,
-          ...Object.values(transientHighlights).flat(),
-        ]
-        return all.flatMap(({ row, rows, start, end, label, color }) => {
-          const base = {
-            label: label && this.fillHighlightLabel(label, row, start),
-            color,
-          }
-          if (rows) {
-            const rowIndices = rows
-              .map(name => rowNamesSet.get(name))
-              .filter(notEmpty)
-            return rowIndices.length ? [{ ...base, rowIndices }] : []
-          }
-          if (start === undefined || end === undefined) {
-            return []
-          }
-          const span = self.visibleSpan({ row, start, end })
-          return span ? [{ ...base, ...span, rowIndices: [] }] : []
-        })
       },
 
       /**
@@ -4440,6 +4508,7 @@ function stateModelFactory({
         self.setMousePos(undefined, undefined)
         self.setMouseClickPos(undefined, undefined)
         self.setHoveredTreeNode(undefined)
+        self.setHoveredHighlight(undefined)
       },
       /**
        * #action

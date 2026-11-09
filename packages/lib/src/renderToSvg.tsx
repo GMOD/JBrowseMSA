@@ -7,7 +7,10 @@ import { visibleRowRange } from './components/getVisibleLeaves.ts'
 import MinimapSVG from './components/minimap/MinimapSVG.tsx'
 import { legendRows } from './components/msa/legendRows.ts'
 import { rasterApplies, rasterImageHref } from './components/msa/msaRaster.ts'
-import { renderPersistentHighlights } from './components/msa/renderHighlights.ts'
+import {
+  highlightStripShown,
+  renderPersistentHighlights,
+} from './components/msa/renderHighlights.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import { headerRunsAcross } from './components/rowpanels/headerLayout.ts'
@@ -436,6 +439,7 @@ function CoreRendering({ model, theme, layout, Context, layers }: LayerProps) {
     offsetY,
     width: msaAreaWidth,
     height: contentHeight,
+    stripShown: layout.trackHeight > 0 && highlightStripShown(model),
   })
 
   return (

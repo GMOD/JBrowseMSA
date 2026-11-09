@@ -20,3 +20,7 @@ export const clickColor = 'rgba(128,128,0,0.2)'
 // the selected block, a blue that reads apart from the orange highlights
 export const selectionFill = 'rgba(25,118,210,0.22)'
 export const selectionBorder = 'rgba(25,118,210,0.95)'
+
+// the band of the highlight whose bracket the pointer is over; neutral, so it
+// reads apart from both the highlight's own color and the selection's blue
+export const highlightHoverWash = 'rgba(0,0,0,0.08)'

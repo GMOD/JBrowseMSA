@@ -13,7 +13,14 @@ export interface Accession {
 }
 // every kind draws into the same per-column space; drawTracks.ts dispatches on
 // it to pick the draw function
-export type TrackKind = 'text' | 'bar' | 'logo' | 'arc' | 'ruler' | 'reference'
+export type TrackKind =
+  | 'text'
+  | 'bar'
+  | 'logo'
+  | 'arc'
+  | 'ruler'
+  | 'reference'
+  | 'highlights'
 
 /**
  * Which channel the color scheme paints. `fill` colors the cell a residue sits
@@ -65,8 +72,30 @@ export interface ArcTrackModel extends BasicTrackModel {
   arcColor?: string
 }
 
+/**
+ * A bracket-mark highlight placed in the highlight strip: its `key` in
+ * `resolvedHighlights`, its visible columns, and the lane it stacks into.
+ * `nextStartCol` is where the next bracket in its lane starts, as far as its
+ * label may run.
+ */
+export interface HighlightBand {
+  key: string
+  startCol: number
+  endCol: number
+  lane: number
+  nextStartCol?: number
+  label?: string
+  color?: string
+}
+
+// labeled brackets over the columns each highlight covers, one lane per level
+// of overlap
+export interface HighlightTrackModel extends BasicTrackModel {
+  bands?: HighlightBand[]
+}
+
 export interface BasicTrack {
-  model: TextTrackModel & BarTrackModel & ArcTrackModel
+  model: TextTrackModel & BarTrackModel & ArcTrackModel & HighlightTrackModel
 }
 
 // one arc of an arc track, in the snapshot's own coordinates: 1-based and
@@ -346,6 +375,14 @@ export interface Legend {
  * GFF's are. `row` makes `start`/`end` residues of that row; without it they
  * are alignment columns. `rows` marks whole rows instead.
  */
+/**
+ * How a column-span highlight draws. `band` fills its columns across the
+ * alignment, with its label in a box at the top. `bracket` outlines them and
+ * draws a labeled bracket in a strip above the alignment, packed into lanes so
+ * nested highlights stay apart, and leaves the residue colors unchanged.
+ */
+export type HighlightMark = 'band' | 'bracket'
+
 export interface Highlight {
   row?: string
   rows?: string[]
@@ -353,6 +390,7 @@ export interface Highlight {
   end?: number
   label?: string
   color?: string
+  mark?: HighlightMark
 }
 
 /**
@@ -548,6 +586,16 @@ export interface ResolvedHighlight {
   rowIndices: number[]
   label?: string
   color?: string
+  row?: string
+  start?: number
+  end?: number
+  mark: HighlightMark
+  // set by host code through applyHighlight, outside the snapshot. Always a
+  // band, so a highlight that follows the pointer never reflows the strip
+  transient: boolean
+  // the same for the same record across recomputes, which a position in the
+  // list is not once a span lands on hidden columns
+  key: string
 }
 
 export interface Node {

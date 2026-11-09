@@ -3,10 +3,17 @@ import { setFontSize } from '../../setFontSize.ts'
 import { contrastTextFn } from '../../util.ts'
 import { tileColorFn } from '../msa/tileColor.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
+import {
+  highlightLabelFontSize,
+  highlightLabelX,
+  highlightLaneHeight,
+  highlightMarkerHalfWidth,
+  opaqueColor,
+} from './highlightBands.ts'
 
 import type { ColumnCounts } from '../../columnCounts.ts'
 import type { MsaViewModel } from '../../model.ts'
-import type { Arc, BasicTrack } from '../../types.ts'
+import type { Arc, BasicTrack, HighlightBand } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
@@ -298,6 +305,74 @@ function drawSequenceLogo({
   }
 }
 
+function drawHighlightBrackets({
+  ctx,
+  bands,
+  hovered,
+  defaultColor,
+  colWidth,
+  offsetX,
+  blockSize,
+  viewLeft,
+}: {
+  ctx: RenderCtx
+  bands: HighlightBand[]
+  hovered?: string
+  defaultColor: string
+  colWidth: number
+  offsetX: number
+  blockSize: number
+  viewLeft: number
+}) {
+  ctx.textAlign = 'start'
+  ctx.textBaseline = 'alphabetic'
+  for (const band of bands) {
+    const { key, startCol, endCol, nextStartCol, lane, label, color } = band
+    const x0 = startCol * colWidth
+    const reach = (nextStartCol ?? endCol + 1) * colWidth
+    if (
+      reach < offsetX ||
+      x0 - highlightMarkerHalfWidth > offsetX + blockSize
+    ) {
+      continue
+    }
+    const isHovered = key === hovered
+    const ink = color ? opaqueColor(color) : defaultColor
+    const barY = (lane + 1) * highlightLaneHeight - 3
+    ctx.strokeStyle = ink
+    ctx.fillStyle = ink
+    ctx.lineWidth = isHovered ? 2.5 : 1.5
+    ctx.beginPath()
+    if (startCol === endCol) {
+      const mid = x0 + colWidth / 2
+      ctx.moveTo(mid - highlightMarkerHalfWidth, barY - 7)
+      ctx.lineTo(mid + highlightMarkerHalfWidth, barY - 7)
+      ctx.lineTo(mid, barY)
+      ctx.closePath()
+      ctx.fill()
+    } else {
+      const x1 = (endCol + 1) * colWidth
+      ctx.moveTo(x0 + 0.75, barY - 6)
+      ctx.lineTo(x0 + 0.75, barY)
+      ctx.lineTo(x1 - 0.75, barY)
+      ctx.lineTo(x1 - 0.75, barY - 6)
+      ctx.stroke()
+    }
+    if (label) {
+      setFontSize(ctx, highlightLabelFontSize, isHovered)
+      const x = highlightLabelX({
+        band,
+        labelWidth: ctx.measureText(label).width,
+        colWidth,
+        viewLeft,
+      })
+      if (x !== undefined) {
+        ctx.fillText(label, x, barY - 3)
+      }
+    }
+  }
+}
+
 /**
  * Draw one track's content into a block of the alignment's column space, at
  * `offsetY` within the ctx. Owns the transform, so the live canvas blocks and
@@ -313,6 +388,8 @@ export function drawTrackBlock({
   theme,
   blockSizeXOverride,
   highResScaleFactorOverride,
+  viewLeft,
+  hoveredHighlight,
 }: {
   model: MsaViewModel
   ctx: RenderCtx
@@ -322,6 +399,12 @@ export function drawTrackBlock({
   theme: Theme
   blockSizeXOverride?: number
   highResScaleFactorOverride?: number
+  // the content x at the visible left edge, where a scrolled-off highlight
+  // keeps its label
+  viewLeft?: number
+  // the highlight bracket to draw as hovered; the live strip passes the
+  // pointer's, and an export none
+  hoveredHighlight?: string
 }) {
   // an autorun tracks every model read here, so each kind reads only what it
   // draws and a vertical zoom leaves the bar and arc canvases alone
@@ -403,6 +486,19 @@ export function drawTrackBlock({
       })
       break
     }
+    case 'highlights': {
+      drawHighlightBrackets({
+        ctx,
+        bands: track.model.bands ?? [],
+        hovered: hoveredHighlight,
+        defaultColor: theme.palette.text.secondary,
+        colWidth,
+        offsetX,
+        blockSize: blockSizeX,
+        viewLeft: viewLeft ?? offsetX,
+      })
+      break
+    }
     case 'text':
     case 'reference': {
       const { bgColor, fontSize, rowHeight, showMsaLetters } = model
@@ -464,6 +560,7 @@ export function renderAllTracks({
       theme,
       blockSizeXOverride,
       highResScaleFactorOverride,
+      viewLeft: offsetX,
     })
     currentY += track.model.height
   }

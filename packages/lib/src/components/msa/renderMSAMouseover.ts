@@ -59,6 +59,7 @@ export function renderMouseover({
     offsetY: -scrollY,
     width,
     height,
+    hoveredHighlight: model.hoveredHighlight,
   })
   renderSelection({ ctx, model, offsetX: -scrollX, offsetY: -scrollY, height })
 

@@ -155,9 +155,19 @@ const Track = observer(function ({
   const ref = useRef<HTMLDivElement>(null)
   useWheelScroll({ ref, model, axes: 'x' })
   const { classes } = useStyles()
-  const { anchor, onMouseMove, onMouseDown, onMouseLeave } = useTrackHover({
+  const bands =
+    track.model.kind === 'highlights' ? (track.model.bands ?? []) : undefined
+  const {
+    anchor,
+    onMouseMove,
+    onMouseDown,
+    onClick,
+    onDoubleClick,
+    onMouseLeave,
+  } = useTrackHover({
     model,
-    tooltip: showColumnStats,
+    tooltip: showColumnStats || !!bands,
+    bands,
   })
 
   return (
@@ -172,7 +182,6 @@ const Track = observer(function ({
         ref={ref}
         data-testid={`track_${track.model.id}`}
         tabIndex={-1}
-        style={{ outline: 'none' }}
         onKeyDown={event => {
           if (onMsaKey(model, event)) {
             event.preventDefault()
@@ -188,9 +197,12 @@ const Track = observer(function ({
             onMouseDown(event, ref.current)
           }
         }}
+        onClick={onClick}
+        onDoubleClick={onDoubleClick}
         onMouseLeave={() => {
           onMouseLeave()
         }}
+        style={{ outline: 'none', cursor: bands ? 'pointer' : undefined }}
       >
         <TrackBlocks model={model} track={track} />
         {anchor ? (

@@ -61,7 +61,9 @@ export function useMsaBlockMouse({
     model.setMousePos(hit ? pos.col : undefined, hit ? pos.row : undefined)
 
     const hasTooltip =
-      !!model.hoveredInsertion || model.mouseOverDomains.length > 0
+      !!model.hoveredInsertion ||
+      model.mouseOverDomains.length > 0 ||
+      model.mouseOverHighlights.length > 0
     hoverAt(event, hasTooltip || undefined)
   }
 
