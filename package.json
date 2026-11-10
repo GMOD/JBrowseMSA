@@ -10,8 +10,8 @@
   "scripts": {
     "preinstall": "node scripts/only-pnpm.mjs",
     "dev": "pnpm --filter app dev",
-    "watch": "pnpm -r --parallel --filter svgcanvas --filter msa-parsers --filter react-msaview --filter app run '/^(watch|dev)$/'",
-    "build": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build && pnpm --filter react-msaview-cli build",
+    "watch": "pnpm -r --parallel --filter svgcanvas --filter msa-coordinates --filter msa-parsers --filter react-msaview --filter app run '/^(watch|dev)$/'",
+    "build": "pnpm --filter svgcanvas build && pnpm --filter msa-coordinates build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build && pnpm --filter react-msaview-cli build",
     "check:pack": "node scripts/check-pack.mjs",
     "check:media": "pnpm media:pull && node scripts/check-media-refs.mjs",
     "check:data": "node scripts/check-data-refs.mjs",
@@ -26,7 +26,7 @@
     "media:report": "node scripts/media-store/media.mjs report",
     "media:stale": "node scripts/media-store/media.mjs stale",
     "smoke:npm": "node scripts/npm-smoke.mjs",
-    "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",
+    "build:lib": "pnpm --filter svgcanvas build && pnpm --filter msa-coordinates build && pnpm --filter msa-parsers build && pnpm --filter react-msaview build:esm",
     "build:site": "pnpm media:pull && pnpm --filter website build",
     "build:pages": "pnpm build:lib && pnpm build:site && pnpm --filter app build && node scripts/assemble-pages.mjs",
     "clean": "pnpm -r run clean",
@@ -46,7 +46,7 @@
     "release:patch": "node scripts/release.js patch",
     "release:minor": "node scripts/release.js minor",
     "release:major": "node scripts/release.js major",
-    "attw": "pnpm -r --filter react-msaview --filter msa-parsers --filter @jbrowse/svgcanvas exec attw --pack . --ignore-rules cjs-resolves-to-esm"
+    "attw": "pnpm -r --filter react-msaview --filter msa-coordinates --filter msa-parsers --filter @jbrowse/svgcanvas exec attw --pack . --ignore-rules cjs-resolves-to-esm"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

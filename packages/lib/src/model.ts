@@ -17,17 +17,19 @@ import {
   transaction,
 } from 'mobx'
 import {
-  annotationTextToGFF,
   buildSeqPosIndex,
-  generateNodeIds,
-  gffToAnnotations,
   globalColToVisibleCol,
-  parseGFF,
-  parseMSA,
-  parseTree,
   seqPosOfGlobalCol,
   visibleColToGlobalCol,
   visibleColsBefore,
+} from 'msa-coordinates'
+import {
+  annotationTextToGFF,
+  generateNodeIds,
+  gffToAnnotations,
+  parseGFF,
+  parseMSA,
+  parseTree,
 } from 'msa-parsers'
 
 import { blockFasta } from './blockFasta.ts'

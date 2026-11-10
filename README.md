@@ -75,15 +75,16 @@ writes, as labelled boxes on the alignment:
 
 ## Packages
 
-| Package                                       | Description                                                    |
-| --------------------------------------------- | -------------------------------------------------------------- |
-| [packages/lib](packages/lib/)                 | Main react-msaview React component                             |
-| [website](website/)                           | Docs site (deployed at gmod.org/JBrowseMSA)                    |
-| [packages/app](packages/app/)                 | Demo application (deployed at gmod.org/JBrowseMSA/demo)        |
-| [packages/examples](packages/examples/)       | Live usage examples (deployed at gmod.org/JBrowseMSA/examples) |
-| [packages/cli](packages/cli/)                 | Domain/exon GFFs and headless SVG export                       |
-| [packages/msa-parsers](packages/msa-parsers/) | MSA file format parsers                                        |
-| [packages/svgcanvas](packages/svgcanvas/)     | SVG canvas rendering (ESM fork of svgcanvas)                   |
+| Package                                               | Description                                                    |
+| ----------------------------------------------------- | -------------------------------------------------------------- |
+| [packages/lib](packages/lib/)                         | Main react-msaview React component                             |
+| [website](website/)                                   | Docs site (deployed at gmod.org/JBrowseMSA)                    |
+| [packages/app](packages/app/)                         | Demo application (deployed at gmod.org/JBrowseMSA/demo)        |
+| [packages/examples](packages/examples/)               | Live usage examples (deployed at gmod.org/JBrowseMSA/examples) |
+| [packages/cli](packages/cli/)                         | Domain/exon GFFs and headless SVG export                       |
+| [packages/msa-parsers](packages/msa-parsers/)         | MSA file format parsers                                        |
+| [packages/msa-coordinates](packages/msa-coordinates/) | Alignment column and row residue conversions                   |
+| [packages/svgcanvas](packages/svgcanvas/)             | SVG canvas rendering (ESM fork of svgcanvas)                   |
 
 ## Development
 

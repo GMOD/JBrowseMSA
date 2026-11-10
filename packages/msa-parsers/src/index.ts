@@ -24,16 +24,6 @@ export {
 } from './msa/index.ts'
 export type { MSAFormat, MSAParserType } from './msa/index.ts'
 
-// Alignment column <-> row residue
-export {
-  buildSeqPosIndex,
-  globalColToVisibleCol,
-  residuesBefore,
-  seqPosOfGlobalCol,
-  visibleColToGlobalCol,
-  visibleColsBefore,
-} from './rowCoordinates.ts'
-
 // Overlay annotations: the canonical shape, and the adapters onto it
 export {
   indexResultsByXref,

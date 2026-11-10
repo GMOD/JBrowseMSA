@@ -6,7 +6,7 @@ import {
   residuesBefore,
   seqPosOfGlobalCol,
   visibleColToGlobalCol,
-} from './rowCoordinates.ts'
+} from './index.ts'
 
 // what the model does for a mouse position: visible column -> global column ->
 // the row's own ungapped position

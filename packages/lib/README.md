@@ -52,5 +52,7 @@ the
   exon GFFs, plus headless SVG export
 - [msa-parsers](https://github.com/GMOD/JBrowseMSA/tree/main/packages/msa-parsers):
   standalone parsing library
+- [msa-coordinates](https://github.com/GMOD/JBrowseMSA/tree/main/packages/msa-coordinates):
+  conversions between alignment columns and each row's residues
 - [ProteinBrowser](https://github.com/GMOD/proteinbrowser): protein analysis
   suite built on this viewer

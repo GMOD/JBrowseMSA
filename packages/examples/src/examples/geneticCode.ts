@@ -2,7 +2,7 @@
 // rows against one reference row. CodonView.tsx turns the comparison into
 // layers.
 
-import { buildSeqPosIndex, seqPosOfGlobalCol } from 'msa-parsers'
+import { buildSeqPosIndex, seqPosOfGlobalCol } from 'msa-coordinates'
 
 const bases = 'TCAG'
 const aminoAcids =

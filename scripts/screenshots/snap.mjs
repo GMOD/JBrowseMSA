@@ -24,7 +24,7 @@ export function alignedRows(fasta) {
 }
 
 // The 0-based column of each residue of an aligned row, residue n at [n - 1],
-// skipping both gap characters the way buildSeqPosIndex in msa-parsers does
+// skipping both gap characters the way buildSeqPosIndex in msa-coordinates does
 export function residueColumns(row) {
   return [...row].flatMap((letter, column) =>
     letter === '-' || letter === '.' ? [] : [column],

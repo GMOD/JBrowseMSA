@@ -364,6 +364,7 @@ function cmdReport() {
 // pixels.
 const RENDER_INPUTS = [
   'packages/lib/src',
+  'packages/msa-coordinates/src',
   'packages/msa-parsers/src',
   'packages/svgcanvas/src',
   'packages/app/src',

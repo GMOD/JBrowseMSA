@@ -1,6 +1,7 @@
 import * as fs from 'node:fs'
 
-import { buildSeqPosIndex, parseMSA, residuesBefore } from 'msa-parsers'
+import { buildSeqPosIndex, residuesBefore } from 'msa-coordinates'
+import { parseMSA } from 'msa-parsers'
 
 import { fetchJsonWithRetry } from './fetchWithRetry.ts'
 import { isRecord, isRecordArray } from './json.ts'

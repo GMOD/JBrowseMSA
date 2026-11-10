@@ -54,7 +54,7 @@ try {
 }
 
 // Packages to publish (in dependency order)
-const packages = ['svgcanvas', 'msa-parsers', 'lib', 'cli']
+const packages = ['svgcanvas', 'msa-coordinates', 'msa-parsers', 'lib', 'cli']
 
 // A release ships the docs too, and nothing else says the figures predate the
 // UI they show. It lists and does not block, since most lib commits change no

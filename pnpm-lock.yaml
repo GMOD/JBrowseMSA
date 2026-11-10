@@ -168,6 +168,9 @@ importers:
       mobx-react:
         specifier: ^10.0.3
         version: 10.0.3(mobx@7.1.5)(react@19.3.1)
+      msa-coordinates:
+        specifier: workspace:*
+        version: link:../msa-coordinates
       msa-parsers:
         specifier: workspace:*
         version: link:../msa-parsers
@@ -214,9 +217,9 @@ importers:
       mobx-react:
         specifier: ^10.0.3
         version: 10.0.3(mobx@7.1.5)(react@19.3.1)
-      msa-parsers:
+      msa-coordinates:
         specifier: workspace:*
-        version: link:../msa-parsers
+        version: link:../msa-coordinates
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -251,6 +254,9 @@ importers:
       flatbush:
         specifier: ^4.7.0
         version: 4.7.0
+      msa-coordinates:
+        specifier: workspace:*
+        version: link:../msa-coordinates
       msa-parsers:
         specifier: workspace:*
         version: link:../msa-parsers
@@ -285,6 +291,15 @@ importers:
       react-dom:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
+
+  packages/msa-coordinates:
+    devDependencies:
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.1.0
+        version: 5.1.0(@types/node@26.6.6)(jsdom@31.0.0(@napi-rs/canvas@1.1.0))(vite@8.3.6(@types/node@26.6.6)(esbuild@0.28.2)(yaml@2.9.1))
 
   packages/msa-parsers:
     dependencies:

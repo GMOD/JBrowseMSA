@@ -159,6 +159,7 @@ async function checkQuickStart(workDir, tarballs) {
     'vite',
     '@vitejs/plugin-react',
     tarballs['@jbrowse/svgcanvas'],
+    tarballs['msa-coordinates'],
     tarballs['msa-parsers'],
     tarballs['react-msaview'],
     ...QUICK_START_DEPS,

@@ -15,7 +15,7 @@
     "@nightingale-elements/nightingale-sequence": "5.11.0",
     "mobx": "^7.1.5",
     "mobx-react": "^10.0.3",
-    "msa-parsers": "workspace:*",
+    "msa-coordinates": "workspace:*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-msaview": "workspace:*",
