@@ -12,7 +12,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { domainRange, fileSnap } from '../snap.mjs'
+import { alignedRows, domainRange, fileSnap, residueColumns } from '../snap.mjs'
 
 const dataDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -22,16 +22,7 @@ const read = name => fs.readFileSync(path.join(dataDir, name), 'utf8')
 
 const REFERENCE = 'TEM-1'
 
-const aligned = {}
-let name
-for (const line of read('tem.afa').split('\n')) {
-  if (line.startsWith('>')) {
-    name = line.slice(1).trim()
-    aligned[name] = ''
-  } else if (name) {
-    aligned[name] += line.trim()
-  }
-}
+const aligned = alignedRows(read('tem.afa'))
 
 const rowData = JSON.parse(read('tem-rowdata.json'))
 const positions = Object.keys(rowData[REFERENCE])
@@ -52,14 +43,12 @@ const ambler = index => {
 }
 
 // Ambler position -> 0-based alignment column, through the reference row
-const amblerColumn = {}
-let residue = 0
-for (const [index, char] of [...aligned[REFERENCE]].entries()) {
-  if (char !== '-') {
-    residue += 1
-    amblerColumn[ambler(residue)] = index
-  }
-}
+const amblerColumn = Object.fromEntries(
+  residueColumns(aligned[REFERENCE]).map((column, i) => [
+    ambler(i + 1),
+    column,
+  ]),
+)
 
 const ESBL = [104, 164, 238, 240]
 const INHIBITOR = [69, 244, 276]

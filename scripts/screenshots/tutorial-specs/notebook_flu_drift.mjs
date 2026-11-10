@@ -11,7 +11,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { repoRoot } from '../lib.mjs'
-import { fileSnap } from '../snap.mjs'
+import { alignedRows, fileSnap, residueColumns } from '../snap.mjs'
 
 const dataDir = path.join(repoRoot, 'packages', 'app', 'public', 'data', 'h3n2')
 const layers = JSON.parse(
@@ -23,29 +23,11 @@ const REFERENCE = '1968_HongKong'
 const LATEST = '2022_Massachusetts'
 
 // residue of the 1968 row -> 0-based alignment column
-const referenceColumn = (() => {
-  const rows = {}
-  let name = ''
-  for (const line of alignment.split('\n')) {
-    if (line.startsWith('>')) {
-      name = line.slice(1).trim()
-      rows[name] = ''
-    } else if (line.trim()) {
-      rows[name] += line.trim()
-    }
-  }
-  const columns = []
-  let residue = 0
-  for (const [column, letter] of [...rows[REFERENCE]].entries()) {
-    if (letter !== '-') {
-      columns[++residue] = column
-    }
-  }
-  return columns
-})()
+const referenceColumns = residueColumns(alignedRows(alignment)[REFERENCE])
+const referenceColumn = residue => referenceColumns[residue - 1]
 
 const band = label => layers.highlights.find(h => h.label === label)
-const startColumn = label => referenceColumn[band(label).start]
+const startColumn = label => referenceColumn(band(label).start)
 
 const base = {
   height: 560,
@@ -67,7 +49,7 @@ function closeup({ fromResidue, colWidth = 13, ...rest }) {
     rowHeight: 20,
     treeFilehandle: undefined,
     treeAreaWidth: 210,
-    scrollX: -referenceColumn[fromResidue] * colWidth,
+    scrollX: -referenceColumn(fromResidue) * colWidth,
     ...rest,
   }
 }

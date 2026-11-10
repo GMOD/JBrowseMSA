@@ -8,6 +8,29 @@ export function fileSnap(msaview) {
   return `#data=${encodeURIComponent(JSON.stringify(snap))}`
 }
 
+// An aligned FASTA's rows by name
+export function alignedRows(fasta) {
+  const rows = {}
+  let name
+  for (const line of fasta.split('\n')) {
+    if (line.startsWith('>')) {
+      name = line.slice(1).trim()
+      rows[name] = ''
+    } else if (name) {
+      rows[name] += line.trim()
+    }
+  }
+  return rows
+}
+
+// The 0-based column of each residue of an aligned row, residue n at [n - 1],
+// skipping both gap characters the way buildSeqPosIndex in msa-parsers does
+export function residueColumns(row) {
+  return [...row].flatMap((letter, column) =>
+    letter === '-' || letter === '.' ? [] : [column],
+  )
+}
+
 // A color per value as the color object spells it: a `scale` with the values as
 // `domain`, in key order, which is legend order, and their colors as `range`
 export function domainRange(colors) {

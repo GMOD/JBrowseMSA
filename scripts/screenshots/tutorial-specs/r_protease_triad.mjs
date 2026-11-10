@@ -12,7 +12,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { repoRoot } from '../lib.mjs'
-import { fileSnap } from '../snap.mjs'
+import { alignedRows, fileSnap, residueColumns } from '../snap.mjs'
 
 const dataDir = path.join(
   repoRoot,
@@ -31,30 +31,12 @@ const REFERENCE = 'Chymotrypsinogen'
 
 // residue of the reference row -> 0-based alignment column, the same walk the
 // viewer does when a highlight names a row
-const referenceColumn = (() => {
-  const rows = {}
-  let name = ''
-  for (const line of alignment.split('\n')) {
-    if (line.startsWith('>')) {
-      name = line.slice(1).trim()
-      rows[name] = ''
-    } else if (line.trim()) {
-      rows[name] += line.trim()
-    }
-  }
-  const columns = []
-  let residue = 0
-  for (const [column, letter] of [...rows[REFERENCE]].entries()) {
-    if (letter !== '-') {
-      columns[++residue] = column
-    }
-  }
-  return columns
-})()
+const referenceColumns = residueColumns(alignedRows(alignment)[REFERENCE])
+const referenceColumn = residue => referenceColumns[residue - 1]
 
 const track = id => layers.columnTracks.find(t => t.id === id)
 const band = label => layers.highlights.find(h => h.label === label)
-const column = label => referenceColumn[band(label).start]
+const column = label => referenceColumn(band(label).start)
 
 const base = {
   height: 520,

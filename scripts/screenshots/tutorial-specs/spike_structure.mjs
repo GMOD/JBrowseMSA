@@ -12,7 +12,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { fileSnap } from '../snap.mjs'
+import { alignedRows, fileSnap, residueColumns } from '../snap.mjs'
 
 const dataDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -23,25 +23,11 @@ const read = name => fs.readFileSync(path.join(dataDir, name), 'utf8')
 const layers = JSON.parse(read('spike-layers.json'))
 const ROW = 'SARS-CoV-2'
 
-const aligned = {}
-let name
-for (const line of read('spike.afa').split('\n')) {
-  if (line.startsWith('>')) {
-    name = line.slice(1).trim()
-    aligned[name] = ''
-  } else if (name) {
-    aligned[name] += line.trim()
-  }
-}
+const aligned = alignedRows(read('spike.afa'))
 
 // residue of ROW (1-based) -> 0-based alignment column, the same projection
 // seqPosToGlobalCol does in the viewer
-const columnOfResidue = []
-for (const [i, char] of [...aligned[ROW]].entries()) {
-  if (char !== '-') {
-    columnOfResidue.push(i)
-  }
-}
+const columnOfResidue = residueColumns(aligned[ROW])
 const col = residue => columnOfResidue[residue - 1]
 
 const highlight = label => layers.highlights.find(h => h.label === label)

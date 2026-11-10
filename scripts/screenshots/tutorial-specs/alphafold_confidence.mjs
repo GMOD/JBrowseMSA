@@ -12,7 +12,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { repoRoot } from '../lib.mjs'
-import { fileSnap } from '../snap.mjs'
+import { alignedRows, fileSnap, residueColumns } from '../snap.mjs'
 
 const dataDir = path.join(
   repoRoot,
@@ -27,24 +27,10 @@ const read = name => fs.readFileSync(path.join(dataDir, name), 'utf8')
 const layers = JSON.parse(read('tardbp-layers.json'))
 const REF = 'Human'
 
-const aligned = {}
-let name
-for (const line of read('tardbp.afa').split('\n')) {
-  if (line.startsWith('>')) {
-    name = line.slice(1).trim()
-    aligned[name] = ''
-  } else if (line.trim()) {
-    aligned[name] += line.trim()
-  }
-}
+const aligned = alignedRows(read('tardbp.afa'))
 
 // residue of the reference row (1-based) -> 0-based alignment column
-const columnOfResidue = []
-for (const [i, letter] of [...aligned[REF]].entries()) {
-  if (letter !== '-') {
-    columnOfResidue.push(i)
-  }
-}
+const columnOfResidue = residueColumns(aligned[REF])
 const col = residue => columnOfResidue[residue - 1]
 
 const [, bandTrack] = layers.columnTracks

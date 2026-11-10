@@ -10,7 +10,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 import { repoRoot } from '../lib.mjs'
-import { fileSnap } from '../snap.mjs'
+import { alignedRows, fileSnap, residueColumns } from '../snap.mjs'
 
 const dataDir = path.join(repoRoot, 'packages', 'app', 'public', 'data', 'p53')
 const layers = JSON.parse(
@@ -34,26 +34,8 @@ const band = (start, end, label) => ({
 })
 
 // residue of the Human row -> 0-based alignment column
-const humanColumn = (() => {
-  const rows = {}
-  let name = ''
-  for (const line of alignment.split('\n')) {
-    if (line.startsWith('>')) {
-      name = line.slice(1).trim()
-      rows[name] = ''
-    } else if (line.trim()) {
-      rows[name] += line.trim()
-    }
-  }
-  const columns = []
-  let residue = 0
-  for (const [col, letter] of [...rows.Human].entries()) {
-    if (letter !== '-') {
-      columns[++residue] = col
-    }
-  }
-  return columns
-})()
+const humanColumns = residueColumns(alignedRows(alignment).Human)
+const humanColumn = residue => humanColumns[residue - 1]
 
 // The six hotspot residues, each its own band. 248 and 249 are one column
 // apart, and a label sits to the right of the band it names, so 248's would be
@@ -88,7 +70,7 @@ function closeup({ fromResidue, colWidth, ...rest }) {
     ...base,
     colWidth,
     rowHeight: 16,
-    scrollX: -humanColumn[fromResidue] * colWidth,
+    scrollX: -humanColumn(fromResidue) * colWidth,
     ...rest,
   }
 }
@@ -183,8 +165,8 @@ export const specs = [
         fontSize: 15,
         maxWidth: 600,
         anchor: {
-          col: humanColumn[175],
-          colEnd: humanColumn[282],
+          col: humanColumn(175),
+          colEnd: humanColumn(282),
           alignY: 'bottom',
           dy: 30,
         },
@@ -215,13 +197,13 @@ export const specs = [
       {
         type: 'arrow',
         fromAnchor: {
-          col: humanColumn[102],
+          col: humanColumn(102),
           alignX: 'left',
           alignY: 'bottom',
           dx: -150,
           dy: 40,
         },
-        anchor: { col: humanColumn[102], alignX: 'left', alignY: 'bottom' },
+        anchor: { col: humanColumn(102), alignX: 'left', alignY: 'bottom' },
       },
       {
         type: 'text',
@@ -229,7 +211,7 @@ export const specs = [
         fontSize: 15,
         textAlign: 'end',
         anchor: {
-          col: humanColumn[102],
+          col: humanColumn(102),
           alignX: 'left',
           alignY: 'bottom',
           dx: -150,
