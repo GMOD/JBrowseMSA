@@ -43,6 +43,41 @@ if (behind) {
   process.exit(1)
 }
 
+// Packages to publish (in dependency order)
+const packages = ['svgcanvas', 'msa-coordinates', 'msa-parsers', 'lib', 'cli']
+
+// publish.yml publishes through npm trusted publishing, which cannot create a
+// package, so a new one is published once by hand and given a trusted publisher
+// before its first tag. Without that, the tag publishes some packages and fails
+// on the new one.
+const unpublished = packages
+  .map(
+    pkg =>
+      JSON.parse(
+        fs.readFileSync(
+          path.join(rootDir, 'packages', pkg, 'package.json'),
+          'utf8',
+        ),
+      ).name,
+  )
+  .filter(name => {
+    try {
+      capture(`npm view ${name} name`)
+      return false
+    } catch {
+      return true
+    }
+  })
+if (unpublished.length > 0) {
+  console.error(
+    `Not on npm yet: ${unpublished.join(', ')}. Publish each once by hand ` +
+      '(pnpm build, then pnpm publish --access public from its package ' +
+      "directory, since npm publish ignores publishConfig's exports), then add " +
+      'GMOD/JBrowseMSA publish.yml as its trusted publisher on npmjs.com',
+  )
+  process.exit(1)
+}
+
 // Pushes HEAD if it is ahead, then blocks until CI is green on that exact
 // commit. The build below is the only other thing standing between a bad tree
 // and a tag, and it says nothing about lint, typecheck or the test suite.
@@ -52,9 +87,6 @@ try {
   // The gate already said why, in more words than a stack trace would
   process.exit(1)
 }
-
-// Packages to publish (in dependency order)
-const packages = ['svgcanvas', 'msa-coordinates', 'msa-parsers', 'lib', 'cli']
 
 // A release ships the docs too, and nothing else says the figures predate the
 // UI they show. It lists and does not block, since most lib commits change no
