@@ -4,6 +4,17 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [10.1.1](https://github.com/GMOD/JBrowseMSA/compare/v10.1.0...v10.1.1) (2026-11-10)
+
+### Other Changes
+
+- Row coordinate helpers get their own package, msa-coordinates ([6949115](https://github.com/GMOD/JBrowseMSA/commit/6949115e69d6b78eca52cdac3e1db631fcfee863))
+- The release script stops on a package npm has never seen ([05c7bbf](https://github.com/GMOD/JBrowseMSA/commit/05c7bbfb4a2261d1fcfb76fcdf4c28d479435805))
+- The release script also checks each package trusts this repository ([598aa1e](https://github.com/GMOD/JBrowseMSA/commit/598aa1ef9ae818ffccce1ea4112339a3d6a7e3fe))
+- Bump tsrs, serve-handler, astro and @astrojs/react ([1c9ae83](https://github.com/GMOD/JBrowseMSA/commit/1c9ae83788ce19f5309d1cee3a8a873e428651b3))
+- The release script warns when it cannot read a package's trust ([f7f0779](https://github.com/GMOD/JBrowseMSA/commit/f7f07790d1b31bc47ced8c7ad714ac94c3ec8b6c))
+- Pin @astrojs/react to 7.1.5 ([c37d5b4](https://github.com/GMOD/JBrowseMSA/commit/c37d5b496113a1f276b33b6195e0519e0040daa1))
+
 ## [10.1.0](https://github.com/GMOD/JBrowseMSA/compare/v10.0.0...v10.1.0) (2026-11-10)
 
 ### Documentation

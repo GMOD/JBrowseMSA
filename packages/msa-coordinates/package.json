@@ -1,6 +1,6 @@
 {
   "name": "msa-coordinates",
-  "version": "10.1.0",
+  "version": "10.1.1",
   "description": "Convert between a multiple sequence alignment's columns, the columns left once some are hidden, and each row's own residue positions",
   "license": "MIT",
   "type": "module",
