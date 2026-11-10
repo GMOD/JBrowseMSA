@@ -47,10 +47,9 @@ if (behind) {
 const packages = ['svgcanvas', 'msa-coordinates', 'msa-parsers', 'lib', 'cli']
 
 // publish.yml publishes through npm trusted publishing, which cannot create a
-// package, so a new one is published once by hand and given a trusted publisher
-// before its first tag. Without that, the tag publishes some packages and fails
-// on the new one.
-const unpublished = packages
+// package or publish one that does not trust this repository. A tag with such a
+// package publishes the others and fails on it.
+const untrusted = packages
   .map(
     pkg =>
       JSON.parse(
@@ -63,17 +62,20 @@ const unpublished = packages
   .filter(name => {
     try {
       capture(`npm view ${name} name`)
-      return false
+      return !capture(`npm trust list ${name}`).includes(
+        'repository: GMOD/JBrowseMSA',
+      )
     } catch {
       return true
     }
   })
-if (unpublished.length > 0) {
+if (untrusted.length > 0) {
   console.error(
-    `Not on npm yet: ${unpublished.join(', ')}. Publish each once by hand ` +
-      '(pnpm build, then pnpm publish --access public from its package ' +
-      "directory, since npm publish ignores publishConfig's exports), then add " +
-      'GMOD/JBrowseMSA publish.yml as its trusted publisher on npmjs.com',
+    `Not ready for trusted publishing: ${untrusted.join(', ')}. For each, ` +
+      'claim the name if npm lacks it (pnpm build, then pnpm publish ' +
+      '--access public in its package directory; npm publish ignores ' +
+      "publishConfig's exports), then run npm trust github <name> --file " +
+      'publish.yml --repo GMOD/JBrowseMSA --allow-publish --allow-stage-publish',
   )
   process.exit(1)
 }
