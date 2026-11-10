@@ -49,26 +49,49 @@ const packages = ['svgcanvas', 'msa-coordinates', 'msa-parsers', 'lib', 'cli']
 // publish.yml publishes through npm trusted publishing, which cannot create a
 // package or publish one that does not trust this repository. A tag with such a
 // package publishes the others and fails on it.
-const untrusted = packages
-  .map(
-    pkg =>
-      JSON.parse(
-        fs.readFileSync(
-          path.join(rootDir, 'packages', pkg, 'package.json'),
-          'utf8',
-        ),
-      ).name,
-  )
-  .filter(name => {
-    try {
-      capture(`npm view ${name} name`)
-      return !capture(`npm trust list ${name}`).includes(
-        'repository: GMOD/JBrowseMSA',
-      )
-    } catch {
-      return true
+function npmOutput(cmd) {
+  try {
+    return {
+      ok: true,
+      out: execSync(cmd, { cwd: rootDir, stdio: 'pipe' }).toString(),
     }
-  })
+  } catch (e) {
+    return { ok: false, out: `${e.stdout ?? ''}${e.stderr ?? ''}` }
+  }
+}
+
+// `npm trust list` needs a recent web login, so a failure that is not npm
+// saying there is no configuration leaves the trust unknown
+function trustState(name) {
+  const trust = npmOutput(`npm trust list ${name}`).out
+  return !npmOutput(`npm view ${name} name`).ok
+    ? 'missing'
+    : trust.includes('repository: GMOD/JBrowseMSA')
+      ? 'trusted'
+      : trust.includes('No trust configurations')
+        ? 'untrusted'
+        : 'unknown'
+}
+
+const states = packages.map(pkg => {
+  const { name } = JSON.parse(
+    fs.readFileSync(
+      path.join(rootDir, 'packages', pkg, 'package.json'),
+      'utf8',
+    ),
+  )
+  return { name, state: trustState(name) }
+})
+const unknown = states.filter(s => s.state === 'unknown').map(s => s.name)
+if (unknown.length > 0) {
+  console.warn(
+    `Could not check the trusted publisher of ${unknown.join(', ')}; ` +
+      '`npm trust list <name>` asks for a fresh npm login',
+  )
+}
+const untrusted = states
+  .filter(s => s.state === 'missing' || s.state === 'untrusted')
+  .map(s => s.name)
 if (untrusted.length > 0) {
   console.error(
     `Not ready for trusted publishing: ${untrusted.join(', ')}. For each, ` +
