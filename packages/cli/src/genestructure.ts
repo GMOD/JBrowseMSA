@@ -1,6 +1,6 @@
 import * as fs from 'node:fs'
 
-import { parseMSA } from 'msa-parsers'
+import { buildSeqPosIndex, parseMSA, residuesBefore } from 'msa-parsers'
 
 import { fetchJsonWithRetry } from './fetchWithRetry.ts'
 import { isRecord, isRecordArray } from './json.ts'
@@ -206,41 +206,6 @@ export function codingExons(t: Transcript): CodingExon[] {
   }))
 }
 
-// 0-based ungapped position -> alignment column holding that non-gap char
-function seqPosToCol(row: string, seqPos: number): number {
-  let n = 0
-  for (let col = 0; col < row.length; col++) {
-    if (row[col] !== '-' && row[col] !== '.') {
-      if (n === seqPos) {
-        return col
-      }
-      n += 1
-    }
-  }
-  return row.length
-}
-
-// prefix[c] = count of non-gap chars in row[0..c) (length row.length + 1), so the
-// ungapped span of any column range [c1, c2) is prefix[c2] - prefix[c1] in O(1)
-function prefixNonGap(row: string): number[] {
-  const prefix = new Array<number>(row.length + 1)
-  let n = 0
-  prefix[0] = 0
-  for (let c = 0; c < row.length; c++) {
-    if (row[c] !== '-' && row[c] !== '.') {
-      n += 1
-    }
-    prefix[c + 1] = n
-  }
-  return prefix
-}
-
-// a3m and hand-edited fasta produce rows shorter than the reference; past a
-// row's end the count stays at its total instead of reading NaN
-function nonGapBefore(prefix: number[], col: number) {
-  return prefix[Math.min(col, prefix.length - 1)]!
-}
-
 export interface ExonColumns {
   exon: number
   c1: number
@@ -263,10 +228,10 @@ export function projectExonsOntoRows({
   cols: ExonColumns[]
 }) {
   return names.flatMap(name => {
-    const prefix = prefixNonGap(getRow(name))
+    const index = buildSeqPosIndex(getRow(name))
     return cols.flatMap(({ exon, c1, c2 }) => {
-      const start = nonGapBefore(prefix, c1)
-      const len = nonGapBefore(prefix, c2) - start
+      const start = residuesBefore(index, c1)
+      const len = residuesBefore(index, c2) - start
       return len > 0 ? [{ name, exon, start: start + 1, end: start + len }] : []
     })
   })
@@ -317,7 +282,8 @@ export async function runGeneStructure(
   const exons = codingExons(chosen)
   const cdsLen = exons.reduce((a, e) => a + e.cdsLen, 0)
   const refRow = msa.getRow(ref)
-  const refUngapped = prefixNonGap(refRow)[refRow.length]!
+  const refIndex = buildSeqPosIndex(refRow)
+  const refUngapped = refIndex.length
   console.log(
     `${exons.length} coding exons, CDS ${cdsLen} nt; reference row ungapped ${refUngapped} nt`,
   )
@@ -332,8 +298,8 @@ export async function runGeneStructure(
   // reference boundary columns for each coding exon [c1, c2)
   const cols = exons.map(e => ({
     exon: e.exon,
-    c1: seqPosToCol(refRow, e.cdsStart),
-    c2: seqPosToCol(refRow, e.cdsStart + e.cdsLen),
+    c1: refIndex[e.cdsStart] ?? refRow.length,
+    c2: refIndex[e.cdsStart + e.cdsLen] ?? refRow.length,
   }))
 
   const source = chosen.accession_version

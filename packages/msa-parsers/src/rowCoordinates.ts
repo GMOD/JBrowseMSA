@@ -90,6 +90,43 @@ export function visibleColsBefore(blanks: number[], globalCol: number) {
 }
 
 /**
+ * The global column of every ungapped sequence position in a row, i.e.
+ * index[seqPos] is the column holding the seqPos-th non-gap character.
+ *
+ * The domain overlay resolves one position per feature per row on every redraw,
+ * and scanning the row for each would be quadratic.
+ *
+ * @example
+ * // Row: "A-TG-C" (A at 0, T at 2, G at 3, C at 5)
+ * buildSeqPosIndex('A-TG-C') // → [0, 2, 3, 5]
+ */
+export function buildSeqPosIndex(row: string) {
+  const index = new Int32Array(row.length)
+  let n = 0
+  for (let col = 0; col < row.length; col++) {
+    // bit trick: (code - 45) >>> 0 <= 1 checks for '-' (45) or '.' (46)
+    if (!((row.charCodeAt(col) - 45) >>> 0 <= 1)) {
+      index[n++] = col
+    }
+  }
+  // slice, not subarray: a subarray keeps the whole row-length buffer alive,
+  // and a gappy alignment's indexes are held for as long as the parse is
+  return index.slice(0, n)
+}
+
+/**
+ * How many of a row's residues sit before a global column, which is the
+ * ungapped position of the first residue at or after it. A column past the
+ * row's end counts every residue, so a short a3m row reads its length there.
+ *
+ * @param index - The row's seqPos -> global column index (buildSeqPosIndex)
+ * @param globalCol - The global column index in the full MSA
+ */
+export function residuesBefore(index: Int32Array, globalCol: number) {
+  return partitionPoint(index.length, i => index[i]! >= globalCol)
+}
+
+/**
  * The ungapped position a row holds at a global column, or undefined when that
  * column is a gap in the row or past its end.
  *
@@ -103,9 +140,8 @@ export function seqPosOfGlobalCol(
   index: Int32Array | undefined,
   globalCol: number,
 ) {
-  if (!index) {
-    return undefined
-  }
-  const seqPos = partitionPoint(index.length, i => index[i]! >= globalCol)
-  return index[seqPos] === globalCol ? seqPos : undefined
+  const seqPos = index ? residuesBefore(index, globalCol) : undefined
+  return seqPos !== undefined && index?.[seqPos] === globalCol
+    ? seqPos
+    : undefined
 }

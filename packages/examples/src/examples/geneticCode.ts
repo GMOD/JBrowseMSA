@@ -2,6 +2,8 @@
 // rows against one reference row. CodonView.tsx turns the comparison into
 // layers.
 
+import { buildSeqPosIndex, seqPosOfGlobalCol } from 'msa-parsers'
+
 const bases = 'TCAG'
 const aminoAcids =
   'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG'
@@ -55,12 +57,7 @@ export function translate(codon: string) {
  * interrupts are not adjacent. It drops a trailing partial codon.
  */
 export function readingFrame(row: string) {
-  const baseColumns: number[] = []
-  for (let col = 0; col < row.length; col++) {
-    if (!isGap(row[col])) {
-      baseColumns.push(col)
-    }
-  }
+  const baseColumns = [...buildSeqPosIndex(row)]
   const codons: number[][] = []
   for (let i = 0; i + 3 <= baseColumns.length; i += 3) {
     codons.push(baseColumns.slice(i, i + 3))
@@ -93,11 +90,6 @@ export function classify(reference: string, other: string): Change | undefined {
   return from === to ? 'synonymous' : 'non-synonymous'
 }
 
-function residueNumbers(row: string) {
-  let n = 0
-  return row.split('').map(base => (isGap(base) ? undefined : ++n))
-}
-
 /**
  * Every codon of the reference row, translated, with the rows whose bases at
  * the same columns make a different codon. Every row is read in the
@@ -114,7 +106,7 @@ export function compareCodons(
   }
   const others = rows
     .filter(row => row.name !== reference)
-    .map(row => ({ ...row, numbers: residueNumbers(row.sequence) }))
+    .map(row => ({ ...row, index: buildSeqPosIndex(row.sequence) }))
   return readingFrame(ref.sequence).map((columns, i) => {
     const codon = columns.map(col => ref.sequence[col]).join('')
     return {
@@ -122,12 +114,13 @@ export function compareCodons(
       columns,
       codon,
       aminoAcid: translate(codon) ?? 'X',
-      changes: others.flatMap(({ name, sequence, numbers }) => {
+      changes: others.flatMap(({ name, sequence, index }) => {
         const rowCodon = columns.map(col => sequence[col] ?? '-').join('')
         const change = classify(codon, rowCodon)
-        const covered = columns
-          .map(col => numbers[col])
-          .filter(n => n !== undefined)
+        const covered = columns.flatMap(col => {
+          const seqPos = seqPosOfGlobalCol(index, col)
+          return seqPos === undefined ? [] : [seqPos + 1]
+        })
         return change
           ? [
               {

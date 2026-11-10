@@ -1,11 +1,12 @@
 import { expect, test } from 'vitest'
 
 import {
+  buildSeqPosIndex,
   globalColToVisibleCol,
+  residuesBefore,
   seqPosOfGlobalCol,
   visibleColToGlobalCol,
-} from './rowCoordinateCalculations.ts'
-import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
+} from './rowCoordinates.ts'
 
 // what the model does for a mouse position: visible column -> global column ->
 // the row's own ungapped position
@@ -226,4 +227,16 @@ test('visibleColToSeqPos with both blanks and row gaps', () => {
 
   // Visible col 2 → global col 4 → 'G' → seqPos 2
   expect(visibleColToSeqPos({ seq, visibleCol: 2, blanks })).toBe(2)
+})
+
+test('buildSeqPosIndex lists the column of each residue, skipping - and .', () => {
+  expect([...buildSeqPosIndex('A-T.G-C')]).toEqual([0, 2, 4, 6])
+  expect([...buildSeqPosIndex('--..')]).toEqual([])
+})
+
+test('residuesBefore counts the residues left of a column', () => {
+  const index = buildSeqPosIndex('-AC--G-')
+  expect([0, 1, 2, 3, 5, 6, 7, 99].map(c => residuesBefore(index, c))).toEqual([
+    0, 0, 1, 2, 2, 3, 3, 3,
+  ])
 })

@@ -73,6 +73,29 @@ const tree = parseNewick('(A:0.1,B:0.2,(C:0.3,D:0.4):0.5);')
 const treeWithIds = generateNodeIds(tree)
 ```
 
+### Alignment columns and row residues
+
+A row's residue positions are 0-based and count only non-gap characters (`-` and
+`.` are gaps). `buildSeqPosIndex` lists the column of each residue once, and the
+lookups binary-search it.
+
+```typescript
+import {
+  buildSeqPosIndex,
+  residuesBefore,
+  seqPosOfGlobalCol,
+} from 'msa-parsers'
+
+const index = buildSeqPosIndex('A-TG-C') // [0, 2, 3, 5]
+seqPosOfGlobalCol(index, 3) // 2, the G
+seqPosOfGlobalCol(index, 4) // undefined, a gap
+residuesBefore(index, 4) // 3
+```
+
+`visibleColToGlobalCol`, `globalColToVisibleCol` and `visibleColsBefore` convert
+between the full alignment's columns and the columns left on screen once a
+sorted list of hidden columns is removed.
+
 ### GFF and InterProScan utilities
 
 Every source of overlay annotations converts to one flat list of `Annotation` (a

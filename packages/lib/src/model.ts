@@ -17,10 +17,15 @@ import {
 } from 'mobx'
 import {
   annotationTextToGFF,
+  buildSeqPosIndex,
   generateNodeIds,
   gffToAnnotations,
+  globalColToVisibleCol,
   parseGFF,
   parseMSA,
+  seqPosOfGlobalCol,
+  visibleColToGlobalCol,
+  visibleColsBefore,
 } from 'msa-parsers'
 
 import { blockFasta } from './blockFasta.ts'
@@ -105,14 +110,7 @@ import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
 import { preorder } from './rerootTree.ts'
-import {
-  globalColToVisibleCol,
-  seqPosOfGlobalCol,
-  visibleColToGlobalCol,
-  visibleColsBefore,
-} from './rowCoordinateCalculations.ts'
 import { colorTable, declarationKey, resolveShared } from './scales.ts'
-import { buildSeqPosIndex } from './seqPosToGlobalCol.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import {
   blosum62ColumnColors,
