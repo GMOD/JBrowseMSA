@@ -4,6 +4,45 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [10.1.0](https://github.com/GMOD/JBrowseMSA/compare/v10.0.0...v10.1.0) (2026-11-10)
+
+### Documentation
+
+- Docs/tutorials/CLAUDE.md keeps the figure traps, and the authoring guide moves to agent-docs ([3cc4b2d](https://github.com/GMOD/JBrowseMSA/commit/3cc4b2d1f1b2f1d432f19ed91d68fe25aa75e1f9))
+
+### Other Changes
+
+- The root CLAUDE.md keeps the repo-wide traps, packages/lib/CLAUDE.md the model's ([4072ed6](https://github.com/GMOD/JBrowseMSA/commit/4072ed6c8624c12b80b17bb1e42987f9f9f04ca5))
+- Typecheck and type-aware lint run on tsrs ([763dd28](https://github.com/GMOD/JBrowseMSA/commit/763dd28b4e6d856367fddd6bd766862aad412ed1))
+- Clear the strict lint rules in the JS scripts ([2aa1f2e](https://github.com/GMOD/JBrowseMSA/commit/2aa1f2e63ed229aa8f160ac970081a522eb41070))
+- Type the viewer's any sources for the strict lint rules ([91d1105](https://github.com/GMOD/JBrowseMSA/commit/91d110537af752cb29e3a80a0a757afd79a96961))
+- Lint with the strict type-aware rule set ([ee005de](https://github.com/GMOD/JBrowseMSA/commit/ee005de01285a8c4c39b64ffc524034a460ff19b))
+- Dialogs queue with their component's props, as jbrowse's session does ([a457281](https://github.com/GMOD/JBrowseMSA/commit/a457281caa5c402ba1b3411a33c3024ca32733e6))
+- Update dependencies to latest, keeping typescript ([0093189](https://github.com/GMOD/JBrowseMSA/commit/00931890515835d93c081e9e3f5f77a66b5f475f))
+- Ellipsize cuts a label's middle, keeping both ends ([ee44090](https://github.com/GMOD/JBrowseMSA/commit/ee44090d7591d26628f81e713d97c07ac0f735f8))
+- Fix stale demo comments, a typecast and unread residueMappings in the examples ([5f8a938](https://github.com/GMOD/JBrowseMSA/commit/5f8a9380cdcc4fb480d63d9ce3ce8007e839bac7))
+- Structure demos share a selection-following fit, and the index globs its examples ([f4d50e0](https://github.com/GMOD/JBrowseMSA/commit/f4d50e073056c6e69d4e30d9e203f87eac0ce1c5))
+- Fold the examples into 24 demos that each show several things ([ad55101](https://github.com/GMOD/JBrowseMSA/commit/ad55101d906c10adf9843c15135c2ca15beeac49))
+- Examples page shows each demo's source behind a button ([809f54c](https://github.com/GMOD/JBrowseMSA/commit/809f54c33fb03733e0ad47a5ca906d94e01e747f))
+- KinaseFacets is tall enough for its eight rows under the CA distance track ([8641c9e](https://github.com/GMOD/JBrowseMSA/commit/8641c9ea01d5f301fbecd8ec9465c96bd59833c0))
+- Drop the Pfam full alignment from the examples, leaving the A3M demo ([3bf8126](https://github.com/GMOD/JBrowseMSA/commit/3bf81260e8f467efb01eca34bc8ae079ad8430af))
+- Example generators stop writing residue mappings no example reads ([18a685f](https://github.com/GMOD/JBrowseMSA/commit/18a685f3b6e0735da28212f3bf5e65d85cc55721))
+- HemoglobinChains and KinaseFacets share one structure color select ([50bad9e](https://github.com/GMOD/JBrowseMSA/commit/50bad9e219bed29176d0539a05472c2e1a85a70a))
+- Regenerate the apidocs and the protein figure for the typed signatures and middle ellipsis ([5d20a5c](https://github.com/GMOD/JBrowseMSA/commit/5d20a5cde7ef0d5b4c68e9f0b57aeb1cfcebfffb))
+- Add a machine learning example: ESM-2 against a measured p53 screen ([f54ad40](https://github.com/GMOD/JBrowseMSA/commit/f54ad40013265190dd9b27d67125406f92bc90ff))
+- Structures paint from any column track and draw as a surface ([e9c75ee](https://github.com/GMOD/JBrowseMSA/commit/e9c75eee5e224aff1411b2dcf77ab9cb3aea5af4))
+- Highlights take a bracket mark: a labeled strip above the alignment ([aca6ea9](https://github.com/GMOD/JBrowseMSA/commit/aca6ea9b513bac4d7dcb8e16da0f3b491259cade))
+- Structure panel hides its search and style controls behind buttons ([b11d068](https://github.com/GMOD/JBrowseMSA/commit/b11d068d69950a5ccfd9482119dc0835caeb74cd))
+- Hovering a highlight bracket lights its range on the structure ([3dd2f25](https://github.com/GMOD/JBrowseMSA/commit/3dd2f256af07a5283b1f6a7ec81c38789e35b18e))
+- A label wider than its bracket starts past the bracket's end ([5a9dc65](https://github.com/GMOD/JBrowseMSA/commit/5a9dc654158decf14dec6bc96f1ddf4b6d4d720d))
+- The spike tutorial draws its UniProt regions as brackets ([e83f7db](https://github.com/GMOD/JBrowseMSA/commit/e83f7dbc541635ba6a1a105204196ca6e96b9d00))
+- Format layers.md and paint.ts with oxfmt ([55b6f32](https://github.com/GMOD/JBrowseMSA/commit/55b6f32368ce440202e56e8b5e4e7c7408ed523c))
+- The spike tutorial's R figure draws the highlight strip ([c1dcfdb](https://github.com/GMOD/JBrowseMSA/commit/c1dcfdb4c047b248dd9ca1dd650447ecc8266cd0))
+- Reflow the spike tutorial's R caption ([c6323af](https://github.com/GMOD/JBrowseMSA/commit/c6323afb095c833c72817831b773925872e063ac))
+- Row coordinate helpers move to msa-parsers ([bf93838](https://github.com/GMOD/JBrowseMSA/commit/bf938383357421071248514acd585f9bfc7eefd2))
+- Tutorial specs share one FASTA reader and residue walk ([2c7b9d1](https://github.com/GMOD/JBrowseMSA/commit/2c7b9d158f00773b2fc9f4902252dd521c16ff31))
+- Tree reading moves to msa-parsers, rerooting to @gmod/newick ([8c9949a](https://github.com/GMOD/JBrowseMSA/commit/8c9949a0d572ebf7e4cb9a08b33d0bf031ca98cc))
+
 ## [10.0.0](https://github.com/GMOD/JBrowseMSA/compare/v9.8.0...v10.0.0) (2026-11-06)
 
 ### Other Changes
