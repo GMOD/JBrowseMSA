@@ -18,6 +18,7 @@ export {
   parseEmfTree,
   parseMSA,
   parseNewick,
+  parseTree,
   stockholmSniff,
   stripEmfHeader,
 } from './msa/index.ts'

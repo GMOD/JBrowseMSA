@@ -240,8 +240,8 @@ importers:
   packages/lib:
     dependencies:
       '@gmod/newick':
-        specifier: ^1.0.3
-        version: 1.0.3
+        specifier: ^1.1.0
+        version: 1.1.0
       '@jbrowse/svgcanvas':
         specifier: workspace:*
         version: link:../svgcanvas
@@ -289,8 +289,8 @@ importers:
   packages/msa-parsers:
     dependencies:
       '@gmod/newick':
-        specifier: ^1.0.3
-        version: 1.0.3
+        specifier: ^1.1.0
+        version: 1.1.0
       clustal-js:
         specifier: ^2.0.19
         version: 2.0.19
@@ -927,8 +927,8 @@ packages:
   '@gmod/bgzf-filehandle@6.8.4':
     resolution: {integrity: sha512-eN3yOAfij5xTKARWFSAn61byFyRWjU5XQSvpm0+C7tptxHOGi/t0xMZt5V1/Lf4VxRT2By5yUu3RtBiG+oP0LA==}
 
-  '@gmod/newick@1.0.3':
-    resolution: {integrity: sha512-r8xab2D78LqYSuOmAEetzw5JNvsCSVHhhoCdKOxsOGbBMSCKvWZE5jkAq88iuHjvGcdkn0fRWfkvTr7szJVnng==}
+  '@gmod/newick@1.1.0':
+    resolution: {integrity: sha512-sqJ9AwgLqCKvmwufTNf9GhmGcxrDv8Mp7boCj390J40gSQkdAF9yyFteL/bcGWUxTJfGQXH928ezMyW/KHOuFQ==}
 
   '@gmod/range-cache-filehandle@2.0.0':
     resolution: {integrity: sha512-7sa2T4yeI4JNAQfzwrZedmpFtd3hLlH1/3xsSOxRNJWULtdKC++u0I1WRv+GLNqgHMdSTF/qZjIfawXK1QBt4w==}
@@ -5121,7 +5121,7 @@ snapshots:
       generic-filehandle2: 2.5.1
       pako-esm2: 2.0.2
 
-  '@gmod/newick@1.0.3': {}
+  '@gmod/newick@1.1.0': {}
 
   '@gmod/range-cache-filehandle@2.0.0':
     dependencies:

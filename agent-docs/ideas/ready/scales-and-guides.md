@@ -358,8 +358,7 @@ its react-msaview column reads clade focus, branch lengths and clade collapse as
 missing; all three exist (`clades` with `focus` and `collapse`,
 `showBranchLen`). Its `packages/tree-sidebar` draws a dendrogram beside rows,
 with `rotateNewickByDomain` turning each node toward the earliest listed leaf
-and a note that the function lifts into `@gmod/newick` as written.
-`rerootTree.ts` here carries the same note, and `mrca` in `hierarchy.ts` is the
-third such function. `@gmod/newick` 1.0.3 exports the parser and the traversals.
-Moving reroot, rotate-to-order and MRCA there is a change to that package and is
-out of this document's scope.
+and a note that the function lifts into `@gmod/newick` as written. Rerooting
+moved there in `@gmod/newick` 1.1.0, alongside a writer. `mrca` in
+`hierarchy.ts` is the other candidate. Moving rotate-to-order and MRCA there is
+a change to that package and is out of this document's scope.

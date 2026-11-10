@@ -1,7 +1,7 @@
-import { generateNodeIds, isEmf, parseEmfTree, parseNewick } from 'msa-parsers'
+import { midpointRoot, preorder, rerootTree } from '@gmod/newick'
+import { generateNodeIds } from 'msa-parsers'
 
 import { cladeHighlightAlpha, cladeHighlightColor } from './constants.ts'
-import { flatToTree } from './flatToTree.ts'
 import {
   collapse,
   find,
@@ -13,12 +13,9 @@ import {
   sort,
   sum as hierarchySum,
 } from './hierarchy.ts'
-import { parseAsn1 } from './parseAsn1.ts'
-import { midpointRoot, preorder, rerootTree } from './rerootTree.ts'
 import { withAlpha } from './util.ts'
 
 import type { HierarchyNode } from './hierarchy.ts'
-import type { TreeNode } from './rerootTree.ts'
 import type {
   Clade,
   CladeMark,
@@ -27,13 +24,7 @@ import type {
   TreeOrder,
   TreeRoot,
 } from './types.ts'
-
-export function parseTreeText(text: string) {
-  if (text.startsWith('BioTreeContainer')) {
-    return flatToTree(parseAsn1(text))
-  }
-  return parseNewick(isEmf(text) ? parseEmfTree(text).tree : text)
-}
+import type { NewickNode } from '@gmod/newick'
 
 // the marks that set tree state from a node rather than drawing
 export const seedingMarks = new Set<CladeMark>(['collapse', 'focus', 'rotate'])
@@ -248,7 +239,7 @@ export function outgroupNode(root: HierarchyNode, outgroup: string[]) {
  * along as labels, so they come off first.
  */
 export function rootTree(tree: NodeWithIds, treeRoot: TreeRoot) {
-  const plain = new Map<NodeWithIds, TreeNode>()
+  const plain = new Map<NodeWithIds, NewickNode>()
   for (const node of preorder(tree).toReversed()) {
     plain.set(node, {
       name: node.name === node.id ? undefined : node.name,

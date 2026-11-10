@@ -1,3 +1,4 @@
+import { preorder } from '@gmod/newick'
 import { clamp, groupBy, notEmpty, sum } from '@jbrowse/core/util'
 import { ElementId, FileLocation } from '@jbrowse/core/util/types/mst'
 import {
@@ -23,6 +24,7 @@ import {
   globalColToVisibleCol,
   parseGFF,
   parseMSA,
+  parseTree,
   seqPosOfGlobalCol,
   visibleColToGlobalCol,
   visibleColsBefore,
@@ -109,7 +111,6 @@ import { MSAModelF } from './model/msaModel.ts'
 import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
-import { preorder } from './rerootTree.ts'
 import { colorTable, declarationKey, resolveShared } from './scales.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import {
@@ -121,7 +122,6 @@ import { treeTips, widestLabel } from './tipLabels.ts'
 import {
   buildTreeRoot,
   outgroupNode,
-  parseTreeText,
   resolveClades,
   rootTree,
   seedingMarks,
@@ -1578,7 +1578,7 @@ function stateModelFactory({
       get inputTree(): NodeWithIds {
         const text = self.data.tree
         return text
-          ? generateNodeIds(parseTreeText(text))
+          ? generateNodeIds(parseTree(text))
           : (this.MSA?.getTree() ?? {
               noTree: true,
               children: [],

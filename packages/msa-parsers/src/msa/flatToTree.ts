@@ -1,5 +1,3 @@
-import { nonEmpty } from './util.ts'
-
 interface FlatItem {
   id: number
   parent?: number
@@ -25,7 +23,10 @@ export function flatToTree(items: FlatItem[]): TreeNode {
         {
           id: `${item.id}`,
           // NCBI's tree viewer shows the label
-          name: nonEmpty(item.label) ?? `${item.id}`,
+          name:
+            item.label === undefined || item.label === ''
+              ? `${item.id}`
+              : item.label,
           ...(length !== undefined && Number.isFinite(length)
             ? { length }
             : {}),

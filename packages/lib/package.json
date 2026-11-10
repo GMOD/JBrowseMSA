@@ -71,7 +71,7 @@
     "react-dom": "^19.3.1"
   },
   "dependencies": {
-    "@gmod/newick": "^1.0.3",
+    "@gmod/newick": "^1.1.0",
     "@jbrowse/svgcanvas": "workspace:*",
     "colord": "^2.10.0",
     "flatbush": "^4.7.0",

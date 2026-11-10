@@ -125,13 +125,15 @@ background.
 ## The tree
 
 - Node ids are path-derived from `tree`, which is `inputTree` after `treeRoot`
-  reroots it (`rerootTree.ts`). `collapsed`, `rotated` and `showOnly` hold those
-  ids, so `setTreeRoot` clears them through `clearNodeState` and the seeding
-  clade marks apply again. `treeRoot` names tips, so it survives a reload of the
-  same tree. `buildTreeRoot` sorts each node's children by `treeOrder`, then
-  reverses the `rotated` ones. `rerootTree.ts` imports nothing and works on the
-  plain `parseNewick` node, so it can move into `@gmod/newick`, which the
-  jbrowse-components tree sidebar also uses.
+  reroots it (`rootTree` in `treeDisplay.ts`, over `@gmod/newick`'s `rerootTree`
+  and `midpointRoot`). `collapsed`, `rotated` and `showOnly` hold those ids, so
+  `setTreeRoot` clears them through `clearNodeState` and the seeding clade marks
+  apply again. `treeRoot` names tips, so it survives a reload of the same tree.
+  `buildTreeRoot` sorts each node's children by `treeOrder`, then reverses the
+  `rotated` ones.
+- `msa-parsers`' `parseTree` reads every tree format the viewer takes (Newick,
+  EMF, NCBI ASN.1), and `writeNewick` hands `@gmod/newick`'s writer the drawn
+  tree with generated ids dropped.
 - The tree overview (`components/tree/TreeOverview.tsx`,
   `renderTreeOverview.ts`) is the brush on the row scale, behind
   `showTreeOverview`. It draws `get tree()` rather than `root`, so the whole

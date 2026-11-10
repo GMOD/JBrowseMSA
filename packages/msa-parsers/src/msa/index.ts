@@ -8,6 +8,7 @@ import { fastaSniff, splitFastaRecords } from './fastaRecords.ts'
 
 export { isEmf, parseEmfTree, stripEmfHeader } from './emf.ts'
 export { default as parseNewick } from './parseNewick.ts'
+export { parseTree } from './parseTree.ts'
 
 export type MSAParserType =
   | StockholmMSA
