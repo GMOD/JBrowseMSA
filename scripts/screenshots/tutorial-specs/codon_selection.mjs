@@ -27,13 +27,18 @@ const dndsValues = JSON.parse(
   ),
 )
 
+// a threshold at 1 colors a codon's bar red from dN = dS up and blue below
 const dndsTrack = {
   id: 'dnds',
   name: 'dN/dS (FEL)',
   kind: 'bar',
   values: dndsValues,
-  encoding: { y: { scale: { domainMax: 5 } } },
-  color: '#c0392b',
+  encoding: {
+    y: { scale: { domainMax: 5 } },
+    color: {
+      scale: { type: 'threshold', domain: [1], range: ['#2c7fb8', '#c0392b'] },
+    },
+  },
 }
 
 // Human-row nucleotide ranges (1-based, CDS coordinates), aa * 3 from the

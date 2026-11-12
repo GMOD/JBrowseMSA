@@ -3,23 +3,23 @@ name: scales-and-guides
 description:
   The color object jbrowse-components declares, with linear, log, threshold and
   identity scales, a gradient legend, an axis guide, and the bar, point, text
-  and column strip marks they unlock. Steps 1 to 3, the color object, the shared
-  domain, the continuous and threshold scales, the gradient legend and the scale
-  problems, are built, and so are step 5, the axis and the bar, point and text
-  row panels, and step 6, the tree channels; steps 4 and 7 remain.
+  and column strip marks they unlock. Steps 1 to 6 are built: the color object,
+  the shared domain, the continuous and threshold scales, the gradient legend,
+  the scale problems, the column tracks' color and value scales, the axis and
+  the bar, point and text row panels, and the tree channels; step 7 remains.
 ---
 
 # Scales and guides
 
 `resolveScale` in `packages/lib/src/scales.ts` reads the color object,
 `ColorSpec`, through an ordinal, linear, log, threshold or identity scale, and
-`encodings`, the row panels and the `features` column track read it. A text
-column track, a bar track and the cell fill do not yet, so a dN/dS bar colored
-by its value waits on steps 4 and 7. This document adopts the color object
-jbrowse-components' displays declare, adds the continuous and threshold scales
-it names, gives every scale its guide, a legend or an axis, and lists the marks
-those unlock. [panels-and-marks](../../reference/panels-and-marks.md) holds the
-vocabulary of panels, marks and channels this builds on.
+`encodings`, the row panels and every column track read it, so a dN/dS bar
+takes its color from its value. The cell fill does not yet, and waits on step
+7. This document adopts the color object jbrowse-components' displays declare,
+adds the continuous and threshold scales it names, gives every scale its guide,
+a legend or an axis, and lists the marks those unlock.
+[panels-and-marks](../../reference/panels-and-marks.md) holds the vocabulary of
+panels, marks and channels this builds on.
 
 Two target figures, in order of work:
 
@@ -58,12 +58,13 @@ Two target figures, in order of work:
   fields' values and list one legend. This is Vega-Lite's shared `resolve` and
   ggplot2's one scale per aesthetic, and jbrowse-components' rule in ADR-136.
 
-## What the color object lacks
+## The color object's members
 
-| Today                 | Target                                                                                              |
-| --------------------- | --------------------------------------------------------------------------------------------------- |
-| a bar track's `color` | `encoding.color.value`, with `color` kept as the shorthand                                          |
-| absent                | `linear`, `log`, `threshold`, a ramp `scheme`, the domain ends, `reverse`, `labels`, `missingLabel` |
+A color object is unset, one color as `value`, or a field read through `scale`,
+the three states of jbrowse-components' ADR-241. A column track's one color is
+`encoding.color.value`, with `color` kept as the shorthand, and a scale takes
+the `linear`, `log` and `threshold` kinds, a ramp `scheme`, the domain ends,
+`reverse`, `labels` and `missingLabel`.
 
 `range` takes a list of colors, and `scheme` a palette name. The names stay
 `ggplot`, `set1`, `dark2`, `okabeito` and `tableau`, and `okabeIto` and
@@ -251,10 +252,6 @@ axis has `strip` and `features` where the column axis has `bar`, `text`, `arc`,
   label, with `genome` the field read where no encoding names one.
   jbrowse-components spells the same thing as a `rows.labels` map.
 
-The column-track legends need a producer: `legends` reads the overlay, the
-row-table encodings and the row panels, and a text track's `encoding.color`
-lists no key today.
-
 ### Copy the shapes, import nothing new
 
 `@jbrowse/core` 5.0.0-beta.9, the version `packages/lib` pins, ships
@@ -341,6 +338,24 @@ day.
 
 ### 4. Column tracks read a color object and a value scale
 
+Built: `columnTrackColor.ts` reads a bar, strip, text or arc track's
+`encoding.color` as one `value` or the track's own values through a scale, and
+its `ColorRecord` carries those values under the `columns` table with the
+track's name as the field, so `resolvedScales`, `scaleProblems` and `legends`
+take column tracks as they take strips. `columnTrackColors` on the model holds
+the color per visible column and per character. An `ArcSpec` carries a `value`,
+which the arc track's scale reads, and an arc's own `color` wins; under an
+identity scale the arc track reads each arc's `color`, which then takes a
+legend. A value `hiddenCategories` hides leaves its bar, cell, character or
+arc undrawn. `barTrackScale` in `valuePanels.ts` reads `encoding.y.scale`
+through step 5's `ValueScaleSpec` and `resolveValueScale`, with a linear
+scale's unset ends at 0 and 1, and `valueScaleProblems` reports it under
+`columnTracks[i].encoding.y`. A features panel's or track's `fill` takes
+`{value}` too. The `left` axis down a bar track's edge waits on a canvas in the
+track label gutter, where `TrackLabels` and `TrackLabelsSVG` draw the name, and
+an `encoding.size` for an arc's stroke width over its value waits on a figure
+that needs it.
+
 `ColumnTrackSpec` gains a `type` on `encoding.y.scale`; `drawConservationBars`
 takes a color per bar; `drawTextTrackContent` reads the resolved scale; the
 `strip` kind and its draw function in `drawTracks.ts`, its case in
@@ -355,8 +370,8 @@ stepping along `ladderStepBelow` from `components/tree/scaleBar.ts`;
 `renderValuePanel.ts` and `renderTextPanel.ts` draw the marks; and
 `headerLayout.ts` puts the axis at the foot of the header band, on screen as a
 canvas and in the export as a svgcanvas layer. A resolved panel carries its
-`axis` as `{scale, extent, format}`. The `left` orientation waits for step 4's
-column-track axis.
+`axis` as `{scale, extent, format}`. The `left` orientation waits for the
+column-track axis step 4 leaves.
 
 `components/axis.ts` with `drawAxis`; the axis on the `features` panel under
 `x: "position"`, in the header band; `bar`, `point` and `text` row panels in

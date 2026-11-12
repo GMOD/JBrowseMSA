@@ -264,6 +264,9 @@ for alpha, beta, ab, lrt, p, tbl in content:
     values.extend([v, v, v])
 json.dump(values, open(sys.argv[2], 'w'))
 print(f"wrote {sys.argv[2]}: {len(values)} values")
+# the track's threshold at 1 draws these codons red
+red = sum(1 for v in values[::3] if v >= 1)
+print(f"{red} of {len(values) // 3} codons at dN/dS >= 1")
 PY
 
 # 11. the alignment, tree and exon numbers the page quotes, and the domain
