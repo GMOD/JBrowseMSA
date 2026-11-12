@@ -816,6 +816,73 @@ with the forward ones.
 }
 ```
 
+## rowTransform
+
+What the row axis does with the `rowData` fields: `filter` keeps the rows that
+pass every test, `sort` orders them, and `facet` stacks them in bands, each
+labelled with its field's value. Every panel reads the one row order, so the
+tree, the labels, the row panels and the alignment move together.
+
+```json
+{
+  "type": "MsaView",
+  "data": {
+    "msa": ">duck\nMKAANSE\n>chicken\nMKA-NSE\n>goose\nMKAANSE\n>swan\nMKAGNSE",
+    "treeMetadata": "{\"duck\":{\"host\":\"wild\",\"year\":2021},\"chicken\":{\"host\":\"poultry\",\"year\":2015},\"goose\":{\"host\":\"poultry\",\"year\":2022},\"swan\":{\"host\":\"wild\",\"year\":2009}}"
+  },
+  "rowTransform": {
+    "filter": [{ "field": "year", "range": [2010, null] }],
+    "sort": [{ "field": "year", "order": "descending" }],
+    "facet": { "field": "host", "sort": ["wild"] }
+  }
+}
+```
+
+[Open this snapshot in the app][live-layers-rowtransform].
+
+| Field    | Meaning                                                                              |
+| -------- | ------------------------------------------------------------------------------------ |
+| `filter` | `[{field, oneOf: [values]}]` or `[{field, range: [min, max]}]`, every test passing   |
+| `sort`   | `[{field, order}]`, `order` being `ascending` (the default) or `descending`          |
+| `facet`  | `{field, sort}`, where `sort` lists the values whose bands come first, in that order |
+
+A `oneOf` test compares the value as a string, so `2015` matches `"2015"`. A
+`range` is inclusive, and `null` leaves an end open. A row with no value for the
+field fails every test. A filter keeping no row is not applied, and the header
+warns that it keeps none.
+
+A sort compares values in the natural order a scale's `domain` uses: numbers by
+value, and digit runs by magnitude, so `2.3.2.1a` sorts before `2.3.4.4b`. Each
+further key orders the rows the keys before it leave tied, and rows tied on
+every key keep the file's order. Rows with no value sort last in either order.
+
+A facet stacks the bands the values `sort` lists first, then the other values in
+natural order, and the rows with no value last, under no label. Each band keeps
+the order the sort gives its rows. A band's label draws in the gutter the
+`bracket` clade mark uses, beside a bar over the band's rows, and exports with
+the figure the same way.
+
+With a tree, the tree sets the row order:
+
+- `filter` prunes the tree to the tips it keeps, as "Show only this clade"
+  narrows it. An internal node whose tips all fail drops with them. The `clades`
+  marks resolve against the whole tree, so a highlight keeps the rows of its
+  clade that remain.
+- `sort` is not applied, and the header warns that the tree sets the order. This
+  holds with `drawTree` off, since collapses, the focus and the `clades` marks
+  all follow the tree.
+- `facet` labels each band whose rows are one clade of the pruned tree: the most
+  recent common ancestor of the band's tips has no other tips under it. A band
+  that is not a clade draws no label, and the header warns, naming it. The rows
+  stay in the tree's order.
+
+A link carries `rowTransform` as written: field names and values. Rerooting the
+tree keeps it, and a new `rowData` table reapplies it.
+
+React: the `rowTransform` prop on `MSAViewer`, or
+`model.setRowTransform(transform)`. Python: the `row_transform` trait, a dict of
+the same shape.
+
 ## residueMappings
 
 A residue mapping records which residue of which structure each residue of a row
@@ -972,3 +1039,5 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A430%2C%22rowHeight%22%3A26%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22role%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%7D%5D%7D%7D
 [live-layers-strandpile]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A240%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2FtrpB.nwk%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fneighborhoods%2Ftrp-neighborhoods.gff%22%7D%2C%22height%22%3A530%2C%22rowHeight%22%3A34%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22x%22%3A%22position%22%2C%22width%22%3A1080%2C%22header%22%3A%22trp%20neighborhood%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22role%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22trp%22%2C%22regulator%22%2C%22pseudogene%22%2C%22other%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%23f28e2b%22%2C%22%23d9d9d9%22%5D%7D%7D%2C%22text%22%3A%7B%22field%22%3A%22Name%22%7D%7D%2C%22transform%22%3A%5B%7B%22type%22%3A%22align%22%2C%22on%22%3A%22trpB%22%7D%5D%2C%22position%22%3A%22strandpile%22%7D%5D%7D%7D
+[live-layers-rowtransform]:
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Educk%5CnMKAANSE%5Cn%3Echicken%5CnMKA-NSE%5Cn%3Egoose%5CnMKAANSE%5Cn%3Eswan%5CnMKAGNSE%22%2C%22treeMetadata%22%3A%22%7B%5C%22duck%5C%22%3A%7B%5C%22host%5C%22%3A%5C%22wild%5C%22%2C%5C%22year%5C%22%3A2021%7D%2C%5C%22chicken%5C%22%3A%7B%5C%22host%5C%22%3A%5C%22poultry%5C%22%2C%5C%22year%5C%22%3A2015%7D%2C%5C%22goose%5C%22%3A%7B%5C%22host%5C%22%3A%5C%22poultry%5C%22%2C%5C%22year%5C%22%3A2022%7D%2C%5C%22swan%5C%22%3A%7B%5C%22host%5C%22%3A%5C%22wild%5C%22%2C%5C%22year%5C%22%3A2009%7D%7D%22%7D%2C%22rowTransform%22%3A%7B%22filter%22%3A%5B%7B%22field%22%3A%22year%22%2C%22range%22%3A%5B2010%2Cnull%5D%7D%5D%2C%22sort%22%3A%5B%7B%22field%22%3A%22year%22%2C%22order%22%3A%22descending%22%7D%5D%2C%22facet%22%3A%7B%22field%22%3A%22host%22%2C%22sort%22%3A%5B%22wild%22%5D%7D%7D%7D%7D

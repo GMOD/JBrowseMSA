@@ -567,6 +567,27 @@ export const linkSpecs = [
     }),
   },
   {
+    name: 'layers-rowtransform',
+    // the rowTransform section's inline snapshot: four rows filtered by year,
+    // sorted by it and banded by host
+    url: fileSnap({
+      data: {
+        msa: '>duck\nMKAANSE\n>chicken\nMKA-NSE\n>goose\nMKAANSE\n>swan\nMKAGNSE',
+        treeMetadata: JSON.stringify({
+          duck: { host: 'wild', year: 2021 },
+          chicken: { host: 'poultry', year: 2015 },
+          goose: { host: 'poultry', year: 2022 },
+          swan: { host: 'wild', year: 2009 },
+        }),
+      },
+      rowTransform: {
+        filter: [{ field: 'year', range: [2010, null] }],
+        sort: [{ field: 'year', order: 'descending' }],
+        facet: { field: 'host', sort: ['wild'] },
+      },
+    }),
+  },
+  {
     name: 'layers-customcolorscheme',
     // the customColorScheme section's inline snapshot
     url: fileSnap({

@@ -134,6 +134,13 @@ background.
 - `msa-parsers`' `parseTree` reads every tree format the viewer takes (Newick,
   EMF, NCBI ASN.1), and `writeNewick` hands `@gmod/newick`'s writer the drawn
   tree with generated ids dropped.
+- `rowTransform` (`rowTransform.ts`) sits between `tree` and `root`:
+  `filteredTree` prunes the tips the filter refuses, keeping every node id, and
+  `arrangedTree` sorts and bands the root's children where the file has no tree.
+  `buildTreeRoot` reads `arrangedTree`, so every row reader follows it. A facet
+  band is a `bracket` clade (`facetClades`), resolved with the `clades` records
+  in `resolvedClades`. The design is in
+  `agent-docs/ideas/ready/row-transforms.md`.
 - The tree overview (`components/tree/TreeOverview.tsx`,
   `renderTreeOverview.ts`) is the brush on the row scale, behind
   `showTreeOverview`. It draws `get tree()` rather than `root`, so the whole
