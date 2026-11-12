@@ -2554,12 +2554,8 @@ function stateModelFactory({
             ) {
               return undefined
             }
-            const startCol = hideGapsEffective
-              ? visibleColsBefore(blanks, startGlobal)
-              : startGlobal
-            const endCol = hideGapsEffective
-              ? visibleColsBefore(blanks, endGlobal + 1)
-              : endGlobal + 1
+            const startCol = visibleColsBefore(blanks, startGlobal)
+            const endCol = visibleColsBefore(blanks, endGlobal + 1)
             return startCol < endCol
               ? { annotation, startCol, endCol }
               : undefined
