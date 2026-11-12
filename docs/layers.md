@@ -69,7 +69,7 @@ through unchanged.
 | a highlight `"102-292 DB"` | residues 102-292 labeled "DB"; `"248"` is residue 248 and `"248 hotspot"` labels it     |
 | `region: "170-290"`        | `{row, start: 170, end: 290}`                                                           |
 | a column track's `id`      | taken from `name` when absent, "ClinVar pathogenic" becoming `clinvar-pathogenic`       |
-| a column track's `kind`    | `bar` for `values`, `text` for `data`, `arc` for `arcs`                                 |
+| a column track's `kind`    | `bar` for `values`, `text` for `data`, `arc` for `arcs`, `features` for `features`      |
 | a column track's `start`   | the position its `values` or `data` begins at, so leading zeros stay out of the link    |
 
 Without `query`, the same highlight forms are alignment columns and a single one
@@ -82,10 +82,11 @@ label `{residue}{position}`. A malformed string, such as `"R175"` or
 ## columnTracks
 
 A track above the alignment, supplied as data. `kind` picks what it draws: `bar`
-reads `values`, `text` reads `data`, `arc` reads `arcs`. `row` makes any of them
-index that row's residues instead of alignment columns, so the first one is
-residue 1 and the viewer fills in the row's gaps. A data track appears in the
-Tracks menu, toggles like any other, and exports to SVG.
+reads `values`, `text` reads `data`, `arc` reads `arcs`, `features` reads
+`features`. `row` makes any of them index that row's residues instead of
+alignment columns, so the first one is residue 1 and the viewer fills in the
+row's gaps. A data track appears in the Tracks menu, toggles like any other, and
+exports to SVG.
 
 [![](media/layers-columntracks.png)][live-layers-columntracks]
 
@@ -137,18 +138,19 @@ B19-A20 reach across the C peptide that processing cuts out.
 }
 ```
 
-| Field      | Kind | Meaning                                                                                                    |
-| ---------- | ---- | ---------------------------------------------------------------------------------------------------------- |
-| `id`       | both | Unique key. The Tracks menu and `turnedOffTracks` use it                                                   |
-| `name`     | both | Label beside the track                                                                                     |
-| `values`   | bar  | One number per column, or per residue of `row`                                                             |
-| `encoding` | bar  | `{y: {scale: {domainMax}}}`, the value drawn at full height (default 1)                                    |
-| `color`    | bar  | Bar fill (default gray)                                                                                    |
-| `data`     | text | One character per column, or per residue of `row`                                                          |
-| `encoding` | text | `{color: {scale: {domain, range}}}`, a color per upper-case character, painted as `residueEncoding` paints |
-| `arcs`     | arc  | `{start, end, color?}` pairs; each end is a column or a residue                                            |
-| `row`      | both | Row name whose residues the values or characters index                                                     |
-| `height`   | both | Pixel height (default 40 for a bar, 50 for an arc, the row height for text)                                |
+| Field      | Kind     | Meaning                                                                                                    |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `id`       | all      | Unique key. The Tracks menu and `turnedOffTracks` use it                                                   |
+| `name`     | all      | Label beside the track                                                                                     |
+| `values`   | bar      | One number per column, or per residue of `row`                                                             |
+| `encoding` | bar      | `{y: {scale: {domainMax}}}`, the value drawn at full height (default 1)                                    |
+| `color`    | bar      | Bar fill (default gray)                                                                                    |
+| `data`     | text     | One character per column, or per residue of `row`                                                          |
+| `encoding` | text     | `{color: {scale: {domain, range}}}`, a color per upper-case character, painted as `residueEncoding` paints |
+| `arcs`     | arc      | `{start, end, color?}` pairs; each end is a column or a residue                                            |
+| `features` | features | `{start, end, strand?, ...}` spans; see [the features track](#the-features-track)                          |
+| `row`      | all      | Row name whose residues the values or characters index                                                     |
+| `height`   | all      | Pixel height (default 40 for a bar, 50 for an arc, the row height for text, 18 per lane for features)      |
 
 A `row` on an arc track carries both ends of every arc, so a contact map
 computed in a protein's own numbering lands on the alignment without conversion.
@@ -167,6 +169,67 @@ that applies to inline alignments. The demo app raises the limit to 1 MB, as
 much as its links hold, and `MSAModelF({ maxInlineSnapshotBytes })` sets it for
 another host. To go past it, host the values and set them at runtime with
 `model.setColumnTracks(...)`.
+
+### The features track
+
+A `features` track draws spans over the columns with the mark a `features` row
+panel draws in each row: an arrow where a span carries a `strand`, a box
+otherwise, labeled where the text fits. Spans that overlap pack into lanes, and
+the track is 18 pixels tall per lane until a `height` or a drag sets it.
+Secondary-structure blocks, the Pfam domains of the reference row and the exons
+along a DNA alignment each make one.
+
+The insulin example in the examples catalog draws two: the precursor's signal, B
+chain, C peptide and A chain from UniProt P01308, and the helices and strand
+UniProt takes from PDB 3W7Y.
+
+```json
+{
+  "id": "ss",
+  "name": "Secondary structure",
+  "kind": "features",
+  "row": "Human",
+  "features": [
+    { "start": 33, "end": 43, "type": "helix" },
+    { "start": 48, "end": 50, "type": "strand", "strand": "+" },
+    { "start": 91, "end": 97, "type": "helix", "color": "#9467bd" }
+  ],
+  "encoding": {
+    "fill": {
+      "field": "type",
+      "scale": {
+        "domain": ["helix", "strand"],
+        "range": ["#e15759", "#edc948"]
+      },
+      "legend": { "title": "Secondary structure" }
+    },
+    "text": { "field": "type" }
+  }
+}
+```
+
+| Field      | Meaning                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| `features` | spans with a `start` and an `end`, 1-based and inclusive, in columns or in residues of `row`      |
+| `encoding` | `{fill: {field, scale, legend}, text: {field}}` over the spans' fields                            |
+| `color`    | the fill of every span when the track sets no `fill` (default light grey)                         |
+| `position` | `identity` packs overlapping spans into lanes; `strandpile` puts forward spans above reverse ones |
+
+A span's `strand` of `+` or `-` draws it as an arrow pointing that way. A span's
+own `color` wins over the scale and the track's `color`, as a GFF `color=`
+attribute does, so the last helix above draws purple. Every other field, such as
+`type`, `name` or a host's own `source`, is one the encoding reads, as a string.
+
+`encoding.fill` is the color object of `encodings` and of a `features` row
+panel. While the track is shown its scale lists a legend, titled by
+`legend.title` or else the field, and a track and a panel declaring the same
+scale share one legend and one set of colors. A value the scale gives no color
+draws grey. `encoding.text` names the field drawn inside each span.
+
+Hovering the track lists every span at that column with its fields. Hiding gappy
+columns moves each span onto the visible columns, shrinks one that crosses
+hidden columns, and drops one lying on hidden columns alone. An end past the end
+of `row` clamps to its last residue.
 
 ## highlights
 

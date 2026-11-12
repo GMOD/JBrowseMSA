@@ -95,9 +95,9 @@ background.
   panels stay out of the track machinery, which is column space.
 - `renderStrip.ts` draws the `strip` kind, a cell per row. `features` draws the
   GFF's spans per row through `components/msa/drawFeatureSpans.ts`, the one span
-  mark: the alignment's overlay (`renderBoxFeatureCanvasBlock.ts`) and the panel
-  each hand it an x mapping, the fills, the labels and a row geometry, so a
-  strand arrow is drawn in one place.
+  mark: the alignment's overlay (`renderBoxFeatureCanvasBlock.ts`), the panel
+  and a `features` column track each hand it an x mapping, the fills, the labels
+  and a row geometry, so a strand arrow is drawn in one place.
 - The head is the last `headLength` pixels _of_ the feature, tapering to a point
   at its end the way gggenes and gggenomes draw one, and a feature shorter than
   the head is all head. A glyph covers its own span and nothing past it, so the
@@ -192,6 +192,14 @@ background.
   in `drawTrackBlock`, and a case in `components/tracks/TrackTooltipContent.tsx`
   for that track's reading at the hovered column, with no second rendering path
   or component.
+- A `features` column track is the span mark on the column axis. Its spans
+  resolve to visible columns in `columnTrackContent`, the way the arcs do, and
+  pack into lanes through `panelLanes`, so `position: "strandpile"` reads as it
+  does on a row panel. `trackAnnotations` in `featuresLayer.ts` converts its
+  spans to annotations once per record, and `featureTrackScales` colors them
+  through `featureColorMap` and the `fill` scale `resolvedScales` shares with
+  the encodings and the row panels, so a scale the track and a panel both
+  declare lists one legend.
 - `components/Track.tsx` hosts every kind's hover: `useTrackHover` sets the
   model's mouse column and anchors the tooltip, so the column statistics live on
   the tracks that draw them and the alignment's own tooltip stays about the cell
