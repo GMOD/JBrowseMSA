@@ -129,9 +129,11 @@ def features(value: Any) -> list[dict[str, Any]]:
 
 
 def column_track(track: Mapping[str, Any]) -> dict[str, Any]:
-    """A column track with a numpy array or pandas Series `values` as a list.
+    """A column track with a numpy array or pandas Series `values` as a list,
+    and a features track's `features` from a list of dicts or a DataFrame.
 
-    JSON has no NaN, so a NaN value becomes None, which draws no bar.
+    JSON has no NaN, so a NaN value becomes None, which draws no bar, and a
+    missing value in a DataFrame of spans leaves that field out of the span.
     """
     track = dict(track)
     values = track.get("values")
@@ -139,4 +141,6 @@ def column_track(track: Mapping[str, Any]) -> dict[str, Any]:
         if hasattr(values, "tolist"):
             values = values.tolist()
         track["values"] = [_json_number(x) for x in values]
+    if track.get("features") is not None:
+        track["features"] = features(track["features"])
     return track

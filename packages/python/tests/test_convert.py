@@ -131,3 +131,24 @@ def test_features_take_a_dataframe_and_leave_out_missing_values():
         {"row": "human", "start": 2, "end": 9, "color": "#c0392b", "score": 0.5},
         {"row": "mouse", "start": 5, "end": 12},
     ]
+
+
+def test_a_features_track_takes_a_dataframe_of_spans():
+    pd = pytest.importorskip("pandas")
+    frame = pd.DataFrame(
+        {
+            "start": [1, 8],
+            "end": [6, 12],
+            "type": ["helix", "strand"],
+            "strand": [None, "+"],
+        }
+    )
+    view = MSAView(
+        column_tracks=[
+            {"id": "ss", "name": "SS", "kind": "features", "features": frame}
+        ]
+    )
+    assert view.column_tracks[0]["features"] == [
+        {"start": 1, "end": 6, "type": "helix"},
+        {"start": 8, "end": 12, "type": "strand", "strand": "+"},
+    ]
