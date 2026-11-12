@@ -206,8 +206,9 @@ export const catalog: CatalogEntry[] = [
     category: 'Conservation & diffing',
     description:
       'Preproinsulin across vertebrates diffed against human: the B and A ' +
-      'chains stay conserved while the cleaved C-peptide drifts. Arcs mark ' +
-      'the three disulfide bonds.',
+      'chains stay conserved while the cleaved C-peptide drifts. Two ' +
+      'features tracks mark the precursor parts and the secondary structure ' +
+      'of PDB 3W7Y, and arcs mark the three disulfide bonds.',
   },
   {
     id: 'ProteinFamilies',
