@@ -79,6 +79,16 @@ export interface LegacyColorKeys {
  * by member.
  */
 export function liftResidueColor<S extends LegacyColorKeys>(snapshot: S) {
+  return isObject(snapshot) ? liftKeys(snapshot) : snapshot
+}
+
+// MST runs the preprocessor on whatever it validates, undefined included,
+// before it checks for an object
+function isObject(value: unknown) {
+  return typeof value === 'object' && value !== null
+}
+
+function liftKeys<S extends LegacyColorKeys>(snapshot: S) {
   const {
     bgColor,
     colorSchemeName,

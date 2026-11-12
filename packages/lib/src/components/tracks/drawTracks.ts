@@ -1,4 +1,5 @@
 import { arcColorValue, letterValue } from '../../columnTrackColor.ts'
+import { cssColorOf } from '../../scales.ts'
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { contrastTextFn } from '../../util.ts'
@@ -158,7 +159,8 @@ function drawArcs({
       const x1 = (arc.start + 0.5) * colWidth
       const x2 = (arc.end + 0.5) * colWidth
       const apex = apexRoom * Math.sqrt((arc.end - arc.start) / maxSpan)
-      ctx.strokeStyle = arc.color ?? colorOf?.(arc) ?? color
+      ctx.strokeStyle =
+        (arc.color && cssColorOf(arc.color)) ?? colorOf?.(arc) ?? color
       ctx.beginPath()
       ctx.moveTo(x1, trackHeight)
       ctx.quadraticCurveTo(

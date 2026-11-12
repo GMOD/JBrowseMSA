@@ -194,17 +194,32 @@ export function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
  * from the first selected to the last as the view orders them
  */
 export function selectionArea(model: MsaViewModel) {
-  const { resolvedSelection, colWidth, rowHeight } = model
+  const { colWidth, rowHeight } = model
+  const block = selectionBlock(model)
+  return block
+    ? {
+        width: block.columns * colWidth,
+        height: block.rows * rowHeight,
+        offsetX: block.firstCol * colWidth,
+        offsetY: block.firstRow * rowHeight,
+      }
+    : undefined
+}
+
+/**
+ * the selected block an export draws, in visible columns and rows: from the
+ * first selected row to the last, every row between them included
+ */
+export function selectionBlock(model: MsaViewModel) {
+  const { resolvedSelection } = model
   const firstRow = resolvedSelection?.rowRuns[0]?.[0]
   const lastRow = resolvedSelection?.rowRuns.at(-1)?.[1]
   return resolvedSelection && firstRow !== undefined && lastRow !== undefined
     ? {
-        width:
-          (resolvedSelection.endCol - resolvedSelection.startCol + 1) *
-          colWidth,
-        height: (lastRow - firstRow + 1) * rowHeight,
-        offsetX: resolvedSelection.startCol * colWidth,
-        offsetY: firstRow * rowHeight,
+        firstCol: resolvedSelection.startCol,
+        columns: resolvedSelection.endCol - resolvedSelection.startCol + 1,
+        firstRow,
+        rows: lastRow - firstRow + 1,
       }
     : undefined
 }

@@ -116,3 +116,11 @@ test('rowLabel names the field the tip labels draw, else the row name', async ()
   expect(svg).toContain('>Homo sapiens</text>')
   expect(svg).not.toContain('GRCh38')
 })
+
+test('node support reads the labelled internal nodes, so no tip counts as missing', () => {
+  const model = makeModel([
+    { ...support, legend: { title: 'support', missingLabel: 'no support' } },
+  ])
+  const legend = model.legends.find(l => l.title === 'support')!
+  expect(legend.items.map(item => item.label)).not.toContain('no support')
+})

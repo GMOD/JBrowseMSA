@@ -412,8 +412,11 @@ const syncedProps = [
   ),
   synced(
     p => p.selection,
-    (m, v) => {
+    (m, v, props) => {
       m.setSelection(v)
+      if (props.trimToSelection !== undefined) {
+        m.setTrimToSelection(props.trimToSelection)
+      }
     },
   ),
   synced(

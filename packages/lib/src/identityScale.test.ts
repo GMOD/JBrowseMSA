@@ -107,3 +107,27 @@ test('a range, a scheme or labels past the domain are problems', () => {
   ).toEqual(['labels-domain'])
   expect(rules({ scale: { type: 'identity', domain: ['red'] } })).toEqual([])
 })
+
+test('a hidden color hides the values that write it as r,g,b', () => {
+  const model = createTestModel({
+    id: 'identity-hide-test',
+    data: {
+      msa: '>a\nAC\n>b\nAC\n',
+      treeMetadata: JSON.stringify({
+        a: { tint: '255,0,0' },
+        b: { tint: 'blue' },
+      }),
+    },
+    encodings: [
+      {
+        channel: 'rowTint',
+        field: 'tint',
+        scale: { type: 'identity', domain: ['255,0,0', 'blue'] },
+      },
+    ],
+    hiddenCategories: [{ field: 'tint', value: 'rgb(255,0,0)' }],
+  })
+  const tint = model.resolvedEncodings.find(e => e.channel === 'rowTint')!
+  expect(tint.colorOf('255,0,0')).toBeUndefined()
+  expect(tint.colorOf('blue')).toBe('blue')
+})

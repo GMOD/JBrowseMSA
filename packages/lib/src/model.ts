@@ -859,6 +859,11 @@ function stateModelFactory({
       headerHeight: 0,
       /**
        * #volatile
+       * the trimmed file columns a drag holds still, see `setHeldTrimSpan`
+       */
+      heldTrimSpan: undefined as { start: number; end: number } | undefined,
+      /**
+       * #volatile
        * the height a host that fills its container measures, px. While set it
        * replaces `height`, stays out of the snapshot, and hides the drag handle
        */
@@ -1199,6 +1204,9 @@ function stateModelFactory({
         if (!compareStructural(next, self.selection)) {
           self.selection = next
         }
+        if (!next) {
+          self.trimToSelection = false
+        }
       },
       /**
        * #action
@@ -1206,7 +1214,15 @@ function stateModelFactory({
        */
       clearSelection() {
         this.setSelection(undefined)
-        self.trimToSelection = false
+      },
+      /**
+       * #action
+       * keep the trimmed columns where they are while a drag reselects inside
+       * them, so the cells under the pointer stay put; undefined lets the trim
+       * follow the selection again
+       */
+      setHeldTrimSpan(span?: { start: number; end: number }) {
+        self.heldTrimSpan = span
       },
 
       /**
@@ -1843,7 +1859,9 @@ function stateModelFactory({
        * every column
        */
       get trimSpan() {
-        return self.trimToSelection ? this.selectionFileSpan : undefined
+        return self.trimToSelection
+          ? (self.heldTrimSpan ?? this.selectionFileSpan)
+          : undefined
       },
 
       /**
@@ -2477,6 +2495,15 @@ function stateModelFactory({
 
       /**
        * #getter
+       * every letter the rows hold, hidden columns included, which a change
+       * of the hidden columns leaves cached
+       */
+      get rowLetters() {
+        return lettersInRows(this.rows.map(([, seq]) => seq))
+      },
+
+      /**
+       * #getter
        * Detects sequence type based on letters present in the alignment.
        * Returns 'dna', 'rna', or 'amino'. Hidden columns count, so trimming
        * to a few columns keeps the type.
@@ -2485,7 +2512,7 @@ function stateModelFactory({
         const letters =
           this.blanks.length === 0
             ? this.colStats.lettersPresent
-            : lettersInRows(this.rows.map(([, seq]) => seq))
+            : this.rowLetters
         // the two-base IUPAC codes keep an ambiguous read nucleotide; the
         // three-base ones (B, D, H, V) are common amino acids, so they don't
         const ambiguous = ['N', 'R', 'Y', 'K', 'M', 'S', 'W']
@@ -4481,8 +4508,8 @@ function stateModelFactory({
        */
       get scaleProblems(): RecordScaleProblem[] {
         return [
-          ...self.colorRecords.flatMap(({ record, channel }) =>
-            colorProblems(channel).map(problem => ({ record, ...problem })),
+          ...this.colorRecordProblems.flatMap(({ record, problems }) =>
+            problems.map(problem => ({ record, ...problem })),
           ),
           ...self.rowPanels.flatMap((panel, i) =>
             panel.kind === 'bar' || panel.kind === 'point'
@@ -4510,18 +4537,26 @@ function stateModelFactory({
        */
       get scaleProblemNotes() {
         const notes = new Map<string, string>()
-        for (const { channel, table } of self.colorRecords) {
-          const key = declarationKey({
-            spec: channel,
-            field: channel.field,
-            table,
-          })
-          const [first] = colorProblems(channel)
+        for (const { key, problems } of this.colorRecordProblems) {
+          const [first] = problems
           if (first && !notes.has(key)) {
             notes.set(key, first.message)
           }
         }
         return notes
+      },
+
+      /**
+       * #getter
+       * each color record with its declaration key and the problems its color
+       * object has, checked once for `scaleProblems` and the legend notes both
+       */
+      get colorRecordProblems() {
+        return self.colorRecords.map(({ record, channel, table }) => ({
+          record,
+          key: declarationKey({ spec: channel, field: channel.field, table }),
+          problems: colorProblems(channel),
+        }))
       },
 
       /**
@@ -4821,7 +4856,10 @@ function stateModelFactory({
        */
       get resolvedScales() {
         const rows = Object.values(self.rowData)
-        const nodes = preorder(self.tree)
+        const { tree } = self
+        const nodes = preorder(tree).filter(
+          node => node !== tree && node.children.length > 0,
+        )
         const valuesOf = (record: ColorRecord) => {
           const { field } = record.channel
           return record.table === 'rows'
@@ -5250,17 +5288,14 @@ function stateModelFactory({
        */
       get nodePointColors(): Map<string, string> | undefined {
         const encoding = this.encodingFor('nodePoint')
-        if (!encoding) {
-          return undefined
-        }
-        const colors = new Map<string, string>()
-        for (const node of preorder(self.tree)) {
-          const color = encoding.colorOf(nodeField(node, encoding.field))
-          if (color) {
-            colors.set(node.id, color)
-          }
-        }
-        return colors
+        return encoding
+          ? new Map(
+              preorder(self.tree).flatMap(node => {
+                const color = encoding.colorOf(nodeField(node, encoding.field))
+                return color ? [[node.id, color] as const] : []
+              }),
+            )
+          : undefined
       },
     }))
     .actions(self => ({

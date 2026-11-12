@@ -1,4 +1,4 @@
-import { getSnapshot } from '@jbrowse/mobx-state-tree'
+import { getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { describe, expect, test } from 'vitest'
 
 import colorSchemes from './colorSchemes.ts'
@@ -289,4 +289,11 @@ describe('a snapshot with the keys written before residueColor', () => {
       scale: { scheme: 'flower' },
     })
   })
+})
+
+test('a host validating no snapshot, through maybe or a union, passes the lift', () => {
+  const Model = MSAModelF()
+  expect(Model.is(undefined)).toBe(false)
+  expect(types.maybe(Model).is(undefined)).toBe(true)
+  expect(types.union(Model, types.literal('none')).is('none')).toBe(true)
 })

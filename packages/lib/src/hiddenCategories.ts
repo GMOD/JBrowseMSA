@@ -1,8 +1,16 @@
 import { featureField } from './featureFields.ts'
-import { isCategorical, scaleKind } from './scales.ts'
+import { cssColorOf, isCategorical, scaleKind } from './scales.ts'
 
 import type { ColorRecord, ScaleTable } from './scales.ts'
 import type { Annotation, HiddenCategory } from './types.ts'
+
+// an identity scale's legend keys each color as `cssColorOf` writes it, so a
+// value is looked up the same way
+class ColorKeySet extends Set<string> {
+  override has(value: string) {
+    return super.has(cssColorOf(value))
+  }
+}
 
 /** the hidden values of each field, per table */
 export type HiddenValues = Map<ScaleTable, Map<string, Set<string>>>
@@ -18,11 +26,15 @@ export function activeHiddenValues(
 ): HiddenValues {
   const active: HiddenValues = new Map()
   for (const { channel, table } of records) {
-    if (isCategorical(scaleKind(channel.scale))) {
+    const kind = scaleKind(channel.scale)
+    if (isCategorical(kind)) {
       for (const { field, value } of hidden) {
         if (field === channel.field) {
           const fields = active.get(table) ?? new Map<string, Set<string>>()
-          fields.set(field, (fields.get(field) ?? new Set()).add(value))
+          const values =
+            fields.get(field) ??
+            (kind === 'identity' ? new ColorKeySet() : new Set<string>())
+          fields.set(field, values.add(value))
           active.set(table, fields)
         }
       }

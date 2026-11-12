@@ -8,6 +8,7 @@
 // jbrowse-plugin-protein3d no longer depends on this package at all: it reads
 // the msaview plugin's model through a structural type of its own.
 export { renderToSvg } from './renderToSvg.tsx'
+export { selectionBlock } from './exportLayout.ts'
 export type { ExportSvgOptions } from './renderToSvg.tsx'
 // renderToSvg outside a browser needs DOM bits jsdom omits; react-msaview-cli
 // and the README figure generator both drive it that way

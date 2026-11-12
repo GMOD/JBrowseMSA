@@ -127,3 +127,25 @@ test('a drag inside a trimmed view selects file columns', () => {
   expect(model.selection).toEqual({ start: 4, end: 5 })
   expect(model.numColumns).toBe(2)
 })
+
+test('a drag inside a trimmed view keeps its anchor while the trim holds still', () => {
+  const model = makeModel({
+    selection: { start: 2, end: 8 },
+    trimToSelection: true,
+  })
+  model.setHeldTrimSpan(model.trimSpan)
+  model.selectBlock({ col: 1 }, { col: 3 })
+  model.selectBlock({ col: 1 }, { col: 4 })
+  expect(model.selection).toEqual({ start: 3, end: 6 })
+  model.setHeldTrimSpan(undefined)
+  expect(model.numColumns).toBe(4)
+})
+
+test('clearing the selection, from a prop or a host, ends the trim', () => {
+  const model = makeModel({
+    selection: { start: 3, end: 6 },
+    trimToSelection: true,
+  })
+  model.setSelection(undefined)
+  expect(model.trimToSelection).toBe(false)
+})

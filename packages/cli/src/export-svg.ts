@@ -186,6 +186,7 @@ export async function exportSvg({
     installHeadlessRenderEnv,
     resolveTheme,
     problemLine,
+    selectionBlock,
   } = await import('react-msaview')
 
   enableStaticRendering(true)
@@ -246,17 +247,14 @@ export async function exportSvg({
     console.warn(problemLine(problem))
   }
 
-  const block = selection ? model.resolvedSelection : undefined
+  const block = selection ? selectionBlock(model) : undefined
   if (selection && !block) {
     throw new Error(
       '--selection draws the selected block, and the --spec or --props has no selection',
     )
   }
   const [columns, rows] = block
-    ? [
-        block.endCol - block.startCol + 1,
-        (block.rowRuns.at(-1)?.[1] ?? 0) - (block.rowRuns[0]?.[0] ?? 0) + 1,
-      ]
+    ? [block.columns, block.rows]
     : [model.numColumns, model.leaves.length]
   const letters = model.showMsaLetters && !viewport ? columns * rows : 0
   if (letters > MAX_EXPORT_LETTERS && !force) {

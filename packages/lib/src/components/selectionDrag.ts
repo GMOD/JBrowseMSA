@@ -26,9 +26,14 @@ export function dragSelection(
   const { clientX, clientY } = start
   let dragging = false
   function onMove(event: MouseEvent) {
-    dragging ||=
+    if (
+      !dragging &&
       Math.hypot(event.clientX - clientX, event.clientY - clientY) >
-      maxClickTravel
+        maxClickTravel
+    ) {
+      dragging = true
+      model.setHeldTrimSpan(model.trimSpan)
+    }
     if (dragging && isAlive(model)) {
       model.selectBlock(anchor, cellAt(event))
     }
@@ -36,6 +41,9 @@ export function dragSelection(
   function onUp() {
     window.removeEventListener('mousemove', onMove)
     window.removeEventListener('mouseup', onUp)
+    if (isAlive(model)) {
+      model.setHeldTrimSpan(undefined)
+    }
   }
   window.addEventListener('mousemove', onMove)
   window.addEventListener('mouseup', onUp)

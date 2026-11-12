@@ -31,10 +31,10 @@ export function featuresToAnnotations(features: Feature[]): Annotation[] {
  * frozen track record the way `featuresToAnnotations` caches on a feature
  */
 export function trackAnnotations(track: ColumnTrackSpec): Annotation[] {
-  const cached = trackConverted.get(track)
-  if (cached) {
-    return cached
-  }
+  return trackConverted.get(track) ?? convertTrack(track)
+}
+
+function convertTrack(track: ColumnTrackSpec) {
   const annotations = (track.features ?? []).map(span =>
     spanAnnotation(span, track.row),
   )
