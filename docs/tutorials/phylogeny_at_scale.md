@@ -377,9 +377,12 @@ declare one scale and the view lists one gradient legend for them, running from
 dark purple at 1977 to yellow at 2024. With an end left unset, each record would
 follow its own field's values and list a legend of its own.
 
-[Open the year strip in the app](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A700%2C%22treeAreaWidth%22%3A560%2C%22colWidth%22%3A0.3%2C%22rowHeight%22%3A18%2C%22drawLabels%22%3Atrue%2C%22scrollY%22%3A-1188%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22nucleotide%22%7D%7D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22year%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22scheme%22%3A%22viridis%22%2C%22domainMin%22%3A1977%2C%22domainMax%22%3A2024%7D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22year%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22scheme%22%3A%22viridis%22%2C%22domainMin%22%3A1977%2C%22domainMax%22%3A2024%7D%7D%7D%2C%22width%22%3A14%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample.nh%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample-rowdata.json%22%7D%7D%7D).
-The link opens the readable window of step 9 with the labels and the strip
-colored by year.
+[![](../media/phylogeny_metadata-year-strip.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A700%2C%22treeAreaWidth%22%3A560%2C%22colWidth%22%3A0.3%2C%22rowHeight%22%3A18%2C%22drawLabels%22%3Atrue%2C%22scrollY%22%3A-1188%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22nucleotide%22%7D%7D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22year%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22scheme%22%3A%22viridis%22%2C%22domainMin%22%3A1977%2C%22domainMax%22%3A2024%7D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22year%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22scheme%22%3A%22viridis%22%2C%22domainMin%22%3A1977%2C%22domainMax%22%3A2024%7D%7D%7D%2C%22width%22%3A14%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample.nh%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample-rowdata.json%22%7D%7D%7D)
+
+The readable window of step 9, with each tip label and its cell in the strip
+colored by collection year. Most rows in this window were collected between 2015
+and 2023, the green-to-yellow end of the ramp, and the legend at top right reads
+the ramp from 1977 to 2024.
 
 ## 15. Open the link and check one row against the JSON
 
