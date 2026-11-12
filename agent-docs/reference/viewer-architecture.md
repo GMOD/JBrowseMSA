@@ -140,7 +140,7 @@ background.
   `buildTreeRoot` reads `arrangedTree`, so every row reader follows it. A facet
   band is a `bracket` clade (`facetClades`), resolved with the `clades` records
   in `resolvedClades`. The design is in
-  `agent-docs/ideas/ready/row-transforms.md`.
+  `agent-docs/reference/row-transforms.md`.
 - The tree overview (`components/tree/TreeOverview.tsx`,
   `renderTreeOverview.ts`) is the brush on the row scale, behind
   `showTreeOverview`. It draws `get tree()` rather than `root`, so the whole

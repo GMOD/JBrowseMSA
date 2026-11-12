@@ -10,17 +10,17 @@ description:
 
 # Scales and guides
 
-Every scale in react-msaview is categorical. `resolveScale` in
-`packages/lib/src/scales.ts` reads the color object of step 1, `ColorSpec`, and
-returns a color per distinct string value, and `encodings`, the `strip` and
-`features` row panels, a text column track and `colorScheme` all read it. A
-number has no scale to go through, so a strip over a sampling date, a feature
-fill over pLDDT, a node colored by support and a bar per row are each blocked on
-the same missing piece. This document adopts the color object
-jbrowse-components' displays declare, adds the continuous and threshold scales
-it names, gives every scale its guide, a legend or an axis, and lists the marks
-those unlock. [panels-and-marks](../../reference/panels-and-marks.md) holds the
-vocabulary of panels, marks and channels this builds on.
+`resolveScale` in `packages/lib/src/scales.ts` reads the color object,
+`ColorSpec`, through an ordinal, linear, log or threshold scale, and
+`encodings`, the `strip` and `features` row panels and the `features` column
+track read it. A text column track, a bar track, the tree's node points and the
+cell fill do not yet, so a dN/dS bar colored by its value, a node colored by
+support and a bar per row each wait on steps 4 to 7. This document adopts the
+color object jbrowse-components' displays declare, adds the continuous and
+threshold scales it names, gives every scale its guide, a legend or an axis, and
+lists the marks those unlock.
+[panels-and-marks](../../reference/panels-and-marks.md) holds the vocabulary of
+panels, marks and channels this builds on.
 
 Two target figures, in order of work:
 
