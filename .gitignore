@@ -125,7 +125,9 @@ app/build
 lib/bundle
 pages-dist
 
-.claude
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 __pycache__/
 
 # Figure bytes live in s3://jbrowse.org/msaview-figures/ and git tracks
