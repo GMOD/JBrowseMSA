@@ -301,13 +301,30 @@ P(substitute). The script also reads AlphaMissense for P04637 and the Giacomelli
 2018 saturation screen from MaveDB, averages each per residue, and records the
 Spearman correlation of each model with the screen over the 7,448 substitutions
 all three score, and the six residues where the two models' per-residue ranks
-differ most. It is the one Python script here, because the model runs in
-PyTorch; `uv run` installs a CPU build of torch, and the first run downloads the
-2.5 GB weights. Scoring takes a few minutes on eight threads, and a second run
-writes the same scores.
+differ most. It and `kinaseEsmContacts.py` are in Python because the model runs
+in PyTorch; `uv run` installs a CPU build of torch, and the first run downloads
+the 2.5 GB weights. Scoring takes a few minutes on eight threads, and a second
+run writes the same scores.
 
 ```sh
 uv run scripts/examples-gen/p53Predictors.py
+```
+
+`kinaseEsmContacts.py` writes `kinaseEsmContacts.json` for the predicted
+contacts example. ESM-2's contact head gives a probability for every residue
+pair of the SRC_HUMAN row in one forward pass. `contactMap.mjs` lists every
+C-beta pair under 8 Å in 2SRC, through the same SIFTS mapping and row check as
+`contacts.mjs`, and the Python script runs it. Pairs at least 6 residues apart
+with both ends resolved in 2SRC are ranked by probability, and the top L are
+kept, where L is the number of resolved residues. CASP scores contact prediction
+by the precision of the top L/5, L/2 and L, and for Src the top L reaches down
+to a probability of 0.48, close to the model's own even odds. The script records
+how many of each top set are 2SRC contacts (88 of the top 90), and splits the
+2SRC contacts into those in the top L and the rest. The forward pass takes about
+4 seconds on eight threads.
+
+```sh
+uv run scripts/examples-gen/kinaseEsmContacts.py
 ```
 
 The SIFTS lookup matters most here, because a PDB entry numbers its residues its

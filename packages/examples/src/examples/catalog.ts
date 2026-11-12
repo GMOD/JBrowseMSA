@@ -193,6 +193,16 @@ export const catalog: CatalogEntry[] = [
       'the two models disagree most.',
   },
   {
+    id: 'KinaseEsmContacts',
+    name: 'Predicted contacts against a structure (ESM-2 on Src)',
+    category: 'Machine learning',
+    description:
+      "ESM-2's contact head reads the human Src sequence alone, and its most " +
+      'probable residue pairs draw as arcs colored by probability, above ' +
+      'the contacts in PDB 2SRC. 88 of its top 90 pairs are 2SRC contacts, ' +
+      'and the red 2SRC arcs are the ones it ranks in its top L.',
+  },
+  {
     id: 'Ace2',
     name: 'Host range (ACE2 / SARS-CoV-2 receptor)',
     category: 'Conservation & diffing',
