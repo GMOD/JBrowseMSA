@@ -22,6 +22,13 @@ refuse() {
 command -v msa-test >/dev/null || exit 0
 grep -Eq '\bssh\b|MSA_LOCAL_TESTS=1' <<<"$cmd" && exit 0
 
+# only a run inside a react-msaview checkout goes to ada: the directory the
+# command's last `cd` names, else the session's
+dir=$(grep -oE "(^|[;&|(])[[:space:]]*cd[[:space:]]+[^;&|)[:space:]]+" <<<"$cmd" | tail -1 | sed -E 's/.*cd[[:space:]]+//')
+case $dir in '') dir=$cwd ;; '~'*) dir=$HOME${dir:1} ;; /*) ;; *) dir=$cwd/$dir ;; esac
+root=$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)
+[ -f "$root/packages/lib/src/model.ts" ] && [ -f "$root/vitest.config.ts" ] || exit 0
+
 if grep -Eq "${start}${wrapper}pnpm[[:space:]]+(run[[:space:]]+)?typecheck([[:space:]]|$)" <<<"$cmd"; then
   refuse 'Refused: pnpm typecheck on the laptop. `msa-test --types` runs it on ada (`msa-test --full` runs every suite and then the typecheck). MSA_LOCAL_TESTS=1 when ada is unreachable.'
 fi
@@ -33,7 +40,7 @@ if grep -Eq "$vitest_call" <<<"$cmd" &&
   named=0
   multi=
   while IFS= read -r w; do
-    case $w in /*) p=$w ;; *) p=${cwd:-.}/$w ;; esac
+    case $w in /*) p=$w ;; *) p=$dir/$w ;; esac
     [ -n "$w" ] && [ -e "$p" ] || continue
     named=$((named + 1))
     if [ -d "$p" ] || ! grep -qE '\.test\.[cm]?[jt]sx?$' <<<"$w"; then
