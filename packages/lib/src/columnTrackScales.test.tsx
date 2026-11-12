@@ -429,3 +429,35 @@ test('the export draws a strip cell per column in its scale color', async () => 
     expect.arrayContaining([0, colWidth * 3]),
   )
 })
+
+test('a row panel and a column track declaring one threshold list one legend', () => {
+  const model = MSAModelF().create({
+    id: 'column-track-scales-shared',
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: {
+      msa,
+      treeMetadata: JSON.stringify({ s1: { low: '3' }, s2: { low: '0.5' } }),
+    },
+    columnTracks: [
+      {
+        id: 'dnds',
+        name: 'dN/dS',
+        kind: 'bar',
+        values: [0.2, 1, 3, 0.9],
+        encoding: { color: dndsColor },
+      },
+    ],
+    rowPanels: [
+      {
+        kind: 'bar',
+        encoding: {
+          x: { field: 'low' },
+          color: { field: 'low', ...dndsColor },
+        },
+      },
+    ],
+  })
+  model.setWidth(1000)
+  expect(model.legends.filter(l => l.title === 'dN/dS')).toHaveLength(1)
+})

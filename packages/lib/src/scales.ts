@@ -504,7 +504,9 @@ function rampEnds(scale: ColorScale | undefined) {
  * one scheme with no title read two fields and list two legends; naming one
  * title gives them one scale and one legend. A ramp pinned at both ends is its
  * declaration whatever the field, and a ramp with an open end follows its own
- * field's values, so its field joins the key.
+ * field's values, so its field joins the key. A threshold or a pinned ramp
+ * colors no value by the others, so a row panel and a column track declaring
+ * one share it across their tables.
  */
 export function declarationKey({
   spec,
@@ -514,8 +516,9 @@ export function declarationKey({
   const { scale, legend } = spec
   const ends = rampEnds(scale)
   const title = legend?.title ?? (ends === 'pinned' ? undefined : field)
+  const fixed = ends === 'pinned' || scale?.type === 'threshold'
   return JSON.stringify([
-    table,
+    fixed ? undefined : table,
     scale?.type ?? 'ordinal',
     scale?.domain,
     scale?.range,
