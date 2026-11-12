@@ -36,6 +36,17 @@ const TABLED = {
   treeMetadataFilehandle: { uri: 'data/scale/rsv-sample-rowdata.json' },
 }
 
+// the subsample's collection years run from 1977 to 2024
+const YEAR = {
+  field: 'year',
+  scale: {
+    type: 'linear',
+    scheme: 'viridis',
+    domainMin: 1977,
+    domainMax: 2024,
+  },
+}
+
 // The readable window: 38 rows at 18px, starting on row 66. A.D holds rows
 // 72-79, A.D.3 rows 80-92 and A.D rows 93-108, so two clades meet twice inside
 // the frame.
@@ -272,6 +283,21 @@ export const specs = [
       ...READABLE,
       encodings: [byClade('tipLabel')],
       clades: [AD3],
+      ...TABLED,
+    }),
+    settle: 2500,
+    clip: 'viewer',
+  },
+  {
+    name: 'phylogeny_metadata-year-strip',
+    // the year field through one viridis ramp pinned at 1977 and 2024, read
+    // by the tip labels and a strip, which share one gradient legend
+    viewportWidth: 1300,
+    viewportHeight: 760,
+    url: fileSnap({
+      ...READABLE,
+      encodings: [{ channel: 'tipLabel', ...YEAR }],
+      rowPanels: [{ kind: 'strip', encoding: { fill: YEAR }, width: 14 }],
       ...TABLED,
     }),
     settle: 2500,

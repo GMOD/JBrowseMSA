@@ -344,7 +344,44 @@ The amber rectangle over display rows 80 to 92, from the branch point the two
 named tips share across the labels and the alignment, around 13 purple A.D.3
 labels.
 
-## 14. Open the link and check one row against the JSON
+## 14. Add a strip of collection years
+
+The `year` field holds numbers, from 1977 to 2024, so a `linear` scale draws it
+on a ramp. A `strip` row panel puts one cell per row beside the tree, and the
+`tipLabel` channel colors the labels through the same scale:
+
+```json
+"encodings": [
+  {
+    "channel": "tipLabel",
+    "field": "year",
+    "scale": { "type": "linear", "scheme": "viridis", "domainMin": 1977, "domainMax": 2024 }
+  }
+],
+"rowPanels": [
+  {
+    "kind": "strip",
+    "width": 14,
+    "encoding": {
+      "fill": {
+        "field": "year",
+        "scale": { "type": "linear", "scheme": "viridis", "domainMin": 1977, "domainMax": 2024 }
+      }
+    }
+  }
+]
+```
+
+`domainMin` and `domainMax` pin both ends of the ramp, so the two records
+declare one scale and the view lists one gradient legend for them, running from
+dark purple at 1977 to yellow at 2024. With an end left unset, each record would
+follow its own field's values and list a legend of its own.
+
+[Open the year strip in the app](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A700%2C%22treeAreaWidth%22%3A560%2C%22colWidth%22%3A0.3%2C%22rowHeight%22%3A18%2C%22drawLabels%22%3Atrue%2C%22scrollY%22%3A-1188%2C%22colorSchemeName%22%3A%22nucleotide%22%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22year%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22scheme%22%3A%22viridis%22%2C%22domainMin%22%3A1977%2C%22domainMax%22%3A2024%7D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22year%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22scheme%22%3A%22viridis%22%2C%22domainMin%22%3A1977%2C%22domainMax%22%3A2024%7D%7D%7D%2C%22width%22%3A14%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample.nh%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Fscale%2Frsv-sample-rowdata.json%22%7D%7D%7D).
+The link opens the readable window of step 9 with the labels and the strip
+colored by year.
+
+## 15. Open the link and check one row against the JSON
 
 <!-- usage: web -->
 
