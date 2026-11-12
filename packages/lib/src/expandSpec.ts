@@ -117,8 +117,11 @@ function kindOf(track: ColumnTrackShorthand) {
   if (track.arcs) {
     return 'arc'
   }
+  if (track.features) {
+    return 'features'
+  }
   throw new Error(
-    `column track "${track.name}" has no values, data or arcs to take its kind from`,
+    `column track "${track.name}" has no values, data, arcs or features to take its kind from`,
   )
 }
 

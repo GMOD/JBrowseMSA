@@ -113,6 +113,7 @@ test('column tracks take id, kind and row from what they carry', () => {
         { name: 'ClinVar pathogenic', values: [2] },
         { name: 'SS', data: 'HHE' },
         { name: 'Contacts', arcs: [{ start: 1, end: 5 }], row: null },
+        { name: 'Pfam', features: [{ start: 2, end: 9, name: 'SH3' }] },
       ],
     }).columnTracks,
   ).toEqual([
@@ -137,6 +138,13 @@ test('column tracks take id, kind and row from what they carry', () => {
       kind: 'arc',
       arcs: [{ start: 1, end: 5 }],
     },
+    {
+      id: 'pfam',
+      name: 'Pfam',
+      kind: 'features',
+      row: 'H',
+      features: [{ start: 2, end: 9, name: 'SH3' }],
+    },
   ])
 })
 
@@ -153,7 +161,7 @@ test('start pads the positions before it', () => {
 
 test('a track with nothing to draw says so', () => {
   expect(() => expandSpec({ columnTracks: [{ name: 'empty' }] })).toThrow(
-    /"empty" has no values, data or arcs/,
+    /"empty" has no values, data, arcs or features/,
   )
 })
 

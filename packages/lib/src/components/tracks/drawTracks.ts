@@ -1,6 +1,7 @@
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { contrastTextFn } from '../../util.ts'
+import { drawFeatureSpans } from '../msa/drawFeatureSpans.ts'
 import { tileColorFn } from '../msa/tileColor.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
 import {
@@ -13,7 +14,13 @@ import {
 
 import type { ColumnCounts } from '../../columnCounts.ts'
 import type { MsaViewModel } from '../../model.ts'
-import type { Arc, BasicTrack, HighlightBand } from '../../types.ts'
+import type {
+  Annotation,
+  Arc,
+  BasicTrack,
+  ColumnSpan,
+  HighlightBand,
+} from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
@@ -305,6 +312,57 @@ function drawSequenceLogo({
   }
 }
 
+// a span keeps a pixel clear above and below it, so stacked lanes read apart
+const laneGap = 2
+// the head of a span in an unresized lane is as long as the span is tall, and
+// a taller track keeps that length
+const maxHeadLength = 16
+
+/**
+ * A features track's spans, drawn with the mark the alignment overlay and a
+ * `features` row panel draw: an arrow where the span carries a strand, a box
+ * otherwise, labeled where the text fits. Overlapping spans divide the track's
+ * height between their lanes.
+ */
+function drawFeatureTrack({
+  ctx,
+  spans,
+  colors,
+  labels,
+  contrastText,
+  colWidth,
+  trackHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: RenderCtx
+  spans: ColumnSpan[]
+  colors: Map<Annotation, { fill: string; stroke: string }>
+  labels?: Map<Annotation, string>
+  contrastText: (color: string) => string
+  colWidth: number
+  trackHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  ctx.lineWidth = 1
+  drawFeatureSpans<ColumnSpan>({
+    ctx,
+    rows: spans.length > 0 ? [{ y: trackHeight, bands: spans }] : [],
+    layout: {
+      height: laneCount => Math.max(1, trackHeight / laneCount - laneGap),
+      top: (_y, lane, h) => lane * (h + laneGap) + laneGap / 2,
+      headLength: h => Math.min(h, maxHeadLength),
+    },
+    xOf: span => [span.startCol * colWidth, span.endCol * colWidth],
+    colors,
+    labelOf: span => labels?.get(span.annotation),
+    contrastText,
+    xMin: offsetX,
+    xMax: offsetX + blockSize,
+  })
+}
+
 function drawHighlightBrackets({
   ctx,
   bands,
@@ -485,6 +543,23 @@ export function drawTrackBlock({
         offsetX,
         blockSize: blockSizeX,
       })
+      break
+    }
+    case 'features': {
+      const scale = model.featureTrackScales.get(id)
+      if (scale) {
+        drawFeatureTrack({
+          ctx,
+          spans: track.model.spans ?? [],
+          colors: scale.colors,
+          labels: scale.labels,
+          contrastText: contrastTextFn(theme),
+          colWidth,
+          trackHeight,
+          offsetX,
+          blockSize: blockSizeX,
+        })
+      }
       break
     }
     case 'highlights': {

@@ -94,11 +94,13 @@ import {
   colorByRow,
   featureColorMap,
   featureLabelMap,
+  UNSCALED_FEATURE,
   featurePanelSpans,
+  panelLanes,
   rowPanelWidth,
   stringFields,
 } from './featurePanels.ts'
-import { featuresToAnnotations } from './featuresLayer.ts'
+import { featuresToAnnotations, trackAnnotations } from './featuresLayer.ts'
 import { installFilehandleLoader } from './filehandleLoader.ts'
 import {
   find,
@@ -171,6 +173,7 @@ import type {
   Cell,
   Clade,
   ResidueMappingProblem,
+  ColumnSpan,
   ColumnTrackSpec,
   ColorEncoding,
   ColorEncodingChannel,
@@ -220,9 +223,13 @@ export const defaultTrackHeights: Partial<Record<TrackKind, number>> = {
   ruler: 20,
 }
 
+// a features track is this tall per lane its overlapping spans pack into,
+// which leaves a span room for an 11px label
+const featureLaneHeight = 18
+
 // the kinds a divider resizes. The ruler is a fixed scale, and a text track
 // follows the vertical zoom.
-const resizableKinds = new Set<TrackKind>(['bar', 'logo', 'arc'])
+const resizableKinds = new Set<TrackKind>(['bar', 'logo', 'arc', 'features'])
 
 const defaultOffTracks = new Set(['sequence-logo', 'position-ruler'])
 
@@ -2431,8 +2438,9 @@ function stateModelFactory({
       return {
         /**
          * #getter
-         * a data track's values or string, projected from its row's residues
-         * onto alignment columns when it names a row
+         * a data track's values, string, arcs or spans, projected from its
+         * row's residues onto alignment columns when it names a row, and onto
+         * the visible columns when gappy ones are hidden
          */
         get columnTrackContent() {
           const { MSA, blanks, hideGapsEffective } = self
@@ -2465,11 +2473,56 @@ function stateModelFactory({
             }
             return hideGapsEffective ? visibleColsBefore(blanks, col) : col
           }
+          // a span's visible columns, its end exclusive. An end past the row
+          // or the alignment clamps to its last column, and a span lying on
+          // hidden columns alone draws nothing
+          const spanCols = (track: ColumnTrackSpec, annotation: Annotation) => {
+            const first = Math.min(annotation.start, annotation.end)
+            const last = Math.max(annotation.start, annotation.end)
+            const index = track.row ? self.seqPosIndex(track.row) : undefined
+            const length = track.row ? (index?.length ?? 0) : width
+            const startGlobal = index ? index[first - 1] : first - 1
+            const endGlobal = index
+              ? index[Math.min(last, length) - 1]
+              : Math.min(last, length) - 1
+            if (
+              startGlobal === undefined ||
+              endGlobal === undefined ||
+              startGlobal < 0 ||
+              startGlobal >= width
+            ) {
+              return undefined
+            }
+            const startCol = hideGapsEffective
+              ? visibleColsBefore(blanks, startGlobal)
+              : startGlobal
+            const endCol = hideGapsEffective
+              ? visibleColsBefore(blanks, endGlobal + 1)
+              : endGlobal + 1
+            return startCol < endCol
+              ? { annotation, startCol, endCol }
+              : undefined
+          }
           return new Map<
             string,
-            { values?: number[]; data?: string; arcs?: Arc[] }
+            {
+              values?: number[]
+              data?: string
+              arcs?: Arc[]
+              spans?: ColumnSpan[]
+            }
           >(
             self.columnTracks.map(track => {
+              if (track.kind === 'features') {
+                const unlaned = trackAnnotations(track)
+                  .map(annotation => spanCols(track, annotation))
+                  .filter(notEmpty)
+                const spans =
+                  panelLanes(track.position, [[track.id, unlaned]]).get(
+                    track.id,
+                  ) ?? []
+                return [track.id, { spans }] as const
+              }
               if (track.kind === 'arc') {
                 const arcs = (track.arcs ?? [])
                   .map(arc => {
@@ -2527,13 +2580,21 @@ function stateModelFactory({
                 ? ownHeightKey(track.id)
                 : undefined
               const content = this.columnTrackContent.get(track.id)
+              const lanes = content?.spans?.[0]?.laneCount ?? 1
               return {
                 model: {
                   id: track.id,
                   name: track.name,
                   kind: track.kind,
                   heightKey,
-                  height: this.trackHeight(track.kind, heightKey, track.height),
+                  height: this.trackHeight(
+                    track.kind,
+                    heightKey,
+                    track.height ??
+                      (track.kind === 'features'
+                        ? lanes * featureLaneHeight
+                        : undefined),
+                  ),
                   barColor: track.color,
                   arcColor: track.color,
                   customColorScheme: track.encoding?.color
@@ -2544,6 +2605,7 @@ function stateModelFactory({
                     : undefined,
                   data: content?.data,
                   arcs: content?.arcs,
+                  spans: content?.spans,
                 },
               }
             })
@@ -3942,7 +4004,7 @@ function stateModelFactory({
         return featureColorMap(
           self.filteredAnnotations,
           this.featureFillEncoding,
-          this.fillPalette,
+          annotation => this.fillPalette[annotation.accession]!,
         )
       },
 
@@ -3991,10 +4053,11 @@ function stateModelFactory({
        * the categorical color keys drawn for this view, shared by the on-screen
        * legend overlay and the SVG export's reserved column. The domain overlay
        * produces the first, listing the `featureFill` scale where an encoding
-       * names one. Every scale a row-table encoding or a row panel reads
-       * produces one more, keyed by its declaration, so two channels or two
-       * strips declaring one scale list it once, and strips over eight fields
-       * naming one `legend.title` list one legend between them
+       * names one. Every scale a row-table encoding, a row panel or a shown
+       * features track reads produces one more, keyed by its declaration, so
+       * two channels or two strips declaring one scale list it once, and
+       * strips over eight fields naming one `legend.title` list one legend
+       * between them
        */
       get legends(): Legend[] {
         const { featureFillEncoding } = this
@@ -4039,6 +4102,11 @@ function stateModelFactory({
         }
         for (const { legendKey, legendTitle, legend } of this.rowPanelScales) {
           add(legendKey, legendTitle, legend)
+        }
+        for (const [id, { scale }] of this.featureTrackScales) {
+          if (scale && !trackIsOff(self.turnedOffTracks, id)) {
+            add(scale.key, scale.title, scale.legend)
+          }
         }
         return [...byKey.values()]
       },
@@ -4368,6 +4436,24 @@ function stateModelFactory({
                 ? [use(panel.encoding.fill, 'features')]
                 : [],
           ),
+          ...self.columnTracks.flatMap(track => {
+            const fill =
+              track.kind === 'features' ? track.encoding?.fill : undefined
+            const values = fill
+              ? featureValues(trackAnnotations(track), fill.field)
+              : []
+            return fill
+              ? [
+                  {
+                    spec: fill,
+                    field: fill.field,
+                    table: 'features' as const,
+                    values,
+                    shown: values,
+                  },
+                ]
+              : []
+          }),
         ])
       },
 
@@ -4406,7 +4492,11 @@ function stateModelFactory({
               legendKey: encoding?.key,
               legendTitle: encoding?.title,
               colors: fill
-                ? featureColorMap(annotations, encoding, fillPalette)
+                ? featureColorMap(
+                    annotations,
+                    encoding,
+                    annotation => fillPalette[annotation.accession]!,
+                  )
                 : this.featureColors,
               labels: label
                 ? featureLabelMap(annotations, label)
@@ -4426,6 +4516,40 @@ function stateModelFactory({
             legend,
           }
         })
+      },
+
+      /**
+       * #getter
+       * each features track's fill and label per span, keyed by track id: a
+       * span's own `color` first, then the `fill` scale over one of its
+       * fields, then the track's `color`. Reads no cell size or hidden
+       * column, so a zoom or a gap toggle reuses it.
+       */
+      get featureTrackScales() {
+        return new Map(
+          self.columnTracks
+            .filter(track => track.kind === 'features')
+            .map(track => {
+              const annotations = trackAnnotations(track)
+              const fill = track.encoding?.fill
+              const scale = fill ? this.scaleOf(fill, 'features') : undefined
+              const label = track.encoding?.text?.field
+              return [
+                track.id,
+                {
+                  colors: featureColorMap(
+                    annotations,
+                    fill && scale ? { field: fill.field, ...scale } : undefined,
+                    () => track.color ?? UNSCALED_FEATURE,
+                  ),
+                  labels: label
+                    ? featureLabelMap(annotations, label)
+                    : undefined,
+                  scale,
+                },
+              ] as const
+            }),
+        )
       },
 
       /**

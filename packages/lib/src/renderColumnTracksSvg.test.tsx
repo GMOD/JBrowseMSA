@@ -110,6 +110,43 @@ test('a data track that is toggled off stays out of the export', async () => {
   expect(rectsFilled(await exportSvg(model), barColor)).toEqual([])
 })
 
+test('a features track exports its spans, labels and legend', async () => {
+  const model = makeModel([
+    {
+      id: 'ss',
+      name: 'Secondary structure',
+      kind: 'features',
+      features: [
+        { start: 1, end: 2, type: 'helix', name: 'H1' },
+        { start: 3, end: 4, type: 'strand', name: 'E1', strand: '+' },
+      ],
+      encoding: {
+        fill: {
+          field: 'type',
+          scale: { domain: ['helix', 'strand'], range: ['#e41a1c', '#377eb8'] },
+        },
+        text: { field: 'name' },
+      },
+    },
+  ])
+  const svg = await exportSvg(model)
+  // the helix is a box over columns 1-2 beside its legend swatch, and the
+  // strand an arrow
+  const boxes = rectsFilled(svg, '#e41a1c')
+  expect(boxes.map(b => [b.x, b.width])).toContainEqual([0, colWidth * 2])
+  expect(svg).toMatch(/<path [^>]*fill="#377eb8"/)
+  const texts = svgNamesTrack(svg)
+  expect(texts).toEqual(
+    expect.arrayContaining([
+      'Secondary structure',
+      'H1',
+      'E1',
+      'helix',
+      'strand',
+    ]),
+  )
+})
+
 function svgNamesTrack(svg: string) {
   return [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map(m => m[1])
 }

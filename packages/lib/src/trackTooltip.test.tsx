@@ -163,3 +163,29 @@ test('leaving a track clears the hover', () => {
   expect(model.mouseCol).toBeUndefined()
   expect(document.body.textContent).not.toContain('Conservation:')
 })
+
+test('hovering a features track names the spans at that column', () => {
+  act(() => {
+    model.setColumnTracks([
+      {
+        id: 'ss',
+        name: 'Secondary structure',
+        kind: 'features',
+        row: 'a',
+        features: [
+          { start: 1, end: 3, name: 'H1', type: 'helix' },
+          { start: 3, end: 5, name: 'E1', type: 'strand', strand: '+' },
+        ],
+      },
+    ])
+  })
+  hoverColumn('ss', 2)
+  const { textContent } = document.body
+  expect(textContent).toContain('Secondary structure')
+  expect(textContent).toContain('H1 a 1–3')
+  expect(textContent).toContain('type: helix')
+  expect(textContent).toContain('E1 a 3–5')
+  expect(textContent).toContain('strand: +')
+  hoverColumn('ss', 4)
+  expect(document.body.textContent).not.toContain('H1')
+})

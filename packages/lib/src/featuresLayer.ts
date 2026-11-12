@@ -1,4 +1,4 @@
-import type { Annotation, Feature } from './types.ts'
+import type { Annotation, ColumnTrackSpec, Feature, SpanSpec } from './types.ts'
 
 const placement = new Set(['row', 'start', 'end'])
 
@@ -6,6 +6,7 @@ const placement = new Set(['row', 'start', 'end'])
 // outside a reaction recomputes on every read. Caching on the frozen feature
 // gives it one annotation however often the layer converts.
 const converted = new WeakMap<Feature, Annotation>()
+const trackConverted = new WeakMap<ColumnTrackSpec, Annotation[]>()
 
 /**
  * The `features` layer as the annotations a GFF would parse to. Every field
@@ -19,22 +20,39 @@ export function featuresToAnnotations(features: Feature[]): Annotation[] {
     if (cached) {
       return cached
     }
-    const annotation = featureAnnotation(feature)
+    const annotation = spanAnnotation(feature, feature.row)
     converted.set(feature, annotation)
     return annotation
   })
 }
 
-function featureAnnotation(feature: Feature): Annotation {
-  const { row, start, end, name, description, type, strand, color } = feature
-  const accession = name ?? `${row}:${start}-${end}`
+/**
+ * A features track's spans as annotations on the track's `row`, cached on the
+ * frozen track record the way `featuresToAnnotations` caches on a feature
+ */
+export function trackAnnotations(track: ColumnTrackSpec): Annotation[] {
+  const cached = trackConverted.get(track)
+  if (cached) {
+    return cached
+  }
+  const annotations = (track.features ?? []).map(span =>
+    spanAnnotation(span, track.row),
+  )
+  trackConverted.set(track, annotations)
+  return annotations
+}
+
+function spanAnnotation(span: SpanSpec, row: string | undefined): Annotation {
+  const { start, end, name, description, type, strand, color } = span
+  const accession =
+    name ?? (row === undefined ? `${start}-${end}` : `${row}:${start}-${end}`)
   const attributes = Object.fromEntries(
-    Object.entries(feature)
+    Object.entries(span)
       .filter(([key, value]) => !placement.has(key) && value !== undefined)
       .map(([key, value]) => [key, String(value)]),
   )
   return {
-    id: row,
+    id: row ?? '',
     accession,
     name: name ?? accession,
     description: description ?? name ?? accession,

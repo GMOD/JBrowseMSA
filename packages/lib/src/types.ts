@@ -21,6 +21,7 @@ export type TrackKind =
   | 'ruler'
   | 'reference'
   | 'highlights'
+  | 'features'
 
 /**
  * Which channel the color scheme paints. `fill` colors the cell a residue sits
@@ -94,8 +95,31 @@ export interface HighlightTrackModel extends BasicTrackModel {
   bands?: HighlightBand[]
 }
 
+/**
+ * One span of a features track at the visible columns it covers, `endCol`
+ * exclusive, and the lane it packs into out of the `laneCount` the track's
+ * overlaps need
+ */
+export interface ColumnSpan {
+  annotation: Annotation
+  startCol: number
+  endCol: number
+  lane: number
+  laneCount: number
+}
+
+// spans over columns, drawn as boxes or strand arrows and packed into lanes
+// where they overlap
+export interface FeatureTrackModel extends BasicTrackModel {
+  spans?: ColumnSpan[]
+}
+
 export interface BasicTrack {
-  model: TextTrackModel & BarTrackModel & ArcTrackModel & HighlightTrackModel
+  model: TextTrackModel &
+    BarTrackModel &
+    ArcTrackModel &
+    HighlightTrackModel &
+    FeatureTrackModel
 }
 
 // one arc of an arc track, in the snapshot's own coordinates: 1-based and
@@ -107,12 +131,30 @@ export interface ArcSpec {
 }
 
 /**
+ * One span of a features track, in the snapshot's own coordinates: 1-based and
+ * inclusive, alignment columns unless the track names a `row`. A `strand` draws
+ * it as an arrow, its own `color` wins over any scale, and every field but
+ * `start` and `end` is one the track's encoding can read.
+ */
+export interface SpanSpec {
+  start: number
+  end: number
+  name?: string
+  description?: string
+  /** a GFF feature type; `exon`, `CDS` and the UTRs draw as numbered segments */
+  type?: string
+  strand?: '+' | '-'
+  color?: string
+  [field: string]: string | number | undefined
+}
+
+/**
  * The channels a column track reads. `y.scale.domainMax` is the bar value
  * drawn at full height, and a text track's `color` maps its characters onto
  * colors through its `scale`, painted the way `residueEncoding` paints the
- * residues.
+ * residues. A features track reads `fill` and `text` off its spans' fields.
  */
-export interface ColumnTrackEncoding {
+export interface ColumnTrackEncoding extends FeatureEncodingSpec {
   color?: ColorSpec
   y?: { scale?: { domainMax?: number } }
 }
@@ -120,16 +162,20 @@ export interface ColumnTrackEncoding {
 // a track supplied as data in the snapshot rather than computed from the
 // alignment. `values` (bar) or `data` (text) index alignment columns, or the
 // 1-based residues of `row` when it names one; `arcs` (arc) name two such
-// positions each. `color` is one color for every bar or arc.
+// positions each, and `features` (features) the two ends of a span. `color` is
+// one color for every bar or arc, and the fill of a span no scale colors.
 export interface ColumnTrackSpec {
   id: string
   name: string
-  kind: 'bar' | 'text' | 'arc'
+  kind: 'bar' | 'text' | 'arc' | 'features'
   values?: number[]
   data?: string
   arcs?: ArcSpec[]
+  features?: SpanSpec[]
   color?: string
   encoding?: ColumnTrackEncoding
+  /** how a features track's overlapping spans share its height */
+  position?: FeaturePosition
   row?: string
   height?: number
 }
@@ -185,8 +231,15 @@ export interface RowFeaturesSpec {
   encoding?: FeatureEncodingSpec
   transform?: AlignTransform[]
   /** how overlapping features share the row's height; see docs/layers.md */
-  position?: 'identity' | 'strandpile'
+  position?: FeaturePosition
 }
+
+/**
+ * How overlapping spans share a row's or a track's height: `identity` packs
+ * them into lanes, and `strandpile` packs each strand on its own, the forward
+ * spans above the reverse ones
+ */
+export type FeaturePosition = 'identity' | 'strandpile'
 
 /**
  * A panel left of the alignment on the row scale, the counterpart of
@@ -400,17 +453,8 @@ export interface Highlight {
  * palette and any scale, and a `strand` draws the span as an arrow. Every other
  * field is a column the `featureFill` and `featureLabel` encodings can read.
  */
-export interface Feature {
+export interface Feature extends SpanSpec {
   row: string
-  start: number
-  end: number
-  name?: string
-  description?: string
-  /** a GFF feature type; `exon`, `CDS` and the UTRs draw as numbered segments */
-  type?: string
-  strand?: '+' | '-'
-  color?: string
-  [field: string]: string | number | undefined
 }
 
 /**

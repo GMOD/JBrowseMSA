@@ -77,10 +77,14 @@ const TrackBlocks = observer(function ({
   // does, not 20px further under the vertical scrollbar, so their columns and
   // the hover indicator line up with the alignment
   const { blocksX, msaCanvasWidth, scrollX } = model
-  const { kind, height, data, arcs } = track.model
+  const { kind, height, data, arcs, spans } = track.model
 
   // a track with nothing to draw would still take up its vertical space
-  if ((kind === 'text' && !data) || (kind === 'arc' && !arcs?.length)) {
+  if (
+    (kind === 'text' && !data) ||
+    (kind === 'arc' && !arcs?.length) ||
+    (kind === 'features' && !spans?.length)
+  ) {
     return null
   }
 

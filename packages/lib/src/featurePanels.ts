@@ -6,6 +6,7 @@ import { outlineColor } from './util.ts'
 import type {
   Annotation,
   DomainBand,
+  FeaturePosition,
   RowFeaturesSpec,
   RowPanelSpan,
   RowPanelSpec,
@@ -13,7 +14,7 @@ import type {
 
 // the fill of a span under a scale that gives its value no color, such as a
 // gene a `domain` of gene names leaves out
-const UNSCALED_FEATURE = '#d9d9d9'
+export const UNSCALED_FEATURE = '#d9d9d9'
 
 // the fraction of a span a following one may cover before it takes a lane of
 // its own in a `features` panel
@@ -68,14 +69,14 @@ export function colorByRow(
 }
 
 // the fill and outline of every feature in a list: its own GFF `color=` first,
-// then the scale an encoding resolves over one of its fields, then the
-// accession palette
+// then the scale an encoding resolves over one of its fields, then with no
+// encoding the fill `unencoded` gives it, such as the accession palette's
 export function featureColorMap(
   annotations: Annotation[],
   encoding:
     | { field: string; colorOf: (value: string) => string | undefined }
     | undefined,
-  fillPalette: Record<string, string>,
+  unencoded: (annotation: Annotation) => string,
 ) {
   const strokes = new Map<string, string>()
   const strokeOf = (fill: string) => {
@@ -95,7 +96,7 @@ export function featureColorMap(
       const fill =
         annotation.color ??
         (value === undefined ? undefined : encoding!.colorOf(value)) ??
-        (encoding ? UNSCALED_FEATURE : fillPalette[annotation.accession]!)
+        (encoding ? UNSCALED_FEATURE : unencoded(annotation))
       return [annotation, { fill, stroke: strokeOf(fill) }]
     }),
   )
@@ -115,10 +116,13 @@ export function featureLabelMap(annotations: Annotation[], field: string) {
 }
 
 /** what `packDomainLanes` needs to lay a row out, before it has its lane */
-type Unlaned = Omit<RowPanelSpan, 'lane' | 'laneCount'> & {
+interface Unlaned {
+  annotation: Annotation
   startCol: number
   endCol: number
 }
+
+type Laned<T> = T & { lane: number; laneCount: number }
 
 function deepestLane(rows: { laneCount: number }[][]) {
   return rows.reduce((depth, row) => Math.max(depth, row[0]?.laneCount ?? 0), 0)
@@ -131,9 +135,9 @@ function deepestLane(rows: { laneCount: number }[][]) {
  * out on, so the line between the strands sits at one height down the panel and
  * a reader can scan it. A feature with no strand piles with the forward ones.
  */
-function strandpileLanes(
-  rows: [string, Unlaned[]][],
-): Map<string, RowPanelSpan[]> {
+function strandpileLanes<T extends Unlaned>(
+  rows: [string, T[]][],
+): Map<string, Laned<T>[]> {
   const piled = rows.map(([name, bands]) => {
     const reverse = packDomainLanes(
       bands.filter(b => b.annotation.strand === -1),
@@ -158,12 +162,15 @@ function strandpileLanes(
   )
 }
 
-/** one row's spans laid out by the panel's `position` */
-function panelLanes(
-  panel: RowFeaturesSpec,
-  rows: [string, Unlaned[]][],
-): Map<string, RowPanelSpan[]> {
-  return panel.position === 'strandpile'
+/**
+ * Each row's spans laid out by a `position`, a row panel's or a features
+ * track's, which is one row
+ */
+export function panelLanes<T extends Unlaned>(
+  position: FeaturePosition | undefined,
+  rows: [string, T[]][],
+): Map<string, Laned<T>[]> {
+  return position === 'strandpile'
     ? strandpileLanes(rows)
     : new Map(rows.map(([name, bands]) => [name, packDomainLanes(bands)]))
 }
@@ -193,7 +200,7 @@ export function featurePanelSpans({
 }): Map<string, RowPanelSpan[]> {
   if (panel.x === 'column') {
     return panelLanes(
-      panel,
+      panel.position,
       [...domainBands].map(([name, bands]) => [
         name,
         bands.map(band => ({
@@ -234,7 +241,7 @@ export function featurePanelSpans({
   // share a few bases, and a stop codon overlapping the next start reads as a
   // second lane over the whole row
   return panelLanes(
-    panel,
+    panel.position,
     shifted.map(([name, features]) => [
       name,
       features.map(({ annotation, start, end }) => ({

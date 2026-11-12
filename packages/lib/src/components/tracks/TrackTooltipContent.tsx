@@ -116,6 +116,46 @@ function ArcTooltip({
   )
 }
 
+function FeatureTooltip({
+  model,
+  track,
+  col,
+}: {
+  model: MsaViewModel
+  track: BasicTrack
+  col: number
+}) {
+  const { name, spans } = track.model
+  const hits = (spans ?? []).filter(s => s.startCol <= col && col < s.endCol)
+  return hits.length === 0 ? null : (
+    <div>
+      <ColumnLabel model={model} col={col} />
+      <br />
+      {name}
+      {hits.map(({ annotation, lane }) => {
+        const { id, start, end, attributes } = annotation
+        const fields = Object.entries(attributes ?? {}).filter(
+          ([field]) => field !== 'name',
+        )
+        return (
+          <div key={lane}>
+            <b>{annotation.name}</b> {id ? `${id} ` : null}
+            {start === end ? start : `${start}–${end}`}
+            {fields.length > 0 ? (
+              <>
+                <br />
+                {fields
+                  .map(([field, value]) => `${field}: ${value}`)
+                  .join(', ')}
+              </>
+            ) : null}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function HighlightTooltip({ model }: { model: MsaViewModel }) {
   const { hoveredHighlight, resolvedHighlights } = model
   const highlight = resolvedHighlights.find(h => h.key === hoveredHighlight)
@@ -132,7 +172,7 @@ function HighlightTooltip({ model }: { model: MsaViewModel }) {
 /**
  * One track's reading at the hovered column: a bar track's value, the logo's
  * information content and composition, the columns an arc joins, the letter on a
- * text track. `drawTrackBlock` dispatches on the same `kind`, so a new kind
+ * text track, the fields of every span a features track draws there. `drawTrackBlock` dispatches on the same `kind`, so a new kind
  * needs a case in both.
  */
 const TrackTooltipContent = observer(function ({
@@ -157,6 +197,9 @@ const TrackTooltipContent = observer(function ({
     }
     case 'arc': {
       return <ArcTooltip model={model} track={track} col={col} />
+    }
+    case 'features': {
+      return <FeatureTooltip model={model} track={track} col={col} />
     }
     case 'highlights': {
       return <HighlightTooltip model={model} />

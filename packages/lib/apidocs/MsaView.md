@@ -941,11 +941,12 @@ columns2d: string[]
 
 #### getter: columnTrackContent
 
-a data track's values or string, projected from its row's residues onto
-alignment columns when it names a row
+a data track's values, string, arcs or spans, projected from its row's residues
+onto alignment columns when it names a row, and onto the visible columns when
+gappy ones are hidden
 
 ```js
-columnTrackContent: Map<string, { values?: number[] | undefined; data?: string | undefined; arcs?: Arc[] | undefined; }>
+columnTrackContent: Map<string, { values?: number[] | undefined; data?: string | undefined; arcs?: Arc[] | undefined; spans?: ColumnSpan[] | undefined; }>
 ```
 
 #### getter: columnTrackModels
@@ -1125,6 +1126,17 @@ residue letters do
 featureLabels: Map<Annotation, string> | undefined
 ```
 
+#### getter: featureTrackScales
+
+each features track's fill and label per span, keyed by track id: a span's own
+`color` first, then the `fill` scale over one of its fields, then the track's
+`color`. Reads no cell size or hidden column, so a zoom or a gap toggle reuses
+it.
+
+```js
+featureTrackScales: Map<string, { readonly colors: Map<Annotation, { fill: string; stroke: string; }>; readonly labels: Map<Annotation, string> | undefined; readonly scale: SharedScale | undefined; }>
+```
+
 #### getter: fillPalette
 
 accession -> fill: segments alternate two shades, a domain takes a mid-light
@@ -1291,9 +1303,10 @@ leaves: HierarchyNode < NodeWithIds > []
 the categorical color keys drawn for this view, shared by the on-screen legend
 overlay and the SVG export's reserved column. The domain overlay produces the
 first, listing the `featureFill` scale where an encoding names one. Every scale
-a row-table encoding or a row panel reads produces one more, keyed by its
-declaration, so two channels or two strips declaring one scale list it once, and
-strips over eight fields naming one `legend.title` list one legend between them
+a row-table encoding, a row panel or a shown features track reads produces one
+more, keyed by its declaration, so two channels or two strips declaring one
+scale list it once, and strips over eight fields naming one `legend.title` list
+one legend between them
 
 ```js
 legends: Legend[]
