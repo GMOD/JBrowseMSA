@@ -917,6 +917,16 @@ the encodings feeding a color channel, each read through a scale
 colorEncodings: ColorEncoding[]
 ```
 
+#### getter: colorRecords
+
+every record that reads a field through a color object: each color encoding,
+each strip's `fill` and each features panel's `fill`, with where it sits in the
+snapshot and the table its field is read from
+
+```js
+colorRecords: ColorRecord[]
+```
+
 #### getter: colorScheme
 
 ```js
@@ -1024,13 +1034,13 @@ renderer walks columns and needs the band covering each one)
 domainBandsByStart: Map<string, DomainBand[]>
 ```
 
-#### getter: domainLegendEntries
+#### getter: domainLegendItems
 
-the legend entries of the accession palette, for the overlay and a features
-panel that names no color scale
+the legend items of the accession palette, for the overlay and a features panel
+that names no color scale
 
 ```js
-domainLegendEntries: LegendEntry[]
+domainLegendItems: LegendItem[]
 ```
 
 #### getter: domainUnderline
@@ -1321,16 +1331,17 @@ leaves: HierarchyNode < NodeWithIds > []
 
 #### getter: legends
 
-the categorical color keys drawn for this view, shared by the on-screen legend
-overlay and the SVG export's reserved column. The domain overlay produces the
-first, listing the `featureFill` scale where an encoding names one. Every scale
-a row-table encoding, a row panel or a shown features track reads produces one
-more, keyed by its declaration, so two channels or two strips declaring one
-scale list it once, and strips over eight fields naming one `legend.title` list
-one legend between them
+the color keys drawn for this view, one section per scale, shared by the
+on-screen legend overlay and the SVG export's reserved column. The domain
+overlay produces the first, listing the `featureFill` scale where an encoding
+names one. Every scale a row-table encoding, a row panel or a shown features
+track reads produces one more, keyed by its declaration, so two channels or two
+strips declaring one scale list it once, and strips over eight fields naming one
+`legend.title` list one legend between them. A section's note is the first of
+its records' `scaleProblems`, else the scale's own note.
 
 ```js
-legends: Legend[]
+legends: LegendSection[]
 ```
 
 #### getter: mappedStructures
@@ -1681,6 +1692,27 @@ row, a sort under a tree, and facet bands that are not clades of the tree
 
 ```js
 rowTransformWarnings: string[]
+```
+
+#### getter: scaleProblemNotes
+
+the first problem of each declaration's records, keyed as `resolvedScales` is,
+for its legend section's note
+
+```js
+scaleProblemNotes: Map<string, string>
+```
+
+#### getter: scaleProblems
+
+why a record's color object draws other than it says, per record: a `domainMax`
+below its `domainMin`, a threshold whose cuts are unsorted or whose `range` is
+not one longer, a `domainQuantile` outside 0.5 to 1, `labels` of the wrong
+length, a `scheme` no table holds. The viewer draws what it can, and the scale's
+legend notes the first problem.
+
+```js
+scaleProblems: RecordScaleProblem[]
 ```
 
 #### getter: secondaryStructureArcs

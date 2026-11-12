@@ -4565,7 +4565,9 @@ function stateModelFactory({
                 }),
         })
         return resolveShared(
-          this.colorRecords.map(({ channel, table, annotations }) => use(channel, table, annotations)),
+          this.colorRecords.map(({ channel, table, annotations }) =>
+            use(channel, table, annotations),
+          ),
         )
       },
 
