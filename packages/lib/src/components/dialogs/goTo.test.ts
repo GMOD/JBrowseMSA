@@ -65,6 +65,15 @@ test('a number centers the column the ruler numbers that way', () => {
   expect(model.mouseCol).toBe(299)
 })
 
+test('a number names a file column past any hidden ones', () => {
+  const model = makeModel(wideMsa)
+  model.setSelection({ start: 201, end: 400 })
+  model.setTrimToSelection(true)
+  expect(goTo(model, '300')).toBe(true)
+  expect(model.mouseCol).toBe(99)
+  expect(goTo(model, '100')).toBe(false)
+})
+
 test('name:N centers residue N of that row and lights both', () => {
   const model = makeModel(wideMsa)
   expect(goTo(model, 'gappy:1')).toBe(true)

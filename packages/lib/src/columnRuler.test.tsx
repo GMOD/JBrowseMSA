@@ -68,6 +68,24 @@ test('a reference row numbers the ticks by its own residues', async () => {
   )
 })
 
+test('ticks number file columns past hidden ones', async () => {
+  const model = makeModel()
+  model.setSelection({ start: 23, end: 100 })
+  model.setTrimToSelection(true)
+  const ticks = await exportTicks(model)
+  // the first visible column is file column 23, and 25, the next multiple of
+  // the step, is too close to it to label
+  expect(ticks.slice(0, 3)).toEqual(['23', '30', '35'])
+})
+
+test('a hidden run labels the first column past each multiple it skips', () => {
+  expect(rulerCols(0, 13, 12, col => col + 508)).toEqual([0, 7, 12])
+  // file columns 3 to 40 are hidden, so file column 41 sits two columns
+  // after column 1 and goes unlabeled
+  const skipping = (col: number) => (col < 2 ? col + 1 : col + 39)
+  expect(rulerCols(0, 12, 12, skipping)).toEqual([0, 6, 11])
+})
+
 test('the step grows as the columns shrink', () => {
   expect(rulerStep(16)).toBe(5)
   expect(rulerStep(1)).toBe(100)

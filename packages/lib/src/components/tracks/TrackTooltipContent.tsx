@@ -20,7 +20,7 @@ function ColumnLabel({ model, col }: { model: MsaViewModel; col: number }) {
     : undefined
   return (
     <b>
-      Column {col + 1}
+      Column {model.visibleColToGlobalCol(col) + 1}
       {pos === undefined ? null : ` (${relativeTo}:${pos})`}
     </b>
   )

@@ -37,11 +37,11 @@ function resolveGoTo(model: MsaViewModel, text: string) {
   }
   if (/^\d+$/.test(query)) {
     const n = +query
-    const { relativeTo, numColumns } = model
+    const { relativeTo, MSA } = model
     const col = relativeTo
       ? columnOfResidue(model, relativeTo, n)
-      : n >= 1 && n <= numColumns
-        ? n - 1
+      : n >= 1 && n <= (MSA?.getWidth() ?? 0)
+        ? model.globalColToVisibleCol(n - 1)
         : undefined
     return col === undefined ? undefined : { col }
   }

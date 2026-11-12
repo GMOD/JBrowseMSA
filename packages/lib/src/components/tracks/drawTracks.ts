@@ -174,16 +174,36 @@ export function rulerStep(colWidth: number, minPixels = 55) {
   return step
 }
 
-// The 0-based columns in [xStart, end) to label: column 1, then each column
-// whose 1-based number is a multiple of the step. A step of 2 or more puts the
-// first multiple at least half a step's width past column 1, which clears the
-// two labels.
-export function rulerCols(xStart: number, end: number, colWidth: number) {
+// The 0-based visible columns in [xStart, end) to label, given each one's
+// 1-based file column number: the first visible column, then each column whose
+// number reaches a new multiple of the step, which is every step-th column
+// where none are hidden. A column within half a step of an earlier such column
+// stays unlabeled, so the labels stay apart across hidden columns, and column
+// 1 and the first multiple clear each other.
+export function rulerCols(
+  xStart: number,
+  end: number,
+  colWidth: number,
+  fileColumn = (col: number) => col + 1,
+) {
   const step = rulerStep(colWidth)
-  const cols = step > 1 && xStart <= 0 && end > 0 ? [0] : []
-  const first = Math.max(1, Math.ceil((xStart + 1) / step)) * step
-  for (let n = first; n <= end; n += step) {
-    cols.push(n - 1)
+  const guard = Math.ceil(step / 2)
+  const crosses = (col: number) =>
+    col === 0 ||
+    Math.floor(fileColumn(col) / step) > Math.floor(fileColumn(col - 1) / step)
+  const crossedJustBefore = (col: number) => {
+    for (let prev = col - 1; prev > col - guard && prev >= 0; prev--) {
+      if (crosses(prev)) {
+        return true
+      }
+    }
+    return false
+  }
+  const cols = []
+  for (let col = Math.max(0, xStart); col < end; col++) {
+    if (crosses(col) && !crossedJustBefore(col)) {
+      cols.push(col)
+    }
   }
   return cols
 }
@@ -194,6 +214,7 @@ const TICK_HEIGHT = 4
 function drawColumnRuler({
   ctx,
   numColumns,
+  fileColumn,
   label,
   textColor,
   colWidth,
@@ -203,6 +224,7 @@ function drawColumnRuler({
 }: {
   ctx: RenderCtx
   numColumns: number
+  fileColumn: (col: number) => number
   label: (col: number) => string | undefined
   textColor: string
   colWidth: number
@@ -223,7 +245,7 @@ function drawColumnRuler({
   ctx.strokeStyle = textColor
   ctx.lineWidth = 1
 
-  for (const col of rulerCols(xStart, end, colWidth)) {
+  for (const col of rulerCols(xStart, end, colWidth, fileColumn)) {
     const text = label(col)
     if (text === undefined) {
       continue
@@ -527,16 +549,18 @@ export function drawTrackBlock({
     }
     case 'ruler': {
       const { relativeTo, numColumns } = model
+      const fileColumn = (col: number) => model.visibleColToGlobalCol(col) + 1
       drawColumnRuler({
         ctx,
         numColumns,
+        fileColumn,
         // with relativeTo set, number by the reference row's residues
         label: relativeTo
           ? col => {
               const pos = model.visibleColToSeqPosOneBased(relativeTo, col)
               return pos === undefined ? undefined : `${pos}`
             }
-          : col => `${col + 1}`,
+          : col => `${fileColumn(col)}`,
         textColor,
         colWidth,
         trackHeight,
