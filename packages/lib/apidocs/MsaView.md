@@ -337,9 +337,13 @@ rowHeight: stripDefault(types.number, 16)
 
 panels drawn between the tree and the alignment:
 `{kind: "strip", encoding: {fill}, width?, header?}` fills one cell per row from
-a `rowData` field, and
+a `rowData` field,
 `{kind: "features", x, encoding?, transform?, width?, header?}` draws the spans
-the GFF carries. See docs/layers.md
+the GFF carries,
+`{kind: "bar" | "point", encoding: {x: {field, scale?}, color?}}` draws a
+numeric field along an axis, and
+`{kind: "text", encoding: {text: {field}, color?}}` prints a field. See
+docs/layers.md
 
 ```js
 rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), [])
@@ -957,8 +961,9 @@ colorEncodings: ColorEncoding[]
 #### getter: colorRecords
 
 every record that reads a field through a color object: each color encoding,
-each strip's `fill` and each features panel's `fill`, with where it sits in the
-snapshot and the table its field is read from
+each strip's `fill`, each features panel's `fill` and each bar, point or text
+panel's `color`, with where it sits in the snapshot and the table its field is
+read from
 
 ```js
 colorRecords: ColorRecord[]
@@ -1710,11 +1715,11 @@ rowNamesSet: Map<string, number>
 #### getter: rowPanelScales
 
 each row panel's scale resolved against the values its field takes, giving the
-colors, labels and legend entries. Reads no cell size, so a zoom reuses it and
-the legends built from it.
+colors, labels and legend entries, and a bar or point panel's value scale. Reads
+no cell size, so a zoom reuses it and the legends built from it.
 
 ```js
-rowPanelScales: (StripPanelScale | FeaturePanelScale)[]
+rowPanelScales: RowPanelScale[]
 ```
 
 #### getter: rowPanelsHeaderHeight
@@ -1774,8 +1779,9 @@ scaleProblemNotes: Map<string, string>
 why a record's color object draws other than it says, per record: a `domainMax`
 below its `domainMin`, a threshold whose cuts are unsorted or whose `range` is
 not one longer, a `domainQuantile` outside 0.5 to 1, `labels` of the wrong
-length, a `scheme` no table holds. The viewer draws what it can, and the scale's
-legend notes the first problem.
+length, a `scheme` no table holds. A bar or point panel's value scale lists its
+ends' problems under `rowPanels[i].encoding.x`. The viewer draws what it can,
+and the scale's legend notes the first problem.
 
 ```js
 scaleProblems: RecordScaleProblem[]

@@ -1,5 +1,7 @@
 import { renderFeaturePanel } from './renderFeaturePanel.ts'
 import { renderStrip } from './renderStrip.ts'
+import { renderTextPanel } from './renderTextPanel.ts'
+import { renderValuePanel } from './renderValuePanel.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { ResolvedRowPanel } from '../../types.ts'
@@ -23,7 +25,11 @@ interface PanelArgs {
 export function renderRowPanel({ panel, ...rest }: PanelArgs) {
   if (panel.kind === 'features') {
     renderFeaturePanel({ panel, ...rest })
-  } else {
+  } else if (panel.kind === 'text') {
+    renderTextPanel({ panel, ...rest })
+  } else if (panel.kind === 'strip') {
     renderStrip({ panel, ...rest })
+  } else {
+    renderValuePanel({ panel, ...rest })
   }
 }

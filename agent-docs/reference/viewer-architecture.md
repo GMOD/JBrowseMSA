@@ -103,6 +103,14 @@ background.
   the head is all head. A glyph covers its own span and nothing past it, so the
   genes of an operon butt together. A `headRise` lifts the head above a band too
   thin to taper, which the underline bar is.
+- `renderValuePanel.ts` draws the `bar` and `point` kinds and
+  `renderTextPanel.ts` the `text` kind, each over the values `valuePanels.ts`
+  reads from `rowData`. A resolved panel with a value scale carries an `axis`,
+  `{scale, extent, format}`, which `drawAxis` (`components/axis.ts`) draws at
+  the foot of the header band through `drawHeaderAxis`: a small canvas in
+  `RowPanelHeaders` on screen, a svgcanvas layer in `RowPanelHeadersSVG` in the
+  export. A `features` panel under `x: "position"` carries one too, over the
+  extent its spans map onto the panel width.
 - `resolvedRowPanels` resolves a panel's spans to panel pixels: `x: "column"`
   scales `domainBands` by `colWidth`, and `x: "position"` packs each row's
   features in residue positions through `packDomainLanes` (generic over

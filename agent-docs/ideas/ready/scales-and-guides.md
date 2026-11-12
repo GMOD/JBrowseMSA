@@ -5,22 +5,21 @@ description:
   identity scales, a gradient legend, an axis guide, and the bar, point, text
   and column strip marks they unlock. Steps 1 to 3, the color object, the shared
   domain, the continuous and threshold scales, the gradient legend and the scale
-  problems, are built, and so is step 6, the tree channels; steps 4, 5 and 7
-  remain.
+  problems, are built, and so are step 5, the axis and the bar, point and text
+  row panels, and step 6, the tree channels; steps 4 and 7 remain.
 ---
 
 # Scales and guides
 
 `resolveScale` in `packages/lib/src/scales.ts` reads the color object,
 `ColorSpec`, through an ordinal, linear, log, threshold or identity scale, and
-`encodings`, the `strip` and `features` row panels and the `features` column
-track read it. A text column track, a bar track and the cell fill do not yet, so
-a dN/dS bar colored by its value and a bar per row wait on steps 4, 5 and 7.
-This document adopts the color object jbrowse-components' displays declare, adds
-the continuous and threshold scales it names, gives every scale its guide, a
-legend or an axis, and lists the marks those unlock.
-[panels-and-marks](../../reference/panels-and-marks.md) holds the vocabulary of
-panels, marks and channels this builds on.
+`encodings`, the row panels and the `features` column track read it. A text
+column track, a bar track and the cell fill do not yet, so a dN/dS bar colored
+by its value waits on steps 4 and 7. This document adopts the color object
+jbrowse-components' displays declare, adds the continuous and threshold scales
+it names, gives every scale its guide, a legend or an axis, and lists the marks
+those unlock. [panels-and-marks](../../reference/panels-and-marks.md) holds the
+vocabulary of panels, marks and channels this builds on.
 
 Two target figures, in order of work:
 
@@ -350,6 +349,15 @@ takes a color per bar; `drawTextTrackContent` reads the resolved scale; the
 
 ### 5. The axis and the row-panel marks
 
+Built: `components/axis.ts` holds `drawAxis`, `axisTicks` and the tick labels,
+stepping along `ladderStepBelow` from `components/tree/scaleBar.ts`;
+`valuePanels.ts` resolves a value scale over a `rowData` field;
+`renderValuePanel.ts` and `renderTextPanel.ts` draw the marks; and
+`headerLayout.ts` puts the axis at the foot of the header band, on screen as a
+canvas and in the export as a svgcanvas layer. A resolved panel carries its
+`axis` as `{scale, extent, format}`. The `left` orientation waits for step 4's
+column-track axis.
+
 `components/axis.ts` with `drawAxis`; the axis on the `features` panel under
 `x: "position"`, in the header band; `bar`, `point` and `text` row panels in
 `renderRowPanel.ts` with `encoding.x.scale`, their `resolvedRowPanels` geometry
@@ -398,7 +406,11 @@ own: `pLDDT` is the B-factor column of an AlphaFold model's mmCIF, one value per
 residue, which a script writes as a `strip` column track over the query row with
 a threshold scale at 50, 70 and 90, the four confidence bands AlphaFold's own
 viewer draws. The gene-neighbourhood tutorial gains a `bar` row panel of genome
-size beside its `features` panel, with the axis in the header band.
+size beside its `features` panel, with the axis in the header band, once
+`build_gene_neighborhoods.sh` writes a `rowData` table: the script prints each
+genome's gene count and stores no per-genome value, and the committed GFF holds
+only the windows. Until then the `CodonView` example carries a `bar` panel of
+each row's non-synonymous codons.
 
 ## Shared code with jbrowse-components
 

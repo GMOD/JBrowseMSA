@@ -12,7 +12,11 @@ import {
 } from './components/msa/renderHighlights.ts'
 import { renderMSABlock } from './components/msa/renderMSABlock.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
-import { headerRunsAcross } from './components/rowpanels/headerLayout.ts'
+import {
+  drawHeaderAxis,
+  headerAxisHeight,
+  headerRunsAcross,
+} from './components/rowpanels/headerLayout.ts'
 import { renderRowPanel } from './components/rowpanels/renderRowPanel.ts'
 import { renderAllTracks } from './components/tracks/drawTracks.ts'
 import ScaleBarSVG from './components/tree/ScaleBarSVG.tsx'
@@ -144,6 +148,8 @@ function MsaSvg({
             model={model}
             theme={theme}
             bandHeight={topHeight}
+            Context={Context}
+            layers={layers}
           />
           {model.showTreeOverview ? (
             <TreeOverviewSVG
@@ -230,45 +236,77 @@ function TreeScaleBarSVG({
   )
 }
 
+function drawn(ctx: ContextType, draw: (ctx: ContextType) => void) {
+  draw(ctx)
+  return ctx
+}
+
 // Each strip's header over the column it names, turned on its side, where the
 // live view puts it (see RowPanelHeaders). The baseline runs up the figure, so
 // the name sits to the left of it, the way TrackLabelsSVG offsets a horizontal
-// baseline by a third of the font size.
+// baseline by a third of the font size. A panel with a value scale draws its
+// axis at the foot of the band and its header across above it.
 function RowPanelHeadersSVG({
   model,
   theme,
   bandHeight,
+  Context,
+  layers,
 }: {
   model: MsaViewModel
   theme: Theme
   bandHeight: number
+  Context: typeof ContextType
+  layers: LayerMap
 }) {
-  const { resolvedRowPanels, effectiveTreeAreaWidth, fontSize } = model
-  const y = bandHeight - 4
+  const { resolvedRowPanels, effectiveTreeAreaWidth, fontSize, id } = model
+  const color = theme.palette.text.primary
   return resolvedRowPanels.length === 0 ? null : (
     <g id="rowpanel-headers">
-      {resolvedRowPanels.map(panel => {
-        const across = headerRunsAcross(panel.width)
+      {resolvedRowPanels.map((panel, i) => {
+        const { axis } = panel
+        const left = effectiveTreeAreaWidth + panel.offsetX
+        const y = bandHeight - 4 - (axis ? headerAxisHeight : 0)
+        const across = !!axis || headerRunsAcross(panel.width)
         const size = across ? fontSize : Math.min(fontSize, panel.width)
-        const center = effectiveTreeAreaWidth + panel.offsetX + panel.width / 2
+        const center = left + panel.width / 2
         const x = across ? center : center + size / 3
         const room = across ? panel.width : y - LEGEND_PAD
-        return size < 5 ? null : (
-          <text
-            key={panel.id}
-            x={x}
-            y={y}
-            {...(across
-              ? { textAnchor: 'middle' }
-              : { transform: `rotate(-90 ${x} ${y})` })}
-            fontSize={size}
-            fill={theme.palette.text.primary}
-          >
-            {
-              ellipsize(t => measureTextCanvas(t, size), panel.header, room)
-                .text
-            }
-          </text>
+        const ctx = axis
+          ? drawn(new Context(panel.width, headerAxisHeight), c => {
+              drawHeaderAxis(c, axis, color)
+            })
+          : undefined
+        return (
+          <React.Fragment key={panel.id}>
+            {size < 5 ? null : (
+              <text
+                x={x}
+                y={y}
+                {...(across
+                  ? { textAnchor: 'middle' }
+                  : { transform: `rotate(-90 ${x} ${y})` })}
+                fontSize={size}
+                fill={color}
+              >
+                {
+                  ellipsize(t => measureTextCanvas(t, size), panel.header, room)
+                    .text
+                }
+              </text>
+            )}
+            {ctx ? (
+              <ClipGroup
+                panelId={`rowpanel-axis-${i}`}
+                clipId={`rowpanel-axis-${id}-${i}`}
+                width={panel.width}
+                height={headerAxisHeight}
+                transform={`translate(${left} ${bandHeight - headerAxisHeight})`}
+                ctx={ctx}
+                layers={layers}
+              />
+            ) : null}
+          </React.Fragment>
         )
       })}
     </g>

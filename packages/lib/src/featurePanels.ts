@@ -1,5 +1,9 @@
+import { positionLabel } from './components/axis.ts'
 import { packDomainLanes } from './components/msa/packDomainLanes.ts'
-import { defaultFeaturePanelWidth } from './constants.ts'
+import {
+  defaultFeaturePanelWidth,
+  defaultValuePanelWidth,
+} from './constants.ts'
 import { featureField } from './featureFields.ts'
 import { outlineColor } from './util.ts'
 
@@ -7,6 +11,7 @@ import type {
   Annotation,
   DomainBand,
   FeaturePosition,
+  PanelAxis,
   RowFeaturesSpec,
   RowPanelSpan,
   RowPanelSpec,
@@ -21,16 +26,20 @@ export const UNSCALED_FEATURE = '#d9d9d9'
 const laneOverlap = 0.1
 
 // a row panel's own width, or a default: the row height, which makes a strip
-// cell square, and a gene neighborhood's width for a features panel. The row
-// height is read only when used, so a panel with a width of its own does not
-// recompute on a vertical zoom
+// cell square, a gene neighborhood's width for a features panel, and 80 for a
+// bar, point or text panel. The row height is read only when used, so a panel
+// with a width of its own does not recompute on a vertical zoom
 export function rowPanelWidth(
   panel: RowPanelSpec,
   view: { rowHeight: number },
 ) {
   return (
     panel.width ??
-    (panel.kind === 'features' ? defaultFeaturePanelWidth : view.rowHeight)
+    (panel.kind === 'features'
+      ? defaultFeaturePanelWidth
+      : panel.kind === 'strip'
+        ? view.rowHeight
+        : defaultValuePanelWidth)
   )
 }
 
@@ -182,7 +191,9 @@ export function panelLanes<T extends Unlaned>(
  * alignment's column width. `position` packs each row's features in its own
  * residue positions, shifted by an `align` transform, and maps the extent they
  * cover across every row onto the panel width, so a row with no alignment
- * still has an x.
+ * still has an x, and that linear scale is the panel's axis. A position counts
+ * from 0 at the start of each row's sequence, or at the start of the feature
+ * an `align` transform names.
  */
 export function featurePanelSpans({
   panel,
@@ -198,20 +209,35 @@ export function featurePanelSpans({
   domainBands: Map<string, DomainBand[]>
   annotationsByRow: Record<string, Annotation[]>
   shifts: Map<string, number> | undefined
-}): Map<string, RowPanelSpan[]> {
-  if (panel.x === 'column') {
-    return panelLanes(
-      panel.position,
-      [...domainBands].map(([name, bands]) => [
-        name,
-        bands.map(band => ({
-          ...band,
-          xStart: band.startCol * colWidth,
-          xEnd: band.endCol * colWidth,
-        })),
-      ]),
-    )
-  }
+}): { spans: Map<string, RowPanelSpan[]>; axis?: PanelAxis } {
+  return panel.x === 'column'
+    ? {
+        spans: panelLanes(
+          panel.position,
+          [...domainBands].map(([name, bands]) => [
+            name,
+            bands.map(band => ({
+              ...band,
+              xStart: band.startCol * colWidth,
+              xEnd: band.endCol * colWidth,
+            })),
+          ]),
+        ),
+      }
+    : positionSpans({ panel, width, annotationsByRow, shifts })
+}
+
+function positionSpans({
+  panel,
+  width,
+  annotationsByRow,
+  shifts,
+}: {
+  panel: RowFeaturesSpec
+  width: number
+  annotationsByRow: Record<string, Annotation[]>
+  shifts: Map<string, number> | undefined
+}) {
   const shifted = Object.entries(annotationsByRow).map(
     ([name, annotations]) => {
       const shift = shifts?.get(name) ?? 0
@@ -241,7 +267,7 @@ export function featurePanelSpans({
   // which keeps the genes of an operon on one lane: adjacent genes commonly
   // share a few bases, and a stop codon overlapping the next start reads as a
   // second lane over the whole row
-  return panelLanes(
+  const spans = panelLanes(
     panel.position,
     shifted.map(([name, features]) => [
       name,
@@ -254,4 +280,13 @@ export function featurePanelSpans({
       })),
     ]),
   )
+  const axis: PanelAxis | undefined =
+    max > min
+      ? {
+          scale: { type: 'linear', domain: [min, max] },
+          extent: [0, drawable],
+          format: positionLabel,
+        }
+      : undefined
+  return { spans, axis }
 }

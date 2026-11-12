@@ -8,6 +8,7 @@ import { namedPalettes, paletteNamed } from './ggplotPalettes.ts'
 import { scaleKind } from './scales.ts'
 
 import type { ColorSpec } from './scales.ts'
+import type { ValueChannel } from './types.ts'
 
 /** A combination of a color object's members the viewer cannot draw as written. */
 export interface ScaleProblem {
@@ -68,7 +69,10 @@ function schemeProblems(
  * `domainMax` below its `domainMin`, a quantile outside 0.5 to 1, and a log
  * scale's `domainMin` at or below 0
  */
-function scaleEndProblems({ scale }: ColorSpec): ScaleProblem[] {
+function scaleEndProblems(
+  { scale }: ColorSpec,
+  reversible = true,
+): ScaleProblem[] {
   const { type, domainMin, domainMax, domainQuantile } = scale ?? {}
   return [
     ...(type === 'log' && domainMin !== undefined && domainMin <= 0
@@ -87,8 +91,9 @@ function scaleEndProblems({ scale }: ColorSpec): ScaleProblem[] {
           {
             rule: 'domain-ends' as const,
             slot: 'scale.domainMax',
-            message:
-              'domainMax is below domainMin: the scale spans the two in order either way, and reverse is what turns it round',
+            message: reversible
+              ? 'domainMax is below domainMin: the scale spans the two in order either way, and reverse is what turns it round'
+              : 'domainMax is below domainMin: the scale spans the two in order either way',
           },
         ]
       : []),
@@ -205,4 +210,24 @@ export function colorProblems(spec: ColorSpec): ScaleProblem[] {
     problems.push(...schemeProblems(scale?.scheme, kind === 'ordinal'))
   }
   return problems
+}
+
+/**
+ * What a bar or point panel's value scale says that it cannot draw: a `type`
+ * other than `linear` or `log`, and the problems of its ends
+ */
+export function valueScaleProblems({ scale }: ValueChannel): ScaleProblem[] {
+  const type: unknown = scale?.type
+  return [
+    ...(type === undefined || type === 'linear' || type === 'log'
+      ? []
+      : [
+          {
+            rule: 'scale-type' as const,
+            slot: 'scale.type',
+            message: `${JSON.stringify(type)} is no value scale type: linear and log are, and the scale reads as linear`,
+          },
+        ]),
+    ...scaleEndProblems({ scale }, false),
+  ]
 }

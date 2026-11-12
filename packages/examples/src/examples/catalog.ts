@@ -255,7 +255,8 @@ export const catalog: CatalogEntry[] = [
     description:
       'The F12 coding alignment read codon by codon against a row you pick: ' +
       'synonymous changes fill blue, non-synonymous orange, stops black. ' +
-      'Against human, the four cetaceans share a 1-bp deletion at codon 69.',
+      'Against human, the four cetaceans share a 1-bp deletion at codon 69. ' +
+      'A bar beside each row counts its non-synonymous codons.',
   },
   {
     id: 'GeneCluster',

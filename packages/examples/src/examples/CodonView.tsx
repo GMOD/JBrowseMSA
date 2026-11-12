@@ -18,6 +18,7 @@ import type { ColumnTrackSpec, Feature } from 'react-msaview'
 // the bases every other row has at the same three columns (geneticCode.ts).
 // The viewer draws the result as four column tracks and one row feature per
 // changed codon, which the featureFill encoding colors by its `change` field.
+// A bar row panel beside the tree counts each row's non-synonymous codons.
 //
 // Every track names the reference in `row`, so its data holds one character or
 // number per base of the reference and the viewer places it through the gaps.
@@ -48,13 +49,14 @@ const layers = {
   translation: 'Translation',
   counts: 'Changes per codon',
   features: 'Changed codons in each row',
+  rowCounts: 'Non-synonymous codons per row',
 }
 type Layer = keyof typeof layers
 
 function isLayer(name: string): name is Layer {
   return name in layers
 }
-type TrackLayer = Exclude<Layer, 'features'>
+type TrackLayer = Exclude<Layer, 'features' | 'rowCounts'>
 const trackLayers: TrackLayer[] = ['numbers', 'translation', 'counts']
 
 function codonTracks(
@@ -126,6 +128,24 @@ function codonTracks(
   }
 }
 
+// each row's count of non-synonymous codons against the reference, the field
+// the bar row panel reads. The reference itself has no count and no bar.
+function nonSynonymousByRow(codons: CodonComparison[], reference: string) {
+  const counts = new Map(
+    rows.filter(({ name }) => name !== reference).map(({ name }) => [name, 0]),
+  )
+  for (const { changes } of codons) {
+    for (const { row, change } of changes) {
+      if (change === 'non-synonymous') {
+        counts.set(row, (counts.get(row) ?? 0) + 1)
+      }
+    }
+  }
+  return Object.fromEntries(
+    [...counts].map(([name, nonSynonymous]) => [name, { nonSynonymous }]),
+  )
+}
+
 // one feature per changed codon, in the row's own residue numbers
 function changedCodons(codons: CodonComparison[]): Feature[] {
   return codons.flatMap(({ number, codon, aminoAcid, changes }) =>
@@ -150,12 +170,14 @@ export default function CodonView() {
     translation: true,
     counts: true,
     features: true,
+    rowCounts: true,
   })
-  const { tracks, features } = useMemo(() => {
+  const { tracks, features, rowData } = useMemo(() => {
     const codons = compareCodons(rows, reference)
     return {
       tracks: codonTracks(codons, reference),
       features: changedCodons(codons),
+      rowData: nonSynonymousByRow(codons, reference),
     }
   }, [reference])
 
@@ -210,6 +232,19 @@ export default function CodonView() {
         columnTracks={trackLayers.flatMap(layer =>
           shown[layer] ? tracks[layer] : [],
         )}
+        rowData={rowData}
+        rowPanels={
+          shown.rowCounts
+            ? [
+                {
+                  kind: 'bar',
+                  encoding: { x: { field: 'nonSynonymous' } },
+                  header: 'non-synonymous',
+                  width: 110,
+                },
+              ]
+            : []
+        }
         encodings={[
           {
             channel: 'featureFill',

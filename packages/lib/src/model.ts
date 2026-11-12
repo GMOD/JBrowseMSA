@@ -133,7 +133,7 @@ import {
   pruneTree,
   tipNames,
 } from './rowTransform.ts'
-import { colorProblems } from './scaleProblems.ts'
+import { colorProblems, valueScaleProblems } from './scaleProblems.ts'
 import {
   colorTable,
   declarationKey,
@@ -170,12 +170,21 @@ import {
   trimBlanks,
   withAlpha,
 } from './util.ts'
+import {
+  defaultPointSize,
+  resolveValueScale,
+  rowNumbers,
+  rowsHolding,
+  rowTexts,
+  valuePanelAxis,
+} from './valuePanels.ts'
 import { saveAs } from './vendor/fileSaver.ts'
 import { writeNewick } from './writeNewick.ts'
 import { parseWuss } from './wuss.ts'
 import { takeZoomSnapshot, zoomSnapshotCovers } from './zoomSnapshot.ts'
 
 import type { ColumnStats } from './columnStats.ts'
+import type { ValueScale } from './components/axis.ts'
 import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
 import type { LegendHides, LegendItem, LegendSection } from './legendSpec.ts'
@@ -213,6 +222,8 @@ import type {
   ResolvedEncoding,
   ResolvedFeaturePanel,
   ResolvedStripPanel,
+  ResolvedTextPanel,
+  ResolvedValuePanel,
   ResolvedHighlight,
   ResolvedSelection,
   TreeRoot,
@@ -456,6 +467,16 @@ type FeaturePanelScale = Omit<
   ResolvedFeaturePanel,
   'id' | 'width' | 'offsetX' | 'spans'
 >
+type ValuePanelScale = Omit<
+  ResolvedValuePanel,
+  'id' | 'width' | 'offsetX' | 'axis'
+> & { valueScale: ValueScale }
+type TextPanelScale = Omit<ResolvedTextPanel, 'id' | 'width' | 'offsetX'>
+type RowPanelScale =
+  | StripPanelScale
+  | FeaturePanelScale
+  | ValuePanelScale
+  | TextPanelScale
 
 /**
  * #stateModel MsaView
@@ -801,9 +822,12 @@ function stateModelFactory({
          * #property
          * panels drawn between the tree and the alignment:
          * `{kind: "strip", encoding: {fill}, width?, header?}` fills one cell
-         * per row from a `rowData` field, and
+         * per row from a `rowData` field,
          * `{kind: "features", x, encoding?, transform?, width?, header?}`
-         * draws the spans the GFF carries. See docs/layers.md
+         * draws the spans the GFF carries, `{kind: "bar" | "point",
+         * encoding: {x: {field, scale?}, color?}}` draws a numeric field along
+         * an axis, and `{kind: "text", encoding: {text: {field}, color?}}`
+         * prints a field. See docs/layers.md
          */
         rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), []),
         /**
@@ -1460,8 +1484,9 @@ function stateModelFactory({
       /**
        * #getter
        * every record that reads a field through a color object: each color
-       * encoding, each strip's `fill` and each features panel's `fill`, with
-       * where it sits in the snapshot and the table its field is read from
+       * encoding, each strip's `fill`, each features panel's `fill` and each
+       * bar, point or text panel's `color`, with where it sits in the
+       * snapshot and the table its field is read from
        */
       get colorRecords(): ColorRecord[] {
         return [
@@ -1480,9 +1505,25 @@ function stateModelFactory({
             const record = `rowPanels[${i}].encoding.fill`
             return panel.kind === 'strip'
               ? [{ record, channel: panel.encoding.fill, table: 'rows' }]
-              : panel.encoding?.fill
-                ? [{ record, channel: panel.encoding.fill, table: 'features' }]
-                : []
+              : panel.kind === 'features'
+                ? panel.encoding?.fill
+                  ? [
+                      {
+                        record,
+                        channel: panel.encoding.fill,
+                        table: 'features',
+                      },
+                    ]
+                  : []
+                : panel.encoding.color
+                  ? [
+                      {
+                        record: `rowPanels[${i}].encoding.color`,
+                        channel: panel.encoding.color,
+                        table: 'rows',
+                      },
+                    ]
+                  : []
           }),
           ...self.columnTracks.flatMap((track, i): ColorRecord[] =>
             track.kind === 'features' && track.encoding?.fill
@@ -4374,13 +4415,25 @@ function stateModelFactory({
        * why a record's color object draws other than it says, per record: a
        * `domainMax` below its `domainMin`, a threshold whose cuts are unsorted
        * or whose `range` is not one longer, a `domainQuantile` outside 0.5 to
-       * 1, `labels` of the wrong length, a `scheme` no table holds. The viewer
-       * draws what it can, and the scale's legend notes the first problem.
+       * 1, `labels` of the wrong length, a `scheme` no table holds. A bar or
+       * point panel's value scale lists its ends' problems under
+       * `rowPanels[i].encoding.x`. The viewer draws what it can, and the
+       * scale's legend notes the first problem.
        */
       get scaleProblems(): RecordScaleProblem[] {
-        return self.colorRecords.flatMap(({ record, channel }) =>
-          colorProblems(channel).map(problem => ({ record, ...problem })),
-        )
+        return [
+          ...self.colorRecords.flatMap(({ record, channel }) =>
+            colorProblems(channel).map(problem => ({ record, ...problem })),
+          ),
+          ...self.rowPanels.flatMap((panel, i) =>
+            panel.kind === 'bar' || panel.kind === 'point'
+              ? valueScaleProblems(panel.encoding.x).map(problem => ({
+                  record: `rowPanels[${i}].encoding.x`,
+                  ...problem,
+                }))
+              : [],
+          ),
+        ]
       },
 
       /**
@@ -4746,15 +4799,67 @@ function stateModelFactory({
       /**
        * #getter
        * each row panel's scale resolved against the values its field takes,
-       * giving the colors, labels and legend entries. Reads no cell size, so
-       * a zoom reuses it and the legends built from it.
+       * giving the colors, labels and legend entries, and a bar or point
+       * panel's value scale. Reads no cell size, so a zoom reuses it and the
+       * legends built from it.
        */
-      get rowPanelScales(): (StripPanelScale | FeaturePanelScale)[] {
+      get rowPanelScales(): RowPanelScale[] {
         const { rowData } = self
         const { fillPalette, featureFillEncoding, featureLabels } = this
         const annotations = self.filteredAnnotations
-        return self.rowPanels.map(panel => {
-          if (panel.kind === 'features') {
+        const hiddenRows = self.activeHiddenCategories.get('rows')
+        const hiddenOf = (field: string) => hiddenRows?.get(field)
+        const colorPart = (color: ColorChannel | undefined) => {
+          const scale = color ? this.scaleOf(color, 'rows') : undefined
+          return {
+            colorField: color?.field,
+            colors:
+              color && scale
+                ? colorByRow(
+                    rowData,
+                    color.field,
+                    unhiddenColorOf(scale.colorOf, hiddenOf(color.field)),
+                  )
+                : new Map<string, string>(),
+            hiddenRows: color
+              ? rowsHolding(rowData, color.field, hiddenOf(color.field))
+              : new Set<string>(),
+            legendKey: scale?.key,
+            legendTitle: scale?.title,
+            legendNote: scale?.note,
+            legend: scale?.items ?? [],
+          }
+        }
+        return self.rowPanels.map((panel): RowPanelScale => {
+          if (panel.kind === 'bar' || panel.kind === 'point') {
+            const { x, color } = panel.encoding
+            const values = rowNumbers(rowData, x.field)
+            return {
+              kind: panel.kind,
+              field: x.field,
+              header: panel.header ?? x.field,
+              values,
+              valueScale: resolveValueScale(
+                x.scale,
+                values.values(),
+                panel.kind === 'bar',
+              ),
+              size:
+                panel.kind === 'point'
+                  ? (panel.size ?? defaultPointSize)
+                  : defaultPointSize,
+              ...colorPart(color),
+            }
+          } else if (panel.kind === 'text') {
+            const { text, color } = panel.encoding
+            return {
+              kind: panel.kind,
+              field: text.field,
+              header: panel.header ?? text.field,
+              texts: rowTexts(rowData, text.field),
+              ...colorPart(color),
+            }
+          } else if (panel.kind === 'features') {
             const fill = panel.encoding?.fill
             const encoding = fill
               ? { field: fill.field, ...this.scaleOf(fill, 'features') }
@@ -4780,28 +4885,26 @@ function stateModelFactory({
               legend: encoding?.items ?? this.domainLegendItems,
               legendNote: encoding?.note,
             }
-          }
-          const { fill } = panel.encoding
-          const { colorOf, items, note, key, title } = this.scaleOf(
-            fill,
-            'rows',
-          )
-          const hidden = self.activeHiddenCategories
-            .get('rows')
-            ?.get(fill.field)
-          return {
-            kind: panel.kind,
-            field: fill.field,
-            header: panel.header ?? fill.field,
-            legendKey: key,
-            legendTitle: title,
-            legendNote: note,
-            colors: colorByRow(
-              rowData,
-              fill.field,
-              unhiddenColorOf(colorOf, hidden),
-            ),
-            legend: items,
+          } else {
+            const { fill } = panel.encoding
+            const { colorOf, items, note, key, title } = this.scaleOf(
+              fill,
+              'rows',
+            )
+            return {
+              kind: panel.kind,
+              field: fill.field,
+              header: panel.header ?? fill.field,
+              legendKey: key,
+              legendTitle: title,
+              legendNote: note,
+              colors: colorByRow(
+                rowData,
+                fill.field,
+                unhiddenColorOf(colorOf, hiddenOf(fill.field)),
+              ),
+              legend: items,
+            }
           }
         })
       },
@@ -4860,7 +4963,7 @@ function stateModelFactory({
             return {
               ...base,
               ...scale,
-              spans: featurePanelSpans({
+              ...featurePanelSpans({
                 panel,
                 width,
                 colWidth: self.colWidth,
@@ -4871,11 +4974,18 @@ function stateModelFactory({
                   : undefined,
               }),
             }
-          }
-          if (scale.kind === 'features') {
+          } else if (scale.kind === 'features') {
             throw new Error(`row panel ${index} has a features scale`)
+          } else if (scale.kind === 'strip' || scale.kind === 'text') {
+            return { ...base, ...scale }
+          } else {
+            const { valueScale, ...rest } = scale
+            return {
+              ...base,
+              ...rest,
+              axis: valuePanelAxis(scale.kind, valueScale, width, scale.size),
+            }
           }
-          return { ...base, ...scale }
         })
       },
 

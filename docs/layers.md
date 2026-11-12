@@ -764,7 +764,8 @@ declares it (`encodings[0]`, `rowPanels[2].encoding.fill`), the member (`slot`)
 and a message. The scale's legend carries the first as a note, and
 `react-msaview-cli export-svg --spec` prints every one to stderr as
 `record.slot: message`. The rules and their messages are jbrowse-components'
-`colorProblems`.
+`colorProblems`. A bar or point panel's value scale reports its ends' problems
+the same way, under `rowPanels[i].encoding.x`.
 
 ### Hiding a category
 
@@ -773,9 +774,10 @@ a second click shows it again. The overlay strikes a hidden row through, and the
 SVG export leaves it out of the legend and the figure.
 
 - A hidden `rowData` value leaves the marks it colors unpainted: a strip draws
-  no cell, a tip label and a branch draw in the default color, and a row takes
-  no tint. The row stays in the tree and the alignment; a `rowTransform` filter
-  drops rows.
+  no cell, a bar, point or text panel draws no bar, dot or text for a row its
+  `encoding.color` reads the value in, a tip label and a branch draw in the
+  default color, and a row takes no tint. The row stays in the tree and the
+  alignment; a `rowTransform` filter drops rows.
 - A hidden feature value takes the features carrying it out of the overlay, the
   `features` panels and the `features` tracks, and out of their tooltips.
 - A hidden `support` value leaves its node's bubble plain.
@@ -899,7 +901,9 @@ A panel beside the tree on the row scale, the counterpart of `columnTracks` on
 the column scale. Each record names a `kind`. A `strip` reads a field of
 `rowData` and fills each row's cell through its color object, and eight strips
 make the tip-aligned matrix ggtree draws with `gheatmap`. A `features` panel
-draws the spans `gff` carries, one row per alignment row, which is gggenes.
+draws the spans `gff` carries, one row per alignment row, which is gggenes. A
+`bar`, `point` or `text` panel draws a number or a string from `rowData` beside
+each row, which is ggtree's `geom_facet`.
 
 [![](media/layers-rowpanels.png)][live-layers-rowpanels]
 
@@ -930,12 +934,12 @@ residue colors.
 }
 ```
 
-| Field      | Meaning                                                                     |
-| ---------- | --------------------------------------------------------------------------- |
-| `kind`     | `strip` or `features`                                                       |
-| `encoding` | a strip's `{fill: {field, scale, legend}}`, the color object of `encodings` |
-| `width`    | the column's pixel width: a row height for a strip, 200 for features        |
-| `header`   | the name drawn above the column, defaulting to a strip's field              |
+| Field      | Meaning                                                                                       |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| `kind`     | `strip`, `features`, `bar`, `point` or `text`                                                 |
+| `encoding` | a strip's `{fill: {field, scale, legend}}`, the color object of `encodings`                   |
+| `width`    | the column's pixel width: a row height for a strip, 200 for features, 80 for bar, point, text |
+| `header`   | the name drawn above the column, defaulting to the field a strip, bar, point or text reads    |
 
 A strip's `fill` reads a `rowData` field, and its `legend.title` names the
 legend its values list under, defaulting to the field. A strip over a numeric
@@ -949,7 +953,10 @@ row the table gives no value leaves its cell empty.
 
 Each header draws in the band the tree's scale bar and the minimap share, turned
 on its side, and it exports with the figure. The band is as tall as the minimap,
-so a longer header is clipped to it and the full name is the column's tooltip.
+so a longer header is clipped to it and the full name is the column's tooltip. A
+panel with an axis, a `bar`, a `point` or a `features` panel under
+`x: "position"`, draws the axis at the foot of the band and writes its header
+across above it.
 
 A panel's scale carries a legend of its own, titled by the field, and every
 panel and encoding declaring the same members over one field lists it once.
@@ -1022,6 +1029,13 @@ alignment panel is zero columns wide, and the tree and the panel fill the view.
 row carrying no such feature keeps its own origin. An `align` under
 `x: "column"` draws nothing different, since the columns are the alignment's.
 
+Under `x: "position"` the header band draws the panel's axis, with the `header`
+above it as the axis title. The ticks count positions from 0 at the start of
+each row's sequence, and step in kb or Mb once the step reaches a thousand. With
+an `align` transform, 0 is the start of the aligned feature: a tick at `-2 kb`
+marks two kilobases before `genE` starts in every row that carries one, and in a
+row with no `genE` it marks two kilobases before the row's own start.
+
 `encoding.fill` reads any field of the feature table, the same fields a
 `featureFill` encoding reads. A record naming none takes the colors the overlay
 gives the same features, and `encoding.text` falls back to the `featureLabel`
@@ -1060,6 +1074,59 @@ with the forward ones.
   ]
 }
 ```
+
+### Bar, point and text panels
+
+A `bar` panel draws one bar per row from the panel's left edge to the value of a
+numeric `rowData` field, and a `point` panel draws a dot at that value. The
+value runs along the panel's width through `encoding.x.scale`, and the header
+band draws that scale's axis with the `header` above it as its title. A `text`
+panel prints a `rowData` field in the panel's width, cut in the middle where it
+runs longer.
+
+```json
+"rowPanels": [
+  {
+    "kind": "bar",
+    "header": "genome (bp)",
+    "encoding": {
+      "x": { "field": "genomeSize", "scale": { "domainMin": 0 } },
+      "color": { "field": "host", "scale": { "scheme": "dark2" } }
+    }
+  },
+  { "kind": "point", "encoding": { "x": { "field": "year" } }, "size": 5 },
+  { "kind": "text", "encoding": { "text": { "field": "clade" } } }
+]
+```
+
+| Field              | Meaning                                                                       |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `encoding.x`       | a bar or point's `{field, scale}`, the numeric field and its value scale      |
+| `encoding.x.scale` | `{type, domainMin, domainMax, domainQuantile}`, with `type` `linear` or `log` |
+| `encoding.text`    | a text panel's `{field}`                                                      |
+| `encoding.color`   | a color object over the same field or another, coloring each bar, dot or text |
+| `size`             | a point's diameter in pixels, 6 by default and at most the row height         |
+
+Each end of the value scale is `domainMin` or `domainMax` where set, and
+otherwise follows the field's values, clipped at `domainQuantile` as a color
+ramp's ends are. A linear bar scale with an end unset takes 0 into its domain,
+so the bars start at 0. A `log` scale reads only the positive values and draws
+its bars from its low end. A row whose field is missing or no number draws no
+mark, and its tooltip reads `(none)`.
+
+The axis ticks step along 1, 2 and 5 times a power of ten, the ladder the tree's
+scale bar uses, and print a thousand or more as `k`, `M` or `G`. A log axis
+ticks each power of ten. `encoding.color` resolves through the same declarations
+as the strips and the encodings, so a bar colored by `host` and a strip over
+`host` with one scale list one legend. Under `scale: {type: "identity"}` each
+bar, dot or text takes the color its field names. A bar or point with no
+`encoding.color` draws grey, and a text with none draws in the theme's text
+color.
+
+`model.scaleProblems` lists a value scale's contradictions under
+`rowPanels[i].encoding.x`: a `domainMax` below its `domainMin`, a log scale's
+`domainMin` at or below 0, a `domainQuantile` outside 0.5 to 1, and a `type`
+other than `linear` or `log`.
 
 ## rowTransform
 

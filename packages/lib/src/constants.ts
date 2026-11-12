@@ -171,6 +171,10 @@ export const treeScaleBarHeight = 22
 // neighborhood of a few arrows to read.
 export const defaultFeaturePanelWidth = 200
 
+// Width of a `bar`, `point` or `text` row panel that names none, which holds
+// an axis of two or three labeled ticks.
+export const defaultValuePanelWidth = 80
+
 // The alignment's overlay canvas draws the mouseover, the persisted highlights
 // and the row tints over the residues, and the legend key floats above that,
 // so a tint reaching the top right corner leaves the key readable.

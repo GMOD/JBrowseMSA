@@ -1,3 +1,4 @@
+import type { TickFormat, ValueScale } from './components/axis.ts'
 import type { LegendItem } from './legendSpec.ts'
 import type { ColorChannel, ColorSpec, SharedScale } from './scales.ts'
 import type { Annotation } from 'msa-parsers'
@@ -238,16 +239,90 @@ export interface RowFeaturesSpec {
 export type FeaturePosition = 'identity' | 'strandpile'
 
 /**
+ * The scale a bar or point mark reads a number through into a length: `linear`
+ * (the default) or `log`, each end pinned by `domainMin` or `domainMax` or
+ * following the values, clipped at the nearest-rank `domainQuantile` (0.5 to
+ * 1, the default the extremes)
+ */
+export interface ValueScaleSpec {
+  type?: 'linear' | 'log'
+  domainMin?: number
+  domainMax?: number
+  domainQuantile?: number
+}
+
+/** a channel reading a numeric field through a value scale */
+export interface ValueChannel {
+  field: string
+  scale?: ValueScaleSpec
+}
+
+interface RowValueSpec {
+  encoding: { x: ValueChannel; color?: ColorChannel }
+  width?: number
+  header?: string
+}
+
+/**
+ * A bar per row, from the panel's left edge to its `x` field's value through
+ * `encoding.x.scale`, filled through `encoding.color` where one is set, which
+ * is ggtree's `geom_facet(geom_col)`. `width` defaults to 80, and `header`,
+ * the title of the axis the header band draws, to the field. A linear scale
+ * with no `domainMin` starts at 0.
+ */
+export interface RowBarSpec extends RowValueSpec {
+  kind: 'bar'
+}
+
+/**
+ * A dot per row at its `x` field's value, as a `bar` reads it, `size` pixels
+ * across (6 by default, at most the row height): ggtree's
+ * `geom_facet(geom_point)`
+ */
+export interface RowPointSpec extends RowValueSpec {
+  kind: 'point'
+  size?: number
+}
+
+/**
+ * A `rowData` field printed beside each row in the panel's width, colored
+ * through `encoding.color` where one is set. `width` defaults to 80, and
+ * `header` to the field.
+ */
+export interface RowTextSpec {
+  kind: 'text'
+  encoding: { text: FieldChannel; color?: ColorChannel }
+  width?: number
+  header?: string
+}
+
+/**
  * A panel left of the alignment on the row scale, the counterpart of
  * ColumnTrackSpec on the column scale. See docs/layers.md
  */
-export type RowPanelSpec = RowStripSpec | RowFeaturesSpec
+export type RowPanelSpec =
+  | RowStripSpec
+  | RowFeaturesSpec
+  | RowBarSpec
+  | RowPointSpec
+  | RowTextSpec
+
+/**
+ * The guide of a panel's value scale, which the header band draws: the scale,
+ * the panel pixels of its low and high ends, and how a tick is labeled
+ */
+export interface PanelAxis {
+  scale: ValueScale
+  extent: readonly [number, number]
+  format: TickFormat
+}
 
 interface ResolvedPanelBase {
   id: string
   header: string
   width: number
   offsetX: number
+  axis?: PanelAxis
   legend: LegendItem[]
   /** the scale this panel's entries list under; absent means the domain key */
   legendKey?: string
@@ -289,7 +364,43 @@ export interface ResolvedFeaturePanel extends ResolvedPanelBase {
   labels?: Map<Annotation, string>
 }
 
-export type ResolvedRowPanel = ResolvedStripPanel | ResolvedFeaturePanel
+/**
+ * A bar or point panel with its scales resolved: each row's value, the color
+ * `encoding.color` gives it (none where the record sets no color), and the
+ * axis its value scale draws. `colorField` is the field the color reads, and
+ * `hiddenRows` the rows whose value of it a legend click hid, which draw no
+ * mark.
+ */
+export interface ResolvedValuePanel extends ResolvedPanelBase {
+  kind: 'bar' | 'point'
+  field: string
+  colorField?: string
+  values: Map<string, number>
+  colors: Map<string, string>
+  hiddenRows: Set<string>
+  size: number
+  axis: PanelAxis
+}
+
+/**
+ * A text panel with each row's text and the color `encoding.color` gives it.
+ * A row in `hiddenRows` holds a color value a legend click hid, and prints
+ * nothing.
+ */
+export interface ResolvedTextPanel extends ResolvedPanelBase {
+  kind: 'text'
+  field: string
+  colorField?: string
+  texts: Map<string, string>
+  colors: Map<string, string>
+  hiddenRows: Set<string>
+}
+
+export type ResolvedRowPanel =
+  | ResolvedStripPanel
+  | ResolvedFeaturePanel
+  | ResolvedValuePanel
+  | ResolvedTextPanel
 
 // One contiguous run where a row's residues and a structure's line up 1:1, as
 // SIFTS reports them. A position no segment covers is unmapped.

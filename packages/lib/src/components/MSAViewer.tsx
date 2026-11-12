@@ -119,9 +119,12 @@ export interface MSAViewerProps {
   /**
    * panels between the tree and the alignment:
    * `{kind: 'strip', encoding: {fill: {field, scale?, legend?}}}`
-   * fills one cell per row from a `rowData` field, and
+   * fills one cell per row from a `rowData` field,
    * `{kind: 'features', x, encoding?: {fill?, text?}}` draws the annotation
-   * spans per row (see docs/layers.md)
+   * spans per row, `{kind: 'bar' | 'point', encoding: {x: {field, scale?},
+   * color?}}` draws a numeric field along an axis, and
+   * `{kind: 'text', encoding: {text: {field}, color?}}` prints a field (see
+   * docs/layers.md)
    */
   rowPanels?: RowPanelSpec[]
   /**

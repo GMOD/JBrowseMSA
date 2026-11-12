@@ -10,11 +10,12 @@ import { useHoverAnchor } from '../useHoverAnchor.ts'
 import { renderRowPanel } from './renderRowPanel.ts'
 
 import type { MsaViewModel } from '../../model.ts'
-import type { ResolvedRowPanel } from '../../types.ts'
+import type { ResolvedFeaturePanel, ResolvedRowPanel } from '../../types.ts'
 
-// what the cell or span under the pointer reads, which is the field a strip
-// colors by, and a span's name, its coordinates and its encoded field. A cell
-// whose value a legend click hid reads nothing.
+// what the cell, mark or span under the pointer reads: the field a strip
+// colors by; the field a bar, point or text panel draws and the one it colors
+// by; and a span's name, its coordinates and its encoded field. A cell or mark
+// whose color value a legend click hid reads nothing.
 function hoverLines({
   model,
   panel,
@@ -26,13 +27,38 @@ function hoverLines({
   name: string
   x: number
 }) {
-  if (panel.kind === 'strip') {
-    const value = model.rowDataOf(name)?.[panel.field]
-    return value !== undefined &&
-      model.activeHiddenCategories.get('rows')?.get(panel.field)?.has(value)
+  const row = model.rowDataOf(name)
+  const value = (field: string) => row?.[field]
+  const hidden =
+    panel.kind === 'strip'
+      ? rowValueHidden(model, panel.field, value(panel.field))
+      : panel.kind !== 'features' && panel.hiddenRows.has(name)
+  return panel.kind === 'features'
+    ? spanLines(panel, name, x)
+    : hidden
       ? []
-      : [`${panel.header}: ${value ?? '(none)'}`]
-  }
+      : [
+          `${panel.header}: ${value(panel.field) ?? '(none)'}`,
+          ...(panel.kind !== 'strip' &&
+          panel.colorField !== undefined &&
+          panel.colorField !== panel.field
+            ? [`${panel.colorField}: ${value(panel.colorField) ?? '(none)'}`]
+            : []),
+        ]
+}
+
+function rowValueHidden(
+  model: MsaViewModel,
+  field: string,
+  value: string | undefined,
+) {
+  return (
+    value !== undefined &&
+    !!model.activeHiddenCategories.get('rows')?.get(field)?.has(value)
+  )
+}
+
+function spanLines(panel: ResolvedFeaturePanel, name: string, x: number) {
   const span = panel.spans
     .get(name)
     ?.findLast(s => x >= s.xStart && x <= s.xEnd)
