@@ -36,6 +36,7 @@ import {
   fetchStructure,
   observedResidues,
   readRow,
+  residueContacts,
   residueMapping,
   residuePoints,
   sequenceToUniprot,
@@ -101,29 +102,15 @@ const regionOf = pos => {
   return hit ? hit.name : pos > lastDomainEnd ? 'C-terminal tail' : undefined
 }
 
-const residues = [...points.keys()]
-  .map(seqId => ({ seqId, pos: toUniprot(seqId) }))
-  .filter(r => r.pos !== undefined)
-  .toSorted((a, b) => a.pos - b.pos)
-
-const contacts = []
-for (let i = 0; i < residues.length; i++) {
-  for (let j = i + 1; j < residues.length; j++) {
-    const a = residues[i]
-    const b = residues[j]
-    const ra = regionOf(a.pos)
-    const rb = regionOf(b.pos)
-    if (!ra || !rb || ra === rb) {
-      continue
-    }
-    const [ax, ay, az] = points.get(a.seqId).xyz
-    const [bx, by, bz] = points.get(b.seqId).xyz
-    const d = Math.hypot(ax - bx, ay - by, az - bz)
-    if (d < CUTOFF) {
-      contacts.push({ start: a.pos, end: b.pos, pair: `${ra} - ${rb}` })
-    }
-  }
-}
+const contacts = residueContacts({ points, toUniprot, cutoff: CUTOFF })
+  .map(({ start, end }) => ({
+    start,
+    end,
+    ra: regionOf(start),
+    rb: regionOf(end),
+  }))
+  .filter(({ ra, rb }) => ra && rb && ra !== rb)
+  .map(({ start, end, ra, rb }) => ({ start, end, pair: `${ra} - ${rb}` }))
 
 const byPair = new Map()
 for (const c of contacts) {

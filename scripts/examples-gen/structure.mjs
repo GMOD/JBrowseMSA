@@ -1,8 +1,8 @@
 /**
  * mmCIF coordinates from RCSB, the SIFTS residue mapping from PDBe, and the
  * checks that the structure's, UniProt's and the alignment row's numbering
- * agree. Shared by contacts.mjs (Src), hemoglobin.mjs (sickle-cell) and
- * ace2Interface.mjs (the spike contacts).
+ * agree. Shared by contacts.mjs and contactMap.mjs (Src), hemoglobin.mjs
+ * (sickle-cell) and ace2Interface.mjs (the spike contacts).
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -285,6 +285,29 @@ export function checkRowNumbering({ points, toUniprot, seq, row, pdb }) {
   }
   console.log(`${checked} residues of ${row} match ${pdb.toUpperCase()}`)
   return checked
+}
+
+/**
+ * Every pair of residues whose points (see residuePoints) sit under `cutoff`
+ * angstroms apart, as `{start, end}` in UniProt numbering with start < end.
+ * Residues SIFTS leaves unmapped are skipped.
+ */
+export function residueContacts({ points, toUniprot, cutoff }) {
+  const residues = [...points]
+    .map(([seqId, { xyz }]) => ({ pos: toUniprot(seqId), xyz }))
+    .filter(r => r.pos !== undefined)
+    .toSorted((a, b) => a.pos - b.pos)
+  const contacts = []
+  for (let i = 0; i < residues.length; i++) {
+    for (let j = i + 1; j < residues.length; j++) {
+      const [ax, ay, az] = residues[i].xyz
+      const [bx, by, bz] = residues[j].xyz
+      if (Math.hypot(ax - bx, ay - by, az - bz) < cutoff) {
+        contacts.push({ start: residues[i].pos, end: residues[j].pos })
+      }
+    }
+  }
+  return contacts
 }
 
 export function writeJson(outFile, value) {
