@@ -612,15 +612,22 @@ no tint. Each field lists its own legend.
 }
 ```
 
-| Field          | Meaning                                                                       |
-| -------------- | ----------------------------------------------------------------------------- |
-| `channel`      | one of the five below                                                         |
-| `field`        | the field the channel reads                                                   |
-| `scale.type`   | `ordinal`, the only type so far and the default                               |
-| `scale.domain` | values in legend order, each taking the `range` color at its index            |
-| `scale.range`  | a list of colors                                                              |
-| `scale.scheme` | a palette name, read where `range` is unset; the ggplot palette when both are |
-| `legend.title` | the legend's title; records with the same scale and title share one scale     |
+| Field                  | Meaning                                                                                                         |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `channel`              | one of the five below                                                                                           |
+| `field`                | the field the channel reads                                                                                     |
+| `scale.type`           | `ordinal` (the default), `linear`, `log` or `threshold`                                                         |
+| `scale.domain`         | an ordinal scale's values in legend order, each taking the `range` color at its index; a threshold scale's cuts |
+| `scale.range`          | a list of colors: one per value, a ramp's stops, or one per threshold interval                                  |
+| `scale.scheme`         | a palette name for an ordinal scale, a ramp name for the others, read where `range` is unset                    |
+| `scale.domainMin`      | a ramp's low end; the field's lowest value when unset                                                           |
+| `scale.domainMax`      | a ramp's high end; the field's highest value when unset                                                         |
+| `scale.domainMid`      | the value a ramp's middle color marks, for a diverging ramp such as `redblue`                                   |
+| `scale.domainQuantile` | the nearest-rank quantile an unset end follows, from 0.5 to 1 (default 1, the extremes)                         |
+| `scale.reverse`        | `true` turns the ramp round                                                                                     |
+| `legend.title`         | the legend's title; records with the same scale and title share one scale                                       |
+| `legend.labels`        | the legend's name for each ordinal `domain` value or each threshold interval, in order                          |
+| `legend.missingLabel`  | the grey legend row for a record with no value, which then draws grey                                           |
 
 | Channel        | What it sets                                                  | Reads a field of |
 | -------------- | ------------------------------------------------------------- | ---------------- |
@@ -657,6 +664,80 @@ with the group read from the table.
 Every scale an encoding reads carries a legend, titled by `legend.title` or else
 the field name, drawn by the overlay on screen and reserved as a column in the
 SVG export. Two channels declaring the same members over one field list it once.
+A legend lists at most 20 rows, then a `+N more` line counting the rest.
+
+A field whose every value is a number still takes ordinal colors, one per
+distinct value, until the record names `scale: {"type": "linear"}`. Its legend
+carries a note saying so.
+
+### Linear, log and threshold scales
+
+A `linear` or `log` scale reads each value as a number and colors it from a ramp
+between `domainMin` and `domainMax`. Its legend is a gradient bar with the two
+ends printed under it. A `log` scale spaces the ramp by orders of magnitude and
+reads only the positive values.
+
+```json
+{
+  "channel": "tipLabel",
+  "field": "year",
+  "scale": {
+    "type": "linear",
+    "scheme": "viridis",
+    "domainMin": 2000,
+    "domainMax": 2024
+  }
+}
+```
+
+The ramps are `viridis` (the default), `magma`, `inferno`, `cividis`, `reds`,
+`blues`, `redblue` and `purpleorange`, the tables jbrowse-components bakes. A
+`range` of two or more colors makes a ramp of its own, evenly spaced. A value
+past a pinned end draws in the end color, and the legend prints that end as
+`≤2000` or `≥2024`.
+
+An end left unset follows the field's values: the lowest and the highest, or
+with `domainQuantile` below 1 the nearest-rank quantile at each end, so `0.99`
+sets aside the outermost 1% and one outlier date leaves the rest of the ramp in
+use. A scale with an unset end is resolved per field. A scale pinned at both
+ends is its declaration, so two strips over different fields with the same
+pinned scale share one ramp and one gradient legend.
+
+A `threshold` scale cuts the number line at the values `domain` lists, in
+ascending order, and colors each interval from `range`, which is one longer than
+`domain`. Without a `range` each interval takes an evenly spaced color of its
+`scheme`. The legend lists every interval, as `< 50`, `50 – 70`, `70 – 90` and
+`≥ 90`, or under the names `legend.labels` gives them:
+
+```json
+{
+  "channel": "featureFill",
+  "field": "plddt",
+  "scale": {
+    "type": "threshold",
+    "domain": [50, 70, 90],
+    "range": ["#ff7d45", "#ffdb13", "#65cbf3", "#0053d6"]
+  },
+  "legend": { "labels": ["Very low", "Low", "Confident", "Very high"] }
+}
+```
+
+On a continuous or threshold scale a value that is no number, such as `NA`,
+draws grey and lists under a grey `not a number` row. `legend.missingLabel`
+renames that row, and records with no value at all then draw grey under it too.
+
+### Scale problems
+
+Some combinations of members contradict each other, and the viewer draws what it
+can and reports them: a `domainMax` below its `domainMin`, threshold cuts out of
+ascending order, a threshold `range` that is not one longer than its `domain`, a
+`domainQuantile` outside 0.5 to 1, `legend.labels` of a different length from
+what it names, and a `scheme` no table holds. `model.scaleProblems` lists each
+one with the `record` that declares it (`encodings[0]`,
+`rowPanels[2].encoding.fill`), the member (`slot`) and a message. The scale's
+legend carries the first as a note, and `react-msaview-cli export-svg --spec`
+prints every one to stderr as `record.slot: message`. The rules and their
+messages are jbrowse-components' `colorProblems`.
 
 ### The feature channels
 
@@ -773,7 +854,10 @@ residue colors.
 | `header`   | the name drawn above the column, defaulting to a strip's field              |
 
 A strip's `fill` reads a `rowData` field, and its `legend.title` names the
-legend its values list under, defaulting to the field.
+legend its values list under, defaulting to the field. A strip over a numeric
+field reads it through a `linear`, `log` or `threshold` scale the way an
+encoding does, so a column of collection years takes a ramp and a gradient
+legend.
 
 The panels take their width out of the alignment's, so the alignment scrolls and
 fits within what is left. A strip scrolls with the tree and the alignment, and a

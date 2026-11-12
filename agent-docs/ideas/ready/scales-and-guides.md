@@ -3,8 +3,9 @@ name: scales-and-guides
 description:
   The color object jbrowse-components declares, with linear, log and threshold
   scales, a gradient legend, an axis guide, and the bar, point, text and column
-  strip marks they unlock. Step 1, the color object and the shared domain, is
-  built; steps 2 to 7 remain.
+  strip marks they unlock. Steps 1 to 3, the color object, the shared domain,
+  the continuous and threshold scales, the gradient legend and the scale
+  problems, are built; steps 4 to 7 remain.
 ---
 
 # Scales and guides
@@ -279,6 +280,11 @@ plus 150 of test. One day.
 
 ### 2. Continuous and threshold scales, and the gradient legend
 
+Built: `scales.ts` resolves all four kinds, `colorRamp.ts` and
+`colorRampStops.ts` hold the ramps, and `legendSpec.ts` the legend shape and
+`legendEntries`. A ramp pinned at both ends shares by declaration whatever its
+field; one with an open end keys on its field too.
+
 `resolveScale` over `linear`, `log` and `threshold`: the scheme stop table,
 `domainMin`, `domainMax`, `domainMid`, `domainQuantile` with the nearest-rank
 quantile, `reverse`, `labels`. `types.ts`: `LegendSpec`, `legendEntries`
@@ -289,6 +295,10 @@ gradient in the SVG snapshot, a threshold's interval rows, a pinned ramp shared
 and an open one not. About 400 lines plus 200 of test. Two days.
 
 ### 3. Scale problems
+
+Built: `scaleProblems.ts` holds the rules. `MSAViewer` exposes
+`model.scaleProblems` through `ref` and `onModel`, as it does
+`residueMappingProblems`, so it gains no prop.
 
 `scaleProblems` on the model, the note in the legend, the stderr lines in
 `export-svg --spec`, the `MSAViewer` surface beside the mapping problems. Half a

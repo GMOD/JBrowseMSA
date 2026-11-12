@@ -166,12 +166,25 @@ background.
 
 - `model.legends` is the one list both legend renderings read:
   `components/msa/AnnotationLegend.tsx` on screen and `LegendSVG` in
-  `renderToSvg.tsx` for the export. A producer contributes
-  `{ id, title, entries }`, and `legendRows` flattens the list into rows, giving
-  each legend a title row once there is more than one. The domain overlay, the
-  row-table encodings and the row panels are its producers, each keyed by its
-  scale's declaration (`resolvedScales`), so a matrix of strips naming one
-  `legend.title` lists one legend.
+  `renderToSvg.tsx` for the export. Each producer contributes a section in
+  jbrowse-components' `LegendSpec` shape (`legendSpec.ts`),
+  `{id, title, note, items}`, where an item is a swatch `{value, label, color}`
+  or a ramp `{label, gradient}`. `legendEntries` flattens the sections into
+  title, note, swatch and gradient rows, giving each section a title row once
+  there is more than one and capping a section at 20 rows plus a `+N more` line.
+  The domain overlay, the row-table encodings and the row panels are its
+  producers, each keyed by its scale's declaration (`resolvedScales`), so a
+  matrix of strips naming one `legend.title` lists one legend.
+- A gradient row is a CSS `linear-gradient` on screen and a `<linearGradient>`
+  in `<defs>` in the export, which the React half of `renderToSvg.tsx` emits, so
+  `packages/svgcanvas` draws no gradient.
+- `scales.ts` resolves `ordinal`, `linear`, `log` and `threshold` scales;
+  `colorRamp.ts` and `colorRampStops.ts` hold the ramps, the domain and the
+  nearest-rank quantile, and `scaleProblems.ts` the rules `scaleProblems` on the
+  model reports, all copied from jbrowse-components with the source path in a
+  comment. A ramp pinned at both ends is keyed by its declaration alone; one
+  with an open end also by its field, since its domain follows that field's
+  values.
 - A channel nests `scale: {type, domain, range, scheme}` and `legend: {title}`,
   as jbrowse-components' displays do since its ADR-238. Nothing reads an earlier
   spelling: the flat color object, a palette name in `range`, `{palette}`,
