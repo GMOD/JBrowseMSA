@@ -465,6 +465,41 @@ export interface Clade {
 }
 
 /**
+ * A test a row's `rowData` field passes: `oneOf` lists the values kept, and
+ * `range` the inclusive numeric bounds, either end `null` for open. A row with
+ * no value for the field fails both.
+ */
+export type RowFilter =
+  | { field: string; oneOf: (string | number | boolean)[] }
+  | { field: string; range: [number | null, number | null] }
+
+/** a sort key over a `rowData` field, ascending unless `order` says not */
+export interface RowSort {
+  field: string
+  order?: 'ascending' | 'descending'
+}
+
+/**
+ * Bands of rows by a `rowData` field, each labelled with its value. `sort`
+ * lists the values whose bands come first.
+ */
+export interface RowFacet {
+  field: string
+  sort?: string[]
+}
+
+/**
+ * The row axis's transforms over `rowData`: `filter` keeps the rows passing
+ * every test, `sort` orders the rows where no tree does, and `facet` bands
+ * them. See docs/layers.md
+ */
+export interface RowTransform {
+  filter?: RowFilter[]
+  sort?: RowSort[]
+  facet?: RowFacet
+}
+
+/**
  * A Clade resolved to the rows it covers, with its fill color settled. `color`
  * is the highlight fill; `markColor` is the producer's own color for a bracket
  * bar and its label, unset where the theme's text color stands. `nodeId` is the

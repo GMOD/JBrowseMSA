@@ -162,3 +162,28 @@ test('a highlight carrying a label draws the label and no bar', async () => {
   expect(labels(svg)[0]!.text).toBe('clade II')
   expect(bar(svg, 'rgb(1, 2, 3)')).toBeUndefined()
 })
+
+test('a facet without a tree exports a label per band beside its rows', async () => {
+  const model = createTestModel({
+    data: {
+      msa,
+      treeMetadata: JSON.stringify({
+        A: { group: 'beta' },
+        B: { group: 'alpha' },
+        C: { group: 'beta' },
+        D: { group: 'alpha' },
+      }),
+    },
+    rowTransform: { facet: { field: 'group' } },
+  })
+  const svg = await renderToSvg(model, {
+    theme: createJBrowseTheme(),
+    exportType: 'entire',
+  })
+  expect(model.rowNames).toEqual(['B', 'D', 'A', 'C'])
+  const drawn = labels(svg)
+  expect(drawn.map(l => l.text)).toEqual(['alpha', 'beta'])
+  const ys = drawn.map(l => Number(/ y="([\d.]+)"/.exec(l.attrs)?.[1]))
+  expect(ys[0]).toBeLessThan(2 * model.rowHeight)
+  expect(ys[1]).toBeGreaterThan(2 * model.rowHeight)
+})

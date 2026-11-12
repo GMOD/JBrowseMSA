@@ -327,6 +327,17 @@ the GFF carries. See docs/layers.md
 rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), [])
 ```
 
+#### property: rowTransform
+
+the row axis's transforms over `rowData`: `filter` keeps the rows passing every
+`{field, oneOf}` or `{field, range}` test, `sort` orders the rows by
+`[{field, order}]` where no tree does, and `facet: {field, sort?}` bands them
+under a label per value. See docs/layers.md
+
+```js
+rowTransform: types.frozen<RowTransform | undefined>()
+```
+
 #### property: scrollX
 
 scroll position, X-offset, px
@@ -758,6 +769,25 @@ y-axis ceiling of the sequence logo track.
 alphabetMaxBits: number
 ```
 
+#### getter: arrangedHierarchy
+
+`arrangedTree` as a hierarchy, every clade expanded and none in focus, which the
+facet bands resolve against
+
+```js
+arrangedHierarchy: HierarchyNode<NodeWithIds>
+```
+
+#### getter: arrangedTree
+
+the tree the rows follow: `filteredTree`, with the rows of a file with no tree
+put in `rowTransform`'s sort and facet order. A filter keeping no row is left
+unapplied, and `dataWarnings` names it.
+
+```js
+arrangedTree: NodeWithIds
+```
+
 #### getter: basePairTrackModels
 
 the consensus secondary structure as a track, when there is one. A separate
@@ -1037,6 +1067,25 @@ label column, which a zoom hiding the labels gives to the tree
 effectiveTreeWidth: number
 ```
 
+#### getter: facetBandsNotClades
+
+the labels of the facet bands whose rows are not one clade of the filtered tree,
+which draw no bracket
+
+```js
+facetBandsNotClades: string[]
+```
+
+#### getter: facetClades
+
+one `bracket` clade per band of `rowTransform.facet`. Under a tree a band names
+its tips, and draws only where they are one clade of the filtered tree; without
+one, the rows stack by band, and a band names its first and last row.
+
+```js
+facetClades: Clade[]
+```
+
 #### getter: featureAlignShifts
 
 the shift an `align` transform gives each row, keyed by the feature name it
@@ -1084,6 +1133,15 @@ them
 
 ```js
 fillPalette: { [x: string]: string; }
+```
+
+#### getter: filteredTree
+
+`tree` pruned to the tips `rowTransform.filter` keeps, the whole tree where no
+filter is set, and undefined where the filter keeps no tip
+
+```js
+filteredTree: NodeWithIds | undefined
 ```
 
 #### getter: fittedTreeAreaWidth
@@ -1415,7 +1473,8 @@ residueMappingProblems: ResidueMappingProblem[]
 `clades` resolved to the rows each one covers. The tip names resolve against
 `tree` rather than `root`, so a clade whose ancestor the user collapsed keeps
 its rows. One leaf pass over the tree serves every clade. A `range` record names
-no node, so `collapse`, `focus` and `rotate`, which need one, drop it.
+no node, so `collapse`, `focus` and `rotate`, which need one, drop it. The
+`facetClades` brackets follow, resolved against `arrangedTree`.
 
 ```js
 resolvedClades: ResolvedClade[]
@@ -1579,6 +1638,15 @@ of the raster tile cache and its keys.
 
 ```js
 rowTints: (string | undefined)[] | undefined
+```
+
+#### getter: rowTransformWarnings
+
+what `rowTransform` asks for and the view does not draw: a filter keeping no
+row, a sort under a tree, and facet bands that are not clades of the tree
+
+```js
+rowTransformWarnings: string[]
 ```
 
 #### getter: secondaryStructureArcs
@@ -2664,6 +2732,14 @@ replace the panels drawn between the tree and the alignment
 
 ```js
 setRowPanels: (panels: RowPanelSpec[]) => void
+```
+
+#### action: setRowTransform
+
+replace the row axis's filter, sort and facet
+
+```js
+setRowTransform: (transform?: RowTransform | undefined) => void
 ```
 
 #### action: setScrollX

@@ -15,6 +15,7 @@ import type {
   ResidueMapping,
   RowDataInput,
   RowPanelSpec,
+  RowTransform,
   TreeOrder,
   TreeRoot,
   Viewport,
@@ -46,6 +47,7 @@ export interface Traits {
   row_data: RowDataInput
   encodings: Encoding[]
   row_panels: RowPanelSpec[]
+  row_transform: RowTransform | null
   relative_to: string | null
   region: Region | null
   selection: MsaSelection | null
@@ -88,6 +90,7 @@ export const INPUT_TRAITS = [
   'row_data',
   'encodings',
   'row_panels',
+  'row_transform',
   'relative_to',
   'region',
   'selection',
@@ -151,6 +154,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     rowData: model.get('row_data'),
     encodings: model.get('encodings'),
     rowPanels: model.get('row_panels'),
+    rowTransform: optional(model.get('row_transform')),
     relativeTo: optional(model.get('relative_to')),
     region: optional(model.get('region')),
     selection: optional(model.get('selection')),

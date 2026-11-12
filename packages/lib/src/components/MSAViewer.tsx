@@ -36,6 +36,7 @@ import type {
   ResidueMapping,
   RowDataInput,
   RowPanelSpec,
+  RowTransform,
   TreeOrder,
   TreeRoot,
   Viewport,
@@ -123,6 +124,13 @@ export interface MSAViewerProps {
    * spans per row (see docs/layers.md)
    */
   rowPanels?: RowPanelSpec[]
+  /**
+   * the row axis's transforms over `rowData`: `filter` keeps the rows passing
+   * `[{field, oneOf}]` or `[{field, range}]`, `sort` orders them by
+   * `[{field, order}]` where there is no tree, and `facet: {field, sort?}`
+   * bands them under a label per value (see docs/layers.md)
+   */
+  rowTransform?: RowTransform
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
   drawTree?: boolean
   /** fixed width (px) of the tree/label area; unset fits it to the labels and the tree */
@@ -460,6 +468,12 @@ const syncedProps = [
     p => p.rowPanels ?? [],
     (m, v) => {
       m.setRowPanels(v)
+    },
+  ),
+  synced(
+    p => p.rowTransform,
+    (m, v) => {
+      m.setRowTransform(v)
     },
   ),
 ]

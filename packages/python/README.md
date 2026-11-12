@@ -57,6 +57,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `row_data`                                            | extra fields per row name, such as a lineage or a host                                            |
 | `encodings`                                           | `{channel, field, scale, legend}`: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
 | `row_panels`                                          | `strip` and `features` panels drawn beside the tree                                               |
+| `row_transform`                                       | `{filter, sort, facet}` over `row_data` fields: keep, order and band the rows                     |
 | `relative_to`                                         | a row name; other rows draw as their differences from it                                          |
 | `region`                                              | `{start, end}` columns or `{row, start, end}` residues                                            |
 | `selection`                                           | the selected block, `{start, end}` columns and optional `rows` names (see below)                  |

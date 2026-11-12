@@ -109,6 +109,9 @@ class MSAView(anywidget.AnyWidget):
     # panels between the tree and the alignment: a colored cell per row, or
     # the GFF's spans as arrows
     row_panels = traitlets.List(traitlets.Dict()).tag(sync=True)
+    # the rows filtered, sorted and banded by row_data fields:
+    # {"filter": [...], "sort": [...], "facet": {"field": ...}}
+    row_transform = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
     relative_to = traitlets.Unicode(None, allow_none=True).tag(sync=True)
     region = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
     # the selected block, {"start", "end"} columns and "rows" by name: set it

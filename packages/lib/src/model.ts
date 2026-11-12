@@ -113,6 +113,14 @@ import { MSAModelF } from './model/msaModel.ts'
 import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
+import {
+  arrangeRows,
+  bandsNotClades,
+  facetClades,
+  passesFilters,
+  pruneTree,
+  tipNames,
+} from './rowTransform.ts'
 import { colorTable, declarationKey, resolveShared } from './scales.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import {
@@ -188,6 +196,7 @@ import type {
   RowDataInput,
   RowPanelSpec,
   RowResidue,
+  RowTransform,
   StructureResidue,
   TrackKind,
   UnshareableData,
@@ -728,6 +737,15 @@ function stateModelFactory({
          * draws the spans the GFF carries. See docs/layers.md
          */
         rowPanels: stripDefault(types.array(types.frozen<RowPanelSpec>()), []),
+        /**
+         * #property
+         * the row axis's transforms over `rowData`: `filter` keeps the rows
+         * passing every `{field, oneOf}` or `{field, range}` test, `sort`
+         * orders the rows by `[{field, order}]` where no tree does, and
+         * `facet: {field, sort?}` bands them under a label per value. See
+         * docs/layers.md
+         */
+        rowTransform: types.frozen<RowTransform | undefined>(),
       }),
     )
     .volatile(() => ({
@@ -1604,6 +1622,73 @@ function stateModelFactory({
 
       /**
        * #getter
+       * `tree` pruned to the tips `rowTransform.filter` keeps, the whole tree
+       * where no filter is set, and undefined where the filter keeps no tip
+       */
+      get filteredTree(): NodeWithIds | undefined {
+        const filters = self.rowTransform?.filter ?? []
+        return filters.length > 0
+          ? pruneTree(this.tree, name =>
+              passesFilters(this.rowDataOf(name), filters),
+            )
+          : this.tree
+      },
+
+      /**
+       * #getter
+       * the tree the rows follow: `filteredTree`, with the rows of a file
+       * with no tree put in `rowTransform`'s sort and facet order. A filter
+       * keeping no row is left unapplied, and `dataWarnings` names it.
+       */
+      get arrangedTree(): NodeWithIds {
+        const tree = this.filteredTree ?? this.tree
+        return tree.noTree
+          ? arrangeRows(tree, name => this.rowDataOf(name), self.rowTransform)
+          : tree
+      },
+
+      /**
+       * #getter
+       * one `bracket` clade per band of `rowTransform.facet`. Under a tree a
+       * band names its tips, and draws only where they are one clade of the
+       * filtered tree; without one, the rows stack by band, and a band names
+       * its first and last row.
+       */
+      get facetClades(): Clade[] {
+        const facet = self.rowTransform?.facet
+        const tree = this.arrangedTree
+        return facet
+          ? facetClades(
+              tipNames(tree),
+              name => this.rowDataOf(name),
+              facet,
+              !tree.noTree,
+            )
+          : []
+      },
+
+      /**
+       * #getter
+       * the labels of the facet bands whose rows are not one clade of the
+       * filtered tree, which draw no bracket
+       */
+      get facetBandsNotClades(): string[] {
+        return this.noTree || this.facetClades.length === 0
+          ? []
+          : bandsNotClades(this.facetClades, this.arrangedHierarchy)
+      },
+
+      /**
+       * #getter
+       * `arrangedTree` as a hierarchy, every clade expanded and none in focus,
+       * which the facet bands resolve against
+       */
+      get arrangedHierarchy() {
+        return hierarchy(this.arrangedTree, d => d.children)
+      },
+
+      /**
+       * #getter
        * Returns the list of row (sequence) names in display order.
        * Part of the public API used by downstream consumers (e.g. jbrowse plugins).
        */
@@ -1624,13 +1709,21 @@ function stateModelFactory({
        * against `tree` rather than `root`, so a clade whose ancestor the user
        * collapsed keeps its rows. One leaf pass over the tree serves every
        * clade. A `range` record names no node, so `collapse`, `focus` and
-       * `rotate`, which need one, drop it.
+       * `rotate`, which need one, drop it. The `facetClades` brackets follow,
+       * resolved against `arrangedTree`.
        */
       get resolvedClades(): ResolvedClade[] {
-        if (self.clades.length === 0) {
-          return noClades
-        }
-        return resolveClades(self.clades, this.treeHierarchy, this.root)
+        const facet = this.facetClades
+        return self.clades.length === 0 && facet.length === 0
+          ? noClades
+          : [
+              ...(self.clades.length > 0
+                ? resolveClades(self.clades, this.treeHierarchy, this.root)
+                : []),
+              ...(facet.length > 0
+                ? resolveClades(facet, this.arrangedHierarchy, this.root)
+                : []),
+            ]
       },
       /**
        * #getter
@@ -1639,7 +1732,7 @@ function stateModelFactory({
        * where no clade draws a bar or a label.
        */
       get cladeGutterWidth() {
-        return cladeGutterWidth(self.clades)
+        return cladeGutterWidth([...self.clades, ...this.facetClades])
       },
       /**
        * #getter
@@ -1791,7 +1884,7 @@ function stateModelFactory({
        * #getter
        */
       get root() {
-        return buildTreeRoot(this.tree, {
+        return buildTreeRoot(this.arrangedTree, {
           collapsed: self.collapsed,
           rotated: self.rotated,
           order: self.treeOrder,
@@ -3272,12 +3365,42 @@ function stateModelFactory({
           dataInitialized && annotations.length > 0
             ? new Set(self.treeTips.names)
             : undefined
-        return tips &&
+        return [
+          ...(tips &&
           !annotations.some(a => tips.has(annotationRowName(a.id, tips)))
-          ? [
-              `0 of ${annotations.length} annotations name a row in this alignment`,
-            ]
-          : []
+            ? [
+                `0 of ${annotations.length} annotations name a row in this alignment`,
+              ]
+            : []),
+          ...(dataInitialized ? this.rowTransformWarnings : []),
+        ]
+      },
+      /**
+       * #getter
+       * what `rowTransform` asks for and the view does not draw: a filter
+       * keeping no row, a sort under a tree, and facet bands that are not
+       * clades of the tree
+       */
+      get rowTransformWarnings(): string[] {
+        const transform = self.rowTransform
+        const notClades = self.facetBandsNotClades
+        return [
+          ...(transform?.filter?.length && !self.filteredTree
+            ? [
+                `rowTransform.filter keeps none of the ${self.treeTips.names.length} rows, so every row is shown`,
+              ]
+            : []),
+          ...(transform?.sort?.length && !self.noTree
+            ? [
+                'The tree sets the row order, so rowTransform.sort is not applied',
+              ]
+            : []),
+          ...(notClades.length > 0
+            ? [
+                `${notClades.length} of ${self.facetClades.length} facet bands are not clades of the tree and draw no label: ${notClades.slice(0, 5).join(', ')}${notClades.length > 5 ? ', …' : ''}`,
+              ]
+            : []),
+        ]
       },
       /**
        * #getter
@@ -3638,6 +3761,13 @@ function stateModelFactory({
        */
       setRowPanels(panels: RowPanelSpec[]) {
         self.rowPanels.replace(panels)
+      },
+      /**
+       * #action
+       * replace the row axis's filter, sort and facet
+       */
+      setRowTransform(transform?: RowTransform) {
+        self.rowTransform = transform
       },
       /**
        * #action

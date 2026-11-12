@@ -48,6 +48,7 @@ const defaults: Traits = {
   row_data: {},
   encodings: [],
   row_panels: [],
+  row_transform: null,
   relative_to: null,
   region: null,
   selection: null,
