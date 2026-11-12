@@ -102,7 +102,12 @@ test('a text track letter contrasts against its own color, not the alignment sch
     columnTracks,
   })
   const svg = await exportEntire(model)
-  const fills = letterFills(svg)
+  // the track's glyphs alone: the legend of its scale labels 1 and 2 too
+  const fills = letterFills(
+    svg.replaceAll(/<text[^>]*>[^<]*<\/text>/g, text =>
+      text.includes('dominant-baseline="central"') ? text : '',
+    ),
+  )
 
   expect([...fills.get('1')!]).toEqual(['#fff|'])
   expect([...fills.get('2')!]).toEqual([asFill(light.palette.text.primary)])
