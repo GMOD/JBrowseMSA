@@ -203,7 +203,7 @@ test('a track without a fill encoding takes its own color', () => {
 test('a shown track lists its fill scale among the legends', () => {
   const model = makeModel([secondaryStructure])
   const legend = model.legends.find(l => l.title === 'type')
-  expect(legend?.entries.map(e => e.label)).toEqual(['helix', 'strand'])
+  expect(legend?.items.map(e => e.label)).toEqual(['helix', 'strand'])
   model.toggleTrack('ss')
   expect(model.legends.find(l => l.title === 'type')).toBeUndefined()
 })
@@ -220,7 +220,7 @@ test('a track and a features panel declaring one scale share it', () => {
   })
   const legends = model.legends.filter(l => l.title === 'type')
   expect(legends).toHaveLength(1)
-  expect(legends[0]!.entries.map(e => e.label)).toEqual([
+  expect(legends[0]!.items.map(e => e.label)).toEqual([
     'domain',
     'helix',
     'strand',
