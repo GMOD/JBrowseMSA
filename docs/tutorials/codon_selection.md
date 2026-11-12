@@ -259,7 +259,7 @@ w <- msaview(
   color_scheme = "nucleotide"
 ) +
   geom_msa_track(dnds, name = "dN/dS (FEL)", domain_max = 5,
-    color = "#c0392b") +
+    type = "threshold", domain = 1, range = c("#2c7fb8", "#c0392b")) +
   geom_msa_highlight(sites)
 w
 ggplot2::ggsave("codon-final-view-r.png",
@@ -270,8 +270,9 @@ ggplot2::ggsave("codon-final-view-r.png",
 ![](../media/codon-final-view-r.png)
 
 The ggplot2 figure of all 1,800 columns, with the exons in alternating shades
-and the tree on the left. The dN/dS bars above thin out over the RING+B-box
-control on the left and crowd over the SPRY V1 patch and R332 on the right.
+and the tree on the left. The dN/dS bars above, red at 1 and above and blue
+below, thin out over the RING+B-box control on the left and crowd over the SPRY
+V1 patch and R332 on the right.
 
 <!-- /usage -->
 
