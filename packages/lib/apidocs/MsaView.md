@@ -548,6 +548,14 @@ error: undefined as unknown
 headerHeight: 0
 ```
 
+#### volatile: heldTrimSpan
+
+the trimmed file columns a drag holds still, see `setHeldTrimSpan`
+
+```js
+heldTrimSpan: undefined as { start: number; end: number } | undefined
+```
+
 #### volatile: hideHeader
 
 leaves the toolbar out, for a host drawing its own controls. Kept out of the
@@ -943,6 +951,15 @@ the encodings feeding a color channel, each read through a scale
 
 ```js
 colorEncodings: ColorEncoding[]
+```
+
+#### getter: colorRecordProblems
+
+each color record with its declaration key and the problems its color object
+has, checked once for `scaleProblems` and the legend notes both
+
+```js
+colorRecordProblems: { record: string; key: string; problems: ScaleProblem[]; }[]
 ```
 
 #### getter: colorRecords
@@ -1703,6 +1720,15 @@ names, else `genome`
 
 ```js
 rowLabelField: string
+```
+
+#### getter: rowLetters
+
+every letter the rows hold, hidden columns included, which a change of the
+hidden columns leaves cached
+
+```js
+rowLetters: Set<string>
 ```
 
 #### getter: rowMap
@@ -2764,6 +2790,16 @@ set the height of the view in px
 
 ```js
 setHeight: (height: number) => void
+```
+
+#### action: setHeldTrimSpan
+
+keep the trimmed columns where they are while a drag reselects inside them, so
+the cells under the pointer stay put; undefined lets the trim follow the
+selection again
+
+```js
+setHeldTrimSpan: (span?: { start: number; end: number; } | undefined) => void
 ```
 
 #### action: setHiddenCategories
