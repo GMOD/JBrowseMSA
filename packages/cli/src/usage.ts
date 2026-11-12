@@ -133,6 +133,11 @@ export const commands = {
         about:
           'Draw the `--width` x `--height` viewport at the top left instead of the entire alignment',
       },
+      selection: {
+        ...off,
+        about:
+          'Draw the selected block of the `--spec` or `--props` instead of the entire alignment: its columns, and the rows from the first selected to the last',
+      },
       minimap: {
         ...off,
         about: 'Include the minimap bar (`--viewport` only)',

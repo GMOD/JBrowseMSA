@@ -20,6 +20,7 @@ import { observer } from 'mobx-react'
 import { exportPageSize, getLayout } from '../../exportLayout.ts'
 import Checkbox2 from '../Checkbox2.tsx'
 
+import type { ExportType } from '../../exportLayout.ts'
 import type { MsaViewModel } from '../../model.ts'
 
 // Run after the browser has painted. A requestAnimationFrame callback still
@@ -32,6 +33,10 @@ function afterPaint(fn: () => void) {
   })
 }
 
+function isExportType(value: string): value is ExportType {
+  return value === 'entire' || value === 'viewport' || value === 'selection'
+}
+
 const ExportSVGDialog = observer(function ({
   model,
   onClose,
@@ -41,24 +46,26 @@ const ExportSVGDialog = observer(function ({
 }) {
   const [includeMinimap, setIncludeMinimap] = useState(true)
   const [includeTracks, setIncludeTracks] = useState(true)
-  const [exportType, setExportType] = useState<'entire' | 'viewport'>(
-    'viewport',
-  )
+  const [chosenType, setExportType] = useState<ExportType>('viewport')
   const [error, setError] = useState<unknown>()
   const [exporting, setExporting] = useState(false)
   const theme = useTheme()
-  const { turnedOnTracks, numColumns, leaves, showMsaLetters } = model
+  const { turnedOnTracks, showMsaLetters, resolvedSelection } = model
+  const { colWidth, rowHeight } = model
   const hasTracks = turnedOnTracks.length > 0
-  const entire = exportPageSize(
-    model,
-    getLayout(model, { theme, exportType: 'entire', includeTracks }),
-  )
+  const exportType =
+    chosenType === 'selection' && !resolvedSelection ? 'entire' : chosenType
+  const layout = getLayout(model, { theme, exportType, includeTracks })
+  const page = exportPageSize(model, layout)
   // the background is one raster image whatever its size, so what the figure
   // actually costs is its residue letters: each is an svg element of its own.
   // Past roughly this many the export runs to tens of seconds and can exhaust
   // the tab's memory outright
   const glyphs =
-    showMsaLetters && exportType === 'entire' ? numColumns * leaves.length : 0
+    showMsaLetters && exportType !== 'viewport'
+      ? Math.round(layout.msaAreaWidth / colWidth) *
+        Math.round(layout.contentHeight / rowHeight)
+      : 0
   const isLargeExport = glyphs > 100_000
   return (
     <Dialog
@@ -73,7 +80,7 @@ const ExportSVGDialog = observer(function ({
         <Typography>Settings:</Typography>
         <Checkbox2
           label="Include minimap?"
-          disabled={exportType === 'entire'}
+          disabled={exportType !== 'viewport'}
           checked={includeMinimap}
           onChange={() => {
             setIncludeMinimap(!includeMinimap)
@@ -95,7 +102,7 @@ const ExportSVGDialog = observer(function ({
               value={exportType}
               onChange={event => {
                 const { value } = event.target
-                if (value === 'entire' || value === 'viewport') {
+                if (isExportType(value)) {
                   setExportType(value)
                 }
               }}
@@ -110,13 +117,20 @@ const ExportSVGDialog = observer(function ({
                 control={<Radio />}
                 label="Current viewport only"
               />
+              {resolvedSelection ? (
+                <FormControlLabel
+                  value="selection"
+                  control={<Radio />}
+                  label="Selection only"
+                />
+              ) : null}
             </RadioGroup>
           </FormControl>
         </div>
         {isLargeExport ? (
           <Alert severity="warning" style={{ marginTop: 8 }}>
-            The entire MSA is {Math.round(entire.width)}x
-            {Math.round(entire.height)} pixels and draws{' '}
+            The {exportType === 'selection' ? 'selection' : 'entire MSA'} is{' '}
+            {Math.round(page.width)}x{Math.round(page.height)} pixels and draws{' '}
             {Math.round(glyphs / 1000)}k residue letters, each its own SVG
             element. Export may be slow or fail — zooming out far enough to hide
             the letters exports the same alignment as an image instead.

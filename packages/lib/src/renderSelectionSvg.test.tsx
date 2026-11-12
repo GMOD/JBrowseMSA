@@ -7,6 +7,7 @@ import { enableStaticRendering } from 'mobx-react'
 import { beforeAll, expect, test } from 'vitest'
 
 import { renderSelection } from './components/msa/renderHighlights.ts'
+import { getLayout } from './exportLayout.ts'
 import { installHeadlessRenderEnv } from './headlessRenderEnv.ts'
 import MSAModelF from './model.ts'
 import { renderToSvg } from './renderToSvg.tsx'
@@ -72,6 +73,49 @@ test('rows apart in the display draw as one band each', () => {
     rows: ['seq1', 'seq4'],
   })
   expect(fills.map(r => r[1])).toEqual([0, 3 * model.rowHeight])
+})
+
+function panelLetters(svg: string) {
+  const panel = /<g id="msa-panel">([\s\S]*?)<\/g><\/g>/.exec(svg)?.[1] ?? ''
+  return [...panel.matchAll(/<text[^>]*>([^<]*)<\/text>/g)]
+    .map(m => m[1])
+    .join('')
+}
+
+test('a selection export crops to the block', async () => {
+  const model = modelWith({ start: 3, end: 5, rows: ['seq2', 'seq3'] })
+  const theme = createJBrowseTheme()
+  const opts = { theme, exportType: 'selection' as const }
+  const layout = getLayout(model, opts)
+  const { colWidth, rowHeight } = model
+  expect(layout).toMatchObject({
+    msaAreaWidth: 3 * colWidth,
+    contentHeight: 2 * rowHeight,
+    offsetX: 2 * colWidth,
+    offsetY: rowHeight,
+  })
+  // the rows either side of the block draw under the clip, as in a viewport
+  // export, and no column outside it draws
+  const letters = panelLetters(await renderToSvg(model, opts))
+  expect(letters).toContain('--FDEF')
+  expect(letters).not.toMatch(/[ACGHIKL]/)
+})
+
+test('a selection export spans every row when the selection names none', () => {
+  const model = modelWith({ start: 3, end: 5 })
+  const opts = { theme: createJBrowseTheme(), exportType: 'selection' as const }
+  expect(getLayout(model, opts)).toMatchObject({
+    contentHeight: 4 * model.rowHeight,
+    offsetY: 0,
+  })
+})
+
+test('a selection export without a selection draws the entire alignment', () => {
+  const model = modelWith()
+  const theme = createJBrowseTheme()
+  expect(getLayout(model, { theme, exportType: 'selection' })).toEqual(
+    getLayout(model, { theme, exportType: 'entire' }),
+  )
 })
 
 test('the SVG export leaves the selected block out', async () => {

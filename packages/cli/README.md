@@ -76,27 +76,28 @@ react-msaview-cli export-svg --msa <file> [options]
 
 <!-- options:export-svg -->
 
-| Option                   | Description                                                                                            | Default                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------- |
-| `--spec <file.json>`     | View spec or snapshot, with any layer from docs/layers.md; the flags below override it                 |                                   |
-| `--props <file.json>`    | MSAViewer props as the R and Python widgets send them, in place of `--spec`                            |                                   |
-| `--msa <file>`           | MSA file (FASTA, Stockholm, Clustal, A3M, EMF); required without `--spec` or `--props`                 |                                   |
-| `--format <name>`        | Force the MSA format (stockholm, fasta, a3m, clustal, emf) instead of sniffing it                      |                                   |
-| `--tree <file>`          | Newick tree file                                                                                       |                                   |
-| `--gff <file>`           | Domain or exon GFF, or InterProScan JSON                                                               |                                   |
-| `-o, --output <file>`    | Output file; `.svg`, `.png` or `.pdf` picks the format, and PNG and PDF need rsvg-convert from librsvg | `alignment.svg`                   |
-| `--scale <n>`            | Pixels per SVG unit in a PNG                                                                           | `2`                               |
-| `--color-scheme <name>`  | Color scheme                                                                                           | `maeditor`                        |
-| `--theme <light\|dark>`  | Page and text colors                                                                                   | the `--props` theme, else `light` |
-| `--width <px>`           | Viewport width, which sets the tree area                                                               | `1200`                            |
-| `--height <px>`          | Viewport height                                                                                        | `600`                             |
-| `--tree-area-width <px>` | Tree panel width in pixels                                                                             | fit to the labels                 |
-| `--col-width <px>`       | Width of one alignment column                                                                          | `12`                              |
-| `--row-height <px>`      | Height of one alignment row                                                                            | `16`                              |
-| `--tracks <list>`        | Tracks to draw above the alignment, by id (`conservation,position-ruler`), or `all`                    | none                              |
-| `--viewport`             | Draw the `--width` x `--height` viewport at the top left instead of the entire alignment               |                                   |
-| `--minimap`              | Include the minimap bar (`--viewport` only)                                                            |                                   |
-| `--force`                | Export past the 500,000-letter limit, where the export can run out of memory                           |                                   |
+| Option                   | Description                                                                                                                                         | Default                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `--spec <file.json>`     | View spec or snapshot, with any layer from docs/layers.md; the flags below override it                                                              |                                   |
+| `--props <file.json>`    | MSAViewer props as the R and Python widgets send them, in place of `--spec`                                                                         |                                   |
+| `--msa <file>`           | MSA file (FASTA, Stockholm, Clustal, A3M, EMF); required without `--spec` or `--props`                                                              |                                   |
+| `--format <name>`        | Force the MSA format (stockholm, fasta, a3m, clustal, emf) instead of sniffing it                                                                   |                                   |
+| `--tree <file>`          | Newick tree file                                                                                                                                    |                                   |
+| `--gff <file>`           | Domain or exon GFF, or InterProScan JSON                                                                                                            |                                   |
+| `-o, --output <file>`    | Output file; `.svg`, `.png` or `.pdf` picks the format, and PNG and PDF need rsvg-convert from librsvg                                              | `alignment.svg`                   |
+| `--scale <n>`            | Pixels per SVG unit in a PNG                                                                                                                        | `2`                               |
+| `--color-scheme <name>`  | Color scheme                                                                                                                                        | `maeditor`                        |
+| `--theme <light\|dark>`  | Page and text colors                                                                                                                                | the `--props` theme, else `light` |
+| `--width <px>`           | Viewport width, which sets the tree area                                                                                                            | `1200`                            |
+| `--height <px>`          | Viewport height                                                                                                                                     | `600`                             |
+| `--tree-area-width <px>` | Tree panel width in pixels                                                                                                                          | fit to the labels                 |
+| `--col-width <px>`       | Width of one alignment column                                                                                                                       | `12`                              |
+| `--row-height <px>`      | Height of one alignment row                                                                                                                         | `16`                              |
+| `--tracks <list>`        | Tracks to draw above the alignment, by id (`conservation,position-ruler`), or `all`                                                                 | none                              |
+| `--viewport`             | Draw the `--width` x `--height` viewport at the top left instead of the entire alignment                                                            |                                   |
+| `--selection`            | Draw the selected block of the `--spec` or `--props` instead of the entire alignment: its columns, and the rows from the first selected to the last |                                   |
+| `--minimap`              | Include the minimap bar (`--viewport` only)                                                                                                         |                                   |
+| `--force`                | Export past the 500,000-letter limit, where the export can run out of memory                                                                        |                                   |
 
 <!-- /options -->
 

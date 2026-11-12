@@ -119,6 +119,43 @@ test('--props draws what MSAViewer draws from the same props', async () => {
   expect(background(svg)).not.toBe(background(light))
 })
 
+test('--selection draws the selected block, and a trim draws its columns', async () => {
+  const props = (extra: Record<string, unknown>) =>
+    write(
+      'selection.json',
+      JSON.stringify({
+        msa: MSA,
+        selection: { start: 3, end: 5, rows: ['seq2'] },
+        ...extra,
+      }),
+    )
+  const size = (svg: string) => {
+    const [, width, height] = /<svg width="([\d.]+)" height="([\d.]+)"/.exec(
+      svg,
+    )!
+    return { width: Number(width), height: Number(height) }
+  }
+  const entire = size(await render({ propsFile: props({}) }))
+  const block = size(await render({ propsFile: props({}), selection: true }))
+  const trim = size(
+    await render({ propsFile: props({ trimToSelection: true }) }),
+  )
+  // the block is 3 columns of 1 row, the trim 3 columns of both rows, and
+  // the entire alignment 13 columns
+  expect(block.width).toBe(trim.width)
+  expect(entire.width).toBeGreaterThan(trim.width)
+  expect(block.height).toBeLessThan(trim.height)
+  expect(trim.height).toBe(entire.height)
+
+  const error = await render({
+    msaFile: write('none.fa', MSA),
+    selection: true,
+  })
+    .then(() => undefined)
+    .catch((e: unknown) => e)
+  expect(String(error)).toContain('no selection')
+})
+
 test('--spec reads a shorthand msa path beside the spec, and --msa overrides it', async () => {
   write('spec-rows.fa', MSA)
   const specFile = write(

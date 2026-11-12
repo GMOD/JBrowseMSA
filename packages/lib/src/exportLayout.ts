@@ -9,8 +9,15 @@ export interface ExportSvgOptions {
   theme: Theme
   includeMinimap?: boolean
   includeTracks?: boolean
-  exportType: 'entire' | 'viewport'
+  exportType: ExportType
 }
+
+/**
+ * `entire` draws the whole alignment, `viewport` what is on screen, and
+ * `selection` the selected columns across the rows from the first selected to
+ * the last
+ */
+export type ExportType = 'entire' | 'viewport' | 'selection'
 
 // legend geometry, shared by the width calculation and the renderer so the
 // reserved column on the right exactly fits the drawn legends
@@ -35,7 +42,7 @@ export function legendHeight(rows: LegendRow[]) {
 
 // resolved sizes/offsets (in svg user units) for the chosen export, shared by
 // every layer; 'entire' renders the whole alignment unscrolled, 'viewport'
-// mirrors the live scroll position
+// mirrors the live scroll position, and 'selection' crops to the selected block
 export interface Layout {
   width: number
   msaAreaWidth: number
@@ -91,31 +98,54 @@ export function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
   // size rather than the widget's -- the widget box also covers the header, the
   // resize handle and the scrollbars, and rendering that box exports rows and
   // columns the scrollbars hide on screen
-  return opts.exportType === 'entire'
+  const area =
+    opts.exportType === 'viewport'
+      ? {
+          width: msaCanvasWidth,
+          height: msaAreaHeight,
+          offsetX: -scrollX,
+          offsetY: -scrollY,
+        }
+      : ((opts.exportType === 'selection'
+          ? selectionArea(model)
+          : undefined) ?? {
+          width: totalWidth,
+          height: totalHeight,
+          offsetX: 0,
+          offsetY: 0,
+        })
+  return {
+    width: area.width + gutterWidth,
+    msaAreaWidth: area.width,
+    height: area.height + trackHeight + topHeight,
+    contentHeight: area.height,
+    trackHeight,
+    topHeight,
+    offsetX: area.offsetX,
+    offsetY: area.offsetY,
+    includeMinimap,
+    legendWidth,
+  }
+}
+
+/**
+ * the selected block in alignment pixels: its visible columns, and the rows
+ * from the first selected to the last as the view orders them
+ */
+export function selectionArea(model: MsaViewModel) {
+  const { resolvedSelection, colWidth, rowHeight } = model
+  const firstRow = resolvedSelection?.rowRuns[0]?.[0]
+  const lastRow = resolvedSelection?.rowRuns.at(-1)?.[1]
+  return resolvedSelection && firstRow !== undefined && lastRow !== undefined
     ? {
-        width: totalWidth + gutterWidth,
-        msaAreaWidth: totalWidth,
-        height: totalHeight + trackHeight + topHeight,
-        contentHeight: totalHeight,
-        trackHeight,
-        topHeight,
-        offsetX: 0,
-        offsetY: 0,
-        includeMinimap,
-        legendWidth,
+        width:
+          (resolvedSelection.endCol - resolvedSelection.startCol + 1) *
+          colWidth,
+        height: (lastRow - firstRow + 1) * rowHeight,
+        offsetX: resolvedSelection.startCol * colWidth,
+        offsetY: firstRow * rowHeight,
       }
-    : {
-        width: msaCanvasWidth + gutterWidth,
-        msaAreaWidth: msaCanvasWidth,
-        height: msaAreaHeight + topHeight + trackHeight,
-        contentHeight: msaAreaHeight,
-        trackHeight,
-        topHeight,
-        offsetX: -scrollX,
-        offsetY: -scrollY,
-        includeMinimap,
-        legendWidth,
-      }
+    : undefined
 }
 
 /**

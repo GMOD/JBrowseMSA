@@ -152,6 +152,7 @@ export async function exportSvg({
   format,
   tracks,
   viewport,
+  selection,
   minimap,
   scale,
   force,
@@ -172,6 +173,7 @@ export async function exportSvg({
   format?: MSAFormat
   tracks?: string[]
   viewport?: boolean
+  selection?: boolean
   minimap?: boolean
   scale?: number
   force?: boolean
@@ -232,13 +234,22 @@ export async function exportSvg({
   }
   model.setWidth(width)
 
-  const letters =
-    model.showMsaLetters && !viewport
-      ? model.numColumns * model.leaves.length
-      : 0
+  const block = selection ? model.resolvedSelection : undefined
+  if (selection && !block) {
+    throw new Error(
+      '--selection draws the selected block, and the --spec or --props has no selection',
+    )
+  }
+  const [columns, rows] = block
+    ? [
+        block.endCol - block.startCol + 1,
+        (block.rowRuns.at(-1)?.[1] ?? 0) - (block.rowRuns[0]?.[0] ?? 0) + 1,
+      ]
+    : [model.numColumns, model.leaves.length]
+  const letters = model.showMsaLetters && !viewport ? columns * rows : 0
   if (letters > MAX_EXPORT_LETTERS && !force) {
     throw new Error(
-      `the entire alignment draws ${model.numColumns} x ${model.leaves.length} = ${letters} residue letters, over the limit of ${MAX_EXPORT_LETTERS}, past which the export can run out of memory. ` +
+      `the ${selection ? 'selection' : 'entire alignment'} draws ${columns} x ${rows} = ${letters} residue letters, over the limit of ${MAX_EXPORT_LETTERS}, past which the export can run out of memory. ` +
         'Draw it without letters at a smaller --col-width (e.g. 2) or --row-height (e.g. 6), draw one window of it with --viewport, or pass --force to try anyway',
     )
   }
@@ -264,7 +275,7 @@ export async function exportSvg({
 
   const svg = await renderToSvg(model, {
     theme,
-    exportType: viewport ? 'viewport' : 'entire',
+    exportType: viewport ? 'viewport' : selection ? 'selection' : 'entire',
     includeMinimap: minimap,
     includeTracks:
       (!!tracks || !!specFile || !!propsFile) &&

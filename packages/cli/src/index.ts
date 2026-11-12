@@ -136,6 +136,7 @@ async function main() {
       format: readFormat(values.format),
       tracks: values.tracks !== undefined ? readList(values.tracks) : undefined,
       viewport: values.viewport,
+      selection: values.selection,
       minimap: values.minimap,
       scale: readOptional('scale', values.scale),
       force: values.force,

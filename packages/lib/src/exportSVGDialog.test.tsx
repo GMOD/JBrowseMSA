@@ -41,3 +41,32 @@ test('the size warning follows the model while the dialog is open', () => {
   expect(model.showMsaLetters).toBe(true)
   expect(document.body.textContent).toContain('120k residue letters')
 })
+
+test('the selection is a choice while there is one, sized to the block', () => {
+  const model = createTestModel({
+    data: { msa: syntheticProteinMsa(600, 200) },
+  })
+  const container = document.createElement('div')
+  document.body.append(container)
+  root = createRoot(container)
+  act(() => {
+    root!.render(<ExportSVGDialog model={model} onClose={() => {}} />)
+  })
+  const option = () =>
+    document.querySelector<HTMLInputElement>('input[value="selection"]')
+  expect(option()).toBeNull()
+
+  act(() => {
+    model.setSelection({ start: 1, end: 200 })
+  })
+  act(() => {
+    option()!.click()
+  })
+  expect(document.body.textContent).toContain('The selection is')
+  expect(document.body.textContent).toContain('120k residue letters')
+
+  act(() => {
+    model.setSelection({ start: 1, end: 100, rows: ['seq0', 'seq1'] })
+  })
+  expect(document.body.textContent).not.toContain('residue letters')
+})
