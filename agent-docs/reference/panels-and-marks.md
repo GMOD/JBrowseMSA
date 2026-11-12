@@ -35,7 +35,7 @@ Two target figures, in order of work:
   spelt as Vega-Lite and jbrowse-components' ADR-238 and ADR-240 spell them. An
   ordinal scale takes a palette name as its `scheme` or a color list as its
   `range` and produces a legend; the continuous kinds are in
-  `ideas/ready/scales-and-guides.md`.
+  [scales-and-guides](scales-and-guides.md).
 - **Transform.** A change of coordinates before drawing. The viewer has one
   today, the projection of residue positions through gaps, and gains one more,
   `align`.

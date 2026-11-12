@@ -43,6 +43,9 @@ background.
 
 ## Color
 
+The color object, its scales and their legends and axes are in
+`agent-docs/reference/scales-and-guides.md`.
+
 - The residue colors are one color object, `residueColor` (`residueColor.ts`),
   which is the MST property, the shared-URL key and the `MSAViewer` prop:
   `channel` is `fill` (the cell) or `color` (the letter), `field` is `feature`
