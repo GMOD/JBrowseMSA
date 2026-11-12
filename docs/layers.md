@@ -312,14 +312,28 @@ back the block a person chose.
 the way a column highlight does, so hiding gaps leaves the band on the same
 residues. A selection that lies entirely on hidden columns draws nothing. The
 header's selection menu copies the block as FASTA across those columns, gaps
-kept, and zooms to it.
+kept, zooms to it, and trims the view to it.
 
-React: the `selection` prop on `MSAViewer`, with `onSelectionChange` reporting
-each change the reader makes, or `model.setSelection(block)`. R:
+`trimToSelection: true` hides every column outside the selection, the way
+`hideGaps` hides gappy ones, and the two combine. The tracks, the highlights,
+the minimap, the structure panel and the SVG export draw the remaining columns,
+and the position ruler and the "Find" box keep the file's column numbers.
+Clearing the selection clears the trim. The trim leaves every row in place,
+since hiding rows by name would prune the tree; a `focus` clade hides rows.
+
+The SVG export's **Selection only** choice draws the block: its columns, and the
+rows from the first selected to the last in the order the view draws them.
+`react-msaview-cli export-svg --selection` draws the same block from a `--spec`
+or `--props` that holds a selection, and an export of a snapshot with
+`trimToSelection` draws only the selected columns.
+
+React: the `selection` and `trimToSelection` props on `MSAViewer`, with
+`onSelectionChange` reporting each change the reader makes, or
+`model.setSelection(block)` and `model.setTrimToSelection(true)`. R:
 `msaview(selection = list(start = 2, end = 5, rows = c("human", "mouse")))` or
 `geom_msa_selection(2, 5, rows = c("human", "mouse"))`, with
 `input$<id>_selection` in Shiny. Python: the `selection` trait, which the widget
-also writes back.
+also writes back, and `trim_to_selection`.
 
 ## relativeTo
 

@@ -1,14 +1,14 @@
 ---
 name: selection-model
 description:
-  The selection shipped; trim-to-selection, selective export and the MSA editor
-  build on it next.
+  The selection, the trim to it and its export shipped; the MSA editor builds on
+  them next.
 ---
 
 # A selection model
 
-**The selection shipped 2026-09-25. Trim, selective export and the editor
-remain.**
+**The selection shipped 2026-09-25, and the trim and the selection export
+2026-11-12. The editor remains.**
 
 The MsaView model holds `selection`: columns `start` to `end` of the file,
 1-based and inclusive like a column highlight, and `rows` by name, every row
@@ -24,12 +24,22 @@ The MSA editor sketched in `../../handoffs/dna-msa-comparative-genomics.md` (the
 grant) needs this selection first, since a user has to select an exon boundary
 before dragging it.
 
-## What builds on it next, cheapest first
+`trimToSelection` hides every column outside the selection. The model's `blanks`
+holds the gappy columns `hideGaps` hides together with the columns outside the
+trim, and every conversion between file and visible columns reads it, so the
+tracks, highlights, minimap, structure panel and export follow. The position
+ruler, its tooltip and the "Find" box number file columns. The trim keeps every
+row: hiding rows by name would prune the tree, and the row filter by a `rowData`
+field is a separate transform. `MSAViewer` takes `trimToSelection`, and Python
+`trim_to_selection`.
 
-- Trim-to-selection as a view filter: hide every column outside the selection
-  the way `hideGaps` hides gappy ones.
-- Export only the selected columns. The SVG export already takes an
-  `exportType`, so this would be a third mode.
-- Then the editor: drag a boundary, recompute through the columns, and write the
-  result back, which runs the read-only projection in
-  `packages/cli/src/genestructure.ts` in reverse.
+The SVG export's `exportType: 'selection'` crops to the block's columns and the
+rows from the first selected to the last, and the export dialog offers it while
+there is a selection. `react-msaview-cli export-svg --selection` draws it from a
+spec.
+
+## What builds on it next
+
+The editor: drag a boundary, recompute through the columns, and write the result
+back, which runs the read-only projection in `packages/cli/src/genestructure.ts`
+in reverse.

@@ -63,7 +63,10 @@ you can read one site down the whole family.
   alignment, or a range of columns across every row by dragging along a track,
   such as the Position ruler. The header then shows the block's size, such as
   "12 columns × 3 rows", as a button whose menu copies the block as FASTA, zooms
-  to it, or clears it. Escape clears it too. The selection travels in the
+  to it, trims the view to it, or clears it. **Trim to selection** hides every
+  column outside the block, and **Show all columns** in the same menu brings
+  them back. The position ruler keeps numbering the file's columns. Escape
+  clears the selection and the trim. The selection and the trim travel in the
   `#data=` link.
 - **Scroll** with the wheel or a drag, or a finger on a touch screen. A vertical
   wheel passes to the page at the top or bottom row, and a vertical wheel or
@@ -260,8 +263,8 @@ options to copy them and to show/hide gaps.
   [layers reference](https://gmod.org/JBrowseMSA/layers)), so a link can open on
   a band labeled "R248, conserved in 651 of 658 orthologs".
 - **Export an image** with **File → Export as SVG…**: a vector figure of the
-  current viewport or the entire alignment, optionally with the minimap and
-  annotation tracks.
+  current viewport, the entire alignment, or, while there is a selection, the
+  selected block, optionally with the minimap and annotation tracks.
 
 [![](media/export-svg-dialog.png)][live-export-svg-dialog]
 
