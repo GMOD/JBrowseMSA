@@ -103,3 +103,18 @@ test('a left axis labels its ticks left of the line, the high end at the top', (
   const bottom = texts.find(t => t.text === '0.0')
   expect(top!.y).toBeLessThan(bottom!.y)
 })
+
+test('an end label pulled inside the extent never overlaps its neighbor', () => {
+  installSvgTestEnv()
+  const ctx = new Context(100, 100)
+  ctx.font = '10px sans-serif'
+  const texts = axisSvg('top', { type: 'linear', domain: [480, 543] }, [0, 90])
+  const boxes = texts.map(t => {
+    const half = ctx.measureText(t.text).width / 2
+    return [t.x - half, t.x + half] as const
+  })
+  expect(texts.length).toBeGreaterThan(1)
+  for (let i = 1; i < boxes.length; i++) {
+    expect(boxes[i]![0] - boxes[i - 1]![1]).toBeGreaterThanOrEqual(4)
+  }
+})

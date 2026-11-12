@@ -204,20 +204,21 @@ export function drawAxis({
 
   ctx.textAlign = orientation === 'top' ? 'center' : 'right'
   ctx.textBaseline = orientation === 'top' ? 'alphabetic' : 'middle'
-  for (const { value, text, width } of labels) {
-    const p = at(value)
-    if (orientation === 'top') {
-      ctx.fillText(
-        text,
-        clamp(p, lo + width / 2, hi - width / 2),
-        -tickLength - labelGap,
-      )
-    } else {
-      ctx.fillText(
-        text,
-        -tickLength - labelGap,
-        clamp(p, lo + fontSize / 2, hi - fontSize / 2),
-      )
+  const placed = labels
+    .map(({ value, text, width }) => {
+      const half = orientation === 'top' ? width / 2 : fontSize / 2
+      return { text, half, center: clamp(at(value), lo + half, hi - half) }
+    })
+    .toSorted((a, b) => a.center - b.center)
+  let reached = -Infinity
+  for (const { text, half, center } of placed) {
+    if (center - half > reached + labelPadding / 2) {
+      reached = center + half
+      if (orientation === 'top') {
+        ctx.fillText(text, center, -tickLength - labelGap)
+      } else {
+        ctx.fillText(text, -tickLength - labelGap, center)
+      }
     }
   }
 }
