@@ -4,6 +4,60 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [11.0.0](https://github.com/GMOD/JBrowseMSA/compare/v10.1.1...v11.0.0) (2026-11-12)
+
+### Documentation
+
+- Docs/layers.md describes the continuous and threshold scales and scaleProblems ([0a2aaeb](https://github.com/GMOD/JBrowseMSA/commit/0a2aaeb50af117fd1a0e9ecc3be4168b69ac1563))
+
+### Other Changes
+
+- Design row transforms: filter, sort and facet over rowData ([fd7a1b6](https://github.com/GMOD/JBrowseMSA/commit/fd7a1b6c5dfe38a543936f39fc7f66a34c998632))
+- The row axis filters, sorts and facets rows by rowData fields ([ddd148c](https://github.com/GMOD/JBrowseMSA/commit/ddd148c971098f206cf0c03e1496ac116b78f3e4))
+- Document rowTransform in layers.md and the architecture reference ([62ad7ec](https://github.com/GMOD/JBrowseMSA/commit/62ad7ec1b5c2185c867decd7e7d13f2ab08ee2fa))
+- The kinase facets example bands its rows by kinome group ([8384513](https://github.com/GMOD/JBrowseMSA/commit/8384513a4f000c2ad90d61fcde0aaf4168afe8ac))
+- A features column track draws spans with the span mark ([48948c1](https://github.com/GMOD/JBrowseMSA/commit/48948c1a0270440376ab87adafa3bc4670c56999))
+- The insulin example draws the precursor and its secondary structure ([4565650](https://github.com/GMOD/JBrowseMSA/commit/4565650bf08905fe28c6577239fd392100d1c654))
+- The Python widget takes a DataFrame of spans for a features track ([81f4206](https://github.com/GMOD/JBrowseMSA/commit/81f4206c5acdc3173405399ebe965c7c37c92029))
+- Document the features column track ([e2d955d](https://github.com/GMOD/JBrowseMSA/commit/e2d955d98a1a977fa653e1f96e3c99550bc3c736))
+- Trim to selection hides every column outside the selection ([f7bcd98](https://github.com/GMOD/JBrowseMSA/commit/f7bcd98eb3a32bd1a32fcf7bc84d97b98a670ec6))
+- The ruler, its tooltip and Find number the file's columns ([512690d](https://github.com/GMOD/JBrowseMSA/commit/512690df296e057b2587d6d9e1cac55a0ec0cbe9))
+- The SVG export draws the selected block ([0987f91](https://github.com/GMOD/JBrowseMSA/commit/0987f91c1899d88b69ca0c5a29656c4c75a6e970))
+- The layers reference and the user guide describe the trim and the selection export ([c4b9d9a](https://github.com/GMOD/JBrowseMSA/commit/c4b9d9ad6e1c621497d2392bf719c99adeeaa44f))
+- Features column spans map through blanks, which the trim now feeds ([c55d549](https://github.com/GMOD/JBrowseMSA/commit/c55d549bf783b3a49f6bd4d5c2fb03c4297dfee7))
+- Scales read numbers through linear, log and threshold kinds, with a gradient legend and scale problems ([a1ed773](https://github.com/GMOD/JBrowseMSA/commit/a1ed7735102a7a5f3ad6efc6dfa8c8acee8387ed))
+- The RSV tutorial adds a strip of collection years through a pinned viridis ramp ([424c5fb](https://github.com/GMOD/JBrowseMSA/commit/424c5fb79fee629ff43c7c051509a3b4540d6261))
+- Rsvg-convert reads the SVG from stdin with no file named, as librsvg 2.52 requires ([750fb4d](https://github.com/GMOD/JBrowseMSA/commit/750fb4da7e760c29ab45450d8e3fe9b72c2feb4e))
+- Features track tests read legend sections' items ([1a3ab37](https://github.com/GMOD/JBrowseMSA/commit/1a3ab3716959527175544a7f6d43523a3374704a))
+- Regenerate the apidocs and format the merged model ([2073e53](https://github.com/GMOD/JBrowseMSA/commit/2073e53e79cb5565d2b0c1a9a3e9d44553e1e6a5))
+- A hook sends whole-suite tests and the typecheck to ada where msa-test is installed ([8796ad9](https://github.com/GMOD/JBrowseMSA/commit/8796ad9a34a74140ed1bb77e803a638c0e465a49))
+- Row transforms move to the reference docs, and the scales proposal names what still waits ([a705b18](https://github.com/GMOD/JBrowseMSA/commit/a705b184a8e40a30a908fe166a148addb67885ee))
+- Node points and tip labels read encodings, a legend row hides its value, and identity joins the scales ([4c45727](https://github.com/GMOD/JBrowseMSA/commit/4c4572706b4a5d2f5fb5fb6c9ccd16a935db4a51))
+- Row panels draw bars, points and text, and an axis guides each value scale ([348ec06](https://github.com/GMOD/JBrowseMSA/commit/348ec064a7b5dff8f81ef5081a923e37d40f328e))
+- The package exports the value panel and axis types the model's getters name ([824c06c](https://github.com/GMOD/JBrowseMSA/commit/824c06c4ddf035ff8977bdfd587663237cccae7c))
+- Column tracks read a color object and a value scale, and a strip track draws a cell per column ([aa0ad55](https://github.com/GMOD/JBrowseMSA/commit/aa0ad55cf5287d4b6afa9e10ed79d6d27fb84b53))
+- The TRIM5 dN/dS bar colors each codon through a threshold at 1, and the scales proposal marks step 4 built ([d329072](https://github.com/GMOD/JBrowseMSA/commit/d329072917afe9c955060fdc08fd5ed43a217cde))
+- The text-track letter test reads the track's glyphs apart from the legend its scale now lists ([a48ad50](https://github.com/GMOD/JBrowseMSA/commit/a48ad5002b3be8c9134eee340dc6ca8a6c3ed529))
+- Regenerate the apidocs and format the column-track scales merged onto the tree channels and the row-panel marks ([8996369](https://github.com/GMOD/JBrowseMSA/commit/8996369092d4994398afff47789de47ac8c6b00c))
+- Sync the R package page from ggmsaview afda67f, whose layers filter, sort and facet rows ([6b093b9](https://github.com/GMOD/JBrowseMSA/commit/6b093b90adb796472e2ee98b909333ea5f9dad55))
+- The AlphaFold tutorial colors pLDDT through AlphaFold DB's threshold scale ([10b13ba](https://github.com/GMOD/JBrowseMSA/commit/10b13ba30868721b2682971cfb80fcb0a5663002))
+- A threshold or pinned ramp shares one scale across the row and column tables ([46875f9](https://github.com/GMOD/JBrowseMSA/commit/46875f9b5b6ae46a122a9beabfb99950bc5df989))
+- The TRIM5 R block colors dN/dS through the same threshold at 1 ([bf6b2a5](https://github.com/GMOD/JBrowseMSA/commit/bf6b2a50acb36fbf63c04f777b361756128c1a3f))
+- Sync the R package page from ggmsaview c82ed7a, whose row panels draw bars, points and text ([a4a04d8](https://github.com/GMOD/JBrowseMSA/commit/a4a04d847bd3a7130a2cf0568e76caa37cc47dbd))
+- The cell fill becomes one color object, residueColor ([4df40af](https://github.com/GMOD/JBrowseMSA/commit/4df40afb4e8226b62058cc65ff7e4ab20b6d14aa))
+- The scales and guides proposal becomes a reference doc ([70cb575](https://github.com/GMOD/JBrowseMSA/commit/70cb5759423a2a11f766d7a764bf92c17fcbe24f))
+- Structure.mjs lists every residue pair under a cutoff, and contactMap.mjs writes a chain's full contact map ([c3f8991](https://github.com/GMOD/JBrowseMSA/commit/c3f8991753997f9550bb5b13b546f17a26d2813e))
+- The examples gain ESM-2's predicted contacts for human Src as arcs colored by probability, above the contacts in 2SRC ([38fc660](https://github.com/GMOD/JBrowseMSA/commit/38fc6606d464bbd5e7ac86b14b664c477e0686e2))
+- The ESM-2 contacts example names its scheme through residueColor ([a531bdd](https://github.com/GMOD/JBrowseMSA/commit/a531bdde52b104f411e802415d386a4ccfc535fd))
+- Regenerate the figures the scales, panels, column-track colors and pLDDT rewrite changed ([039baca](https://github.com/GMOD/JBrowseMSA/commit/039bacaba5f77d57810e706d682a0d88db3d12e4))
+- The RSV tutorial shows the year strip figure its spec captures ([fb94f7f](https://github.com/GMOD/JBrowseMSA/commit/fb94f7f02d6f63df7d6403e71584eaececfdd2aa))
+- The R snippets write residue_color, and the pLDDT R figure draws the strips and the counts ([7b5ac3d](https://github.com/GMOD/JBrowseMSA/commit/7b5ac3d7fc5a7ff3e1f3a26f33309907bcf5e438))
+- Regenerate the R figures for residue_color and the pLDDT strips, and the gene cluster gallery pair ([78b74e2](https://github.com/GMOD/JBrowseMSA/commit/78b74e235e378757ec1a235b811a528a99a7863f))
+- An axis drops a label that would touch its neighbor once the end labels are pulled inside ([1c075f9](https://github.com/GMOD/JBrowseMSA/commit/1c075f974ced4f99e99e1e08daf8c3dd6055835e))
+- Fix what the release review found ([061fa15](https://github.com/GMOD/JBrowseMSA/commit/061fa157331125ecfda2c9477ff64b1157d82bff))
+- Regenerate the apidocs for the held trim, the row letters and the record problems ([3a13ea6](https://github.com/GMOD/JBrowseMSA/commit/3a13ea650c7456e9cf863ff906497f08a5d874bc))
+- Regenerate two pLDDT close-ups ([54c37ee](https://github.com/GMOD/JBrowseMSA/commit/54c37ee34de47db8b12d1c1d87b6babebf95b51c))
+
 ## [10.1.1](https://github.com/GMOD/JBrowseMSA/compare/v10.1.0...v10.1.1) (2026-11-10)
 
 ### Other Changes
