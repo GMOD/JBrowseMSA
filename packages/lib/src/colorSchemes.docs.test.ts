@@ -5,8 +5,9 @@ import { expect, test } from 'vitest'
 import colorSchemes from './colorSchemes.ts'
 
 // Every color-scheme name a user copies out of the docs must be a registered
-// scheme. The R package and the CLI pass the name straight through as
-// colorSchemeName, so an unregistered one there renders with no coloring. Their
+// scheme. The R package and the CLI pass the name straight through as the
+// `scale.scheme` of `residueColor`, so an unregistered one there renders with
+// no coloring. Their
 // READMEs may leave a scheme out; USAGE.md lists every one.
 
 // comma-separated bare names, after dropping the bold labels (**Protein:**, ...)

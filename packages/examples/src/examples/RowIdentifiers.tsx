@@ -63,7 +63,7 @@ const RowIdentifiers = observer(function RowIdentifiers() {
     MSAModelF().create({
       type: 'MsaView',
       height: 360,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       data: { msa: renamed(p53MSA), tree: renamed(p53Tree) },
     }),
   )

@@ -26,7 +26,7 @@ export default function F12() {
     <MSAViewer
       msa={f12CdsMSA}
       gff={f12ExonsGFF}
-      colorScheme="nucleotide"
+      residueColor={{ scale: { scheme: 'nucleotide' } }}
       colWidth={3}
       highlights={[
         { row: 'human', start: 206, end: 206, label: 'shared 1-bp deletion' },

@@ -299,7 +299,7 @@ const temBase = {
   treeAreaWidth: 260,
   colWidth: 3,
   rowHeight: 14,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   turnedOffTracks: { 'property-conservation': true },
   ...TEM_FILES,
 }
@@ -360,7 +360,7 @@ export const specs = [
       // the residues stay readable beside the per-residue tracks
       colWidth: 12,
       rowHeight: 18,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       turnedOffTracks: { conservation: true, 'property-conservation': true },
       columnTracks: insulinTracks,
       msaFilehandle: { uri: 'data/insulin.aln' },
@@ -381,7 +381,7 @@ export const specs = [
       colWidth: 2.4,
       rowHeight: 18,
       relativeTo: 'Human',
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       turnedOffTracks: { 'property-conservation': true },
       highlights: p53Highlights,
       msaFilehandle: { uri: 'data/p53/p53-vertebrates.afa' },
@@ -470,7 +470,7 @@ export const specs = [
       treeAreaWidth: 215,
       colWidth: 1.8,
       rowHeight: 24,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       turnedOffTracks: { 'property-conservation': true },
       encodings: [
         {
@@ -519,7 +519,7 @@ export const specs = [
   },
 ]
 
-// The Shorthand, rowData, customColorScheme, selection and features sections
+// The Shorthand, rowData, residueColor, selection and features sections
 // of docs/layers.md link these states in the app and show no figure, so
 // generate.mjs never captures them and only genGuideLinks reads the list.
 export const linkSpecs = [
@@ -588,15 +588,15 @@ export const linkSpecs = [
     }),
   },
   {
-    name: 'layers-customcolorscheme',
-    // the customColorScheme section's inline snapshot
+    name: 'layers-residuecolor',
+    // the residueColor section's inline snapshot
     url: fileSnap({
       data: { msa: '>human\nMKAANSE\n>mouse\nMKA-NSE' },
-      customColorScheme: {
-        K: '#1f77b4',
-        R: '#1f77b4',
-        D: '#d62728',
-        E: '#d62728',
+      residueColor: {
+        scale: {
+          domain: ['K', 'R', 'D', 'E'],
+          range: ['#1f77b4', '#1f77b4', '#d62728', '#d62728'],
+        },
       },
     }),
   },

@@ -17,31 +17,6 @@ objects in our source code.
 
 ### MSAModel - Properties
 
-#### property: bgColor
-
-draw MSA tiles with a background color
-
-```js
-bgColor: stripDefault(types.boolean, true)
-```
-
-#### property: colorSchemeName
-
-default color scheme name
-
-```js
-colorSchemeName: stripDefault(types.string, 'maeditor')
-```
-
-#### property: customColorScheme
-
-a color per residue letter, which replaces the `colorSchemeName` table while
-set. A letter the map leaves out takes no color
-
-```js
-customColorScheme: types.frozen<Record<string, string> | undefined>()
-```
-
 #### property: msaFormat
 
 force the MSA data to be parsed as a specific format instead of relying on
@@ -51,6 +26,16 @@ auto-detection (which is ambiguous between e.g. fasta and a3m)
 msaFormat: types.maybe(
   types.enumeration < MSAFormat > ('MSAFormat', msaFormats),
 )
+```
+
+#### property: residueColor
+
+the residue mark's color object, `{channel, field, scale}`: which of the cell
+and the letter the color paints, whether the cell reads its residue or the
+feature covering it, and the scheme or the letter colors. See docs/layers.md
+
+```js
+residueColor: stripDefault(types.frozen<ResidueColor>(), {})
 ```
 
 #### property: showColumnStats
@@ -64,35 +49,20 @@ showColumnStats: stripDefault(types.boolean, true)
 
 ### MSAModel - Actions
 
-#### action: setBgColor
-
-```js
-setBgColor: (arg: boolean) => void
-```
-
-#### action: setColorSchemeName
-
-pick a scheme from the built-in table, which clears `customColorScheme`
-
-```js
-setColorSchemeName: (name: string) => void
-```
-
-#### action: setCustomColorScheme
-
-color residues from a map of letter to color, or pass undefined to return to
-`colorSchemeName`
-
-```js
-setCustomColorScheme: (map?: Record<string, string> | undefined) => void
-```
-
 #### action: setMSAFormat
 
 force a specific MSA parser, or pass undefined to auto-detect
 
 ```js
 setMSAFormat: (arg?: MSAFormat | undefined) => void
+```
+
+#### action: setResidueColor
+
+replace the residue color; a member left out takes its default
+
+```js
+setResidueColor: (color: ResidueColor) => void
 ```
 
 #### action: setShowColumnStats

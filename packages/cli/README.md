@@ -86,7 +86,7 @@ react-msaview-cli export-svg --msa <file> [options]
 | `--gff <file>`           | Domain or exon GFF, or InterProScan JSON                                                                                                            |                                   |
 | `-o, --output <file>`    | Output file; `.svg`, `.png` or `.pdf` picks the format, and PNG and PDF need rsvg-convert from librsvg                                              | `alignment.svg`                   |
 | `--scale <n>`            | Pixels per SVG unit in a PNG                                                                                                                        | `2`                               |
-| `--color-scheme <name>`  | Color scheme                                                                                                                                        | `maeditor`                        |
+| `--color-scheme <name>`  | Residue color scheme, the `scale.scheme` of `residueColor`                                                                                          | `maeditor`                        |
 | `--theme <light\|dark>`  | Page and text colors                                                                                                                                | the `--props` theme, else `light` |
 | `--width <px>`           | Viewport width, which sets the tree area                                                                                                            | `1200`                            |
 | `--height <px>`          | Viewport height                                                                                                                                     | `600`                             |

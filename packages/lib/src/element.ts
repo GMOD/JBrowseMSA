@@ -14,7 +14,7 @@ type ElementData = Pick<
   | 'tree'
   | 'gff'
   | 'features'
-  | 'colorScheme'
+  | 'residueColor'
   | 'highlights'
   | 'columnTracks'
   | 'residueMappings'
@@ -26,7 +26,7 @@ const dataProperties = [
   'tree',
   'gff',
   'features',
-  'colorScheme',
+  'residueColor',
   'highlights',
   'columnTracks',
   'residueMappings',
@@ -56,6 +56,11 @@ const lazyMargin = '200px'
 
 // the attributes a <nightingale-manager> writes on the elements it holds
 const nightingaleAttributes = ['display-start', 'display-end', 'highlight']
+
+function schemeColor(element: HTMLElement) {
+  const scheme = element.getAttribute('color-scheme')
+  return scheme === null ? undefined : { scale: { scheme } }
+}
 
 function numberAttribute(value: string | null | undefined) {
   const n = value ? Number(value) : Number.NaN
@@ -94,9 +99,10 @@ function residueRange(model: MsaViewModel, row: string, viewport: Viewport) {
  * Registers a custom element that renders MSAViewer, for pages with no React.
  * Attributes: msa-url, tree-url, gff-url, color-scheme, height, hide-header,
  * theme, tree-area-width, reference-row and loading. Properties: msa, tree and
- * gff text, features, colorScheme, highlights, columnTracks, residueMappings
- * and selection. The colorScheme property takes a `{domain, range}` the
- * color-scheme attribute cannot hold, and wins over the attribute while set. Events:
+ * gff text, features, residueColor, highlights, columnTracks, residueMappings
+ * and selection. The color-scheme attribute names a built-in scheme, the
+ * residueColor property's `scale.scheme`, and the property wins over it while
+ * set. Events:
  * cell-hover, cell-click, viewport-change and selection-change, each with the
  * MSAViewer callback's value as detail.
  *
@@ -132,7 +138,7 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
     declare tree: ElementData['tree']
     declare gff: ElementData['gff']
     declare features: ElementData['features']
-    declare colorScheme: ElementData['colorScheme']
+    declare residueColor: ElementData['residueColor']
     declare highlights: ElementData['highlights']
     declare columnTracks: ElementData['columnTracks']
     declare residueMappings: ElementData['residueMappings']
@@ -175,10 +181,7 @@ export function defineMsaElement(tagName = 'jbrowse-msa') {
         msaUrl: this.getAttribute('msa-url') ?? undefined,
         treeUrl: this.getAttribute('tree-url') ?? undefined,
         gffUrl: this.getAttribute('gff-url') ?? undefined,
-        colorScheme:
-          this.#data.colorScheme ??
-          this.getAttribute('color-scheme') ??
-          undefined,
+        residueColor: this.#data.residueColor ?? schemeColor(this),
         height: numberAttribute(this.getAttribute('height')),
         treeAreaWidth: numberAttribute(this.getAttribute('tree-area-width')),
         hideHeader: this.hasAttribute('hide-header'),

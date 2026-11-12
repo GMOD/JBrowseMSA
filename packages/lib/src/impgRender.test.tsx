@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
 //
 // End-to-end check of the impg (https://github.com/pangenome/impg) integration:
-// impg's scripts/faln2html.py drives the viewer exactly as below --
-//   MSAModelF().create({ type:'MsaView', data:{ msa } })
-//   model.setColorSchemeName('percent_identity_dynamic')
-//   model.setBgColor(true); model.setWidth(1300)
-// then renders <MSAView model/>. This exercises that path headlessly via the
+// impg's scripts/faln2html.py creates the model from a snapshot naming the
+// percent-identity scheme and the fasta format, sets its width, then renders
+// <MSAView model/>. This exercises that path headlessly via the
 // public renderToSvg export. Polyfills mirror scripts/generateFigures.tsx.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { beforeAll, expect, test } from 'vitest'
@@ -29,24 +27,23 @@ ACGTACGTGGACGTNNNNACGT----ACGTACGTACGT`
 
 test('renders an impg fasta-aln block with declarative impg config', async () => {
   // everything except width is a declarative MST property, so it can be set in
-  // the create() snapshot -- no setColorSchemeName/setBgColor/setMSAFormat
-  // action calls needed. msaFormat:'fasta' forces the parser and skips the
+  // the create() snapshot -- no setResidueColor/setMSAFormat action calls
+  // needed. msaFormat:'fasta' forces the parser and skips the
   // heuristic fasta-vs-a3m sniffing. width is volatile (tracks container size)
   // so it remains an action.
   const model = MSAModelF().create({
     id: 'impg-test',
     type: 'MsaView',
     height: 400,
-    colorSchemeName: 'percent_identity_dynamic',
-    bgColor: true,
+    residueColor: { scale: { scheme: 'percent_identity_dynamic' } },
     msaFormat: 'fasta',
     data: { msa: impgFastaAln },
   })
   model.setWidth(1300)
 
   // the declarative config took effect
-  expect(model.colorSchemeName).toBe('percent_identity_dynamic')
-  expect(model.bgColor).toBe(true)
+  expect(model.dynamicColorSchemeName).toBe('percent_identity_dynamic')
+  expect(model.cellFill).toBe('residue')
   expect(model.msaFormat).toBe('fasta')
 
   // the alignment parsed and all 3 rows are present at equal width

@@ -317,8 +317,7 @@ function rasterKeys(model: MsaViewModel, theme: Theme) {
   return [
     model.columns,
     model.leaves,
-    model.colorSchemeName,
-    model.customColorScheme,
+    model.residueColor,
     tileColorTable(model),
     model.relativeTo,
     theme.palette.action.hover,

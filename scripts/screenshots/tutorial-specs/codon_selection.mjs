@@ -77,7 +77,7 @@ const COL = {
 const base = {
   treeAreaWidth: 170,
   rowHeight: 11,
-  colorSchemeName: 'nucleotide',
+  residueColor: { scale: { scheme: 'nucleotide' } },
   // the tree is embedded in the Stockholm file (#=GF NH), same as F12, so no
   // separate treeFilehandle is needed
   msaFilehandle: { uri: MSA_URI },

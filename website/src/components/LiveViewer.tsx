@@ -18,7 +18,7 @@ export default function LiveViewer() {
       msa={nlrp1MSA}
       tree={nlrp1Tree}
       gff={nlrp1DomainsGFF}
-      colorScheme="clustalx_protein_dynamic"
+      residueColor={{ scale: { scheme: 'clustalx_protein_dynamic' } }}
       treeAreaWidth={180}
       region={{ start: 360, end: 420 }}
       height={390}

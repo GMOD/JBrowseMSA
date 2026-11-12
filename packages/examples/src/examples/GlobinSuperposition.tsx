@@ -41,7 +41,7 @@ const GlobinSuperposition = observer(function GlobinSuperposition() {
     MSAModelF().create({
       type: 'MsaView',
       height: 340,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       data: { msa: globins.msa },
       highlights: hemeHistidines,
     }),

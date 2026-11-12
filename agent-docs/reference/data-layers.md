@@ -116,11 +116,11 @@ in the tree gutter for rows. The draw path is the persistent-highlight branch of
 
 ### 5. Letter colors from a map
 
-`colorSchemeName` is a string chosen from the built-in table. A
-`customColorScheme: Record<string, string>` at the model level, the field text
-tracks already accept, lets an agent color "the residues I care about" without
-adding a scheme. The raster cache keys on the scheme, so the only other change
-is adding the map to that key.
+`residueColor.scale.scheme` is a string chosen from the built-in table. A
+`domain` and `range` on the same scale, a color per letter as text tracks
+already accept, lets an agent color "the residues I care about" without adding a
+scheme. The raster cache keys on the `residueColor` object, so the letters reach
+it with no other change.
 
 ### Out of scope
 
@@ -161,8 +161,8 @@ agent produces one that does not.
    `rowTint` encoding.
 5. `export-svg` from a snapshot, so an agent can render what it wrote. Shipped
    2026-09-24 as `export-svg --spec`.
-6. Letter color map. Shipped 2026-09-24 as `customColorScheme`, which the
-   `colorScheme` prop sets from `{domain, range}`.
+6. Letter color map. Shipped 2026-09-24, and held as the `domain` and `range` of
+   `residueColor.scale`.
 
 ## What it changes in the backlog
 

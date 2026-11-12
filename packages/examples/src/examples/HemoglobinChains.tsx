@@ -53,7 +53,7 @@ const HemoglobinChains = observer(function HemoglobinChains() {
     MSAModelF().create({
       type: 'MsaView',
       height: 320,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       data: { msa: globins.msa },
       highlights: [
         ...hemeHistidines,

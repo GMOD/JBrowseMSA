@@ -301,7 +301,7 @@ jq -rj \
       colWidth: 2.6,
       rowHeight: 15,
       relativeTo: "Human",
-      colorSchemeName: "clustalx_protein_dynamic",
+      residueColor: {scale: {scheme: "clustalx_protein_dynamic"}},
       turnedOffTracks: {"property-conservation": true},
       msaFilehandle: {uri: $msa},
       treeFilehandle: {uri: $tree},

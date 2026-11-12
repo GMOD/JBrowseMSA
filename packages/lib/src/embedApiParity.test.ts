@@ -72,7 +72,7 @@ test('MSAViewerProps is readable, and this test is looking at all of it', () => 
   // a rename or a reformat that broke the regexes would leave every other
   // assertion here passing over an empty list
   expect(props).toContain('msa')
-  expect(props).toContain('residueEncoding')
+  expect(props).toContain('residueColor')
   expect(props.length).toBeGreaterThan(20)
 })
 

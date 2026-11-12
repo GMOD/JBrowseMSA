@@ -68,7 +68,7 @@ export const specs = [
       ...msa,
       ...tree,
       colWidth: 2.9,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
     }),
     settle: 2500,
     clip: 'viewer',
@@ -135,7 +135,7 @@ export const specs = [
       ...tree,
       ...gff,
       colWidth: 0.9,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       // the GFF's positions are genome coordinates, so the overlay that reads
       // them as residues of each row stays off
       showDomains: false,

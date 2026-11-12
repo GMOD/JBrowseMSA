@@ -3,10 +3,11 @@ name: scales-and-guides
 description:
   The color object jbrowse-components declares, with linear, log, threshold and
   identity scales, a gradient legend, an axis guide, and the bar, point, text
-  and column strip marks they unlock. Steps 1 to 6 are built: the color object,
+  and column strip marks they unlock. Steps 1 to 7 are built: the color object,
   the shared domain, the continuous and threshold scales, the gradient legend,
   the scale problems, the column tracks' color and value scales, the axis and
-  the bar, point and text row panels, and the tree channels; step 7 remains.
+  the bar, point and text row panels, the tree channels, and the cell fill as
+  one color object, `residueColor`.
 ---
 
 # Scales and guides
@@ -14,10 +15,10 @@ description:
 `resolveScale` in `packages/lib/src/scales.ts` reads the color object,
 `ColorSpec`, through an ordinal, linear, log, threshold or identity scale, and
 `encodings`, the row panels and every column track read it, so a dN/dS bar takes
-its color from its value. The cell fill does not yet, and waits on step 7. This
-document adopts the color object jbrowse-components' displays declare, adds the
-continuous and threshold scales it names, gives every scale its guide, a legend
-or an axis, and lists the marks those unlock.
+its color from its value. The cell fill reads `residueColor`, the residue mark's
+color object (step 7). This document adopts the color object jbrowse-components'
+displays declare, adds the continuous and threshold scales it names, gives every
+scale its guide, a legend or an axis, and lists the marks those unlock.
 [panels-and-marks](../../reference/panels-and-marks.md) holds the vocabulary of
 panels, marks and channels this builds on.
 
@@ -279,6 +280,51 @@ commit.
   `size` on a `point` row panel takes a number, one diameter per record.
 - **A per-cell color matrix.** See `data-layers.md`.
 
+### One color object for the residue mark
+
+`residueColor` in `packages/lib/src/residueColor.ts` is the residue mark's color
+object, `{channel, field, scale}`, and it is the `MSAViewer` prop, the MST
+property and the shared-URL key alike.
+
+- `channel` names what the color paints: `fill`, the default, colors the cell,
+  and `color` colors the letter and leaves the cell plain.
+- `field` names what a cell reads: `residue`, its letter through `scale`, or
+  `feature`, the default, the color the annotation overlay gives the span
+  covering it. Under `feature` the residue scale fills the cells wherever the
+  overlay draws no span, so an alignment with no annotations keeps its scheme
+  and a loaded GFF takes the cells it covers. The `color` channel reads the
+  residue, and the spans draw as bars under the rows.
+- `scale` holds `scheme`, a built-in scheme name with `maeditor` where unset, or
+  `domain` and `range`, a color per residue letter. A `domain` wins over
+  `scheme` and leaves every letter it does not list uncolored, so clearing it
+  returns the cells to `scheme`.
+
+Three scheme names resolve to a function of the column and the letter in place
+of a letter table: `clustalx_protein_dynamic`, `blosum62_dynamic` and
+`percent_identity_dynamic` color a residue from its column's statistics, so one
+letter takes a different color in each column. They are no ordinal scale, and
+`scheme` names them anyway, the way jbrowse-components' `scheme` names a ramp
+the scale samples. `dynamicColorSchemeName` is the test for one, and is
+undefined while a `domain` wins.
+
+The domains own the fill as `field: "feature"`, the table the overlay reads, and
+the color of a span stays with `featureFill`, a GFF `color=` and the accession
+palette, which color it under every layout: a filled box, a bar under the row, a
+sub-row, a panel. A feature field named on the residue channel, such as
+`field: "type"` through its own scale, was declined, because it would give one
+span two colors, one in the cell and another in its bar.
+
+The prop replaces `colorScheme` and `residueEncoding`. `preProcessSnapshot`
+reads the four keys a snapshot held before into `residueColor`
+(`liftResidueColor`): `bgColor: false` is `channel: "color"`,
+`domainFill: false` is `field: "residue"`, `colorSchemeName` is `scale.scheme`,
+and a `customColorScheme` map is `scale.domain` and `scale.range`. A
+`residueColor` in the same snapshot wins member by member. The lift exists for
+links already shared; every producer in the repository writes `residueColor`.
+`msaRaster.ts` keys its tile cache on the object, the menus and the settings
+panel write it through `setResidueColor` and `setCellFill`, and the Python
+widget's `residue_color` trait carries it whole.
+
 ### Revisited: `identity` as a scale kind
 
 This document first declined `identity`, because a GFF `color=` attribute
@@ -391,17 +437,15 @@ draws no node points, and both channels reach the export through
 
 ### 7. One fill object for the cell
 
-The cell fill has five spellings today: `bgColor` and `residueEncoding` pick the
-cell or the letter, `colorSchemeName` names a built-in scheme,
-`customColorScheme` holds a letter map that wins while set, and `domainFill`
-with the `cellFill` getter decides whether the domain boxes own the cell
-instead. One color object on a residue channel collapses them: `field` is
-`residue` or a feature field, `scheme` or `range` and `domain` say the colors,
-and the channel names cell or letter. It breaks the snapshot and URL keys
-`bgColor`, `colorSchemeName`, `customColorScheme` and `domainFill`, the
-`colorScheme` and `residueEncoding` props, and the R `color_scheme` and Python
-`color_scheme` and `residue_encoding` arguments, so it needs a snapshot lift
-that reads the five old keys into the one object.
+Built: `residueColor` replaces `bgColor`, `colorSchemeName`, `customColorScheme`
+and `domainFill` in the model and the URL, and the `colorScheme` and
+`residueEncoding` props; "One color object for the residue mark" above holds the
+design. `cellFill` stays as the getter the renderers read, derived from the
+object. `residueColor.test.ts` loads each old-key snapshot the docs linked and
+compares its resolved fill, cell by cell, with the same view spelled with
+`residueColor`. The Python widget's `color_scheme` and `residue_encoding` became
+`residue_color`. ggmsaview's `color_scheme` and `residue_encoding` arguments and
+its `scale_residue_color` layer write the old props and wait on its own change.
 
 ## Sequence
 

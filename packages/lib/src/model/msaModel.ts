@@ -1,12 +1,10 @@
 import { types } from '@jbrowse/mobx-state-tree'
 
-import {
-  defaultBgColor,
-  defaultColorSchemeName,
-  defaultShowColumnStats,
-} from '../constants.ts'
+import { defaultShowColumnStats } from '../constants.ts'
+import { normalizedResidueColor } from '../residueColor.ts'
 import { stripDefault } from '../stripDefault.ts'
 
+import type { ResidueColor } from '../residueColor.ts'
 import type { MSAFormat } from 'msa-parsers'
 
 const msaFormats: MSAFormat[] = ['stockholm', 'a3m', 'fasta', 'emf', 'clustal']
@@ -19,22 +17,12 @@ export function MSAModelF() {
     .model({
       /**
        * #property
-       * draw MSA tiles with a background color
+       * the residue mark's color object, `{channel, field, scale}`: which of
+       * the cell and the letter the color paints, whether the cell reads its
+       * residue or the feature covering it, and the scheme or the letter
+       * colors. See docs/layers.md
        */
-      bgColor: stripDefault(types.boolean, defaultBgColor),
-
-      /**
-       * #property
-       * default color scheme name
-       */
-      colorSchemeName: stripDefault(types.string, defaultColorSchemeName),
-
-      /**
-       * #property
-       * a color per residue letter, which replaces the `colorSchemeName` table
-       * while set. A letter the map leaves out takes no color
-       */
-      customColorScheme: types.frozen<Record<string, string> | undefined>(),
+      residueColor: stripDefault(types.frozen<ResidueColor>(), {}),
 
       /**
        * #property
@@ -56,28 +44,10 @@ export function MSAModelF() {
     .actions(self => ({
       /**
        * #action
-       * pick a scheme from the built-in table, which clears
-       * `customColorScheme`
+       * replace the residue color; a member left out takes its default
        */
-      setColorSchemeName(name: string) {
-        self.colorSchemeName = name
-        self.customColorScheme = undefined
-      },
-
-      /**
-       * #action
-       * color residues from a map of letter to color, or pass undefined to
-       * return to `colorSchemeName`
-       */
-      setCustomColorScheme(map?: Record<string, string>) {
-        self.customColorScheme = map
-      },
-
-      /**
-       * #action
-       */
-      setBgColor(arg: boolean) {
-        self.bgColor = arg
+      setResidueColor(color: ResidueColor) {
+        self.residueColor = normalizedResidueColor(color)
       },
 
       /**

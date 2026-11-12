@@ -82,13 +82,11 @@ class MSAView(anywidget.AnyWidget):
     tree_filehandle = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
     gff_filehandle = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
 
-    # a scheme name, or a dict of residue letter to color that leaves every
-    # letter it does not list uncolored
-    color_scheme = traitlets.Union(
-        [traitlets.Unicode(), traitlets.Dict(value_trait=traitlets.Unicode())],
-        default_value=None,
-        allow_none=True,
-    ).tag(sync=True)
+    # the residue color object, {"channel", "field", "scale"}: "channel" is
+    # "fill" (the cell) or "color" (the letter), "field" is "feature" (a
+    # domain covering the cell) or "residue", and "scale" is {"scheme": name}
+    # or {"domain": letters, "range": colors}
+    residue_color = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
     height = traitlets.Int(None, allow_none=True).tag(sync=True)
     col_width = traitlets.Float(None, allow_none=True).tag(sync=True)
     row_height = traitlets.Float(None, allow_none=True).tag(sync=True)
@@ -133,7 +131,6 @@ class MSAView(anywidget.AnyWidget):
         default_value=None,
         allow_none=True,
     ).tag(sync=True)
-    residue_encoding = traitlets.Enum(["fill", "color"], default_value="fill").tag(sync=True)
     hide_header = traitlets.Bool(False).tag(sync=True)
     # "auto" follows the notebook's light or dark theme; a dict is MUI theme
     # options merged over the JBrowse theme

@@ -88,7 +88,7 @@ const wide = {
   treeAreaWidth: 190,
   colWidth: 3.2,
   rowHeight: 22,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   // the second conservation histogram repeats the first in another palette
   turnedOffTracks: { 'property-conservation': true },
   ...files,
@@ -102,7 +102,7 @@ const closeUp = (fromResidue, colWidth) => ({
   rowHeight: 22,
   scrollX: -col(fromResidue) * colWidth,
   relativeTo: REF,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   turnedOffTracks: { 'property-conservation': true },
   ...files,
 })

@@ -65,7 +65,7 @@ describe('blosum62_dynamic', () => {
   function makeModel(msa: string) {
     return MSAModelF().create({
       type: 'MsaView',
-      colorSchemeName: 'blosum62_dynamic',
+      residueColor: { scale: { scheme: 'blosum62_dynamic' } },
       data: { msa },
     })
   }

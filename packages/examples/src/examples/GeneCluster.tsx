@@ -13,7 +13,7 @@ export default function GeneCluster() {
     <MSAViewer
       msa={geneClusterMSA}
       gff={geneClusterGFF}
-      colorScheme="nucleotide"
+      residueColor={{ scale: { scheme: 'nucleotide' } }}
       colWidth={1}
       rowHeight={44}
       height={360}

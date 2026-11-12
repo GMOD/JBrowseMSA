@@ -180,7 +180,7 @@ function drawTextTrackContent({
   colorAt,
   hiddenLetter,
   contrastText,
-  bgColor,
+  fillsCells,
   drawLetters,
   colWidth,
   rowHeight,
@@ -192,7 +192,7 @@ function drawTextTrackContent({
   colorAt: (col: number, letter: string) => string | undefined
   hiddenLetter?: (letter: string) => boolean
   contrastText: (color: string | undefined) => string
-  bgColor: boolean
+  fillsCells: boolean
   drawLetters: boolean
   colWidth: number
   rowHeight: number
@@ -210,7 +210,7 @@ function drawTextTrackContent({
     const letter = str[i]!
     if (!hiddenLetter?.(letter)) {
       const col = xStart + i
-      const fill = bgColor ? colorAt(col, letter) : undefined
+      const fill = fillsCells ? colorAt(col, letter) : undefined
       const x = col * colWidth
       if (fill) {
         ctx.fillStyle = fill
@@ -680,7 +680,7 @@ export function drawTrackBlock({
     }
     case 'text':
     case 'reference': {
-      const { bgColor, fontSize, rowHeight, showMsaLetters } = model
+      const { fontSize, rowHeight, showMsaLetters } = model
       const colors = model.columnTrackColors.get(id)
       const scheme = colors?.letters ?? customColorScheme ?? model.colorScheme
       ctx.textAlign = 'center'
@@ -699,7 +699,7 @@ export function drawTrackBlock({
           ? letter => colors.isHidden(letterValue(letter))
           : undefined,
         contrastText: contrastTextFn(theme),
-        bgColor,
+        fillsCells: model.resolvedResidueColor.channel === 'fill',
         drawLetters: showMsaLetters,
         colWidth,
         rowHeight,

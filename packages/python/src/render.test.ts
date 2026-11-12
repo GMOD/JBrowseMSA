@@ -34,7 +34,7 @@ const defaults: Traits = {
   msa_filehandle: null,
   tree_filehandle: null,
   gff_filehandle: null,
-  color_scheme: null,
+  residue_color: null,
   height: null,
   col_width: null,
   row_height: null,
@@ -58,7 +58,6 @@ const defaults: Traits = {
   show_branch_len: true,
   tree_order: null,
   tree_root: null,
-  residue_encoding: 'fill',
   hide_header: false,
   theme: 'auto',
   clicked: null,
@@ -149,7 +148,7 @@ test('traits become MSAViewer props, with empty values left unset', () => {
     fakeModel({
       msa: '>a\nMK\n',
       tree_url: 'https://example.org/t.nh',
-      color_scheme: 'clustal',
+      residue_color: { scale: { scheme: 'clustal' } },
       hide_header: true,
     }),
   )
@@ -160,7 +159,7 @@ test('traits become MSAViewer props, with empty values left unset', () => {
     treeUrl: 'https://example.org/t.nh',
     msaFilehandle: undefined,
     treeFilehandle: undefined,
-    colorScheme: 'clustal',
+    residueColor: { scale: { scheme: 'clustal' } },
     height: undefined,
     relativeTo: undefined,
     hideHeader: true,
@@ -183,17 +182,20 @@ test('tree_root takes the midpoint, or a list of names as an outgroup', () => {
   expect(mounted.props.at(-1)?.treeRoot).toBeUndefined()
 })
 
-test('color_scheme takes a scheme name, or a dict of letter to color', () => {
-  const model = fakeModel({ color_scheme: { K: '#1f77b4', R: '#1f77b4' } })
+test('residue_color reaches the viewer as the color object, and None unsets it', () => {
+  const letters = {
+    channel: 'color' as const,
+    scale: { domain: ['K', 'R'], range: ['#1f77b4', '#1f77b4'] },
+  }
+  const model = fakeModel({ residue_color: letters })
   renderWidget(model)
-  expect(mounted.props[0]?.colorScheme).toEqual({
-    domain: ['K', 'R'],
-    range: ['#1f77b4', '#1f77b4'],
+  expect(mounted.props[0]?.residueColor).toEqual(letters)
+  model.change('residue_color', { scale: { scheme: 'lesk' } })
+  expect(mounted.props.at(-1)?.residueColor).toEqual({
+    scale: { scheme: 'lesk' },
   })
-  model.change('color_scheme', 'lesk')
-  expect(mounted.props.at(-1)?.colorScheme).toBe('lesk')
-  model.change('color_scheme', null)
-  expect(mounted.props.at(-1)?.colorScheme).toBeUndefined()
+  model.change('residue_color', null)
+  expect(mounted.props.at(-1)?.residueColor).toBeUndefined()
 })
 
 test('a trait change updates the mounted viewer', () => {

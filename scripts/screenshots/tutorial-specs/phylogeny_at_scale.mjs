@@ -59,7 +59,7 @@ const READABLE = {
   rowHeight: ROW_H,
   drawLabels: true,
   scrollY: -WINDOW_TOP * ROW_H,
-  colorSchemeName: 'nucleotide',
+  residueColor: { scale: { scheme: 'nucleotide' } },
 }
 
 // All 184 rows at once, with the tree area widened so the edges carrying a
@@ -70,7 +70,7 @@ const WHOLE = {
   colWidth: 0.3,
   rowHeight: 8,
   drawLabels: false,
-  colorSchemeName: 'nucleotide',
+  residueColor: { scale: { scheme: 'nucleotide' } },
 }
 
 // 23 clades and 28 countries both run past the end of every named palette, so
@@ -104,7 +104,7 @@ export const specs = [
       treeAreaWidth: 130,
       colWidth: 0.3,
       rowHeight: 1,
-      colorSchemeName: 'nucleotide',
+      residueColor: { scale: { scheme: 'nucleotide' } },
       ...FULL,
     }),
     settle: 2500,
@@ -126,7 +126,7 @@ export const specs = [
       colWidth: 0.3,
       rowHeight: 10,
       scrollY: -1780 * 10,
-      colorSchemeName: 'nucleotide',
+      residueColor: { scale: { scheme: 'nucleotide' } },
       collapsed: ['node-0-0-1'],
       ...FULL,
     }),
@@ -154,7 +154,7 @@ export const specs = [
       treeAreaWidth: 420,
       colWidth: 0.3,
       rowHeight: 16,
-      colorSchemeName: 'nucleotide',
+      residueColor: { scale: { scheme: 'nucleotide' } },
       ...SAMPLE,
     }),
     settle: 2500,
@@ -172,7 +172,7 @@ export const specs = [
       colWidth: COL_WIDTH_BASE,
       rowHeight: 16,
       scrollX: -(G_HOTSPOT0 - 10) * COL_WIDTH_BASE,
-      colorSchemeName: 'nucleotide',
+      residueColor: { scale: { scheme: 'nucleotide' } },
       ...SAMPLE,
     }),
     settle: 2000,
@@ -190,7 +190,7 @@ export const specs = [
       colWidth: COL_WIDTH_BASE,
       rowHeight: 16,
       scrollX: -(L_COLDSPOT0 - 10) * COL_WIDTH_BASE,
-      colorSchemeName: 'nucleotide',
+      residueColor: { scale: { scheme: 'nucleotide' } },
       ...SAMPLE,
     }),
     settle: 2000,

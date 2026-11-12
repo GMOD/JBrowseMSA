@@ -71,7 +71,7 @@ const KinaseFacets = observer(function KinaseFacets() {
     const created = MSAModelF().create({
       type: 'MsaView',
       height: 400,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       data: { msa: kinases.msa },
       rowTransform: {
         facet: { field: 'group', sort: Object.keys(groupColors) },

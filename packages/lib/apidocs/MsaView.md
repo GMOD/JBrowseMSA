@@ -80,15 +80,11 @@ that declares it.
 
 ### From [MSAModel](./MSAModel.md)
 
-**Properties:** [bgColor](./MSAModel.md#property-bgcolor),
-[colorSchemeName](./MSAModel.md#property-colorschemename),
-[customColorScheme](./MSAModel.md#property-customcolorscheme),
+**Properties:** [residueColor](./MSAModel.md#property-residuecolor),
 [showColumnStats](./MSAModel.md#property-showcolumnstats),
 [msaFormat](./MSAModel.md#property-msaformat)
 
-**Actions:** [setColorSchemeName](./MSAModel.md#action-setcolorschemename),
-[setCustomColorScheme](./MSAModel.md#action-setcustomcolorscheme),
-[setBgColor](./MSAModel.md#action-setbgcolor),
+**Actions:** [setResidueColor](./MSAModel.md#action-setresiduecolor),
 [setShowColumnStats](./MSAModel.md#action-setshowcolumnstats),
 [setMSAFormat](./MSAModel.md#action-setmsaformat)
 
@@ -161,15 +157,6 @@ data from the loaded tree/msa/treeMetadata, generally loaded by autorun
 
 ```js
 data: types.optional(DataModelF(maxInlineSnapshotBytes), {})
-```
-
-#### property: domainFill
-
-whether shown domains fill the cells they cover. Off, the residue scheme keeps
-the cells and each domain draws as a bar under its row. See `cellFill`.
-
-```js
-domainFill: stripDefault(types.boolean, true)
 ```
 
 #### property: drawMsaLetters
@@ -972,6 +959,9 @@ colorRecords: ColorRecord[]
 
 #### getter: colorScheme
 
+the color per residue letter: the `domain` and `range` of `residueColor` where
+it lists letters, else the table its `scheme` names
+
 ```js
 colorScheme: Record<string, string>
 ```
@@ -1117,8 +1107,8 @@ domainUnderline: boolean
 #### getter: dynamicColorSchemeName
 
 the scheme coloring each cell from its column's statistics, or undefined while
-the cells take a fixed color per letter, from the built-in table or from
-`customColorScheme`
+the cells take a fixed color per letter, from the built-in table or from the
+`domain` and `range` of `residueColor`
 
 ```js
 dynamicColorSchemeName: string | undefined
@@ -1624,6 +1614,16 @@ row are ignored.
 
 ```js
 resolvedHighlights: ResolvedHighlight[]
+```
+
+#### getter: resolvedResidueColor
+
+`residueColor` with its defaults filled in: the `channel`, the `field`, the
+`scheme` name, and the `letters` table its `domain` and `range` give, undefined
+where it lists none
+
+```js
+resolvedResidueColor: { channel: "color" | "fill"; field: "feature" | "residue"; scheme: string; letters: { [k: string]: string; } | undefined; }
 ```
 
 #### getter: resolvedRowPanels
@@ -2644,7 +2644,7 @@ setAvailableHeight: (height?: number | undefined) => void
 #### action: setCellFill
 
 hand the cell fill to the residue scheme, the domains, or neither, which colors
-the letters instead
+the letters instead: the `channel` and `field` of `residueColor`
 
 ```js
 setCellFill: (mode: "domain" | "none" | "residue") => void
@@ -2689,12 +2689,6 @@ filehandle loaders
 
 ```js
 setData: (data: { msa?: string | undefined; tree?: string | undefined; treeMetadata?: string | undefined; gff?: string | undefined; }) => void
-```
-
-#### action: setDomainFill
-
-```js
-setDomainFill: (arg: boolean) => void
 ```
 
 #### action: setDrawMsaLetters

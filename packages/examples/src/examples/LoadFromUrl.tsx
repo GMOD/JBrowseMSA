@@ -13,7 +13,7 @@ export default function LoadFromUrl() {
       msaUrl={`${BASE}/p53.aln`}
       treeUrl={`${BASE}/p53.nh`}
       gffUrl={`${BASE}/p53-domains.gff`}
-      colorScheme="clustalx_protein_dynamic"
+      residueColor={{ scale: { scheme: 'clustalx_protein_dynamic' } }}
       height={500}
     />
   )

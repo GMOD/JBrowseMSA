@@ -23,7 +23,7 @@ const SvgFigure = observer(function SvgFigure() {
       height: 300,
       colWidth: 14,
       rowHeight: 16,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       relativeTo: 'Human',
       scrollX: -236 * 14,
       highlights: [

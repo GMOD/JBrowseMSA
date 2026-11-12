@@ -75,12 +75,12 @@ describe('reset', () => {
 
   test('display preferences survive', () => {
     const model = makeModel()
-    model.setColorSchemeName('clustalx')
+    model.setResidueColor({ scale: { scheme: 'clustalx' } })
     model.setDrawNodeBubbles(false)
     model.toggleTrack('conservation')
 
     model.reset()
-    expect(model.colorSchemeName).toBe('clustalx')
+    expect(model.resolvedResidueColor.scheme).toBe('clustalx')
     expect(model.drawNodeBubbles).toBe(false)
     expect(model.turnedOffTracks.get('conservation')).toBe(true)
   })

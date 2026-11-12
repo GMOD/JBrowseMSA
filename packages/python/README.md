@@ -29,7 +29,7 @@ view
 Setting a trait updates the widget in place and keeps its scroll and zoom:
 
 ```python
-view.color_scheme = "clustal"
+view.residue_color = {"scale": {"scheme": "clustal"}}
 view.highlights = [{"row": "Human_beta", "start": 64, "end": 64, "label": "distal His"}]
 ```
 
@@ -45,7 +45,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `msa`, `tree`, `gff`                                  | document text or a file path                                                                                               |
 | `msa_url`, `tree_url`, `gff_url`                      | a URL the viewer fetches                                                                                                   |
 | `msa_filehandle`, `tree_filehandle`, `gff_filehandle` | a JBrowse `FileLocation` dict, which wins over the URL                                                                     |
-| `color_scheme`                                        | a scheme name, such as `"clustal"`, or a dict of residue letter to color                                                   |
+| `residue_color`                                       | `{channel, field, scale}`, the residue color object in docs/layers.md: `{"scale": {"scheme": "clustal"}}`                  |
 | `height`                                              | pixels                                                                                                                     |
 | `col_width`, `row_height`                             | pixels per column and per row                                                                                              |
 | `highlights`                                          | list of `{start, end}`, `{row, start, end}` or `{rows}`                                                                    |
@@ -67,7 +67,6 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `tree_order`                                          | `"branchLength"` (default), `"input"`, `"ladderize"` or `"ladderizeReverse"`                                               |
 | `tree_root`                                           | `"midpoint"`, or outgroup tip names: one name or a list                                                                    |
 | `tree_area_width`                                     | pixels; unset fits the gutter to the labels and the tree                                                                   |
-| `residue_encoding`                                    | `"fill"` (default) paints the cell; `"color"` paints the letter                                                            |
 | `hide_header`                                         | boolean, default `False`                                                                                                   |
 | `theme`                                               | `"auto"` (default), `"light"`, `"dark"` or MUI theme options                                                               |
 

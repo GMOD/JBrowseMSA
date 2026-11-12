@@ -1,17 +1,9 @@
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 
-import { letterColors } from './scales.ts'
+import { normalizedResidueColor } from './residueColor.ts'
 
 import type { MSAViewerProps } from './components/MSAViewer.tsx'
-import type { ColorScheme, Highlight } from './types.ts'
-
-export function colorSchemeSnapshot(scheme: ColorScheme | undefined) {
-  return typeof scheme === 'string'
-    ? { colorSchemeName: scheme }
-    : scheme
-      ? { customColorScheme: letterColors(scheme) }
-      : {}
-}
+import type { Highlight } from './types.ts'
 
 /**
  * The `highlightColumns` prop as `highlights`: one `{start, end}` per run of
@@ -79,7 +71,7 @@ export function viewerSnapshot(props: MSAViewerProps) {
     tree,
     gff,
     rowData,
-    colorScheme,
+    residueColor,
     height,
     colWidth,
     rowHeight,
@@ -102,7 +94,6 @@ export function viewerSnapshot(props: MSAViewerProps) {
     treeOrder,
     treeRoot,
     region,
-    residueEncoding,
   } = props
   const { msaFilehandle, treeFilehandle, gffFilehandle } = fileLocations(props)
   return {
@@ -122,7 +113,9 @@ export function viewerSnapshot(props: MSAViewerProps) {
     ...(msaFilehandle ? { msaFilehandle } : {}),
     ...(treeFilehandle ? { treeFilehandle } : {}),
     ...(gffFilehandle ? { gffFilehandle } : {}),
-    ...colorSchemeSnapshot(colorScheme),
+    ...(residueColor
+      ? { residueColor: normalizedResidueColor(residueColor) }
+      : {}),
     ...(height ? { height } : {}),
     ...(colWidth ? { colWidth } : {}),
     ...(rowHeight ? { rowHeight } : {}),
@@ -146,8 +139,5 @@ export function viewerSnapshot(props: MSAViewerProps) {
     ...(treeOrder ? { treeOrder } : {}),
     ...(treeRoot ? { treeRoot } : {}),
     ...(region ? { region } : {}),
-    ...(residueEncoding !== undefined
-      ? { bgColor: residueEncoding === 'fill' }
-      : {}),
   }
 }

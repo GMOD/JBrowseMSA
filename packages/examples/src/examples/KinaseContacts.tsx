@@ -31,7 +31,7 @@ export default function KinaseContacts() {
       msa={kinaseMSA}
       tree={kinaseTree}
       gff={kinaseDomainsGFF}
-      colorScheme="clustalx_protein_dynamic"
+      residueColor={{ scale: { scheme: 'clustalx_protein_dynamic' } }}
       height={520}
       columnTracks={[
         {

@@ -38,7 +38,7 @@ export const specs = [
       colWidth: 4.6,
       rowHeight: 2,
       drawLabels: false,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       ...FILES,
     }),
     settle: 2500,
@@ -60,7 +60,7 @@ export const specs = [
       colWidth: 4.6,
       rowHeight: 2,
       drawLabels: false,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       turnedOffTracks: { 'sequence-logo': false },
       // persisted bands under the four called-out columns, in 1-based
       // alignment coordinates (unlike the annotation anchors below, which
@@ -158,7 +158,7 @@ export const specs = [
       treeAreaWidth: 160,
       colWidth: 34,
       rowHeight: 46,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       // both tracks summarize all 474 rows, not the two visible here, so
       // they are off
       turnedOffTracks: { conservation: true, 'property-conservation': true },
@@ -199,7 +199,7 @@ export const specs = [
       treeAreaWidth: 160,
       colWidth: 34,
       rowHeight: 46,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       turnedOffTracks: { conservation: true, 'property-conservation': true },
       scrollX: -(GATEKEEPER - 8) * 34,
       // CDK2/CDK3/CDK1 are rows 261-263, adjacent in that order (not

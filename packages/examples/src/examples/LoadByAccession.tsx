@@ -282,11 +282,13 @@ export default function LoadByAccession() {
         <MSAViewer
           msa={family.msa}
           tree={family.tree}
-          colorScheme={
-            family.accession.startsWith('RF')
-              ? 'nucleotide'
-              : 'clustalx_protein_dynamic'
-          }
+          residueColor={{
+            scale: {
+              scheme: family.accession.startsWith('RF')
+                ? 'nucleotide'
+                : 'clustalx_protein_dynamic',
+            },
+          }}
           drawTree={family.tree !== undefined}
           height={500}
         />

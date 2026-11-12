@@ -196,7 +196,7 @@ snapshot <- list(msaview = c(
     type = "MsaView",
     height = 560,
     treeAreaWidth = 150,
-    colorSchemeName = "clustalx_protein_dynamic",
+    residueColor = list(scale = list(scheme = "clustalx_protein_dynamic")),
     msaFilehandle = list(uri = "data/proteases/proteases.aln"),
     treeFilehandle = list(uri = "data/proteases/proteases.nh")
   ),

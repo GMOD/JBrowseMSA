@@ -43,7 +43,7 @@ export default function App() {
     <MSAViewer
       msa={`>human\nMKAANSE\n>mouse\nMKA-NSE`}
       tree="(human:0.1,mouse:0.2);"
-      colorScheme="clustal"
+      residueColor={{ scale: { scheme: 'clustal' } }}
     />
   )
 }

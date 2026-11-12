@@ -27,7 +27,7 @@ function view(extra) {
   return fileSnap({
     treeAreaWidth: 240,
     colWidth: 8,
-    colorSchemeName: 'nucleotide',
+    residueColor: { scale: { scheme: 'nucleotide' } },
     msaFilehandle: msa,
     height: 150 + (ROWS + GC_TRACKS) * rowHeight + 40,
     rowHeight,

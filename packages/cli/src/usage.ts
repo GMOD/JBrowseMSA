@@ -82,7 +82,7 @@ export const commands = {
       'color-scheme': {
         type: 'string',
         arg: '<name>',
-        about: 'Color scheme',
+        about: 'Residue color scheme, the `scale.scheme` of `residueColor`',
         otherwise: '`maeditor`',
       },
       theme: {

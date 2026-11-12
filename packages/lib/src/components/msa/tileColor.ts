@@ -25,7 +25,7 @@ export function tileColorFn(model: MsaViewModel) {
 }
 
 // The table the active scheme colors from: a dynamic scheme's per-column table,
-// or the letter table of a static scheme or a `customColorScheme` map. A cache
+// or the letter table of a static scheme or of a `residueColor` domain. A cache
 // of rendered colors keys on its identity plus the scheme name.
 export function tileColorTable(model: MsaViewModel) {
   const { dynamicColorSchemeName } = model

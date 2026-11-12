@@ -107,7 +107,7 @@ test('the overlay fills the row when the background carries the color scheme', (
 test('letter-color mode shrinks the overlay to a bar under the row', () => {
   const boxes = drawOverlay(makeModel())
   const model = makeModel()
-  model.setBgColor(false)
+  model.setCellFill('none')
   expect(model.domainUnderline).toBe(true)
 
   const bars = drawOverlay(model)
@@ -123,7 +123,7 @@ test('letter-color mode shrinks the overlay to a bar under the row', () => {
 
 test('letters under a domain take the color scheme, not a contrast color', () => {
   const model = makeModel()
-  model.setBgColor(false)
+  model.setCellFill('none')
 
   const letters = drawLetters(model)
   expect(letters).not.toHaveLength(0)
@@ -134,7 +134,7 @@ test('letters under a domain take the color scheme, not a contrast color', () =>
 
 test('sub-row layout keeps its stacked boxes and still colors the letters', () => {
   const model = makeModel()
-  model.setBgColor(false)
+  model.setCellFill('none')
   model.setSubFeatureRows(true)
   expect(model.domainUnderline).toBe(false)
 
@@ -144,7 +144,7 @@ test('sub-row layout keeps its stacked boxes and still colors the letters', () =
 
 test('with the letters too small to draw, the overlay keeps its filled boxes', () => {
   const model = makeModel()
-  model.setBgColor(false)
+  model.setCellFill('none')
   model.setRowHeight(3)
   model.setColWidth(2)
   expect(model.showMsaLetters).toBe(false)
@@ -196,13 +196,14 @@ test('residue fill keeps the scheme in the cells and draws domains as a bar', ()
 
 test('the cell fill travels in the snapshot only off its default', () => {
   const model = makeModel()
-  expect(JSON.stringify(getSnapshot(model))).not.toContain('domainFill')
+  expect(JSON.stringify(getSnapshot(model))).not.toContain('residueColor')
   model.setCellFill('residue')
-  expect(getSnapshot(model).domainFill).toBe(false)
+  expect(getSnapshot(model).residueColor).toEqual({ field: 'residue' })
   model.setCellFill('none')
   expect(model.cellFill).toBe('none')
   model.setCellFill('domain')
-  expect([model.cellFill, model.bgColor]).toEqual(['domain', true])
+  expect(model.cellFill).toBe('domain')
+  expect(JSON.stringify(getSnapshot(model))).not.toContain('residueColor')
 })
 
 test('picking a scheme while the domains fill the cells hands them back', () => {
@@ -213,7 +214,7 @@ test('picking a scheme while the domains fill the cells hands them back', () => 
   if (clustal && 'onClick' in clustal) {
     clustal.onClick()
   }
-  expect([model.colorSchemeName, model.cellFill]).toEqual([
+  expect([model.resolvedResidueColor.scheme, model.cellFill]).toEqual([
     'clustalx_protein',
     'residue',
   ])

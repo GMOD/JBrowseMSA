@@ -72,6 +72,7 @@ export type {
   ScaleType,
   SharedScale,
 } from './scales.ts'
+export type { ResidueColor, ResidueScale } from './residueColor.ts'
 export type { RecordScaleProblem, ScaleProblem } from './scaleProblems.ts'
 export { problemLine } from './scaleProblems.ts'
 export type {
@@ -96,7 +97,6 @@ export type {
   CladeMark,
   ColorEncoding,
   ColorEncodingChannel,
-  ColorScheme,
   ColumnSpan,
   ColumnTrackEncoding,
   ColumnTrackSpec,
@@ -117,7 +117,6 @@ export type {
   NodeWithIds,
   PanelAxis,
   Region,
-  ResidueEncoding,
   ResidueMapping,
   ResidueMappingProblem,
   ResidueSegment,

@@ -38,7 +38,7 @@ test('the minimap thumb keeps its alpha as fill-opacity', async () => {
 test('percent identity colors export as hex, not hsl', async () => {
   const model = createTestModel({
     id: 'export-colors-identity',
-    colorSchemeName: 'percent_identity_dynamic',
+    residueColor: { scale: { scheme: 'percent_identity_dynamic' } },
     data: { msa: '>s1\nACDE\n>s2\nACDE\n>s3\nACDE\n' },
   })
   expect(model.colConsensus[0]!.color).toContain('hsl(')

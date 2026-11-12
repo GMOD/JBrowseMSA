@@ -138,9 +138,9 @@ What the layout gives the API:
 a `gheatmap`, and one `features` record reproduces the gene figure. Each record
 carries its own `encoding`, the way each mark in `LinearMarkDisplay` does, so a
 panel's channels sit beside the panel they color. A channel is named for the
-part of the mark it paints, as `residueEncoding` names it: `fill` for a strip's
-cell and a span's body, `color` for ink, `text` for a span's label, and `y` for
-a bar's height. Each channel nests its `scale` and `legend` the way
+part of the mark it paints, as `residueColor.channel` names it: `fill` for a
+strip's cell and a span's body, `color` for ink, `text` for a span's label, and
+`y` for a bar's height. Each channel nests its `scale` and `legend` the way
 jbrowse-components' displays do, so a bar's top is `y.scale.domainMax` and a
 color channel's palette is `scale.scheme`. jbrowse-components paints every body
 with `color`; `fill` stays here because a cell carries a letter, a second paint
@@ -231,8 +231,7 @@ serializes it into `data.treeMetadata`, the JSON string that exists today, so
 the 50 kB inline limit (`model.ts:1048`, `constants.ts:85`), the
 `postProcessSnapshot` strip (`model.ts:3350`) and `treeMetadataFilehandle`
 (`model.ts:390`, loader at `model.ts:3227`) apply without new code. The snapshot
-field keeps the name `data.treeMetadata`, which travels in existing links, the
-reason `bgColor` kept its name under `residueEncoding`.
+field keeps the name `data.treeMetadata`, which travels in existing links.
 
 `rowDataOf(name)` becomes the single reader and replaces the three call sites
 that read `?.genome` for a display label (`model.ts:1587`,

@@ -137,7 +137,7 @@ const WIDE = {
   colWidth: 4.2,
   rowHeight: 16,
   drawLabels: true,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   ...FILES,
 }
 // A close-up starts a few columns to the left of its position, so the frame

@@ -46,7 +46,7 @@ export default function Insulin() {
       msa={insulinMSA}
       tree={insulinTree}
       relativeTo="Human"
-      colorScheme="clustalx_protein_dynamic"
+      residueColor={{ scale: { scheme: 'clustalx_protein_dynamic' } }}
       height={400}
       columnTracks={[
         {

@@ -53,7 +53,7 @@ function exportEntire(model: ReturnType<typeof makeModel>) {
 
 test('the background is one image, not a rect per cell', async () => {
   const model = makeModel(40, 300)
-  expect(model.bgColor).toBe(true)
+  expect(model.cellFill).toBe('residue')
   expect(model.actuallyShowDomains).toBe(false)
 
   const svg = await exportEntire(model)
@@ -104,7 +104,7 @@ test('the domain overlay keeps the vector path, which paints its own boxes', asy
 
 test('turning background color off leaves nothing for a raster to draw', async () => {
   const model = makeModel(4, 10)
-  model.setBgColor(false)
+  model.setCellFill('none')
 
   expect(await exportEntire(model)).not.toContain('<image')
 })

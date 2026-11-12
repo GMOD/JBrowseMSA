@@ -187,14 +187,14 @@ test('a zoom reuses the tiles, a recolor rebuilds them', () => {
   model.setRowHeight(2)
   expect(imagesFor(model)[0]).toBe(tile)
 
-  model.setColorSchemeName('clustalx_protein_dynamic')
+  model.setResidueColor({ scale: { scheme: 'clustalx_protein_dynamic' } })
   expect(imagesFor(model)[0]).not.toBe(tile)
 })
 
 test('a changed letter map rebuilds the tiles and the minimap strip', () => {
   const model = make()
   const thumbnail = () => msaThumbnail({ model, theme: theme(), height: 12 })
-  model.setCustomColorScheme({ K: '#1f77b4' })
+  model.setResidueColor({ scale: { domain: ['K'], range: ['#1f77b4'] } })
   const tile = imagesFor(model)[0]
   const strip = thumbnail()
   expect(tile).toBeDefined()
@@ -204,12 +204,12 @@ test('a changed letter map rebuilds the tiles and the minimap strip', () => {
   expect(imagesFor(model)[0]).toBe(tile)
   expect(thumbnail()).toBe(strip)
 
-  model.setCustomColorScheme({ K: '#d62728' })
+  model.setResidueColor({ scale: { domain: ['K'], range: ['#d62728'] } })
   const recolored = imagesFor(model)[0]
   expect(recolored).not.toBe(tile)
   expect(thumbnail()).not.toBe(strip)
 
-  model.setCustomColorScheme(undefined)
+  model.setResidueColor({})
   expect(imagesFor(model)[0]).not.toBe(recolored)
 })
 

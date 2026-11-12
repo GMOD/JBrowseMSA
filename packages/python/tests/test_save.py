@@ -29,12 +29,13 @@ def test_save_writes_every_prop_the_front_end_sends():
         msa_filehandle={"uri": "a.fa", "locationType": "UriLocation"},
         tree_filehandle={"uri": "a.nh", "locationType": "UriLocation"},
         gff_filehandle={"uri": "a.gff", "locationType": "UriLocation"},
-        color_scheme="clustal",
+        residue_color={"scale": {"scheme": "clustal"}},
         height=300,
         col_width=10,
         row_height=12,
         allowed_gappyness=50,
         relative_to="Mouse",
+        row_transform={"sort": [{"field": "host"}]},
         region={"start": 1, "end": 3},
         selection={"start": 1, "end": 2},
         tree_area_width=150,
@@ -46,9 +47,10 @@ def test_save_writes_every_prop_the_front_end_sends():
 
 
 def test_props_convert_the_traits_the_way_render_ts_does():
-    view = MSAView(msa=MSA, color_scheme={"A": "red"}, tree_root="Mouse", msa_url="https://x.org/a.fa")
+    letters = {"field": "residue", "scale": {"domain": ["A"], "range": ["red"]}}
+    view = MSAView(msa=MSA, residue_color=letters, tree_root="Mouse", msa_url="https://x.org/a.fa")
     p = props(view)
-    assert p["colorScheme"] == {"domain": ["A"], "range": ["red"]}
+    assert p["residueColor"] == letters
     assert p["treeRoot"] == {"outgroup": ["Mouse"]}
     assert p["msaUrl"] == "https://x.org/a.fa"
     assert "theme" not in p and "height" not in p and "tree" not in p

@@ -95,7 +95,7 @@ export default function P53Predictors() {
         msa={p53MSA}
         tree={p53Tree}
         gff={p53DomainsGFF}
-        colorScheme="clustalx_protein_dynamic"
+        residueColor={{ scale: { scheme: 'clustalx_protein_dynamic' } }}
         relativeTo={row}
         colWidth={3}
         height={680}

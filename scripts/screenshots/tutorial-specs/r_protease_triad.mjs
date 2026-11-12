@@ -43,7 +43,7 @@ const base = {
   treeAreaWidth: 200,
   colWidth: 3.4,
   rowHeight: 18,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   msaFilehandle: { uri: 'data/proteases/proteases.aln' },
   treeFilehandle: { uri: 'data/proteases/proteases.nh' },
 }

@@ -45,7 +45,7 @@ const FoldseekReplay = observer(function FoldseekReplay() {
     MSAModelF().create({
       type: 'MsaView',
       height: 260,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       data: { msa: globins.msa.replace('>MYG_HUMAN', `>${row}`) },
       highlights: hemeHistidines,
     }),

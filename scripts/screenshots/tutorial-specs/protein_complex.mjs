@@ -78,7 +78,7 @@ const wide = {
   treeAreaWidth: 150,
   colWidth: 4.4,
   rowHeight: 22,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   ...files,
 }
 // a close-up starts a few columns left of its feature, so the frame shows some
@@ -89,7 +89,7 @@ const closeUp = (startCol, colWidth) => ({
   colWidth,
   rowHeight: 22,
   scrollX: -startCol * colWidth,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   ...files,
 })
 

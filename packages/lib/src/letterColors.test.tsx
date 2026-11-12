@@ -53,7 +53,7 @@ async function exportEntire(
 test('a dark theme draws uncolored letters in its own text color', async () => {
   const model = createTestModel({
     id: 'dark-letters',
-    colorSchemeName: 'maeditor',
+    residueColor: { scale: { scheme: 'maeditor' } },
     // B and Z have no maeditor color, and neither does a gap
     data: { msa: '>s1\nBZ-A\n>s2\nBZ-A\n' },
   })
@@ -73,7 +73,7 @@ test('a dark theme draws uncolored letters in its own text color', async () => {
 test('a reference match draws its dot in the theme text color', async () => {
   const model = createTestModel({
     id: 'reference-dots',
-    colorSchemeName: 'maeditor',
+    residueColor: { scale: { scheme: 'maeditor' } },
     data: { msa: '>s1\nAAAA\n>s2\nAAAA\n' },
   })
   model.drawRelativeTo('s2')

@@ -82,7 +82,7 @@ Edit [`specs.mjs`](specs.mjs), or for a tutorial's figures add a module under
 ```js
 {
   name: 'my-shot',                 // → docs/media/my-shot.png
-  url: data({ colorSchemeName }),  // '' for the import form, or data({...})
+  url: data({ residueColor }),     // '' for the import form, or data({...})
   actions: [                       // optional, for menus/dialogs
     { click: '[data-testid="file_menu"]' },
     { waitFor: '::-p-text(Export as SVG)' },

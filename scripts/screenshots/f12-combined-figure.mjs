@@ -114,7 +114,7 @@ const msaBase = {
   id: 'msa-f12',
   type: 'MsaView',
   displayName: 'F12 CDS — cetacean gene loss (DNA, tree + exon model)',
-  colorSchemeName: 'nucleotide',
+  residueColor: { scale: { scheme: 'nucleotide' } },
   treeAreaWidth: 180,
   labelsAlignRight: true,
   highlightColumns: [205],

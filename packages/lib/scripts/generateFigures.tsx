@@ -62,18 +62,18 @@ GPCR_chicken\tInterProScan\tprotein_match\t6\t62\t.\t.\t.\tName=PF00001;descript
 const figures = [
   {
     name: 'example-protein',
-    colorScheme: 'maeditor',
+    scheme: 'maeditor',
     data: { msa: proteinMSA, tree: proteinTree },
   },
   {
     name: 'r-quickstart',
-    colorScheme: 'clustal',
+    scheme: 'clustal',
     treeAreaWidth: 160,
     data: { msa: hemoglobinMSA, tree: hemoglobinTree },
   },
   {
     name: 'example-domains',
-    colorScheme: 'clustalx_protein_dynamic',
+    scheme: 'clustalx_protein_dynamic',
     treeAreaWidth: 220,
     data: { msa: domainsMSA, tree: '', gff: domainsGFF },
   },
@@ -96,7 +96,7 @@ test('generate README figures', async () => {
       id: fig.name,
       type: 'MsaView',
       height: 400,
-      colorSchemeName: fig.colorScheme,
+      residueColor: { scale: { scheme: fig.scheme } },
       data: fig.data,
     })
     if (fig.treeAreaWidth !== undefined) {

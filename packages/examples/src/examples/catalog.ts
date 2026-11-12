@@ -115,8 +115,8 @@ export const catalog: CatalogEntry[] = [
     description:
       'Conservation, InterPro domains and ClinVar pathogenic missense counts ' +
       'over the same p53 columns. 94% of the variants land in the DNA-binding ' +
-      'domain. residueEncoding switches the color scheme between the cell, ' +
-      'under the domain boxes, and the letter, with each domain a bar.',
+      "domain. residueColor's channel switches the color scheme between the " +
+      'cell, under the domain boxes, and the letter, with each domain a bar.',
   },
   {
     id: 'GlobinSuperposition',

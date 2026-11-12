@@ -46,8 +46,8 @@ export function renderMSABlock({
     fontSize,
     highResScaleFactor,
     cellFill,
-    bgColor,
   } = model
+  const fillsCells = cellFill !== 'none'
   const k = highResScaleFactorOverride ?? highResScaleFactor
   const bx = blockSizeXOverride ?? blockSize
   const by = blockSizeYOverride ?? blockSize
@@ -57,7 +57,7 @@ export function renderMSABlock({
     ctx.translate(-offsetX, rowHeight / 2 - offsetY)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'alphabetic'
-    setFontSize(ctx, fontSize, !bgColor)
+    setFontSize(ctx, fontSize, !fillsCells)
   }
   setup()
 
@@ -144,7 +144,7 @@ function drawTilesAndText({
   pass: 'tiles' | 'letters' | 'both'
 }) {
   const {
-    bgColor,
+    cellFill,
     columns,
     colWidth,
     rowHeight,
@@ -156,7 +156,8 @@ function drawTilesAndText({
     featureColors,
   } = model
 
-  const tiles = drawTiles && bgColor
+  const fillsCells = cellFill !== 'none'
+  const tiles = drawTiles && fillsCells
   const paintTiles = tiles && !rasterTiles && pass !== 'letters'
   const letters = lettersOn && pass !== 'tiles'
   if (paintTiles || letters) {
@@ -217,7 +218,7 @@ function drawTilesAndText({
                   ? // on top of a colored tile, or on the background where the
                     // scheme gives that cell no color
                     contrastText(color)
-                  : bgColor || !color
+                  : fillsCells || !color
                     ? // plain background, uncolored letters
                       theme.palette.text.primary
                     : // letter-color mode: darken/lighten to stay readable
@@ -250,7 +251,7 @@ function drawInsertionIndicators({
   xStart: number
   xEnd: number
 }) {
-  const { bgColor, hideGapsEffective } = model
+  const { cellFill, hideGapsEffective } = model
   if (!hideGapsEffective) {
     return
   }
@@ -258,7 +259,7 @@ function drawInsertionIndicators({
   ctx.lineWidth = 1
   ctx.strokeStyle = '#f0f'
   drawZigZag({ visibleLeaves, xStart, ctx, model, xEnd, offset: 0 })
-  ctx.strokeStyle = !bgColor ? '#000' : '#fff'
+  ctx.strokeStyle = cellFill === 'none' ? '#000' : '#fff'
   drawZigZag({ visibleLeaves, xStart, ctx, model, xEnd, offset: -1 })
 }
 

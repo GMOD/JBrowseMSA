@@ -55,7 +55,7 @@ const base = {
   colWidth: 2.6,
   rowHeight: 15,
   relativeTo: 'Human',
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   // the second conservation histogram repeats the first in a different
   // palette and takes height from the three tracks below it
   turnedOffTracks: { 'property-conservation': true },

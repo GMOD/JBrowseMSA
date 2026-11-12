@@ -12,6 +12,7 @@ import type {
   MountedViewer,
   MsaSelection,
   Region,
+  ResidueColor,
   ResidueMapping,
   RowDataInput,
   RowPanelSpec,
@@ -33,7 +34,7 @@ export interface Traits {
   msa_filehandle: FileLocation | null
   tree_filehandle: FileLocation | null
   gff_filehandle: FileLocation | null
-  color_scheme: string | Record<string, string> | null
+  residue_color: ResidueColor | null
   height: number | null
   col_width: number | null
   row_height: number | null
@@ -57,7 +58,6 @@ export interface Traits {
   show_branch_len: boolean
   tree_order: TreeOrder | null
   tree_root: string | string[] | null
-  residue_encoding: 'fill' | 'color'
   hide_header: boolean
   theme: 'auto' | 'light' | 'dark' | Exclude<MSAViewerProps['theme'], string>
   clicked: Cell | null
@@ -77,7 +77,7 @@ export const INPUT_TRAITS = [
   'msa_filehandle',
   'tree_filehandle',
   'gff_filehandle',
-  'color_scheme',
+  'residue_color',
   'height',
   'col_width',
   'row_height',
@@ -101,7 +101,6 @@ export const INPUT_TRAITS = [
   'show_branch_len',
   'tree_order',
   'tree_root',
-  'residue_encoding',
   'hide_header',
   'theme',
 ] as const
@@ -122,14 +121,6 @@ function optional<T>(value: T | null | '') {
   return value === null || value === '' ? undefined : value
 }
 
-// a scheme name, or a dict of residue letter to color, which goes to the
-// viewer as a color object over the letters
-function colorScheme(scheme: Traits['color_scheme']) {
-  return typeof scheme === 'object' && scheme !== null
-    ? { domain: Object.keys(scheme), range: Object.values(scheme) }
-    : optional(scheme)
-}
-
 export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
   const theme = model.get('theme')
   return {
@@ -142,7 +133,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     msaFilehandle: optional(model.get('msa_filehandle')),
     treeFilehandle: optional(model.get('tree_filehandle')),
     gffFilehandle: optional(model.get('gff_filehandle')),
-    colorScheme: colorScheme(model.get('color_scheme')),
+    residueColor: optional(model.get('residue_color')),
     height: optional(model.get('height')),
     colWidth: optional(model.get('col_width')),
     rowHeight: optional(model.get('row_height')),
@@ -166,7 +157,6 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     showBranchLen: model.get('show_branch_len'),
     treeOrder: optional(model.get('tree_order')),
     treeRoot: treeRoot(model.get('tree_root')),
-    residueEncoding: model.get('residue_encoding'),
     hideHeader: model.get('hide_header'),
     theme: theme === 'auto' ? hostTheme(doc) : theme,
   }

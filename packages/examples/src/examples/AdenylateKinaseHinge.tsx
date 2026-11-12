@@ -48,7 +48,7 @@ const AdenylateKinaseHinge = observer(function AdenylateKinaseHinge() {
       type: 'MsaView',
       height: 220,
       colWidth: 5,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       data: { msa: `>${open}\n${sequence}\n>${closed}\n${sequence}\n` },
       turnedOffTracks: { conservation: true, 'property-conservation': true },
       selection: core,

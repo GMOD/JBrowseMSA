@@ -25,7 +25,7 @@ export default function Ace2() {
       msa={ace2MSA}
       tree={ace2Tree}
       relativeTo="Human"
-      colorScheme="clustalx_protein_dynamic"
+      residueColor={{ scale: { scheme: 'clustalx_protein_dynamic' } }}
       height={480}
       highlights={interface6m0j.highlights.map(({ row, start, end }, i) => ({
         row,

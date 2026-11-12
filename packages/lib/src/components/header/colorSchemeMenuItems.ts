@@ -76,12 +76,14 @@ const schemes: SchemeEntry[] = [
 
 export const catalogedSchemeNames = schemes.map(s => s.name)
 
-// While a `customColorScheme` map is set, a checked Custom entry stands for it
-// and no named scheme is checked. Picking a named scheme clears the map. The
-// active scheme always shows at the top level. While the domains fill the
-// cells no scheme is checked, and picking one hands the cells back to it.
+// While the residue color lists letters in its `domain`, a checked Custom
+// entry stands for them and no named scheme is checked. Picking a named scheme
+// clears the letters. The active scheme always shows at the top level. While
+// the domains fill the cells no scheme is checked, and picking one hands the
+// cells back to it.
 export function colorSchemeMenuItems(model: MsaViewModel): MenuItem[] {
-  const { cellFill, colorSchemeName, customColorScheme, sequenceType } = model
+  const { cellFill, resolvedResidueColor, sequenceType } = model
+  const { letters, scheme } = resolvedResidueColor
   const alphabet = sequenceType === 'amino' ? 'protein' : 'nucleotide'
   const schemeShown = cellFill !== 'domain'
   function takeCells() {
@@ -93,10 +95,12 @@ export function colorSchemeMenuItems(model: MsaViewModel): MenuItem[] {
     return {
       label: entry.label,
       type: 'radio',
-      checked:
-        schemeShown && !customColorScheme && colorSchemeName === entry.name,
+      checked: schemeShown && !letters && scheme === entry.name,
       onClick: () => {
-        model.setColorSchemeName(entry.name)
+        model.setResidueColor({
+          ...model.residueColor,
+          scale: { scheme: entry.name },
+        })
         takeCells()
       },
     } as const
@@ -104,9 +108,9 @@ export function colorSchemeMenuItems(model: MsaViewModel): MenuItem[] {
   const top = (e: SchemeEntry) =>
     (e.featured === true &&
       (e.alphabet === 'any' || e.alphabet === alphabet)) ||
-    (!customColorScheme && e.name === colorSchemeName)
+    (!letters && e.name === scheme)
   return [
-    ...(customColorScheme
+    ...(letters
       ? [
           {
             label: 'Custom',

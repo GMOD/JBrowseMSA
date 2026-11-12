@@ -219,13 +219,11 @@ export async function exportSvg({
   }
 
   const model = MSAModelF().create({
-    colorSchemeName: 'maeditor',
     height: 600,
     ...spec,
     // a fixed id keeps clipPath ids, and so the output bytes, stable across runs
     id: 'msaview-export',
     type: 'MsaView',
-    ...(colorScheme === undefined ? {} : { colorSchemeName: colorScheme }),
     ...(height === undefined ? {} : { height }),
     // an entire-alignment export is sized by cell size, not --width/--height;
     // cells below the letter threshold draw a long alignment as blocks
@@ -234,6 +232,12 @@ export async function exportSvg({
     ...(format ? { msaFormat: format } : {}),
     data,
   })
+  if (colorScheme !== undefined) {
+    model.setResidueColor({
+      ...model.residueColor,
+      scale: { scheme: colorScheme },
+    })
+  }
   if (treeAreaWidth !== undefined) {
     model.setTreeAreaWidth(treeAreaWidth)
   }

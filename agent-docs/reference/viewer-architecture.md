@@ -43,22 +43,26 @@ background.
 
 ## Color
 
-- The color scheme is a categorical scale over residue letters, and the public
-  `residueEncoding` prop names the channel it paints: `fill` colors the cell,
-  `color` colors the letter. The MST property behind it stays `bgColor`, because
-  that name travels in the shared URL. The vocabulary is the one
+- The residue colors are one color object, `residueColor` (`residueColor.ts`),
+  which is the MST property, the shared-URL key and the `MSAViewer` prop:
+  `channel` is `fill` (the cell) or `color` (the letter), `field` is `feature`
+  or `residue`, and `scale` is a `scheme` name or a `domain` and `range` over
+  letters, which wins over the `scheme` while set. The vocabulary is the one
   jbrowse-components uses for `LinearMarkDisplay` (marks, encodings, channels,
   scales).
-- The `colorScheme` prop takes a scheme name or a color object's
-  `{domain, range}` over letters, which the model keeps as the letter map
-  `customColorScheme` and which wins over `colorSchemeName` while set.
-  `dynamicColorSchemeName` is undefined under a map.
+- Three scheme names resolve to a function of the column and the letter in place
+  of a letter table, and `dynamicColorSchemeName` names the one in use,
+  undefined under a `domain`.
+- `preProcessSnapshot` reads the keys the residue colors had before into
+  `residueColor` (`liftResidueColor`), so links written with `bgColor`,
+  `colorSchemeName`, `customColorScheme` or `domainFill` still open as they
+  drew.
 - A domain box and the scale contend for the cell fill, and `cellFill` in
   `model.ts` names the owner: `residue` (the scheme), `domain` (the boxes), or
-  `none`, which is `residueEncoding: 'color'`. Domains own it only while shown
-  and `domainFill` is on, its default, so a loaded GFF fills the cells; picking
-  a scheme in the menu sets `domainFill` off, since a scheme picked under the
-  boxes would change nothing on screen.
+  `none`, which is the `color` channel. Domains own it only while shown and the
+  `field` is `feature`, its default, so a loaded GFF fills the cells; picking a
+  scheme in the menu sets the `field` to `residue`, since a scheme picked under
+  the boxes would change nothing on screen.
 - Whenever the domains do not own the fill and the letters are big enough to
   draw, `domainUnderline` marks each span with a `domainUnderlineHeight` bar
   along the bottom of the row, drawn after the residue tiles. A filled box wins

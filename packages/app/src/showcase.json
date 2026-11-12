@@ -6,7 +6,7 @@
       "type": "MsaView",
       "treeAreaWidth": 150,
       "colWidth": 0.7,
-      "colorSchemeName": "clustalx_protein_dynamic",
+      "residueColor": { "scale": { "scheme": "clustalx_protein_dynamic" } },
       "msaFilehandle": {
         "uri": "data/nlrp1.aln"
       },
@@ -26,7 +26,7 @@
       "treeAreaWidth": 170,
       "colWidth": 0.8,
       "rowHeight": 22,
-      "colorSchemeName": "clustalx_protein_dynamic",
+      "residueColor": { "scale": { "scheme": "clustalx_protein_dynamic" } },
       "msaFilehandle": {
         "uri": "data/spike/spike.afa"
       },
@@ -165,7 +165,7 @@
         "uri": "data/neighborhoods/trp-neighborhoods.gff"
       },
       "colWidth": 0.9,
-      "colorSchemeName": "clustalx_protein_dynamic",
+      "residueColor": { "scale": { "scheme": "clustalx_protein_dynamic" } },
       "showDomains": false,
       "rowPanels": [
         {
@@ -226,7 +226,7 @@
       "colWidth": 0.3,
       "rowHeight": 8,
       "drawLabels": false,
-      "colorSchemeName": "nucleotide",
+      "residueColor": { "scale": { "scheme": "nucleotide" } },
       "encodings": [
         {
           "channel": "branch",

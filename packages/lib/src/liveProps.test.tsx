@@ -81,33 +81,39 @@ test('the model is built once and reused across renders', () => {
 test('height, color scheme and zoom follow the props', () => {
   const model = show({
     height: 300,
-    colorScheme: 'clustal',
+    residueColor: { scale: { scheme: 'clustal' } },
     colWidth: 10,
     rowHeight: 12,
   })
   expect(model.height).toBe(300)
 
-  show({ height: 700, colorScheme: 'lesk', colWidth: 4, rowHeight: 6 })
+  show({
+    height: 700,
+    residueColor: { scale: { scheme: 'lesk' } },
+    colWidth: 4,
+    rowHeight: 6,
+  })
   expect(model.height).toBe(700)
-  expect(model.colorSchemeName).toBe('lesk')
+  expect(model.resolvedResidueColor.scheme).toBe('lesk')
   expect(model.colWidth).toBe(4)
   expect(model.rowHeight).toBe(6)
 })
 
-test('colorScheme takes a scheme name or a letter map', () => {
-  const model = show({ colorScheme: { domain: ['K'], range: ['#1f77b4'] } })
-  expect(model.customColorScheme).toEqual({ K: '#1f77b4' })
+test('residueColor takes a scheme name or a letter map', () => {
+  const kBlue = { scale: { domain: ['K'], range: ['#1f77b4'] } }
+  const model = show({ residueColor: kBlue })
+  expect(model.resolvedResidueColor.letters).toEqual({ K: '#1f77b4' })
   expect(model.colorScheme.K).toBe('#1f77b4')
 
-  show({ colorScheme: { domain: ['K'], range: ['#1f77b4'] } })
-  expect(model.customColorScheme).toEqual({ K: '#1f77b4' })
+  show({ residueColor: kBlue })
+  expect(model.resolvedResidueColor.letters).toEqual({ K: '#1f77b4' })
 
-  show({ colorScheme: { domain: ['R'], range: ['#d62728'] } })
-  expect(model.customColorScheme).toEqual({ R: '#d62728' })
+  show({ residueColor: { scale: { domain: ['R'], range: ['#d62728'] } } })
+  expect(model.resolvedResidueColor.letters).toEqual({ R: '#d62728' })
 
-  show({ colorScheme: 'lesk' })
-  expect(model.customColorScheme).toBeUndefined()
-  expect(model.colorSchemeName).toBe('lesk')
+  show({ residueColor: { scale: { scheme: 'lesk' } } })
+  expect(model.resolvedResidueColor.letters).toBeUndefined()
+  expect(model.resolvedResidueColor.scheme).toBe('lesk')
 })
 
 test('dropping relativeTo turns the reference diff back off', () => {
@@ -132,29 +138,29 @@ test('with no treeAreaWidth the gutter fits, and the prop wins over the fit', ()
   expect(model.effectiveTreeAreaWidth).toBe(model.fittedTreeAreaWidth + 50)
 })
 
-test('residueEncoding follows the prop, and the flip keeps the scroll position', () => {
+test('the residueColor channel follows the prop, and the flip keeps the scroll position', () => {
   // wider than the alignment pane, so there is a scroll position to keep
   const wide = `>human\n${'MKAANSE'.repeat(40)}\n>mouse\n${'MKA-NSE'.repeat(40)}\n`
-  const render = (residueEncoding: 'fill' | 'color') => {
+  const render = (channel: 'fill' | 'color') => {
     act(() => {
-      root.render(<MSAViewer msa={wide} residueEncoding={residueEncoding} />)
+      root.render(<MSAViewer msa={wide} residueColor={{ channel }} />)
     })
     return captured!
   }
 
   const model = render('color')
-  expect(model.bgColor).toBe(false)
+  expect(model.cellFill).toBe('none')
   act(() => {
     model.setScrollX(-240)
   })
 
   expect(render('fill')).toBe(model)
-  expect(model.bgColor).toBe(true)
+  expect(model.cellFill).toBe('residue')
   expect(model.scrollX).toBe(-240)
 })
 
-test('a viewer given no residueEncoding colors the background', () => {
-  expect(show({}).bgColor).toBe(true)
+test('a viewer given no residueColor colors the background', () => {
+  expect(show({}).cellFill).toBe('residue')
 })
 
 test('a change made inside the viewer survives the host re-rendering', () => {
@@ -162,12 +168,12 @@ test('a change made inside the viewer survives the host re-rendering', () => {
   const model = show({ height: 300 })
   act(() => {
     model.setRowHeight(30)
-    model.setColorSchemeName('flower')
+    model.setResidueColor({ scale: { scheme: 'flower' } })
   })
   show({ height: 320 })
   expect(model.height).toBe(320)
   expect(model.rowHeight).toBe(30)
-  expect(model.colorSchemeName).toBe('flower')
+  expect(model.resolvedResidueColor.scheme).toBe('flower')
 })
 
 test('the data layers follow their props', () => {

@@ -86,7 +86,11 @@ export default function RnaFamilies() {
       <Typography variant="body2" sx={{ my: 1 }}>
         {caption}
       </Typography>
-      <MSAViewer msa={msa} colorScheme="nucleotide" height={height} />
+      <MSAViewer
+        msa={msa}
+        residueColor={{ scale: { scheme: 'nucleotide' } }}
+        height={height}
+      />
     </div>
   )
 }

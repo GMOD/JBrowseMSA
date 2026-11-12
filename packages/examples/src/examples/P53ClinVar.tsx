@@ -7,7 +7,7 @@ import { MSAViewer } from 'react-msaview'
 import { p53DomainsGFF, p53MSA, p53Tree } from './data'
 import clinvar from './p53ClinVar.json'
 
-import type { ResidueEncoding } from 'react-msaview'
+type Channel = 'fill' | 'color'
 
 // Three measures of which part of p53 matters, from three sources, on the same
 // columns.
@@ -24,23 +24,23 @@ import type { ResidueEncoding } from 'react-msaview'
 // and `encoding.y.scale.domainMax` sets which count draws full height. Data and provenance in
 // p53ClinVar.json, built by scripts/examples-gen/clinvar.mjs.
 //
-// colorScheme is the scale over residue letters, and residueEncoding is the
-// channel it paints. On `fill` it colors the cell, which is also where a domain
-// box draws, so the box covers the residue colors. On `color` it colors the letter, and
+// residueColor's scale is over residue letters, and its channel is what it
+// paints. On `fill` it colors the cell, which is also where a domain box draws,
+// so the box covers the residue colors. On `color` it colors the letter, and
 // each domain draws as a bar along the bottom of its row. The standalone app
 // has the same switch under Settings → Color, as "Color the letters, not the
 // cells".
 export default function P53ClinVar() {
-  const [encoding, setEncoding] = useState<ResidueEncoding>('fill')
+  const [channel, setChannel] = useState<Channel>('fill')
   return (
     <div>
       <ToggleButtonGroup
         size="small"
         exclusive
-        value={encoding}
-        onChange={(_, value: ResidueEncoding | null) => {
+        value={channel}
+        onChange={(_, value: Channel | null) => {
           if (value) {
-            setEncoding(value)
+            setChannel(value)
           }
         }}
         sx={{ mb: 1 }}
@@ -52,9 +52,11 @@ export default function P53ClinVar() {
         msa={p53MSA}
         tree={p53Tree}
         gff={p53DomainsGFF}
-        colorScheme="clustalx_protein_dynamic"
+        residueColor={{
+          channel,
+          scale: { scheme: 'clustalx_protein_dynamic' },
+        }}
         relativeTo="Human"
-        residueEncoding={encoding}
         height={480}
         columnTracks={[
           {

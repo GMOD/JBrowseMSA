@@ -68,7 +68,7 @@ const P53Hotspots3D = observer(function P53Hotspots3D() {
     MSAModelF().create({
       type: 'MsaView',
       height: 420,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       relativeTo: clinvar.row,
       region: { row: clinvar.row, ...domain },
       data: { msa: p53MSA, tree: p53Tree, gff: p53DomainsGFF },

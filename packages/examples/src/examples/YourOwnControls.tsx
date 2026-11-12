@@ -30,7 +30,7 @@ function isMode(value: unknown): value is Mode {
 // sentence under the viewer is built from them.
 export default function YourOwnControls() {
   const [mode, setMode] = useState<Mode>('dark')
-  const [colorScheme, setColorScheme] = useState('clustalx_protein_dynamic')
+  const [scheme, setScheme] = useState('clustalx_protein_dynamic')
   const [colWidth, setColWidth] = useState(12)
   const [diff, setDiff] = useState(false)
   const [tree, setTree] = useState(true)
@@ -68,9 +68,9 @@ export default function YourOwnControls() {
         <TextField
           select
           size="small"
-          value={colorScheme}
+          value={scheme}
           onChange={event => {
-            setColorScheme(event.target.value)
+            setScheme(event.target.value)
           }}
           sx={{ minWidth: 220, bgcolor: '#fff', borderRadius: 1 }}
         >
@@ -122,7 +122,7 @@ export default function YourOwnControls() {
         tree={globinTree}
         hideHeader
         theme={mode}
-        colorScheme={colorScheme}
+        residueColor={{ scale: { scheme } }}
         colWidth={colWidth}
         relativeTo={diff ? 'Human_beta' : undefined}
         drawTree={tree}

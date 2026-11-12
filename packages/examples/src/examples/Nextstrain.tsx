@@ -39,7 +39,7 @@ export default function Nextstrain() {
       <MSAViewer
         treeUrl={`${base}/${slug}.nwk`}
         msaUrl={`${base}/${slug}_msa.fasta`}
-        colorScheme="nucleotide"
+        residueColor={{ scale: { scheme: 'nucleotide' } }}
         treeAreaWidth={300}
         height={600}
       />

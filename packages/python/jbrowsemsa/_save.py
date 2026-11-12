@@ -27,7 +27,6 @@ def _tree_root(root: Any) -> Any:
 def props(view: Any) -> dict[str, Any]:
     """The props `propsFromModel` in src/render.ts builds from the same traits.
     `theme="auto"` follows the notebook in the browser and is light here."""
-    scheme = view.color_scheme
     theme = view.theme
     out = {
         "msa": _optional(view.msa),
@@ -39,11 +38,7 @@ def props(view: Any) -> dict[str, Any]:
         "msaFilehandle": view.msa_filehandle,
         "treeFilehandle": view.tree_filehandle,
         "gffFilehandle": view.gff_filehandle,
-        "colorScheme": (
-            {"domain": list(scheme), "range": list(scheme.values())}
-            if isinstance(scheme, dict)
-            else _optional(scheme)
-        ),
+        "residueColor": view.residue_color,
         "height": view.height,
         "colWidth": view.col_width,
         "rowHeight": view.row_height,
@@ -67,7 +62,6 @@ def props(view: Any) -> dict[str, Any]:
         "showBranchLen": view.show_branch_len,
         "treeOrder": view.tree_order,
         "treeRoot": _tree_root(view.tree_root),
-        "residueEncoding": view.residue_encoding,
         "hideHeader": view.hide_header,
         "theme": None if theme == "auto" else theme,
     }

@@ -26,7 +26,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "msa_filehandle": None,
         "tree_filehandle": None,
         "gff_filehandle": None,
-        "color_scheme": None,
+        "residue_color": None,
         "height": None,
         "col_width": None,
         "row_height": None,
@@ -50,7 +50,6 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "show_branch_len": True,
         "tree_order": None,
         "tree_root": None,
-        "residue_encoding": "fill",
         "hide_header": False,
         "theme": "auto",
         "clicked": None,
@@ -90,18 +89,13 @@ def test_theme_takes_a_mode_or_theme_options():
         MSAView(theme="sepia")
 
 
-def test_color_scheme_takes_a_name_or_a_letter_map():
-    assert MSAView(color_scheme="clustal").color_scheme == "clustal"
-    letters = {"K": "#1f77b4", "R": "#1f77b4"}
-    assert MSAView(color_scheme=letters).color_scheme == letters
+def test_residue_color_takes_the_color_object():
+    scheme = {"scale": {"scheme": "clustal"}}
+    assert MSAView(residue_color=scheme).residue_color == scheme
+    letters = {"channel": "color", "scale": {"domain": ["K"], "range": ["#1f77b4"]}}
+    assert MSAView(residue_color=letters).residue_color == letters
     with pytest.raises(traitlets.TraitError):
-        MSAView(color_scheme=["K", "R"])
-
-
-def test_residue_encoding_takes_fill_or_color():
-    assert MSAView(residue_encoding="color").residue_encoding == "color"
-    with pytest.raises(traitlets.TraitError):
-        MSAView(residue_encoding="both")
+        MSAView(residue_color="clustal")
 
 
 def test_positional_msa_and_tree():

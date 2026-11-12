@@ -24,7 +24,7 @@ export default function A3m() {
   return (
     <MSAViewer
       msaUrl={A3M}
-      colorScheme="clustalx_protein_dynamic"
+      residueColor={{ scale: { scheme: 'clustalx_protein_dynamic' } }}
       drawTree={false}
       treeAreaWidth={130}
       allowedGappyness={50}

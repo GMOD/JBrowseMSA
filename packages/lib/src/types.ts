@@ -26,20 +26,6 @@ export type TrackKind =
   | 'features'
   | 'strip'
 
-/**
- * Which channel the color scheme paints. `fill` colors the cell a residue sits
- * in, `color` colors the letter itself, the same distinction a grammar of
- * graphics draws between a shape's interior and its own ink.
- */
-export type ResidueEncoding = 'fill' | 'color'
-
-/**
- * The residue colors: a scheme name from the built-in table, or a scale over
- * residue letters, `{domain: ['K', 'R'], range: ['#1f77b4', '#1f77b4']}`,
- * which leaves every letter it does not list uncolored
- */
-export type ColorScheme = string | { domain?: string[]; range?: string[] }
-
 export interface BasicTrackModel {
   id: string
   name: string
@@ -161,8 +147,8 @@ export interface SpanSpec {
  * The channels a column track reads. `y.scale` maps a bar's value onto its
  * height. `color` is one color as `{value}`, or else reads the track's own
  * values through its `scale`: a bar's or a strip's numbers, an arc's `value`,
- * a text track's upper-case characters, painted the way `residueEncoding`
- * paints the residues. A features track reads `fill` and `text` off its
+ * a text track's upper-case characters, painted on the channel `residueColor`
+ * names. A features track reads `fill` and `text` off its
  * spans' fields.
  */
 export interface ColumnTrackEncoding extends FeatureEncodingSpec {

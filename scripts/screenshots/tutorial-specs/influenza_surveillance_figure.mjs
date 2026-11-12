@@ -26,7 +26,7 @@ const WHOLE = {
   colWidth: 0.35,
   rowHeight: 8,
   drawLabels: false,
-  colorSchemeName: 'nucleotide',
+  residueColor: { scale: { scheme: 'nucleotide' } },
 }
 
 // The readable window: 38 rows at 18px starting on display row 41, the first
@@ -41,7 +41,7 @@ const READABLE = {
   rowHeight: ROW_H,
   drawLabels: true,
   scrollY: -WINDOW_TOP * ROW_H,
-  colorSchemeName: 'nucleotide',
+  residueColor: { scale: { scheme: 'nucleotide' } },
 }
 
 // One color per amino acid, shared by the eight segment strips, so a state

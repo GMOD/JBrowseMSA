@@ -12,7 +12,7 @@ import { paletteNamed } from './ggplotPalettes.ts'
 import { compareGroupKeys } from './groupKeys.ts'
 
 import type { LegendItem } from './legendSpec.ts'
-import type { Annotation, ColorScheme } from './types.ts'
+import type { Annotation } from './types.ts'
 
 export type ScaleType = 'ordinal' | 'linear' | 'log' | 'threshold' | 'identity'
 
@@ -590,7 +590,7 @@ export function colorTable(
   )
 }
 
-/** the letter-to-color table an object `colorScheme`, a scale, gives */
-export function letterColors(scheme: Exclude<ColorScheme, string>) {
-  return colorTable(scheme, scheme.domain ?? [])
+/** the letter-to-color table a residue scale's `domain` and `range` give */
+export function letterColors(scale: { domain?: string[]; range?: string[] }) {
+  return colorTable(scale, scale.domain ?? [])
 }

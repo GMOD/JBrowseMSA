@@ -186,12 +186,6 @@ export function StructureLinkedViewer({
     }
   }, [layersUrl])
 
-  useEffect(() => {
-    if (model && schemePicks > 0) {
-      model.setDomainFill(false)
-    }
-  }, [model, schemePicks])
-
   // a layers file written before the panel read each mapping's own file url
   // names no file, so the page's structure url stands in for it
   const residueMappings = layers.residueMappings?.map(m => ({
@@ -225,7 +219,10 @@ export function StructureLinkedViewer({
           highlights={layers.highlights}
           columnTracks={layers.columnTracks}
           residueMappings={residueMappings}
-          colorScheme={colorScheme}
+          residueColor={{
+            field: schemePicks > 0 ? 'residue' : 'feature',
+            scale: { scheme: colorScheme },
+          }}
           treeAreaWidth={150}
           height={height}
           region={focus}

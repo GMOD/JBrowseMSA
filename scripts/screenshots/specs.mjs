@@ -46,12 +46,16 @@ export const specs = [
   },
   {
     name: 'colorscheme-clustalx',
-    url: data({ colorSchemeName: 'clustalx_protein_dynamic' }),
+    url: data({
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
+    }),
     clip: 'viewer',
   },
   {
     name: 'colorscheme-pid',
-    url: data({ colorSchemeName: 'percent_identity_dynamic' }),
+    url: data({
+      residueColor: { scale: { scheme: 'percent_identity_dynamic' } },
+    }),
     clip: 'viewer',
   },
   {
@@ -59,7 +63,7 @@ export const specs = [
     // the logo track is hidden by default, and a `turnedOffTracks` value of
     // false turns it on from a deep link
     url: data({
-      colorSchemeName: 'maeditor',
+      residueColor: { scale: { scheme: 'maeditor' } },
       height: 260,
       turnedOffTracks: { 'sequence-logo': false, conservation: true },
     }),
@@ -69,7 +73,7 @@ export const specs = [
     name: 'settings-menu',
     // the panel is as tall as the view, so the view is tall enough to show
     // every section
-    url: data({ colorSchemeName: 'maeditor', height: 760 }),
+    url: data({ residueColor: { scale: { scheme: 'maeditor' } }, height: 760 }),
     actions: [
       { click: '[data-testid="settings_button"]' },
       { waitFor: '::-p-text(Show letters)' },
@@ -86,7 +90,7 @@ export const specs = [
       height: 360,
       treeAreaWidth: 175,
       colWidth: 2,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       msaFilehandle: { uri: 'data/kinase.aln' },
       treeFilehandle: { uri: 'data/kinase.nh' },
       gffFilehandle: { uri: 'data/kinase-domains.gff' },
@@ -107,7 +111,7 @@ export const specs = [
       height: 340,
       treeAreaWidth: 150,
       colWidth: 0.7,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       msaFilehandle: { uri: 'data/nlrp1.aln' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
@@ -132,7 +136,7 @@ export const specs = [
       height: 390,
       treeAreaWidth: 150,
       colWidth: 0.7586,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       msaFilehandle: { uri: 'data/nlrp1-unaligned.aln' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
@@ -156,7 +160,7 @@ export const specs = [
       height: 390,
       treeAreaWidth: 150,
       colWidth: 0.7,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       msaFilehandle: { uri: 'data/nlrp1.aln' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
@@ -197,7 +201,7 @@ export const specs = [
       // scrollX is a negative px offset: put column 34 at the left edge, so the
       // PYD block (col 38) starts just inside the frame
       scrollX: -34 * 14,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       msaFilehandle: { uri: 'data/nlrp1.aln' },
       treeFilehandle: { uri: 'data/nlrp1.nh' },
       gffFilehandle: { uri: 'data/nlrp1-domains.gff' },
@@ -233,7 +237,7 @@ export const specs = [
       colWidth: 9,
       rowHeight: 2,
       allowedGappyness: 50,
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       msaFilehandle: {
         uri: 'https://www.ebi.ac.uk/interpro/api/entry/pfam/PF00042/?annotation=alignment:full',
       },
@@ -243,7 +247,7 @@ export const specs = [
   },
   {
     name: 'color-scheme-menu',
-    url: data({ colorSchemeName: 'clustal', height: 400 }),
+    url: data({ residueColor: { scale: { scheme: 'clustal' } }, height: 400 }),
     actions: [
       { click: '[data-testid="settings_button"]' },
       { waitFor: '::-p-text(Percent identity)' },
@@ -294,7 +298,7 @@ export const specs = [
       treeAreaWidth: 175,
       colWidth: 3,
       relativeTo: 'Human',
-      colorSchemeName: 'clustalx_protein_dynamic',
+      residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
       msaFilehandle: { uri: 'data/p53.aln' },
       treeFilehandle: { uri: 'data/p53.nh' },
       gffFilehandle: { uri: 'data/p53-domains.gff' },

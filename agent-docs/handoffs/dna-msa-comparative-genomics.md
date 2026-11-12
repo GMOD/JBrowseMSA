@@ -58,9 +58,9 @@ same alignment twice.
 - The LGV snapshot uses `init: { assembly, loc, tracks }` (resolved by the main
   build's afterAttach), with `colorByCDS` top-level.
 - MsaView accepts inline `data: { msa, tree, gff }` plus native snapshot props:
-  `colorSchemeName`, `colWidth`, `rowHeight`, `height`, `scrollX`,
-  `treeAreaWidth`, `labelsAlignRight`, `highlightColumns`. (`scrollX` is a
-  negative px offset; `colWidth` < 1 is allowed for the fit-all overview.)
+  `residueColor`, `colWidth`, `rowHeight`, `height`, `scrollX`, `treeAreaWidth`,
+  `labelsAlignRight`, `highlightColumns`. (`scrollX` is a negative px offset;
+  `colWidth` < 1 is allowed for the fit-all overview.)
 - The F12 reference row is named `human`; the shared frameshift is alignment
   column `205`; the gene is chr5:177,401,800-177,409,900, minus strand,
   NM_000505.4.

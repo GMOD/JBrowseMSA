@@ -76,7 +76,7 @@ const ModelApi = observer(function ModelApi() {
       height: 500,
       colWidth: 16,
       rowHeight: 20,
-      colorSchemeName: 'maeditor',
+      residueColor: { scale: { scheme: 'maeditor' } },
       data: { msa: proteinMSA, tree: proteinTree },
     }),
   )
@@ -123,9 +123,12 @@ const ModelApi = observer(function ModelApi() {
           select
           size="small"
           label="Color scheme"
-          value={model.colorSchemeName}
+          value={model.resolvedResidueColor.scheme}
           onChange={event => {
-            model.setColorSchemeName(event.target.value)
+            model.setResidueColor({
+              ...model.residueColor,
+              scale: { scheme: event.target.value },
+            })
           }}
           sx={{ minWidth: 200 }}
         >

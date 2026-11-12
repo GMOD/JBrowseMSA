@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 //
-// A customColorScheme map in the SVG export: the letters it lists take its
+// A residueColor letter map in the SVG export: the letters it lists take its
 // color in either channel, and every other letter stays uncolored.
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { beforeAll, expect, test } from 'vitest'
@@ -42,8 +42,13 @@ test('a mapped letter fills its cell, and an unlisted one keeps the background',
   const model = createTestModel({
     id: 'letter-map-fill',
     // a map over a dynamic scheme name draws as the map
-    colorSchemeName: 'clustalx_protein_dynamic',
-    customColorScheme: { k: blue },
+    residueColor: {
+      scale: {
+        scheme: 'clustalx_protein_dynamic',
+        domain: ['k'],
+        range: [blue],
+      },
+    },
     data: { msa: '>s1\nKAK\n>s2\nKAR\n' },
   })
   const background = theme.palette.background.default
@@ -61,8 +66,7 @@ test('a mapped letter fills its cell, and an unlisted one keeps the background',
 test('under the color channel a mapped letter takes the color, and an unlisted one the text color', async () => {
   const model = createTestModel({
     id: 'letter-map-color',
-    bgColor: false,
-    customColorScheme: { K: blue },
+    residueColor: { channel: 'color', scale: { domain: ['K'], range: [blue] } },
     data: { msa: '>s1\nKAK\n>s2\nKAR\n' },
   })
   const letters = letterFills(await exportEntire(model))

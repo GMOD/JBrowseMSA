@@ -34,7 +34,7 @@ const base = {
   treeAreaWidth: 210,
   colWidth: 2.2,
   rowHeight: 16,
-  colorSchemeName: 'clustalx_protein_dynamic',
+  residueColor: { scale: { scheme: 'clustalx_protein_dynamic' } },
   msaFilehandle: { uri: 'data/h3n2/h3n2-ha.aln' },
   treeFilehandle: { uri: 'data/h3n2/h3n2-ha.nh' },
 }

@@ -135,6 +135,7 @@ import { MSAModelF } from './model/msaModel.ts'
 import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
+import { liftResidueColor, resolveResidueColor } from './residueColor.ts'
 import {
   arrangeRows,
   bandsNotClades,
@@ -339,9 +340,7 @@ export const preservedOnReset = new Set([
   'drawMsaLetters',
   'scrollZoom',
   'scrollZoomAxis',
-  'bgColor',
-  'colorSchemeName',
-  'customColorScheme',
+  'residueColor',
   'showColumnStats',
   'drawLabels',
   'labelsAlignRight',
@@ -360,7 +359,6 @@ export const preservedOnReset = new Set([
   'allowedGappyness',
   'subFeatureRows',
   'showDomainLegend',
-  'domainFill',
   'embeddedMode',
 ])
 
@@ -542,13 +540,6 @@ function stateModelFactory({
          * #property
          */
         showDomains: stripDefault(types.boolean, defaultShowDomains),
-        /**
-         * #property
-         * whether shown domains fill the cells they cover. Off, the residue
-         * scheme keeps the cells and each domain draws as a bar under its
-         * row. See `cellFill`.
-         */
-        domainFill: stripDefault(types.boolean, true),
         /**
          * #property
          * whether the domain legend is expanded. The legend floats over the
@@ -1256,20 +1247,21 @@ function stateModelFactory({
       },
       /**
        * #action
-       */
-      setDomainFill(arg: boolean) {
-        self.domainFill = arg
-      },
-      /**
-       * #action
        * hand the cell fill to the residue scheme, the domains, or neither,
-       * which colors the letters instead
+       * which colors the letters instead: the `channel` and `field` of
+       * `residueColor`
        */
       setCellFill(mode: 'residue' | 'domain' | 'none') {
-        self.setBgColor(mode !== 'none')
-        if (mode !== 'none') {
-          self.domainFill = mode === 'domain'
-        }
+        const { residueColor } = self
+        self.setResidueColor(
+          mode === 'none'
+            ? { ...residueColor, channel: 'color' }
+            : {
+                ...residueColor,
+                channel: 'fill',
+                field: mode === 'domain' ? 'feature' : 'residue',
+              },
+        )
       },
       /**
        * #action
@@ -1626,28 +1618,38 @@ function stateModelFactory({
     .views(self => ({
       /**
        * #getter
+       * `residueColor` with its defaults filled in: the `channel`, the
+       * `field`, the `scheme` name, and the `letters` table its `domain` and
+       * `range` give, undefined where it lists none
+       */
+      get resolvedResidueColor() {
+        return resolveResidueColor(self.residueColor)
+      },
+
+      /**
+       * #getter
+       * the color per residue letter: the `domain` and `range` of
+       * `residueColor` where it lists letters, else the table its `scheme`
+       * names
        */
       get colorScheme() {
-        const { customColorScheme, colorSchemeName } = self
-        // colorSchemeName is a free string (menus, snapshots, URL params), so a
+        const { letters, scheme } = this.resolvedResidueColor
+        // the scheme is a free string (menus, snapshots, URL params), so a
         // stale name falls back to the default
-        return customColorScheme
-          ? letterColorTable(customColorScheme)
-          : (colorSchemes[colorSchemeName] ??
-              colorSchemes[defaultColorSchemeName]!)
+        return letters
+          ? letterColorTable(letters)
+          : (colorSchemes[scheme] ?? colorSchemes[defaultColorSchemeName]!)
       },
 
       /**
        * #getter
        * the scheme coloring each cell from its column's statistics, or
        * undefined while the cells take a fixed color per letter, from the
-       * built-in table or from `customColorScheme`
+       * built-in table or from the `domain` and `range` of `residueColor`
        */
       get dynamicColorSchemeName() {
-        const { customColorScheme, colorSchemeName } = self
-        return !customColorScheme && colorSchemeName.includes('dynamic')
-          ? colorSchemeName
-          : undefined
+        const { letters, scheme } = this.resolvedResidueColor
+        return !letters && scheme.includes('dynamic') ? scheme : undefined
       },
 
       /**
@@ -3603,10 +3605,11 @@ function stateModelFactory({
        * annotations all start hidden keeps its residue colors
        */
       get cellFill(): 'residue' | 'domain' | 'none' {
-        return !self.bgColor
+        const { channel, field } = self.resolvedResidueColor
+        return channel === 'color'
           ? 'none'
           : self.actuallyShowDomains &&
-              self.domainFill &&
+              field === 'feature' &&
               this.filteredAnnotations.length > 0
             ? 'domain'
             : 'residue'
@@ -5714,6 +5717,7 @@ function stateModelFactory({
         )
       },
     }))
+    .preProcessSnapshot(snapshot => liftResidueColor(snapshot))
     .postProcessSnapshot(({ data, columnTracks, ...rest }) => ({
       // stripDefault handles per-property defaults; this drops inline documents
       // whose filehandle can refetch them

@@ -12,7 +12,6 @@ import { ThemeProvider } from '@mui/material/styles'
 import { compareStructural, reaction, when } from 'mobx'
 
 import MSAModelF from '../model.ts'
-import { letterColors } from '../scales.ts'
 import {
   fileLocations,
   resolveTheme,
@@ -22,17 +21,16 @@ import {
 import Loading from './Loading.tsx'
 
 import type { MsaViewModel } from '../model.ts'
+import type { ResidueColor } from '../residueColor.ts'
 import type {
   Cell,
   Clade,
-  ColorScheme,
   ColumnTrackSpec,
   Encoding,
   Feature,
   Highlight,
   MsaSelection,
   Region,
-  ResidueEncoding,
   ResidueMapping,
   RowDataInput,
   RowPanelSpec,
@@ -59,11 +57,14 @@ export interface MSAViewerProps {
   /** a URL the viewer fetches the GFF from; `gffFilehandle` wins */
   gffUrl?: string
   /**
-   * a scheme name from the built-in table, or `{domain, range}`, a color per
-   * residue letter that leaves every other letter uncolored. The earlier
-   * `{map}` still reads
+   * the residue mark's color object, `{channel, field, scale}`: `channel` is
+   * `fill` (default), the cell, or `color`, the letter; `field` is `feature`
+   * (default), the domain covering a cell where the overlay draws one, or
+   * `residue`; `scale` is `{scheme}`, a built-in scheme name, or
+   * `{domain, range}`, a color per residue letter that leaves every other
+   * letter uncolored (see docs/layers.md)
    */
-  colorScheme?: ColorScheme
+  residueColor?: ResidueColor
   height?: number
   /** initial per-column pixel width (zoom level) */
   colWidth?: number
@@ -152,13 +153,6 @@ export interface MSAViewerProps {
    * above those tips' common ancestor
    */
   treeRoot?: TreeRoot
-  /**
-   * which channel `colorScheme` paints: `fill` (default) colors the background
-   * of the cell a residue sits in, `color` colors the letter itself and leaves
-   * the background plain, which lets a domain overlay mark each span with a bar
-   * under the row and the residue colors show through
-   */
-  residueEncoding?: ResidueEncoding
   /**
    * a span to zoom and scroll to once the alignment loads, and again whenever
    * it changes: `{row, start, end}` in residues of that row, or `{start, end}`
@@ -373,12 +367,6 @@ const syncedProps = [
     }),
   ),
   synced(
-    p => p.residueEncoding,
-    ifSet((m, v) => {
-      m.setBgColor(v === 'fill')
-    }),
-  ),
-  synced(
     p => !!p.hideHeader,
     (m, v) => {
       m.setHideHeader(v)
@@ -408,14 +396,10 @@ const syncedProps = [
     { inSnapshot: true },
   ),
   synced(
-    p => p.colorScheme,
-    (m, scheme) => {
-      if (typeof scheme === 'string') {
-        m.setColorSchemeName(scheme)
-      } else if (scheme) {
-        m.setCustomColorScheme(letterColors(scheme))
-      }
-    },
+    p => p.residueColor,
+    ifSet((m, v) => {
+      m.setResidueColor(v)
+    }),
   ),
   synced(viewerHighlights, (m, v) => {
     m.setHighlights(v)

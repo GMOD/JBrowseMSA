@@ -107,7 +107,6 @@ export const maxCellSize = 80
 export const settingsPanelWidth = 280
 
 // MSA model defaults
-export const defaultBgColor = true
 export const defaultColorSchemeName = 'maeditor'
 export const defaultShowColumnStats = true
 

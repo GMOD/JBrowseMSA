@@ -225,7 +225,7 @@ export default function CodonView() {
       <MSAViewer
         msa={f12CdsMSA}
         features={shown.features ? features : undefined}
-        colorScheme="nucleotide"
+        residueColor={{ scale: { scheme: 'nucleotide' } }}
         relativeTo={reference}
         region={{ row: 'human', start: 181, end: 240 }}
         height={510}
