@@ -56,13 +56,25 @@ export type { ZoomSnapshot } from './zoomSnapshot.ts'
 // gives
 export type {
   ColorChannel,
+  ColorLegend,
+  ColorRecord,
   ColorScale,
   ColorSpec,
-  LegendSpec,
   ResolvedScale,
   ScaleTable,
+  ScaleType,
   SharedScale,
 } from './scales.ts'
+export type { RecordScaleProblem, ScaleProblem } from './scaleProblems.ts'
+export { problemLine } from './scaleProblems.ts'
+export type {
+  LegendEntry,
+  LegendGradient,
+  LegendItem,
+  LegendSection,
+  LegendSpec,
+  RampStop,
+} from './legendSpec.ts'
 export type {
   Accession,
   Annotation,
@@ -90,8 +102,6 @@ export type {
   FieldChannel,
   Highlight,
   LabelEncoding,
-  Legend,
-  LegendEntry,
   MsaSelection,
   Node,
   MappedStructure,

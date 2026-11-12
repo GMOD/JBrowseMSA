@@ -127,6 +127,7 @@ import {
   pruneTree,
   tipNames,
 } from './rowTransform.ts'
+import { colorProblems } from './scaleProblems.ts'
 import { colorTable, declarationKey, resolveShared } from './scales.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import {
@@ -165,9 +166,12 @@ import { takeZoomSnapshot, zoomSnapshotCovers } from './zoomSnapshot.ts'
 import type { ColumnStats } from './columnStats.ts'
 import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
+import type { LegendItem, LegendSection } from './legendSpec.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
+import type { RecordScaleProblem } from './scaleProblems.ts'
 import type {
   ColorChannel,
+  ColorRecord,
   ScaleTable,
   ScaleUse,
   SharedScale,
@@ -187,8 +191,6 @@ import type {
   Encoding,
   Feature,
   Highlight,
-  Legend,
-  LegendEntry,
   MsaSelection,
   NodeWithIds,
   Region,
@@ -2656,7 +2658,9 @@ function stateModelFactory({
                   arcColor: track.color,
                   customColorScheme: track.encoding?.color
                     ? colorTable(track.encoding.color.scale, [
-                        ...(track.encoding.color.scale?.domain ?? []),
+                        ...(track.encoding.color.scale?.domain ?? []).map(
+                          String,
+                        ),
                         ...new Set(track.data),
                       ])
                     : undefined,
@@ -3991,12 +3995,12 @@ function stateModelFactory({
 
       /**
        * #getter
-       * the legend entries of the accession palette, for the overlay and a
+       * the legend items of the accession palette, for the overlay and a
        * features panel that names no color scale
        */
-      get domainLegendEntries(): LegendEntry[] {
+      get domainLegendItems(): LegendItem[] {
         return this.visibleDomainTypes.map(d => ({
-          id: d.accession,
+          value: d.accession,
           label: d.name,
           color: d.color ?? this.fillPalette[d.accession]!,
         }))
@@ -4099,38 +4103,46 @@ function stateModelFactory({
 
       /**
        * #getter
-       * the categorical color keys drawn for this view, shared by the on-screen
-       * legend overlay and the SVG export's reserved column. The domain overlay
-       * produces the first, listing the `featureFill` scale where an encoding
-       * names one. Every scale a row-table encoding, a row panel or a shown
-       * features track reads produces one more, keyed by its declaration, so
-       * two channels or two strips declaring one scale list it once, and
-       * strips over eight fields naming one `legend.title` list one legend
-       * between them
+       * the color keys drawn for this view, one section per scale, shared by
+       * the on-screen legend overlay and the SVG export's reserved column. The
+       * domain overlay produces the first, listing the `featureFill` scale
+       * where an encoding names one. Every scale a row-table encoding, a row
+       * panel or a shown features track reads produces one more, keyed by its declaration, so two
+       * channels or two strips declaring one scale list it once, and strips
+       * over eight fields naming one `legend.title` list one legend between
+       * them. A section's note is the first of its records' `scaleProblems`,
+       * else the scale's own note.
        */
-      get legends(): Legend[] {
-        const { featureFillEncoding } = this
-        const byKey = new Map<string, Legend>()
+      get legends(): LegendSection[] {
+        const { featureFillEncoding, scaleProblemNotes } = this
+        const byKey = new Map<string, LegendSection>()
         const ids = new Set<string>()
         // the accession palette keys on no field, so it takes a key of its own
         const add = (
           key: string | undefined,
           title: string | undefined,
-          entries: LegendEntry[],
+          items: LegendItem[],
+          note?: string,
           overlay = false,
         ) => {
           const k = key ?? 'domains'
-          if (entries.length === 0 || byKey.has(k)) {
-            return
+          if (items.length > 0 && !byKey.has(k)) {
+            const base =
+              overlay || key === undefined ? 'domains' : `rowData-${title}`
+            let id = base
+            for (let n = 2; ids.has(id); n++) {
+              id = `${base}-${n}`
+            }
+            ids.add(id)
+            const problem =
+              key === undefined ? undefined : scaleProblemNotes.get(key)
+            byKey.set(k, {
+              id,
+              title: title ?? 'Domains',
+              ...((problem ?? note) ? { note: problem ?? note } : {}),
+              items,
+            })
           }
-          const base =
-            overlay || key === undefined ? 'domains' : `rowData-${title}`
-          let id = base
-          for (let n = 2; ids.has(id); n++) {
-            id = `${base}-${n}`
-          }
-          ids.add(id)
-          byKey.set(k, { id, title: title ?? 'Domains', entries })
         }
         // the overlay draws the domain key; with no columns it draws nothing,
         // and a features panel taking the same colors lists them instead
@@ -4139,25 +4151,108 @@ function stateModelFactory({
             featureFillEncoding?.key,
             featureFillEncoding?.title,
             featureFillEncoding
-              ? featureFillEncoding.legend
-              : this.domainLegendEntries,
+              ? featureFillEncoding.items
+              : this.domainLegendItems,
+            featureFillEncoding?.note,
             true,
           )
         }
-        for (const { channel, key, title, legend } of this.resolvedEncodings) {
-          if (channel !== 'featureFill') {
-            add(key, title, legend)
+        for (const encoding of this.resolvedEncodings) {
+          if (encoding.channel !== 'featureFill') {
+            add(encoding.key, encoding.title, encoding.items, encoding.note)
           }
         }
-        for (const { legendKey, legendTitle, legend } of this.rowPanelScales) {
-          add(legendKey, legendTitle, legend)
+        for (const panel of this.rowPanelScales) {
+          add(
+            panel.legendKey,
+            panel.legendTitle,
+            panel.legend,
+            panel.legendNote,
+          )
         }
         for (const [id, { scale }] of this.featureTrackScales) {
           if (scale && !trackIsOff(self.turnedOffTracks, id)) {
-            add(scale.key, scale.title, scale.legend)
+            add(scale.key, scale.title, scale.items, scale.note)
           }
         }
         return [...byKey.values()]
+      },
+
+      /**
+       * #getter
+       * every record that reads a field through a color object: each color
+       * encoding, each strip's `fill` and each features panel's `fill`, with
+       * where it sits in the snapshot and the table its field is read from
+       */
+      get colorRecords(): ColorRecord[] {
+        return [
+          ...self.encodings.flatMap((encoding, i): ColorRecord[] =>
+            encoding.channel === 'featureLabel'
+              ? []
+              : [
+                  {
+                    record: `encodings[${i}]`,
+                    channel: encoding,
+                    table: encodingTable(encoding),
+                  },
+                ],
+          ),
+          ...self.rowPanels.flatMap((panel, i): ColorRecord[] => {
+            const record = `rowPanels[${i}].encoding.fill`
+            return panel.kind === 'strip'
+              ? [{ record, channel: panel.encoding.fill, table: 'rows' }]
+              : panel.encoding?.fill
+                ? [{ record, channel: panel.encoding.fill, table: 'features' }]
+                : []
+          }),
+          ...self.columnTracks.flatMap((track, i): ColorRecord[] =>
+            track.kind === 'features' && track.encoding?.fill
+              ? [
+                  {
+                    record: `columnTracks[${i}].encoding.fill`,
+                    channel: track.encoding.fill,
+                    table: 'features',
+                    annotations: trackAnnotations(track),
+                  },
+                ]
+              : [],
+          ),
+        ]
+      },
+
+      /**
+       * #getter
+       * why a record's color object draws other than it says, per record: a
+       * `domainMax` below its `domainMin`, a threshold whose cuts are unsorted
+       * or whose `range` is not one longer, a `domainQuantile` outside 0.5 to
+       * 1, `labels` of the wrong length, a `scheme` no table holds. The viewer
+       * draws what it can, and the scale's legend notes the first problem.
+       */
+      get scaleProblems(): RecordScaleProblem[] {
+        return this.colorRecords.flatMap(({ record, channel }) =>
+          colorProblems(channel).map(problem => ({ record, ...problem })),
+        )
+      },
+
+      /**
+       * #getter
+       * the first problem of each declaration's records, keyed as
+       * `resolvedScales` is, for its legend section's note
+       */
+      get scaleProblemNotes() {
+        const notes = new Map<string, string>()
+        for (const { channel, table } of this.colorRecords) {
+          const key = declarationKey({
+            spec: channel,
+            field: channel.field,
+            table,
+          })
+          const [first] = colorProblems(channel)
+          if (first && !notes.has(key)) {
+            notes.set(key, first.message)
+          }
+        }
+        return notes
       },
 
       /**
@@ -4449,49 +4544,29 @@ function stateModelFactory({
        */
       get resolvedScales() {
         const rows = Object.values(self.rowData)
-        const use = (channel: ColorChannel, table: ScaleTable): ScaleUse => ({
+        const use = (
+          channel: ColorChannel,
+          table: ScaleTable,
+          annotations?: Annotation[],
+        ): ScaleUse => ({
           spec: channel,
           field: channel.field,
           table,
           ...(table === 'rows'
-            ? {
-                values: rows.map(row => row?.[channel.field]).filter(notEmpty),
-              }
-            : {
-                values: featureValues(self.allAnnotations, channel.field),
-                shown: featureValues(self.filteredAnnotations, channel.field),
-              }),
+            ? { values: rows.map(row => row?.[channel.field]) }
+            : annotations
+              ? {
+                  values: featureValues(annotations, channel.field),
+                  shown: featureValues(annotations, channel.field),
+                }
+              : {
+                  values: featureValues(self.allAnnotations, channel.field),
+                  shown: featureValues(self.filteredAnnotations, channel.field),
+                }),
         })
-        return resolveShared([
-          ...this.colorEncodings.map(encoding =>
-            use(encoding, encodingTable(encoding)),
-          ),
-          ...self.rowPanels.flatMap(panel =>
-            panel.kind === 'strip'
-              ? [use(panel.encoding.fill, 'rows')]
-              : panel.encoding?.fill
-                ? [use(panel.encoding.fill, 'features')]
-                : [],
-          ),
-          ...self.columnTracks.flatMap(track => {
-            const fill =
-              track.kind === 'features' ? track.encoding?.fill : undefined
-            const values = fill
-              ? featureValues(trackAnnotations(track), fill.field)
-              : []
-            return fill
-              ? [
-                  {
-                    spec: fill,
-                    field: fill.field,
-                    table: 'features' as const,
-                    values,
-                    shown: values,
-                  },
-                ]
-              : []
-          }),
-        ])
+        return resolveShared(
+          this.colorRecords.map(({ channel, table, annotations }) => use(channel, table, annotations)),
+        )
       },
 
       /**
@@ -4538,19 +4613,24 @@ function stateModelFactory({
               labels: label
                 ? featureLabelMap(annotations, label)
                 : featureLabels,
-              legend: encoding?.legend ?? this.domainLegendEntries,
+              legend: encoding?.items ?? this.domainLegendItems,
+              legendNote: encoding?.note,
             }
           }
           const { fill } = panel.encoding
-          const { colorOf, legend, key, title } = this.scaleOf(fill, 'rows')
+          const { colorOf, items, note, key, title } = this.scaleOf(
+            fill,
+            'rows',
+          )
           return {
             kind: panel.kind,
             field: fill.field,
             header: panel.header ?? fill.field,
             legendKey: key,
             legendTitle: title,
+            legendNote: note,
             colors: colorByRow(rowData, fill.field, colorOf),
-            legend,
+            legend: items,
           }
         })
       },

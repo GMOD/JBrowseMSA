@@ -15,13 +15,13 @@ import type { ColorChannel } from './scales.ts'
 const set1 = namedPalettes.set1!
 
 test('a spec with no range takes the ggplot colors of its size', () => {
-  const { colorOf, legend, kind } = resolveScale(undefined, ['a', 'b', 'a'])
-  expect(kind).toBe('categorical')
+  const { colorOf, items, kind } = resolveScale(undefined, ['a', 'b', 'a'])
+  expect(kind).toBe('ordinal')
   expect(colorOf('a')).toBe('#F8766D')
   expect(colorOf('b')).toBe('#00BFC4')
-  expect(legend).toEqual([
-    { id: 'a', label: 'a', color: '#F8766D' },
-    { id: 'b', label: 'b', color: '#00BFC4' },
+  expect(items).toEqual([
+    { value: 'a', label: 'a', color: '#F8766D' },
+    { value: 'b', label: 'b', color: '#00BFC4' },
   ])
 })
 
@@ -47,13 +47,13 @@ test('an unknown palette name falls back to the ggplot colors', () => {
 
 test('a domain past a named palette gets a hue of its own per value', () => {
   const values = Array.from({ length: 12 }, (_, i) => `v${i}`)
-  const { colorOf, legend } = resolveScale({ scheme: 'dark2' }, values)
+  const { colorOf, items } = resolveScale({ scheme: 'dark2' }, values)
   expect(new Set(values.map(colorOf)).size).toBe(12)
-  expect(legend).toHaveLength(12)
+  expect(items).toHaveLength(12)
 })
 
 test('domain and range color the values they name and no others', () => {
-  const { colorOf, legend } = resolveScale(
+  const { colorOf, items } = resolveScale(
     { domain: ['19B', '20A'], range: ['#e41a1c', '#377eb8'] },
     ['19B', '21K'],
   )
@@ -61,7 +61,7 @@ test('domain and range color the values they name and no others', () => {
   expect(colorOf('21K')).toBeUndefined()
   // 20A is listed and absent from the data, so no legend entry stands for
   // rows that are not there
-  expect(legend).toEqual([{ id: '19B', label: '19B', color: '#e41a1c' }])
+  expect(items).toEqual([{ value: '19B', label: '19B', color: '#e41a1c' }])
 })
 
 test('a range list colors as many values as it holds', () => {
@@ -78,18 +78,18 @@ test('a range list colors as many values as it holds', () => {
 })
 
 test('domain lists values first in its order, and spends the scheme from there', () => {
-  const { colorOf, legend } = resolveScale(
+  const { colorOf, items } = resolveScale(
     { domain: ['zeta', 'alpha'], scheme: 'set1' },
     ['alpha', 'beta', 'zeta'],
   )
-  expect(legend.map(e => e.id)).toEqual(['zeta', 'alpha', 'beta'])
+  expect(items.map(e => e.value)).toEqual(['zeta', 'alpha', 'beta'])
   expect(colorOf('zeta')).toBe(set1[0])
   expect(colorOf('beta')).toBe(set1[2])
 })
 
 test('the domain sorts naturally, so 2 comes before 10', () => {
   const values = ['chr10', '10', 'H5N8', '2.3.4.4b', 'chr2', '2', 'H5N1']
-  expect(resolveScale(undefined, values).legend.map(e => e.id)).toEqual([
+  expect(resolveScale(undefined, values).items.map(e => e.value)).toEqual([
     '2',
     '10',
     '2.3.4.4b',
@@ -111,8 +111,8 @@ test('the domain sorts, so row order does not move a color', () => {
 })
 
 test('an empty field gives an empty legend and no colors', () => {
-  const { colorOf, legend } = resolveScale({ scheme: 'set1' }, [])
-  expect(legend).toEqual([])
+  const { colorOf, items } = resolveScale({ scheme: 'set1' }, [])
+  expect(items).toEqual([])
   expect(colorOf('anything')).toBeUndefined()
   expect(colorOf('constructor')).toBeUndefined()
 })
@@ -136,7 +136,7 @@ test('one declaration resolves once over both fields', () => {
   expect(scales.size).toBe(1)
   const [scale] = scales.values()
   expect(scale!.title).toBe('segment lineage')
-  expect(scale!.legend.map(e => [e.id, e.color])).toEqual([
+  expect(scale!.items.map(e => [e.value, e.color])).toEqual([
     ['am2.2', set1[0]],
     ['am4', set1[1]],
     ['eu1', set1[2]],

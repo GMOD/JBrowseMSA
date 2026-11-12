@@ -2,7 +2,7 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 
-import { afterAll, beforeAll, expect, test } from 'vitest'
+import { afterAll, beforeAll, expect, test, vi } from 'vitest'
 
 import { MAX_EXPORT_LETTERS, exportSvg } from './export-svg.ts'
 
@@ -99,6 +99,43 @@ test('--spec draws the columnTracks example from docs/layers.md', async () => {
   expect(svg).toContain('dN/dS')
   expect(svg).toContain('Codon frame')
   expect(svg).toContain('#6a51a3')
+})
+
+test('--spec prints each scale problem to stderr and still draws', async () => {
+  const specFile = write(
+    'scaleProblems.json',
+    JSON.stringify({
+      type: 'MsaView',
+      data: {
+        msa: '>human\nMKAANSE\n>mouse\nMKA-NSE',
+        treeMetadata: JSON.stringify({
+          human: { year: '2019' },
+          mouse: { year: '2023' },
+        }),
+      },
+      rowPanels: [
+        {
+          kind: 'strip',
+          encoding: {
+            fill: {
+              field: 'year',
+              scale: { type: 'linear', domainMin: 2023, domainMax: 2019 },
+            },
+          },
+        },
+      ],
+    }),
+  )
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+  const svg = await render({ specFile })
+  const lines = warn.mock.calls.map(call => String(call[0]))
+  warn.mockRestore()
+  expect(lines).toEqual([
+    expect.stringMatching(
+      /^rowPanels\[0\]\.encoding\.fill\.scale\.domainMax: domainMax is below domainMin/,
+    ),
+  ])
+  expect(svg).toContain('linearGradient')
 })
 
 test('--props draws what MSAViewer draws from the same props', async () => {

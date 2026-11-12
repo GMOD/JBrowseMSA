@@ -1,9 +1,5 @@
-import type {
-  ColorChannel,
-  ColorScale,
-  ColorSpec,
-  SharedScale,
-} from './scales.ts'
+import type { LegendItem } from './legendSpec.ts'
+import type { ColorChannel, ColorSpec, SharedScale } from './scales.ts'
 import type { Annotation } from 'msa-parsers'
 
 export interface Accession {
@@ -35,7 +31,7 @@ export type ResidueEncoding = 'fill' | 'color'
  * residue letters, `{domain: ['K', 'R'], range: ['#1f77b4', '#1f77b4']}`,
  * which leaves every letter it does not list uncolored
  */
-export type ColorScheme = string | Pick<ColorScale, 'domain' | 'range'>
+export type ColorScheme = string | { domain?: string[]; range?: string[] }
 
 export interface BasicTrackModel {
   id: string
@@ -252,10 +248,11 @@ interface ResolvedPanelBase {
   header: string
   width: number
   offsetX: number
-  legend: LegendEntry[]
+  legend: LegendItem[]
   /** the scale this panel's entries list under; absent means the domain key */
   legendKey?: string
   legendTitle?: string
+  legendNote?: string
 }
 
 /**
@@ -400,27 +397,6 @@ export interface DomainBand {
   stackIndex: number
   lane: number
   laneCount: number
-}
-
-/**
- * One swatch of a categorical color key. `id` is the value the scale read, and
- * `label` is the text drawn beside the swatch.
- */
-export interface LegendEntry {
-  id: string
-  label: string
-  color: string
-}
-
-/**
- * A categorical color key, drawn by the on-screen overlay and reserved as a
- * column in the SVG export. `title` names the legend where the viewer draws
- * more than one.
- */
-export interface Legend {
-  id: string
-  title: string
-  entries: LegendEntry[]
 }
 
 /**

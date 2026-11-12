@@ -1,7 +1,7 @@
-import { legendRows } from './components/msa/legendRows.ts'
 import { treeScaleBarHeight } from './constants.ts'
+import { legendEntries } from './legendSpec.ts'
 
-import type { LegendRow } from './components/msa/legendRows.ts'
+import type { LegendEntry } from './legendSpec.ts'
 import type { MsaViewModel } from './model.ts'
 import type { Theme } from '@mui/material'
 
@@ -29,15 +29,73 @@ export const LEGEND_CHAR_W = 7
 
 export const LEGEND_MAX_W = 360
 export const LEGEND_TEXT_X = LEGEND_PAD + LEGEND_SWATCH + 6
+export const LEGEND_GRADIENT_W = 120
+export const LEGEND_GRADIENT_H = 10
 
-function getLegendWidth(rows: LegendRow[]) {
-  const maxLen = rows.reduce((a, r) => Math.max(a, r.label.length), 0)
-  const w = LEGEND_TEXT_X + LEGEND_PAD + maxLen * LEGEND_CHAR_W
-  return Math.min(LEGEND_MAX_W, Math.max(120, w))
+/** the rows the export draws, the model's legends flattened */
+export function exportLegendEntries(model: MsaViewModel) {
+  return legendEntries({ sections: model.legends })
 }
 
-export function legendHeight(rows: LegendRow[]) {
-  return LEGEND_PAD * 2 + rows.length * LEGEND_ROW_H
+function entryWidth(entry: LegendEntry) {
+  const text = entry.label.length * LEGEND_CHAR_W
+  const { gradient } = entry
+  return gradient
+    ? LEGEND_PAD * 2 +
+        Math.max(
+          LEGEND_GRADIENT_W,
+          text,
+          (gradient.minLabel.length + gradient.maxLabel.length + 2) *
+            LEGEND_CHAR_W,
+        )
+    : LEGEND_TEXT_X + LEGEND_PAD + text
+}
+
+// a note wraps to the column the other rows size, rather than widening it
+function getLegendWidth(rows: LegendEntry[]) {
+  const widest = rows
+    .filter(r => r.kind !== 'note')
+    .reduce((a, r) => Math.max(a, entryWidth(r)), 0)
+  return Math.min(LEGEND_MAX_W, Math.max(120, widest))
+}
+
+/** the lines a row's text takes in a column `width` wide */
+export function legendLines(entry: LegendEntry, width: number) {
+  const perLine = Math.max(
+    8,
+    Math.floor((width - LEGEND_PAD * 2) / LEGEND_CHAR_W),
+  )
+  const lines: string[] = []
+  if (entry.kind === 'note') {
+    for (const word of entry.label.split(' ')) {
+      const last = lines.at(-1)
+      if (last !== undefined && last.length + word.length + 1 <= perLine) {
+        lines[lines.length - 1] = `${last} ${word}`
+      } else {
+        lines.push(word)
+      }
+    }
+  } else {
+    lines.push(entry.label)
+  }
+  return lines
+}
+
+/**
+ * a row's height: a line per line of text, and for a gradient its bar and
+ * the end labels under it below the label line
+ */
+export function legendRowHeight(entry: LegendEntry, width: number) {
+  return entry.gradient
+    ? (entry.label ? LEGEND_ROW_H : 0) + 2 * LEGEND_ROW_H
+    : legendLines(entry, width).length * LEGEND_ROW_H
+}
+
+export function legendHeight(rows: LegendEntry[], width: number) {
+  return (
+    LEGEND_PAD * 2 +
+    rows.reduce((sum, row) => sum + legendRowHeight(row, width), 0)
+  )
 }
 
 // resolved sizes/offsets (in svg user units) for the chosen export, shared by
@@ -84,7 +142,7 @@ export function getLayout(model: MsaViewModel, opts: ExportSvgOptions): Layout {
     opts.exportType === 'viewport' &&
     !!opts.includeMinimap &&
     showHorizontalScrollbar
-  const rows = legendRows(model.legends)
+  const rows = exportLegendEntries(model)
   const legendWidth = rows.length > 0 ? getLegendWidth(rows) : 0
   const topHeight = Math.max(
     includeMinimap ? minimapHeight : 0,
@@ -158,7 +216,10 @@ export function exportPageSize(model: MsaViewModel, layout: Layout) {
     width: width + legendWidth,
     height:
       legendWidth > 0
-        ? Math.max(height, topHeight + legendHeight(legendRows(model.legends)))
+        ? Math.max(
+            height,
+            topHeight + legendHeight(exportLegendEntries(model), legendWidth),
+          )
         : height,
   }
 }

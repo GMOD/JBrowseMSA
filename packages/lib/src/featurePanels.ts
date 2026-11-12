@@ -55,12 +55,11 @@ export function stringFields(row: unknown) {
 export function colorByRow(
   rowData: Record<string, Record<string, string> | undefined>,
   field: string,
-  colorOf: (value: string) => string | undefined,
+  colorOf: (value: string | undefined) => string | undefined,
 ) {
   const colors = new Map<string, string>()
   for (const [name, row] of Object.entries(rowData)) {
-    const value = row?.[field]
-    const color = value === undefined ? undefined : colorOf(value)
+    const color = colorOf(row?.[field])
     if (color) {
       colors.set(name, color)
     }
@@ -74,7 +73,10 @@ export function colorByRow(
 export function featureColorMap(
   annotations: Annotation[],
   encoding:
-    | { field: string; colorOf: (value: string) => string | undefined }
+    | {
+        field: string
+        colorOf: (value: string | undefined) => string | undefined
+      }
     | undefined,
   unencoded: (annotation: Annotation) => string,
 ) {
@@ -90,13 +92,12 @@ export function featureColorMap(
   }
   return new Map(
     annotations.map(annotation => {
-      const value = encoding
-        ? featureField(annotation, encoding.field)
-        : undefined
       const fill =
         annotation.color ??
-        (value === undefined ? undefined : encoding!.colorOf(value)) ??
-        (encoding ? UNSCALED_FEATURE : unencoded(annotation))
+        (encoding
+          ? (encoding.colorOf(featureField(annotation, encoding.field)) ??
+            UNSCALED_FEATURE)
+          : unencoded(annotation))
       return [annotation, { fill, stroke: strokeOf(fill) }]
     }),
   )

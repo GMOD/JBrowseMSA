@@ -6,9 +6,45 @@ import { IconButton, Paper, Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
 import { legendZIndex } from '../../constants.ts'
-import { legendRows } from './legendRows.ts'
+import { legendEntries } from '../../legendSpec.ts'
 
+import type { LegendGradient } from '../../legendSpec.ts'
 import type { MsaViewModel } from '../../model.ts'
+
+const textStyle = { fontSize: 10, lineHeight: 1.4 }
+
+function GradientRow({
+  label,
+  gradient,
+}: {
+  label: string
+  gradient: LegendGradient
+}) {
+  const { stops, minLabel, maxLabel } = gradient
+  return (
+    <div style={{ width: 120, padding: '1px 0' }}>
+      {label ? (
+        <Typography variant="caption" noWrap component="div" style={textStyle}>
+          {label}
+        </Typography>
+      ) : null}
+      <div
+        style={{
+          height: 9,
+          background: `linear-gradient(to right, ${stops.map(s => `${s.color} ${s.offset * 100}%`).join(', ')})`,
+        }}
+      />
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="caption" style={textStyle}>
+          {minLabel}
+        </Typography>
+        <Typography variant="caption" style={textStyle}>
+          {maxLabel}
+        </Typography>
+      </div>
+    </div>
+  )
+}
 
 const AnnotationLegend = observer(function ({
   model,
@@ -16,7 +52,7 @@ const AnnotationLegend = observer(function ({
   model: MsaViewModel
 }) {
   const { legends, showDomainLegend: expanded } = model
-  const rows = legendRows(legends)
+  const rows = legendEntries({ sections: legends })
   const ExpandIcon = expanded ? ExpandLess : ExpandMore
 
   return rows.length > 0 ? (
@@ -54,40 +90,40 @@ const AnnotationLegend = observer(function ({
           {rows.map((row, i) => (
             <div
               key={row.key}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                marginRight: i === 0 ? 18 : 0,
-              }}
+              style={{ marginRight: i === 0 ? 18 : 0, pointerEvents: 'auto' }}
             >
-              {row.color ? (
-                <div
-                  style={{
-                    width: 9,
-                    height: 9,
-                    flexShrink: 0,
-                    background: row.color,
-                  }}
-                />
-              ) : null}
-              <Typography
-                variant="caption"
-                noWrap
-                title={
-                  row.hint && row.hint !== row.label
-                    ? `${row.label} (${row.hint})`
-                    : row.label
-                }
-                style={{
-                  fontSize: 10,
-                  lineHeight: 1.4,
-                  fontWeight: row.color ? undefined : 'bold',
-                  pointerEvents: 'auto',
-                }}
-              >
-                {row.label}
-              </Typography>
+              {row.gradient ? (
+                <GradientRow label={row.label} gradient={row.gradient} />
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  {row.color ? (
+                    <div
+                      style={{
+                        width: 9,
+                        height: 9,
+                        flexShrink: 0,
+                        background: row.color,
+                      }}
+                    />
+                  ) : null}
+                  <Typography
+                    variant="caption"
+                    noWrap={row.kind !== 'note'}
+                    title={
+                      row.hint && row.hint !== row.label
+                        ? `${row.label} (${row.hint})`
+                        : row.label
+                    }
+                    style={{
+                      ...textStyle,
+                      fontWeight: row.kind === 'title' ? 'bold' : undefined,
+                      fontStyle: row.kind === 'note' ? 'italic' : undefined,
+                    }}
+                  >
+                    {row.label}
+                  </Typography>
+                </div>
+              )}
             </div>
           ))}
         </div>

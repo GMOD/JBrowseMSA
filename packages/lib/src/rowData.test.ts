@@ -93,7 +93,7 @@ test('a number or a boolean in the row table reads as its string', () => {
 
   expect(model.rowDataOf('seq1')).toEqual({ year: '2015', vaccinated: 'true' })
   expect(model.tipLabelColors?.get('seq2')).toBe('#00BFC4')
-  expect(model.legends.map(l => l.entries.map(e => e.label))).toEqual([
+  expect(model.legends.map(l => l.items.map(e => e.label))).toEqual([
     ['2015', '2019'],
   ])
 
@@ -118,7 +118,7 @@ test('resolvedEncodings resolves each scale over the values in the table', () =>
 
   const [labels, tints] = model.resolvedEncodings
   expect(labels!.colorOf('19B')).toBe('#F8766D')
-  expect(labels!.legend.map(e => e.label)).toEqual(['19B', '20A'])
+  expect(labels!.items.map(e => e.label)).toEqual(['19B', '20A'])
   expect(tints!.colorOf('20A')).toBeUndefined()
 })
 

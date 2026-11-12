@@ -1,5 +1,3 @@
-import { notEmpty } from '@jbrowse/core/util'
-
 import type { Annotation } from './types.ts'
 
 /**
@@ -12,8 +10,9 @@ export function featureField(annotation: Annotation, field: string) {
   return typeof value === 'string' ? value : undefined
 }
 
+/** the value each feature gives a field, undefined where one has none */
 export function featureValues(list: Annotation[], field: string) {
-  return list.map(a => featureField(a, field)).filter(notEmpty)
+  return list.map(a => featureField(a, field))
 }
 
 /**

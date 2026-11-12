@@ -46,7 +46,9 @@ test('a strip colors each row by its field', () => {
     ['duck', '#e41a1c'],
     ['chicken', '#e41a1c'],
   ])
-  expect(panel!.legend).toEqual([{ id: 'H5', label: 'H5', color: '#e41a1c' }])
+  expect(panel!.legend).toEqual([
+    { value: 'H5', label: 'H5', color: '#e41a1c' },
+  ])
 })
 
 test('a strip is as wide as a row is tall until it says otherwise', () => {
@@ -90,7 +92,7 @@ test('a strip and an encoding over one field share one legend', () => {
   model.setEncodings([{ channel: 'tipLabel', field: 'HA' }])
   expect(model.legends).toHaveLength(1)
   expect(model.legends[0]!.title).toBe('HA')
-  expect(model.legends[0]!.entries.map(e => e.id)).toEqual(['H5', 'H7'])
+  expect(model.legends[0]!.items.map(e => e.value)).toEqual(['H5', 'H7'])
 })
 
 test('two strips declaring one scale over one field list it once', () => {
@@ -133,7 +135,7 @@ test('strips naming one title list their values under it once', () => {
     { kind: 'strip', encoding: { fill: { field: 'NA', ...colors } } },
   ])
   expect(model.legends.map(l => l.title)).toEqual(['lineage'])
-  expect(model.legends[0]!.entries.map(e => e.id)).toEqual(['H5', 'H7', 'N1'])
+  expect(model.legends[0]!.items.map(e => e.value)).toEqual(['H5', 'H7', 'N1'])
   expect(model.resolvedRowPanels.map(p => p.header)).toEqual(['HA', 'NA'])
 })
 
@@ -177,10 +179,10 @@ test('two strips over one palette and title color a shared value alike', () => {
   expect(pb1!.colors.get('duck')).toBe(am4)
   const [legend] = model.legends
   expect(model.legends).toHaveLength(1)
-  expect(legend!.entries).toEqual([
-    { id: 'am2.2', label: 'am2.2', color: pb2!.colors.get('duck') },
-    { id: 'am4', label: 'am4', color: am4 },
-    { id: 'eu1', label: 'eu1', color: pb1!.colors.get('chicken') },
+  expect(legend!.items).toEqual([
+    { value: 'am2.2', label: 'am2.2', color: pb2!.colors.get('duck') },
+    { value: 'am4', label: 'am4', color: am4 },
+    { value: 'eu1', label: 'eu1', color: pb1!.colors.get('chicken') },
   ])
 })
 

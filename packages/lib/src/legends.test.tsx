@@ -16,14 +16,15 @@ import { renderToStaticMarkup } from './renderToStaticMarkup.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
+import type { LegendSection } from './legendSpec.ts'
 import type { MsaViewModel } from './model.ts'
-import type { Encoding, Legend } from './types.ts'
+import type { Encoding } from './types.ts'
 
 beforeAll(() => {
   installSvgTestEnv()
 })
 
-function modelWithLegends(legends: Legend[]): MsaViewModel {
+function modelWithLegends(legends: LegendSection[]): MsaViewModel {
   const model = MSAModelF()
     .views(() => ({
       get legends() {
@@ -50,19 +51,19 @@ function exportEntire(model: MsaViewModel) {
   })
 }
 
-const lineage: Legend = {
+const lineage: LegendSection = {
   id: 'lineage',
   title: 'Lineage',
-  entries: [
-    { id: 'a', label: 'clade A', color: '#ff0000' },
-    { id: 'b', label: 'clade B', color: '#00ff00' },
+  items: [
+    { value: 'a', label: 'clade A', color: '#ff0000' },
+    { value: 'b', label: 'clade B', color: '#00ff00' },
   ],
 }
 
-const segment: Legend = {
+const segment: LegendSection = {
   id: 'segment',
   title: 'Segment',
-  entries: [{ id: 'ha', label: 'HA', color: '#0000ff' }],
+  items: [{ value: 'ha', label: 'HA', color: '#0000ff' }],
 }
 
 // the key box is 8px of padding above and below rows of 16px
@@ -92,9 +93,9 @@ test('a lone legend draws its entries and no title', async () => {
 })
 
 test('the reserved column measures across every legend', async () => {
-  const wide: Legend = {
+  const wide: LegendSection = {
     ...segment,
-    entries: [{ id: 'ha', label: 'HA'.repeat(30), color: '#0000ff' }],
+    items: [{ value: 'ha', label: 'HA'.repeat(30), color: '#0000ff' }],
   }
   const narrow = await exportEntire(modelWithLegends([lineage]))
   const widened = await exportEntire(modelWithLegends([lineage, wide]))
@@ -157,9 +158,9 @@ test('an encoding legend draws in both renderings', async () => {
     {
       id: 'rowData-clade',
       title: 'clade',
-      entries: [
-        { id: '2.3.2.1c', label: '2.3.2.1c', color: '#e41a1c' },
-        { id: '2.3.4.4b', label: '2.3.4.4b', color: '#377eb8' },
+      items: [
+        { value: '2.3.2.1c', label: '2.3.2.1c', color: '#e41a1c' },
+        { value: '2.3.4.4b', label: '2.3.4.4b', color: '#377eb8' },
       ],
     },
   ])
@@ -187,7 +188,7 @@ test('a non-breaking space in a label leaves the export valid XML', async () => 
       {
         id: 'nbsp',
         title: 'Domain',
-        entries: [{ id: 'a', label: 'dom one', color: '#ff0000' }],
+        items: [{ value: 'a', label: 'dom one', color: '#ff0000' }],
       },
     ]),
   )

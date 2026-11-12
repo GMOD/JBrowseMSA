@@ -5,7 +5,6 @@ import { when } from 'mobx'
 
 import { visibleRowRange } from './components/getVisibleLeaves.ts'
 import MinimapSVG from './components/minimap/MinimapSVG.tsx'
-import { legendRows } from './components/msa/legendRows.ts'
 import { rasterApplies, rasterImageHref } from './components/msa/msaRaster.ts'
 import {
   highlightStripShown,
@@ -25,13 +24,17 @@ import { treeScaleBarHeight } from './constants.ts'
 import {
   LEGEND_CHAR_W,
   LEGEND_FONT,
+  LEGEND_GRADIENT_H,
   LEGEND_PAD,
   LEGEND_ROW_H,
   LEGEND_SWATCH,
   LEGEND_TEXT_X,
+  exportLegendEntries,
   exportPageSize,
   getLayout,
   legendHeight,
+  legendLines,
+  legendRowHeight,
 } from './exportLayout.ts'
 import { measureTextCanvas } from './measureTextCanvas.ts'
 import { renderToStaticMarkup, svgSafeColors } from './renderToStaticMarkup.ts'
@@ -330,11 +333,18 @@ function LegendSVG({
   theme: Theme
   width: number
 }) {
-  const rows = legendRows(model.legends)
-  const boxHeight = legendHeight(rows)
-  // the column is capped at LEGEND_MAX_W, so a name too long for it has to be
-  // clipped here -- text that overruns the reserved width runs off the figure
-  const room = width - LEGEND_TEXT_X - LEGEND_PAD
+  const rows = exportLegendEntries(model)
+  const boxHeight = legendHeight(rows, width)
+  const ink = theme.palette.text.primary
+  // the column is capped at LEGEND_MAX_W, so a name too long for it is
+  // clipped here, where it would otherwise run off the figure
+  const clip = (text: string, x: number) =>
+    ellipsize(t => t.length * LEGEND_CHAR_W, text, width - x - LEGEND_PAD).text
+  const barWidth = width - 4 - LEGEND_PAD * 2
+  const tops = rows.reduce<number[]>(
+    (acc, row, i) => [...acc, acc[i]! + legendRowHeight(row, width)],
+    [LEGEND_PAD],
+  )
   return (
     <g>
       <rect
@@ -347,10 +357,57 @@ function LegendSVG({
         rx={2}
       />
       {rows.map((row, i) => {
-        const y = LEGEND_PAD + i * LEGEND_ROW_H
-        return (
+        const y = tops[i]!
+        const baseline = y + LEGEND_SWATCH - 1
+        const barTop = y + (row.label ? LEGEND_ROW_H : 0) + 2
+        const labelY = barTop + LEGEND_GRADIENT_H + LEGEND_FONT
+        const gradientId = `${model.id}-legend-gradient-${i}`
+        return row.gradient ? (
           <g key={row.key}>
-            {row.color ? (
+            {row.label ? (
+              <text
+                x={LEGEND_PAD}
+                y={baseline}
+                fontSize={LEGEND_FONT}
+                fill={ink}
+              >
+                {clip(row.label, LEGEND_PAD)}
+              </text>
+            ) : null}
+            <defs>
+              <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+                {row.gradient.stops.map(stop => (
+                  <stop
+                    key={stop.offset}
+                    offset={stop.offset}
+                    stopColor={stop.color}
+                  />
+                ))}
+              </linearGradient>
+            </defs>
+            <rect
+              x={LEGEND_PAD}
+              y={barTop}
+              width={barWidth}
+              height={LEGEND_GRADIENT_H}
+              fill={`url(#${gradientId})`}
+            />
+            <text x={LEGEND_PAD} y={labelY} fontSize={LEGEND_FONT} fill={ink}>
+              {row.gradient.minLabel}
+            </text>
+            <text
+              x={LEGEND_PAD + barWidth}
+              y={labelY}
+              fontSize={LEGEND_FONT}
+              fill={ink}
+              textAnchor="end"
+            >
+              {row.gradient.maxLabel}
+            </text>
+          </g>
+        ) : (
+          <g key={row.key}>
+            {row.kind === 'swatch' && row.color ? (
               <rect
                 x={LEGEND_PAD}
                 y={y}
@@ -360,15 +417,19 @@ function LegendSVG({
                 stroke={outlineColor(row.color)}
               />
             ) : null}
-            <text
-              x={row.color ? LEGEND_TEXT_X : LEGEND_PAD}
-              y={y + LEGEND_SWATCH - 1}
-              fontSize={LEGEND_FONT}
-              fontWeight={row.color ? undefined : 'bold'}
-              fill={theme.palette.text.primary}
-            >
-              {ellipsize(t => t.length * LEGEND_CHAR_W, row.label, room).text}
-            </text>
+            {legendLines(row, width).map((line, n) => (
+              <text
+                key={n}
+                x={row.kind === 'swatch' ? LEGEND_TEXT_X : LEGEND_PAD}
+                y={baseline + n * LEGEND_ROW_H}
+                fontSize={LEGEND_FONT}
+                fontWeight={row.kind === 'title' ? 'bold' : undefined}
+                fontStyle={row.kind === 'note' ? 'italic' : undefined}
+                fill={row.kind === 'note' ? theme.palette.text.secondary : ink}
+              >
+                {clip(line, row.kind === 'swatch' ? LEGEND_TEXT_X : LEGEND_PAD)}
+              </text>
+            ))}
           </g>
         )
       })}

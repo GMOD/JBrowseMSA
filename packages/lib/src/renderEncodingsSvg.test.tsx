@@ -54,9 +54,9 @@ test('a tipLabel encoding colors each label by its field', async () => {
     { channel: 'tipLabel', field: 'clade' },
   ])
   const scale = model.resolvedEncodings[0]!
-  expect(scale.legend).toEqual([
-    { id: 'bird', label: 'bird', color: '#F8766D' },
-    { id: 'mammal', label: 'mammal', color: '#00BFC4' },
+  expect(scale.items).toEqual([
+    { value: 'bird', label: 'bird', color: '#F8766D' },
+    { value: 'mammal', label: 'mammal', color: '#00BFC4' },
   ])
 
   const drawn = texts(svg)

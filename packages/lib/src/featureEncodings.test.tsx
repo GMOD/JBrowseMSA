@@ -89,9 +89,9 @@ test('the domain legend lists the values of the field featureFill reads', () => 
     {
       id: 'domains',
       title: 'group',
-      entries: [
-        { id: 'enzyme', label: 'enzyme', color: '#e41a1c' },
-        { id: 'binder', label: 'binder', color: '#377eb8' },
+      items: [
+        { value: 'enzyme', label: 'enzyme', color: '#e41a1c' },
+        { value: 'binder', label: 'binder', color: '#377eb8' },
       ],
     },
   ])
@@ -102,14 +102,14 @@ test('hiding a feature type leaves the rest in the colors they had', () => {
   model.setFilter('myb', false)
 
   expect(fillOf(model, 'kinase')).toBe('#00BFC4')
-  expect(model.legends[0]!.entries.map(e => e.id)).toEqual(['enzyme'])
+  expect(model.legends[0]!.items.map(e => e.value)).toEqual(['enzyme'])
 })
 
 test('the domain legend keeps the accessions when no encoding names the channel', () => {
-  const { title, entries } = makeModel().legends[0]!
+  const { title, items } = makeModel().legends[0]!
 
   expect(title).toBe('Domains')
-  expect(entries.map(e => e.id)).toEqual(['kinase', 'myb', 'flagged'])
+  expect(items.map(e => e.value)).toEqual(['kinase', 'myb', 'flagged'])
 })
 
 test('the export fills each span from the scale and labels it from the field', async () => {

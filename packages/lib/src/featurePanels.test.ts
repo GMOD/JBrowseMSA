@@ -140,7 +140,7 @@ test('the panel colors its spans by its own field, and lists that scale', () => 
   expect(panel.labels!.get(span(panel, 'g3', 'genA').annotation)).toBe('genA')
   // with no columns the overlay draws nothing and lists nothing, so the
   // panel's own scale is the whole key
-  expect(model.legends.map(l => [l.title, l.entries.map(e => e.id)])).toEqual([
+  expect(model.legends.map(l => [l.title, l.items.map(e => e.value)])).toEqual([
     ['class', ['core']],
   ])
 })
@@ -159,13 +159,13 @@ test('hiding a feature type leaves the panel colors of the rest as they were', (
   expect(panel.colors.get(span(panel, 'g1', 'genE').annotation)!.fill).toBe(
     '#00BFC4',
   )
-  expect(panel.legend.map(e => e.id)).toEqual(['core'])
+  expect(panel.legend.map(e => e.value)).toEqual(['core'])
 })
 
 test('a panel taking the overlay colors lists them under the domain key', () => {
   const { model } = featurePanel([{ kind: 'features', x: 'position' }])
   expect(
-    model.legends.map(l => [l.id, l.title, l.entries.map(e => e.id)]),
+    model.legends.map(l => [l.id, l.title, l.items.map(e => e.value)]),
   ).toEqual([['domains', 'Domains', ['genA', 'genE']]])
 })
 

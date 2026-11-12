@@ -180,8 +180,13 @@ export async function exportSvg({
 }) {
   const outputFormat = figureFormat(outputFile)
   checkConverter(outputFormat)
-  const { MSAModelF, renderToSvg, installHeadlessRenderEnv, resolveTheme } =
-    await import('react-msaview')
+  const {
+    MSAModelF,
+    renderToSvg,
+    installHeadlessRenderEnv,
+    resolveTheme,
+    problemLine,
+  } = await import('react-msaview')
 
   enableStaticRendering(true)
   // jsdom provides document/window/SVGElement needed by svgcanvas and
@@ -233,6 +238,9 @@ export async function exportSvg({
     model.setTreeAreaWidth(treeAreaWidth)
   }
   model.setWidth(width)
+  for (const problem of model.scaleProblems) {
+    console.warn(problemLine(problem))
+  }
 
   const block = selection ? model.resolvedSelection : undefined
   if (selection && !block) {
