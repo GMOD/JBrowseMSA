@@ -1,8 +1,9 @@
 /**
  * Figures for docs/tutorials/alphafold_confidence.md: fourteen vertebrate
- * TDP-43 orthologs with the per-residue pLDDT of their AlphaFold models as a
- * column track, the very low runs of each model as a per-row overlay, and the
- * Pfam domains of the human row as highlights.
+ * TDP-43 orthologs with the mean pLDDT of their AlphaFold models per column as
+ * a bar track, three rows' own pLDDT as strip tracks, each row's count of
+ * residues under 50 as a bar panel, and the Pfam domains of the human row as
+ * highlights.
  *
  * Every column and every residue number comes from the files the build script
  * wrote (packages/app/public/data/tdp43), so a re-run that moves a column moves
@@ -33,7 +34,7 @@ const aligned = alignedRows(read('tardbp.afa'))
 const columnOfResidue = residueColumns(aligned[REF])
 const col = residue => columnOfResidue[residue - 1]
 
-const [, bandTrack] = layers.columnTracks
+const [meanTrack, ...rowStrips] = layers.columnTracks
 const domain = short =>
   layers.highlights.find(h => h.label.startsWith(`${short} `))
 const rrm1 = domain('RRM1')
@@ -45,7 +46,7 @@ const bumpColumns = (() => {
   const runs = []
   let run
   for (let i = col(ctd.start); i <= col(ctd.end); i++) {
-    if (bandTrack.data[i] === 'D') {
+    if (meanTrack.values[i] < 50) {
       run = undefined
     } else if (run) {
       run.end = i
@@ -73,14 +74,15 @@ const files = {
   msaFilehandle: { uri: 'data/tdp43/tardbp.afa' },
   treeFilehandle: { uri: 'data/tdp43/tardbp.nwk' },
 }
-const gff = { gffFilehandle: { uri: 'data/tdp43/tardbp-lowconf.gff' } }
 const rowTable = {
   treeMetadataFilehandle: { uri: 'data/tdp43/tardbp-rowdata.json' },
   rowPanels: layers.rowPanels,
 }
-const tracks = { columnTracks: layers.columnTracks }
+const mean = { columnTracks: [meanTrack] }
+const strips = { columnTracks: [meanTrack, ...rowStrips] }
 
-// 431 columns at 3.2px fill a 1600px viewport beside a 190px tree
+// 431 columns at 3.2px fill a 1600px viewport beside a 190px tree, and a
+// 1720px one beside the tree and the bar panel
 const wide = {
   height: 520,
   treeAreaWidth: 190,
@@ -147,19 +149,19 @@ export const specs = [
   },
   {
     name: 'alphafold_confidence-2',
-    // the mean pLDDT per column and its band, over the alignment
+    // the mean pLDDT per column, colored by its band, over the alignment
     viewportWidth: 1600,
-    url: fileSnap({ ...wide, ...tracks }),
+    url: fileSnap({ ...wide, ...mean }),
     settle: 2500,
     clip: 'viewer',
   },
   {
     name: 'alphafold_confidence-3',
-    // the Pfam domains of the reference row against the same two tracks
+    // the Pfam domains of the reference row against the same track
     viewportWidth: 1600,
     url: fileSnap({
       ...wide,
-      ...tracks,
+      ...mean,
       highlights: layers.highlights,
     }),
     settle: 2500,
@@ -167,22 +169,18 @@ export const specs = [
   },
   {
     name: 'alphafold_confidence-4',
-    // each row's own runs under pLDDT 50, from the GFF
+    // three rows' own pLDDT as strips under the mean
     viewportWidth: 1600,
-    url: fileSnap({
-      ...wide,
-      ...tracks,
-      ...gff,
-      showDomainLegend: false,
-    }),
+    url: fileSnap({ ...wide, height: 540, ...strips }),
     settle: 2500,
     clip: 'viewer',
   },
   {
     name: 'alphafold_confidence-5',
-    // one strip per Pfam domain, each row's band over that domain's columns
-    viewportWidth: 1600,
-    url: fileSnap({ ...wide, ...tracks, ...rowTable }),
+    // each row's count of residues under 50 as a bar beside the tree, in a
+    // viewport wider by the panel's 130px
+    viewportWidth: 1720,
+    url: fileSnap({ ...wide, height: 540, ...strips, ...rowTable }),
     settle: 3000,
     clip: 'viewer',
   },
@@ -193,9 +191,7 @@ export const specs = [
     viewportWidth: 1600,
     url: fileSnap({
       ...closeUp(rrm1.start + 8, 20),
-      ...tracks,
-      ...gff,
-      showDomainLegend: false,
+      ...strips,
       highlights: [
         {
           row: REF,
@@ -211,7 +207,7 @@ export const specs = [
       { type: 'box', anchor: { col: probeColumn }, pad: 3 },
       {
         type: 'text',
-        text: 'inside RRM1: one letter, a high bar, no overlay box in any row',
+        text: 'inside RRM1: one letter, and a confident bar and strips',
         fontSize: 16,
         maxWidth: 520,
         anchor: {
@@ -230,9 +226,7 @@ export const specs = [
     viewportWidth: 1600,
     url: fileSnap({
       ...closeUp(ctdProbeResidue - 13, 20),
-      ...tracks,
-      ...gff,
-      showDomainLegend: false,
+      ...strips,
       highlights: [
         {
           row: REF,
@@ -248,7 +242,7 @@ export const specs = [
       { type: 'box', anchor: { col: ctdProbeColumn }, pad: 3 },
       {
         type: 'text',
-        text: 'inside TDP43_C: four letters, a low bar, an orange box in every row',
+        text: 'inside TDP43_C: four letters, and a very low bar and strips',
         fontSize: 16,
         maxWidth: 560,
         anchor: {
@@ -266,9 +260,7 @@ export const specs = [
     viewportWidth: 1600,
     url: fileSnap({
       ...closeUp(bumpResidues.start - 12, 20),
-      ...tracks,
-      ...gff,
-      showDomainLegend: false,
+      ...strips,
       highlights: [
         {
           row: REF,
@@ -288,9 +280,9 @@ export const specs = [
       },
       {
         type: 'text',
-        text: 'the overlay boxes stop on both sides of these columns',
+        text: 'Human and Zebrafish rise to low here, Ghostshark stays very low',
         fontSize: 16,
-        maxWidth: 480,
+        maxWidth: 600,
         anchor: {
           col: bumpColumns.start,
           colEnd: bumpColumns.end,
@@ -302,17 +294,15 @@ export const specs = [
   },
   {
     name: 'alphafold_confidence-8',
-    // the two tracks, the four strips, the domain highlights and the per-row
-    // overlay in one view
-    viewportWidth: 1600,
+    // the mean, the three row strips, the bar panel and the domain highlights
+    // in one view
+    viewportWidth: 1720,
     viewportHeight: 900,
     url: fileSnap({
       ...wide,
       height: 540,
-      ...tracks,
-      ...gff,
+      ...strips,
       ...rowTable,
-      showDomainLegend: false,
       highlights: layers.highlights,
     }),
     settle: 3000,

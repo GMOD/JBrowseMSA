@@ -1,86 +1,58 @@
 {
  "Human": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 65.2,
+  "under50": 156
  },
  "Mouse": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 63.8,
+  "under50": 162
  },
  "Cow": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 61.6,
+  "under50": 172
  },
  "Elephant": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 62.0,
+  "under50": 178
  },
  "Opossum": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 62.4,
+  "under50": 169
  },
  "Platypus": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 61.9,
+  "under50": 175
  },
  "Chicken": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 65.8,
+  "under50": 155
  },
  "Turtle": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 61.4,
+  "under50": 175
  },
  "Lizard": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 62.3,
+  "under50": 173
  },
  "Frog": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 66.5,
+  "under50": 156
  },
  "Coelacanth": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 61.5,
+  "under50": 167
  },
  "Zebrafish": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 65.9,
+  "under50": 149
  },
  "Seabream": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 61.6,
+  "under50": 170
  },
  "Ghostshark": {
-  "TDP43_N": "confident",
-  "RRM1": "confident",
-  "RRM2": "confident",
-  "TDP43_C": "very low"
+  "meanPlddt": 62.0,
+  "under50": 172
  }
 }

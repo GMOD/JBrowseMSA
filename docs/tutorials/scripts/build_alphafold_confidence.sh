@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Build the TDP-43 alignment of docs/tutorials/alphafold_confidence.md:
-# fourteen vertebrate orthologs from UniProt, aligned, with a tree, the
-# per-residue pLDDT of each row's AlphaFold model as a column track, the runs
-# of very low confidence as a per-row GFF, and the Pfam domains of the human
-# row as highlights. Every step is the one the page shows.
+# fourteen vertebrate orthologs from UniProt, aligned, with a tree, the mean
+# pLDDT of their AlphaFold models per column as a bar track, three rows' own
+# pLDDT as strip tracks, each row's count of residues under 50 as a bar panel,
+# and the Pfam domains of the human row as highlights. The tracks color pLDDT
+# in AlphaFold DB's four bands. Every step is the one the page shows.
 #
 #   bash build_alphafold_confidence.sh [rows.tsv] [outdir]
 #
@@ -137,13 +138,25 @@ THREE_TO_ONE = {
     'MET': 'M', 'PHE': 'F', 'PRO': 'P', 'SER': 'S', 'THR': 'T', 'TRP': 'W',
     'TYR': 'Y', 'VAL': 'V',
 }
-# the four pLDDT bands AlphaFold DB colors its models by, and its colors
-BANDS = [(90, 'V', '#0053d6'), (70, 'C', '#65cbf3'), (50, 'L', '#ffdb13'),
-         (0, 'D', '#ff7d45')]
+# the four pLDDT bands AlphaFold DB colors its models by, lowest first, as one
+# threshold scale every layer below reads
+CUTS = [50, 70, 90]
+PLDDT = {
+    'scale': {
+        'type': 'threshold',
+        'domain': CUTS,
+        'range': ['#ff7d45', '#ffdb13', '#65cbf3', '#0053d6'],
+    },
+    'legend': {
+        'title': 'pLDDT',
+        'labels': ['Very low', 'Low', 'Confident', 'Very high'],
+    },
+}
 
 
 def band(value):
-    return next(code for cut, code, _ in BANDS if value >= cut)
+    """0 for very low up to 3 for very high, as the threshold scale cuts"""
+    return sum(value >= cut for cut in CUTS)
 
 
 def read_model(path):
@@ -154,6 +167,19 @@ def read_model(path):
             seq += THREE_TO_ONE[line[17:20]]
             plddt.append(float(line[60:66]))
     return seq, plddt
+
+
+def runs_under_50(values, min_run):
+    """(first, last) 0-based index of every run of min_run or more values under 50"""
+    runs, start = [], None
+    for i, value in enumerate(list(values) + [100.0]):
+        if value < 50 and start is None:
+            start = i
+        elif value >= 50 and start is not None:
+            if i - start >= min_run:
+                runs.append((start, i - 1))
+            start = None
+    return runs
 
 
 labels, accession = [], {}
@@ -175,16 +201,19 @@ ncols = len(aligned[REF])
 
 # the model sequence against the row, residue by residue, before anything reads
 # a position off either
-plddt = {}
+plddt, row_data = {}, {}
 for label in labels:
     seq, values = read_model(f'{out}/models/{accession[label]}.pdb')
     row = aligned[label].replace('-', '')
     if seq != row:
         raise SystemExit(f'{label}: model sequence differs from the row')
     plddt[label] = values
-    very_low = sum(v < 50 for v in values)
+    mean = sum(values) / len(values)
+    under_50 = sum(v < 50 for v in values)
+    row_data[label] = {'meanPlddt': round(mean, 1), 'under50': under_50}
     print(f'  {label:12s} {accession[label]:12s} model {len(seq)} aa matches the row, '
-          f'mean pLDDT {sum(values) / len(values):5.1f}, {very_low} residues under 50')
+          f'mean pLDDT {mean:5.1f}, {under_50} residues under 50')
+json.dump(row_data, open(f'{out}/tardbp-rowdata.json', 'w'), indent=1)
 
 # column of every residue of a row, through that row's gaps, and the value of
 # every column of a row, with None where the row has a gap
@@ -205,10 +234,9 @@ for col in range(ncols):
     values = [v for v in values if v is not None]
     means.append(round(sum(values) / len(values)))
     depth.append(len(values))
-bands = ''.join(band(m) for m in means)
-counts = {code: bands.count(code) for _, code, _ in BANDS}
-print(f'columns by mean pLDDT band: {counts["V"]} very high, {counts["C"]} confident, '
-      f'{counts["L"]} low, {counts["D"]} very low')
+counts = [sum(band(m) == b for m in means) for b in range(4)]
+print(f'columns by mean pLDDT band: {counts[3]} very high, {counts[2]} confident, '
+      f'{counts[1]} low, {counts[0]} very low')
 print(f'every column carries a residue from {min(depth)} to {max(depth)} of the {len(labels)} rows')
 
 # the Pfam domains of the reference row, in its own residue numbering
@@ -255,7 +283,7 @@ lowest = min(domain_means, key=domain_means.get)
 first, last = spans[lowest]
 runs, run = [], None
 for col in range(first, last + 2):
-    if col <= last and bands[col] != 'D':
+    if col <= last and means[col] >= 50:
         run = col if run is None else run
     elif run is not None:
         runs.append((run, col - 1))
@@ -273,48 +301,23 @@ print(f'inside {lowest}, columns {longest[0] + 1}-{longest[1] + 1} rise to a mea
       f'{sum(run_means) / len(run_means):.0f}, which is {REF} residues '
       f'{ref_residue(longest[0])}-{ref_residue(longest[1])}')
 
-# 7. the runs of very low confidence in each row, as a GFF in that row's own
-#    residue numbering. A run shorter than five residues is a dip inside a
-#    fold, so the GFF keeps the runs of five and longer.
+# 7. a strip of the model's own pLDDT for three rows: the reference, the one
+#    with the fewest residues under 50, and the one with the longest run under
+#    50. A run shorter than five residues is a dip inside a fold, so the runs
+#    printed are those of five and longer.
 MIN_RUN = 5
-with open(f'{out}/tardbp-lowconf.gff', 'w') as gff:
-    gff.write('##gff-version 3\n')
-    total = 0
-    for label in labels:
-        values = plddt[label]
-        start = None
-        for i, value in enumerate(list(values) + [100.0]):
-            if value < 50 and start is None:
-                start = i
-            elif value >= 50 and start is not None:
-                if i - start >= MIN_RUN:
-                    gff.write(
-                        f'{label}\tAlphaFold\tpolypeptide_region\t{start + 1}\t{i}\t.\t.\t.\t'
-                        f'Name=pLDDT<50;color=%23ff7d45\n'
-                    )
-                    total += 1
-                start = None
-    print(f'{total} runs of {MIN_RUN} or more residues under pLDDT 50 across the {len(labels)} rows')
+runs = {label: runs_under_50(plddt[label], MIN_RUN) for label in labels}
+fewest = min(labels, key=lambda label: row_data[label]['under50'])
+longest_run = max(
+    labels, key=lambda label: max(last - first for first, last in runs[label]))
+strip_rows = list(dict.fromkeys([REF, fewest, longest_run]))
+print(f'strips for {REF}, {fewest} with the fewest residues under 50 and '
+      f'{longest_run} with the longest run under 50')
+for label in strip_rows:
+    spans_text = ', '.join(
+        f'{columns[label][a] + 1}-{columns[label][b] + 1}' for a, b in runs[label])
+    print(f'  {label:12s} runs of {MIN_RUN} or more under 50 at columns {spans_text}')
 
-# 8. one field per Pfam domain per row for the row panels: the band each row's
-#    own model falls in over the columns that domain spans in the reference row
-BAND_NAMES = {'V': 'very high', 'C': 'confident', 'L': 'low', 'D': 'very low'}
-row_data = {}
-for label in labels:
-    fields = {}
-    for short, (first, last) in spans.items():
-        values = [v for v in by_column[label][first:last + 1] if v is not None]
-        fields[short] = BAND_NAMES[band(sum(values) / len(values))]
-    row_data[label] = fields
-json.dump(row_data, open(f'{out}/tardbp-rowdata.json', 'w'), indent=1)
-for short in spans:
-    tally = {}
-    for fields in row_data.values():
-        tally[fields[short]] = tally.get(fields[short], 0) + 1
-    summary = ', '.join(f'{n} rows {name}' for name, n in sorted(tally.items()))
-    print(f'{short:8s} {summary}')
-
-band_colors = {BAND_NAMES[code]: color for _, code, color in BANDS}
 layers = {
     'columnTracks': [
         {
@@ -322,51 +325,36 @@ layers = {
             'name': 'Mean pLDDT',
             'kind': 'bar',
             'values': means,
-            'encoding': {'y': {'scale': {'domainMax': 100}}},
-            'color': '#4e79a7',
+            'encoding': {'y': {'scale': {'domainMax': 100}}, 'color': PLDDT},
             'height': 60,
         },
-        {
-            'id': 'plddt-band',
-            'name': 'pLDDT band',
-            'kind': 'text',
-            'data': bands,
-            'encoding': {
-                'color': {
-                    'scale': {
-                        'domain': [code for _, code, _ in BANDS],
-                        'range': [color for _, _, color in BANDS],
-                    }
-                }
-            },
-            'height': 16,
-        },
+        *(
+            {
+                'id': f'plddt-{label.lower()}',
+                'name': f'{label} pLDDT',
+                'kind': 'strip',
+                'row': label,
+                'values': plddt[label],
+                'encoding': {'color': PLDDT},
+            }
+            for label in strip_rows
+        ),
     ],
     'highlights': highlights,
     'rowPanels': [
         {
-            'kind': 'strip',
-            'encoding': {
-                'fill': {
-                    'field': short,
-                    'legend': {'title': 'pLDDT band'},
-                    'scale': {
-                        'domain': list(band_colors),
-                        'range': list(band_colors.values()),
-                    },
-                }
-            },
-            'header': short,
-            'width': 14,
-        }
-        for short in spans
+            'kind': 'bar',
+            'header': 'residues < 50',
+            'encoding': {'x': {'field': 'under50'}},
+            'width': 130,
+        },
     ],
 }
 json.dump(layers, open(f'{out}/tardbp-layers.json', 'w'), indent=1)
 
-# 9. check the inference against the model files: the residue and the pLDDT
+# 8. check the inference against the model files: the residue and the pLDDT
 #    every row carries at one column inside RRM1 and one inside the C-terminal
-#    region, read straight from the B-factor column of each PDB
+#    region, read from the B-factor column of each PDB
 probes = {
     'RRM1': spans['RRM1'][0] + 21,
     'TDP43_C': spans['TDP43_C'][0] + 44,
@@ -382,4 +370,4 @@ for name, col in probes.items():
 PY
 
 echo
-echo "wrote $OUT/tardbp.afa, $OUT/tardbp.nwk, $OUT/tardbp-lowconf.gff, $OUT/tardbp-rowdata.json, $OUT/tardbp-layers.json"
+echo "wrote $OUT/tardbp.afa, $OUT/tardbp.nwk, $OUT/tardbp-rowdata.json, $OUT/tardbp-layers.json"
