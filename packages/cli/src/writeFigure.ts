@@ -62,7 +62,6 @@ export function writeFigure({
         ...(format === 'png' ? ['-z', String(scale)] : []),
         '-o',
         file,
-        '-',
       ],
       svg,
     )
