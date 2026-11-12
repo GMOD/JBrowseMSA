@@ -133,7 +133,9 @@ export const catalog: CatalogEntry[] = [
     category: 'Protein structure',
     description:
       'Eight human kinases from four kinome groups, one structure panel per ' +
-      'group, superposed into one frame with the cameras tied. The fit ' +
+      'group, superposed into one frame with the cameras tied. A facet on ' +
+      'the group field labels the alignment rows in the same four bands. ' +
+      'The fit ' +
       'follows the selection: pick a lobe or drag along the ruler, and the ' +
       'CA distance track follows.',
   },

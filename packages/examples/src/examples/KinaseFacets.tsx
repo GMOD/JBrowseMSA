@@ -53,6 +53,8 @@ const lobes = [
 ]
 
 // Eight human kinases from four of the kinome's groups, one panel per group.
+// A facet on the group field stacks the alignment's rows in the same four
+// bands, labelled in the order the panels take.
 // The alignment decides which residues sit on which, so all eight structures
 // lie in one frame and the four panels turn together: whatever differs
 // between groups differs in place. The four colored marks are the motifs every
@@ -71,6 +73,9 @@ const KinaseFacets = observer(function KinaseFacets() {
       height: 400,
       colorSchemeName: 'clustalx_protein_dynamic',
       data: { msa: kinases.msa },
+      rowTransform: {
+        facet: { field: 'group', sort: Object.keys(groupColors) },
+      },
       highlights: marks.map(({ name, color }) => ({
         start: landmarks[name].column,
         end: landmarks[name].column,
