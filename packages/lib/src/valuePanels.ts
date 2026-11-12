@@ -87,6 +87,24 @@ export function resolveValueScale(
 }
 
 /**
+ * A column bar track's value scale over its values. A linear one's unset ends
+ * are 0 and 1, so a track that names no `domainMax` draws its values as
+ * fractions of its height; a log one's follow the positive values.
+ */
+export function barTrackScale(
+  spec: ValueScaleSpec | undefined,
+  values: Iterable<number>,
+) {
+  return resolveValueScale(
+    spec?.type === 'log'
+      ? spec
+      : { ...spec, domainMin: spec?.domainMin ?? 0, domainMax: spec?.domainMax ?? 1 },
+    values,
+    false,
+  )
+}
+
+/**
  * The axis of a bar or point panel `width` pixels wide: its scale's ends a
  * pixel in from the edges, and in from a dot's radius
  */

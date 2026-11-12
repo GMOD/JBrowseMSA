@@ -140,10 +140,10 @@ return (
 ### Data layers
 
 `highlights`, `columnTracks` and `residueMappings` take data the host computed:
-a labeled band over a residue or column range, a bar, text, arc or features
-track above the alignment, and the residue-by-residue correspondence between a
-row and a structure. Each is also a model property, so it travels in a shared
-URL and the SVG export draws it.
+a labeled band over a residue or column range, a bar, strip, text, arc or
+features track above the alignment, and the residue-by-residue correspondence
+between a row and a structure. Each is also a model property, so it travels in a
+shared URL and the SVG export draws it.
 
 ```tsx
 <MSAViewer

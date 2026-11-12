@@ -1,3 +1,4 @@
+import { arcColorValue, letterValue } from '../../columnTrackColor.ts'
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { contrastTextFn } from '../../util.ts'
@@ -24,9 +25,14 @@ import type {
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
+// `values` are each bar's fraction of the track height, and `colors` the color
+// of each bar where a scale colors it, `color` where it leaves one unset. A
+// bar `hidden` marks, its value hidden through the legend, draws nothing.
 function drawConservationBars({
   ctx,
   values,
+  colors,
+  hidden,
   color,
   colWidth,
   trackHeight,
@@ -35,6 +41,8 @@ function drawConservationBars({
 }: {
   ctx: RenderCtx
   values: number[]
+  colors?: readonly (string | undefined)[]
+  hidden?: readonly boolean[]
   color: string
   colWidth: number
   trackHeight: number
@@ -49,10 +57,46 @@ function drawConservationBars({
 
   ctx.fillStyle = color
   for (let i = xStart; i < xEnd && i < values.length; i++) {
-    const value = values[i]!
-    const barHeight = value * trackHeight
-    const x = i * colWidth
-    ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
+    if (!hidden?.[i]) {
+      const value = values[i]!
+      const barHeight = value * trackHeight
+      const x = i * colWidth
+      if (colors) {
+        ctx.fillStyle = colors[i] ?? color
+      }
+      ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
+    }
+  }
+}
+
+// one cell per visible column, the full track height, in the color a scale
+// gives its value; a column with no color draws nothing
+function drawStrip({
+  ctx,
+  colors,
+  colWidth,
+  trackHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: RenderCtx
+  colors: readonly (string | undefined)[]
+  colWidth: number
+  trackHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  const { xStart, xEnd } = visibleColRange({
+    offsetX,
+    blockWidth: blockSize,
+    colWidth,
+  })
+  for (let i = xStart; i < xEnd && i < colors.length; i++) {
+    const color = colors[i]
+    if (color !== undefined) {
+      ctx.fillStyle = color
+      ctx.fillRect(i * colWidth, 0, colWidth, trackHeight)
+    }
   }
 }
 
@@ -69,11 +113,15 @@ export function barTrackValues(model: MsaViewModel, trackId: string) {
 }
 
 // An arc's apex scales with the square root of its span. Contact-map spans skew
-// short, and a linear scale flattens them along the baseline.
+// short, and a linear scale flattens them along the baseline. An arc strokes
+// in its own color, else the color `colorOf` gives its value, else `color`,
+// and an arc whose value `hiddenArc` names draws nothing.
 function drawArcs({
   ctx,
   arcs,
   color,
+  colorOf,
+  hiddenArc,
   colWidth,
   trackHeight,
   offsetX,
@@ -82,6 +130,8 @@ function drawArcs({
   ctx: RenderCtx
   arcs: Arc[] | undefined
   color: string
+  colorOf?: (arc: Arc) => string | undefined
+  hiddenArc?: (arc: Arc) => boolean
   colWidth: number
   trackHeight: number
   offsetX: number
@@ -104,24 +154,31 @@ function drawArcs({
   ctx.lineWidth = 1
   for (const arc of arcs) {
     // an arc that spans the block draws even though neither foot is inside it
-    if (arc.end < xStart || arc.start > xEnd) {
-      continue
+    if (arc.end >= xStart && arc.start <= xEnd && !hiddenArc?.(arc)) {
+      const x1 = (arc.start + 0.5) * colWidth
+      const x2 = (arc.end + 0.5) * colWidth
+      const apex = apexRoom * Math.sqrt((arc.end - arc.start) / maxSpan)
+      ctx.strokeStyle = arc.color ?? colorOf?.(arc) ?? color
+      ctx.beginPath()
+      ctx.moveTo(x1, trackHeight)
+      ctx.quadraticCurveTo(
+        (x1 + x2) / 2,
+        trackHeight - 2 * apex,
+        x2,
+        trackHeight,
+      )
+      ctx.stroke()
     }
-    const x1 = (arc.start + 0.5) * colWidth
-    const x2 = (arc.end + 0.5) * colWidth
-    const apex = apexRoom * Math.sqrt((arc.end - arc.start) / maxSpan)
-    ctx.strokeStyle = arc.color ?? color
-    ctx.beginPath()
-    ctx.moveTo(x1, trackHeight)
-    ctx.quadraticCurveTo((x1 + x2) / 2, trackHeight - 2 * apex, x2, trackHeight)
-    ctx.stroke()
   }
 }
 
+// a letter `hiddenLetter` names, its value hidden through the legend, draws
+// neither its cell nor itself
 function drawTextTrackContent({
   ctx,
   data,
   colorAt,
+  hiddenLetter,
   contrastText,
   bgColor,
   drawLetters,
@@ -133,6 +190,7 @@ function drawTextTrackContent({
   ctx: RenderCtx
   data: string | undefined
   colorAt: (col: number, letter: string) => string | undefined
+  hiddenLetter?: (letter: string) => boolean
   contrastText: (color: string | undefined) => string
   bgColor: boolean
   drawLetters: boolean
@@ -150,16 +208,18 @@ function drawTextTrackContent({
 
   for (let i = 0; i < str.length; i++) {
     const letter = str[i]!
-    const col = xStart + i
-    const fill = bgColor ? colorAt(col, letter) : undefined
-    const x = col * colWidth
-    if (fill) {
-      ctx.fillStyle = fill
-      ctx.fillRect(x, 0, colWidth, rowHeight)
-    }
-    if (drawLetters) {
-      ctx.fillStyle = contrastText(fill)
-      ctx.fillText(letter, x + colWidth / 2, rowHeight / 2)
+    if (!hiddenLetter?.(letter)) {
+      const col = xStart + i
+      const fill = bgColor ? colorAt(col, letter) : undefined
+      const x = col * colWidth
+      if (fill) {
+        ctx.fillStyle = fill
+        ctx.fillRect(x, 0, colWidth, rowHeight)
+      }
+      if (drawLetters) {
+        ctx.fillStyle = contrastText(fill)
+        ctx.fillText(letter, x + colWidth / 2, rowHeight / 2)
+      }
     }
   }
 }
@@ -513,6 +573,8 @@ export function drawTrackBlock({
       drawConservationBars({
         ctx,
         values: barTrackValues(model, id),
+        colors: model.columnTrackColors.get(id)?.columns,
+        hidden: model.columnTrackColors.get(id)?.hiddenColumns,
         color: barColor ?? 'gray',
         colWidth,
         trackHeight,
@@ -522,10 +584,14 @@ export function drawTrackBlock({
       break
     }
     case 'arc': {
+      const colors = model.columnTrackColors.get(id)
+      const valueOf = (arc: Arc) => arcColorValue(arc, !!colors?.identity)
       drawArcs({
         ctx,
         arcs,
         color: arcColor ?? theme.palette.text.primary,
+        colorOf: colors?.scale ? arc => colors.colorOf(valueOf(arc)) : undefined,
+        hiddenArc: colors ? arc => colors.isHidden(valueOf(arc)) : undefined,
         colWidth,
         trackHeight,
         offsetX,
@@ -569,6 +635,17 @@ export function drawTrackBlock({
       })
       break
     }
+    case 'strip': {
+      drawStrip({
+        ctx,
+        colors: model.columnTrackColors.get(id)?.columns ?? [],
+        colWidth,
+        trackHeight,
+        offsetX,
+        blockSize: blockSizeX,
+      })
+      break
+    }
     case 'features': {
       const scale = model.featureTrackScales.get(id)
       if (scale) {
@@ -602,7 +679,8 @@ export function drawTrackBlock({
     case 'text':
     case 'reference': {
       const { bgColor, fontSize, rowHeight, showMsaLetters } = model
-      const scheme = customColorScheme ?? model.colorScheme
+      const colors = model.columnTrackColors.get(id)
+      const scheme = colors?.letters ?? customColorScheme ?? model.colorScheme
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       setFontSize(ctx, fontSize)
@@ -615,6 +693,9 @@ export function drawTrackBlock({
           kind === 'reference'
             ? tileColorFn(model)
             : (_col, letter) => scheme[letter.toUpperCase()],
+        hiddenLetter: colors
+          ? letter => colors.isHidden(letterValue(letter))
+          : undefined,
         contrastText: contrastTextFn(theme),
         bgColor,
         drawLetters: showMsaLetters,

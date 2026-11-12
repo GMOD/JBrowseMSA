@@ -213,10 +213,13 @@ export function colorProblems(spec: ColorSpec): ScaleProblem[] {
 }
 
 /**
- * What a bar or point panel's value scale says that it cannot draw: a `type`
- * other than `linear` or `log`, and the problems of its ends
+ * What a bar or point panel's or a bar track's value scale says that it
+ * cannot draw: a `type` other than `linear` or `log`, and the problems of its
+ * ends
  */
-export function valueScaleProblems({ scale }: ValueChannel): ScaleProblem[] {
+export function valueScaleProblems({
+  scale,
+}: Pick<ValueChannel, 'scale'>): ScaleProblem[] {
   const type: unknown = scale?.type
   return [
     ...(type === undefined || type === 'linear' || type === 'log'

@@ -1,6 +1,11 @@
 import type { TickFormat, ValueScale } from './components/axis.ts'
 import type { LegendItem } from './legendSpec.ts'
-import type { ColorChannel, ColorSpec, SharedScale } from './scales.ts'
+import type {
+  ColorChannel,
+  ColorSpec,
+  ColorValue,
+  SharedScale,
+} from './scales.ts'
 import type { Annotation } from 'msa-parsers'
 
 export interface Accession {
@@ -19,6 +24,7 @@ export type TrackKind =
   | 'reference'
   | 'highlights'
   | 'features'
+  | 'strip'
 
 /**
  * Which channel the color scheme paints. `fill` colors the cell a residue sits
@@ -50,9 +56,11 @@ export interface TextTrackModel extends BasicTrackModel {
 }
 
 // a track that draws a per-column bar chart (conservation, property
-// conservation)
+// conservation), or a strip of one cell per column. `columnColors` holds the
+// color of each visible column's bar or cell where a scale colors them.
 export interface BarTrackModel extends BasicTrackModel {
   barColor?: string
+  columnColors?: (string | undefined)[]
 }
 
 // a pair of columns joined by an arc, resolved to 0-based visible columns for
@@ -61,6 +69,7 @@ export interface Arc {
   start: number
   end: number
   color?: string
+  value?: number
 }
 
 // a track that joins pairs of columns with arcs (RNA base pairs, disulfide
@@ -120,11 +129,14 @@ export interface BasicTrack {
 }
 
 // one arc of an arc track, in the snapshot's own coordinates: 1-based and
-// inclusive, alignment columns unless the track names a `row`
+// inclusive, alignment columns unless the track names a `row`. `value`, such
+// as a contact probability, is what the track's `encoding.color` reads, and
+// the arc's own `color` wins over it.
 export interface ArcSpec {
   start: number
   end: number
   color?: string
+  value?: number
 }
 
 /**
@@ -146,25 +158,29 @@ export interface SpanSpec {
 }
 
 /**
- * The channels a column track reads. `y.scale.domainMax` is the bar value
- * drawn at full height, and a text track's `color` maps its characters onto
- * colors through its `scale`, painted the way `residueEncoding` paints the
- * residues. A features track reads `fill` and `text` off its spans' fields.
+ * The channels a column track reads. `y.scale` maps a bar's value onto its
+ * height. `color` is one color as `{value}`, or else reads the track's own
+ * values through its `scale`: a bar's or a strip's numbers, an arc's `value`,
+ * a text track's upper-case characters, painted the way `residueEncoding`
+ * paints the residues. A features track reads `fill` and `text` off its
+ * spans' fields.
  */
 export interface ColumnTrackEncoding extends FeatureEncodingSpec {
   color?: ColorSpec
-  y?: { scale?: { domainMax?: number } }
+  y?: { scale?: ValueScaleSpec }
 }
 
 // a track supplied as data in the snapshot rather than computed from the
-// alignment. `values` (bar) or `data` (text) index alignment columns, or the
-// 1-based residues of `row` when it names one; `arcs` (arc) name two such
-// positions each, and `features` (features) the two ends of a span. `color` is
-// one color for every bar or arc, and the fill of a span no scale colors.
+// alignment. `values` (bar, strip) or `data` (text) index alignment columns,
+// or the 1-based residues of `row` when it names one; `arcs` (arc) name two
+// such positions each, and `features` (features) the two ends of a span.
+// `color` is shorthand for `encoding.color: {value}` on a bar, text or arc
+// track and for `encoding.fill: {value}` on a features track, read while that
+// member is unset.
 export interface ColumnTrackSpec {
   id: string
   name: string
-  kind: 'bar' | 'text' | 'arc' | 'features'
+  kind: 'bar' | 'strip' | 'text' | 'arc' | 'features'
   values?: number[]
   data?: string
   arcs?: ArcSpec[]
@@ -198,10 +214,11 @@ export interface RowStripSpec {
 
 /**
  * The channels a `features` panel reads off the feature table: the `fill` of
- * each span and the `text` drawn inside it
+ * each span, one color as `{value}` or a field through a scale, and the
+ * `text` drawn inside it
  */
 export interface FeatureEncodingSpec {
-  fill?: ColorChannel
+  fill?: ColorChannel | ColorValue
   text?: FieldChannel
 }
 

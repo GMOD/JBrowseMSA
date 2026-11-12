@@ -76,12 +76,16 @@ function rampColor(value: number | undefined) {
 }
 
 /**
- * The column tracks a structure can be painted from: a bar track, through the
- * ramp, and a text track whose letters a color scale names
+ * The column tracks a structure can be painted from: a bar track, through its
+ * color scale or else the ramp, a strip, and a text track whose letters a
+ * color names
  */
 export function paintableTracks(model: MsaViewModel): ColumnTrackSpec[] {
   return model.columnTracks.filter(
-    t => t.kind === 'bar' || (t.kind === 'text' && t.encoding?.color),
+    t =>
+      t.kind === 'bar' ||
+      t.kind === 'strip' ||
+      (t.kind === 'text' && model.columnTrackColors.get(t.id)?.letters),
   )
 }
 
@@ -91,18 +95,24 @@ export function trackColorBy(track: ColumnTrackSpec) {
 }
 
 /**
- * A track's color at each visible column, read the way the track draws: a text
- * letter through its scale in upper case, and nothing where the track's own row
- * has a gap, which the track fills with a zero or a blank. The row is looked up
- * in the alignment, so it need not be drawn.
+ * A track's color at each visible column, read the way the track draws: a bar
+ * or strip value through the track's color scale, a bar with none through the
+ * ramp, a text letter through its scale in upper case, and nothing where the
+ * track's own row has a gap, which the track fills with a zero or a blank. The
+ * row is looked up in the alignment, so it need not be drawn.
  */
 function trackColumnColor(model: MsaViewModel, track: ColumnTrackSpec) {
   const content = model.columnTrackContent.get(track.id)
+  const colors = model.columnTrackColors.get(track.id)
+  const columns =
+    colors?.scale || track.kind === 'strip' ? colors?.columns : undefined
   const { row } = track
   const colorOf =
-    track.kind === 'bar'
-      ? (col: number) => rampColor(content?.values?.[col])
-      : letterColor(model, track, content?.data)
+    track.kind === 'text'
+      ? letterColor(colors?.letters, content?.data)
+      : columns
+        ? (col: number) => cssHex(columns[col])
+        : (col: number) => rampColor(content?.values?.[col])
   return (col: number) =>
     row && model.visibleColToSeqPos(row, col) === undefined
       ? undefined
@@ -110,14 +120,11 @@ function trackColumnColor(model: MsaViewModel, track: ColumnTrackSpec) {
 }
 
 function letterColor(
-  model: MsaViewModel,
-  track: ColumnTrackSpec,
+  letters: Record<string, string> | undefined,
   data: string | undefined,
 ) {
   const hexes = new Map(
-    Object.entries(
-      model.columnTrackModel(track).model.customColorScheme ?? {},
-    ).map(([letter, css]) => [letter, cssHex(css)]),
+    Object.entries(letters ?? {}).map(([letter, css]) => [letter, cssHex(css)]),
   )
   return (col: number) => hexes.get(data?.[col]?.toUpperCase() ?? '')
 }

@@ -67,10 +67,14 @@ export interface ColorLegend {
 }
 
 /**
- * The color object: a channel's `scale` and its `legend`. Records declaring
- * the same scale and legend share one scale.
+ * The color object: a channel's `scale` and its `legend`, or one color as
+ * `value`. It is unset, a constant `value`, or a field read through `scale`,
+ * the three states of jbrowse-components' ADR-241: a written field paints,
+ * and `value` beside it goes unread. Records declaring the same scale and
+ * legend share one scale.
  */
 export interface ColorSpec {
+  value?: string
   scale?: ColorScale
   legend?: ColorLegend
 }
@@ -78,6 +82,21 @@ export interface ColorSpec {
 /** a channel record: a field read through a color object */
 export interface ColorChannel extends ColorSpec {
   field: string
+}
+
+/** a color object holding one color, which every mark it reaches paints in */
+export interface ColorValue {
+  value: string
+}
+
+/** a color object's field and scale, undefined where it holds no field */
+export function fieldChannel(color: ColorChannel | ColorValue | undefined) {
+  return color && 'field' in color ? color : undefined
+}
+
+/** a color object's one color, undefined where it holds a field or none */
+export function constantColor(color: ColorChannel | ColorValue | undefined) {
+  return color && !('field' in color) ? color.value : undefined
 }
 
 /**
@@ -431,10 +450,11 @@ export function resolveScale(
 }
 
 /**
- * which table a record's field is read from: `rowData`, the features, or the
- * tree's internal nodes, whose one field is `support`
+ * which table a record's field is read from: `rowData`, the features, the
+ * tree's internal nodes, whose one field is `support`, or a column track's own
+ * values
  */
-export type ScaleTable = 'rows' | 'features' | 'nodes'
+export type ScaleTable = 'rows' | 'features' | 'nodes' | 'columns'
 
 /**
  * One record's use of a color object: the values its field takes in its
@@ -451,15 +471,17 @@ export interface ScaleUse {
 
 /**
  * A record that reads a field through a color object, with where it sits in
- * the snapshot (`encodings[0]`, `rowPanels[2].encoding.fill`)
+ * the snapshot (`encodings[0]`, `rowPanels[2].encoding.fill`). A features
+ * column track carries its spans in place of the feature table, and a bar,
+ * strip, text or arc track carries the values its color reads, with its name
+ * standing as the field.
  */
-export interface ColorRecord {
-  record: string
-  channel: ColorChannel
-  table: ScaleTable
-  /** the spans a features column track carries in place of the feature table */
-  annotations?: Annotation[]
-}
+export type ColorRecord = { record: string; channel: ColorChannel } & (
+  | { table: 'rows' }
+  | { table: 'nodes' }
+  | { table: 'features'; annotations?: Annotation[] }
+  | { table: 'columns'; values: (string | undefined)[] }
+)
 
 export interface SharedScale extends ResolvedScale {
   key: string

@@ -91,7 +91,7 @@ test('data tracks join the track list with their own color and height', () => {
   expect(bar.barColor).toBe('red')
   expect(bar.height).toBe(defaultTrackHeights.bar)
   const text = model.tracks.find(t => t.model.id === 'f')!.model
-  expect(text.customColorScheme).toEqual({ 1: 'blue' })
+  expect(model.columnTrackColors.get('f')?.letters).toEqual({ 1: 'blue' })
   expect(text.height).toBe(model.rowHeight)
   expect(text.data).toBe('1')
 

@@ -189,3 +189,27 @@ test('hovering a features track names the spans at that column', () => {
   hoverColumn('ss', 4)
   expect(document.body.textContent).not.toContain('H1')
 })
+
+test('hovering a bar or strip track reports the value it was given', () => {
+  act(() => {
+    model.setColumnTracks([
+      {
+        id: 'dnds',
+        name: 'dN/dS',
+        kind: 'bar',
+        values: [0.5, 3.25, 1, 0, 0, 0],
+        encoding: { y: { scale: { domainMax: 5 } } },
+      },
+      {
+        id: 'plddt',
+        name: 'pLDDT',
+        kind: 'strip',
+        values: [91.27, 40, 70, 0, 0, 0],
+      },
+    ])
+  })
+  hoverColumn('dnds', 1)
+  expect(document.body.textContent).toContain('dN/dS: 3.25')
+  hoverColumn('plddt', 0)
+  expect(document.body.textContent).toContain('pLDDT: 91.3')
+})

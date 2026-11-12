@@ -75,7 +75,7 @@ test('a bar track from values exports one bar per column in its color', async ()
   expect(svgNamesTrack(await exportSvg(model))).toContain('dN/dS')
 })
 
-test('a text track from data exports its letters and its own colors', async () => {
+test('a text track from data exports its letters, its own colors and its legend', async () => {
   const model = makeModel([
     {
       id: 'frame',
@@ -93,12 +93,16 @@ test('a text track from data exports its letters and its own colors', async () =
     },
   ])
   const svg = await exportSvg(model)
+  const cells = (fill: string) =>
+    rectsFilled(svg, fill).filter(b => b.width === colWidth)
   expect(
-    rectsFilled(svg, '#aaaaaa')
+    cells('#aaaaaa')
       .map(b => b.x)
       .toSorted((a, b) => a - b),
   ).toEqual([0, colWidth * 3])
-  expect(rectsFilled(svg, '#bbbbbb').map(b => b.x)).toEqual([colWidth])
+  expect(cells('#bbbbbb').map(b => b.x)).toEqual([colWidth])
+  expect(cells('#cccccc').map(b => b.x)).toEqual([colWidth * 2])
+  expect(rectsFilled(svg, '#cccccc')).toHaveLength(2)
   expect(svgNamesTrack(svg)).toContain('Codon frame')
 })
 

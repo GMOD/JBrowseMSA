@@ -100,8 +100,9 @@ export interface MSAViewerProps {
   /** row name to diff every other row against (matches render as ".") */
   relativeTo?: string
   /**
-   * tracks supplied as data: per-column bar values, a text row, or arcs
-   * joining pairs of columns (see docs/layers.md)
+   * tracks supplied as data: per-column bar values, a strip of colored
+   * cells, a text row, arcs joining pairs of columns, or spans (see
+   * docs/layers.md)
    */
   columnTracks?: ColumnTrackSpec[]
   /** which residue of which structure each row's residues are (see docs/layers.md) */

@@ -2,6 +2,7 @@ import React from 'react'
 
 import { observer } from 'mobx-react'
 
+import { finiteNumber } from '../../columnTrackColor.ts'
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { HighlightReadout } from '../HighlightReadout.tsx'
 import { barTrackValues } from './drawTracks.ts'
@@ -36,14 +37,47 @@ function BarTooltip({
   col: number
 }) {
   const { id, name } = track.model
-  const value = barTrackValues(model, id)[col]
-  return value === undefined ? null : (
+  const raw = model.columnTrackContent.get(id)?.raw
+  const value = raw ? raw[col] : barTrackValues(model, id)[col]
+  return value === undefined || columnHidden(model, id, col) ? null : (
     <div>
       <ColumnLabel model={model} col={col} />
       <br />
-      {name}: {value.toFixed(2)}
+      {name}: {raw ? formatValue(value) : value.toFixed(2)}
     </div>
   )
+}
+
+function StripTooltip({
+  model,
+  track,
+  col,
+}: {
+  model: MsaViewModel
+  track: BasicTrack
+  col: number
+}) {
+  const { id, name } = track.model
+  const value = model.columnTrackContent.get(id)?.raw?.[col]
+  return value === undefined || columnHidden(model, id, col) ? null : (
+    <div>
+      <ColumnLabel model={model} col={col} />
+      <br />
+      {name}: {formatValue(value)}
+    </div>
+  )
+}
+
+// whether a legend click hid the value a bar or strip track holds at `col`
+function columnHidden(model: MsaViewModel, id: string, col: number) {
+  return !!model.columnTrackColors.get(id)?.hiddenColumns?.[col]
+}
+
+// a supplied value as written, to three significant digits
+function formatValue(value: number) {
+  return Number.isInteger(value)
+    ? `${value}`
+    : `${Number(value.toPrecision(3))}`
 }
 
 function LogoTooltip({ model, col }: { model: MsaViewModel; col: number }) {
@@ -105,7 +139,13 @@ function ArcTooltip({
   const { name, arcs } = track.model
   const partners = (arcs ?? [])
     .filter(arc => arc.start === col || arc.end === col)
-    .map(arc => (arc.start === col ? arc.end : arc.start) + 1)
+    .map(arc => {
+      const partner = (arc.start === col ? arc.end : arc.start) + 1
+      const value = finiteNumber(arc.value)
+      return value === undefined
+        ? `${partner}`
+        : `${partner} (${formatValue(value)})`
+    })
   return partners.length === 0 ? null : (
     <div>
       <ColumnLabel model={model} col={col} />
@@ -170,7 +210,8 @@ function HighlightTooltip({ model }: { model: MsaViewModel }) {
 }
 
 /**
- * One track's reading at the hovered column: a bar track's value, the logo's
+ * One track's reading at the hovered column: a bar or strip track's value,
+ * the logo's
  * information content and composition, the columns an arc joins, the letter on a
  * text track, the fields of every span a features track draws there. `drawTrackBlock` dispatches on the same `kind`, so a new kind
  * needs a case in both.
@@ -187,6 +228,9 @@ const TrackTooltipContent = observer(function ({
   switch (track.model.kind) {
     case 'bar': {
       return <BarTooltip model={model} track={track} col={col} />
+    }
+    case 'strip': {
+      return <StripTooltip model={model} track={track} col={col} />
     }
     case 'logo': {
       return <LogoTooltip model={model} col={col} />

@@ -42,6 +42,16 @@ import {
   lettersInRows,
 } from './columnCounts.ts'
 import { columnStats } from './columnStats.ts'
+import {
+  finiteNumber,
+  letterValue,
+  numberText,
+  paintableColor,
+  trackColorChannel,
+  trackColorValues,
+  trackConstantColor,
+} from './columnTrackColor.ts'
+import { valuePosition } from './components/axis.ts'
 import { packDomainLanes } from './components/msa/packDomainLanes.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
 import {
@@ -136,9 +146,12 @@ import {
 import { colorProblems, valueScaleProblems } from './scaleProblems.ts'
 import {
   colorTable,
+  constantColor,
   declarationKey,
+  fieldChannel,
   isCategorical,
   resolveShared,
+  scaleKind,
 } from './scales.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import {
@@ -171,6 +184,7 @@ import {
   withAlpha,
 } from './util.ts'
 import {
+  barTrackScale,
   defaultPointSize,
   resolveValueScale,
   rowNumbers,
@@ -253,6 +267,7 @@ export const defaultTrackHeights: Partial<Record<TrackKind, number>> = {
   logo: 80,
   arc: 50,
   ruler: 20,
+  strip: 12,
 }
 
 // a features track is this tall per lane its overlapping spans pack into,
@@ -261,7 +276,13 @@ const featureLaneHeight = 18
 
 // the kinds a divider resizes. The ruler is a fixed scale, and a text track
 // follows the vertical zoom.
-const resizableKinds = new Set<TrackKind>(['bar', 'logo', 'arc', 'features'])
+const resizableKinds = new Set<TrackKind>([
+  'bar',
+  'logo',
+  'arc',
+  'features',
+  'strip',
+])
 
 const defaultOffTracks = new Set(['sequence-logo', 'position-ruler'])
 
@@ -359,7 +380,7 @@ const noClades: ResolvedClade[] = []
 
 // `featureFill` reads the feature table, `nodePoint` the tree's internal
 // nodes, and every other color channel rowData
-function encodingTable({ channel }: ColorEncoding): ScaleTable {
+function encodingTable({ channel }: ColorEncoding) {
   return channel === 'featureFill'
     ? 'features'
     : channel === 'nodePoint'
@@ -1484,9 +1505,11 @@ function stateModelFactory({
       /**
        * #getter
        * every record that reads a field through a color object: each color
-       * encoding, each strip's `fill`, each features panel's `fill` and each
-       * bar, point or text panel's `color`, with where it sits in the
-       * snapshot and the table its field is read from
+       * encoding, each strip's `fill`, each features panel's or features
+       * track's `fill` naming a field, each bar, point or text panel's
+       * `color`, and each other column track's `encoding.color` reading the
+       * track's own values, with where it sits in the snapshot and the table
+       * its field is read from
        */
       get colorRecords(): ColorRecord[] {
         return [
@@ -1503,17 +1526,15 @@ function stateModelFactory({
           ),
           ...self.rowPanels.flatMap((panel, i): ColorRecord[] => {
             const record = `rowPanels[${i}].encoding.fill`
+            const fill =
+              panel.kind === 'features'
+                ? fieldChannel(panel.encoding?.fill)
+                : undefined
             return panel.kind === 'strip'
               ? [{ record, channel: panel.encoding.fill, table: 'rows' }]
               : panel.kind === 'features'
-                ? panel.encoding?.fill
-                  ? [
-                      {
-                        record,
-                        channel: panel.encoding.fill,
-                        table: 'features',
-                      },
-                    ]
+                ? fill
+                  ? [{ record, channel: fill, table: 'features' }]
                   : []
                 : panel.encoding.color
                   ? [
@@ -1525,18 +1546,34 @@ function stateModelFactory({
                     ]
                   : []
           }),
-          ...self.columnTracks.flatMap((track, i): ColorRecord[] =>
-            track.kind === 'features' && track.encoding?.fill
-              ? [
-                  {
-                    record: `columnTracks[${i}].encoding.fill`,
-                    channel: track.encoding.fill,
-                    table: 'features',
-                    annotations: trackAnnotations(track),
-                  },
-                ]
-              : [],
-          ),
+          ...self.columnTracks.flatMap((track, i): ColorRecord[] => {
+            const fill = fieldChannel(track.encoding?.fill)
+            const color = trackColorChannel(track)
+            return track.kind === 'features'
+              ? fill
+                ? [
+                    {
+                      record: `columnTracks[${i}].encoding.fill`,
+                      channel: fill,
+                      table: 'features',
+                      annotations: trackAnnotations(track),
+                    },
+                  ]
+                : []
+              : color
+                ? [
+                    {
+                      record: `columnTracks[${i}].encoding.color`,
+                      channel: color,
+                      table: 'columns',
+                      values: trackColorValues(
+                        track,
+                        scaleKind(color.scale) === 'identity',
+                      ),
+                    },
+                  ]
+                : []
+          }),
         ]
       },
 
@@ -2671,7 +2708,10 @@ function stateModelFactory({
          * #getter
          * a data track's values, string, arcs or spans, projected from its
          * row's residues onto alignment columns when it names a row, and onto
-         * the visible columns when gappy ones are hidden
+         * the visible columns when gappy ones are hidden. A bar or strip
+         * track's `raw` holds its numbers, undefined where it has none, and a
+         * bar's `values` the fraction of the track's height each draws at
+         * through `encoding.y.scale`
          */
         get columnTrackContent() {
           const { MSA, blanks } = self
@@ -2733,6 +2773,7 @@ function stateModelFactory({
             string,
             {
               values?: number[]
+              raw?: (number | undefined)[]
               data?: string
               arcs?: Arc[]
               spans?: ColumnSpan[]
@@ -2758,18 +2799,37 @@ function stateModelFactory({
                     return start !== undefined &&
                       end !== undefined &&
                       start < end
-                      ? { start, end, color: arc.color }
+                      ? { start, end, color: arc.color, value: arc.value }
                       : undefined
                   })
                   .filter(notEmpty)
                 return [track.id, { arcs }] as const
               }
-              if (track.kind === 'bar') {
-                const max = track.encoding?.y?.scale?.domainMax ?? 1
-                const values = skip(project(track, track.values ?? [], 0)).map(
-                  v => Math.min(1, Math.max(0, v / max)),
+              if (track.kind === 'bar' || track.kind === 'strip') {
+                const raw = skip(
+                  project(
+                    track,
+                    (track.values ?? []).map(finiteNumber),
+                    undefined,
+                  ),
                 )
-                return [track.id, { values }] as const
+                const valueScale = barTrackScale(
+                  track.encoding?.y?.scale,
+                  (track.values ?? []).flatMap(v => finiteNumber(v) ?? []),
+                )
+                const fraction = valuePosition(valueScale, [0, 1])
+                const log = valueScale.type === 'log'
+                return [
+                  track.id,
+                  track.kind === 'bar'
+                    ? {
+                        raw,
+                        values: raw.map(v =>
+                          v === undefined || (log && v <= 0) ? 0 : fraction(v),
+                        ),
+                      }
+                    : { raw },
+                ] as const
               }
               const data = skip(
                 project(track, (track.data ?? '').split(''), ' '),
@@ -2822,16 +2882,8 @@ function stateModelFactory({
                         ? lanes * featureLaneHeight
                         : undefined),
                   ),
-                  barColor: track.color,
-                  arcColor: track.color,
-                  customColorScheme: track.encoding?.color
-                    ? colorTable(track.encoding.color.scale, [
-                        ...(track.encoding.color.scale?.domain ?? []).map(
-                          String,
-                        ),
-                        ...new Set(track.data),
-                      ])
-                    : undefined,
+                  barColor: trackConstantColor(track),
+                  arcColor: trackConstantColor(track),
                   data: content?.data,
                   arcs: content?.arcs,
                   spans: content?.spans,
@@ -4298,7 +4350,8 @@ function stateModelFactory({
        * the on-screen legend overlay and the SVG export's reserved column. The
        * domain overlay produces the first, listing the `featureFill` scale
        * where an encoding names one. Every scale a row-table encoding, a row
-       * panel or a shown features track reads produces one more, keyed by its declaration, so two
+       * panel or a shown column track reads produces one more, keyed by its
+       * declaration, so two
        * channels or two strips declaring one scale list it once, and strips
        * over eight fields naming one `legend.title` list one legend between
        * them. A section's note is the first of its records' `scaleProblems`,
@@ -4378,7 +4431,10 @@ function stateModelFactory({
             panel.legendNote,
           )
         }
-        for (const [id, { scale }] of this.featureTrackScales) {
+        for (const [id, { scale }] of [
+          ...this.featureTrackScales,
+          ...this.columnTrackColors,
+        ]) {
           if (scale && !trackIsOff(self.turnedOffTracks, id)) {
             add(scale.key, scale.title, scale.items, scale.note)
           }
@@ -4417,7 +4473,8 @@ function stateModelFactory({
        * or whose `range` is not one longer, a `domainQuantile` outside 0.5 to
        * 1, `labels` of the wrong length, a `scheme` no table holds. A bar or
        * point panel's value scale lists its ends' problems under
-       * `rowPanels[i].encoding.x`. The viewer draws what it can, and the
+       * `rowPanels[i].encoding.x`, and a bar track's under
+       * `columnTracks[i].encoding.y`. The viewer draws what it can, and the
        * scale's legend notes the first problem.
        */
       get scaleProblems(): RecordScaleProblem[] {
@@ -4429,6 +4486,14 @@ function stateModelFactory({
             panel.kind === 'bar' || panel.kind === 'point'
               ? valueScaleProblems(panel.encoding.x).map(problem => ({
                   record: `rowPanels[${i}].encoding.x`,
+                  ...problem,
+                }))
+              : [],
+          ),
+          ...self.columnTracks.flatMap((track, i) =>
+            track.kind === 'bar' && track.encoding?.y
+              ? valueScaleProblems(track.encoding.y).map(problem => ({
+                  record: `columnTracks[${i}].encoding.y`,
                   ...problem,
                 }))
               : [],
@@ -4744,44 +4809,43 @@ function stateModelFactory({
 
       /**
        * #getter
-       * every color object the encodings and the row panels declare, keyed
-       * by declaration (`declarationKey`) and resolved once over the union
-       * of the values its records' fields take, so a value two strips share
-       * takes one color in both. A feature field reads every feature loaded,
-       * so hiding a type in the filter dialog leaves the rest in their
-       * colors, and its legend lists the values of the drawn features.
+       * every color object the encodings, the row panels and the column
+       * tracks declare, keyed by declaration (`declarationKey`) and resolved
+       * once over the union of the values its records' fields take, so a
+       * value two strips share takes one color in both. A feature field reads
+       * every feature loaded, so hiding a type in the filter dialog leaves the
+       * rest in their colors, and its legend lists the values of the drawn
+       * features. A column track reads its own values.
        */
       get resolvedScales() {
         const rows = Object.values(self.rowData)
         const nodes = preorder(self.tree)
-        const use = (
-          channel: ColorChannel,
-          table: ScaleTable,
-          annotations?: Annotation[],
-        ): ScaleUse => ({
-          spec: channel,
-          field: channel.field,
-          table,
-          ...(table === 'rows'
-            ? { values: rows.map(row => row?.[channel.field]) }
-            : table === 'nodes'
-              ? { values: nodes.map(node => nodeField(node, channel.field)) }
-              : annotations
-                ? {
-                    values: featureValues(annotations, channel.field),
-                    shown: featureValues(annotations, channel.field),
-                  }
-                : {
-                    values: featureValues(self.allAnnotations, channel.field),
-                    shown: featureValues(
-                      self.typeFilteredAnnotations,
-                      channel.field,
-                    ),
-                  }),
-        })
+        const valuesOf = (record: ColorRecord) => {
+          const { field } = record.channel
+          return record.table === 'rows'
+            ? { values: rows.map(row => row?.[field]) }
+            : record.table === 'nodes'
+              ? { values: nodes.map(node => nodeField(node, field)) }
+              : record.table === 'columns'
+                ? { values: record.values }
+                : record.annotations
+                  ? {
+                      values: featureValues(record.annotations, field),
+                      shown: featureValues(record.annotations, field),
+                    }
+                  : {
+                      values: featureValues(self.allAnnotations, field),
+                      shown: featureValues(self.typeFilteredAnnotations, field),
+                    }
+        }
         return resolveShared(
-          self.colorRecords.map(({ channel, table, annotations }) =>
-            use(channel, table, annotations),
+          self.colorRecords.map(
+            (record): ScaleUse => ({
+              spec: record.channel,
+              field: record.channel.field,
+              table: record.table,
+              ...valuesOf(record),
+            }),
           ),
         )
       },
@@ -4860,10 +4924,13 @@ function stateModelFactory({
               ...colorPart(color),
             }
           } else if (panel.kind === 'features') {
-            const fill = panel.encoding?.fill
+            const fill = fieldChannel(panel.encoding?.fill)
+            const constant = constantColor(panel.encoding?.fill)
             const encoding = fill
               ? { field: fill.field, ...this.scaleOf(fill, 'features') }
-              : featureFillEncoding
+              : constant === undefined
+                ? featureFillEncoding
+                : undefined
             const label = panel.encoding?.text?.field
             return {
               kind: panel.kind,
@@ -4872,17 +4939,21 @@ function stateModelFactory({
               field: encoding?.field,
               legendKey: encoding?.key,
               legendTitle: encoding?.title,
-              colors: fill
-                ? featureColorMap(
-                    annotations,
-                    encoding,
-                    annotation => fillPalette[annotation.accession]!,
-                  )
-                : this.featureColors,
+              colors:
+                fill || constant !== undefined
+                  ? featureColorMap(
+                      annotations,
+                      encoding,
+                      annotation =>
+                        constant ?? fillPalette[annotation.accession]!,
+                    )
+                  : this.featureColors,
               labels: label
                 ? featureLabelMap(annotations, label)
                 : featureLabels,
-              legend: encoding?.items ?? this.domainLegendItems,
+              legend:
+                encoding?.items ??
+                (constant === undefined ? this.domainLegendItems : []),
               legendNote: encoding?.note,
             }
           } else {
@@ -4913,8 +4984,9 @@ function stateModelFactory({
        * #getter
        * each features track's fill and label per span, keyed by track id: a
        * span's own `color` first, then the `fill` scale over one of its
-       * fields, then the track's `color`. Reads no cell size or hidden
-       * column, so a zoom or a gap toggle reuses it.
+       * fields, then `fill.value`, or the track's `color` while `fill` is
+       * unset. Reads no cell size or hidden column, so a zoom or a gap toggle
+       * reuses it.
        */
       get featureTrackScales() {
         return new Map(
@@ -4922,8 +4994,13 @@ function stateModelFactory({
             .filter(track => track.kind === 'features')
             .map(track => {
               const annotations = trackAnnotations(track)
-              const fill = track.encoding?.fill
+              const written = track.encoding?.fill
+              const fill = fieldChannel(written)
               const scale = fill ? this.scaleOf(fill, 'features') : undefined
+              const unscaled =
+                constantColor(written) ??
+                (written === undefined ? track.color : undefined) ??
+                UNSCALED_FEATURE
               const label = track.encoding?.text?.field
               return [
                 track.id,
@@ -4931,7 +5008,7 @@ function stateModelFactory({
                   colors: featureColorMap(
                     annotations,
                     fill && scale ? { field: fill.field, ...scale } : undefined,
-                    () => track.color ?? UNSCALED_FEATURE,
+                    () => unscaled,
                   ),
                   labels: label
                     ? featureLabelMap(annotations, label)
@@ -4940,6 +5017,80 @@ function stateModelFactory({
                 },
               ] as const
             }),
+        )
+      },
+
+      /**
+       * #getter
+       * each bar, strip, text and arc track's colors, keyed by track id, for
+       * the tracks whose `encoding.color` or `color` sets them: the shared
+       * scale its values read through, if any, `colorOf` over a value, the
+       * color of each visible column's bar or strip cell, and a text track's
+       * color per upper-case character. A value hidden through the legend
+       * paints nothing, and `hiddenColumns` marks the columns holding one. An
+       * identity scale paints each value that names a color. An arc's own
+       * `color` wins over the scale at draw time.
+       */
+      get columnTrackColors() {
+        const hiddenColumns = self.activeHiddenCategories.get('columns')
+        return new Map(
+          self.columnTracks.flatMap(track => {
+            const channel = trackColorChannel(track)
+            const scale = channel ? this.scaleOf(channel, 'columns') : undefined
+            const identity = scale?.kind === 'identity'
+            const hidden = channel
+              ? hiddenColumns?.get(channel.field)
+              : undefined
+            const isHidden = (value: string | undefined) =>
+              value !== undefined && !!hidden?.has(value)
+            const colorOf = (value: string | undefined) =>
+              isHidden(value)
+                ? undefined
+                : scale?.kind === 'identity'
+                  ? paintableColor(scale.colorOf(value))
+                  : scale?.colorOf(value)
+            const constant = trackConstantColor(track)
+            const raw = self.columnTrackContent.get(track.id)?.raw
+            const letters = [...new Set(track.data ?? '')].flatMap(letter => {
+              const value = letterValue(letter)
+              const color =
+                value === undefined
+                  ? undefined
+                  : scale
+                    ? colorOf(value)
+                    : constant
+              return value === undefined || color === undefined
+                ? []
+                : [[value, color] as const]
+            })
+            return scale || constant !== undefined
+              ? [
+                  [
+                    track.id,
+                    {
+                      scale,
+                      colorOf,
+                      isHidden,
+                      identity,
+                      columns: raw?.map(v =>
+                        scale
+                          ? colorOf(numberText(v))
+                          : v === undefined
+                            ? undefined
+                            : constant,
+                      ),
+                      hiddenColumns: hidden
+                        ? raw?.map(v => isHidden(numberText(v)))
+                        : undefined,
+                      letters:
+                        track.kind === 'text'
+                          ? Object.fromEntries(letters)
+                          : undefined,
+                    },
+                  ] as const,
+                ]
+              : []
+          }),
         )
       },
 

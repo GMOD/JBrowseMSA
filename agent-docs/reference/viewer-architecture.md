@@ -185,9 +185,10 @@ background.
   or a ramp `{label, gradient}`. `legendEntries` flattens the sections into
   title, note, swatch and gradient rows, giving each section a title row once
   there is more than one and capping a section at 20 rows plus a `+N more` line.
-  The domain overlay, the row-table encodings and the row panels are its
-  producers, each keyed by its scale's declaration (`resolvedScales`), so a
-  matrix of strips naming one `legend.title` lists one legend.
+  The domain overlay, the row-table encodings, the row panels and the shown
+  column tracks are its producers, each keyed by its scale's declaration
+  (`resolvedScales`), so a matrix of strips naming one `legend.title` lists one
+  legend.
 - A gradient row is a CSS `linear-gradient` on screen and a `<linearGradient>`
   in `<defs>` in the export, which the React half of `renderToSvg.tsx` emits, so
   `packages/svgcanvas` draws no gradient.
@@ -235,6 +236,23 @@ background.
   through `featureColorMap` and the `fill` scale `resolvedScales` shares with
   the encodings and the row panels, so a scale the track and a panel both
   declare lists one legend.
+- A bar, strip, text or arc track's `encoding.color` reads the track's own
+  values, so its `ColorRecord` carries them under the `columns` table with the
+  track's name as the field (`columnTrackColor.ts`). `columnTrackColors`
+  resolves each through `resolvedScales` into a color per visible column and a
+  color per upper-case character, which `drawTrackBlock` and the structure paint
+  read off the model, since `columnTrackModel` is defined before the scales. A
+  value `hiddenCategories` hides under the track's name paints nothing, and
+  `hiddenColumns` marks the bars it leaves undrawn. A bar's height reads
+  `encoding.y.scale`, the row panels' `ValueScaleSpec`, through
+  `barTrackScale` in `valuePanels.ts`, which pins a linear scale's unset ends
+  at 0 and 1. `columnTrackContent` keeps each bar's value as `raw` for the
+  color and the tooltip.
+- A color object is unset, a constant `value`, or a field read through a scale,
+  jbrowse-components' ADR-241. A column track's object with no `value` reads the
+  track's values, its `withImpliedField`, and a bare `color` is shorthand for
+  `{value}`. A strip's unset object reads its values too, since a strip has no
+  plain color.
 - `components/Track.tsx` hosts every kind's hover: `useTrackHover` sets the
   model's mouse column and anchors the tooltip, so the column statistics live on
   the tracks that draw them and the alignment's own tooltip stays about the cell

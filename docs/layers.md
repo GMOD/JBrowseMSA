@@ -82,8 +82,8 @@ label `{residue}{position}`. A malformed string, such as `"R175"` or
 ## columnTracks
 
 A track above the alignment, supplied as data. `kind` picks what it draws: `bar`
-reads `values`, `text` reads `data`, `arc` reads `arcs`, `features` reads
-`features`. `row` makes any of them index that row's residues instead of
+and `strip` read `values`, `text` reads `data`, `arc` reads `arcs`, `features`
+reads `features`. `row` makes any of them index that row's residues instead of
 alignment columns, so the first one is residue 1 and the viewer fills in the
 row's gaps. A data track appears in the Tracks menu, toggles like any other, and
 exports to SVG.
@@ -105,8 +105,16 @@ B19-A20 reach across the C peptide that processing cuts out.
       "name": "dN/dS",
       "kind": "bar",
       "values": [0.1, 0.4, 1.8, 0.2, 0.3, 0.1],
-      "encoding": { "y": { "scale": { "domainMax": 2 } } },
-      "color": "#6a51a3",
+      "encoding": {
+        "y": { "scale": { "domainMax": 2 } },
+        "color": {
+          "scale": {
+            "type": "threshold",
+            "domain": [1],
+            "range": ["#2c7fb8", "#d7301f"]
+          }
+        }
+      },
       "row": "human"
     },
     {
@@ -138,25 +146,93 @@ B19-A20 reach across the C peptide that processing cuts out.
 }
 ```
 
-| Field      | Kind     | Meaning                                                                                                    |
-| ---------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `id`       | all      | Unique key. The Tracks menu and `turnedOffTracks` use it                                                   |
-| `name`     | all      | Label beside the track                                                                                     |
-| `values`   | bar      | One number per column, or per residue of `row`                                                             |
-| `encoding` | bar      | `{y: {scale: {domainMax}}}`, the value drawn at full height (default 1)                                    |
-| `color`    | bar      | Bar fill (default gray)                                                                                    |
-| `data`     | text     | One character per column, or per residue of `row`                                                          |
-| `encoding` | text     | `{color: {scale: {domain, range}}}`, a color per upper-case character, painted as `residueEncoding` paints |
-| `arcs`     | arc      | `{start, end, color?}` pairs; each end is a column or a residue                                            |
-| `features` | features | `{start, end, strand?, ...}` spans; see [the features track](#the-features-track)                          |
-| `row`      | all      | Row name whose residues the values or characters index                                                     |
-| `height`   | all      | Pixel height (default 40 for a bar, 50 for an arc, the row height for text, 18 per lane for features)      |
+| Field            | Kind           | Meaning                                                                                                               |
+| ---------------- | -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `id`             | all            | Unique key. The Tracks menu and `turnedOffTracks` use it                                                              |
+| `name`           | all            | Label beside the track, and the title of its legend when `legend.title` is unset                                      |
+| `values`         | bar, strip     | One number per column, or per residue of `row`; `null` draws nothing                                                  |
+| `encoding.y`     | bar            | `{scale: {type, domainMin, domainMax, domainQuantile}}`, how a value maps onto the bar's height                       |
+| `encoding.color` | bar, strip     | `{value}`, one color, or `{scale, legend}`, a color per value                                                         |
+| `encoding.color` | text           | `{value}`, or `{scale, legend}` over the upper-case characters, painted as `residueEncoding` paints                   |
+| `encoding.color` | arc            | `{value}`, or `{scale, legend}` over each arc's `value`                                                               |
+| `color`          | bar, text, arc | Shorthand for `encoding.color: {value}`, read while `encoding.color` is unset (default gray bars, theme-colored arcs) |
+| `data`           | text           | One character per column, or per residue of `row`                                                                     |
+| `arcs`           | arc            | `{start, end, color?, value?}` pairs; each end is a column or a residue                                               |
+| `features`       | features       | `{start, end, strand?, ...}` spans; see [the features track](#the-features-track)                                     |
+| `row`            | all            | Row name whose residues the values or characters index                                                                |
+| `height`         | all            | Pixel height (default 40 for a bar, 12 for a strip, 50 for an arc, the row height for text, 18 per lane for features) |
 
 A `row` on an arc track carries both ends of every arc, so a contact map
 computed in a protein's own numbering lands on the alignment without conversion.
 The viewer draws arcs on one baseline in the order given, and a `color` on an
-individual arc overrides the track's, so one track can separate nested helices
-from a pseudoknot.
+individual arc overrides the track's and its scale's, as a GFF `color=`
+attribute does, so one track can separate nested helices from a pseudoknot.
+
+### Column track scales
+
+`encoding.color` on a column track is the color object of
+[`encodings`](#encodings), with the track's own values in place of a field: a
+bar's or a strip's numbers, each arc's `value`, a text track's characters. It
+holds one color as `{"value": "#6a51a3"}`, or a `scale` and a `legend` that read
+the values, and the bare `color` member is shorthand for the first. A `{value}`
+keeps the object one color even beside a `scale`.
+
+The dN/dS bar above reads its values through a threshold at 1, so a codon above
+1 draws red and one below draws blue, and the legend lists the two intervals. A
+scale over the track's values lists a legend while the track is shown, titled by
+`legend.title` or else the track's `name`, and two tracks declaring the same
+scale and title share one legend and one set of colors.
+[Scale problems](#scale-problems) name the record as
+`columnTracks[0].encoding.color`.
+
+A `strip` track draws one cell per column, the full track height, in the color
+`encoding.color` gives its value, which makes a heatmap row of a per-residue
+score: AlphaFold's pLDDT, a disorder prediction, a hydropathy scale. A column
+with no value draws nothing. A strip with no `encoding.color` reads its values
+through the default ordinal scale, one color per distinct value, and its legend
+notes that `scale: {"type": "linear"}` draws them on a ramp.
+
+```json
+{
+  "id": "plddt",
+  "name": "pLDDT",
+  "kind": "strip",
+  "row": "human",
+  "values": [96.2, 94.8, 71.3, 48.0, 33.5],
+  "encoding": {
+    "color": {
+      "scale": {
+        "type": "threshold",
+        "domain": [50, 70, 90],
+        "range": ["#ff7d45", "#ffdb13", "#65cbf3", "#0053d6"]
+      },
+      "legend": {
+        "title": "pLDDT",
+        "labels": ["very low", "low", "confident", "very high"]
+      }
+    }
+  }
+}
+```
+
+An arc track's scale reads each arc's `value`, such as a contact probability,
+and an arc with no `value` draws in the track's color. Under
+`scale: {"type": "identity"}` an arc track reads each arc's own `color`, so
+`domain` and `legend.labels` give the arcs' colors a legend, as they give a
+GFF's `color=` one. On a bar, strip or text track an identity scale paints each
+value that names a color and leaves the rest undrawn.
+
+`encoding.y.scale` is the value scale of a `bar` row panel's `encoding.x`,
+mapping a bar's value onto its height. A `linear` scale, the default, draws
+`domainMin` (default 0) at no height and `domainMax` (default 1) at the full
+height, so values are fractions of 1 until `domainMax` says otherwise. A `log`
+scale spaces the values by orders of magnitude and takes an unset end from the
+track's positive values, clipped at `domainQuantile` as a color ramp's end is.
+A value past an end draws at that end, and a value at or below 0 on a log
+scale draws no bar.
+
+Hovering a bar or a strip prints the value as given, and hovering an arc's end
+prints each partner with its `value`.
 
 An RNA Stockholm file needs no arc track, because `#=GC SS_cons` already pairs
 the columns. The viewer draws a **Base pairs** track from it and gives
@@ -211,8 +287,8 @@ UniProt takes from PDB 3W7Y.
 | Field      | Meaning                                                                                           |
 | ---------- | ------------------------------------------------------------------------------------------------- |
 | `features` | spans with a `start` and an `end`, 1-based and inclusive, in columns or in residues of `row`      |
-| `encoding` | `{fill: {field, scale, legend}, text: {field}}` over the spans' fields                            |
-| `color`    | the fill of every span when the track sets no `fill` (default light grey)                         |
+| `encoding` | `{fill: {field, scale, legend}, text: {field}}` over the spans' fields, or `fill: {value}`        |
+| `color`    | shorthand for `encoding.fill: {value}`, read while `fill` is unset (default light grey)           |
 | `position` | `identity` packs overlapping spans into lanes; `strandpile` puts forward spans above reverse ones |
 
 A span's `strand` of `+` or `-` draws it as an arrow pointing that way. A span's
@@ -765,7 +841,8 @@ and a message. The scale's legend carries the first as a note, and
 `react-msaview-cli export-svg --spec` prints every one to stderr as
 `record.slot: message`. The rules and their messages are jbrowse-components'
 `colorProblems`. A bar or point panel's value scale reports its ends' problems
-the same way, under `rowPanels[i].encoding.x`.
+the same way, under `rowPanels[i].encoding.x`, and a bar track's under
+`columnTracks[i].encoding.y`.
 
 ### Hiding a category
 
@@ -781,6 +858,9 @@ SVG export leaves it out of the legend and the figure.
 - A hidden feature value takes the features carrying it out of the overlay, the
   `features` panels and the `features` tracks, and out of their tooltips.
 - A hidden `support` value leaves its node's bubble plain.
+- A hidden value of a column track, whose legend's field is the track's
+  `name`, leaves the bar, strip cell, character or arc holding it undrawn, and
+  the bar's or cell's tooltip empty.
 
 The hides persist as `hiddenCategories`, a list of `{field, value}`, and travel
 in the snapshot and the shared URL. A hide applies wherever an ordinal or
@@ -1013,12 +1093,12 @@ and one `features` panel under `x: "position"`. The `align` transform starts
 `trpB` at one x down the panel, and `encoding.fill` reads the GFF's `role`
 attribute while `encoding.text` reads `Name`.
 
-| Field       | Meaning                                                                                   |
-| ----------- | ----------------------------------------------------------------------------------------- |
-| `x`         | `column` draws in the alignment's columns; `position` in each row's own residue positions |
-| `encoding`  | `{fill: {field, scale, legend}, text: {field}}` over fields of the features               |
-| `transform` | `[{type: "align", on: <Name value>}]`, only under `x: "position"`                         |
-| `position`  | `identity` stacks overlapping features; `strandpile` splits the row by strand             |
+| Field       | Meaning                                                                                         |
+| ----------- | ----------------------------------------------------------------------------------------------- |
+| `x`         | `column` draws in the alignment's columns; `position` in each row's own residue positions       |
+| `encoding`  | `{fill: {field, scale, legend}, text: {field}}` over fields of the features, or `fill: {value}` |
+| `transform` | `[{type: "align", on: <Name value>}]`, only under `x: "position"`                               |
+| `position`  | `identity` stacks overlapping features; `strandpile` splits the row by strand                   |
 
 `x: "position"` maps every row's features onto one linear scale across the
 extent they cover, so a genome with no alignment has an x. With no `msa` the
@@ -1037,9 +1117,10 @@ marks two kilobases before `genE` starts in every row that carries one, and in a
 row with no `genE` it marks two kilobases before the row's own start.
 
 `encoding.fill` reads any field of the feature table, the same fields a
-`featureFill` encoding reads. A record naming none takes the colors the overlay
-gives the same features, and `encoding.text` falls back to the `featureLabel`
-encoding the same way. A feature's own GFF `color=` wins over either.
+`featureFill` encoding reads, or holds one color as `{"value": "#bbbbbb"}`. A
+record with no `fill` takes the colors the overlay gives the same features, and
+`encoding.text` falls back to the `featureLabel` encoding the same way. A
+feature's own GFF `color=` wins over either.
 
 [![](media/layers-strandpile.png)][live-layers-strandpile]
 

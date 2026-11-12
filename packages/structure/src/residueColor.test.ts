@@ -81,6 +81,37 @@ test('a text track paints the letters its scale names, in either case', () => {
   expect(colorOf('a', 1)).toBeUndefined()
 })
 
+test('a bar or strip with a color scale paints each residue in its scale color', () => {
+  const model = makeModel()
+  const color = {
+    scale: {
+      type: 'threshold' as const,
+      domain: [1],
+      range: ['#2c7fb8', '#d7301f'],
+    },
+  }
+  model.setColumnTracks([
+    {
+      id: 'dnds',
+      name: 'dN/dS',
+      kind: 'bar',
+      values: [0.5, 2, 0, 0, 0, 0, 0],
+      encoding: { color },
+    },
+    {
+      id: 'plddt',
+      name: 'pLDDT',
+      kind: 'strip',
+      values: [2, 0.5, 0, 0, 0, 0, 0],
+      encoding: { color },
+    },
+  ])
+  expect(residueColor(model, 'track:dnds')('a', 1)).toBe('#2c7fb8')
+  expect(residueColor(model, 'track:dnds')('a', 2)).toBe('#d7301f')
+  expect(residueColor(model, 'track:plddt')('a', 1)).toBe('#d7301f')
+  expect(paintableTracks(model).map(t => t.id)).toEqual(['dnds', 'plddt'])
+})
+
 test('a track the alignment lacks gives no residue a color', () => {
   expect(residueColor(makeModel(), 'track:gone')('a', 1)).toBeUndefined()
 })

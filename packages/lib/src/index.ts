@@ -66,6 +66,7 @@ export type {
   ColorRecord,
   ColorScale,
   ColorSpec,
+  ColorValue,
   ResolvedScale,
   ScaleTable,
   ScaleType,

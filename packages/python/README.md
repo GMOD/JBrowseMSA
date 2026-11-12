@@ -53,7 +53,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `clades`                                              | list of `{mrca or range, tips, mark}` clades of the tree to mark                                                           |
 | `highlight_columns`                                   | columns (1-based, like `highlights`), one band per run of adjacent columns                                                 |
 | `residue_mappings`                                    | which structure residue each row residue is                                                                                |
-| `column_tracks`                                       | list of bar, text, arc or features tracks; a features track's `features` may be a DataFrame                                |
+| `column_tracks`                                       | list of bar, strip, text, arc or features tracks; a features track's `features` may be a DataFrame                                |
 | `row_data`                                            | extra fields per row name, such as a lineage or a host                                                                     |
 | `encodings`                                           | `{channel, field, scale, legend}`: `tipLabel`, `rowTint`, `branch`, `nodePoint`, `featureFill`, `featureLabel`, `rowLabel` |
 | `row_panels`                                          | `strip` and `features` panels drawn beside the tree                                                                        |
