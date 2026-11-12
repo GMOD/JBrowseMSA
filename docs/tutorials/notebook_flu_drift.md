@@ -378,7 +378,7 @@ drift <- layers$columnTracks
 bands <- layers$highlights
 w <- msaview(msa = paste0(data, "h3n2-ha.aln"),
     tree = paste0(data, "h3n2-ha.nh"),
-    color_scheme = "clustalx_protein_dynamic") +
+    residue_color = "clustalx_protein_dynamic") +
   geom_msa_track(drift$values[[1]], name = drift$name, id = drift$id,
     domain_max = drift$encoding$y$scale$domainMax, color = drift$color,
     height = drift$height) +

@@ -459,7 +459,7 @@ w <- msaview(
   msa = paste0(data, "spike.afa"),
   tree = paste0(data, "spike.nwk"),
   gff = paste0(data, "spike-domains.gff"),
-  color_scheme = "clustalx_protein_dynamic",
+  residue_color = "clustalx_protein_dynamic",
   column_tracks = layers$columnTracks,
   highlights = layers$highlights,
   residue_mappings = layers$residueMappings

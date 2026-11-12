@@ -301,8 +301,9 @@ and a `customColorScheme` map is `scale.domain` and `scale.range`. A
 `residueColor` in the same snapshot wins member by member. The lift exists for
 links already shared; every producer in the repository writes `residueColor`.
 `msaRaster.ts` keys its tile cache on the object, the menus and the settings
-panel write it through `setResidueColor` and `setCellFill`, and the Python
-widget's `residue_color` trait carries it whole.
+panel write it through `setResidueColor` and `setCellFill`, the Python widget's
+`residue_color` trait carries it whole, and ggmsaview's `residue_color` argument
+and `scale_residue_color()` layer write it.
 
 ### Revisited: `identity` as a scale kind
 
@@ -325,9 +326,6 @@ legend lists nothing, ADR-243 as its ADR-265 amends it.
 - An arc's stroke width reads no `encoding.size` over its value until a figure
   needs one.
 - The tree overview draws no node points.
-- ggmsaview's `color_scheme` and `residue_encoding` arguments and its
-  `scale_residue_color` layer write the props `residueColor` replaced, and wait
-  on ggmsaview's own change.
 - jbrowse-components' `agent-docs/reference/GRAMMAR_OF_GRAPHICS.md` reads clade
   focus, branch lengths and clade collapse as missing from react-msaview in its
   row-panel table; all three exist (`clades` with `focus` and `collapse`,

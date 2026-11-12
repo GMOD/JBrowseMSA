@@ -231,7 +231,7 @@ w <- msaview(
   msa = "https://gmod.org/JBrowseMSA/demo/data/nlrp1.aln",
   tree = "https://gmod.org/JBrowseMSA/demo/data/nlrp1.nh",
   gff = "https://gmod.org/JBrowseMSA/demo/data/nlrp1-domains.gff",
-  color_scheme = "clustalx_protein_dynamic"
+  residue_color = "clustalx_protein_dynamic"
 )
 w
 ggplot2::ggsave("protein-family-domains-r.png", msaview_plot(w),

@@ -344,7 +344,7 @@ california <- c("A/chicken/CA/24-031667-001-original/2024",
   "A/cattle/CA/24-037821-002-original/2024")
 
 w <- msaview(msa = paste0(data, "h5n1-ha.fa"),
-    tree = paste0(data, "h5n1.nwk"), color_scheme = "nucleotide") +
+    tree = paste0(data, "h5n1.nwk"), residue_color = "nucleotide") +
   geom_msa_rowdata(rows) +
   scale_row_color("state", channel = "tipLabel") +
   scale_row_color("state", channel = "branch") +

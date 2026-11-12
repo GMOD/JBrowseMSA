@@ -169,7 +169,7 @@ bands <- Map(
 widget <- msaview(
   msa = aln,
   tree = tree,
-  color_scheme = "clustalx_protein_dynamic",
+  residue_color = "clustalx_protein_dynamic",
   column_tracks = tracks,
   highlights = bands,
   height = 520

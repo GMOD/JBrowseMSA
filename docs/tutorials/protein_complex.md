@@ -332,7 +332,7 @@ w <- msaview(
   msa = paste0(data, "hemoglobin.afa"),
   tree = paste0(data, "hemoglobin.nwk"),
   gff = paste0(data, "hemoglobin-subunits.gff"),
-  color_scheme = "clustalx_protein_dynamic",
+  residue_color = "clustalx_protein_dynamic",
   column_tracks = layers$columnTracks,
   residue_mappings = layers$residueMappings
 )

@@ -316,7 +316,7 @@ ambler <- c(104, 164, 238, 240, 69, 244, 276, 265)
 column <- c(102, 162, 236, 237, 67, 241, 272, 261)
 
 w <- msaview(msa = paste0(data, "tem.afa"), tree = paste0(data, "tem.nwk"),
-    color_scheme = "clustalx_protein_dynamic") +
+    residue_color = "clustalx_protein_dynamic") +
   geom_msa_rowdata(rows) +
   scale_row_color("phenotype", channel = "tipLabel") +
   geom_msa_strip("phenotype", range = phenotype)

@@ -199,7 +199,7 @@ pocket <- data.frame(
 w <- msaview(
   msa = "https://gmod.org/JBrowseMSA/demo/data/kinase-pocket/kinase-pocket.afa",
   tree = "https://gmod.org/JBrowseMSA/demo/data/kinase-pocket/kinase-pocket.nwk",
-  color_scheme = "clustalx_protein_dynamic", row_height = 2
+  residue_color = "clustalx_protein_dynamic", row_height = 2
 ) + geom_msa_highlight(pocket)
 w
 ggplot2::ggsave("kinase-pocket-logo-r.png",

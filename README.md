@@ -58,7 +58,7 @@ every prop, the model API and the UMD bundle. The
 ```r
 remotes::install_github("GMOD/ggmsaview")
 library(ggmsaview)
-msaview(msa = "alignment.fasta", tree = "tree.nwk", color_scheme = "clustal")
+msaview(msa = "alignment.fasta", tree = "tree.nwk", residue_color = "clustal")
 ```
 
 ![Hemoglobin alignment with tree](docs/media/r-quickstart.svg)

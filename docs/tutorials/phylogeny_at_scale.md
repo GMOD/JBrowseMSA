@@ -415,7 +415,7 @@ library(ggmsaview)
 data <- "https://gmod.org/JBrowseMSA/demo/data/scale/"
 rows <- jsonlite::fromJSON(paste0(data, "rsv-sample-rowdata.json"))
 w <- msaview(msa = paste0(data, "rsv-sample.aln"),
-    tree = paste0(data, "rsv-sample.nh"), color_scheme = "nucleotide") +
+    tree = paste0(data, "rsv-sample.nh"), residue_color = "nucleotide") +
   geom_msa_rowdata(rows) +
   scale_row_color("clade", channel = "tipLabel") +
   scale_row_color("region", channel = "rowTint") +

@@ -329,7 +329,7 @@ w <- msaview(
   msa = paste0(data, "p53-vertebrates.afa"),
   tree = paste0(data, "p53-vertebrates.nh"),
   relative_to = "Human",
-  color_scheme = "clustalx_protein_dynamic",
+  residue_color = "clustalx_protein_dynamic",
   highlights = layers$highlights,
   column_tracks = layers$columnTracks
 )

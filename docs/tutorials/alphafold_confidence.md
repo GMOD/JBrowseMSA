@@ -399,37 +399,54 @@ row's count of residues under 50 beside the tree, and the Pfam bands in blue.
 
 <!-- usage: r -->
 
-[ggmsaview](https://github.com/GMOD/ggmsaview) reads the three hosted files, and
-`msaview()` takes the row data, the mean pLDDT track and the highlights from
-`tardbp-layers.json` through jsonlite:
+[ggmsaview](https://github.com/GMOD/ggmsaview) reads the three hosted files and
+takes each pLDDT track's values from `tardbp-layers.json`. `plddt()` draws one
+through AlphaFold DB's threshold scale, `kind = "bar"` for the mean and
+`kind = "strip"` with `row` for a row's own pLDDT, and `geom_msa_bar()` draws
+each row's count under 50 beside the tree:
 
 ```r
 library(ggmsaview)
 data <- "https://gmod.org/JBrowseMSA/demo/data/tdp43/"
 layers <- jsonlite::fromJSON(paste0(data, "tardbp-layers.json"),
   simplifyVector = FALSE)
+tracks <- setNames(layers$columnTracks,
+  vapply(layers$columnTracks, `[[`, "", "id"))
+plddt <- function(id, kind, ...) {
+  track <- tracks[[id]]
+  geom_msa_track(unlist(track$values), name = track$name, id = id,
+    kind = kind, row = track$row, type = "threshold",
+    domain = c(50, 70, 90),
+    range = c("#ff7d45", "#ffdb13", "#65cbf3", "#0053d6"),
+    labels = c("Very low", "Low", "Confident", "Very high"),
+    title = "pLDDT", ...)
+}
 w <- msaview(
   msa = paste0(data, "tardbp.afa"),
   tree = paste0(data, "tardbp.nwk"),
-  color_scheme = "clustalx_protein_dynamic",
+  residue_color = "clustalx_protein_dynamic",
   row_data = jsonlite::fromJSON(paste0(data, "tardbp-rowdata.json")),
-  column_tracks = layers$columnTracks[1],
   highlights = layers$highlights
-)
+) +
+  plddt("plddt-mean", "bar", domain_max = 100, height = 60) +
+  plddt("plddt-human", "strip") +
+  plddt("plddt-zebrafish", "strip") +
+  plddt("plddt-ghostshark", "strip") +
+  geom_msa_bar("under50", header = "residues < 50", width = 130)
 w
 ggplot2::ggsave("alphafold-confidence-r.png",
-  msaview_plot(w, tracks = "plddt-mean"),
-  width = 12, height = 6)
+  msaview_plot(w, tracks = names(tracks)),
+  width = 12, height = 7)
 ```
 
 ![](../media/alphafold-confidence-r.png)
 
-The 14 rows in ggplot2, with the Pfam matches labeled over the alignment. The
-mean pLDDT bars above stay high over the N-terminal domain and the two RRMs and
-drop across the C-terminal domain. ggmsaview's `msaview()` takes no `strip`
-column track and no `bar` row panel, and its bar track draws in one color, so
-the figure leaves out the three row strips, the counts under 50 and the band
-colors.
+The 14 rows in ggplot2 under the mean pLDDT and the Human, Zebrafish and
+Ghostshark strips, all four colored by one threshold scale and listed under one
+legend. The mean stays confident over the N-terminal domain and the two RRMs and
+drops to very low across the C-terminal region. The bars beside the tree count
+each row's residues under 50, and Zebrafish has the fewest. The Pfam matches
+print as labels over the alignment, where the viewer draws them as blue bands.
 
 <!-- /usage -->
 

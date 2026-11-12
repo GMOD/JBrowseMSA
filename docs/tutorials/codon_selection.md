@@ -256,7 +256,7 @@ sites <- data.frame(
 w <- msaview(
   msa = paste0(data, "trim5-cds.stock"),
   gff = paste0(data, "trim5-exons.gff"),
-  color_scheme = "nucleotide"
+  residue_color = "nucleotide"
 ) +
   geom_msa_track(dnds, name = "dN/dS (FEL)", domain_max = 5,
     type = "threshold", domain = 1, range = c("#2c7fb8", "#c0392b")) +

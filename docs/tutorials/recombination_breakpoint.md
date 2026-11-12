@@ -225,7 +225,7 @@ layers <- jsonlite::fromJSON(file.path(data, "recombinant-layers.json"),
 w <- msaview(
   msa = file.path(data, "recombinant-rbd.afa"),
   tree = file.path(data, "recombinant.nwk"),
-  color_scheme = "nucleotide",
+  residue_color = "nucleotide",
   column_tracks = layers$recombinantTracks
 ) +
   geom_msa_highlight(

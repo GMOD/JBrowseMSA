@@ -172,7 +172,7 @@ write.tree(tree, "proteases.nh")
 An `ape::phylo` goes into `msaview()` as it is, along with the `AAStringSet`:
 
 ```r
-msaview(msa = aln, tree = tree, color_scheme = "clustalx_protein_dynamic")
+msaview(msa = aln, tree = tree, residue_color = "clustalx_protein_dynamic")
 ```
 
 [![](../media/r-protease-tree.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A380%2C%22treeAreaWidth%22%3A200%2C%22colWidth%22%3A3.4%2C%22rowHeight%22%3A18%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22clustalx_protein_dynamic%22%7D%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fproteases%2Fproteases.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fproteases%2Fproteases.nh%22%7D%7D%7D)
@@ -266,7 +266,7 @@ bands <- Map(
 widget <- msaview(
   msa = aln,
   tree = tree,
-  color_scheme = "clustalx_protein_dynamic",
+  residue_color = "clustalx_protein_dynamic",
   column_tracks = list(blosum_track, ss_track),
   highlights = bands,
   height = 520
@@ -361,7 +361,7 @@ layers <- jsonlite::fromJSON(paste0(data, "proteases-layers.json"),
 widget <- msaview(
   msa = paste0(data, "proteases.aln"),
   tree = paste0(data, "proteases.nh"),
-  color_scheme = "clustalx_protein_dynamic",
+  residue_color = "clustalx_protein_dynamic",
   column_tracks = layers$columnTracks,
   highlights = layers$highlights
 )

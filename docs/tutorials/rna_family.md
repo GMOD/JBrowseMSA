@@ -196,7 +196,7 @@ same view as a ggplot2 figure:
 library(ggmsaview)
 w <- msaview(
   msa = "https://gmod.org/JBrowseMSA/demo/data/rna/sam-riboswitch.sto",
-  color_scheme = "nucleotide"
+  residue_color = "nucleotide"
 )
 w
 ggplot2::ggsave("rna-family-overview-r.png", msaview_plot(w),
