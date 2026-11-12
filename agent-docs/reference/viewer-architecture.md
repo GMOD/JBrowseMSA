@@ -244,10 +244,10 @@ background.
   read off the model, since `columnTrackModel` is defined before the scales. A
   value `hiddenCategories` hides under the track's name paints nothing, and
   `hiddenColumns` marks the bars it leaves undrawn. A bar's height reads
-  `encoding.y.scale`, the row panels' `ValueScaleSpec`, through
-  `barTrackScale` in `valuePanels.ts`, which pins a linear scale's unset ends
-  at 0 and 1. `columnTrackContent` keeps each bar's value as `raw` for the
-  color and the tooltip.
+  `encoding.y.scale`, the row panels' `ValueScaleSpec`, through `barTrackScale`
+  in `valuePanels.ts`, which pins a linear scale's unset ends at 0 and 1.
+  `columnTrackContent` keeps each bar's value as `raw` for the color and the
+  tooltip.
 - A color object is unset, a constant `value`, or a field read through a scale,
   jbrowse-components' ADR-241. A column track's object with no `value` reads the
   track's values, its `withImpliedField`, and a bare `color` is shorthand for

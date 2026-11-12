@@ -145,7 +145,6 @@ import {
 } from './rowTransform.ts'
 import { colorProblems, valueScaleProblems } from './scaleProblems.ts'
 import {
-  colorTable,
   constantColor,
   declarationKey,
   fieldChannel,
@@ -4839,14 +4838,12 @@ function stateModelFactory({
                     }
         }
         return resolveShared(
-          self.colorRecords.map(
-            (record): ScaleUse => ({
-              spec: record.channel,
-              field: record.channel.field,
-              table: record.table,
-              ...valuesOf(record),
-            }),
-          ),
+          self.colorRecords.map((record): ScaleUse => ({
+            spec: record.channel,
+            field: record.channel.field,
+            table: record.table,
+            ...valuesOf(record),
+          })),
         )
       },
 

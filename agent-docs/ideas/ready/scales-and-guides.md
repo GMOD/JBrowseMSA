@@ -13,11 +13,11 @@ description:
 
 `resolveScale` in `packages/lib/src/scales.ts` reads the color object,
 `ColorSpec`, through an ordinal, linear, log, threshold or identity scale, and
-`encodings`, the row panels and every column track read it, so a dN/dS bar
-takes its color from its value. The cell fill does not yet, and waits on step
-7. This document adopts the color object jbrowse-components' displays declare,
-adds the continuous and threshold scales it names, gives every scale its guide,
-a legend or an axis, and lists the marks those unlock.
+`encodings`, the row panels and every column track read it, so a dN/dS bar takes
+its color from its value. The cell fill does not yet, and waits on step 7. This
+document adopts the color object jbrowse-components' displays declare, adds the
+continuous and threshold scales it names, gives every scale its guide, a legend
+or an axis, and lists the marks those unlock.
 [panels-and-marks](../../reference/panels-and-marks.md) holds the vocabulary of
 panels, marks and channels this builds on.
 
@@ -346,10 +346,10 @@ take column tracks as they take strips. `columnTrackColors` on the model holds
 the color per visible column and per character. An `ArcSpec` carries a `value`,
 which the arc track's scale reads, and an arc's own `color` wins; under an
 identity scale the arc track reads each arc's `color`, which then takes a
-legend. A value `hiddenCategories` hides leaves its bar, cell, character or
-arc undrawn. `barTrackScale` in `valuePanels.ts` reads `encoding.y.scale`
-through step 5's `ValueScaleSpec` and `resolveValueScale`, with a linear
-scale's unset ends at 0 and 1, and `valueScaleProblems` reports it under
+legend. A value `hiddenCategories` hides leaves its bar, cell, character or arc
+undrawn. `barTrackScale` in `valuePanels.ts` reads `encoding.y.scale` through
+step 5's `ValueScaleSpec` and `resolveValueScale`, with a linear scale's unset
+ends at 0 and 1, and `valueScaleProblems` reports it under
 `columnTracks[i].encoding.y`. A features panel's or track's `fill` takes
 `{value}` too. The `left` axis down a bar track's edge waits on a canvas in the
 track label gutter, where `TrackLabels` and `TrackLabelsSVG` draw the name, and

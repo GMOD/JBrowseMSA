@@ -227,9 +227,9 @@ mapping a bar's value onto its height. A `linear` scale, the default, draws
 `domainMin` (default 0) at no height and `domainMax` (default 1) at the full
 height, so values are fractions of 1 until `domainMax` says otherwise. A `log`
 scale spaces the values by orders of magnitude and takes an unset end from the
-track's positive values, clipped at `domainQuantile` as a color ramp's end is.
-A value past an end draws at that end, and a value at or below 0 on a log
-scale draws no bar.
+track's positive values, clipped at `domainQuantile` as a color ramp's end is. A
+value past an end draws at that end, and a value at or below 0 on a log scale
+draws no bar.
 
 Hovering a bar or a strip prints the value as given, and hovering an arc's end
 prints each partner with its `value`.
@@ -858,9 +858,9 @@ SVG export leaves it out of the legend and the figure.
 - A hidden feature value takes the features carrying it out of the overlay, the
   `features` panels and the `features` tracks, and out of their tooltips.
 - A hidden `support` value leaves its node's bubble plain.
-- A hidden value of a column track, whose legend's field is the track's
-  `name`, leaves the bar, strip cell, character or arc holding it undrawn, and
-  the bar's or cell's tooltip empty.
+- A hidden value of a column track, whose legend's field is the track's `name`,
+  leaves the bar, strip cell, character or arc holding it undrawn, and the bar's
+  or cell's tooltip empty.
 
 The hides persist as `hiddenCategories`, a list of `{field, value}`, and travel
 in the snapshot and the shared URL. A hide applies wherever an ordinal or

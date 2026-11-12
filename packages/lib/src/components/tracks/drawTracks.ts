@@ -590,7 +590,9 @@ export function drawTrackBlock({
         ctx,
         arcs,
         color: arcColor ?? theme.palette.text.primary,
-        colorOf: colors?.scale ? arc => colors.colorOf(valueOf(arc)) : undefined,
+        colorOf: colors?.scale
+          ? arc => colors.colorOf(valueOf(arc))
+          : undefined,
         hiddenArc: colors ? arc => colors.isHidden(valueOf(arc)) : undefined,
         colWidth,
         trackHeight,

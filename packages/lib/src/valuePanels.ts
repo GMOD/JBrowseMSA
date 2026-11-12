@@ -98,7 +98,11 @@ export function barTrackScale(
   return resolveValueScale(
     spec?.type === 'log'
       ? spec
-      : { ...spec, domainMin: spec?.domainMin ?? 0, domainMax: spec?.domainMax ?? 1 },
+      : {
+          ...spec,
+          domainMin: spec?.domainMin ?? 0,
+          domainMax: spec?.domainMax ?? 1,
+        },
     values,
     false,
   )

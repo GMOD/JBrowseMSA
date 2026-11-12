@@ -961,9 +961,10 @@ colorEncodings: ColorEncoding[]
 #### getter: colorRecords
 
 every record that reads a field through a color object: each color encoding,
-each strip's `fill`, each features panel's `fill` and each bar, point or text
-panel's `color`, with where it sits in the snapshot and the table its field is
-read from
+each strip's `fill`, each features panel's or features track's `fill` naming a
+field, each bar, point or text panel's `color`, and each other column track's
+`encoding.color` reading the track's own values, with where it sits in the
+snapshot and the table its field is read from
 
 ```js
 colorRecords: ColorRecord[]
@@ -1004,14 +1005,30 @@ columns: Map<string, string>
 columns2d: string[]
 ```
 
+#### getter: columnTrackColors
+
+each bar, strip, text and arc track's colors, keyed by track id, for the tracks
+whose `encoding.color` or `color` sets them: the shared scale its values read
+through, if any, `colorOf` over a value, the color of each visible column's bar
+or strip cell, and a text track's color per upper-case character. A value hidden
+through the legend paints nothing, and `hiddenColumns` marks the columns holding
+one. An identity scale paints each value that names a color. An arc's own
+`color` wins over the scale at draw time.
+
+```js
+columnTrackColors: Map<…>
+```
+
 #### getter: columnTrackContent
 
 a data track's values, string, arcs or spans, projected from its row's residues
 onto alignment columns when it names a row, and onto the visible columns when
-gappy ones are hidden
+gappy ones are hidden. A bar or strip track's `raw` holds its numbers, undefined
+where it has none, and a bar's `values` the fraction of the track's height each
+draws at through `encoding.y.scale`
 
 ```js
-columnTrackContent: Map<string, { values?: number[] | undefined; data?: string | undefined; arcs?: Arc[] | undefined; spans?: ColumnSpan[] | undefined; }>
+columnTrackContent: Map<string, { values?: number[] | undefined; raw?: (number | undefined)[] | undefined; data?: string | undefined; arcs?: Arc[] | undefined; spans?: ColumnSpan[] | undefined; }>
 ```
 
 #### getter: columnTrackModels
@@ -1194,9 +1211,9 @@ featureLabels: Map<Annotation, string> | undefined
 #### getter: featureTrackScales
 
 each features track's fill and label per span, keyed by track id: a span's own
-`color` first, then the `fill` scale over one of its fields, then the track's
-`color`. Reads no cell size or hidden column, so a zoom or a gap toggle reuses
-it.
+`color` first, then the `fill` scale over one of its fields, then `fill.value`,
+or the track's `color` while `fill` is unset. Reads no cell size or hidden
+column, so a zoom or a gap toggle reuses it.
 
 ```js
 featureTrackScales: Map<string, { readonly colors: Map<Annotation, { fill: string; stroke: string; }>; readonly labels: Map<Annotation, string> | undefined; readonly scale: SharedScale | undefined; }>
@@ -1385,9 +1402,9 @@ leaves: HierarchyNode < NodeWithIds > []
 the color keys drawn for this view, one section per scale, shared by the
 on-screen legend overlay and the SVG export's reserved column. The domain
 overlay produces the first, listing the `featureFill` scale where an encoding
-names one. Every scale a row-table encoding, a row panel or a shown features
-track reads produces one more, keyed by its declaration, so two channels or two
-strips declaring one scale list it once, and strips over eight fields naming one
+names one. Every scale a row-table encoding, a row panel or a shown column track
+reads produces one more, keyed by its declaration, so two channels or two strips
+declaring one scale list it once, and strips over eight fields naming one
 `legend.title` list one legend between them. A section's note is the first of
 its records' `scaleProblems`, else the scale's own note.
 
@@ -1621,12 +1638,12 @@ resolvedRowPanels: ResolvedRowPanel[]
 
 #### getter: resolvedScales
 
-every color object the encodings and the row panels declare, keyed by
-declaration (`declarationKey`) and resolved once over the union of the values
-its records' fields take, so a value two strips share takes one color in both. A
-feature field reads every feature loaded, so hiding a type in the filter dialog
-leaves the rest in their colors, and its legend lists the values of the drawn
-features.
+every color object the encodings, the row panels and the column tracks declare,
+keyed by declaration (`declarationKey`) and resolved once over the union of the
+values its records' fields take, so a value two strips share takes one color in
+both. A feature field reads every feature loaded, so hiding a type in the filter
+dialog leaves the rest in their colors, and its legend lists the values of the
+drawn features. A column track reads its own values.
 
 ```js
 resolvedScales: Map<string, SharedScale>
@@ -1780,8 +1797,9 @@ why a record's color object draws other than it says, per record: a `domainMax`
 below its `domainMin`, a threshold whose cuts are unsorted or whose `range` is
 not one longer, a `domainQuantile` outside 0.5 to 1, `labels` of the wrong
 length, a `scheme` no table holds. A bar or point panel's value scale lists its
-ends' problems under `rowPanels[i].encoding.x`. The viewer draws what it can,
-and the scale's legend notes the first problem.
+ends' problems under `rowPanels[i].encoding.x`, and a bar track's under
+`columnTracks[i].encoding.y`. The viewer draws what it can, and the scale's
+legend notes the first problem.
 
 ```js
 scaleProblems: RecordScaleProblem[]
