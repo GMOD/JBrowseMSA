@@ -503,8 +503,9 @@ outgroup tip names. Python: `tree_order` and `tree_root`, the latter
 
 A table of fields per row, keyed by row name: a lineage, a host, a collection
 date, a kinase group. The `encodings` below color the viewer's marks by one of
-these fields, the tree's node-info dialog lists a row's fields, and a `genome`
-field replaces the row name in the tree labels.
+these fields, the tree's node-info dialog lists a row's fields, and the tip
+labels draw the field a `rowLabel` encoding names, else a `genome` field, else
+the row name.
 
 The model keeps the table as the JSON string `data.treeMetadata`, the field name
 that travels in existing links, so a snapshot carries it there:
@@ -612,30 +613,32 @@ no tint. Each field lists its own legend.
 }
 ```
 
-| Field                  | Meaning                                                                                                         |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `channel`              | one of the five below                                                                                           |
-| `field`                | the field the channel reads                                                                                     |
-| `scale.type`           | `ordinal` (the default), `linear`, `log` or `threshold`                                                         |
-| `scale.domain`         | an ordinal scale's values in legend order, each taking the `range` color at its index; a threshold scale's cuts |
-| `scale.range`          | a list of colors: one per value, a ramp's stops, or one per threshold interval                                  |
-| `scale.scheme`         | a palette name for an ordinal scale, a ramp name for the others, read where `range` is unset                    |
-| `scale.domainMin`      | a ramp's low end; the field's lowest value when unset                                                           |
-| `scale.domainMax`      | a ramp's high end; the field's highest value when unset                                                         |
-| `scale.domainMid`      | the value a ramp's middle color marks, for a diverging ramp such as `redblue`                                   |
-| `scale.domainQuantile` | the nearest-rank quantile an unset end follows, from 0.5 to 1 (default 1, the extremes)                         |
-| `scale.reverse`        | `true` turns the ramp round                                                                                     |
-| `legend.title`         | the legend's title; records with the same scale and title share one scale                                       |
-| `legend.labels`        | the legend's name for each ordinal `domain` value or each threshold interval, in order                          |
-| `legend.missingLabel`  | the grey legend row for a record with no value, which then draws grey                                           |
+| Field                  | Meaning                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `channel`              | one of the seven below                                                                                                                                       |
+| `field`                | the field the channel reads                                                                                                                                  |
+| `scale.type`           | `ordinal` (the default), `linear`, `log`, `threshold` or `identity`                                                                                          |
+| `scale.domain`         | an ordinal scale's values in legend order, each taking the `range` color at its index; a threshold scale's cuts; the colors an identity scale's legend lists |
+| `scale.range`          | a list of colors: one per value, a ramp's stops, or one per threshold interval                                                                               |
+| `scale.scheme`         | a palette name for an ordinal scale, a ramp name for the others, read where `range` is unset                                                                 |
+| `scale.domainMin`      | a ramp's low end; the field's lowest value when unset                                                                                                        |
+| `scale.domainMax`      | a ramp's high end; the field's highest value when unset                                                                                                      |
+| `scale.domainMid`      | the value a ramp's middle color marks, for a diverging ramp such as `redblue`                                                                                |
+| `scale.domainQuantile` | the nearest-rank quantile an unset end follows, from 0.5 to 1 (default 1, the extremes)                                                                      |
+| `scale.reverse`        | `true` turns the ramp round                                                                                                                                  |
+| `legend.title`         | the legend's title; records with the same scale and title share one scale                                                                                    |
+| `legend.labels`        | the legend's name for each ordinal or identity `domain` value or each threshold interval, in order                                                           |
+| `legend.missingLabel`  | the grey legend row for a record with no value, which then draws grey                                                                                        |
 
-| Channel        | What it sets                                                  | Reads a field of |
-| -------------- | ------------------------------------------------------------- | ---------------- |
-| `tipLabel`     | the color of each tip label in the tree                       | `rowData`        |
-| `rowTint`      | a wash over the row, across the tree gutter and the alignment | `rowData`        |
-| `branch`       | the color of a tree edge whose tips all share one value       | `rowData`        |
-| `featureFill`  | the fill of each span of the annotation overlay               | the `gff`        |
-| `featureLabel` | the text drawn inside a span                                  | the `gff`        |
+| Channel        | What it sets                                                  | Reads a field of          |
+| -------------- | ------------------------------------------------------------- | ------------------------- |
+| `tipLabel`     | the color of each tip label in the tree                       | `rowData`                 |
+| `rowTint`      | a wash over the row, across the tree gutter and the alignment | `rowData`                 |
+| `branch`       | the color of a tree edge whose tips all share one value       | `rowData`                 |
+| `nodePoint`    | the fill of the bubble on each internal node of the tree      | the tree, field `support` |
+| `rowLabel`     | the text of each tip label in the tree                        | `rowData`                 |
+| `featureFill`  | the fill of each span of the annotation overlay               | the `gff`                 |
+| `featureLabel` | the text drawn inside a span                                  | the `gff`                 |
 
 A `scheme` is one of `ggplot` (the default), `set1`, `dark2`, `okabeito` and
 `tableau`, with `okabeIto` and `tableau10` read as aliases. The scale hands its
@@ -726,18 +729,70 @@ On a continuous or threshold scale a value that is no number, such as `NA`,
 draws grey and lists under a grey `not a number` row. `legend.missingLabel`
 renames that row, and records with no value at all then draw grey under it too.
 
+### The identity scale
+
+An `identity` scale reads each value as the CSS color it names: `#e41a1c`,
+`steelblue`, or `255,0,0`, which reads as `rgb(255,0,0)`. A producer that has
+already chosen its colors writes them into the table and declares the scale. The
+legend lists the colors `domain` names, in that order and under the names
+`legend.labels` gives them, and only those some record holds. With no `domain`
+the legend lists nothing.
+
+```json
+{
+  "channel": "featureFill",
+  "field": "color",
+  "scale": { "type": "identity", "domain": ["#d7191c", "#2c7bb6"] },
+  "legend": { "title": "ClinVar", "labels": ["pathogenic", "benign"] }
+}
+```
+
+A GFF `color=` attribute colors its own feature through the same rule before any
+scale, and the feature table holds it as `color`, so the record above gives a
+GFF's own colors a legend. A `range` or a `scheme` on an identity scale is never
+read, and `scaleProblems` reports it.
+
 ### Scale problems
 
 Some combinations of members contradict each other, and the viewer draws what it
 can and reports them: a `domainMax` below its `domainMin`, threshold cuts out of
 ascending order, a threshold `range` that is not one longer than its `domain`, a
 `domainQuantile` outside 0.5 to 1, `legend.labels` of a different length from
-what it names, and a `scheme` no table holds. `model.scaleProblems` lists each
-one with the `record` that declares it (`encodings[0]`,
-`rowPanels[2].encoding.fill`), the member (`slot`) and a message. The scale's
-legend carries the first as a note, and `react-msaview-cli export-svg --spec`
-prints every one to stderr as `record.slot: message`. The rules and their
-messages are jbrowse-components' `colorProblems`.
+what it names, a `scheme` no table holds, and a `range` or `scheme` on an
+identity scale. `model.scaleProblems` lists each one with the `record` that
+declares it (`encodings[0]`, `rowPanels[2].encoding.fill`), the member (`slot`)
+and a message. The scale's legend carries the first as a note, and
+`react-msaview-cli export-svg --spec` prints every one to stderr as
+`record.slot: message`. The rules and their messages are jbrowse-components'
+`colorProblems`.
+
+### Hiding a category
+
+A click on a row of an ordinal or identity scale's legend hides that value, and
+a second click shows it again. The overlay strikes a hidden row through, and the
+SVG export leaves it out of the legend and the figure.
+
+- A hidden `rowData` value leaves the marks it colors unpainted: a strip draws
+  no cell, a tip label and a branch draw in the default color, and a row takes
+  no tint. The row stays in the tree and the alignment; a `rowTransform` filter
+  drops rows.
+- A hidden feature value takes the features carrying it out of the overlay, the
+  `features` panels and the `features` tracks, and out of their tooltips.
+- A hidden `support` value leaves its node's bubble plain.
+
+The hides persist as `hiddenCategories`, a list of `{field, value}`, and travel
+in the snapshot and the shared URL. A hide applies wherever an ordinal or
+identity scale reads its field, in any table, and waits unapplied while none
+does. A legend shared by several fields hides the value in each of them.
+
+```json
+{ "hiddenCategories": [{ "field": "clade", "value": "2.3.2.1c" }] }
+```
+
+The accession key, which colors spans by accession where no `featureFill`
+encoding is set, hides a feature type through the filter dialog's own state,
+`turnedOffFeatures`, so a click in the key and a checkbox in the dialog are one
+switch. A ramp or a threshold scale lists no row a click hides.
 
 ### The feature channels
 
@@ -776,6 +831,35 @@ GFF3 `color=` attribute keeps that color whatever the scale says, and `255,0,0`
 reads as `rgb(255,0,0)`, the convention JBrowse and IGV honor. A `featureLabel`
 draws inside its span wherever the text fits, and it is a data channel, so it
 draws whether or not the residue letters do.
+
+### The tree channels
+
+`nodePoint` fills the bubble on each internal node from the node's support
+value, ggtree's `geom_nodepoint(aes(color = support))`. Its one field is
+`support`, the label a Newick file writes after a node's closing paren: `95` and
+`80` in `((A,B)95,(C,D)80);`. The parser keeps that label as a string, so a
+threshold scale reads bootstrap percentages into bands and an ordinal scale
+reads named clades. A node with no label keeps the plain bubble, and the bubbles
+draw while `drawNodeBubbles` is on, its default. The tree overview draws no node
+points.
+
+```json
+{
+  "channel": "nodePoint",
+  "field": "support",
+  "scale": {
+    "type": "threshold",
+    "domain": [70, 95],
+    "range": ["#d7191c", "#fdae61", "#1a9641"]
+  }
+}
+```
+
+`rowLabel` names the `rowData` field each tip label draws, so a tree keyed by
+accession can print strain names: `{"channel": "rowLabel", "field": "strain"}`.
+A row with no value in that field draws its row name. With no `rowLabel`
+encoding the labels read a `genome` field. The tree area fits the labels it
+draws.
 
 ## customColorScheme
 

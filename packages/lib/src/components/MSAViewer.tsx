@@ -111,9 +111,9 @@ export interface MSAViewerProps {
   /**
    * what the viewer's marks read from a table:
    * `{channel, field, scale?, legend?}`, where `channel` is
-   * `tipLabel`, `rowTint` or `branch` over `rowData`, or `featureFill` over
-   * the annotations, and `{channel: 'featureLabel', field}` (see
-   * docs/layers.md)
+   * `tipLabel`, `rowTint` or `branch` over `rowData`, `featureFill` over
+   * the annotations, or `nodePoint` over the tree's support values, and
+   * `{channel: 'featureLabel' | 'rowLabel', field}` (see docs/layers.md)
    */
   encodings?: Encoding[]
   /**

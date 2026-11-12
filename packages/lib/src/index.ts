@@ -52,6 +52,7 @@ export type { InterProScanResults } from 'msa-parsers'
 export type { ColumnCounts } from './columnCounts.ts'
 export type { ColumnStats } from './columnStats.ts'
 export type { ZoomSnapshot } from './zoomSnapshot.ts'
+export type { HiddenValues } from './hiddenCategories.ts'
 // the color object a channel reads its field through, and what resolving one
 // gives
 export type {
@@ -70,6 +71,7 @@ export { problemLine } from './scaleProblems.ts'
 export type {
   LegendEntry,
   LegendGradient,
+  LegendHides,
   LegendItem,
   LegendSection,
   LegendSpec,
@@ -100,6 +102,7 @@ export type {
   FeaturePosition,
   FeatureTrackModel,
   FieldChannel,
+  HiddenCategory,
   Highlight,
   LabelEncoding,
   MsaSelection,

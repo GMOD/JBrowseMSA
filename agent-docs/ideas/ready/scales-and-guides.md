@@ -1,24 +1,24 @@
 ---
 name: scales-and-guides
 description:
-  The color object jbrowse-components declares, with linear, log and threshold
-  scales, a gradient legend, an axis guide, and the bar, point, text and column
-  strip marks they unlock. Steps 1 to 3, the color object, the shared domain,
-  the continuous and threshold scales, the gradient legend and the scale
-  problems, are built; steps 4 to 7 remain.
+  The color object jbrowse-components declares, with linear, log, threshold and
+  identity scales, a gradient legend, an axis guide, and the bar, point, text
+  and column strip marks they unlock. Steps 1 to 3, the color object, the shared
+  domain, the continuous and threshold scales, the gradient legend and the scale
+  problems, are built, and so is step 6, the tree channels; steps 4, 5 and 7
+  remain.
 ---
 
 # Scales and guides
 
 `resolveScale` in `packages/lib/src/scales.ts` reads the color object,
-`ColorSpec`, through an ordinal, linear, log or threshold scale, and
+`ColorSpec`, through an ordinal, linear, log, threshold or identity scale, and
 `encodings`, the `strip` and `features` row panels and the `features` column
-track read it. A text column track, a bar track, the tree's node points and the
-cell fill do not yet, so a dN/dS bar colored by its value, a node colored by
-support and a bar per row each wait on steps 4 to 7. This document adopts the
-color object jbrowse-components' displays declare, adds the continuous and
-threshold scales it names, gives every scale its guide, a legend or an axis, and
-lists the marks those unlock.
+track read it. A text column track, a bar track and the cell fill do not yet, so
+a dN/dS bar colored by its value and a bar per row wait on steps 4, 5 and 7.
+This document adopts the color object jbrowse-components' displays declare, adds
+the continuous and threshold scales it names, gives every scale its guide, a
+legend or an axis, and lists the marks those unlock.
 [panels-and-marks](../../reference/panels-and-marks.md) holds the vocabulary of
 panels, marks and channels this builds on.
 
@@ -41,11 +41,12 @@ Two target figures, in order of work:
   and `legend: {title, labels, missingLabel}`. jbrowse-components spells it this
   way on every display (`packages/core/src/util/colorScale.ts` there, its
   `config_guides/mark_display.md`, and its ADR-238 and ADR-240).
-- **Scale kind.** `scale.type`: `ordinal`, `linear`, `log` or `threshold`. An
-  ordinal scale hands a `range` color to each distinct value. A linear or log
-  scale samples a ramp between `domainMin` and `domainMax`. A threshold scale
-  cuts the number line at the values `domain` lists and hands `range` one color
-  per interval, so `range` is one longer than `domain`.
+- **Scale kind.** `scale.type`: `ordinal`, `linear`, `log`, `threshold` or
+  `identity`. An ordinal scale hands a `range` color to each distinct value. A
+  linear or log scale samples a ramp between `domainMin` and `domainMax`. A
+  threshold scale cuts the number line at the values `domain` lists and hands
+  `range` one color per interval, so `range` is one longer than `domain`. An
+  identity scale reads each value as the CSS color it names.
 - **Value scale.** The scale a bar or point mark reads its value through into a
   length: `{type, domainMin, domainMax, domainQuantile}`, spelled
   `encoding.y.scale` on a column track and `encoding.x.scale` on a row panel,
@@ -182,6 +183,32 @@ prints them all to stderr, and `MSAViewer` exposes them the way it exposes the
 mapping problems. The rules and their messages are jbrowse-components'
 `colorProblems` and `scaleEndProblems`, copied.
 
+### A legend row hides its category
+
+A click on a row of an ordinal or identity scale's legend hides that value, as
+jbrowse-components' ADR-246 has its key rows do. The model keeps the hides as
+`hiddenCategories`, a list of `{field, value}` under ADR-246's name, and the
+list persists in the snapshot and the shared URL. `activeHiddenCategories`
+applies a hide wherever a categorical scale in the row table, the feature table
+or the node table reads its field, and holds it unapplied while none does, so a
+palette edit keeps a hide and a removed encoding leaves it waiting.
+
+A hidden feature value drops the features from `filteredAnnotations` and from a
+`features` track's spans, so the overlay, the panels, the tracks and their
+tooltips all lose them. A hidden row value leaves the row's marks unpainted and
+keeps the row: the strip cell, the label color, the branch color and the tint
+go, and the tree and the alignment keep their rows. Dropping the row would
+reflow every panel from a click on one strip of eight, and a `rowTransform`
+filter already drops rows by field. The on-screen legend strikes a hidden row
+through, and `exportLegendEntries` leaves it out, since the figure draws none of
+it.
+
+The accession key, the overlay's palette where no `featureFill` names a field,
+toggles `turnedOffFeatures` through `setFilter`, the state the filter dialog
+writes, so a feature type has one switch. Its legend keeps a type the user
+turned off, struck through, and leaves out a type that starts hidden, such as a
+Stockholm `#=GR` line, which the dialog turns on.
+
 ### An axis is the guide of a value scale
 
 A `features` panel with `x: "position"` maps each row's residue positions onto
@@ -219,13 +246,11 @@ axis has `strip` and `features` where the column axis has `bar`, `text`, `arc`,
 - **`encoding.color` on a `bar` column track** over `values`, so a threshold
   scale at 1 colors dN/dS.
 - **`nodePoint` in `encodings`**, reading each internal node's support value
-  through a color object and filling the node bubble, which `drawNodeBubbles`
-  draws in one color today. ggtree's `geom_nodepoint(aes(color = support))`.
+  through a color object and filling the node bubble. ggtree's
+  `geom_nodepoint(aes(color = support))`.
 - **`rowLabel` in `encodings`**, naming the `rowData` field drawn as the tip
-  label. The label reads a `genome` field at `model.ts:2657` and
-  `renderTreeCanvas.ts:407` today, which becomes the default when no encoding
-  names a field. jbrowse-components spells the same thing as a `rows.labels`
-  map.
+  label, with `genome` the field read where no encoding names one.
+  jbrowse-components spells the same thing as a `rows.labels` map.
 
 The column-track legends need a producer: `legends` reads the overlay, the
 row-table encodings and the row panels, and a text track's `encoding.color`
@@ -251,14 +276,25 @@ commit.
   and `strand` through red and blue before a config says so. No field of
   `rowData` or a GFF has one meaning across figures, and `strand` already picks
   the arrow glyph. A record writes `scale: {type: "linear"}`.
-- **`identity` as a scale kind.** A GFF `color=` attribute already colors its
-  own feature ahead of any scale. Declaring it adds a word for what happens.
 - **`jexl` channels.** A derived value is computed by the agent that wrote the
   table and stored in a field, under `viewer-not-analysis-tool`.
 - **A top-level `scales` map.** See the declaration rule above.
 - **`opacity` and `size` channels on the span mark.** No figure has asked.
   `size` on a `point` row panel takes a number, one diameter per record.
 - **A per-cell color matrix.** See `data-layers.md`.
+
+### Revisited: `identity` as a scale kind
+
+This document first declined `identity`, because a GFF `color=` attribute
+already colors its own feature ahead of any scale and the word named what
+already happened. jbrowse-components adopted it on 2026-10-25 in ADR-243, and
+two cases the GFF path does not cover decided it here. A `rowData` field of
+colors an agent computed had no way to paint a strip or a tip label, and a GFF's
+own colors had no legend, since the legend lists a scale's rows and `color=`
+declared none. `scale: {type: "identity"}` paints each value as the color it
+names, and its `domain` and `legend.labels` list and name the colors, so
+`featureFill` over `color` keys a GFF's own colors. Without a `domain` the
+legend lists nothing, ADR-243 as its ADR-265 amends it.
 
 ## The work, in order
 
@@ -322,9 +358,13 @@ a panel with an axis takes its header as the axis title. Two days.
 
 ### 6. Tree channels
 
-`nodePoint` and `rowLabel` in `EncodingChannel`, read in `renderNodeBubbles` and
-`renderTreeLabels`, with the `genome` fallback kept. The overview draws no node
-points. One day.
+Built: `nodePoint` reads the `nodes` table, whose one field, `support`, is the
+Newick label msa-parsers keeps as an internal node's name (`nodeField` in
+`treeDisplay.ts`), and `nodePointColors` fills the bubbles `renderNodeBubbles`
+draws. `rowLabel` names the field `rowLabelOf` reads for `renderTreeLabels` and
+the tree area fit, with `genome` read where no encoding names one. The overview
+draws no node points, and both channels reach the export through
+`renderTreeCanvas`.
 
 ### 7. One fill object for the cell
 

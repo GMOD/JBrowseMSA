@@ -40,49 +40,49 @@ The install line pins the majors the viewer shares with `@jbrowse/core`;
 
 Props:
 
-| Prop                | Type                        | Description                                                                         |
-| ------------------- | --------------------------- | ----------------------------------------------------------------------------------- |
-| `msa`               | `string`                    | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                                |
-| `tree`              | `string`                    | Newick tree text                                                                    |
-| `gff`               | `string`                    | Annotations to overlay (GFF3 text)                                                  |
-| `features`          | `Feature[]`                 | Annotations as JSON: `{row, start, end, name, ...}`, drawn with the GFF's           |
-| `msaFilehandle`     | `FileLocation`              | Remote file location for alignment                                                  |
-| `treeFilehandle`    | `FileLocation`              | Remote file location for tree                                                       |
-| `gffFilehandle`     | `FileLocation`              | Remote file location for domain GFF                                                 |
-| `msaUrl`            | `string`                    | URL of the alignment; `msaFilehandle` wins when both are set                        |
-| `treeUrl`           | `string`                    | URL of the Newick tree; `treeFilehandle` wins when both are set                     |
-| `gffUrl`            | `string`                    | URL of the GFF; `gffFilehandle` wins when both are set                              |
-| `colorScheme`       | `string \| {domain, range}` | Color scheme name, or a color per residue letter (see below)                        |
-| `height`            | `number`                    | Widget height in pixels                                                             |
-| `colWidth`          | `number`                    | Per-column width in pixels (horizontal zoom)                                        |
-| `rowHeight`         | `number`                    | Per-row height in pixels (vertical zoom)                                            |
-| `allowedGappyness`  | `number`                    | Hide columns at least this percent gaps (default 100, hide nothing)                 |
-| `relativeTo`        | `string`                    | Row name to diff every other row against; matches draw as `.`                       |
-| `drawTree`          | `boolean`                   | Draw the phylogeny (default true); false leaves a label gutter                      |
-| `treeAreaWidth`     | `number`                    | Fixed width of the tree/label gutter; unset fits it to the labels and the tree      |
-| `columnTracks`      | `ColumnTrackSpec[]`         | Tracks supplied as data (see below)                                                 |
-| `highlights`        | `Highlight[]`               | Labeled highlights (see below)                                                      |
-| `highlightColumns`  | `number[]`                  | Columns (1-based, like `highlights`), one band per run of adjacent columns          |
-| `clades`            | `Clade[]`                   | Tree clades with a mark over them                                                   |
-| `residueMappings`   | `ResidueMapping[]`          | Structure residue for each residue of a row                                         |
-| `rowData`           | `Record<string, ...>`       | Extra fields per row name, such as a lineage or a host                              |
-| `encodings`         | `Encoding[]`                | What the marks read: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
-| `rowPanels`         | `RowPanelSpec[]`            | Panels between the tree and the alignment, one cell per row                         |
-| `rowTransform`      | `RowTransform`              | Filter, sort and facet the rows by `rowData` fields                                 |
-| `showBranchLen`     | `boolean`                   | Draw branch lengths (default true); false draws a cladogram                         |
-| `treeOrder`         | `TreeOrder`                 | Child order: `branchLength` (default), `input`, `ladderize`, `ladderizeReverse`     |
-| `treeRoot`          | `TreeRoot`                  | Reroot: `'midpoint'`, or `{outgroup: [tip names]}`                                  |
-| `residueEncoding`   | `'fill' \| 'color'`         | Which channel `colorScheme` paints: the cell (default) or the letter                |
-| `region`            | `Region`                    | Zoom to `{row, start, end}` residues, or `{start, end}` columns                     |
-| `selection`         | `MsaSelection`              | The selected block: `{start, end}` columns and optional `rows` names                |
-| `trimToSelection`   | `boolean`                   | Hide every column outside `selection` (default false)                               |
-| `hideHeader`        | `boolean`                   | Leave out the toolbar, for a page drawing its own controls                          |
-| `theme`             | `string \| ThemeOptions`    | `'light'` (default), `'dark'`, or MUI theme options merged over JBrowse's           |
-| `onCellHover`       | `(cell) => void`            | The cell under the pointer (see below)                                              |
-| `onCellClick`       | `(cell) => void`            | The cell a click pinned, or `undefined` when a click clears it                      |
-| `onViewportChange`  | `(viewport) => void`        | The alignment columns on screen                                                     |
-| `onSelectionChange` | `(selection) => void`       | The selected block after each change, or `undefined` when it clears                 |
-| `onModel`           | `(model) => void`           | The model the viewer built, for the model API below                                 |
+| Prop                | Type                        | Description                                                                                                  |
+| ------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `msa`               | `string`                    | Alignment text (FASTA, Stockholm, Clustal, A3M, EMF)                                                         |
+| `tree`              | `string`                    | Newick tree text                                                                                             |
+| `gff`               | `string`                    | Annotations to overlay (GFF3 text)                                                                           |
+| `features`          | `Feature[]`                 | Annotations as JSON: `{row, start, end, name, ...}`, drawn with the GFF's                                    |
+| `msaFilehandle`     | `FileLocation`              | Remote file location for alignment                                                                           |
+| `treeFilehandle`    | `FileLocation`              | Remote file location for tree                                                                                |
+| `gffFilehandle`     | `FileLocation`              | Remote file location for domain GFF                                                                          |
+| `msaUrl`            | `string`                    | URL of the alignment; `msaFilehandle` wins when both are set                                                 |
+| `treeUrl`           | `string`                    | URL of the Newick tree; `treeFilehandle` wins when both are set                                              |
+| `gffUrl`            | `string`                    | URL of the GFF; `gffFilehandle` wins when both are set                                                       |
+| `colorScheme`       | `string \| {domain, range}` | Color scheme name, or a color per residue letter (see below)                                                 |
+| `height`            | `number`                    | Widget height in pixels                                                                                      |
+| `colWidth`          | `number`                    | Per-column width in pixels (horizontal zoom)                                                                 |
+| `rowHeight`         | `number`                    | Per-row height in pixels (vertical zoom)                                                                     |
+| `allowedGappyness`  | `number`                    | Hide columns at least this percent gaps (default 100, hide nothing)                                          |
+| `relativeTo`        | `string`                    | Row name to diff every other row against; matches draw as `.`                                                |
+| `drawTree`          | `boolean`                   | Draw the phylogeny (default true); false leaves a label gutter                                               |
+| `treeAreaWidth`     | `number`                    | Fixed width of the tree/label gutter; unset fits it to the labels and the tree                               |
+| `columnTracks`      | `ColumnTrackSpec[]`         | Tracks supplied as data (see below)                                                                          |
+| `highlights`        | `Highlight[]`               | Labeled highlights (see below)                                                                               |
+| `highlightColumns`  | `number[]`                  | Columns (1-based, like `highlights`), one band per run of adjacent columns                                   |
+| `clades`            | `Clade[]`                   | Tree clades with a mark over them                                                                            |
+| `residueMappings`   | `ResidueMapping[]`          | Structure residue for each residue of a row                                                                  |
+| `rowData`           | `Record<string, ...>`       | Extra fields per row name, such as a lineage or a host                                                       |
+| `encodings`         | `Encoding[]`                | What the marks read: `tipLabel`, `rowTint`, `branch`, `nodePoint`, `featureFill`, `featureLabel`, `rowLabel` |
+| `rowPanels`         | `RowPanelSpec[]`            | Panels between the tree and the alignment, one cell per row                                                  |
+| `rowTransform`      | `RowTransform`              | Filter, sort and facet the rows by `rowData` fields                                                          |
+| `showBranchLen`     | `boolean`                   | Draw branch lengths (default true); false draws a cladogram                                                  |
+| `treeOrder`         | `TreeOrder`                 | Child order: `branchLength` (default), `input`, `ladderize`, `ladderizeReverse`                              |
+| `treeRoot`          | `TreeRoot`                  | Reroot: `'midpoint'`, or `{outgroup: [tip names]}`                                                           |
+| `residueEncoding`   | `'fill' \| 'color'`         | Which channel `colorScheme` paints: the cell (default) or the letter                                         |
+| `region`            | `Region`                    | Zoom to `{row, start, end}` residues, or `{start, end}` columns                                              |
+| `selection`         | `MsaSelection`              | The selected block: `{start, end}` columns and optional `rows` names                                         |
+| `trimToSelection`   | `boolean`                   | Hide every column outside `selection` (default false)                                                        |
+| `hideHeader`        | `boolean`                   | Leave out the toolbar, for a page drawing its own controls                                                   |
+| `theme`             | `string \| ThemeOptions`    | `'light'` (default), `'dark'`, or MUI theme options merged over JBrowse's                                    |
+| `onCellHover`       | `(cell) => void`            | The cell under the pointer (see below)                                                                       |
+| `onCellClick`       | `(cell) => void`            | The cell a click pinned, or `undefined` when a click clears it                                               |
+| `onViewportChange`  | `(viewport) => void`        | The alignment columns on screen                                                                              |
+| `onSelectionChange` | `(selection) => void`       | The selected block after each change, or `undefined` when it clears                                          |
+| `onModel`           | `(model) => void`           | The model the viewer built, for the model API below                                                          |
 
 The viewer applies a changed prop to the mounted model, so a host can put a
 control on one without re-fetching the alignment. Each prop updates only its own

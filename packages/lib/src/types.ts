@@ -601,19 +601,23 @@ export type RowDataInput = Record<
  * label in the tree, `rowTint` washes the row across the tree gutter and the
  * alignment, and `branch` colors a tree edge whose tips all share one value;
  * all three read a field of `rowData`. `featureFill` colors each span of the
- * annotation overlay from a field of the feature table.
+ * annotation overlay from a field of the feature table. `nodePoint` fills the
+ * bubble on each internal node of the tree from its `support` field, the label
+ * the Newick file gives the node.
  */
 export type ColorEncodingChannel =
   | 'tipLabel'
   | 'rowTint'
   | 'branch'
   | 'featureFill'
+  | 'nodePoint'
 
 /**
- * A channel of a mark the viewer always draws: a color channel, or
- * `featureLabel`, the field of the feature table drawn inside each span
+ * A channel of a mark the viewer always draws: a color channel,
+ * `featureLabel`, the field of the feature table drawn inside each span, or
+ * `rowLabel`, the field of `rowData` drawn as each tip's label
  */
-export type EncodingChannel = ColorEncodingChannel | 'featureLabel'
+export type EncodingChannel = ColorEncodingChannel | LabelEncoding['channel']
 
 /**
  * A color channel, the field feeding it, and the color object's members it
@@ -623,9 +627,20 @@ export interface ColorEncoding extends ColorChannel {
   channel: ColorEncodingChannel
 }
 
-/** the `featureLabel` channel and the field it draws */
+/** a text channel and the field it draws */
 export interface LabelEncoding extends FieldChannel {
-  channel: 'featureLabel'
+  channel: 'featureLabel' | 'rowLabel'
+}
+
+/**
+ * A value of a field the reader turned off in a legend, jbrowse-components'
+ * ADR-246. It applies wherever a categorical scale reads `field`: a row's
+ * marks draw unpainted, and a feature leaves the overlay, the panels and the
+ * tracks.
+ */
+export interface HiddenCategory {
+  field: string
+  value: string
 }
 
 export type Encoding = ColorEncoding | LabelEncoding

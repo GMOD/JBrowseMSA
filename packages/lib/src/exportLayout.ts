@@ -1,5 +1,5 @@
 import { treeScaleBarHeight } from './constants.ts'
-import { legendEntries } from './legendSpec.ts'
+import { legendEntries, withoutHidden } from './legendSpec.ts'
 
 import type { LegendEntry } from './legendSpec.ts'
 import type { MsaViewModel } from './model.ts'
@@ -32,9 +32,12 @@ export const LEGEND_TEXT_X = LEGEND_PAD + LEGEND_SWATCH + 6
 export const LEGEND_GRADIENT_W = 120
 export const LEGEND_GRADIENT_H = 10
 
-/** the rows the export draws, the model's legends flattened */
+/**
+ * the rows the export draws: the model's legends flattened, less the rows the
+ * reader hid, which the figure does not draw
+ */
 export function exportLegendEntries(model: MsaViewModel) {
-  return legendEntries({ sections: model.legends })
+  return legendEntries({ sections: withoutHidden(model.legends) })
 }
 
 function entryWidth(entry: LegendEntry) {

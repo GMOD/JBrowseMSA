@@ -14,7 +14,7 @@ import { compareGroupKeys } from './groupKeys.ts'
 import type { LegendItem } from './legendSpec.ts'
 import type { Annotation, ColorScheme } from './types.ts'
 
-export type ScaleType = 'ordinal' | 'linear' | 'log' | 'threshold'
+export type ScaleType = 'ordinal' | 'linear' | 'log' | 'threshold' | 'identity'
 
 /**
  * How a channel turns a field's values into colors, spelt as Vega-Lite and
@@ -22,11 +22,13 @@ export type ScaleType = 'ordinal' | 'linear' | 'log' | 'threshold'
  * ADR-240).
  *
  * - `type`: `ordinal` (the default) hands each distinct value a color,
- *   `linear` and `log` sample a ramp between the domain's ends, and
- *   `threshold` cuts the number line at the values `domain` lists
+ *   `linear` and `log` sample a ramp between the domain's ends, `threshold`
+ *   cuts the number line at the values `domain` lists, and `identity` paints
+ *   each value as the CSS color it is (jbrowse-components' ADR-243)
  * - `domain`: an ordinal scale's values in legend order, each taking the
  *   `range` color at its own index, with the field's other values following
- *   in natural order; a threshold scale's cuts
+ *   in natural order; a threshold scale's cuts; the colors an identity
+ *   scale's legend lists
  * - `range`: a list of colors: one per value, the stops of a ramp, or one per
  *   threshold interval
  * - `scheme`: a palette (`ggplot`, `set1`, `dark2`, `okabeito`, `tableau`) for
@@ -54,8 +56,8 @@ export interface ColorScale {
 
 /**
  * The guide a color scale draws. `title` is the field when unset. `labels`
- * names an ordinal scale's `domain` values or a threshold scale's intervals in
- * order, and `missingLabel` names the grey row a record with no value, or one
+ * names an ordinal or identity scale's `domain` values or a threshold scale's
+ * intervals in order, and `missingLabel` names the grey row a record with no value, or one
  * that is no number, draws under.
  */
 export interface ColorLegend {
@@ -101,9 +103,17 @@ const gradientStops = 11
 
 export function scaleKind(scale: ColorScale | undefined): ScaleType {
   const type = scale?.type
-  return type === 'linear' || type === 'log' || type === 'threshold'
+  return type === 'linear' ||
+    type === 'log' ||
+    type === 'threshold' ||
+    type === 'identity'
     ? type
     : 'ordinal'
+}
+
+/** whether each of a scale's legend rows keys one value, which a click hides */
+export function isCategorical(kind: ScaleType) {
+  return kind === 'ordinal' || kind === 'identity'
 }
 
 function isNumeric(value: string) {
@@ -233,6 +243,64 @@ function resolveOrdinal(
   }
 }
 
+/**
+ * A value as the CSS color it names. `255,0,0` reads as `rgb(255,0,0)`, as a
+ * GFF `color=` attribute does in msa-parsers' gffToAnnotations.ts.
+ */
+export function cssColorOf(value: string) {
+  const triple = /^(\d{1,3})[\s,]+(\d{1,3})[\s,]+(\d{1,3})$/.exec(value.trim())
+  return triple ? `rgb(${triple[1]},${triple[2]},${triple[3]})` : value.trim()
+}
+
+/**
+ * Each value is its own color. The legend lists the colors `domain` names
+ * that the values hold, under `labels`, and with no `domain` it lists none,
+ * jbrowse-components' ADR-243 as its ADR-265 amends it. A row keys its color
+ * as `cssColorOf` writes it, the form a GFF `color=` takes once parsed.
+ */
+function resolveIdentity(
+  scale: ColorScale | undefined,
+  legend: ColorLegend | undefined,
+  values: Iterable<string | undefined>,
+): ResolvedScale {
+  const present = new Set<string>()
+  let absent = false
+  for (const value of values) {
+    if (value === undefined || value.trim() === '') {
+      absent = true
+    } else {
+      present.add(cssColorOf(value))
+    }
+  }
+  const missing = legend?.missingLabel
+  return {
+    kind: 'identity',
+    colorOf: value =>
+      value === undefined || value.trim() === ''
+        ? missing === undefined
+          ? undefined
+          : missingColor
+        : cssColorOf(value),
+    items: [
+      ...(scale?.domain ?? []).flatMap((entry, i) => {
+        const color = cssColorOf(String(entry))
+        return present.has(color)
+          ? [
+              {
+                value: color,
+                label: legend?.labels?.[i] ?? String(entry),
+                color,
+              },
+            ]
+          : []
+      }),
+      ...(missing !== undefined && absent
+        ? [{ value: '', label: missing, color: missingColor }]
+        : []),
+    ],
+  }
+}
+
 function resolveRamp(
   type: 'linear' | 'log',
   scale: ColorScale | undefined,
@@ -344,7 +412,8 @@ function resolveThreshold(
  * domain's ends, each pinned by `domainMin` or `domainMax` or else following
  * the values, clipped at `domainQuantile`. A value past an end draws in the end
  * color, and the legend marks that end `≤` or `≥`. A threshold scale colors
- * each interval its cuts make, and its legend lists every interval.
+ * each interval its cuts make, and its legend lists every interval. An
+ * identity scale paints each value as the color it names.
  */
 export function resolveScale(
   scale: ColorScale | undefined,
@@ -354,13 +423,18 @@ export function resolveScale(
   const kind = scaleKind(scale)
   return kind === 'ordinal'
     ? resolveOrdinal(scale, legend, values)
-    : kind === 'threshold'
-      ? resolveThreshold(scale, legend, values)
-      : resolveRamp(kind, scale, legend, values)
+    : kind === 'identity'
+      ? resolveIdentity(scale, legend, values)
+      : kind === 'threshold'
+        ? resolveThreshold(scale, legend, values)
+        : resolveRamp(kind, scale, legend, values)
 }
 
-/** which table a record's field is read from */
-export type ScaleTable = 'rows' | 'features'
+/**
+ * which table a record's field is read from: `rowData`, the features, or the
+ * tree's internal nodes, whose one field is `support`
+ */
+export type ScaleTable = 'rows' | 'features' | 'nodes'
 
 /**
  * One record's use of a color object: the values its field takes in its
@@ -455,7 +529,7 @@ export function resolveShared(uses: ScaleUse[]) {
         spec.legend,
       )
       const shown =
-        group[0]!.shown && resolved.kind === 'ordinal'
+        group[0]!.shown && isCategorical(resolved.kind)
           ? new Set(group.flatMap(u => u.shown ?? []))
           : undefined
       const scale: SharedScale = {

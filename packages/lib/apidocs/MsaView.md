@@ -189,9 +189,10 @@ embeddedMode: stripDefault(types.boolean, false)
 
 #### property: encodings
 
-what the viewer's own marks read from `rowData` or the feature table:
-`{channel, field, scale?, legend?}` per color channel, and
-`{channel: "featureLabel", field}`. See docs/layers.md
+what the viewer's own marks read from `rowData`, the feature table or the tree's
+support values: `{channel, field, scale?, legend?}` per color channel, and
+`{channel: "featureLabel", field}` or `{channel: "rowLabel", field}` for text.
+See docs/layers.md
 
 ```js
 encodings: stripDefault(types.array(types.frozen<Encoding>()), [])
@@ -220,6 +221,23 @@ height of the div containing the view, px
 
 ```js
 height: stripDefault(types.number, 550)
+```
+
+#### property: hiddenCategories
+
+the `{field, value}` pairs the reader turned off by clicking a legend row, as
+jbrowse-components' ADR-246 names them. A hide applies wherever an ordinal or
+identity scale reads its field: the row marks that value colors draw unpainted,
+and the features carrying it leave the overlay, the row panels and the tracks.
+It waits, unapplied, while no such scale reads the field. The accession key's
+rows toggle `turnedOffFeatures` instead, which the filter dialog writes. See
+docs/layers.md
+
+```js
+hiddenCategories: stripDefault(
+    types.array(types.frozen<HiddenCategory>()),
+    [],
+  )
 ```
 
 #### property: hideGaps
@@ -735,6 +753,15 @@ zoomSnapshot: undefined as ZoomSnapshot | undefined
 
 ### MsaView - Getters
 
+#### getter: activeHiddenCategories
+
+the values `hiddenCategories` hides, by table and field, for the fields an
+ordinal or identity scale in that table reads
+
+```js
+activeHiddenCategories: HiddenValues
+```
+
 #### getter: actuallyShowDomains
 
 ```js
@@ -856,6 +883,16 @@ own color and a legend entry
 
 ```js
 categoricalDomainTypes: Annotation[]
+```
+
+#### getter: categoryFields
+
+the fields each ordinal or identity scale reads, keyed by declaration as
+`resolvedScales` is: a click on a row of its legend hides that value in every
+one of them
+
+```js
+categoryFields: Map<string, string[]>
 ```
 
 #### getter: cellFill
@@ -1170,6 +1207,15 @@ them
 fillPalette: { [x: string]: string; }
 ```
 
+#### getter: filteredAnnotations
+
+the annotations drawn: those the filter dialog leaves on, less those carrying a
+value a legend click hid
+
+```js
+filteredAnnotations: Annotation[]
+```
+
 #### getter: filteredTree
 
 `tree` pruned to the tips `rowTransform.filter` keeps, the whole tree where no
@@ -1447,6 +1493,17 @@ showVerticalScrollbar and would form a cycle
 msaCanvasWidth: number
 ```
 
+#### getter: nodePointColors
+
+the fill the `nodePoint` channel gives each internal node's bubble, by node id,
+or undefined when no encoding names the channel. A node with no label, or one
+whose value the scale gives no color, keeps the plain bubble. The pass runs over
+the whole tree, so a collapsed or focused clade keeps its colors.
+
+```js
+nodePointColors: Map<string, string> | undefined
+```
+
 #### getter: noTree
 
 ```js
@@ -1615,6 +1672,15 @@ one to encode
 
 ```js
 rowFields: string[]
+```
+
+#### getter: rowLabelField
+
+the `rowData` field drawn as each tip's label: the one a `rowLabel` encoding
+names, else `genome`
+
+```js
+rowLabelField: string
 ```
 
 #### getter: rowMap
@@ -1989,6 +2055,14 @@ trimSpan: { start: number; end: number; } | undefined
 turnedOnTracks: BasicTrack[]
 ```
 
+#### getter: typeFilteredAnnotations
+
+the annotations the filter dialog leaves on
+
+```js
+typeFilteredAnnotations: Annotation[]
+```
+
 #### getter: unshareableData
 
 loaded documents left out of the snapshot, largest first. A file opened from
@@ -2070,6 +2144,14 @@ width: number
 
 ### MsaView - Methods
 
+#### method: annotationHidden
+
+whether a feature carries a value the reader hid
+
+```js
+annotationHidden: (annotation: Annotation) => boolean
+```
+
 #### method: cellAt
 
 the cell at a visible column and row index, in the coordinates a host writes
@@ -2143,6 +2225,14 @@ one row's fields, the single reader of the row table
 
 ```js
 rowDataOf: (name: string) => Record<string, string> | undefined
+```
+
+#### method: rowLabelOf
+
+the text a row's tip label draws: its `rowLabelField` value, else the row name
+
+```js
+rowLabelOf: (name: string) => string
 ```
 
 #### method: rowResidue
@@ -2658,6 +2748,14 @@ set the height of the view in px
 setHeight: (height: number) => void
 ```
 
+#### action: setHiddenCategories
+
+replace the `{field, value}` pairs the legend hides
+
+```js
+setHiddenCategories: (hidden: HiddenCategory[]) => void
+```
+
 #### action: setHideGaps
 
 hide columns that are entirely (or mostly, see allowedGappyness) gaps
@@ -2970,6 +3068,16 @@ collapse or un-collapse the subtree rooted at the given tree node id
 
 ```js
 toggleCollapsed: (node: string) => void
+```
+
+#### action: toggleLegendItem
+
+a click on a legend row: hides the value it keys, or shows it again. A row of
+the accession key turns its feature type off or on in the filter dialog's
+`turnedOffFeatures`
+
+```js
+toggleLegendItem: (hides: LegendHides, value: string) => void
 ```
 
 #### action: toggleRotated

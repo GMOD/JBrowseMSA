@@ -13,7 +13,8 @@ import type { MsaViewModel } from '../../model.ts'
 import type { ResolvedRowPanel } from '../../types.ts'
 
 // what the cell or span under the pointer reads, which is the field a strip
-// colors by, and a span's name, its coordinates and its encoded field
+// colors by, and a span's name, its coordinates and its encoded field. A cell
+// whose value a legend click hid reads nothing.
 function hoverLines({
   model,
   panel,
@@ -26,9 +27,11 @@ function hoverLines({
   x: number
 }) {
   if (panel.kind === 'strip') {
-    return [
-      `${panel.header}: ${model.rowDataOf(name)?.[panel.field] ?? '(none)'}`,
-    ]
+    const value = model.rowDataOf(name)?.[panel.field]
+    return value !== undefined &&
+      model.activeHiddenCategories.get('rows')?.get(panel.field)?.has(value)
+      ? []
+      : [`${panel.header}: ${value ?? '(none)'}`]
   }
   const span = panel.spans
     .get(name)

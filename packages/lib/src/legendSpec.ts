@@ -17,24 +17,38 @@ export interface LegendGradient {
 
 /**
  * One row of a color key: a swatch keying `value` in `color`, a ramp's
- * `gradient`, or with neither a line of text
+ * `gradient`, or with neither a line of text. `hidden` marks a swatch whose
+ * value the reader turned off, which the overlay strikes through and the
+ * export leaves out.
  */
 export interface LegendItem {
   value?: string
   label: string
   color?: string
   gradient?: LegendGradient
+  hidden?: boolean
 }
 
 /**
+ * What a click on a section's swatch hides: its value in each of `fields`,
+ * through `hiddenCategories`, or the feature type the accession key lists,
+ * through the filter dialog's `turnedOffFeatures`
+ */
+export type LegendHides =
+  | { kind: 'category'; fields: string[] }
+  | { kind: 'featureType' }
+
+/**
  * One scale's key. `note` is a line under the title about the scale itself,
- * such as a problem with its declaration.
+ * such as a problem with its declaration. `hides` is absent on a section whose
+ * rows are no values, a ramp or a threshold scale's intervals.
  */
 export interface LegendSection {
   id: string
   title?: string
   note?: string
   items: LegendItem[]
+  hides?: LegendHides
 }
 
 /** every key the view draws */
@@ -49,7 +63,8 @@ export const MAX_LEGEND_ITEMS = 20
 /**
  * One row as both renderings stack it: a section's `title`, its `note`, a
  * `swatch` or a `gradient` bar. `hint` is the value a swatch keys, which the
- * overlay shows where it differs from the label.
+ * overlay shows where it differs from the label, and `toggle` what a click on
+ * the swatch hides or shows again.
  */
 export interface LegendEntry {
   key: string
@@ -58,9 +73,16 @@ export interface LegendEntry {
   color?: string
   gradient?: LegendGradient
   hint?: string
+  hidden?: boolean
+  toggle?: { hides: LegendHides; value: string }
 }
 
-function entryOf(item: LegendItem, key: string, lone?: string): LegendEntry {
+function entryOf(
+  item: LegendItem,
+  key: string,
+  lone?: string,
+  hides?: LegendHides,
+): LegendEntry {
   return item.gradient
     ? {
         key,
@@ -76,7 +98,19 @@ function entryOf(item: LegendItem, key: string, lone?: string): LegendEntry {
           label: item.label,
           color: item.color,
           hint: item.value,
+          ...(item.hidden ? { hidden: true } : {}),
+          ...(hides && item.value
+            ? { toggle: { hides, value: item.value } }
+            : {}),
         }
+}
+
+/** the sections with every hidden swatch left out, as the export lists them */
+export function withoutHidden(sections: LegendSection[]) {
+  return sections.map(section => ({
+    ...section,
+    items: section.items.filter(item => !item.hidden),
+  }))
 }
 
 /**
@@ -113,7 +147,7 @@ export function legendEntries({ title, sections }: LegendSpec): LegendEntry[] {
             ]),
         ...items
           .slice(0, MAX_LEGEND_ITEMS)
-          .map((item, i) => entryOf(item, `${id}:${i}`, lone)),
+          .map((item, i) => entryOf(item, `${id}:${i}`, lone, section.hides)),
         ...(more > 0
           ? [
               {

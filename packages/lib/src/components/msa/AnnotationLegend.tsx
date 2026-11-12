@@ -95,7 +95,22 @@ const AnnotationLegend = observer(function ({
               {row.gradient ? (
                 <GradientRow label={row.label} gradient={row.gradient} />
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <div
+                  role={row.toggle ? 'button' : undefined}
+                  aria-pressed={row.toggle ? !row.hidden : undefined}
+                  onClick={() => {
+                    if (row.toggle) {
+                      model.toggleLegendItem(row.toggle.hides, row.toggle.value)
+                    }
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    cursor: row.toggle ? 'pointer' : undefined,
+                    opacity: row.hidden ? 0.5 : undefined,
+                  }}
+                >
                   {row.color ? (
                     <div
                       style={{
@@ -109,15 +124,19 @@ const AnnotationLegend = observer(function ({
                   <Typography
                     variant="caption"
                     noWrap={row.kind !== 'note'}
-                    title={
+                    title={[
                       row.hint && row.hint !== row.label
                         ? `${row.label} (${row.hint})`
-                        : row.label
-                    }
+                        : row.label,
+                      ...(row.toggle
+                        ? [row.hidden ? 'click to show' : 'click to hide']
+                        : []),
+                    ].join(': ')}
                     style={{
                       ...textStyle,
                       fontWeight: row.kind === 'title' ? 'bold' : undefined,
                       fontStyle: row.kind === 'note' ? 'italic' : undefined,
+                      textDecoration: row.hidden ? 'line-through' : undefined,
                     }}
                   >
                     {row.label}

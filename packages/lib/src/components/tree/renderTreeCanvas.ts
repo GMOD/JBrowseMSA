@@ -1,6 +1,5 @@
 import { calcDepthToLeaf, nodeCoveringRows } from '../../hierarchy.ts'
 import { setFontSize } from '../../setFontSize.ts'
-import { nonEmpty } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import {
   drawHighlightLabel,
@@ -237,7 +236,8 @@ function renderCollapsedTriangles({
 }
 
 // the bubbles are click targets whether or not they are painted, so this pass
-// always runs and `draw` only decides whether it also strokes the circles
+// always runs and `draw` only decides whether it also strokes the circles. The
+// `nodePoint` channel fills a bubble its scale colors.
 function renderNodeBubbles({
   ctx,
   theme,
@@ -266,6 +266,7 @@ function renderNodeBubbles({
     showBranchLenEffective: showBranchLen,
     blockSize,
     marginLeft: ml,
+    nodePointColors,
   } = model
   const by = blockSizeYOverride ?? blockSize
   forEachNodeInBlock(hierarchy, offsetY, by, blockPad(model), node => {
@@ -282,7 +283,7 @@ function renderNodeBubbles({
         ctx.strokeStyle = theme.palette.text.primary
         ctx.fillStyle = isCollapsed
           ? theme.palette.text.primary
-          : theme.palette.background.default
+          : (nodePointColors?.get(id) ?? theme.palette.background.default)
         ctx.beginPath()
         ctx.arc(x, y, radius, 0, 2 * Math.PI)
         ctx.fill()
@@ -405,7 +406,7 @@ function renderTreeLabels({
     } = node
     const y = node.x!
 
-    const displayName = nonEmpty(model.rowDataOf(name)?.genome) ?? name
+    const displayName = model.rowLabelOf(name)
     // a collapsed clade is drawn as a triangle + tip count; suppress its leaf
     // label when the "name" is just the auto-generated internal-node id
     const isAnonymousCollapsed = collapsedSet.has(id) && name === id

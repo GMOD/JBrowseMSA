@@ -265,3 +265,17 @@ export function rootTree(tree: NodeWithIds, treeRoot: TreeRoot) {
 export function tipRange(node: HierarchyNode): [number, number] {
   return [Math.round(node.xMin! - 0.5), Math.round(node.xMax! - 0.5)]
 }
+
+/**
+ * The value an internal node gives a `nodePoint` field. Its one field is
+ * `support`, the label a Newick file writes after the node's closing paren,
+ * `95` in `((A,B)95,C);`, which msa-parsers reads as the node's name.
+ * `generateNodeIds` names an unlabelled node by its id, so that node has none.
+ */
+export function nodeField(node: NodeWithIds, field: string) {
+  return field === 'support' &&
+    node.children.length > 0 &&
+    node.name !== node.id
+    ? node.name
+    : undefined
+}

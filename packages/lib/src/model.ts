@@ -107,6 +107,12 @@ import {
 import { featuresToAnnotations, trackAnnotations } from './featuresLayer.ts'
 import { installFilehandleLoader } from './filehandleLoader.ts'
 import {
+  activeHiddenValues,
+  categoryHiddenIn,
+  featureHidden,
+  toggledCategories,
+} from './hiddenCategories.ts'
+import {
   find,
   hierarchy,
   layoutTree,
@@ -128,7 +134,12 @@ import {
   tipNames,
 } from './rowTransform.ts'
 import { colorProblems } from './scaleProblems.ts'
-import { colorTable, declarationKey, resolveShared } from './scales.ts'
+import {
+  colorTable,
+  declarationKey,
+  isCategorical,
+  resolveShared,
+} from './scales.ts'
 import { maxBitsFor } from './sequenceLogo.ts'
 import {
   blosum62ColumnColors,
@@ -138,6 +149,7 @@ import { stripDefault } from './stripDefault.ts'
 import { treeTips, widestLabel } from './tipLabels.ts'
 import {
   buildTreeRoot,
+  nodeField,
   outgroupNode,
   resolveClades,
   rootTree,
@@ -166,7 +178,7 @@ import { takeZoomSnapshot, zoomSnapshotCovers } from './zoomSnapshot.ts'
 import type { ColumnStats } from './columnStats.ts'
 import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
-import type { LegendItem, LegendSection } from './legendSpec.ts'
+import type { LegendHides, LegendItem, LegendSection } from './legendSpec.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
 import type { RecordScaleProblem } from './scaleProblems.ts'
 import type {
@@ -190,6 +202,7 @@ import type {
   DomainBand,
   Encoding,
   Feature,
+  HiddenCategory,
   Highlight,
   MsaSelection,
   NodeWithIds,
@@ -333,10 +346,29 @@ function trackIsOff(
 const noDomains: Annotation[] = []
 const noClades: ResolvedClade[] = []
 
-// `featureFill` reads the feature table; every other color channel reads
-// rowData
+// `featureFill` reads the feature table, `nodePoint` the tree's internal
+// nodes, and every other color channel rowData
 function encodingTable({ channel }: ColorEncoding): ScaleTable {
-  return channel === 'featureFill' ? 'features' : 'rows'
+  return channel === 'featureFill'
+    ? 'features'
+    : channel === 'nodePoint'
+      ? 'nodes'
+      : 'rows'
+}
+
+function isColorEncoding(encoding: Encoding): encoding is ColorEncoding {
+  return encoding.channel !== 'featureLabel' && encoding.channel !== 'rowLabel'
+}
+
+// a scale's colorOf with the values the reader hid painting nothing
+function unhiddenColorOf(
+  colorOf: (value: string | undefined) => string | undefined,
+  hidden: Set<string> | undefined,
+) {
+  return hidden
+    ? (value: string | undefined) =>
+        value !== undefined && hidden.has(value) ? undefined : colorOf(value)
+    : colorOf
 }
 
 // seqPos -> column indexes per row, keyed on the parse so they are garbage
@@ -744,11 +776,27 @@ function stateModelFactory({
         clades: stripDefault(types.array(types.frozen<Clade>()), []),
         /**
          * #property
-         * what the viewer's own marks read from `rowData` or the feature
-         * table: `{channel, field, scale?, legend?}` per color channel, and
-         * `{channel: "featureLabel", field}`. See docs/layers.md
+         * what the viewer's own marks read from `rowData`, the feature table
+         * or the tree's support values: `{channel, field, scale?, legend?}`
+         * per color channel, and `{channel: "featureLabel", field}` or
+         * `{channel: "rowLabel", field}` for text. See docs/layers.md
          */
         encodings: stripDefault(types.array(types.frozen<Encoding>()), []),
+        /**
+         * #property
+         * the `{field, value}` pairs the reader turned off by clicking a
+         * legend row, as jbrowse-components' ADR-246 names them. A hide
+         * applies wherever an ordinal or identity scale reads its field: the
+         * row marks that value colors draw unpainted, and the features
+         * carrying it leave the overlay, the row panels and the tracks. It
+         * waits, unapplied, while no such scale reads the field. The accession
+         * key's rows toggle `turnedOffFeatures` instead, which the filter
+         * dialog writes. See docs/layers.md
+         */
+        hiddenCategories: stripDefault(
+          types.array(types.frozen<HiddenCategory>()),
+          [],
+        ),
         /**
          * #property
          * panels drawn between the tree and the alignment:
@@ -1411,6 +1459,68 @@ function stateModelFactory({
 
       /**
        * #getter
+       * every record that reads a field through a color object: each color
+       * encoding, each strip's `fill` and each features panel's `fill`, with
+       * where it sits in the snapshot and the table its field is read from
+       */
+      get colorRecords(): ColorRecord[] {
+        return [
+          ...self.encodings.flatMap((encoding, i): ColorRecord[] =>
+            isColorEncoding(encoding)
+              ? [
+                  {
+                    record: `encodings[${i}]`,
+                    channel: encoding,
+                    table: encodingTable(encoding),
+                  },
+                ]
+              : [],
+          ),
+          ...self.rowPanels.flatMap((panel, i): ColorRecord[] => {
+            const record = `rowPanels[${i}].encoding.fill`
+            return panel.kind === 'strip'
+              ? [{ record, channel: panel.encoding.fill, table: 'rows' }]
+              : panel.encoding?.fill
+                ? [{ record, channel: panel.encoding.fill, table: 'features' }]
+                : []
+          }),
+          ...self.columnTracks.flatMap((track, i): ColorRecord[] =>
+            track.kind === 'features' && track.encoding?.fill
+              ? [
+                  {
+                    record: `columnTracks[${i}].encoding.fill`,
+                    channel: track.encoding.fill,
+                    table: 'features',
+                    annotations: trackAnnotations(track),
+                  },
+                ]
+              : [],
+          ),
+        ]
+      },
+
+      /**
+       * #getter
+       * the values `hiddenCategories` hides, by table and field, for the
+       * fields an ordinal or identity scale in that table reads
+       */
+      get activeHiddenCategories() {
+        return activeHiddenValues(this.colorRecords, self.hiddenCategories)
+      },
+
+      /**
+       * #method
+       * whether a feature carries a value the reader hid
+       */
+      annotationHidden(annotation: Annotation) {
+        return featureHidden(
+          annotation,
+          this.activeHiddenCategories.get('features'),
+        )
+      },
+
+      /**
+       * #getter
        * whether the host restores the loaded documents outside the snapshot.
        * When true, `unshareableData` is empty.
        *
@@ -1566,6 +1676,24 @@ function stateModelFactory({
        */
       rowDataOf(name: string) {
         return this.rowData[name]
+      },
+      /**
+       * #getter
+       * the `rowData` field drawn as each tip's label: the one a `rowLabel`
+       * encoding names, else `genome`
+       */
+      get rowLabelField() {
+        return (
+          self.encodings.find(e => e.channel === 'rowLabel')?.field ?? 'genome'
+        )
+      },
+      /**
+       * #method
+       * the text a row's tip label draws: its `rowLabelField` value, else the
+       * row name
+       */
+      rowLabelOf(name: string) {
+        return nonEmpty(this.rowDataOf(name)?.[this.rowLabelField]) ?? name
       },
       /**
        * #getter
@@ -1813,9 +1941,7 @@ function stateModelFactory({
        */
       get maxTipLabelWidth() {
         return widestLabel(
-          this.treeTips.names.map(
-            name => nonEmpty(this.rowDataOf(name)?.genome) ?? name,
-          ),
+          this.treeTips.names.map(name => this.rowLabelOf(name)),
           labelFitFontSize,
         )
       },
@@ -2574,6 +2700,7 @@ function stateModelFactory({
             self.columnTracks.map(track => {
               if (track.kind === 'features') {
                 const unlaned = trackAnnotations(track)
+                  .filter(annotation => !self.annotationHidden(annotation))
                   .map(annotation => spanCols(track, annotation))
                   .filter(notEmpty)
                 const spans =
@@ -3358,8 +3485,23 @@ function stateModelFactory({
           this.defaultOffAccessions.has(accession)
         )
       },
-      get filteredAnnotations() {
+      /**
+       * #getter
+       * the annotations the filter dialog leaves on
+       */
+      get typeFilteredAnnotations() {
         return self.allAnnotations.filter(r => !this.featureOff(r.accession))
+      },
+      /**
+       * #getter
+       * the annotations drawn: those the filter dialog leaves on, less those
+       * carrying a value a legend click hid
+       */
+      get filteredAnnotations() {
+        const shown = this.typeFilteredAnnotations
+        return self.activeHiddenCategories.has('features')
+          ? shown.filter(r => !self.annotationHidden(r))
+          : shown
       },
       /**
        * #getter
@@ -3999,11 +4141,19 @@ function stateModelFactory({
        * features panel that names no color scale
        */
       get domainLegendItems(): LegendItem[] {
-        return this.visibleDomainTypes.map(d => ({
-          value: d.accession,
-          label: d.name,
-          color: d.color ?? this.fillPalette[d.accession]!,
-        }))
+        return this.categoricalDomainTypes
+          .filter(
+            d =>
+              !self.featureOff(d.accession) ||
+              self.turnedOffFeatures.get(d.accession) === true,
+          )
+          .toSorted((a, b) => a.start - b.start)
+          .map(d => ({
+            value: d.accession,
+            label: d.name,
+            color: d.color ?? this.fillPalette[d.accession]!,
+            ...(self.featureOff(d.accession) ? { hidden: true } : {}),
+          }))
       },
       /**
        * #getter
@@ -4114,7 +4264,8 @@ function stateModelFactory({
        * else the scale's own note.
        */
       get legends(): LegendSection[] {
-        const { featureFillEncoding, scaleProblemNotes } = this
+        const { featureFillEncoding, scaleProblemNotes, categoryFields } = this
+        const { hiddenCategories } = self
         const byKey = new Map<string, LegendSection>()
         const ids = new Set<string>()
         // the accession palette keys on no field, so it takes a key of its own
@@ -4136,11 +4287,27 @@ function stateModelFactory({
             ids.add(id)
             const problem =
               key === undefined ? undefined : scaleProblemNotes.get(key)
+            const fields =
+              key === undefined ? undefined : categoryFields.get(key)
+            const hides: LegendHides | undefined =
+              key === undefined
+                ? { kind: 'featureType' }
+                : fields
+                  ? { kind: 'category', fields }
+                  : undefined
             byKey.set(k, {
               id,
               title: title ?? 'Domains',
               ...((problem ?? note) ? { note: problem ?? note } : {}),
-              items,
+              items: fields
+                ? items.map(item =>
+                    item.value &&
+                    categoryHiddenIn(hiddenCategories, fields, item.value)
+                      ? { ...item, hidden: true }
+                      : item,
+                  )
+                : items,
+              ...(hides ? { hides } : {}),
             })
           }
         }
@@ -4180,44 +4347,26 @@ function stateModelFactory({
 
       /**
        * #getter
-       * every record that reads a field through a color object: each color
-       * encoding, each strip's `fill` and each features panel's `fill`, with
-       * where it sits in the snapshot and the table its field is read from
+       * the fields each ordinal or identity scale reads, keyed by
+       * declaration as `resolvedScales` is: a click on a row of its legend
+       * hides that value in every one of them
        */
-      get colorRecords(): ColorRecord[] {
-        return [
-          ...self.encodings.flatMap((encoding, i): ColorRecord[] =>
-            encoding.channel === 'featureLabel'
-              ? []
-              : [
-                  {
-                    record: `encodings[${i}]`,
-                    channel: encoding,
-                    table: encodingTable(encoding),
-                  },
-                ],
-          ),
-          ...self.rowPanels.flatMap((panel, i): ColorRecord[] => {
-            const record = `rowPanels[${i}].encoding.fill`
-            return panel.kind === 'strip'
-              ? [{ record, channel: panel.encoding.fill, table: 'rows' }]
-              : panel.encoding?.fill
-                ? [{ record, channel: panel.encoding.fill, table: 'features' }]
-                : []
-          }),
-          ...self.columnTracks.flatMap((track, i): ColorRecord[] =>
-            track.kind === 'features' && track.encoding?.fill
-              ? [
-                  {
-                    record: `columnTracks[${i}].encoding.fill`,
-                    channel: track.encoding.fill,
-                    table: 'features',
-                    annotations: trackAnnotations(track),
-                  },
-                ]
-              : [],
-          ),
-        ]
+      get categoryFields() {
+        const fields = new Map<string, string[]>()
+        for (const { channel, table } of self.colorRecords) {
+          if (isCategorical(this.scaleOf(channel, table).kind)) {
+            const key = declarationKey({
+              spec: channel,
+              field: channel.field,
+              table,
+            })
+            const list = fields.get(key) ?? []
+            if (!list.includes(channel.field)) {
+              fields.set(key, [...list, channel.field])
+            }
+          }
+        }
+        return fields
       },
 
       /**
@@ -4229,7 +4378,7 @@ function stateModelFactory({
        * draws what it can, and the scale's legend notes the first problem.
        */
       get scaleProblems(): RecordScaleProblem[] {
-        return this.colorRecords.flatMap(({ record, channel }) =>
+        return self.colorRecords.flatMap(({ record, channel }) =>
           colorProblems(channel).map(problem => ({ record, ...problem })),
         )
       },
@@ -4241,7 +4390,7 @@ function stateModelFactory({
        */
       get scaleProblemNotes() {
         const notes = new Map<string, string>()
-        for (const { channel, table } of this.colorRecords) {
+        for (const { channel, table } of self.colorRecords) {
           const key = declarationKey({
             spec: channel,
             field: channel.field,
@@ -4508,11 +4657,20 @@ function stateModelFactory({
        * table or the encodings, never per row per frame.
        */
       get resolvedEncodings(): ResolvedEncoding[] {
-        return this.colorEncodings.map(encoding => ({
-          channel: encoding.channel,
-          field: encoding.field,
-          ...this.scaleOf(encoding, encodingTable(encoding)),
-        }))
+        const hidden = self.activeHiddenCategories
+        return this.colorEncodings.map(encoding => {
+          const table = encodingTable(encoding)
+          const scale = this.scaleOf(encoding, table)
+          return {
+            channel: encoding.channel,
+            field: encoding.field,
+            ...scale,
+            colorOf: unhiddenColorOf(
+              scale.colorOf,
+              hidden.get(table)?.get(encoding.field),
+            ),
+          }
+        })
       },
 
       /**
@@ -4520,9 +4678,7 @@ function stateModelFactory({
        * the encodings feeding a color channel, each read through a scale
        */
       get colorEncodings() {
-        return self.encodings.filter(
-          (e): e is ColorEncoding => e.channel !== 'featureLabel',
-        )
+        return self.encodings.filter(isColorEncoding)
       },
 
       /**
@@ -4544,6 +4700,7 @@ function stateModelFactory({
        */
       get resolvedScales() {
         const rows = Object.values(self.rowData)
+        const nodes = preorder(self.tree)
         const use = (
           channel: ColorChannel,
           table: ScaleTable,
@@ -4554,18 +4711,23 @@ function stateModelFactory({
           table,
           ...(table === 'rows'
             ? { values: rows.map(row => row?.[channel.field]) }
-            : annotations
-              ? {
-                  values: featureValues(annotations, channel.field),
-                  shown: featureValues(annotations, channel.field),
-                }
-              : {
-                  values: featureValues(self.allAnnotations, channel.field),
-                  shown: featureValues(self.filteredAnnotations, channel.field),
-                }),
+            : table === 'nodes'
+              ? { values: nodes.map(node => nodeField(node, channel.field)) }
+              : annotations
+                ? {
+                    values: featureValues(annotations, channel.field),
+                    shown: featureValues(annotations, channel.field),
+                  }
+                : {
+                    values: featureValues(self.allAnnotations, channel.field),
+                    shown: featureValues(
+                      self.typeFilteredAnnotations,
+                      channel.field,
+                    ),
+                  }),
         })
         return resolveShared(
-          this.colorRecords.map(({ channel, table, annotations }) =>
+          self.colorRecords.map(({ channel, table, annotations }) =>
             use(channel, table, annotations),
           ),
         )
@@ -4624,6 +4786,9 @@ function stateModelFactory({
             fill,
             'rows',
           )
+          const hidden = self.activeHiddenCategories
+            .get('rows')
+            ?.get(fill.field)
           return {
             kind: panel.kind,
             field: fill.field,
@@ -4631,7 +4796,11 @@ function stateModelFactory({
             legendKey: key,
             legendTitle: title,
             legendNote: note,
-            colors: colorByRow(rowData, fill.field, colorOf),
+            colors: colorByRow(
+              rowData,
+              fill.field,
+              unhiddenColorOf(colorOf, hidden),
+            ),
             legend: items,
           }
         })
@@ -4809,6 +4978,29 @@ function stateModelFactory({
         }
         return colors
       },
+
+      /**
+       * #getter
+       * the fill the `nodePoint` channel gives each internal node's bubble, by
+       * node id, or undefined when no encoding names the channel. A node with
+       * no label, or one whose value the scale gives no color, keeps the
+       * plain bubble. The pass runs over the whole tree, so a collapsed or
+       * focused clade keeps its colors.
+       */
+      get nodePointColors(): Map<string, string> | undefined {
+        const encoding = this.encodingFor('nodePoint')
+        if (!encoding) {
+          return undefined
+        }
+        const colors = new Map<string, string>()
+        for (const node of preorder(self.tree)) {
+          const color = encoding.colorOf(nodeField(node, encoding.field))
+          if (color) {
+            colors.set(node.id, color)
+          }
+        }
+        return colors
+      },
     }))
     .actions(self => ({
       /**
@@ -4920,6 +5112,28 @@ function stateModelFactory({
           self.turnedOffFeatures.set(accession, !shown)
         } else {
           self.turnedOffFeatures.delete(accession)
+        }
+      },
+      /**
+       * #action
+       * replace the `{field, value}` pairs the legend hides
+       */
+      setHiddenCategories(hidden: HiddenCategory[]) {
+        self.hiddenCategories.replace(hidden)
+      },
+      /**
+       * #action
+       * a click on a legend row: hides the value it keys, or shows it again.
+       * A row of the accession key turns its feature type off or on in the
+       * filter dialog's `turnedOffFeatures`
+       */
+      toggleLegendItem(hides: LegendHides, value: string) {
+        if (hides.kind === 'featureType') {
+          this.setFilter(value, self.featureOff(value))
+        } else {
+          self.hiddenCategories.replace(
+            toggledCategories(self.hiddenCategories, hides.fields, value),
+          )
         }
       },
 

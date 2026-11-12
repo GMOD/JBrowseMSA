@@ -162,6 +162,7 @@ test('an encoding legend draws in both renderings', async () => {
         { value: '2.3.2.1c', label: '2.3.2.1c', color: '#e41a1c' },
         { value: '2.3.4.4b', label: '2.3.4.4b', color: '#377eb8' },
       ],
+      hides: { kind: 'category', fields: ['clade'] },
     },
   ])
 

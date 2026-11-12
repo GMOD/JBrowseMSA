@@ -156,6 +156,11 @@ background.
   column the bracket takes out of the right of the tree area. The canvas draws
   the bar and the label is DOM text (`CladeLabels.tsx`) on screen and a `<text>`
   in the export, since the canvas layer has no rotation.
+- The `nodePoint` encoding reads a third table, the tree's internal nodes, whose
+  one field `support` is the Newick label msa-parsers keeps as the node's name;
+  `nodePointColors` fills the bubbles. The `rowLabel` encoding names the
+  `rowData` field `rowLabelOf` returns for the tip labels and the label fit,
+  `genome` where none is named.
 - `treeAreaWidth` and `treeWidth` are undefined until a snapshot, a prop or the
   divider sets them, and undefined fits the tree area to the labels and the
   tree. The fit measures the labels and the clade gutter at `labelFitFontSize`
@@ -178,13 +183,22 @@ background.
 - A gradient row is a CSS `linear-gradient` on screen and a `<linearGradient>`
   in `<defs>` in the export, which the React half of `renderToSvg.tsx` emits, so
   `packages/svgcanvas` draws no gradient.
-- `scales.ts` resolves `ordinal`, `linear`, `log` and `threshold` scales;
-  `colorRamp.ts` and `colorRampStops.ts` hold the ramps, the domain and the
-  nearest-rank quantile, and `scaleProblems.ts` the rules `scaleProblems` on the
-  model reports, all copied from jbrowse-components with the source path in a
-  comment. A ramp pinned at both ends is keyed by its declaration alone; one
+- `scales.ts` resolves `ordinal`, `linear`, `log`, `threshold` and `identity`
+  scales; `colorRamp.ts` and `colorRampStops.ts` hold the ramps, the domain and
+  the nearest-rank quantile, and `scaleProblems.ts` the rules `scaleProblems` on
+  the model reports, all copied from jbrowse-components with the source path in
+  a comment. A ramp pinned at both ends is keyed by its declaration alone; one
   with an open end also by its field, since its domain follows that field's
   values.
+- A click on a row of an ordinal or identity legend hides its value through
+  `hiddenCategories`, `{field, value}` pairs as jbrowse-components' ADR-246
+  names them. `activeHiddenCategories` (`hiddenCategories.ts`) applies a hide
+  where a categorical scale reads its field: a feature carrying the value leaves
+  `filteredAnnotations` and a `features` track's spans, and a row's marks draw
+  unpainted while the row stays. The accession key's rows toggle
+  `turnedOffFeatures`, the filter dialog's state. `LegendSection.hides` says
+  which of the two a section's rows toggle, the overlay strikes a hidden row
+  through, and `exportLegendEntries` leaves it out.
 - A channel nests `scale: {type, domain, range, scheme}` and `legend: {title}`,
   as jbrowse-components' displays do since its ADR-238. Nothing reads an earlier
   spelling: the flat color object, a palette name in `range`, `{palette}`,

@@ -40,36 +40,36 @@ The traits are the `MSAViewer` props in
 case. `highlights` and `column_tracks` take the JSON shapes in
 [docs/layers.md](https://github.com/GMOD/JBrowseMSA/blob/main/docs/layers.md).
 
-| Trait                                                 | Value                                                                                             |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `msa`, `tree`, `gff`                                  | document text or a file path                                                                      |
-| `msa_url`, `tree_url`, `gff_url`                      | a URL the viewer fetches                                                                          |
-| `msa_filehandle`, `tree_filehandle`, `gff_filehandle` | a JBrowse `FileLocation` dict, which wins over the URL                                            |
-| `color_scheme`                                        | a scheme name, such as `"clustal"`, or a dict of residue letter to color                          |
-| `height`                                              | pixels                                                                                            |
-| `col_width`, `row_height`                             | pixels per column and per row                                                                     |
-| `highlights`                                          | list of `{start, end}`, `{row, start, end}` or `{rows}`                                           |
-| `features`                                            | list of `{row, start, end, ...}` features, or a DataFrame with those columns                      |
-| `clades`                                              | list of `{mrca or range, tips, mark}` clades of the tree to mark                                  |
-| `highlight_columns`                                   | columns (1-based, like `highlights`), one band per run of adjacent columns                        |
-| `residue_mappings`                                    | which structure residue each row residue is                                                       |
-| `column_tracks`                                       | list of bar, text, arc or features tracks; a features track's `features` may be a DataFrame       |
-| `row_data`                                            | extra fields per row name, such as a lineage or a host                                            |
-| `encodings`                                           | `{channel, field, scale, legend}`: `tipLabel`, `rowTint`, `branch`, `featureFill`, `featureLabel` |
-| `row_panels`                                          | `strip` and `features` panels drawn beside the tree                                               |
-| `row_transform`                                       | `{filter, sort, facet}` over `row_data` fields: keep, order and band the rows                     |
-| `relative_to`                                         | a row name; other rows draw as their differences from it                                          |
-| `region`                                              | `{start, end}` columns or `{row, start, end}` residues                                            |
-| `selection`                                           | the selected block, `{start, end}` columns and optional `rows` names (see below)                  |
-| `trim_to_selection`                                   | hide every column outside `selection`, default `False`                                            |
-| `allowed_gappyness`                                   | hide columns at least this percent gaps (default 100)                                             |
-| `draw_tree`, `show_branch_len`                        | booleans, default `True`                                                                          |
-| `tree_order`                                          | `"branchLength"` (default), `"input"`, `"ladderize"` or `"ladderizeReverse"`                      |
-| `tree_root`                                           | `"midpoint"`, or outgroup tip names: one name or a list                                           |
-| `tree_area_width`                                     | pixels; unset fits the gutter to the labels and the tree                                          |
-| `residue_encoding`                                    | `"fill"` (default) paints the cell; `"color"` paints the letter                                   |
-| `hide_header`                                         | boolean, default `False`                                                                          |
-| `theme`                                               | `"auto"` (default), `"light"`, `"dark"` or MUI theme options                                      |
+| Trait                                                 | Value                                                                                                                      |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `msa`, `tree`, `gff`                                  | document text or a file path                                                                                               |
+| `msa_url`, `tree_url`, `gff_url`                      | a URL the viewer fetches                                                                                                   |
+| `msa_filehandle`, `tree_filehandle`, `gff_filehandle` | a JBrowse `FileLocation` dict, which wins over the URL                                                                     |
+| `color_scheme`                                        | a scheme name, such as `"clustal"`, or a dict of residue letter to color                                                   |
+| `height`                                              | pixels                                                                                                                     |
+| `col_width`, `row_height`                             | pixels per column and per row                                                                                              |
+| `highlights`                                          | list of `{start, end}`, `{row, start, end}` or `{rows}`                                                                    |
+| `features`                                            | list of `{row, start, end, ...}` features, or a DataFrame with those columns                                               |
+| `clades`                                              | list of `{mrca or range, tips, mark}` clades of the tree to mark                                                           |
+| `highlight_columns`                                   | columns (1-based, like `highlights`), one band per run of adjacent columns                                                 |
+| `residue_mappings`                                    | which structure residue each row residue is                                                                                |
+| `column_tracks`                                       | list of bar, text, arc or features tracks; a features track's `features` may be a DataFrame                                |
+| `row_data`                                            | extra fields per row name, such as a lineage or a host                                                                     |
+| `encodings`                                           | `{channel, field, scale, legend}`: `tipLabel`, `rowTint`, `branch`, `nodePoint`, `featureFill`, `featureLabel`, `rowLabel` |
+| `row_panels`                                          | `strip` and `features` panels drawn beside the tree                                                                        |
+| `row_transform`                                       | `{filter, sort, facet}` over `row_data` fields: keep, order and band the rows                                              |
+| `relative_to`                                         | a row name; other rows draw as their differences from it                                                                   |
+| `region`                                              | `{start, end}` columns or `{row, start, end}` residues                                                                     |
+| `selection`                                           | the selected block, `{start, end}` columns and optional `rows` names (see below)                                           |
+| `trim_to_selection`                                   | hide every column outside `selection`, default `False`                                                                     |
+| `allowed_gappyness`                                   | hide columns at least this percent gaps (default 100)                                                                      |
+| `draw_tree`, `show_branch_len`                        | booleans, default `True`                                                                                                   |
+| `tree_order`                                          | `"branchLength"` (default), `"input"`, `"ladderize"` or `"ladderizeReverse"`                                               |
+| `tree_root`                                           | `"midpoint"`, or outgroup tip names: one name or a list                                                                    |
+| `tree_area_width`                                     | pixels; unset fits the gutter to the labels and the tree                                                                   |
+| `residue_encoding`                                    | `"fill"` (default) paints the cell; `"color"` paints the letter                                                            |
+| `hide_header`                                         | boolean, default `False`                                                                                                   |
+| `theme`                                               | `"auto"` (default), `"light"`, `"dark"` or MUI theme options                                                               |
 
 `theme="auto"` follows JupyterLab's and Notebook 7's `data-jp-theme-light`
 attribute, then VS Code's `data-vscode-theme-kind`, then the browser's

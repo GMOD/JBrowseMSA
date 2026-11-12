@@ -22,6 +22,7 @@ export interface ScaleProblem {
     | 'log-floor'
     | 'labels-domain'
     | 'unknown-scheme'
+    | 'identity-colors'
   /** the member to look at, relative to the color object */
   slot: string
   message: string
@@ -121,7 +122,7 @@ export function colorProblems(spec: ColorSpec): ScaleProblem[] {
     problems.push({
       rule: 'scale-type',
       slot: 'scale.type',
-      message: `"${String(scale.type)}" is no scale type: ordinal, linear, log and threshold are, and the scale reads as ordinal`,
+      message: `"${String(scale.type)}" is no scale type: ordinal, linear, log, threshold and identity are, and the scale reads as ordinal`,
     })
   }
   if (kind === 'threshold') {
@@ -171,23 +172,37 @@ export function colorProblems(spec: ColorSpec): ScaleProblem[] {
     }
     problems.push(...scaleEndProblems(spec))
   }
+  if (
+    kind === 'identity' &&
+    (range.length > 0 || scale?.scheme !== undefined)
+  ) {
+    problems.push({
+      rule: 'identity-colors',
+      slot: range.length > 0 ? 'scale.range' : 'scale.scheme',
+      message:
+        'an identity scale paints each value as the color it names and reads no range or scheme; domain lists the colors its legend names',
+    })
+  }
   const named =
-    kind === 'ordinal'
+    kind === 'ordinal' || kind === 'identity'
       ? domain.length
       : kind === 'threshold'
         ? domain.length + 1
         : undefined
   if (labels.length > 0 && labels.length !== named) {
-    const what = kind === 'ordinal' ? 'value' : 'interval'
+    const what =
+      kind === 'ordinal' ? 'value' : kind === 'identity' ? 'color' : 'interval'
     problems.push({
       rule: 'labels-domain',
       slot: 'legend.labels',
       message:
         named === undefined
-          ? "labels names an ordinal scale's domain values or a threshold scale's intervals, and a ramp has neither"
+          ? "labels names an ordinal scale's domain values, an identity scale's colors or a threshold scale's intervals, and a ramp has none of them"
           : `labels gives each ${what} its name in the legend, and ${labels.length} ${labels.length === 1 ? 'label meets' : 'labels meet'} ${named} ${named === 1 ? what : `${what}s`}`,
     })
   }
-  problems.push(...schemeProblems(scale?.scheme, kind === 'ordinal'))
+  if (kind !== 'identity') {
+    problems.push(...schemeProblems(scale?.scheme, kind === 'ordinal'))
+  }
   return problems
 }

@@ -93,6 +93,7 @@ test('the domain legend lists the values of the field featureFill reads', () => 
         { value: 'enzyme', label: 'enzyme', color: '#e41a1c' },
         { value: 'binder', label: 'binder', color: '#377eb8' },
       ],
+      hides: { kind: 'category', fields: ['group'] },
     },
   ])
 })
