@@ -36,7 +36,11 @@ import { blockFasta } from './blockFasta.ts'
 import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
 import colorSchemes, { letterColorTable } from './colorSchemes.ts'
-import { columnCountsFromRows, letterOfResidueSlot } from './columnCounts.ts'
+import {
+  columnCountsFromRows,
+  letterOfResidueSlot,
+  lettersInRows,
+} from './columnCounts.ts'
 import { columnStats } from './columnStats.ts'
 import { packDomainLanes } from './components/msa/packDomainLanes.ts'
 import { visibleColRange } from './components/msa/visibleColRange.ts'
@@ -140,6 +144,7 @@ import {
   tipRange,
 } from './treeDisplay.ts'
 import {
+  blanksWithin,
   computeRowInsertions,
   clampedSpan,
   consecutiveRuns,
@@ -149,6 +154,7 @@ import {
   nonEmpty,
   readComputed,
   skipBlanks,
+  trimBlanks,
   withAlpha,
 } from './util.ts'
 import { saveAs } from './vendor/fileSaver.ts'
@@ -479,6 +485,12 @@ function stateModelFactory({
          * #property
          */
         hideGaps: stripDefault(types.boolean, defaultHideGaps),
+        /**
+         * #property
+         * hide every column outside `selection`, the way `hideGaps` hides the
+         * gappy ones. Without a selection every column shows.
+         */
+        trimToSelection: stripDefault(types.boolean, false),
         /**
          * #property
          */
@@ -955,6 +967,12 @@ function stateModelFactory({
       /**
        * #action
        */
+      setTrimToSelection(arg: boolean) {
+        self.trimToSelection = arg
+      },
+      /**
+       * #action
+       */
       setAllowedGappyness(arg: number) {
         self.allowedGappyness = arg
       },
@@ -1099,9 +1117,11 @@ function stateModelFactory({
       },
       /**
        * #action
+       * clear the selection, and the trim to it
        */
       clearSelection() {
         this.setSelection(undefined)
+        self.trimToSelection = false
       },
 
       /**
@@ -1597,6 +1617,25 @@ function stateModelFactory({
       get numColumns() {
         return (this.MSA?.getWidth() ?? 0) - this.blanks.length
       },
+      /**
+       * #getter
+       * `selection`'s columns clamped to the file's
+       */
+      get selectionFileSpan() {
+        const { selection } = self
+        const width = this.MSA?.getWidth() ?? 0
+        const start = Math.max(1, Math.floor(selection?.start ?? 0))
+        const end = Math.min(width, Math.ceil(selection?.end ?? 0))
+        return selection && start <= end ? { start, end } : undefined
+      },
+      /**
+       * #getter
+       * the file columns `trimToSelection` keeps, or undefined while it keeps
+       * every column
+       */
+      get trimSpan() {
+        return self.trimToSelection ? this.selectionFileSpan : undefined
+      },
 
       /**
        * #getter
@@ -2052,8 +2091,9 @@ function stateModelFactory({
       },
       /**
        * #getter
+       * the columns `hideGaps` hides, ascending
        */
-      get blanks() {
+      get gappyColumns() {
         const { hideGapsEffective, allowedGappyness } = self
         if (!hideGapsEffective) {
           return []
@@ -2092,16 +2132,39 @@ function stateModelFactory({
       },
       /**
        * #getter
-       * Returns a map of row name to array of insertions with display position and letters
+       * the hidden columns, ascending: the gappy ones `hideGaps` hides and
+       * those outside the selection `trimToSelection` hides. Every conversion
+       * between file and visible columns reads this one list.
+       */
+      get blanks() {
+        const { gappyColumns, trimSpan } = this
+        return trimSpan
+          ? trimBlanks(
+              gappyColumns,
+              trimSpan.start - 1,
+              trimSpan.end,
+              this.MSA?.getWidth() ?? 0,
+            )
+          : gappyColumns
+      },
+      /**
+       * #getter
+       * each row's residues in hidden gappy columns, as the visible column
+       * they fall before and the letters. The columns a trim hides mark no
+       * insertion.
        */
       get insertionPositions() {
-        const { blanks, rows } = this
-        if (blanks.length === 0) {
-          return new Map<string, { pos: number; letters: string }[]>()
-        }
+        const { gappyColumns, rows, trimSpan } = this
         const result = new Map<string, { pos: number; letters: string }[]>()
-        for (const [name, seq] of rows) {
-          const insertions = computeRowInsertions(blanks, seq)
+        const from = trimSpan ? trimSpan.start - 1 : 0
+        const inside = trimSpan
+          ? blanksWithin(gappyColumns, from, trimSpan.end)
+          : gappyColumns
+        for (const [name, seq] of inside.length > 0 ? rows : []) {
+          const insertions = computeRowInsertions(
+            inside,
+            seq.slice(from, trimSpan?.end),
+          )
           if (insertions.length > 0) {
             result.set(name, insertions)
           }
@@ -2189,13 +2252,8 @@ function stateModelFactory({
        * #getter
        */
       get columns2d() {
-        const { hideGapsEffective } = self
-        return this.rows.map(([, str]) =>
-          (hideGapsEffective
-            ? skipBlanks(this.blanks, str)
-            : str
-          ).toUpperCase(),
-        )
+        const { blanks } = this
+        return this.rows.map(([, str]) => skipBlanks(blanks, str).toUpperCase())
       },
       /**
        * #getter
@@ -2213,10 +2271,14 @@ function stateModelFactory({
       /**
        * #getter
        * Detects sequence type based on letters present in the alignment.
-       * Returns 'dna', 'rna', or 'amino'.
+       * Returns 'dna', 'rna', or 'amino'. Hidden columns count, so trimming
+       * to a few columns keeps the type.
        */
       get sequenceType(): 'dna' | 'rna' | 'amino' {
-        const letters = this.colStats.lettersPresent
+        const letters =
+          this.blanks.length === 0
+            ? this.colStats.lettersPresent
+            : lettersInRows(this.rows.map(([, seq]) => seq))
         // the two-base IUPAC codes keep an ambiguous read nucleotide; the
         // three-base ones (B, D, H, V) are common amino acids, so they don't
         const ambiguous = ['N', 'R', 'Y', 'K', 'M', 'S', 'W']
@@ -2443,7 +2505,7 @@ function stateModelFactory({
          * the visible columns when gappy ones are hidden
          */
         get columnTrackContent() {
-          const { MSA, blanks, hideGapsEffective } = self
+          const { MSA, blanks } = self
           const width = MSA?.getWidth() ?? 0
           const project = <T>(track: ColumnTrackSpec, items: T[], fill: T) => {
             if (!track.row) {
@@ -2459,8 +2521,7 @@ function stateModelFactory({
             })
             return out
           }
-          const skip = <T>(items: T[]) =>
-            hideGapsEffective ? dropBlanks(blanks, items) : items
+          const skip = <T>(items: T[]) => dropBlanks(blanks, items)
           // an arc endpoint maps row residue -> column -> visible column.
           // visibleColsBefore, not globalColToVisibleCol, so an endpoint in a
           // hidden column moves to the neighboring visible one and the arc stays
@@ -2471,7 +2532,7 @@ function stateModelFactory({
             if (col === undefined || col < 0 || col >= width) {
               return undefined
             }
-            return hideGapsEffective ? visibleColsBefore(blanks, col) : col
+            return visibleColsBefore(blanks, col)
           }
           // a span's visible columns, its end exclusive. An end past the row
           // or the alignment clamps to its last column, and a span lying on
@@ -2638,13 +2699,12 @@ function stateModelFactory({
        * the columns between them are hidden draws nothing
        */
       get secondaryStructureArcs(): Arc[] | undefined {
-        const { blanks, hideGapsEffective } = self
+        const { blanks } = self
         const ss = this.secondaryStructureConsensus
         if (!ss) {
           return undefined
         }
-        const visible = (col: number) =>
-          hideGapsEffective ? visibleColsBefore(blanks, col) : col
+        const visible = (col: number) => visibleColsBefore(blanks, col)
         const width = self.numColumns
         return parseWuss(ss)
           .map(({ start, end, pseudoknot }) => ({
@@ -2659,7 +2719,7 @@ function stateModelFactory({
        * #getter
        */
       get adapterTrackModels(): BasicTrack[] {
-        const { MSA, hideGapsEffective, blanks } = self
+        const { MSA, blanks } = self
         const tracks = (MSA?.tracks ?? []).filter(t => !!t.data)
         if (tracks.length === 0) {
           // return before reading rowHeight, so zooming does not rebuild the
@@ -2671,7 +2731,7 @@ function stateModelFactory({
           model: {
             ...t,
             kind: 'text' as const,
-            data: hideGapsEffective ? skipBlanks(blanks, t.data!) : t.data,
+            data: skipBlanks(blanks, t.data!),
             height: rowHeight,
           },
         }))
@@ -2947,11 +3007,7 @@ function stateModelFactory({
        * @returns The visible column index, or undefined if the column is hidden
        */
       globalColToVisibleCol(globalCol: number) {
-        const { blanks, hideGapsEffective } = self
-        if (!hideGapsEffective) {
-          return globalCol
-        }
-        return globalColToVisibleCol(blanks, globalCol)
+        return globalColToVisibleCol(self.blanks, globalCol)
       },
 
       /**
@@ -2964,10 +3020,7 @@ function stateModelFactory({
        * @returns The global column index in the full MSA
        */
       visibleColToGlobalCol(visibleCol: number) {
-        const { blanks, hideGapsEffective } = self
-        return hideGapsEffective
-          ? visibleColToGlobalCol(blanks, visibleCol)
-          : visibleCol
+        return visibleColToGlobalCol(self.blanks, visibleCol)
       },
 
       /**
@@ -4298,25 +4351,13 @@ function stateModelFactory({
        */
       get selectionSize() {
         const resolved = this.resolvedSelection
-        const span = this.selectionFileSpan
+        const span = self.selectionFileSpan
         return resolved && span
           ? {
               columns: span.end - span.start + 1,
               rows: sum(resolved.rowRuns.map(([a, b]) => b - a + 1)),
             }
           : undefined
-      },
-
-      /**
-       * #getter
-       * `selection`'s columns clamped to the file's
-       */
-      get selectionFileSpan() {
-        const { selection } = self
-        const width = self.MSA?.getWidth() ?? 0
-        const start = Math.max(1, Math.floor(selection?.start ?? 0))
-        const end = Math.min(width, Math.ceil(selection?.end ?? 0))
-        return selection && start <= end ? { start, end } : undefined
       },
 
       /**
@@ -4328,7 +4369,7 @@ function stateModelFactory({
       get selectionFasta() {
         const { rowNames } = self
         const resolved = this.resolvedSelection
-        const span = this.selectionFileSpan
+        const span = self.selectionFileSpan
         if (!resolved || !span) {
           return ''
         }

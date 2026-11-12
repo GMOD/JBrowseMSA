@@ -51,6 +51,7 @@ export interface Traits {
   relative_to: string | null
   region: Region | null
   selection: MsaSelection | null
+  trim_to_selection: boolean
   draw_tree: boolean
   tree_area_width: number | null
   show_branch_len: boolean
@@ -94,6 +95,7 @@ export const INPUT_TRAITS = [
   'relative_to',
   'region',
   'selection',
+  'trim_to_selection',
   'draw_tree',
   'tree_area_width',
   'show_branch_len',
@@ -158,6 +160,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     relativeTo: optional(model.get('relative_to')),
     region: optional(model.get('region')),
     selection: optional(model.get('selection')),
+    trimToSelection: model.get('trim_to_selection'),
     drawTree: model.get('draw_tree'),
     treeAreaWidth: optional(model.get('tree_area_width')),
     showBranchLen: model.get('show_branch_len'),

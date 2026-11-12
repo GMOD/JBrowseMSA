@@ -61,6 +61,7 @@ case. `highlights` and `column_tracks` take the JSON shapes in
 | `relative_to`                                         | a row name; other rows draw as their differences from it                                          |
 | `region`                                              | `{start, end}` columns or `{row, start, end}` residues                                            |
 | `selection`                                           | the selected block, `{start, end}` columns and optional `rows` names (see below)                  |
+| `trim_to_selection`                                   | hide every column outside `selection`, default `False`                                            |
 | `allowed_gappyness`                                   | hide columns at least this percent gaps (default 100)                                             |
 | `draw_tree`, `show_branch_len`                        | booleans, default `True`                                                                          |
 | `tree_order`                                          | `"branchLength"` (default), `"input"`, `"ladderize"` or `"ladderizeReverse"`                      |

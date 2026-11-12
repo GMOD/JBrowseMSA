@@ -166,6 +166,8 @@ export interface MSAViewerProps {
    * inclusive, and `rows` by name, every row where absent
    */
   selection?: MsaSelection
+  /** hide every column outside `selection` (default false) */
+  trimToSelection?: boolean
   /** leave out the toolbar, for a page drawing its own controls */
   hideHeader?: boolean
   /**
@@ -425,6 +427,12 @@ const syncedProps = [
     (m, v) => {
       m.setSelection(v)
     },
+  ),
+  synced(
+    p => p.trimToSelection,
+    ifSet((m, v) => {
+      m.setTrimToSelection(v)
+    }),
   ),
   synced(
     p => p.treeRoot,

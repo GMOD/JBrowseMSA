@@ -52,6 +52,7 @@ const defaults: Traits = {
   relative_to: null,
   region: null,
   selection: null,
+  trim_to_selection: false,
   draw_tree: true,
   tree_area_width: null,
   show_branch_len: true,

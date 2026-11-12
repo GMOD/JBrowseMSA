@@ -117,6 +117,8 @@ class MSAView(anywidget.AnyWidget):
     # the selected block, {"start", "end"} columns and "rows" by name: set it
     # from Python, and read back what the person selected in the viewer
     selection = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
+    # hide every column outside the selection
+    trim_to_selection = traitlets.Bool(False).tag(sync=True)
     draw_tree = traitlets.Bool(True).tag(sync=True)
     tree_area_width = traitlets.Float(None, allow_none=True).tag(sync=True)
     show_branch_len = traitlets.Bool(True).tag(sync=True)

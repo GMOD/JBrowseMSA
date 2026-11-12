@@ -451,6 +451,15 @@ keeps the file's root
 treeRoot: types.frozen<TreeRoot | undefined>()
 ```
 
+#### property: trimToSelection
+
+hide every column outside `selection`, the way `hideGaps` hides the gappy ones.
+Without a selection every column shows.
+
+```js
+trimToSelection: stripDefault(types.boolean, false)
+```
+
 #### property: turnedOffFeatures
 
 the user's departures from each annotation accession's default, keyed by
@@ -798,6 +807,10 @@ basePairTrackModels: BasicTrack[]
 ```
 
 #### getter: blanks
+
+the hidden columns, ascending: the gappy ones `hideGaps` hides and those outside
+the selection `trimToSelection` hides. Every conversion between file and visible
+columns reads this one list.
 
 ```js
 blanks: number[]
@@ -1173,6 +1186,14 @@ fittedTreeAreaWidth: number
 fontSize: number
 ```
 
+#### getter: gappyColumns
+
+the columns `hideGaps` hides, ascending
+
+```js
+gappyColumns: number[]
+```
+
 #### getter: header
 
 ```js
@@ -1270,8 +1291,8 @@ inputTree: NodeWithIds
 
 #### getter: insertionPositions
 
-Returns a map of row name to array of insertions with display position and
-letters
+each row's residues in hidden gappy columns, as the visible column they fall
+before and the letters. The columns a trim hides mark no insertion.
 
 ```js
 insertionPositions: Map<string, { pos: number; letters: string; }[]>
@@ -1729,7 +1750,8 @@ selectionSize: { columns: number; rows: number; } | undefined
 #### getter: sequenceType
 
 Detects sequence type based on letters present in the alignment. Returns 'dna',
-'rna', or 'amino'.
+'rna', or 'amino'. Hidden columns count, so trimming to a few columns keeps the
+type.
 
 ```js
 sequenceType: 'amino' | 'dna' | 'rna'
@@ -1918,6 +1940,15 @@ so a collapse or a focus leaves the tree area as it is
 
 ```js
 treeTips: { names: string[]; depth: number; }
+```
+
+#### getter: trimSpan
+
+the file columns `trimToSelection` keeps, or undefined while it keeps every
+column
+
+```js
+trimSpan: { start: number; end: number; } | undefined
 ```
 
 #### getter: turnedOnTracks
@@ -2299,6 +2330,8 @@ clearRotated: () => void
 ```
 
 #### action: clearSelection
+
+clear the selection, and the trim to it
 
 ```js
 clearSelection: () => void
@@ -2885,6 +2918,12 @@ reroot the tree, which clears the node state (`clearNodeState`)
 
 ```js
 setTreeRoot: (treeRoot?: TreeRoot | undefined) => void
+```
+
+#### action: setTrimToSelection
+
+```js
+setTrimToSelection: (arg: boolean) => void
 ```
 
 #### action: setWidth

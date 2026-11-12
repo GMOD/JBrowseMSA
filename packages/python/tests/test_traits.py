@@ -44,6 +44,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "relative_to": None,
         "region": None,
         "selection": None,
+        "trim_to_selection": False,
         "draw_tree": True,
         "tree_area_width": None,
         "show_branch_len": True,

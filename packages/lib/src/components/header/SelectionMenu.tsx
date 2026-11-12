@@ -3,6 +3,8 @@ import React, { useState } from 'react'
 import ArrowDropDown from '@mui/icons-material/ArrowDropDown'
 import Clear from '@mui/icons-material/Clear'
 import ContentCopy from '@mui/icons-material/ContentCopy'
+import ContentCut from '@mui/icons-material/ContentCut'
+import UnfoldMore from '@mui/icons-material/UnfoldMore'
 import ZoomIn from '@mui/icons-material/ZoomIn'
 import {
   Button,
@@ -30,7 +32,7 @@ function count(n: number, noun: string) {
  */
 const SelectionMenu = observer(function ({ model }: { model: MsaViewModel }) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement>()
-  const { selectionSize, selectionFileSpan } = model
+  const { selectionSize, selectionFileSpan, trimToSelection } = model
   if (!selectionSize || !selectionFileSpan) {
     return null
   }
@@ -51,6 +53,13 @@ const SelectionMenu = observer(function ({ model }: { model: MsaViewModel }) {
       },
     },
     {
+      text: trimToSelection ? 'Show all columns' : 'Trim to selection',
+      Icon: trimToSelection ? UnfoldMore : ContentCut,
+      act: () => {
+        model.setTrimToSelection(!trimToSelection)
+      },
+    },
+    {
       text: 'Clear selection',
       Icon: Clear,
       act: () => {
@@ -61,7 +70,7 @@ const SelectionMenu = observer(function ({ model }: { model: MsaViewModel }) {
   return (
     <>
       <Tooltip
-        title={`Columns ${selectionFileSpan.start}-${selectionFileSpan.end} selected. Shift-drag the alignment to select, Escape to clear`}
+        title={`Columns ${selectionFileSpan.start}-${selectionFileSpan.end} selected${trimToSelection ? ', every other column hidden' : ''}. Shift-drag the alignment to select, Escape to clear`}
       >
         <Button
           size="small"

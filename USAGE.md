@@ -75,6 +75,7 @@ Props:
 | `residueEncoding`   | `'fill' \| 'color'`         | Which channel `colorScheme` paints: the cell (default) or the letter                |
 | `region`            | `Region`                    | Zoom to `{row, start, end}` residues, or `{start, end}` columns                     |
 | `selection`         | `MsaSelection`              | The selected block: `{start, end}` columns and optional `rows` names                |
+| `trimToSelection`   | `boolean`                   | Hide every column outside `selection` (default false)                               |
 | `hideHeader`        | `boolean`                   | Leave out the toolbar, for a page drawing its own controls                          |
 | `theme`             | `string \| ThemeOptions`    | `'light'` (default), `'dark'`, or MUI theme options merged over JBrowse's           |
 | `onCellHover`       | `(cell) => void`            | The cell under the pointer (see below)                                              |

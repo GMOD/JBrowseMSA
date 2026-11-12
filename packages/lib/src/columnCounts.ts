@@ -155,6 +155,21 @@ export class ColumnCounts {
   }
 }
 
+/** the distinct non-gap letters, case folded, appearing in any of `rows` */
+export function lettersInRows(rows: string[]) {
+  const seen = new Uint8Array(SLOTS)
+  for (const row of rows) {
+    for (let i = 0; i < row.length; i++) {
+      seen[slotOf(row.charCodeAt(i))] = 1
+    }
+  }
+  return new Set(
+    letterOfSlot.filter(
+      (_, slot) => slot > 0 && seen[slot] && !isGapSlot(slot),
+    ),
+  )
+}
+
 export function letterOfResidueSlot(slot: number) {
   return letterOfSlot[slot]!
 }

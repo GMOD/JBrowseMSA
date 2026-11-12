@@ -453,9 +453,19 @@ test('the selection menu zooms to the block and clears it', () => {
     button.click()
   })
   act(() => {
+    item('Trim to selection').click()
+  })
+  expect(model.trimToSelection).toBe(true)
+  expect(model.numColumns).toBe(10)
+
+  act(() => {
+    button.click()
+  })
+  act(() => {
     item('Clear selection').click()
   })
   expect(model.selection).toBeUndefined()
+  expect(model.trimToSelection).toBe(false)
 })
 
 function wheel(deltaY: number, deltaX = 0) {

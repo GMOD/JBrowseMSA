@@ -79,6 +79,28 @@ export function contrastTextFn(theme: Theme) {
   }
 }
 
+/**
+ * the hidden columns of a view that keeps only columns `start` (inclusive) to
+ * `end` (exclusive) of `width`: every column outside them, and `blanks` inside
+ */
+export function trimBlanks(
+  blanks: number[],
+  start: number,
+  end: number,
+  width: number,
+) {
+  return [
+    ...Array.from({ length: start }, (_, i) => i),
+    ...blanks.filter(col => col >= start && col < end),
+    ...Array.from({ length: Math.max(0, width - end) }, (_, i) => end + i),
+  ]
+}
+
+/** `blanks` between `start` and `end`, renumbered from `start` */
+export function blanksWithin(blanks: number[], start: number, end: number) {
+  return blanks.filter(col => col >= start && col < end).map(col => col - start)
+}
+
 export function dropBlanks<T>(blanks: number[], arr: T[]) {
   if (blanks.length === 0) {
     return arr

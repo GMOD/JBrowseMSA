@@ -14,7 +14,7 @@ const HiddenColumnsChip = observer(function ({
 }: {
   model: MsaViewModel
 }) {
-  const n = model.blanks.length
+  const n = model.gappyColumns.length
   return n > 0 ? (
     <Tooltip
       title={`Hiding columns with ≥${model.allowedGappyness}% gaps. Click to change the threshold, × to show every column`}

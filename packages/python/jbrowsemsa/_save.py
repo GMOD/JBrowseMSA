@@ -61,6 +61,7 @@ def props(view: Any) -> dict[str, Any]:
         "relativeTo": _optional(view.relative_to),
         "region": view.region,
         "selection": view.selection,
+        "trimToSelection": view.trim_to_selection,
         "drawTree": view.draw_tree,
         "treeAreaWidth": view.tree_area_width,
         "showBranchLen": view.show_branch_len,
