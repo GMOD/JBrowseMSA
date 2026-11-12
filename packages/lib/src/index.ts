@@ -41,6 +41,11 @@ export type { MountedViewer } from './mount.tsx'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
 export type { HierarchyNode, LaidOutNode, TreeScale } from './hierarchy.ts'
+export type {
+  AxisOrientation,
+  TickFormat,
+  ValueScale,
+} from './components/axis.ts'
 // InterProScanResults is the EBI wire format interProScanToAnnotations reads;
 // Annotation is the source-agnostic shape everything else is written against
 export type { InterProScanResults } from 'msa-parsers'
@@ -109,6 +114,7 @@ export type {
   Node,
   MappedStructure,
   NodeWithIds,
+  PanelAxis,
   Region,
   ResidueEncoding,
   ResidueMapping,
@@ -118,6 +124,8 @@ export type {
   ResolvedEncoding,
   ResolvedHighlight,
   ResolvedRowPanel,
+  ResolvedTextPanel,
+  ResolvedValuePanel,
   ResolvedSelection,
   RowDataInput,
   RowFacet,
