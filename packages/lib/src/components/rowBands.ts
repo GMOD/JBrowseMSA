@@ -1,4 +1,5 @@
 import { consecutiveRuns } from '../util.ts'
+import { cellFillRect } from './pixelSnap.ts'
 
 import type { RenderCtx } from './renderCtx.ts'
 
@@ -41,11 +42,12 @@ export interface RowBandArea {
 /** one rect per run of rows, cut to the area's visible rows */
 export function fillRowRuns(area: RowBandArea, runs: [number, number][]) {
   const { ctx, rowHeight, top, x, width, yMin, yMax } = area
+  const fillCell = cellFillRect(ctx)
   for (const [first, last] of runs) {
     const y0 = Math.max(yMin, top + first * rowHeight)
     const y1 = Math.min(yMax, top + (last + 1) * rowHeight)
     if (y1 > y0) {
-      ctx.fillRect(x, y0, width, y1 - y0)
+      fillCell(x, y0, width, y1 - y0)
     }
   }
 }

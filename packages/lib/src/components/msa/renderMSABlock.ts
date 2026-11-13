@@ -2,6 +2,7 @@ import { zoomFrameMaxLetters } from '../../constants.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { adjustColorForContrast, contrastTextFn, nonEmpty } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
+import { cellFillRect } from '../pixelSnap.ts'
 import { domainBandCursor } from './domainBandCursor.ts'
 import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
 import { tileColorFn } from './tileColor.ts'
@@ -162,6 +163,7 @@ function drawTilesAndText({
   const letters = lettersOn && pass !== 'tiles'
   if (paintTiles || letters) {
     const tileColor = tileColorFn(model)
+    const fillCell = cellFillRect(ctx)
     // Domain fills come from a categorical palette with no fixed lightness, and
     // a dynamic scheme colors a cell from its column, so a readable letter color
     // is a question about the cell's own color rather than about its letter.
@@ -202,7 +204,7 @@ function drawTilesAndText({
             ctx.fillStyle = isMatchingReference
               ? theme.palette.action.hover
               : (nonEmpty(color) ?? theme.palette.background.default)
-            ctx.fillRect(x, tileY, colWidth, rowHeight)
+            fillCell(x, tileY, colWidth, rowHeight)
           }
 
           if (letters) {

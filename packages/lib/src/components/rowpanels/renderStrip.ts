@@ -1,4 +1,5 @@
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
+import { cellFillRect } from '../pixelSnap.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { ResolvedStripPanel } from '../../types.ts'
@@ -29,12 +30,13 @@ export function renderStrip({
   const k = highResScaleFactorOverride ?? highResScaleFactor
   ctx.scale(k, k)
   ctx.translate(0, -offsetY)
+  const fillCell = cellFillRect(ctx)
   for (const leaf of getVisibleLeaves({ model, offsetY, blockSizeY: by })) {
     const color = panel.colors.get(leaf.data.name)
     if (color) {
       ctx.fillStyle = color
       // leaf.x is the row's center, at rowHeight*(index+0.5)
-      ctx.fillRect(0, leaf.x! - rowHeight / 2, panel.width, rowHeight)
+      fillCell(0, leaf.x! - rowHeight / 2, panel.width, rowHeight)
     }
   }
 }

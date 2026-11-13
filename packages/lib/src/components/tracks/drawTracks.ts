@@ -5,6 +5,7 @@ import { contrastTextFn } from '../../util.ts'
 import { drawFeatureSpans } from '../msa/drawFeatureSpans.ts'
 import { tileColorFn } from '../msa/tileColor.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
+import { cellFillRect } from '../pixelSnap.ts'
 import { arcApex, arcMaxSpan } from './arcGeometry.ts'
 import { arcPaint } from './arcPaint.ts'
 import {
@@ -57,6 +58,7 @@ function drawConservationBars({
     colWidth,
   })
 
+  const fillCell = cellFillRect(ctx)
   ctx.fillStyle = color
   for (let i = xStart; i < xEnd && i < values.length; i++) {
     if (!hidden?.[i]) {
@@ -66,7 +68,7 @@ function drawConservationBars({
       if (colors) {
         ctx.fillStyle = colors[i] ?? color
       }
-      ctx.fillRect(x, trackHeight - barHeight, colWidth, barHeight)
+      fillCell(x, trackHeight - barHeight, colWidth, barHeight)
     }
   }
 }
@@ -93,11 +95,12 @@ function drawStrip({
     blockWidth: blockSize,
     colWidth,
   })
+  const fillCell = cellFillRect(ctx)
   for (let i = xStart; i < xEnd && i < colors.length; i++) {
     const color = colors[i]
     if (color !== undefined) {
       ctx.fillStyle = color
-      ctx.fillRect(i * colWidth, 0, colWidth, trackHeight)
+      fillCell(i * colWidth, 0, colWidth, trackHeight)
     }
   }
 }
@@ -198,6 +201,7 @@ function drawTextTrackContent({
     colWidth,
   })
   const str = data?.slice(xStart, xEnd) ?? ''
+  const fillCell = cellFillRect(ctx)
 
   for (let i = 0; i < str.length; i++) {
     const letter = str[i]!
@@ -207,7 +211,7 @@ function drawTextTrackContent({
       const x = col * colWidth
       if (fill) {
         ctx.fillStyle = fill
-        ctx.fillRect(x, 0, colWidth, rowHeight)
+        fillCell(x, 0, colWidth, rowHeight)
       }
       if (drawLetters) {
         ctx.fillStyle = contrastText(fill)
