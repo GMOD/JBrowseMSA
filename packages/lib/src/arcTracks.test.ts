@@ -32,7 +32,7 @@ test('column-indexed arcs are 1-based and inclusive', () => {
     { id: 'a', name: 'A', kind: 'arc', arcs: [{ start: 1, end: 7 }] },
   ])
   expect(model.columnTrackContent.get('a')?.arcs).toEqual([
-    { start: 0, end: 6, color: undefined },
+    { start: 0, end: 6, given: { start: 1, end: 7 } },
   ])
 })
 
@@ -42,13 +42,20 @@ test('row-indexed arcs land on that row s residues', () => {
       id: 'a',
       name: 'A',
       kind: 'arc',
-      arcs: [{ start: 1, end: 3, color: 'red' }],
+      arcs: [{ start: 1, end: 3, color: 'red', name: 'A-D' }],
       row: 's1',
     },
   ])
-  // residues 1 and 3 of s1 (A and D) sit at global columns 0 and 3
+  // residues 1 and 3 of s1 (A and D) sit at global columns 0 and 3, and the
+  // arc keeps the residues it was given for its tooltip
   expect(model.columnTrackContent.get('a')?.arcs).toEqual([
-    { start: 0, end: 3, color: 'red' },
+    {
+      start: 0,
+      end: 3,
+      color: 'red',
+      name: 'A-D',
+      given: { start: 1, end: 3 },
+    },
   ])
 })
 
@@ -66,7 +73,7 @@ test('a reversed or degenerate pair is normalized or dropped', () => {
     },
   ])
   expect(model.columnTrackContent.get('a')?.arcs).toEqual([
-    { start: 1, end: 4, color: undefined },
+    { start: 1, end: 4, given: { start: 2, end: 5 } },
   ])
 })
 
@@ -80,7 +87,7 @@ test('hiding gappy columns collapses an arc rather than dropping it', () => {
   // column 6 (0-based 5) is the hidden one, and its arc still draws, anchored
   // where that column collapsed to
   expect(model.columnTrackContent.get('a')?.arcs).toEqual([
-    { start: 0, end: 5, color: undefined },
+    { start: 0, end: 5, given: { start: 1, end: 6 } },
   ])
 })
 

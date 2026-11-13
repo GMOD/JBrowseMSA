@@ -105,8 +105,8 @@ export const catalog: CatalogEntry[] = [
     category: 'Protein domains',
     description:
       'Ten Src-family kinases with their InterPro domains, and arcs for the ' +
-      'contacts between domains in PDB 2SRC, such as the tail that clamps the ' +
-      'kinase shut.',
+      'residue contacts that keep Src inactive in PDB 2SRC: phospho-Tyr527 ' +
+      'in the SH2 pocket, and the SH2-kinase linker bound to SH3.',
   },
   {
     id: 'P53ClinVar',

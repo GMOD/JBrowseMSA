@@ -2,17 +2,19 @@ import React from 'react'
 
 import { observer } from 'mobx-react'
 
-import { finiteNumber } from '../../columnTrackColor.ts'
+import { arcColorValue, finiteNumber } from '../../columnTrackColor.ts'
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { HighlightReadout } from '../HighlightReadout.tsx'
+import { arcsAtPoint } from './arcGeometry.ts'
 import { barTrackValues } from './drawTracks.ts'
 
 import type { MsaViewModel } from '../../model.ts'
-import type { BasicTrack } from '../../types.ts'
+import type { Arc, BasicTrack } from '../../types.ts'
+import type { TrackPointer } from './useTrackHover.ts'
 
 const pct = (n: number) => `${Math.round(n * 100)}%`
 
-const MAX_PARTNERS = 8
+const MAX_ARCS = 12
 
 function ColumnLabel({ model, col }: { model: MsaViewModel; col: number }) {
   const { relativeTo } = model
@@ -127,31 +129,58 @@ function TextTooltip({
   )
 }
 
+// an arc's ends as its track's data gives them, else its 1-based columns, and
+// its value
+function arcEnds(model: MsaViewModel, arc: Arc) {
+  const { start, end } = arc.given ?? {
+    start: model.visibleColToGlobalCol(arc.start) + 1,
+    end: model.visibleColToGlobalCol(arc.end) + 1,
+  }
+  const value = finiteNumber(arc.value)
+  return value === undefined
+    ? `${start}–${end}`
+    : `${start}–${end} (${formatValue(value)})`
+}
+
+// the arcs under the pointer, nearest first, one line per name
 function ArcTooltip({
   model,
   track,
-  col,
+  pointer,
 }: {
   model: MsaViewModel
   track: BasicTrack
-  col: number
+  pointer: TrackPointer
 }) {
-  const { name, arcs } = track.model
-  const partners = (arcs ?? [])
-    .filter(arc => arc.start === col || arc.end === col)
-    .map(arc => {
-      const partner = (arc.start === col ? arc.end : arc.start) + 1
-      const value = finiteNumber(arc.value)
-      return value === undefined
-        ? `${partner}`
-        : `${partner} (${formatValue(value)})`
-    })
-  return partners.length === 0 ? null : (
+  const { id, name, arcs, row, height } = track.model
+  const colors = model.columnTrackColors.get(id)
+  const hits = arcsAtPoint({
+    arcs: arcs ?? [],
+    x: pointer.x,
+    y: pointer.y,
+    colWidth: model.colWidth,
+    trackHeight: height,
+    hidden: colors
+      ? arc => colors.isHidden(arcColorValue(arc, !!colors.identity))
+      : undefined,
+  })
+  const byName = new Map<string, Arc[]>()
+  for (const arc of hits.slice(0, MAX_ARCS)) {
+    const key = arc.name ?? ''
+    byName.set(key, [...(byName.get(key) ?? []), arc])
+  }
+  return hits.length === 0 ? null : (
     <div>
-      <ColumnLabel model={model} col={col} />
-      <br />
-      {name}: pairs with {partners.slice(0, MAX_PARTNERS).join(', ')}
-      {partners.length > MAX_PARTNERS ? '...' : null}
+      <b>{name}</b>, {row && hits[0]?.given ? `${row} residues` : 'columns'}
+      {[...byName].map(([arcName, group]) => (
+        <div key={arcName}>
+          {arcName ? `${arcName}: ` : null}
+          {group.map(arc => arcEnds(model, arc)).join(', ')}
+        </div>
+      ))}
+      {hits.length > MAX_ARCS ? (
+        <div>and {hits.length - MAX_ARCS} more</div>
+      ) : null}
     </div>
   )
 }
@@ -212,19 +241,20 @@ function HighlightTooltip({ model }: { model: MsaViewModel }) {
 /**
  * One track's reading at the hovered column: a bar or strip track's value,
  * the logo's
- * information content and composition, the columns an arc joins, the letter on a
+ * information content and composition, the arcs under the pointer, the letter on a
  * text track, the fields of every span a features track draws there. `drawTrackBlock` dispatches on the same `kind`, so a new kind
  * needs a case in both.
  */
 const TrackTooltipContent = observer(function ({
   model,
   track,
-  col,
+  pointer,
 }: {
   model: MsaViewModel
   track: BasicTrack
-  col: number
+  pointer: TrackPointer
 }) {
+  const { col } = pointer
   switch (track.model.kind) {
     case 'bar': {
       return <BarTooltip model={model} track={track} col={col} />
@@ -240,7 +270,7 @@ const TrackTooltipContent = observer(function ({
       return <TextTooltip model={model} track={track} col={col} />
     }
     case 'arc': {
-      return <ArcTooltip model={model} track={track} col={col} />
+      return <ArcTooltip model={model} track={track} pointer={pointer} />
     }
     case 'features': {
       return <FeatureTooltip model={model} track={track} col={col} />

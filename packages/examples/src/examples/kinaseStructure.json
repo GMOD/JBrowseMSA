@@ -1,16 +1,19 @@
 {
   "generatedBy": "scripts/examples-gen/contacts.mjs",
-  "description": "Inter-domain residue contacts of autoinhibited human Src: every C-beta pair under 8 A whose two residues sit in different annotated regions of the SRC_HUMAN row. A residue touching its own neighbours says nothing about how the domains pack, and that is nearly every contact in the structure.",
+  "description": "Residue contacts between regions of autoinhibited human Src: every C-beta pair under 8 A whose two residues sit in regions of the SRC_HUMAN row with at least one other region between them. The regions are the domains of the GFF and the linkers between them.",
   "pdb": "2SRC",
   "chain": "A",
   "accession": "P12931",
   "row": "SRC_HUMAN",
   "cutoffAngstroms": 8,
   "counts": {
-    "kinase - C-terminal tail": 22,
-    "SH2 domain - C-terminal tail": 19,
-    "SH3 domain - kinase": 8,
-    "SH2 domain - kinase": 8
+    "SH3 - SH2-kinase linker": 24,
+    "SH2 - C-terminal tail": 19,
+    "SH2-kinase linker - C-terminal tail": 9,
+    "SH3 - kinase": 8,
+    "SH2 - kinase": 8,
+    "SH3-SH2 linker - SH2-kinase linker": 7,
+    "N-terminal region - SH3-SH2 linker": 5
   },
   "residueMappings": [
     {
@@ -30,299 +33,419 @@
           "structEnd": 452
         }
       ],
-      "unobserved": [[2, 2]],
+      "unobserved": [
+        [
+          2,
+          2
+        ]
+      ],
       "rowLength": 536,
       "generated": {
         "by": "sifts",
-        "date": "2026-09-13"
+        "date": "2026-11-13"
       }
     }
   ],
   "contacts": [
     {
+      "start": 88,
+      "end": 143,
+      "pair": "N-terminal region - SH3-SH2 linker"
+    },
+    {
+      "start": 89,
+      "end": 140,
+      "pair": "N-terminal region - SH3-SH2 linker"
+    },
+    {
+      "start": 89,
+      "end": 141,
+      "pair": "N-terminal region - SH3-SH2 linker"
+    },
+    {
+      "start": 89,
+      "end": 142,
+      "pair": "N-terminal region - SH3-SH2 linker"
+    },
+    {
+      "start": 89,
+      "end": 143,
+      "pair": "N-terminal region - SH3-SH2 linker"
+    },
+    {
+      "start": 93,
+      "end": 252,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 93,
+      "end": 253,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 94,
+      "end": 252,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 95,
+      "end": 252,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
       "start": 96,
       "end": 292,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
     },
     {
       "start": 97,
       "end": 292,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
+    },
+    {
+      "start": 98,
+      "end": 258,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 98,
+      "end": 259,
+      "pair": "SH3 - SH2-kinase linker"
     },
     {
       "start": 98,
       "end": 289,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
     },
     {
       "start": 98,
       "end": 290,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
     },
     {
       "start": 98,
       "end": 292,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
     },
     {
       "start": 98,
       "end": 293,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
+    },
+    {
+      "start": 99,
+      "end": 259,
+      "pair": "SH3 - SH2-kinase linker"
     },
     {
       "start": 99,
       "end": 290,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
     },
     {
       "start": 99,
       "end": 292,
-      "pair": "SH3 domain - kinase"
+      "pair": "SH3 - kinase"
+    },
+    {
+      "start": 101,
+      "end": 260,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 102,
+      "end": 259,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 102,
+      "end": 260,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 118,
+      "end": 260,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 120,
+      "end": 255,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 120,
+      "end": 256,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 120,
+      "end": 257,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 121,
+      "end": 255,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 121,
+      "end": 256,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 121,
+      "end": 259,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 121,
+      "end": 260,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 121,
+      "end": 261,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 134,
+      "end": 259,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 134,
+      "end": 260,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 136,
+      "end": 253,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 136,
+      "end": 255,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 136,
+      "end": 256,
+      "pair": "SH3 - SH2-kinase linker"
+    },
+    {
+      "start": 138,
+      "end": 253,
+      "pair": "SH3-SH2 linker - SH2-kinase linker"
+    },
+    {
+      "start": 138,
+      "end": 255,
+      "pair": "SH3-SH2 linker - SH2-kinase linker"
+    },
+    {
+      "start": 138,
+      "end": 256,
+      "pair": "SH3-SH2 linker - SH2-kinase linker"
+    },
+    {
+      "start": 139,
+      "end": 252,
+      "pair": "SH3-SH2 linker - SH2-kinase linker"
+    },
+    {
+      "start": 139,
+      "end": 253,
+      "pair": "SH3-SH2 linker - SH2-kinase linker"
+    },
+    {
+      "start": 139,
+      "end": 255,
+      "pair": "SH3-SH2 linker - SH2-kinase linker"
+    },
+    {
+      "start": 150,
+      "end": 247,
+      "pair": "SH3-SH2 linker - SH2-kinase linker"
     },
     {
       "start": 157,
       "end": 527,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 158,
       "end": 527,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 159,
       "end": 371,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 159,
       "end": 520,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 159,
       "end": 527,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 160,
       "end": 323,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 163,
       "end": 368,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 163,
       "end": 400,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 163,
       "end": 401,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 163,
       "end": 402,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 164,
       "end": 400,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 167,
       "end": 400,
-      "pair": "SH2 domain - kinase"
+      "pair": "SH2 - kinase"
     },
     {
       "start": 181,
       "end": 527,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 182,
       "end": 528,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 188,
       "end": 530,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 203,
       "end": 531,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 204,
       "end": 529,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 204,
       "end": 530,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 204,
       "end": 531,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 205,
       "end": 530,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 205,
       "end": 531,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 205,
       "end": 533,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 206,
       "end": 530,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 217,
       "end": 533,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 218,
       "end": 533,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 218,
       "end": 534,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
       "start": 220,
       "end": 534,
-      "pair": "SH2 domain - C-terminal tail"
+      "pair": "SH2 - C-terminal tail"
     },
     {
-      "start": 364,
-      "end": 523,
-      "pair": "kinase - C-terminal tail"
+      "start": 238,
+      "end": 534,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 367,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
+      "start": 239,
+      "end": 533,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 367,
-      "end": 522,
-      "pair": "kinase - C-terminal tail"
+      "start": 239,
+      "end": 534,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 367,
-      "end": 523,
-      "pair": "kinase - C-terminal tail"
+      "start": 239,
+      "end": 535,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 368,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
+      "start": 239,
+      "end": 536,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 370,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
+      "start": 240,
+      "end": 533,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 371,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
+      "start": 240,
+      "end": 535,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 371,
-      "end": 520,
-      "pair": "kinase - C-terminal tail"
+      "start": 241,
+      "end": 531,
+      "pair": "SH2-kinase linker - C-terminal tail"
     },
     {
-      "start": 371,
-      "end": 522,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 374,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 494,
-      "end": 522,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 515,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 516,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 516,
-      "end": 520,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 517,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 517,
-      "end": 520,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 517,
-      "end": 521,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 517,
-      "end": 526,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 518,
-      "end": 519,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 518,
-      "end": 520,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 518,
-      "end": 521,
-      "pair": "kinase - C-terminal tail"
-    },
-    {
-      "start": 518,
-      "end": 522,
-      "pair": "kinase - C-terminal tail"
+      "start": 241,
+      "end": 535,
+      "pair": "SH2-kinase linker - C-terminal tail"
     }
   ]
 }

@@ -157,7 +157,7 @@ B19-A20 reach across the C peptide that processing cuts out.
 | `encoding.color` | arc            | `{value}`, or `{scale, legend}` over each arc's `value`                                                               |
 | `color`          | bar, text, arc | Shorthand for `encoding.color: {value}`, read while `encoding.color` is unset (default gray bars, theme-colored arcs) |
 | `data`           | text           | One character per column, or per residue of `row`                                                                     |
-| `arcs`           | arc            | `{start, end, color?, value?}` pairs; each end is a column or a residue                                               |
+| `arcs`           | arc            | `{start, end, color?, value?, name?}` pairs; each end is a column or a residue                                        |
 | `features`       | features       | `{start, end, strand?, ...}` spans; see [the features track](#the-features-track)                                     |
 | `row`            | all            | Row name whose residues the values or characters index                                                                |
 | `height`         | all            | Pixel height (default 40 for a bar, 12 for a strip, 50 for an arc, the row height for text, 18 per lane for features) |
@@ -166,7 +166,9 @@ A `row` on an arc track carries both ends of every arc, so a contact map
 computed in a protein's own numbering lands on the alignment without conversion.
 The viewer draws arcs on one baseline in the order given, and a `color` on an
 individual arc overrides the track's and its scale's, as a GFF `color=`
-attribute does, so one track can separate nested helices from a pseudoknot.
+attribute does, so one track can separate nested helices from a pseudoknot. The
+tooltip over an arc's stroke lists the arcs under the pointer, each with its
+`name` and its two ends as given.
 
 ### Column track scales
 

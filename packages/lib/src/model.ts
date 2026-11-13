@@ -491,10 +491,7 @@ type ValuePanelScale = Omit<
 > & { valueScale: ValueScale }
 type TextPanelScale = Omit<ResolvedTextPanel, 'id' | 'width' | 'offsetX'>
 type RowPanelScale =
-  | StripPanelScale
-  | FeaturePanelScale
-  | ValuePanelScale
-  | TextPanelScale
+  StripPanelScale | FeaturePanelScale | ValuePanelScale | TextPanelScale
 
 /**
  * #stateModel MsaView
@@ -969,8 +966,7 @@ function stateModelFactory({
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        | { nodeId: string; descendantNames: string[] }
-        | undefined,
+        { nodeId: string; descendantNames: string[] } | undefined,
 
       /**
        * #volatile
@@ -2822,12 +2818,23 @@ function stateModelFactory({
               if (track.kind === 'arc') {
                 const arcs = (track.arcs ?? [])
                   .map(arc => {
-                    const start = resolve(track, Math.min(arc.start, arc.end))
-                    const end = resolve(track, Math.max(arc.start, arc.end))
+                    const given = {
+                      start: Math.min(arc.start, arc.end),
+                      end: Math.max(arc.start, arc.end),
+                    }
+                    const start = resolve(track, given.start)
+                    const end = resolve(track, given.end)
                     return start !== undefined &&
                       end !== undefined &&
                       start < end
-                      ? { start, end, color: arc.color, value: arc.value }
+                      ? {
+                          start,
+                          end,
+                          color: arc.color,
+                          value: arc.value,
+                          name: arc.name,
+                          given,
+                        }
                       : undefined
                   })
                   .filter(notEmpty)
@@ -2914,6 +2921,7 @@ function stateModelFactory({
                   arcColor: trackConstantColor(track),
                   data: content?.data,
                   arcs: content?.arcs,
+                  row: track.row,
                   spans: content?.spans,
                 },
               }

@@ -3,9 +3,9 @@
  * structure and written as arc-track data.
  *
  * The domain overlay draws SH3, SH2 and the kinase domain as three boxes per
- * row, but not how they pack. In autoinhibited Src the C-terminal tail folds
- * back so phospho-Tyr527 binds the protein's own SH2 domain and clamps the
- * kinase shut, and the arcs mark pairs of positions like that one.
+ * row, and the arcs mark how they pack. In autoinhibited Src the C-terminal
+ * tail folds back so phospho-Tyr527 binds the protein's own SH2 domain, and the
+ * linker between SH2 and the kinase domain binds SH3.
  *
  * Steps, all against public data (the first three live in structure.mjs):
  *   1. mmCIF for 2SRC (autoinhibited human Src) from RCSB.
@@ -13,9 +13,11 @@
  *      the UniProt numbering the alignment rows and the domain GFF use, so the
  *      arcs need no second alignment step.
  *   3. The check that the row uses that numbering too.
- *   4. Cbeta-Cbeta contacts under 8 A (Calpha for glycine), keeping only pairs
- *      whose ends sit in different annotated regions. A structure has thousands
- *      of contacts, nearly all between neighbouring residues.
+ *   4. Cbeta-Cbeta contacts under 8 A (Calpha for glycine). The sequence splits
+ *      into the GFF's domains and the stretches between them, and a pair is
+ *      kept when at least one other region lies between its two ends' regions.
+ *      A structure has thousands of contacts, nearly all between neighbouring
+ *      residues or neighbouring regions.
  *
  * Writes packages/examples/src/examples/kinaseStructure.json: the contacts, and
  * the SIFTS residue mapping they were derived through (see docs/layers.md). The
@@ -95,22 +97,50 @@ const mapping = residueMapping({
   rowLength: rowSeq.length,
 })
 
-const regions = readRegions()
-const lastDomainEnd = Math.max(...regions.map(r => r.end))
-const regionOf = pos => {
-  const hit = regions.find(r => pos >= r.start && pos <= r.end)
-  return hit ? hit.name : pos > lastDomainEnd ? 'C-terminal tail' : undefined
+// The domains of the GFF and the stretches between them, in sequence order.
+// The SH2-kinase linker holds no domain and packs against SH3 in the
+// autoinhibited form, so it needs a region of its own.
+function segments(regions) {
+  const named = regions.map(r => ({
+    ...r,
+    name: r.name.replace(/ domain$/, ''),
+  }))
+  return named.flatMap((r, i) => {
+    const prev = named[i - 1]
+    const gap = prev
+      ? {
+          name: `${prev.name}-${r.name} linker`,
+          start: prev.end + 1,
+          end: r.start - 1,
+        }
+      : { name: 'N-terminal region', start: 1, end: r.start - 1 }
+    const tail =
+      i === named.length - 1
+        ? [{ name: 'C-terminal tail', start: r.end + 1, end: Infinity }]
+        : []
+    return [...(gap.start <= gap.end ? [gap] : []), r, ...tail]
+  })
 }
+
+// A pair joining two neighbouring segments, such as SH2 and the linker that
+// follows it, is the chain continuing. A pair between segments with another
+// one between them in sequence marks how the domains pack.
+const parts = segments(readRegions())
+const segmentOf = pos => parts.findIndex(p => pos >= p.start && pos <= p.end)
 
 const contacts = residueContacts({ points, toUniprot, cutoff: CUTOFF })
   .map(({ start, end }) => ({
     start,
     end,
-    ra: regionOf(start),
-    rb: regionOf(end),
+    a: segmentOf(start),
+    b: segmentOf(end),
   }))
-  .filter(({ ra, rb }) => ra && rb && ra !== rb)
-  .map(({ start, end, ra, rb }) => ({ start, end, pair: `${ra} - ${rb}` }))
+  .filter(({ a, b }) => b - a >= 2)
+  .map(({ start, end, a, b }) => ({
+    start,
+    end,
+    pair: `${parts[a].name} - ${parts[b].name}`,
+  }))
 
 const byPair = new Map()
 for (const c of contacts) {
@@ -121,11 +151,10 @@ const summary = [...byPair].toSorted((a, b) => b[1] - a[1])
 writeJson(outFile, {
   generatedBy: 'scripts/examples-gen/contacts.mjs',
   description:
-    `Inter-domain residue contacts of autoinhibited human Src: every ` +
-    `C-beta pair under ${CUTOFF} A whose two residues sit in different ` +
-    `annotated regions of the ${ROW} row. A residue touching its own ` +
-    `neighbours says nothing about how the domains pack, and that is ` +
-    `nearly every contact in the structure.`,
+    `Residue contacts between regions of autoinhibited human Src: every ` +
+    `C-beta pair under ${CUTOFF} A whose two residues sit in regions of the ` +
+    `${ROW} row with at least one other region between them. The regions ` +
+    `are the domains of the GFF and the linkers between them.`,
   pdb: PDB.toUpperCase(),
   chain: CHAIN,
   accession: ACCESSION,

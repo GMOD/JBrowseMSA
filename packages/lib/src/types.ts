@@ -50,19 +50,23 @@ export interface BarTrackModel extends BasicTrackModel {
 }
 
 // a pair of columns joined by an arc, resolved to 0-based visible columns for
-// the renderer
+// the renderer. `given` holds a data track's ends as its spec wrote them, the
+// residues of the track's `row` or 1-based columns, for the tooltip
 export interface Arc {
   start: number
   end: number
   color?: string
   value?: number
+  name?: string
+  given?: { start: number; end: number }
 }
 
 // a track that joins pairs of columns with arcs (RNA base pairs, disulfide
-// bonds, residue contacts)
+// bonds, residue contacts). `row` names the row a data track's arcs index
 export interface ArcTrackModel extends BasicTrackModel {
   arcs?: Arc[]
   arcColor?: string
+  row?: string
 }
 
 /**
@@ -117,12 +121,13 @@ export interface BasicTrack {
 // one arc of an arc track, in the snapshot's own coordinates: 1-based and
 // inclusive, alignment columns unless the track names a `row`. `value`, such
 // as a contact probability, is what the track's `encoding.color` reads, and
-// the arc's own `color` wins over it.
+// the arc's own `color` wins over it. The tooltip over an arc shows its `name`.
 export interface ArcSpec {
   start: number
   end: number
   color?: string
   value?: number
+  name?: string
 }
 
 /**
@@ -304,11 +309,7 @@ export interface RowTextSpec {
  * ColumnTrackSpec on the column scale. See docs/layers.md
  */
 export type RowPanelSpec =
-  | RowStripSpec
-  | RowFeaturesSpec
-  | RowBarSpec
-  | RowPointSpec
-  | RowTextSpec
+  RowStripSpec | RowFeaturesSpec | RowBarSpec | RowPointSpec | RowTextSpec
 
 /**
  * The guide of a panel's value scale, which the header band draws: the scale,
@@ -555,11 +556,7 @@ export interface Feature extends SpanSpec {
  * at load.
  */
 export type CladeMark =
-  | 'highlight'
-  | 'bracket'
-  | 'collapse'
-  | 'focus'
-  | 'rotate'
+  'highlight' | 'bracket' | 'collapse' | 'focus' | 'rotate'
 
 /**
  * The order each node's children draw in, top to bottom. `branchLength` puts
@@ -568,10 +565,7 @@ export type CladeMark =
  * the bottom, and `ladderizeReverse` puts the one with the most tips first.
  */
 export type TreeOrder =
-  | 'branchLength'
-  | 'input'
-  | 'ladderize'
-  | 'ladderizeReverse'
+  'branchLength' | 'input' | 'ladderize' | 'ladderizeReverse'
 
 /**
  * Where the tree is rooted: `midpoint` halfway along the longest path between
@@ -720,11 +714,7 @@ export type RowDataInput = Record<
  * the Newick file gives the node.
  */
 export type ColorEncodingChannel =
-  | 'tipLabel'
-  | 'rowTint'
-  | 'branch'
-  | 'featureFill'
-  | 'nodePoint'
+  'tipLabel' | 'rowTint' | 'branch' | 'featureFill' | 'nodePoint'
 
 /**
  * A channel of a mark the viewer always draws: a color channel,

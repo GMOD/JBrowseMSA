@@ -210,7 +210,7 @@ const Track = observer(function ({
             <TrackTooltipContent
               model={model}
               track={track}
-              col={anchor.value}
+              pointer={anchor.value}
             />
           </BaseTooltip>
         ) : null}

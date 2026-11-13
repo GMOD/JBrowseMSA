@@ -10,7 +10,8 @@ import type React from 'react'
 
 /**
  * Translates pointer events over a track's row into the hovered column and a
- * tooltip anchor. The track shares the alignment's columns, so hovering it sets
+ * tooltip anchor, which also holds the pointer's point in the track's content
+ * px so an arc track can pick the stroke under it. The track shares the alignment's columns, so hovering it sets
  * the model's mouse column too and the alignment's hover band follows along. A
  * drag along the row selects the columns it covers across every row.
  *
@@ -21,6 +22,12 @@ import type React from 'react'
  * bracket under it, a click selects that highlight's columns, and a double
  * click zooms to them.
  */
+export interface TrackPointer {
+  col: number
+  x: number
+  y: number
+}
+
 export function useTrackHover({
   model,
   tooltip,
@@ -30,7 +37,7 @@ export function useTrackHover({
   tooltip: boolean
   bands?: HighlightBand[]
 }) {
-  const { anchor, hoverAt, clearAnchor } = useHoverAnchor<number>()
+  const { anchor, hoverAt, clearAnchor } = useHoverAnchor<TrackPointer>()
   const downAt = useRef<{ x: number; y: number }>(undefined)
 
   // the blocks are laid out in column space and scrolled by a transform on
@@ -43,19 +50,14 @@ export function useTrackHover({
     const { left, top } = el.getBoundingClientRect()
     const col = colAt(event.clientX, left)
     const hit = col >= 0 && col < model.numColumns
+    const x = event.clientX - left - model.scrollX
+    const y = event.clientY - top
     model.setMousePos(hit ? col : undefined, undefined)
     if (bands) {
-      model.setHoveredHighlight(
-        bandAt(
-          bands,
-          event.clientX - left - model.scrollX,
-          event.clientY - top,
-          model.colWidth,
-        )?.key,
-      )
+      model.setHoveredHighlight(bandAt(bands, x, y, model.colWidth)?.key)
     }
     if (tooltip) {
-      hoverAt(event, hit ? col : undefined)
+      hoverAt(event, hit ? { col, x, y } : undefined)
     }
   }
 

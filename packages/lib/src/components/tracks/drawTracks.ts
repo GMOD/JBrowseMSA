@@ -6,6 +6,7 @@ import { contrastTextFn } from '../../util.ts'
 import { drawFeatureSpans } from '../msa/drawFeatureSpans.ts'
 import { tileColorFn } from '../msa/tileColor.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
+import { arcApex, arcMaxSpan } from './arcGeometry.ts'
 import {
   highlightLabelFontSize,
   highlightLabelX,
@@ -113,9 +114,7 @@ export function barTrackValues(model: MsaViewModel, trackId: string) {
     : model.conservation
 }
 
-// An arc's apex scales with the square root of its span. Contact-map spans skew
-// short, and a linear scale flattens them along the baseline. An arc strokes
-// in its own color, else the color `colorOf` gives its value, else `color`,
+// An arc strokes in its own color, else the color `colorOf` gives its value, else `color`,
 // and an arc whose value `hiddenArc` names draws nothing.
 function drawArcs({
   ctx,
@@ -146,19 +145,14 @@ function drawArcs({
     blockWidth: blockSize,
     colWidth,
   })
-  let maxSpan = 1
-  for (const arc of arcs) {
-    maxSpan = Math.max(maxSpan, arc.end - arc.start)
-  }
-  // a full-height apex would put the stroke half outside the track
-  const apexRoom = trackHeight - 1
+  const maxSpan = arcMaxSpan(arcs)
   ctx.lineWidth = 1
   for (const arc of arcs) {
     // an arc that spans the block draws even though neither foot is inside it
     if (arc.end >= xStart && arc.start <= xEnd && !hiddenArc?.(arc)) {
       const x1 = (arc.start + 0.5) * colWidth
       const x2 = (arc.end + 0.5) * colWidth
-      const apex = apexRoom * Math.sqrt((arc.end - arc.start) / maxSpan)
+      const apex = arcApex(arc, maxSpan, trackHeight)
       ctx.strokeStyle =
         (arc.color && cssColorOf(arc.color)) ?? colorOf?.(arc) ?? color
       ctx.beginPath()

@@ -229,11 +229,13 @@ which `row` on the track expects, so nothing has to be recomputed against the
 alignment.
 
 A contact map has the same form with a longer derivation, so a script builds it:
-`contacts.mjs` computes C-beta pairs under 8 Å in a PDB entry and keeps the ones
-whose two ends sit in different domains of the committed domain GFF. Those pairs
-mark how the domains pack, and the thousands of pairs between neighbouring
-residues are dropped. The mmCIF parsing, the SIFTS lookup and the numbering
-check live in `structure.mjs`, shared with the two scripts below.
+`contacts.mjs` computes C-beta pairs under 8 Å in a PDB entry and splits the
+sequence into the domains of the committed domain GFF and the linkers between
+them. It keeps a pair when at least one other region lies between its two ends'
+regions. The contacts between SH3 and the SH2-kinase linker pass that test, and
+the thousands of pairs between neighbouring residues or regions do not. The
+mmCIF parsing, the SIFTS lookup and the numbering check live in `structure.mjs`,
+shared with the two scripts below.
 
 ```sh
 node scripts/examples-gen/contacts.mjs
