@@ -3,6 +3,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 
 import AnnotationLegend from './AnnotationLegend.tsx'
+import HoveredDomains from './HoveredDomains.tsx'
 import MSACanvas from './MSACanvas.tsx'
 import MSAMouseoverCanvas from './MSAMouseoverCanvas.tsx'
 
@@ -14,6 +15,7 @@ const MSAPanel = observer(function ({ model }: { model: MsaViewModel }) {
     <div style={{ position: 'relative' }}>
       <MSACanvas model={model} />
       <MSAMouseoverCanvas model={model} />
+      <HoveredDomains model={model} />
       <AnnotationLegend model={model} />
     </div>
   )

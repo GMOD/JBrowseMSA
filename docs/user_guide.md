@@ -338,7 +338,9 @@ scores, the sequence logo's information content and residue composition, the
 columns an arc joins, the letter on a text track. **Settings → Tracks → Show
 track values on hover** turns the readout off. Over the alignment itself, the
 tooltip carries the domains and insertions under the cursor, and the header
-reads out the hovered row, residue and position.
+reads out the hovered row, residue and position. The domain or gene under the
+pointer darkens, on the alignment, in a `features` panel and on a `features`
+track.
 
 - **Conservation**: a per-column histogram of how conserved the column is, from
   Shannon entropy, scaled down by the column's gap fraction. On by default.

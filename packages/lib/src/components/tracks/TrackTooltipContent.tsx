@@ -7,6 +7,7 @@ import { columnLogoStack } from '../../sequenceLogo.ts'
 import { HighlightReadout } from '../HighlightReadout.tsx'
 import { hoveredArcs } from './arcPaint.ts'
 import { barTrackValues } from './drawTracks.ts'
+import { spansAtCol } from './featureTrack.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { Arc, BasicTrack } from '../../types.ts'
@@ -185,7 +186,7 @@ function FeatureTooltip({
   col: number
 }) {
   const { name, spans } = track.model
-  const hits = (spans ?? []).filter(s => s.startCol <= col && col < s.endCol)
+  const hits = spansAtCol(spans, col)
   return hits.length === 0 ? null : (
     <div>
       <ColumnLabel model={model} col={col} />

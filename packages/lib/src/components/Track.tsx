@@ -11,7 +11,6 @@ import { useWheelScroll } from '../useWheelScroll.ts'
 import { onMsaKey } from './msa/msaKeys.ts'
 import TrackBlocks from './tracks/TrackBlocks.tsx'
 import TrackTooltipContent from './tracks/TrackTooltipContent.tsx'
-import { hoveredArcs } from './tracks/arcPaint.ts'
 import { useTrackHover } from './tracks/useTrackHover.ts'
 
 import type { MsaViewModel } from '../model.ts'
@@ -205,15 +204,7 @@ const Track = observer(function ({
         }}
         style={{ outline: 'none', cursor: bands ? 'pointer' : undefined }}
       >
-        <TrackBlocks
-          model={model}
-          track={track}
-          hoveredArcs={
-            anchor && track.model.kind === 'arc'
-              ? hoveredArcs(model, track, anchor.value)
-              : undefined
-          }
-        />
+        <TrackBlocks model={model} track={track} pointer={anchor?.value} />
         {anchor ? (
           <BaseTooltip clientPoint={anchor.clientPoint}>
             <TrackTooltipContent

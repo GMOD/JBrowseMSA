@@ -5,12 +5,15 @@ import { observer } from 'mobx-react'
 import { useCanvasTheme } from '../../darkReader.ts'
 import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import { TrackResizeHandle } from '../ResizeHandles.tsx'
+import SpanTint from '../msa/SpanTint.tsx'
 import { arcMaxSpan, arcPath } from './arcGeometry.ts'
-import { arcPaint } from './arcPaint.ts'
+import { arcPaint, hoveredArcs } from './arcPaint.ts'
 import { drawTrackBlock } from './drawTracks.ts'
+import { featureTrackSource, spansAtCol } from './featureTrack.ts'
 
 import type { MsaViewModel } from '../../model.ts'
 import type { Arc, BasicTrack } from '../../types.ts'
+import type { TrackPointer } from './useTrackHover.ts'
 
 const TrackBlock = observer(function ({
   model,
@@ -99,6 +102,33 @@ const HoveredArcs = observer(function ({
   )
 })
 
+// the arcs or spans under the pointer, marked over the canvas
+const HoverMarks = observer(function ({
+  model,
+  track,
+  pointer,
+}: {
+  model: MsaViewModel
+  track: BasicTrack
+  pointer: TrackPointer
+}) {
+  const { kind, spans, height } = track.model
+  const source =
+    kind === 'features' ? featureTrackSource(model, track) : undefined
+  const arcs = kind === 'arc' ? hoveredArcs(model, track, pointer) : []
+  return source ? (
+    <SpanTint
+      source={source}
+      annotations={spansAtCol(spans, pointer.col).map(s => s.annotation)}
+      width={model.msaCanvasWidth}
+      height={height}
+      transform={`translate(${model.scrollX} 0)`}
+    />
+  ) : arcs.length > 0 ? (
+    <HoveredArcs model={model} track={track} arcs={arcs} />
+  ) : null
+})
+
 /**
  * The canvas blocks covering one track's row of the alignment. Every track kind
  * shares this host: what differs between conservation, sequence logo and the
@@ -108,11 +138,11 @@ const HoveredArcs = observer(function ({
 const TrackBlocks = observer(function ({
   model,
   track,
-  hoveredArcs,
+  pointer,
 }: {
   model: MsaViewModel
   track: BasicTrack
-  hoveredArcs?: Arc[]
+  pointer?: TrackPointer
 }) {
   // msaCanvasWidth, not msaAreaWidth: tracks stop where the alignment canvas
   // does, not 20px further under the vertical scrollbar, so their columns and
@@ -152,8 +182,8 @@ const TrackBlocks = observer(function ({
           <TrackBlock key={bx} model={model} track={track} offsetX={bx} />
         ))}
       </div>
-      {hoveredArcs?.length ? (
-        <HoveredArcs model={model} track={track} arcs={hoveredArcs} />
+      {pointer ? (
+        <HoverMarks model={model} track={track} pointer={pointer} />
       ) : null}
       <TrackResizeHandle model={model} track={track} />
     </div>
