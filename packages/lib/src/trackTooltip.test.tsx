@@ -190,6 +190,27 @@ test('hovering a features track names the spans at that column', () => {
   expect(document.body.textContent).not.toContain('H1')
 })
 
+test('the span under the pointer darkens with the readout turned off', () => {
+  act(() => {
+    model.setShowColumnStats(false)
+    model.setColumnTracks([
+      {
+        id: 'ss',
+        name: 'Secondary structure',
+        kind: 'features',
+        row: 'a',
+        features: [{ start: 1, end: 3, name: 'H1', type: 'helix' }],
+      },
+    ])
+  })
+  const track = document.querySelector('[data-testid="track_ss"]')!
+  hoverColumn('ss', 1)
+  expect(document.body.textContent).not.toContain('H1 a 1–3')
+  expect(track.querySelectorAll('svg g > *')).toHaveLength(1)
+  hoverColumn('ss', 4)
+  expect(track.querySelectorAll('svg g > *')).toHaveLength(0)
+})
+
 test('hovering a bar or strip track reports the value it was given', () => {
   act(() => {
     model.setColumnTracks([

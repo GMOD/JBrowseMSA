@@ -15,7 +15,8 @@ import type React from 'react'
  * the model's mouse column too and the alignment's hover band follows along. A
  * drag along the row selects the columns it covers across every row.
  *
- * `tooltip` off skips the anchor, so a track whose tooltip is turned off still
+ * `tooltip` off hides the anchor. The pointer is still followed for `marks`,
+ * a track that marks the feature or arc under it, and a track with neither
  * drives the hover band without re-rendering on every mouse move.
  *
  * With `bands`, the highlights track's brackets, the pointer also picks the
@@ -31,10 +32,12 @@ export interface TrackPointer {
 export function useTrackHover({
   model,
   tooltip,
+  marks,
   bands,
 }: {
   model: MsaViewModel
   tooltip: boolean
+  marks: boolean
   bands?: HighlightBand[]
 }) {
   const { anchor, hoverAt, clearAnchor } = useHoverAnchor<TrackPointer>()
@@ -56,7 +59,7 @@ export function useTrackHover({
     if (bands) {
       model.setHoveredHighlight(bandAt(bands, x, y, model.colWidth)?.key)
     }
-    if (tooltip) {
+    if (tooltip || marks) {
       hoverAt(event, hit ? { col, x, y } : undefined)
     }
   }
@@ -107,6 +110,7 @@ export function useTrackHover({
 
   return {
     anchor: tooltip ? anchor : undefined,
+    pointer: anchor?.value,
     onMouseMove,
     onMouseDown,
     onClick,

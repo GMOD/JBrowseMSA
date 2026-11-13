@@ -159,6 +159,7 @@ const Track = observer(function ({
     track.model.kind === 'highlights' ? (track.model.bands ?? []) : undefined
   const {
     anchor,
+    pointer,
     onMouseMove,
     onMouseDown,
     onClick,
@@ -167,6 +168,7 @@ const Track = observer(function ({
   } = useTrackHover({
     model,
     tooltip: showColumnStats || !!bands,
+    marks: track.model.kind === 'features' || track.model.kind === 'arc',
     bands,
   })
 
@@ -204,7 +206,7 @@ const Track = observer(function ({
         }}
         style={{ outline: 'none', cursor: bands ? 'pointer' : undefined }}
       >
-        <TrackBlocks model={model} track={track} pointer={anchor?.value} />
+        <TrackBlocks model={model} track={track} pointer={pointer} />
         {anchor ? (
           <BaseTooltip clientPoint={anchor.clientPoint}>
             <TrackTooltipContent
