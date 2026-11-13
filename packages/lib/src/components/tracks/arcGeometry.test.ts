@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { arcStrokeY, arcsAtPoint } from './arcGeometry.ts'
+import { arcPath, arcStrokeY, arcsAtPoint } from './arcGeometry.ts'
 
 // at colWidth 10 a foot sits mid-column: column 0 at x 5, column 20 at x 205
 const long = { start: 0, end: 20, name: 'long' }
@@ -49,4 +49,10 @@ test('a hidden arc is never picked', () => {
       hidden: arc => arc.name === 'long',
     }),
   ).toEqual([])
+})
+
+test('the arc path runs foot to foot with its control point at twice the apex', () => {
+  expect(arcPath({ arc: long, colWidth: 10, maxSpan: 20, trackHeight })).toBe(
+    'M5 41Q105 -39 205 41',
+  )
 })

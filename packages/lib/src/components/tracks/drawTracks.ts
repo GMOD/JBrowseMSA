@@ -1,5 +1,4 @@
-import { arcColorValue, letterValue } from '../../columnTrackColor.ts'
-import { cssColorOf } from '../../scales.ts'
+import { letterValue } from '../../columnTrackColor.ts'
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { setFontSize } from '../../setFontSize.ts'
 import { contrastTextFn } from '../../util.ts'
@@ -7,6 +6,7 @@ import { drawFeatureSpans } from '../msa/drawFeatureSpans.ts'
 import { tileColorFn } from '../msa/tileColor.ts'
 import { visibleColRange } from '../msa/visibleColRange.ts'
 import { arcApex, arcMaxSpan } from './arcGeometry.ts'
+import { arcPaint } from './arcPaint.ts'
 import {
   highlightLabelFontSize,
   highlightLabelX,
@@ -114,14 +114,13 @@ export function barTrackValues(model: MsaViewModel, trackId: string) {
     : model.conservation
 }
 
-// An arc strokes in its own color, else the color `colorOf` gives its value, else `color`,
-// and an arc whose value `hiddenArc` names draws nothing.
+// An arc strokes in the color `strokeOf` gives it, and one `hidden` names draws
+// nothing
 function drawArcs({
   ctx,
   arcs,
-  color,
-  colorOf,
-  hiddenArc,
+  strokeOf,
+  hidden,
   colWidth,
   trackHeight,
   offsetX,
@@ -129,9 +128,8 @@ function drawArcs({
 }: {
   ctx: RenderCtx
   arcs: Arc[] | undefined
-  color: string
-  colorOf?: (arc: Arc) => string | undefined
-  hiddenArc?: (arc: Arc) => boolean
+  strokeOf: (arc: Arc) => string
+  hidden?: (arc: Arc) => boolean
   colWidth: number
   trackHeight: number
   offsetX: number
@@ -149,12 +147,11 @@ function drawArcs({
   ctx.lineWidth = 1
   for (const arc of arcs) {
     // an arc that spans the block draws even though neither foot is inside it
-    if (arc.end >= xStart && arc.start <= xEnd && !hiddenArc?.(arc)) {
+    if (arc.end >= xStart && arc.start <= xEnd && !hidden?.(arc)) {
       const x1 = (arc.start + 0.5) * colWidth
       const x2 = (arc.end + 0.5) * colWidth
       const apex = arcApex(arc, maxSpan, trackHeight)
-      ctx.strokeStyle =
-        (arc.color && cssColorOf(arc.color)) ?? colorOf?.(arc) ?? color
+      ctx.strokeStyle = strokeOf(arc)
       ctx.beginPath()
       ctx.moveTo(x1, trackHeight)
       ctx.quadraticCurveTo(
@@ -551,7 +548,6 @@ export function drawTrackBlock({
     kind,
     height: trackHeight,
     barColor,
-    arcColor,
     arcs,
     customColorScheme,
     data,
@@ -580,16 +576,10 @@ export function drawTrackBlock({
       break
     }
     case 'arc': {
-      const colors = model.columnTrackColors.get(id)
-      const valueOf = (arc: Arc) => arcColorValue(arc, !!colors?.identity)
       drawArcs({
         ctx,
         arcs,
-        color: arcColor ?? theme.palette.text.primary,
-        colorOf: colors?.scale
-          ? arc => colors.colorOf(valueOf(arc))
-          : undefined,
-        hiddenArc: colors ? arc => colors.isHidden(valueOf(arc)) : undefined,
+        ...arcPaint(model, track, theme),
         colWidth,
         trackHeight,
         offsetX,

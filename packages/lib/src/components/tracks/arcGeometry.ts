@@ -21,6 +21,24 @@ export function arcApex(arc: Arc, maxSpan: number, trackHeight: number) {
   return (trackHeight - 1) * Math.sqrt((arc.end - arc.start) / maxSpan)
 }
 
+// an arc's stroke as an SVG path in content px, the curve drawArcs strokes
+export function arcPath({
+  arc,
+  colWidth,
+  maxSpan,
+  trackHeight,
+}: {
+  arc: Arc
+  colWidth: number
+  maxSpan: number
+  trackHeight: number
+}) {
+  const x1 = (arc.start + 0.5) * colWidth
+  const x2 = (arc.end + 0.5) * colWidth
+  const apexY = trackHeight - 2 * arcApex(arc, maxSpan, trackHeight)
+  return `M${x1} ${trackHeight}Q${(x1 + x2) / 2} ${apexY} ${x2} ${trackHeight}`
+}
+
 /**
  * The y of an arc's stroke at content x, or undefined outside its feet. The
  * stroke is a quadratic curve from foot to foot with its control point at twice

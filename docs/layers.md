@@ -168,7 +168,8 @@ The viewer draws arcs on one baseline in the order given, and a `color` on an
 individual arc overrides the track's and its scale's, as a GFF `color=`
 attribute does, so one track can separate nested helices from a pseudoknot. The
 tooltip over an arc's stroke lists the arcs under the pointer, each with its
-`name` and its two ends as given.
+`name` and its two ends as given, and those arcs draw at 2px while the pointer
+is on them.
 
 ### Column track scales
 

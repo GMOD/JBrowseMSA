@@ -2,10 +2,10 @@ import React from 'react'
 
 import { observer } from 'mobx-react'
 
-import { arcColorValue, finiteNumber } from '../../columnTrackColor.ts'
+import { finiteNumber } from '../../columnTrackColor.ts'
 import { columnLogoStack } from '../../sequenceLogo.ts'
 import { HighlightReadout } from '../HighlightReadout.tsx'
-import { arcsAtPoint } from './arcGeometry.ts'
+import { hoveredArcs } from './arcPaint.ts'
 import { barTrackValues } from './drawTracks.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -152,18 +152,8 @@ function ArcTooltip({
   track: BasicTrack
   pointer: TrackPointer
 }) {
-  const { id, name, arcs, row, height } = track.model
-  const colors = model.columnTrackColors.get(id)
-  const hits = arcsAtPoint({
-    arcs: arcs ?? [],
-    x: pointer.x,
-    y: pointer.y,
-    colWidth: model.colWidth,
-    trackHeight: height,
-    hidden: colors
-      ? arc => colors.isHidden(arcColorValue(arc, !!colors.identity))
-      : undefined,
-  })
+  const { name, row } = track.model
+  const hits = hoveredArcs(model, track, pointer)
   const byName = new Map<string, Arc[]>()
   for (const arc of hits.slice(0, MAX_ARCS)) {
     const key = arc.name ?? ''
