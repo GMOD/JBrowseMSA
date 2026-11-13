@@ -309,7 +309,11 @@ export interface RowTextSpec {
  * ColumnTrackSpec on the column scale. See docs/layers.md
  */
 export type RowPanelSpec =
-  RowStripSpec | RowFeaturesSpec | RowBarSpec | RowPointSpec | RowTextSpec
+  | RowStripSpec
+  | RowFeaturesSpec
+  | RowBarSpec
+  | RowPointSpec
+  | RowTextSpec
 
 /**
  * The guide of a panel's value scale, which the header band draws: the scale,
@@ -556,7 +560,11 @@ export interface Feature extends SpanSpec {
  * at load.
  */
 export type CladeMark =
-  'highlight' | 'bracket' | 'collapse' | 'focus' | 'rotate'
+  | 'highlight'
+  | 'bracket'
+  | 'collapse'
+  | 'focus'
+  | 'rotate'
 
 /**
  * The order each node's children draw in, top to bottom. `branchLength` puts
@@ -565,7 +573,10 @@ export type CladeMark =
  * the bottom, and `ladderizeReverse` puts the one with the most tips first.
  */
 export type TreeOrder =
-  'branchLength' | 'input' | 'ladderize' | 'ladderizeReverse'
+  | 'branchLength'
+  | 'input'
+  | 'ladderize'
+  | 'ladderizeReverse'
 
 /**
  * Where the tree is rooted: `midpoint` halfway along the longest path between
@@ -714,7 +725,11 @@ export type RowDataInput = Record<
  * the Newick file gives the node.
  */
 export type ColorEncodingChannel =
-  'tipLabel' | 'rowTint' | 'branch' | 'featureFill' | 'nodePoint'
+  | 'tipLabel'
+  | 'rowTint'
+  | 'branch'
+  | 'featureFill'
+  | 'nodePoint'
 
 /**
  * A channel of a mark the viewer always draws: a color channel,

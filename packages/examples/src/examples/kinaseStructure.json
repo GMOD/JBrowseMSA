@@ -33,12 +33,7 @@
           "structEnd": 452
         }
       ],
-      "unobserved": [
-        [
-          2,
-          2
-        ]
-      ],
+      "unobserved": [[2, 2]],
       "rowLength": 536,
       "generated": {
         "by": "sifts",

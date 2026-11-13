@@ -491,7 +491,10 @@ type ValuePanelScale = Omit<
 > & { valueScale: ValueScale }
 type TextPanelScale = Omit<ResolvedTextPanel, 'id' | 'width' | 'offsetX'>
 type RowPanelScale =
-  StripPanelScale | FeaturePanelScale | ValuePanelScale | TextPanelScale
+  | StripPanelScale
+  | FeaturePanelScale
+  | ValuePanelScale
+  | TextPanelScale
 
 /**
  * #stateModel MsaView
@@ -966,7 +969,8 @@ function stateModelFactory({
        * the currently hovered tree node ID and its descendant leaf names
        */
       hoveredTreeNode: undefined as
-        { nodeId: string; descendantNames: string[] } | undefined,
+        | { nodeId: string; descendantNames: string[] }
+        | undefined,
 
       /**
        * #volatile
