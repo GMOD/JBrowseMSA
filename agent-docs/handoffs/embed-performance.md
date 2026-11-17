@@ -33,9 +33,9 @@ Desktop browsers are the target; phones and Safari are not a priority.
    `packages/lib/src/renderToSvg.tsx`), which widens a 900 px viewport export to
    1111 px. The live view overlays it on the alignment. An overlay option for
    `--viewport` exports would make the static frame match the first live frame.
-4. **Bump the tutorial's pins after the next npm release.** The page, the build
-   script and the hosted `packages/app/public/data/static_first/` pin
-   `react-msaview@9.1.1`, which has neither the wheel fix nor `loading="lazy"`.
-   Rerun the build script, copy its four files into the hosted folder, update
-   the numbers in step 6, and consider showing `<jbrowse-msa loading="lazy">`
-   with an `<img>` child in step 5.
+4. **Bump the tutorial's pins.** The page, the build script and the hosted
+   `packages/app/public/data/static_first/` pin `react-msaview@9.1.1`, which has
+   neither the wheel fix nor `loading="lazy"`; 9.3.0 and later have both, and
+   npm's latest is 11.0.0. Rerun the build script, copy its four files into the
+   hosted folder, update the numbers in step 6, and consider showing
+   `<jbrowse-msa loading="lazy">` with an `<img>` child in step 5.
