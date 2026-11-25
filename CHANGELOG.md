@@ -4,6 +4,42 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [11.1.0](https://github.com/GMOD/JBrowseMSA/compare/v11.0.0...v11.1.0) (2026-11-25)
+
+### Other Changes
+
+- The ada hook applies only inside a react-msaview checkout ([caac0cb](https://github.com/GMOD/JBrowseMSA/commit/caac0cb8a16097fa582ab289bf18f7a4b4f9e39f))
+- Name the Src contacts and pick an arc by its stroke ([6b78107](https://github.com/GMOD/JBrowseMSA/commit/6b781076f5e62c6967e5ef3d4a602329c37953b2))
+- Format the arc-name change with oxfmt ([32e74de](https://github.com/GMOD/JBrowseMSA/commit/32e74deb41daafe6385ed90c513f62730ee3dae9))
+- Draw the arcs under the pointer at 2px ([c42ac74](https://github.com/GMOD/JBrowseMSA/commit/c42ac74dd38b6f1ba47dacb94d4d25348f03ba35))
+- Snap tiled cell edges to device pixels ([43d3680](https://github.com/GMOD/JBrowseMSA/commit/43d3680c6d5ff0f66727f9067a79cf0213e78933))
+- Darken the domain or gene under the pointer ([42710a3](https://github.com/GMOD/JBrowseMSA/commit/42710a3e71f7bbcd256b8bf6d7c86a3a96b8289d))
+- Darken the feature or arc under the pointer with the readout off ([6f05b32](https://github.com/GMOD/JBrowseMSA/commit/6f05b320fa538a671c9c56029f31e8d656451517))
+- The embed handoff's pin bump waits on nothing: 9.3.0 and later carry the wheel fix and loading="lazy" ([d701843](https://github.com/GMOD/JBrowseMSA/commit/d7018438fb6aeb54ecf9bf982e970cd16e6ae5d8))
+- Create a GitHub release after publishing a tag ([51c90b0](https://github.com/GMOD/JBrowseMSA/commit/51c90b09f85dd650bfaede1e44deb3c393f76966))
+- Take a model composed under another view type name in MSAView ([e3b652e](https://github.com/GMOD/JBrowseMSA/commit/e3b652e8978515efade721be978e54de83204704))
+- Pin the factory's inline limit as the one unshareableData measures ([59e4c3b](https://github.com/GMOD/JBrowseMSA/commit/59e4c3b2c4d1775ae8abaf251551e272ceb01e3f))
+- Let a composing host set its own colWidth, rowHeight and labelsAlignRight defaults ([d1dd2a9](https://github.com/GMOD/JBrowseMSA/commit/d1dd2a9ebb8d9d771c94a6802895cb0654ff1444))
+- Let a composing host set its own residueColor defaults ([3340290](https://github.com/GMOD/JBrowseMSA/commit/3340290e27124290aa10080034b0a6d635cee522))
+- Number a row in a coordinate system of the host's: rowCoordinates ([81826ef](https://github.com/GMOD/JBrowseMSA/commit/81826ef225af77546d7a3ea91c12df093025210e))
+- Keep a bracket or facet label whole on rows taller than 16px ([345a23d](https://github.com/GMOD/JBrowseMSA/commit/345a23dce8a45ea799c4a2a5ae0cfde8a2239e84))
+- Keep a text panel's values and a narrow header readable on tall rows ([46074a7](https://github.com/GMOD/JBrowseMSA/commit/46074a7e220c989dd2516efb3607524034574419))
+- Draw a gap matching the reference's gap as itself under relativeTo ([8fea89a](https://github.com/GMOD/JBrowseMSA/commit/8fea89a8dc1749f4f0324d408124d9446e87647b))
+- Draw no outline around a feature span narrower than 4px ([9e11711](https://github.com/GMOD/JBrowseMSA/commit/9e1171120075609a751d344530eb6362eb891dd1))
+- Keep feature colors and bands across row-table changes and re-sorts ([0ab273f](https://github.com/GMOD/JBrowseMSA/commit/0ab273f87ab46e03b1328c642c6716a257262816))
+- Say what a cell no span covers draws under the domain fill ([93797cf](https://github.com/GMOD/JBrowseMSA/commit/93797cfe2199b271131559ee2fc2e03aa927a219))
+- Draw a transient highlight that asks for a bracket as one ([005d209](https://github.com/GMOD/JBrowseMSA/commit/005d2099d8590d7fc0756af58f8b42d126ca6a6b))
+- Draw the alignment panel's feature marks from a `marks` list ([1775b50](https://github.com/GMOD/JBrowseMSA/commit/1775b50fd2b48e8da25d6d6d622129526db32229))
+- Reach `marks` from MSAViewer, the CLI and the Python widget ([7f9ecbc](https://github.com/GMOD/JBrowseMSA/commit/7f9ecbc4ad4d526b833149f673852092906af9df))
+- Add a "Modification calls over base colors" example ([e8152ba](https://github.com/GMOD/JBrowseMSA/commit/e8152bad8a384f7068b126d2c39c0d234b0f898e))
+- Document `marks` and the cell fill it leaves to `residueColor` ([d9e078b](https://github.com/GMOD/JBrowseMSA/commit/d9e078b7a991f99d09eaff79056b17d9feb9333d))
+- Export the mark types the app's model type names ([92b1f74](https://github.com/GMOD/JBrowseMSA/commit/92b1f7453e7ce548d4e5de731ad81c502114deaa))
+- Keep `domainOverlaySource` for ggmsaview's bridge ([724e894](https://github.com/GMOD/JBrowseMSA/commit/724e89409d3a9934e494630bb9214fc0e88f36a9))
+- Retake the figures this branch moved and add the marks figure ([3a8592d](https://github.com/GMOD/JBrowseMSA/commit/3a8592da71a2ee0ce91a85ac0f275ad0deac1e9e))
+- Let a composing host say which tracks start off ([a72dba5](https://github.com/GMOD/JBrowseMSA/commit/a72dba597f0250d0d022ff2d9a66cbf2ea983faf))
+- Keep `transient` on a resolved highlight ([e23ddf7](https://github.com/GMOD/JBrowseMSA/commit/e23ddf72c3962f2ef8e8e8753e59c84d6fe73b54))
+- Format publish.yml ([d128745](https://github.com/GMOD/JBrowseMSA/commit/d1287458ec65284c57d7f4b0234b48c421a9ecfc))
+
 ## [11.0.0](https://github.com/GMOD/JBrowseMSA/compare/v10.1.1...v11.0.0) (2026-11-12)
 
 ### Documentation
