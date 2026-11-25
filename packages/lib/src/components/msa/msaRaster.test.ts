@@ -103,6 +103,26 @@ test('one pixel per cell, reference matches and short rows', () => {
   expect([...px.slice(9, 12)]).toEqual([0, 0, 0])
 })
 
+test('a residue matching the consensus in a reference gap takes the insertion fill', () => {
+  const px = rasterPixels({
+    spec: {
+      ...spec,
+      columns: new Map([
+        ['a', 'M-L'],
+        ['b', 'MKL'],
+      ]),
+      gapConsensus: ['', 'K', ''],
+      gapConsensusFill: '#0000ff',
+    },
+    col0: 0,
+    row0: 0,
+    width: 3,
+    height: 2,
+    toPixel: css => ({ ...ids, '#0000ff': 4 })[css]!,
+  })
+  expect([...px.slice(3, 6)]).toEqual([3, 4, 3])
+})
+
 test('averaging covers columns without touching rows', () => {
   const px = rasterPixels({
     spec: {

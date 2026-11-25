@@ -443,6 +443,20 @@ The name of a row to read every other row against. With one set, the viewer:
 
 [Open this snapshot in the app][live-layers-relative-to].
 
+Two settings read the columns where the reference row has a gap:
+
+- `consensusInGaps` draws a residue matching its column's consensus there as a
+  dot on a pale purple cell, the color a genome browser draws an insertion in.
+  An insertion most rows share then reads as one band, and the rows whose
+  residues differ inside it keep their color. The consensus is the column's
+  commonest residue, held by at least two rows and by more than half of its
+  residues.
+- `keepReferenceColumns` makes hiding gappy columns keep every column the
+  reference row has a residue in, so `allowedGappyness` hides only columns the
+  reference lacks, such as an insertion one read carries.
+
+jbrowse-plugin-tview turns both on, through the host `defaults` of `MSAModelF`.
+
 The pinned track's id is `reference-row`, so
 `"turnedOffTracks": { "reference-row": true }` keeps the dots and drops the
 copy. In the shorthand, `query` sets `relativeTo` and also names the row whose

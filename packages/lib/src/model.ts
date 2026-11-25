@@ -384,6 +384,8 @@ export const preservedOnReset = new Set([
   'subFeatureRows',
   'showDomainLegend',
   'embeddedMode',
+  'consensusInGaps',
+  'keepReferenceColumns',
 ])
 
 // shared empty results, so observers don't see a fresh [] as a change
@@ -555,6 +557,8 @@ export interface MsaViewDefaults {
   residueColor?: ResidueColorDefault
   /** whether each track id named starts off, as `turnedOffTracks` spells it */
   turnedOffTracks?: Record<string, boolean>
+  consensusInGaps?: boolean
+  keepReferenceColumns?: boolean
 }
 
 /**
@@ -861,6 +865,27 @@ function stateModelFactory({
         relativeTo: types.maybe(types.string),
         /**
          * #property
+         * in a column where the `relativeTo` row has a gap, draw a residue
+         * matching the column's consensus as a dot on a tinted cell, so an
+         * insertion most rows share reads as one band and the residues that
+         * differ inside it keep their color
+         */
+        consensusInGaps: stripDefault(
+          types.boolean,
+          defaults.consensusInGaps ?? false,
+        ),
+        /**
+         * #property
+         * hiding gappy columns keeps every column the `relativeTo` row has a
+         * residue in, so only columns the reference lacks, such as rare
+         * insertions, are hidden
+         */
+        keepReferenceColumns: stripDefault(
+          types.boolean,
+          defaults.keepReferenceColumns ?? false,
+        ),
+        /**
+         * #property
          * declarative seed for the highlighted-columns overlay (visible column
          * indices). Unlike the volatile `highlightedColumns` (driven by
          * transient genome-hover sync), this persists in the snapshot/URL so a
@@ -1161,6 +1186,18 @@ function stateModelFactory({
        */
       drawRelativeTo(id: string | undefined) {
         self.relativeTo = id
+      },
+      /**
+       * #action
+       */
+      setConsensusInGaps(arg: boolean) {
+        self.consensusInGaps = arg
+      },
+      /**
+       * #action
+       */
+      setKeepReferenceColumns(arg: boolean) {
+        self.keepReferenceColumns = arg
       },
       /**
        * #action
@@ -2496,9 +2533,18 @@ function stateModelFactory({
             }
           }
         }
+        const { keepReferenceColumns, relativeTo } = self
+        const reference =
+          keepReferenceColumns && relativeTo !== undefined
+            ? this.MSA?.getRow(relativeTo)
+            : undefined
         const blanks = []
         for (let i = 0; i < numCols; i++) {
-          if (blankCounts[i]! >= threshold) {
+          const kept =
+            reference !== undefined &&
+            i < reference.length &&
+            (reference.charCodeAt(i) - 45) >>> 0 > 1
+          if (!kept && blankCounts[i]! >= threshold) {
             blanks.push(i)
           }
         }
@@ -2698,6 +2744,40 @@ function stateModelFactory({
                 : undefined,
           }
         })
+      },
+
+      /**
+       * #getter
+       * the letter a residue is read against in each visible column where the
+       * `relativeTo` row has a gap and `consensusInGaps` is on: the column's
+       * commonest residue, where at least two rows and more than half of its
+       * residues hold it, else ''. Undefined when nothing is read that way.
+       */
+      get gapConsensus() {
+        const { relativeTo, consensusInGaps } = self
+        const reference =
+          consensusInGaps && relativeTo !== undefined
+            ? this.columns.get(relativeTo)
+            : undefined
+        const { colStats } = this
+        return reference === undefined
+          ? undefined
+          : Array.from({ length: reference.length }, (_, col) => {
+              const gap = reference[col] === '-' || reference[col] === '.'
+              let best = 0
+              let residues = 0
+              let letter = ''
+              if (gap) {
+                colStats.forEachResidue(col, (slot, count) => {
+                  residues += count
+                  if (count > best) {
+                    best = count
+                    letter = letterOfResidueSlot(slot)
+                  }
+                })
+              }
+              return best >= 2 && 2 * best > residues ? letter : ''
+            })
       },
 
       /**

@@ -3,6 +3,7 @@ import { setFontSize } from '../../setFontSize.ts'
 import { adjustColorForContrast, contrastTextFn, nonEmpty } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import { cellFillRect } from '../pixelSnap.ts'
+import { consensusFill } from './consensusFill.ts'
 import { domainBandCursor } from './domainBandCursor.ts'
 import {
   markCoversCells,
@@ -149,6 +150,7 @@ function drawTilesAndText({
   pass: 'tiles' | 'letters' | 'both'
 }) {
   const { cellFill, columns, colWidth, rowHeight, fontSize, relativeTo } = model
+  const { gapConsensus } = model
 
   const fillsCells = cellFill !== 'none'
   const tiles = drawTiles && fillsCells
@@ -161,6 +163,7 @@ function drawTilesAndText({
     // a dynamic scheme colors a cell from its column, so a readable letter color
     // is a question about the cell's own color rather than about its letter.
     const contrastText = contrastTextFn(theme)
+    const insertionFill = consensusFill(theme)
     const offsetXAligned = xStart * colWidth
     const halfColWidth = colWidth / 2
     // the context is translated by rowHeight/2, so `y` is the row's bottom
@@ -200,12 +203,18 @@ function drawTilesAndText({
           const x = j * colWidth + offsetXAligned
           const isMatchingReference =
             referenceSeq && name !== relativeTo && letter === referenceSeq[j]
+          const isMatchingConsensus =
+            !isMatchingReference &&
+            name !== relativeTo &&
+            gapConsensus?.[col] === letter
           const color = tileColor(col, letter)
 
           if (paintTiles) {
             ctx.fillStyle = isMatchingReference
               ? theme.palette.action.hover
-              : (nonEmpty(color) ?? theme.palette.background.default)
+              : isMatchingConsensus
+                ? insertionFill
+                : (nonEmpty(color) ?? theme.palette.background.default)
             fillCell(x, tileY, colWidth, rowHeight)
           }
 
@@ -214,9 +223,10 @@ function drawTilesAndText({
             ctx.fillStyle = covering
               ? // on top of a span: contrast against its fill
                 contrastText(covering.fill)
-              : isMatchingReference
+              : isMatchingReference || isMatchingConsensus
                 ? // the dot sits on the faint reference-match wash, which is
-                  // the theme's background with a little of its text color in it
+                  // the theme's background with a little of its text color in
+                  // it, or on the insertion tint
                   theme.palette.text.primary
                 : tiles
                   ? // on top of a colored tile, or on the background where the
@@ -231,7 +241,9 @@ function drawTilesAndText({
                         theme.palette.background.default,
                       )
             ctx.fillText(
-              isMatchingReference && !isGap(letter) ? '.' : letter,
+              (isMatchingReference && !isGap(letter)) || isMatchingConsensus
+                ? '.'
+                : letter,
               x + halfColWidth,
               textY,
             )

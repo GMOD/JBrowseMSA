@@ -157,6 +157,16 @@ width of columns, px
 colWidth: stripDefault(types.number, defaults.colWidth ?? 12)
 ```
 
+#### property: consensusInGaps
+
+in a column where the `relativeTo` row has a gap, draw a residue matching the
+column's consensus as a dot on a tinted cell, so an insertion most rows share
+reads as one band and the residues that differ inside it keep their color
+
+```js
+consensusInGaps: stripDefault(types.boolean, defaults.consensusInGaps ?? false)
+```
+
 #### property: currentAlignment
 
 ```js
@@ -274,6 +284,18 @@ id of view, randomly generated if not provided
 
 ```js
 id: ElementId
+```
+
+#### property: keepReferenceColumns
+
+hiding gappy columns keeps every column the `relativeTo` row has a residue in,
+so only columns the reference lacks, such as rare insertions, are hidden
+
+```js
+keepReferenceColumns: stripDefault(
+  types.boolean,
+  defaults.keepReferenceColumns ?? false,
+)
 ```
 
 #### property: marks
@@ -1327,6 +1349,17 @@ fittedTreeAreaWidth: number
 
 ```js
 fontSize: number
+```
+
+#### getter: gapConsensus
+
+the letter a residue is read against in each visible column where the
+`relativeTo` row has a gap and `consensusInGaps` is on: the column's commonest
+residue, where at least two rows and more than half of its residues hold it,
+else ''. Undefined when nothing is read that way.
+
+```js
+gapConsensus: string[] | undefined
 ```
 
 #### getter: gappyColumns
@@ -2886,6 +2919,12 @@ set col width (px)
 setColWidth: (n: number) => void
 ```
 
+#### action: setConsensusInGaps
+
+```js
+setConsensusInGaps: (arg: boolean) => void
+```
+
 #### action: setCurrentAlignment
 
 switch to another alignment of a multi-alignment file (Stockholm). Clears the
@@ -3065,6 +3104,12 @@ setHoveredTreeNode: (nodeId?: string | undefined) => void
 
 ```js
 setImportForm: (arg: boolean) => void
+```
+
+#### action: setKeepReferenceColumns
+
+```js
+setKeepReferenceColumns: (arg: boolean) => void
 ```
 
 #### action: setLoadingMSA

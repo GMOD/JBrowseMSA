@@ -1,3 +1,4 @@
+import { consensusFill } from './consensusFill.ts'
 import { tileColorFn, tileColorTable } from './tileColor.ts'
 
 import type { MsaViewModel } from '../../model.ts'
@@ -21,6 +22,9 @@ export interface RasterSpec {
   colorAt: (col: number, letter: string) => string | undefined
   bg: string
   hover: string
+  /** see `gapConsensus` on the model, with the cell it draws its matches on */
+  gapConsensus?: string[]
+  gapConsensusFill?: string
 }
 
 const littleEndian = new Uint8Array(new Uint32Array([1]).buffer)[0] === 1
@@ -64,12 +68,17 @@ export function cssColorToPixel(css: string) {
 
 function cellPixelFn(spec: RasterSpec, toPixel: (css: string) => number) {
   const { columns, relativeTo, colorAt, bg, hover } = spec
+  const { gapConsensus, gapConsensusFill } = spec
   const bgPixel = toPixel(bg)
   const hoverPixel = toPixel(hover)
+  const consensusPixel = gapConsensusFill ? toPixel(gapConsensusFill) : bgPixel
   const reference = relativeTo ? columns.get(relativeTo) : undefined
   return (name: string, col: number, letter: string) => {
     if (reference && name !== relativeTo && letter === reference[col]) {
       return hoverPixel
+    }
+    if (name !== relativeTo && gapConsensus?.[col] === letter) {
+      return consensusPixel
     }
     const color = colorAt(col, letter)
     return color === undefined ? bgPixel : toPixel(color)
@@ -320,6 +329,7 @@ function rasterKeys(model: MsaViewModel, theme: Theme) {
     model.residueColor,
     tileColorTable(model),
     model.relativeTo,
+    model.gapConsensus,
     theme.palette.action.hover,
     theme.palette.background.default,
   ]
@@ -340,6 +350,8 @@ function getCache(model: MsaViewModel, theme: Theme) {
       colorAt: tileColorFn(model),
       bg: theme.palette.background.default,
       hover: theme.palette.action.hover,
+      gapConsensus: model.gapConsensus,
+      gapConsensusFill: consensusFill(theme),
     },
     numColumns: model.numColumns,
     numRows: model.numRows,
