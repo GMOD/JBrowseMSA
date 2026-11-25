@@ -979,10 +979,12 @@ The color object of the residue mark, `{channel, field, scale}`:
 
 Under `field: "feature"` the domains fill the cells only while the overlay draws
 a span, so an alignment with no annotations keeps its residue colors and a
-loaded GFF fills the cells its spans cover. A span takes the color the overlay
-draws it in: its GFF `color=`, a `featureFill` encoding, or the accession
-palette. Under `field: "residue"` or the `color` channel, the scale keeps the
-residue colors and each domain draws as a bar under its row.
+loaded GFF fills the cells its spans cover. Once one span is drawn, every cell
+no span covers draws on the plain background, without its residue color or the
+grey cell of a `relativeTo` match. A span takes the color the overlay draws it
+in: its GFF `color=`, a `featureFill` encoding, or the accession palette. Under
+`field: "residue"` or the `color` channel, the scale keeps the residue colors
+and each domain draws as a bar under its row.
 
 The letters a `domain` lists take the `range` color at their own index, and
 every other letter is uncolored, the rule a `domain` and `range` in `encodings`
