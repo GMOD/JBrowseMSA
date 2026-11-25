@@ -99,6 +99,28 @@ export function markCoversCells(model: MsaViewModel, mark: ResolvedMark) {
 }
 
 /**
+ * The first alignment mark's spans over `leaves`, which with `marks` unset is
+ * the one mark over every feature. ggmsaview's bridge draws the overlay from
+ * it; with `marks: []` it has no rows.
+ */
+export function domainOverlaySource(
+  model: MsaViewModel,
+  leaves: HierarchyNode[],
+) {
+  const [mark] = model.resolvedMarks
+  return markOverlaySource(
+    model,
+    mark ?? {
+      index: 0,
+      bands: new Map(),
+      colors: model.featureColors,
+      labels: model.featureLabels,
+    },
+    leaves,
+  ).source
+}
+
+/**
  * One alignment mark's spans over `leaves`, in alignment pixels: filled rows,
  * a bar at the foot of the row, or thin sub-rows, as the mark's `height`,
  * `domainUnderline` and `subFeatureRows` decide. `bar` says the spans are

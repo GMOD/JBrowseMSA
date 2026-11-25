@@ -3,7 +3,10 @@ import { autorun } from 'mobx'
 import { expect, test } from 'vitest'
 
 import { markProblems, markSpanHeight } from './alignmentMarks.ts'
-import { markOverlaySource } from './components/msa/renderBoxFeatureCanvasBlock.ts'
+import {
+  domainOverlaySource,
+  markOverlaySource,
+} from './components/msa/renderBoxFeatureCanvasBlock.ts'
 import { domainUnderlineHeight } from './constants.ts'
 import stateModelFactory from './model.ts'
 
@@ -323,4 +326,15 @@ test('a row-table change or a re-sort leaves the marks as they are', () => {
   expect(model.rowNames).toEqual(['b', 'a'])
   dispose()
   expect(drawn).toHaveLength(1)
+})
+
+test('domainOverlaySource is the first mark, and no rows with no mark', () => {
+  const model = makeModel()
+  expect(domainOverlaySource(model, model.leaves).rows).toHaveLength(2)
+  model.setMarks([genes])
+  expect(
+    domainOverlaySource(model, model.leaves).rows.map(r => r.bands.length),
+  ).toEqual([1, 1])
+  model.setMarks([])
+  expect(domainOverlaySource(model, model.leaves).rows).toEqual([])
 })
