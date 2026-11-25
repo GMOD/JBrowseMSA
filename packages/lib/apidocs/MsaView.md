@@ -35,7 +35,9 @@ and rebuilds the alignment from reads.
 `defaults` replaces the library's default for each property it names, so a
 snapshot leaves out the host's default and keeps any other value, the library's
 own included. `resetZoom`, `fit` and the zoom detent read the `colWidth` and
-`rowHeight` given here.
+`rowHeight` given here. A `residueColor` default sets the `channel`, `field` and
+`scheme` a member left out of `residueColor` takes, so a host whose default
+`field` is `residue` keeps an explicit `feature`.
 
 ## Overview
 

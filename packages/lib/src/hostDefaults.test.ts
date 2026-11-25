@@ -1,8 +1,10 @@
-import { getSnapshot } from '@jbrowse/mobx-state-tree'
+import { getSnapshot, types } from '@jbrowse/mobx-state-tree'
 import { expect, test } from 'vitest'
 
 import { defaultColWidth, defaultRowHeight } from './constants.ts'
 import MSAModelF from './model.ts'
+
+import type { ResidueColorDefault } from './residueColor.ts'
 
 const msa = '>a\nACGT\n>b\nACGA\n'
 
@@ -56,4 +58,60 @@ test('a zoom reset returns to the host default', () => {
   model.resetZoom()
   expect(model.colWidth).toBe(5)
   expect(model.rowHeight).toBe(12)
+})
+
+test("the library's residueColor holds departures from its defaults", () => {
+  const model = MSAModelF().create({ type: 'MsaView', data: { msa } })
+  model.setResidueColor({ field: 'feature' })
+  expect(model.residueColor).toEqual({})
+  expect(model.resolvedResidueColor.field).toBe('feature')
+})
+
+const dna: ResidueColorDefault = {
+  field: 'residue',
+  scale: { scheme: 'jbrowse_dna' },
+}
+
+const DnaHost = types.compose(
+  'TView',
+  MSAModelF({ defaults: { residueColor: dna } }),
+  types.model({ type: types.literal('TView') }),
+)
+
+test('a host residueColor default colors an unset view', () => {
+  const model = DnaHost.create({ type: 'TView', data: { msa } })
+  expect(model.residueColor).toEqual({})
+  expect(model.resolvedResidueColor).toMatchObject({
+    channel: 'fill',
+    field: 'residue',
+    scheme: 'jbrowse_dna',
+  })
+  expect(getSnapshot(model).residueColor).toBeUndefined()
+})
+
+test("the library's residueColor defaults are a choice under a host's, and travel", () => {
+  const model = DnaHost.create({ type: 'TView', data: { msa } })
+  model.setResidueColor({ field: 'feature', scale: { scheme: 'maeditor' } })
+  expect(model.residueColor).toEqual({
+    field: 'feature',
+    scale: { scheme: 'maeditor' },
+  })
+
+  const reopened = DnaHost.create({
+    type: 'TView',
+    data: { msa },
+    residueColor: getSnapshot(model).residueColor,
+  })
+  expect(reopened.resolvedResidueColor).toMatchObject({
+    field: 'feature',
+    scheme: 'maeditor',
+  })
+})
+
+test('handing the cells to the domains under a host default keeps the field', () => {
+  const model = DnaHost.create({ type: 'TView', data: { msa } })
+  model.setCellFill('domain')
+  expect(model.residueColor).toEqual({ field: 'feature' })
+  model.setCellFill('residue')
+  expect(model.residueColor).toEqual({})
 })

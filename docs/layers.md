@@ -1003,6 +1003,12 @@ them into `residueColor` when it opens the link: `bgColor: false` is
 is `scale.scheme`, and a `customColorScheme` map is `scale.domain` and
 `scale.range`.
 
+The model's `residueColor` holds the members that differ from the defaults, so
+`model.setResidueColor({ field: 'feature' })` reads back as `{}`, and
+`model.resolvedResidueColor` has the value in effect for every member. A host
+that composes `MSAModelF` sets other defaults with
+`MSAModelF({ defaults: { residueColor } })` (`USAGE.md`).
+
 React: `residueColor={{ scale: { domain: ['K'], range: ['#1f77b4'] } }}` on
 `MSAViewer`, or `model.setResidueColor(color)`. R:
 `scale_residue_color(c(K = "#1f77b4"))`. Python:

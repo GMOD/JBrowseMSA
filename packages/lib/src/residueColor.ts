@@ -26,13 +26,39 @@ export interface ResidueColor {
   scale?: ResidueScale
 }
 
+/**
+ * A host's default residue color, which `MSAModelF({defaults})` puts in place
+ * of the library's `fill`, `feature` and `maeditor`
+ */
+export interface ResidueColorDefault {
+  channel?: ResidueColor['channel']
+  field?: ResidueColor['field']
+  scale?: { scheme?: string }
+}
+
+/** the value each member of the residue color takes where it is left out */
+export function residueColorBase(defaults: ResidueColorDefault = {}) {
+  return {
+    channel: defaults.channel ?? 'fill',
+    field: defaults.field ?? 'feature',
+    scheme: defaults.scale?.scheme ?? defaultColorSchemeName,
+  }
+}
+
+export type ResidueColorBase = ReturnType<typeof residueColorBase>
+
+const libraryBase = residueColorBase()
+
 /** the members of the residue color the cell renderers read */
-export function resolveResidueColor(color: ResidueColor) {
+export function resolveResidueColor(
+  color: ResidueColor,
+  base: ResidueColorBase = libraryBase,
+) {
   const scale = color.scale ?? {}
   return {
-    channel: color.channel ?? 'fill',
-    field: color.field ?? 'feature',
-    scheme: scale.scheme ?? defaultColorSchemeName,
+    channel: color.channel ?? base.channel,
+    field: color.field ?? base.field,
+    scheme: scale.scheme ?? base.scheme,
     letters: scale.domain
       ? letterColors({ domain: scale.domain, range: scale.range })
       : undefined,
@@ -43,21 +69,19 @@ export function resolveResidueColor(color: ResidueColor) {
  * The residue color with each member at its default left out, so a view at
  * the defaults writes none into its snapshot
  */
-export function normalizedResidueColor({
-  channel,
-  field,
-  scale,
-}: ResidueColor): ResidueColor {
-  const scheme =
-    scale?.scheme === defaultColorSchemeName ? undefined : scale?.scheme
+export function normalizedResidueColor(
+  { channel, field, scale }: ResidueColor,
+  base: ResidueColorBase = libraryBase,
+): ResidueColor {
+  const scheme = scale?.scheme === base.scheme ? undefined : scale?.scheme
   const kept = {
     ...(scheme === undefined ? {} : { scheme }),
     ...(scale?.domain ? { domain: scale.domain } : {}),
     ...(scale?.range ? { range: scale.range } : {}),
   }
   return {
-    ...(channel === 'color' ? { channel } : {}),
-    ...(field === 'residue' ? { field } : {}),
+    ...(channel === undefined || channel === base.channel ? {} : { channel }),
+    ...(field === undefined || field === base.field ? {} : { field }),
     ...(Object.keys(kept).length > 0 ? { scale: kept } : {}),
   }
 }
@@ -78,8 +102,11 @@ export interface LegacyColorKeys {
  * the `domain` and `range`. A `residueColor` in the same snapshot wins member
  * by member.
  */
-export function liftResidueColor<S extends LegacyColorKeys>(snapshot: S) {
-  return isObject(snapshot) ? liftKeys(snapshot) : snapshot
+export function liftResidueColor<S extends LegacyColorKeys>(
+  snapshot: S,
+  base: ResidueColorBase = libraryBase,
+) {
+  return isObject(snapshot) ? liftKeys(snapshot, base) : snapshot
 }
 
 // MST runs the preprocessor on whatever it validates, undefined included,
@@ -88,7 +115,10 @@ function isObject(value: unknown) {
   return typeof value === 'object' && value !== null
 }
 
-function liftKeys<S extends LegacyColorKeys>(snapshot: S) {
+function liftKeys<S extends LegacyColorKeys>(
+  snapshot: S,
+  base: ResidueColorBase,
+) {
   const {
     bgColor,
     colorSchemeName,
@@ -112,10 +142,9 @@ function liftKeys<S extends LegacyColorKeys>(snapshot: S) {
   }
   return {
     ...snapshot,
-    residueColor: normalizedResidueColor({
-      ...lifted,
-      ...residueColor,
-      scale: lifted.scale,
-    }),
+    residueColor: normalizedResidueColor(
+      { ...lifted, ...residueColor, scale: lifted.scale },
+      base,
+    ),
   }
 }

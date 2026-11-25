@@ -34,6 +34,10 @@ the residue mark's color object, `{channel, field, scale}`: which of the cell
 and the letter the color paints, whether the cell reads its residue or the
 feature covering it, and the scheme or the letter colors. See docs/layers.md
 
+It holds the members that differ from the defaults and no others, so
+`setResidueColor({field: 'feature'})` reads back as `{}`. `resolvedResidueColor`
+has the value in effect for every member
+
 ```js
 residueColor: stripDefault(types.frozen<ResidueColor>(), {})
 ```

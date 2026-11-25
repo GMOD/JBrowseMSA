@@ -294,18 +294,29 @@ model.clearHighlight('protein3d')
 ```
 
 A host that composes `MSAModelF` into its own model can set its own default for
-`colWidth`, `rowHeight` and `labelsAlignRight`. The snapshot leaves out a value
-equal to the host's default and keeps any other, the library's default included,
-so a session that sets `rowHeight: 16` reopens at 16. `resetZoom`, `fit` and the
-wheel zoom's stop at the default cell size use the host's numbers.
+`colWidth`, `rowHeight`, `labelsAlignRight` and the `channel`, `field` and
+`scale.scheme` of `residueColor`. The snapshot leaves out a value equal to the
+host's default and keeps any other, the library's default included, so a session
+that sets `rowHeight: 16` reopens at 16. `resetZoom`, `fit` and the wheel zoom's
+stop at the default cell size use the host's numbers.
 
 ```ts
 const TView = types.compose(
   'TView',
-  MSAModelF({ defaults: { rowHeight: 12, labelsAlignRight: true } }),
+  MSAModelF({
+    defaults: {
+      rowHeight: 12,
+      labelsAlignRight: true,
+      residueColor: { field: 'residue', scale: { scheme: 'jbrowse_dna' } },
+    },
+  }),
   types.model({ type: types.literal('TView') }),
 )
 ```
+
+`model.residueColor` holds the members that differ from those defaults, so under
+the library's defaults `setResidueColor({ field: 'feature' })` reads back as
+`{}`. Read `model.resolvedResidueColor` for the value in effect.
 
 ## Using react-msaview in a plain HTML file with UMD bundle
 

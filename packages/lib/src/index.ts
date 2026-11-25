@@ -77,7 +77,11 @@ export type {
   ScaleType,
   SharedScale,
 } from './scales.ts'
-export type { ResidueColor, ResidueScale } from './residueColor.ts'
+export type {
+  ResidueColor,
+  ResidueColorDefault,
+  ResidueScale,
+} from './residueColor.ts'
 export type { RecordScaleProblem, ScaleProblem } from './scaleProblems.ts'
 export { problemLine } from './scaleProblems.ts'
 export type {

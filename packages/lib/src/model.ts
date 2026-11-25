@@ -135,7 +135,11 @@ import { MSAModelF } from './model/msaModel.ts'
 import { TreeModelF } from './model/treeModel.ts'
 import { calculateNeighborJoiningTree } from './neighborJoining.ts'
 import { calculatePropertyConservation } from './propertyConservation.ts'
-import { liftResidueColor, resolveResidueColor } from './residueColor.ts'
+import {
+  liftResidueColor,
+  residueColorBase,
+  resolveResidueColor,
+} from './residueColor.ts'
 import {
   arrangeRows,
   bandsNotClades,
@@ -203,6 +207,7 @@ import type { ScrollZoomAxis } from './constants.ts'
 import type { HierarchyNode } from './hierarchy.ts'
 import type { LegendHides, LegendItem, LegendSection } from './legendSpec.ts'
 import type { ExportSvgOptions } from './renderToSvg.tsx'
+import type { ResidueColorDefault } from './residueColor.ts'
 import type { RecordScaleProblem } from './scaleProblems.ts'
 import type {
   ColorChannel,
@@ -504,6 +509,7 @@ export interface MsaViewDefaults {
   colWidth?: number
   rowHeight?: number
   labelsAlignRight?: boolean
+  residueColor?: ResidueColorDefault
 }
 
 /**
@@ -538,7 +544,9 @@ export interface MsaViewDefaults {
  * `defaults` replaces the library's default for each property it names, so a
  * snapshot leaves out the host's default and keeps any other value, the
  * library's own included. `resetZoom`, `fit` and the zoom detent read the
- * `colWidth` and `rowHeight` given here.
+ * `colWidth` and `rowHeight` given here. A `residueColor` default sets the
+ * `channel`, `field` and `scheme` a member left out of `residueColor` takes,
+ * so a host whose default `field` is `residue` keeps an explicit `feature`.
  */
 function stateModelFactory({
   maxInlineSnapshotBytes = defaultMaxInlineSnapshotBytes,
@@ -546,11 +554,12 @@ function stateModelFactory({
 }: { maxInlineSnapshotBytes?: number; defaults?: MsaViewDefaults } = {}) {
   const homeColWidth = defaults.colWidth ?? defaultColWidth
   const homeRowHeight = defaults.rowHeight ?? defaultRowHeight
+  const residueBase = residueColorBase(defaults.residueColor)
   return types
     .compose(
       DialogQueueSessionMixin(),
       TreeModelF(defaults),
-      MSAModelF(),
+      MSAModelF(residueBase),
       types.model('MsaView', {
         /**
          * #property
@@ -1667,7 +1676,7 @@ function stateModelFactory({
        * `range` give, undefined where it lists none
        */
       get resolvedResidueColor() {
-        return resolveResidueColor(self.residueColor)
+        return resolveResidueColor(self.residueColor, residueBase)
       },
 
       /**
@@ -5791,7 +5800,7 @@ function stateModelFactory({
         )
       },
     }))
-    .preProcessSnapshot(snapshot => liftResidueColor(snapshot))
+    .preProcessSnapshot(snapshot => liftResidueColor(snapshot, residueBase))
     .postProcessSnapshot(({ data, columnTracks, ...rest }) => ({
       // stripDefault handles per-property defaults; this drops inline documents
       // whose filehandle can refetch them

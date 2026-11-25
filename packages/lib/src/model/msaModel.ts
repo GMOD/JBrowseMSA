@@ -1,10 +1,10 @@
 import { types } from '@jbrowse/mobx-state-tree'
 
 import { defaultShowColumnStats } from '../constants.ts'
-import { normalizedResidueColor } from '../residueColor.ts'
+import { normalizedResidueColor, residueColorBase } from '../residueColor.ts'
 import { stripDefault } from '../stripDefault.ts'
 
-import type { ResidueColor } from '../residueColor.ts'
+import type { ResidueColor, ResidueColorBase } from '../residueColor.ts'
 import type { MSAFormat } from 'msa-parsers'
 
 const msaFormats: MSAFormat[] = ['stockholm', 'a3m', 'fasta', 'emf', 'clustal']
@@ -12,7 +12,7 @@ const msaFormats: MSAFormat[] = ['stockholm', 'a3m', 'fasta', 'emf', 'clustal']
 /**
  * #stateModel MSAModel
  */
-export function MSAModelF() {
+export function MSAModelF(residueBase: ResidueColorBase = residueColorBase()) {
   return types
     .model({
       /**
@@ -21,6 +21,10 @@ export function MSAModelF() {
        * the cell and the letter the color paints, whether the cell reads its
        * residue or the feature covering it, and the scheme or the letter
        * colors. See docs/layers.md
+       *
+       * It holds the members that differ from the defaults and no others, so
+       * `setResidueColor({field: 'feature'})` reads back as `{}`.
+       * `resolvedResidueColor` has the value in effect for every member
        */
       residueColor: stripDefault(types.frozen<ResidueColor>(), {}),
 
@@ -47,7 +51,7 @@ export function MSAModelF() {
        * replace the residue color; a member left out takes its default
        */
       setResidueColor(color: ResidueColor) {
-        self.residueColor = normalizedResidueColor(color)
+        self.residueColor = normalizedResidueColor(color, residueBase)
       },
 
       /**
