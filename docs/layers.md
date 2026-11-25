@@ -420,6 +420,9 @@ The name of a row to read every other row against. With one set, the viewer:
 
 - draws a residue matching the reference row's residue in its column as a dot on
   a grey cell, so only the differences keep their color
+- draws a gap matching the reference row's gap as that gap on a grey cell, so in
+  a column where the reference has `-`, a row holding `-` reads apart from a row
+  holding `.`
 - repeats the reference row as a track pinned above the alignment, so it stays
   in view while the rows under it scroll; the row keeps its place in the tree
 - numbers the position ruler and the track tooltips in the reference row's own
