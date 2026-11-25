@@ -269,6 +269,16 @@ export const catalog: CatalogEntry[] = [
       'A bar beside each row counts its non-synonymous codons.',
   },
   {
+    id: 'ModificationCalls',
+    name: 'Modification calls over base colors',
+    category: 'Genes & DNA',
+    description:
+      'Eight synthetic reads against a reference in base colors. One mark ' +
+      'fills the cell of each 5mC call from blue to red by its probability, ' +
+      'over the base colors and the reference-match wash, and a second draws ' +
+      'the exon on the reference as a bar under its row.',
+  },
+  {
     id: 'GeneCluster',
     name: 'Gene arrow map (gggenes-style)',
     category: 'Genes & DNA',
