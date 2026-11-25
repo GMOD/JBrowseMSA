@@ -37,7 +37,9 @@ snapshot leaves out the host's default and keeps any other value, the library's
 own included. `resetZoom`, `fit` and the zoom detent read the `colWidth` and
 `rowHeight` given here. A `residueColor` default sets the `channel`, `field` and
 `scheme` a member left out of `residueColor` takes, so a host whose default
-`field` is `residue` keeps an explicit `feature`.
+`field` is `residue` keeps an explicit `feature`. A `turnedOffTracks` default
+says which tracks start off, so a host whose rows have genome coordinates starts
+with `position-ruler` on.
 
 ## Overview
 
@@ -520,8 +522,8 @@ turnedOffFeatures: stripDefault(types.map(types.boolean), {})
 
 the user's explicit show/hide choice per track id, keyed by id with the value
 meaning "off". A track the user has never touched is absent and falls back to
-its own default (see `defaultOffTracks`), so a hidden-by-default track adds
-nothing to the shared URL.
+its own default (`defaultOffTracks`, or the host's `defaults.turnedOffTracks`),
+so a track left at its default adds nothing to the shared URL.
 
 ```js
 turnedOffTracks: stripDefault(types.map(types.boolean), {})

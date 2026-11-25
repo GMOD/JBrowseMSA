@@ -386,15 +386,6 @@ export const preservedOnReset = new Set([
   'embeddedMode',
 ])
 
-// `turnedOffTracks` holds only the user's explicit choices, so a hidden-by-default
-// track writes nothing into the snapshot
-function trackIsOff(
-  turnedOffTracks: { get: (id: string) => boolean | undefined },
-  id: string,
-) {
-  return turnedOffTracks.get(id) ?? defaultOffTracks.has(id)
-}
-
 // shared empty results, so observers don't see a fresh [] as a change
 const noDomains: Annotation[] = []
 const noClades: ResolvedClade[] = []
@@ -562,6 +553,8 @@ export interface MsaViewDefaults {
   rowHeight?: number
   labelsAlignRight?: boolean
   residueColor?: ResidueColorDefault
+  /** whether each track id named starts off, as `turnedOffTracks` spells it */
+  turnedOffTracks?: Record<string, boolean>
 }
 
 /**
@@ -599,6 +592,8 @@ export interface MsaViewDefaults {
  * `colWidth` and `rowHeight` given here. A `residueColor` default sets the
  * `channel`, `field` and `scheme` a member left out of `residueColor` takes,
  * so a host whose default `field` is `residue` keeps an explicit `feature`.
+ * A `turnedOffTracks` default says which tracks start off, so a host whose
+ * rows have genome coordinates starts with `position-ruler` on.
  */
 function stateModelFactory({
   maxInlineSnapshotBytes = defaultMaxInlineSnapshotBytes,
@@ -607,6 +602,14 @@ function stateModelFactory({
   const homeColWidth = defaults.colWidth ?? defaultColWidth
   const homeRowHeight = defaults.rowHeight ?? defaultRowHeight
   const residueBase = residueColorBase(defaults.residueColor)
+  const startsOff = (id: string) =>
+    defaults.turnedOffTracks?.[id] ?? defaultOffTracks.has(id)
+  // `turnedOffTracks` holds only the user's explicit choices, so a track left
+  // at its default writes nothing into the snapshot
+  const trackIsOff = (
+    turnedOffTracks: { get: (id: string) => boolean | undefined },
+    id: string,
+  ) => turnedOffTracks.get(id) ?? startsOff(id)
   return types
     .compose(
       DialogQueueSessionMixin(),
@@ -787,8 +790,9 @@ function stateModelFactory({
          * #property
          * the user's explicit show/hide choice per track id, keyed by id with
          * the value meaning "off". A track the user has never touched is absent
-         * and falls back to its own default (see `defaultOffTracks`), so a
-         * hidden-by-default track adds nothing to the shared URL.
+         * and falls back to its own default (`defaultOffTracks`, or the
+         * host's `defaults.turnedOffTracks`), so a track left at its default
+         * adds nothing to the shared URL.
          */
         turnedOffTracks: stripDefault(types.map(types.boolean), {}),
 
@@ -4411,7 +4415,7 @@ function stateModelFactory({
        */
       setTracksShown(ids: string[], shown: boolean) {
         for (const id of ids) {
-          if (defaultOffTracks.has(id) === !shown) {
+          if (startsOff(id) === !shown) {
             self.turnedOffTracks.delete(id)
           } else {
             self.turnedOffTracks.set(id, !shown)

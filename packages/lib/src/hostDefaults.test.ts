@@ -115,3 +115,29 @@ test('handing the cells to the domains under a host default keeps the field', ()
   model.setCellFill('residue')
   expect(model.residueColor).toEqual({})
 })
+
+const Ruled = MSAModelF({
+  defaults: { turnedOffTracks: { 'position-ruler': false } },
+})
+
+const shown = (model: { turnedOnTracks: { model: { id: string } }[] }) =>
+  model.turnedOnTracks.map(t => t.model.id)
+
+test('a host turns on a track the library starts off, and the snapshot says nothing', () => {
+  const model = Ruled.create({ type: 'MsaView', data: { msa } })
+  expect(shown(model)).toContain('position-ruler')
+  expect(shown(model)).not.toContain('sequence-logo')
+  expect(getSnapshot(model).turnedOffTracks).toBeUndefined()
+})
+
+test('turning off a track the host starts on is a choice, and turning it back on is not', () => {
+  const model = Ruled.create({ type: 'MsaView', data: { msa } })
+  model.toggleTrack('position-ruler')
+  expect(shown(model)).not.toContain('position-ruler')
+  expect(getSnapshot(model).turnedOffTracks).toEqual({ 'position-ruler': true })
+  expect(shown(Ruled.create(getSnapshot(model)))).not.toContain(
+    'position-ruler',
+  )
+  model.toggleTrack('position-ruler')
+  expect(getSnapshot(model).turnedOffTracks).toBeUndefined()
+})
