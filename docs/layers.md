@@ -423,8 +423,8 @@ The name of a row to read every other row against. With one set, the viewer:
 - repeats the reference row as a track pinned above the alignment, so it stays
   in view while the rows under it scroll; the row keeps its place in the tree
 - numbers the position ruler and the track tooltips in the reference row's own
-  residues, and reads a number typed into the **Go to row or column** box as one
-  of them
+  residues, or in its [`rowCoordinates`](#rowcoordinates) where it has a record,
+  and reads a number typed into the **Go to row or column** box as one of them
 
 ```json
 {
@@ -444,6 +444,65 @@ residues the highlights count.
 React: the `relativeTo` prop on `MSAViewer`, or `model.drawRelativeTo(name)`. R:
 `msaview(relative_to = "human")` or `+ stat_msa_diff("human")`. Python: the
 `relative_to` trait.
+
+## rowCoordinates
+
+The coordinate system a row's residues are numbered in. A record says that
+residue 1 of `row` is position `start` of the sequence `name`, as for a
+reference row cut from chrX at base 146,993,531, or a protein row that begins at
+residue 120 of its protein.
+
+```json
+{
+  "type": "MsaView",
+  "data": {
+    "msa": ">reference\nACGTACGTACGT---ACGTACGTACGTACGTACGT\n>read\nACGTACGTACGTTTTACGTACGTACGTACGTACGT"
+  },
+  "relativeTo": "reference",
+  "rowCoordinates": [
+    { "row": "reference", "name": "chrX", "start": 146993531 }
+  ],
+  "turnedOffTracks": { "position-ruler": false }
+}
+```
+
+[Open this snapshot in the app][live-layers-row-coordinates].
+
+| Field   | Meaning                                                                                 |
+| ------- | --------------------------------------------------------------------------------------- |
+| `row`   | The row whose residues the record numbers                                               |
+| `start` | The position of the row's first residue                                                 |
+| `name`  | The sequence the positions are on, printed before them; the row's own name where absent |
+
+With a record for the `relativeTo` row, the position ruler puts its ticks at
+round positions of that row, 146,993,540 and 146,993,550, each over the column
+its residue occupies. A column where that row has a gap, such as an insertion
+another row carries, gets no tick. The step between ticks is 1, 2 or 5 times a
+power of ten, the smallest that keeps the widest label 12 px clear of the next,
+and the labels print with thousands separators. Hidden columns can pack two
+ticks closer than that, and the ruler then leaves out the second.
+
+Each row's record also numbers:
+
+- the track tooltips, which name the column `chrX:146,993,540`
+- the readout in the header for the row under the pointer
+- the **Go to row or column** box, which reads a bare number as a position of
+  the `relativeTo` row, `chrX:146,993,540` as a position on the row whose record
+  names `chrX` (the `relativeTo` row first), and `row:N` as a position in that
+  row's coordinates, with or without the separators
+
+Every position a layer writes stays a residue of its row, counted from 1 at the
+row's first letter: `highlights`, `features`, `region`, a `columnTracks` track's
+`row`, and the `residue` of the cell `onCellHover` reports. A position converts
+to a residue as `position - start + 1`, which
+`model.residueAtPosition(row, position)` computes.
+
+A row without a record numbers its residues from 1. Where several records name
+one row, the last applies. A record does not turn the ruler on; the
+`turnedOffTracks` entry above does.
+
+React: the `rowCoordinates` prop on `MSAViewer`, or
+`model.setRowCoordinates(records)`. Python: the `row_coordinates` trait.
 
 ## clades
 
@@ -512,8 +571,9 @@ color at full strength, and takes the theme's text color without one.
 
 The bracket gutter is at the right of the tree area, between the tip labels and
 the first row panel or the alignment, as wide as the bar plus the widest label
-at the tree font, to a limit of 140px, past which a label is cut with an
-ellipsis. A label reads across the rows where they are taller than the font, and
+at the font of a 16px row, to a limit of 140px, past which a label is cut with
+an ellipsis. A label draws at the tree font up to that size, so taller rows keep
+it whole. A label reads across the rows where they are taller than its font, and
 runs up the bar where they are not. A `highlight` record carrying a `label`
 draws it the same way, with no bar.
 
@@ -1073,9 +1133,11 @@ row the table gives no value leaves its cell empty.
 Each header draws in the band the tree's scale bar and the minimap share, turned
 on its side, and it exports with the figure. The band is as tall as the minimap,
 so a longer header is clipped to it and the full name is the column's tooltip. A
-panel with an axis, a `bar`, a `point` or a `features` panel under
-`x: "position"`, draws the axis at the foot of the band and writes its header
-across above it.
+header that fits the panel's width, such as `n` over a 28px column, writes
+across instead. A header draws at the rows' font up to that of a 16px row, since
+the band keeps its height at every row height. A panel with an axis, a `bar`, a
+`point` or a `features` panel under `x: "position"`, draws the axis at the foot
+of the band and writes its header across above it.
 
 A panel's scale carries a legend of its own, titled by the field, and every
 panel and encoding declaring the same members over one field lists it once.
@@ -1201,8 +1263,10 @@ A `bar` panel draws one bar per row from the panel's left edge to the value of a
 numeric `rowData` field, and a `point` panel draws a dot at that value. The
 value runs along the panel's width through `encoding.x.scale`, and the header
 band draws that scale's axis with the `header` above it as its title. A `text`
-panel prints a `rowData` field in the panel's width, cut in the middle where it
-runs longer.
+panel prints a `rowData` field in the panel's width at the rows' font, or at the
+largest smaller font its widest value fits, down to that of a 16px row. A value
+longer than that is cut in the middle, and one with no room for a character
+shows an ellipsis.
 
 ```json
 "rowPanels": [
@@ -1453,6 +1517,8 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSE%5Cn%3Emouse%5CnMKA-NSE%5Cn%3Echicken%5CnMKSANSE%22%7D%2C%22selection%22%3A%7B%22start%22%3A2%2C%22end%22%3A5%2C%22rows%22%3A%5B%22human%22%2C%22mouse%22%5D%7D%7D%7D
 [live-layers-relative-to]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSE%5Cn%3Emouse%5CnMKA-NSE%5Cn%3Echicken%5CnMKSANSE%22%7D%2C%22relativeTo%22%3A%22human%22%7D%7D
+[live-layers-row-coordinates]:
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ereference%5CnACGTACGTACGT---ACGTACGTACGTACGTACGT%5Cn%3Eread%5CnACGTACGTACGTTTTACGTACGTACGTACGTACGT%22%7D%2C%22relativeTo%22%3A%22reference%22%2C%22rowCoordinates%22%3A%5B%7B%22row%22%3A%22reference%22%2C%22name%22%3A%22chrX%22%2C%22start%22%3A146993531%7D%5D%2C%22turnedOffTracks%22%3A%7B%22position-ruler%22%3Afalse%7D%7D%7D
 [live-layers-clades]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22clustalx_protein_dynamic%22%7D%7D%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A700%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%5D%2C%22clades%22%3A%5B%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22highlight%22%2C%22color%22%3A%22%23fff3c4%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-5%22%2C%22TEM-109%22%5D%2C%22tips%22%3A7%2C%22mark%22%3A%22bracket%22%2C%22color%22%3A%22%23b45309%22%2C%22label%22%3A%22cephalosporin%2C%207%22%7D%2C%7B%22mrca%22%3A%5B%22TEM-3%22%2C%22TEM-7%22%5D%2C%22tips%22%3A6%2C%22mark%22%3A%22collapse%22%7D%5D%7D%7D
 [live-layers-rowdata]:

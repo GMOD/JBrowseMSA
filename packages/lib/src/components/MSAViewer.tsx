@@ -32,6 +32,7 @@ import type {
   MsaSelection,
   Region,
   ResidueMapping,
+  RowCoordinates,
   RowDataInput,
   RowPanelSpec,
   RowTransform,
@@ -108,6 +109,13 @@ export interface MSAViewerProps {
   columnTracks?: ColumnTrackSpec[]
   /** which residue of which structure each row's residues are (see docs/layers.md) */
   residueMappings?: ResidueMapping[]
+  /**
+   * the coordinate system each row's residues are numbered in,
+   * `{row, start, name?}`: residue 1 of `row` is position `start` of `name`,
+   * which the ruler, the tooltips and the Go to box print and read (see
+   * docs/layers.md)
+   */
+  rowCoordinates?: RowCoordinates[]
   /** extra fields per row name, such as a lineage or a host (see docs/layers.md) */
   rowData?: RowDataInput
   /**
@@ -447,6 +455,12 @@ const syncedProps = [
     p => p.residueMappings ?? [],
     (m, v) => {
       m.setResidueMappings(v)
+    },
+  ),
+  synced(
+    p => p.rowCoordinates ?? [],
+    (m, v) => {
+      m.setRowCoordinates(v)
     },
   ),
   synced(

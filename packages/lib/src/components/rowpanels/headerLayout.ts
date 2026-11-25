@@ -1,11 +1,32 @@
-import { rowPanelHeaderHeight } from '../../constants.ts'
+import { labelFitFontSize, rowPanelHeaderHeight } from '../../constants.ts'
+import { measureTextCanvas } from '../../measureTextCanvas.ts'
 import { axisHeight, drawAxis } from '../axis.ts'
 
 import type { PanelAxis } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 
-export function headerRunsAcross(panelWidth: number) {
-  return panelWidth > rowPanelHeaderHeight
+/**
+ * The header band is the same height at every row height, so a header draws
+ * at the rows' font up to the font of a 16px row
+ */
+export function headerFontSize(rowFontSize: number) {
+  return Math.min(rowFontSize, labelFitFontSize)
+}
+
+/**
+ * Whether a header writes across its panel: one with an axis, one wider than
+ * the band is tall, and one whose text fits the panel's width do. A narrower
+ * panel turns a longer header on its side.
+ */
+export function headerRunsAcross(
+  panel: { width: number; header: string; axis?: PanelAxis },
+  fontSize: number,
+) {
+  return (
+    !!panel.axis ||
+    panel.width > rowPanelHeaderHeight ||
+    measureTextCanvas(panel.header, fontSize) <= panel.width - 4
+  )
 }
 
 /**

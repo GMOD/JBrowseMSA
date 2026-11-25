@@ -39,6 +39,7 @@ export { defineMsaElement } from './element.ts'
 export { useMsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MountedViewer } from './mount.tsx'
+export type { RulerTick } from './components/tracks/rulerTicks.ts'
 export {
   type MsaViewDefaults,
   type MsaViewModel,
@@ -146,6 +147,7 @@ export type {
   RowSort,
   RowStripSpec,
   RowTextSpec,
+  RowCoordinates,
   RowResidue,
   RowTransform,
   SpanSpec,

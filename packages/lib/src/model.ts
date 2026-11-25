@@ -58,6 +58,10 @@ import {
   highlightTrackHeight,
   packHighlightBands,
 } from './components/tracks/highlightBands.ts'
+import {
+  coordinateRulerTicks,
+  rulerFontSize,
+} from './components/tracks/rulerTicks.ts'
 import { cladeGutterWidth } from './components/tree/cladeBrackets.ts'
 import { scaleBarLength } from './components/tree/scaleBar.ts'
 import {
@@ -129,6 +133,7 @@ import {
   leaves,
   nodeCoveringRows,
 } from './hierarchy.ts'
+import { measureTextCanvas } from './measureTextCanvas.ts'
 import { DataModelF } from './model/DataModel.ts'
 import { DialogQueueSessionMixin } from './model/DialogQueue.ts'
 import { MSAModelF } from './model/msaModel.ts'
@@ -140,6 +145,7 @@ import {
   residueColorBase,
   resolveResidueColor,
 } from './residueColor.ts'
+import { coordinatesByRow, positionLabel, residueAt } from './rowCoordinates.ts'
 import {
   arrangeRows,
   bandsNotClades,
@@ -247,6 +253,7 @@ import type {
   ResolvedSelection,
   TreeRoot,
   ResolvedRowPanel,
+  RowCoordinates,
   RowDataInput,
   RowPanelSpec,
   RowResidue,
@@ -768,6 +775,19 @@ function stateModelFactory({
          */
         residueMappings: stripDefault(
           types.array(types.frozen<ResidueMapping>()),
+          [],
+        ),
+
+        /**
+         * #property
+         * the coordinate system each row's residues are numbered in,
+         * `{row, start, name?}`: residue 1 of `row` is position `start` of the
+         * sequence `name`. The position ruler numbers the `relativeTo` row's,
+         * and the tooltips and the Go to box read every row's. Layer positions
+         * stay residues of the row. See docs/layers.md
+         */
+        rowCoordinates: stripDefault(
+          types.array(types.frozen<RowCoordinates>()),
           [],
         ),
 
@@ -3406,6 +3426,66 @@ function stateModelFactory({
 
       /**
        * #getter
+       * `rowCoordinates` keyed by row, the last record naming a row winning
+       */
+      get rowCoordinatesByRow() {
+        return coordinatesByRow(self.rowCoordinates)
+      },
+
+      /**
+       * #method
+       * a residue of a row as the tooltips print it: `name:position` in the
+       * row's coordinates, or `row:residue` for a row without them
+       *
+       * @param rowName - The name of the row
+       * @param residue - The residue of that row, 1-based
+       */
+      rowPositionLabel(rowName: string, residue: number) {
+        return positionLabel(
+          rowName,
+          this.rowCoordinatesByRow.get(rowName),
+          residue,
+        )
+      },
+
+      /**
+       * #method
+       * the 1-based residue of a row at a position in its coordinates, which
+       * is the position itself for a row without them
+       *
+       * @param rowName - The name of the row
+       * @param position - A position in the row's coordinates
+       */
+      residueAtPosition(rowName: string, position: number) {
+        return residueAt(this.rowCoordinatesByRow.get(rowName), position)
+      },
+
+      /**
+       * #getter
+       * the position ruler's ticks and widest label in the `relativeTo` row's
+       * coordinates, undefined where that row has none
+       */
+      get coordinateRuler() {
+        const { relativeTo, colWidth } = self
+        const coordinates =
+          relativeTo === undefined
+            ? undefined
+            : this.rowCoordinatesByRow.get(relativeTo)
+        const residueColumns =
+          relativeTo === undefined ? undefined : self.seqPosIndex(relativeTo)
+        return coordinates && residueColumns
+          ? coordinateRulerTicks({
+              residueColumns,
+              coordinates,
+              colWidth,
+              visibleCol: globalCol => this.globalColToVisibleCol(globalCol),
+              measure: text => measureTextCanvas(text, rulerFontSize),
+            })
+          : undefined
+      },
+
+      /**
+       * #getter
        * why each ignored residue mapping is ignored, so a host can tell a
        * missing structure from a mapping made against a different alignment.
        */
@@ -4202,6 +4282,14 @@ function stateModelFactory({
        */
       setResidueMappings(mappings: ResidueMapping[]) {
         self.residueMappings.replace(mappings)
+      },
+      /**
+       * #action
+       * replace the coordinate systems the rows are numbered in (see
+       * docs/layers.md)
+       */
+      setRowCoordinates(records: RowCoordinates[]) {
+        self.rowCoordinates.replace(records)
       },
       /**
        * #action
@@ -5002,11 +5090,13 @@ function stateModelFactory({
             }
           } else if (panel.kind === 'text') {
             const { text, color } = panel.encoding
+            const texts = rowTexts(rowData, text.field)
             return {
               kind: panel.kind,
               field: text.field,
               header: panel.header ?? text.field,
-              texts: rowTexts(rowData, text.field),
+              texts,
+              widestText: widestLabel([...texts.values()], labelFitFontSize),
               ...colorPart(color),
             }
           } else if (panel.kind === 'features') {

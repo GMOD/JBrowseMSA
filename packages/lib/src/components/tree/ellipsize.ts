@@ -1,4 +1,4 @@
-const ellipsis = '…'
+export const ellipsis = '…'
 
 function cutMiddle(text: string, kept: number) {
   const head = Math.ceil(kept / 2)

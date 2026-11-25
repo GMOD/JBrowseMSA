@@ -98,8 +98,9 @@ The color object, its scales and their legends and axes are in
   `renderRowPanel.ts` dispatches on the record's `kind` for the live view and
   the SVG export both. `rowPanelsWidth` comes out of `msaAreaWidth`, which moves
   the alignment, the minimap and the tracks right by the panels; the headers
-  take their own band in `TopArea` and export as a `rotate(-90)` text each. Row
-  panels stay out of the track machinery, which is column space.
+  take their own band in `TopArea` and export as a `rotate(-90)` text each, or
+  across where `headerRunsAcross` finds the text fits the panel. Row panels stay
+  out of the track machinery, which is column space.
 - `renderStrip.ts` draws the `strip` kind, a cell per row. `features` draws the
   GFF's spans per row through `components/msa/drawFeatureSpans.ts`, the one span
   mark: the alignment's overlay (`renderBoxFeatureCanvasBlock.ts`), the panel

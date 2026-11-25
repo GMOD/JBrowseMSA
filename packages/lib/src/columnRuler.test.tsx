@@ -5,7 +5,8 @@
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { beforeAll, expect, test } from 'vitest'
 
-import { rulerCols, rulerStep } from './components/tracks/drawTracks.ts'
+import { rulerCols } from './components/tracks/drawTracks.ts'
+import { rulerStep } from './components/tracks/rulerTicks.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 

@@ -400,6 +400,8 @@ export interface ResolvedTextPanel extends ResolvedPanelBase {
   field: string
   colorField?: string
   texts: Map<string, string>
+  // the widest text at labelFitFontSize, px
+  widestText: number
   colors: Map<string, string>
   hiddenRows: Set<string>
 }
@@ -490,6 +492,19 @@ export interface StructureResidue {
 export interface RowResidue {
   rowName: string
   seqPos: number
+}
+
+/**
+ * The coordinate system a row's residues are numbered in: residue 1 is
+ * position `start` of the sequence `name`, as a reference row cut from
+ * chrX starting at 146,993,531 is. The ruler, the tooltips and the Go to box
+ * read it; every position a layer writes stays a residue of the row. See
+ * docs/layers.md
+ */
+export interface RowCoordinates {
+  row: string
+  start: number
+  name?: string
 }
 
 /**

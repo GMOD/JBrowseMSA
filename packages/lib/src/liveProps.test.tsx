@@ -192,9 +192,11 @@ test('the data layers follow their props', () => {
         segments: [{ rowStart: 1, rowEnd: 7, structStart: 1, structEnd: 7 }],
       },
     ],
+    rowCoordinates: [{ row: 'human', name: 'P1', start: 120 }],
     highlightColumns: [1, 2],
   })
 
+  expect(model.rowPositionLabel('human', 1)).toBe('P1:120')
   expect(model.highlights.map(h => h.label)).toEqual(['motif', undefined])
   expect(model.columnTracks.map(t => t.id)).toEqual(['t'])
   expect(model.mappedStructures.map(m => m.structure.id)).toEqual(['1ABC'])

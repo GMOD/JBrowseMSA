@@ -14,6 +14,7 @@ import type {
   Region,
   ResidueColor,
   ResidueMapping,
+  RowCoordinates,
   RowDataInput,
   RowPanelSpec,
   RowTransform,
@@ -45,6 +46,7 @@ export interface Traits {
   clades: Clade[]
   column_tracks: ColumnTrackSpec[]
   residue_mappings: ResidueMapping[]
+  row_coordinates: RowCoordinates[]
   row_data: RowDataInput
   encodings: Encoding[]
   row_panels: RowPanelSpec[]
@@ -88,6 +90,7 @@ export const INPUT_TRAITS = [
   'clades',
   'column_tracks',
   'residue_mappings',
+  'row_coordinates',
   'row_data',
   'encodings',
   'row_panels',
@@ -144,6 +147,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     clades: model.get('clades'),
     columnTracks: model.get('column_tracks'),
     residueMappings: model.get('residue_mappings'),
+    rowCoordinates: model.get('row_coordinates'),
     rowData: model.get('row_data'),
     encodings: model.get('encodings'),
     rowPanels: model.get('row_panels'),

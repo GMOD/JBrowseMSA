@@ -126,6 +126,19 @@ test('shareLink round-trips the view through the gzipped #data=', async () => {
   expect(reopened.msaview.data.msa).toBe(msa)
 })
 
+test("shareLink carries the rows' coordinates", async () => {
+  const rowCoordinates = [{ row: 'human', name: 'chr1', start: 1000 }]
+  const app = await open(
+    JSON.stringify({
+      msaview: { type: 'MsaView', data: { msa }, rowCoordinates },
+    }),
+  )
+  const link = await shareLink(app, href)
+  const reopened = await open(linkParam(new URL(link.url!)))
+  expect(reopened.msaview.rowCoordinates).toEqual(rowCoordinates)
+  expect(reopened.msaview.rowPositionLabel('human', 2)).toBe('chr1:1,001')
+})
+
 test('shareLink moves an old ?data= link into the fragment', async () => {
   const app = await open(
     JSON.stringify({ msaview: { type: 'MsaView', data: { msa } } }),

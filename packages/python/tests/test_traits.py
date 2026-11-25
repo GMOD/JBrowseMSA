@@ -37,6 +37,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "clades": [],
         "column_tracks": [],
         "residue_mappings": [],
+        "row_coordinates": [],
         "row_data": {},
         "encodings": [],
         "row_panels": [],

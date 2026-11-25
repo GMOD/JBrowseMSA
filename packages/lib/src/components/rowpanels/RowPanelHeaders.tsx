@@ -7,6 +7,7 @@ import { useCanvasAutorun } from '../../useCanvasAutorun.ts'
 import {
   drawHeaderAxis,
   headerAxisHeight,
+  headerFontSize,
   headerRunsAcross,
 } from './headerLayout.ts'
 
@@ -50,11 +51,13 @@ const AxisCanvas = observer(function ({
  * tree ruler and the minimap, where the export draws them. A narrow strip's
  * name is DOM text turned on its side, since the canvas layer has no rotation,
  * and the SVG export draws it with a `rotate(-90)`. A panel wider than the
- * band is tall writes its name across. A panel with a value scale draws its
- * axis at the foot of the band and its header above it, as the axis title.
+ * band is tall, or whose name fits its width, writes the name across. A panel
+ * with a value scale draws its axis at the foot of the band and its header
+ * above it, as the axis title.
  */
 const RowPanelHeaders = observer(function ({ model }: { model: MsaViewModel }) {
   const { resolvedRowPanels, rowPanelsHeaderHeight, fontSize } = model
+  const headerFont = headerFontSize(fontSize)
   return resolvedRowPanels.length > 0 ? (
     <div
       style={{
@@ -66,7 +69,7 @@ const RowPanelHeaders = observer(function ({ model }: { model: MsaViewModel }) {
       }}
     >
       {resolvedRowPanels.map(panel => {
-        const across = !!panel.axis || headerRunsAcross(panel.width)
+        const across = headerRunsAcross(panel, headerFont)
         const title = (
           <div
             title={panel.header}
@@ -76,10 +79,10 @@ const RowPanelHeaders = observer(function ({ model }: { model: MsaViewModel }) {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               ...(across
-                ? { fontSize, textAlign: 'center' }
+                ? { fontSize: headerFont, textAlign: 'center' }
                 : {
                     height: rowPanelsHeaderHeight,
-                    fontSize: Math.min(fontSize, panel.width),
+                    fontSize: Math.min(headerFont, panel.width),
                     // vertical-rl reads top to bottom, and the half turn makes
                     // it read upwards from the strip, as rotate(-90) exports
                     writingMode: 'vertical-rl',

@@ -1,3 +1,5 @@
+import { parsePosition } from '../../rowCoordinates.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
 export function findableRowNames(model: MsaViewModel) {
@@ -18,8 +20,11 @@ export function rowNameSuggestions(names: string[], input: string, limit = 50) {
 
 /**
  * The visible row and column a "Go to" entry names: a row by its name, the
- * column the ruler numbers N, or residue N of a row written `name:N`. A name
- * is tried whole first, so a row called `chr1:100` stays reachable.
+ * column the ruler numbers N, or position N of a row written `name:N`. A row
+ * with `rowCoordinates` reads N in them, and the coordinates' own name
+ * (`chrX:146,993,540`) names the `relativeTo` row first, then any other row
+ * carrying it. A name is tried whole first, so a row called `chr1:100` stays
+ * reachable.
  */
 function resolveGoTo(model: MsaViewModel, text: string) {
   const query = text.trim()
@@ -27,25 +32,49 @@ function resolveGoTo(model: MsaViewModel, text: string) {
   if (row !== undefined) {
     return { row }
   }
-  const residue = /^(.+):(\d+)$/.exec(query)
-  if (residue) {
-    const [, name = '', pos] = residue
-    const rowIndex = model.rowNamesSet.get(name)
+  const named = /^(.+):([\d,]+)$/.exec(query)
+  if (named) {
+    const [, name = '', digits = ''] = named
+    const position = parsePosition(digits)
+    const rowName = rowNamed(model, name)
+    const rowIndex =
+      rowName === undefined ? undefined : model.rowNamesSet.get(rowName)
     const col =
-      rowIndex === undefined ? undefined : columnOfResidue(model, name, +pos!)
-    return col === undefined ? undefined : { row: rowIndex, col }
+      rowName === undefined || position === undefined
+        ? undefined
+        : columnOfPosition(model, rowName, position)
+    return rowIndex === undefined || col === undefined
+      ? undefined
+      : { row: rowIndex, col }
   }
-  if (/^\d+$/.test(query)) {
-    const n = +query
+  const n = parsePosition(query)
+  if (n !== undefined) {
     const { relativeTo, MSA } = model
     const col = relativeTo
-      ? columnOfResidue(model, relativeTo, n)
+      ? columnOfPosition(model, relativeTo, n)
       : n >= 1 && n <= (MSA?.getWidth() ?? 0)
         ? model.globalColToVisibleCol(n - 1)
         : undefined
     return col === undefined ? undefined : { col }
   }
   return undefined
+}
+
+// a row by its own name, or by the name of the coordinates it carries
+function rowNamed(model: MsaViewModel, name: string) {
+  const { relativeTo, rowNamesSet, rowCoordinatesByRow } = model
+  const carriers = [...rowCoordinatesByRow.values()]
+    .filter(record => record.name === name && rowNamesSet.has(record.row))
+    .map(record => record.row)
+  return rowNamesSet.has(name)
+    ? name
+    : relativeTo !== undefined && carriers.includes(relativeTo)
+      ? relativeTo
+      : carriers[0]
+}
+
+function columnOfPosition(model: MsaViewModel, name: string, position: number) {
+  return columnOfResidue(model, name, model.residueAtPosition(name, position))
 }
 
 // seqPosToVisibleCol maps a residue past the row's end to the column after

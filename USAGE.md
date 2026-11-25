@@ -65,6 +65,7 @@ Props:
 | `highlightColumns`  | `number[]`               | Columns (1-based, like `highlights`), one band per run of adjacent columns                                   |
 | `clades`            | `Clade[]`                | Tree clades with a mark over them                                                                            |
 | `residueMappings`   | `ResidueMapping[]`       | Structure residue for each residue of a row                                                                  |
+| `rowCoordinates`    | `RowCoordinates[]`       | `{row, start, name?}`: the coordinates the ruler and tooltips number a row's residues in                     |
 | `rowData`           | `Record<string, ...>`    | Extra fields per row name, such as a lineage or a host                                                       |
 | `encodings`         | `Encoding[]`             | What the marks read: `tipLabel`, `rowTint`, `branch`, `nodePoint`, `featureFill`, `featureLabel`, `rowLabel` |
 | `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row                                                  |
@@ -88,10 +89,10 @@ control on one without re-fetching the alignment. Each prop updates only its own
 setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `features`, `clades`, `columnTracks`,
-`residueMappings`, `rowData`, `encodings`, `rowPanels`, `rowTransform`,
-`highlightColumns`), `selection`, `treeRoot` and the filehandles by content, so
-passing a freshly computed array or location object on every render costs
-nothing. A new `msa` or `tree` string, or an `msaUrl`, `treeUrl`,
+`residueMappings`, `rowCoordinates`, `rowData`, `encodings`, `rowPanels`,
+`rowTransform`, `highlightColumns`), `selection`, `treeRoot` and the filehandles
+by content, so passing a freshly computed array or location object on every
+render costs nothing. A new `msa` or `tree` string, or an `msaUrl`, `treeUrl`,
 `msaFilehandle` or `treeFilehandle` pointing somewhere else, builds a new model
 and resets the view. A new `gff`, `gffUrl` or `gffFilehandle` replaces the
 annotations and keeps the view.
