@@ -312,6 +312,67 @@ const KINASE_FILES = {
   gffFilehandle: { uri: 'data/kinase-domains.gff' },
 }
 
+// ----------------------------------------------------------------------- marks
+
+// Four reads against a reference, each carrying a 5mC call at every CpG it
+// reads: r2 has a substitution, r3 a two-base insertion the other rows hold as
+// gaps, and r4 loses the second CpG to a C>T and has a one-base deletion. The
+// sequences and the calls are synthetic.
+const marksSnapshot = {
+  data: {
+    msa: '>ref\nTTACGGATCAGTCCGATT--AGCATCGTTACA\n>r1\nTTACGGATCAGTCCGATT--AGCATCGTTACA\n>r2\nTTACGGATTAGTCCGATT--AGCATCGTTACA\n>r3\nTTACGGATCAGTCCGATTGTAGCATCGTTACA\n>r4\nTTACGGATCAGTCTGATT--AGCATCGT-ACA',
+  },
+  relativeTo: 'ref',
+  residueColor: { field: 'residue', scale: { scheme: 'jbrowse_dna' } },
+  features: [
+    { row: 'ref', start: 5, end: 22, name: 'exon 1', type: 'exon' },
+    ...[
+      ['r1', 4, 96],
+      ['r1', 14, 91],
+      ['r1', 24, 9],
+      ['r2', 4, 88],
+      ['r2', 14, 83],
+      ['r2', 24, 14],
+      ['r3', 4, 97],
+      ['r3', 14, 79],
+      ['r3', 26, 6],
+      ['r4', 4, 92],
+      ['r4', 24, 11],
+    ].map(([row, residue, probability]) => ({
+      row,
+      start: residue,
+      end: residue,
+      type: '5mC',
+      probability,
+    })),
+  ],
+  marks: [
+    {
+      kind: 'features',
+      filter: [{ field: 'type', oneOf: ['5mC'] }],
+      height: { band: 1 },
+      encoding: {
+        fill: {
+          field: 'probability',
+          scale: {
+            type: 'linear',
+            domainMin: 0,
+            domainMax: 100,
+            range: ['#0000ff', '#ff0000'],
+          },
+          legend: { title: '5mC %' },
+        },
+      },
+    },
+    {
+      kind: 'features',
+      filter: [{ field: 'type', oneOf: ['exon'] }],
+      height: 3,
+      encoding: { fill: { value: '#333333' } },
+    },
+  ],
+}
+
 // ---------------------------------------------------------- the features panel
 
 const TRP_FILES = {
@@ -457,6 +518,23 @@ export const specs = [
       rowPanels: temMatrix,
     }),
     settle: 3000,
+    clip: 'viewer',
+  },
+  {
+    name: 'layers-marks',
+    // the marks section's snapshot: two marks over base colors and the
+    // relativeTo wash, one filling the 5mC calls and one drawing the exon
+    viewportWidth: 1000,
+    viewportHeight: 240,
+    url: fileSnap({
+      ...marksSnapshot,
+      height: 140,
+      colWidth: 20,
+      rowHeight: 22,
+      treeAreaWidth: 90,
+      turnedOffTracks: { conservation: true },
+    }),
+    settle: 1500,
     clip: 'viewer',
   },
   {
@@ -623,58 +701,6 @@ export const linkSpecs = [
         { row: 'mouse', start: 3, end: 9, name: 'SH2', source: 'smart' },
       ],
       encodings: [{ channel: 'featureFill', field: 'source' }],
-    }),
-  },
-  {
-    name: 'layers-marks',
-    // the marks section's inline snapshot
-    url: fileSnap({
-      data: {
-        msa: '>ref\nACGTTCGATCGGA\n>read1\nACGTTCGATCGGA\n>read2\nACGTTCGTTCGGA',
-      },
-      relativeTo: 'ref',
-      residueColor: { field: 'residue', scale: { scheme: 'jbrowse_dna' } },
-      features: [
-        { row: 'ref', start: 2, end: 10, name: 'exon 1', type: 'exon' },
-        {
-          row: 'read1',
-          start: 6,
-          end: 6,
-          type: 'modified_base',
-          probability: 94,
-        },
-        {
-          row: 'read2',
-          start: 10,
-          end: 10,
-          type: 'modified_base',
-          probability: 12,
-        },
-      ],
-      marks: [
-        {
-          kind: 'features',
-          filter: [{ field: 'type', oneOf: ['modified_base'] }],
-          height: { band: 1 },
-          encoding: {
-            fill: {
-              field: 'probability',
-              scale: {
-                type: 'linear',
-                domainMin: 0,
-                domainMax: 100,
-                range: ['#0000ff', '#ff0000'],
-              },
-              legend: { title: 'modification %' },
-            },
-          },
-        },
-        {
-          kind: 'features',
-          filter: [{ field: 'type', oneOf: ['exon'] }],
-          height: 3,
-        },
-      ],
     }),
   },
   {

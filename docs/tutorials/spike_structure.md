@@ -230,9 +230,10 @@ the coordinates to columns:
 [![](../media/spike-structure-insertion.png)](https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A522%2C%22treeAreaWidth%22%3A170%2C%22colWidth%22%3A22%2C%22rowHeight%22%3A22%2C%22scrollX%22%3A-21318%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22clustalx_protein_dynamic%22%7D%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fspike%2Fspike.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fspike%2Fspike.nwk%22%7D%2C%22relativeTo%22%3A%22SARS-CoV-2%22%2C%22highlights%22%3A%5B%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A319%2C%22end%22%3A541%2C%22label%22%3A%22RBD%22%2C%22mark%22%3A%22bracket%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A437%2C%22end%22%3A508%2C%22label%22%3A%22RBM%22%2C%22mark%22%3A%22bracket%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A681%2C%22end%22%3A684%2C%22label%22%3A%22PRRA%20insert%22%2C%22mark%22%3A%22bracket%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A685%2C%22end%22%3A686%2C%22label%22%3A%22Furin%20cleavage%22%2C%22mark%22%3A%22bracket%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A816%2C%22end%22%3A837%2C%22label%22%3A%22Fusion%20peptide%22%2C%22mark%22%3A%22bracket%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A920%2C%22end%22%3A970%2C%22label%22%3A%22HR1%22%2C%22mark%22%3A%22bracket%22%7D%2C%7B%22row%22%3A%22SARS-CoV-2%22%2C%22start%22%3A1163%2C%22end%22%3A1202%2C%22label%22%3A%22HR2%22%2C%22mark%22%3A%22bracket%22%7D%5D%7D%7D)
 
 The S1/S2 junction at residue resolution, every row read against SARS-CoV-2: a
-dot is the same residue, a letter a different one. The boxed columns are PRRA,
-and the Highlights strip labels them and the furin cleavage site UniProt
-annotates at 685-686.
+dot is the same residue, a letter a different one, and a `-` on grey a gap in a
+column where SARS-CoV-2 also has a gap. The boxed columns are PRRA, and the
+Highlights strip labels them and the furin cleavage site UniProt annotates at
+685-686.
 
 Columns 992 to 994 are gaps in all ten other rows, and column 995 has a residue
 only in the four rows furthest from SARS-CoV-2 in the tree.

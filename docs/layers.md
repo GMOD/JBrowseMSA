@@ -1102,35 +1102,40 @@ Left out, `marks` is one mark over every feature, which is the overlay a view
 without the property draws. `[]` draws no feature in the alignment, and the
 `features` panels and tracks still draw theirs.
 
+[![](media/layers-marks.png)][live-layers-marks]
+
+Four synthetic reads against a reference, in base colors under `relativeTo`. The
+first mark fills the cell of each 5mC call from blue to red by its probability,
+over the base colors and the match wash, and the second draws the exon on the
+reference as a dark bar under its row. Each read carries a call at every CpG it
+reads, and r4 reads a T at the second CpG and carries none there.
+
 ```json
 {
   "type": "MsaView",
   "data": {
-    "msa": ">ref\nACGTTCGATCGGA\n>read1\nACGTTCGATCGGA\n>read2\nACGTTCGTTCGGA"
+    "msa": ">ref\nTTACGGATCAGTCCGATT--AGCATCGTTACA\n>r1\nTTACGGATCAGTCCGATT--AGCATCGTTACA\n>r2\nTTACGGATTAGTCCGATT--AGCATCGTTACA\n>r3\nTTACGGATCAGTCCGATTGTAGCATCGTTACA\n>r4\nTTACGGATCAGTCTGATT--AGCATCGT-ACA"
   },
   "relativeTo": "ref",
   "residueColor": { "field": "residue", "scale": { "scheme": "jbrowse_dna" } },
   "features": [
-    { "row": "ref", "start": 2, "end": 10, "name": "exon 1", "type": "exon" },
-    {
-      "row": "read1",
-      "start": 6,
-      "end": 6,
-      "type": "modified_base",
-      "probability": 94
-    },
-    {
-      "row": "read2",
-      "start": 10,
-      "end": 10,
-      "type": "modified_base",
-      "probability": 12
-    }
+    { "row": "ref", "start": 5, "end": 22, "name": "exon 1", "type": "exon" },
+    { "row": "r1", "start": 4, "end": 4, "type": "5mC", "probability": 96 },
+    { "row": "r1", "start": 14, "end": 14, "type": "5mC", "probability": 91 },
+    { "row": "r1", "start": 24, "end": 24, "type": "5mC", "probability": 9 },
+    { "row": "r2", "start": 4, "end": 4, "type": "5mC", "probability": 88 },
+    { "row": "r2", "start": 14, "end": 14, "type": "5mC", "probability": 83 },
+    { "row": "r2", "start": 24, "end": 24, "type": "5mC", "probability": 14 },
+    { "row": "r3", "start": 4, "end": 4, "type": "5mC", "probability": 97 },
+    { "row": "r3", "start": 14, "end": 14, "type": "5mC", "probability": 79 },
+    { "row": "r3", "start": 26, "end": 26, "type": "5mC", "probability": 6 },
+    { "row": "r4", "start": 4, "end": 4, "type": "5mC", "probability": 92 },
+    { "row": "r4", "start": 24, "end": 24, "type": "5mC", "probability": 11 }
   ],
   "marks": [
     {
       "kind": "features",
-      "filter": [{ "field": "type", "oneOf": ["modified_base"] }],
+      "filter": [{ "field": "type", "oneOf": ["5mC"] }],
       "height": { "band": 1 },
       "encoding": {
         "fill": {
@@ -1141,24 +1146,19 @@ without the property draws. `[]` draws no feature in the alignment, and the
             "domainMax": 100,
             "range": ["#0000ff", "#ff0000"]
           },
-          "legend": { "title": "modification %" }
+          "legend": { "title": "5mC %" }
         }
       }
     },
     {
       "kind": "features",
       "filter": [{ "field": "type", "oneOf": ["exon"] }],
-      "height": 3
+      "height": 3,
+      "encoding": { "fill": { "value": "#333333" } }
     }
   ]
 }
 ```
-
-[Open this snapshot in the app][live-layers-marks].
-
-The reads keep their base colors and the `relativeTo` wash, each modification
-call fills its cell from blue to red by its probability, and the exon on the
-reference draws as a bar under its row.
 
 | Field      | Meaning                                                                                              |
 | ---------- | ---------------------------------------------------------------------------------------------------- |
@@ -1663,7 +1663,7 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
 [live-layers-residuecolor]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSE%5Cn%3Emouse%5CnMKA-NSE%22%7D%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22domain%22%3A%5B%22K%22%2C%22R%22%2C%22D%22%2C%22E%22%5D%2C%22range%22%3A%5B%22%231f77b4%22%2C%22%231f77b4%22%2C%22%23d62728%22%2C%22%23d62728%22%5D%7D%7D%7D%7D
 [live-layers-marks]:
-  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Eref%5CnACGTTCGATCGGA%5Cn%3Eread1%5CnACGTTCGATCGGA%5Cn%3Eread2%5CnACGTTCGTTCGGA%22%7D%2C%22relativeTo%22%3A%22ref%22%2C%22residueColor%22%3A%7B%22field%22%3A%22residue%22%2C%22scale%22%3A%7B%22scheme%22%3A%22jbrowse_dna%22%7D%7D%2C%22features%22%3A%5B%7B%22row%22%3A%22ref%22%2C%22start%22%3A2%2C%22end%22%3A10%2C%22name%22%3A%22exon%201%22%2C%22type%22%3A%22exon%22%7D%2C%7B%22row%22%3A%22read1%22%2C%22start%22%3A6%2C%22end%22%3A6%2C%22type%22%3A%22modified_base%22%2C%22probability%22%3A94%7D%2C%7B%22row%22%3A%22read2%22%2C%22start%22%3A10%2C%22end%22%3A10%2C%22type%22%3A%22modified_base%22%2C%22probability%22%3A12%7D%5D%2C%22marks%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22filter%22%3A%5B%7B%22field%22%3A%22type%22%2C%22oneOf%22%3A%5B%22modified_base%22%5D%7D%5D%2C%22height%22%3A%7B%22band%22%3A1%7D%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22probability%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22domainMin%22%3A0%2C%22domainMax%22%3A100%2C%22range%22%3A%5B%22%230000ff%22%2C%22%23ff0000%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22modification%20%25%22%7D%7D%7D%7D%2C%7B%22kind%22%3A%22features%22%2C%22filter%22%3A%5B%7B%22field%22%3A%22type%22%2C%22oneOf%22%3A%5B%22exon%22%5D%7D%5D%2C%22height%22%3A3%7D%5D%7D%7D
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Eref%5CnTTACGGATCAGTCCGATT--AGCATCGTTACA%5Cn%3Er1%5CnTTACGGATCAGTCCGATT--AGCATCGTTACA%5Cn%3Er2%5CnTTACGGATTAGTCCGATT--AGCATCGTTACA%5Cn%3Er3%5CnTTACGGATCAGTCCGATTGTAGCATCGTTACA%5Cn%3Er4%5CnTTACGGATCAGTCTGATT--AGCATCGT-ACA%22%7D%2C%22relativeTo%22%3A%22ref%22%2C%22residueColor%22%3A%7B%22field%22%3A%22residue%22%2C%22scale%22%3A%7B%22scheme%22%3A%22jbrowse_dna%22%7D%7D%2C%22features%22%3A%5B%7B%22row%22%3A%22ref%22%2C%22start%22%3A5%2C%22end%22%3A22%2C%22name%22%3A%22exon%201%22%2C%22type%22%3A%22exon%22%7D%2C%7B%22row%22%3A%22r1%22%2C%22start%22%3A4%2C%22end%22%3A4%2C%22type%22%3A%225mC%22%2C%22probability%22%3A96%7D%2C%7B%22row%22%3A%22r1%22%2C%22start%22%3A14%2C%22end%22%3A14%2C%22type%22%3A%225mC%22%2C%22probability%22%3A91%7D%2C%7B%22row%22%3A%22r1%22%2C%22start%22%3A24%2C%22end%22%3A24%2C%22type%22%3A%225mC%22%2C%22probability%22%3A9%7D%2C%7B%22row%22%3A%22r2%22%2C%22start%22%3A4%2C%22end%22%3A4%2C%22type%22%3A%225mC%22%2C%22probability%22%3A88%7D%2C%7B%22row%22%3A%22r2%22%2C%22start%22%3A14%2C%22end%22%3A14%2C%22type%22%3A%225mC%22%2C%22probability%22%3A83%7D%2C%7B%22row%22%3A%22r2%22%2C%22start%22%3A24%2C%22end%22%3A24%2C%22type%22%3A%225mC%22%2C%22probability%22%3A14%7D%2C%7B%22row%22%3A%22r3%22%2C%22start%22%3A4%2C%22end%22%3A4%2C%22type%22%3A%225mC%22%2C%22probability%22%3A97%7D%2C%7B%22row%22%3A%22r3%22%2C%22start%22%3A14%2C%22end%22%3A14%2C%22type%22%3A%225mC%22%2C%22probability%22%3A79%7D%2C%7B%22row%22%3A%22r3%22%2C%22start%22%3A26%2C%22end%22%3A26%2C%22type%22%3A%225mC%22%2C%22probability%22%3A6%7D%2C%7B%22row%22%3A%22r4%22%2C%22start%22%3A4%2C%22end%22%3A4%2C%22type%22%3A%225mC%22%2C%22probability%22%3A92%7D%2C%7B%22row%22%3A%22r4%22%2C%22start%22%3A24%2C%22end%22%3A24%2C%22type%22%3A%225mC%22%2C%22probability%22%3A11%7D%5D%2C%22marks%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22filter%22%3A%5B%7B%22field%22%3A%22type%22%2C%22oneOf%22%3A%5B%225mC%22%5D%7D%5D%2C%22height%22%3A%7B%22band%22%3A1%7D%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22probability%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22domainMin%22%3A0%2C%22domainMax%22%3A100%2C%22range%22%3A%5B%22%230000ff%22%2C%22%23ff0000%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%225mC%20%25%22%7D%7D%7D%7D%2C%7B%22kind%22%3A%22features%22%2C%22filter%22%3A%5B%7B%22field%22%3A%22type%22%2C%22oneOf%22%3A%5B%22exon%22%5D%7D%5D%2C%22height%22%3A3%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22value%22%3A%22%23333333%22%7D%7D%7D%5D%2C%22height%22%3A140%2C%22colWidth%22%3A20%2C%22rowHeight%22%3A22%2C%22treeAreaWidth%22%3A90%2C%22turnedOffTracks%22%3A%7B%22conservation%22%3Atrue%7D%7D%7D
 [live-layers-rowpanels]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22clustalx_protein_dynamic%22%7D%7D%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A830%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%7D%2C%22width%22%3A14%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20104%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22104%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20164%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22164%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20238%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22238%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20240%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22240%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%2069%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%2269%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20244%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22244%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20276%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22276%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20265%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22265%22%7D%5D%7D%7D
 [live-layers-featurespanel]:
