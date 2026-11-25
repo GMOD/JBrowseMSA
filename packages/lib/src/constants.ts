@@ -153,9 +153,9 @@ export const cladeHighlightAlpha = 0.6
 
 // The largest inline document a snapshot carries by default, which keeps a
 // jbrowse session small. A larger pasted or locally-opened file stays in the
-// live model and out of the snapshot, and `unshareableData` warns using the
-// same number. `MSAModelF({ maxInlineSnapshotBytes })` sets another; the demo
-// app's links hold far more.
+// live model and out of the snapshot. `MSAModelF({ maxInlineSnapshotBytes })`
+// sets another for both the snapshot and `unshareableData`; the demo app's
+// links hold far more.
 export const maxInlineSnapshotBytes = 50_000
 
 // Height of the band the `rowPanels` headers draw in, above the strips in the

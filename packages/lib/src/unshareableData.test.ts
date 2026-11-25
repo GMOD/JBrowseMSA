@@ -189,3 +189,45 @@ test('a host can override the question per view, not just answer it once', () =>
   })
   expect(local.unshareableData.map(d => d.what)).toEqual(['alignment'])
 })
+
+test('the factory limit is the one the warning measures against', () => {
+  const NoInline = stateModelFactory({ maxInlineSnapshotBytes: 0 })
+  const model = NoInline.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: smallMsa },
+  })
+  expect(snapshotOf(model).data?.msa).toBeUndefined()
+  expect(model.unshareableData).toEqual([
+    { what: 'alignment', bytes: smallMsa.length },
+  ])
+
+  const Roomy = stateModelFactory({ maxInlineSnapshotBytes: bigMsa.length })
+  const roomy = Roomy.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: bigMsa },
+  })
+  expect(snapshotOf(roomy).data?.msa).toBe(bigMsa)
+  expect(roomy.unshareableData).toEqual([])
+})
+
+test('a host that keeps nothing inline and rebuilds it declares so', () => {
+  // jbrowse-plugin-tview drops every document from the snapshot and rebuilds
+  // the alignment from its `init` property on load
+  const Rebuilt = stateModelFactory({ maxInlineSnapshotBytes: 0 })
+    .props({ init: types.frozen<{ loc: string } | undefined>() })
+    .views(self => ({
+      get hostRestoresData() {
+        return self.init !== undefined
+      },
+    }))
+  const model = Rebuilt.create({
+    type: 'MsaView',
+    msaFormat: 'fasta',
+    data: { msa: smallMsa },
+    init: { loc: 'chr1:1-100' },
+  })
+  expect(snapshotOf(model).data?.msa).toBeUndefined()
+  expect(model.unshareableData).toEqual([])
+})

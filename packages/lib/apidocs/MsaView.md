@@ -26,8 +26,11 @@ root.view.setData({ msa: '>seq1\nACGT\n>seq2\nACGT' })
 
 `maxInlineSnapshotBytes` is the largest pasted or local document, and the
 largest data track, the snapshot keeps; a larger one stays in the live model and
-`unshareableData` names it. The standalone app, whose links carry the snapshot
-in the URL fragment, raises it.
+`unshareableData` names it, measured against the same limit. The standalone app,
+whose links carry the snapshot in the URL fragment, raises it. A host that
+rebuilds the documents itself declares that through `hostRestoresData`, which
+empties `unshareableData` at any limit: jbrowse-plugin-tview sets the limit to 0
+and rebuilds the alignment from reads.
 
 ## Overview
 
@@ -2117,14 +2120,14 @@ typeFilteredAnnotations: Annotation[]
 
 loaded documents left out of the snapshot, largest first. A file opened from
 disk or pasted in becomes inline text, and DataModel drops an inline document
-past `maxInlineSnapshotBytes`.
+past the factory's `maxInlineSnapshotBytes`.
 
 The standalone app drops `#data=` from the address bar while the list is
 non-empty or the encoded link would pass its `maxLinkLength`, so a copied link
 never opens an empty viewer unannounced. A document fetched from a URL never
 appears here, since the snapshot keeps its filehandle.
 
-Empty when `hostCarriesData` is true.
+Empty when `hostRestoresData` is true.
 
 ```js
 unshareableData: UnshareableData[]
