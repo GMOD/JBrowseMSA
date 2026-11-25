@@ -50,6 +50,7 @@ const defaults: Traits = {
   encodings: [],
   row_panels: [],
   row_transform: null,
+  marks: null,
   relative_to: null,
   region: null,
   selection: null,

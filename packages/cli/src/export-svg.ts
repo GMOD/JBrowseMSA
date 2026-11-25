@@ -243,7 +243,7 @@ export async function exportSvg({
     model.setTreeAreaWidth(treeAreaWidth)
   }
   model.setWidth(width)
-  for (const problem of model.scaleProblems) {
+  for (const problem of [...model.scaleProblems, ...model.markProblems]) {
     console.warn(problemLine(problem))
   }
 

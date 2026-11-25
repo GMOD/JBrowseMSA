@@ -2,6 +2,7 @@ import { hostTheme, watchHostTheme } from './hostTheme.ts'
 
 import type { AnyModel, Render } from '@anywidget/types'
 import type {
+  AlignmentMarkSpec,
   Cell,
   Clade,
   ColumnTrackSpec,
@@ -51,6 +52,7 @@ export interface Traits {
   encodings: Encoding[]
   row_panels: RowPanelSpec[]
   row_transform: RowTransform | null
+  marks: AlignmentMarkSpec[] | null
   relative_to: string | null
   region: Region | null
   selection: MsaSelection | null
@@ -95,6 +97,7 @@ export const INPUT_TRAITS = [
   'encodings',
   'row_panels',
   'row_transform',
+  'marks',
   'relative_to',
   'region',
   'selection',
@@ -152,6 +155,7 @@ export function propsFromModel(model: Model, doc?: Document): MSAViewerProps {
     encodings: model.get('encodings'),
     rowPanels: model.get('row_panels'),
     rowTransform: optional(model.get('row_transform')),
+    marks: optional(model.get('marks')),
     relativeTo: optional(model.get('relative_to')),
     region: optional(model.get('region')),
     selection: optional(model.get('selection')),

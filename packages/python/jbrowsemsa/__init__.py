@@ -113,6 +113,10 @@ class MSAView(anywidget.AnyWidget):
     # the rows filtered, sorted and banded by row_data fields:
     # {"filter": [...], "sort": [...], "facet": {"field": ...}}
     row_transform = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
+    # the feature marks drawn over the alignment's cells, each
+    # {"kind": "features", "filter", "encoding", "height"}; None draws one
+    # over every feature, and [] draws none
+    marks = traitlets.List(traitlets.Dict(), default_value=None, allow_none=True).tag(sync=True)
     relative_to = traitlets.Unicode(None, allow_none=True).tag(sync=True)
     region = traitlets.Dict(default_value=None, allow_none=True).tag(sync=True)
     # the selected block, {"start", "end"} columns and "rows" by name: set it

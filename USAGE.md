@@ -70,6 +70,7 @@ Props:
 | `encodings`         | `Encoding[]`             | What the marks read: `tipLabel`, `rowTint`, `branch`, `nodePoint`, `featureFill`, `featureLabel`, `rowLabel` |
 | `rowPanels`         | `RowPanelSpec[]`         | Panels between the tree and the alignment, one cell per row                                                  |
 | `rowTransform`      | `RowTransform`           | Filter, sort and facet the rows by `rowData` fields                                                          |
+| `marks`             | `AlignmentMarkSpec[]`    | The feature marks drawn over the alignment's cells; unset draws one over every feature                       |
 | `showBranchLen`     | `boolean`                | Draw branch lengths (default true); false draws a cladogram                                                  |
 | `treeOrder`         | `TreeOrder`              | Child order: `branchLength` (default), `input`, `ladderize`, `ladderizeReverse`                              |
 | `treeRoot`          | `TreeRoot`               | Reroot: `'midpoint'`, or `{outgroup: [tip names]}`                                                           |
@@ -90,12 +91,12 @@ setting, so the host's next render keeps a change made inside the viewer, such
 as a scheme picked from the menu or a row dragged taller. The viewer compares
 the data layers (`highlights`, `features`, `clades`, `columnTracks`,
 `residueMappings`, `rowCoordinates`, `rowData`, `encodings`, `rowPanels`,
-`rowTransform`, `highlightColumns`), `selection`, `treeRoot` and the filehandles
-by content, so passing a freshly computed array or location object on every
-render costs nothing. A new `msa` or `tree` string, or an `msaUrl`, `treeUrl`,
-`msaFilehandle` or `treeFilehandle` pointing somewhere else, builds a new model
-and resets the view. A new `gff`, `gffUrl` or `gffFilehandle` replaces the
-annotations and keeps the view.
+`rowTransform`, `marks`, `highlightColumns`), `selection`, `treeRoot` and the
+filehandles by content, so passing a freshly computed array or location object
+on every render costs nothing. A new `msa` or `tree` string, or an `msaUrl`,
+`treeUrl`, `msaFilehandle` or `treeFilehandle` pointing somewhere else, builds a
+new model and resets the view. A new `gff`, `gffUrl` or `gffFilehandle` replaces
+the annotations and keeps the view.
 
 ### Events
 
@@ -173,7 +174,9 @@ labels, rows and branches by a `rowData` field, and the annotation spans by a
 field of the GFF. `rowPanels` draws per-row panels between the tree and the
 alignment: colored strips, or the GFF's spans as gene arrows. `rowTransform`
 filters the rows by a `rowData` field, and without a tree sorts them and stacks
-them in labelled bands.
+them in labelled bands. `marks` lists the feature marks the alignment draws over
+its cells, each over the features its `filter` passes, so modification calls can
+fill the cells over the residue colors while exons draw as bars under the row.
 
 The [layers reference](https://gmod.org/JBrowseMSA/layers) lists every field of
 every layer, with examples, and the coordinate rules they share. At runtime

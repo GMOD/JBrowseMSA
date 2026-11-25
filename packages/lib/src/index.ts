@@ -84,6 +84,7 @@ export type {
   ResidueScale,
 } from './residueColor.ts'
 export type { RecordScaleProblem, ScaleProblem } from './scaleProblems.ts'
+export type { MarkProblem } from './alignmentMarks.ts'
 export { problemLine } from './scaleProblems.ts'
 export type {
   LegendEntry,

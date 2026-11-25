@@ -138,6 +138,26 @@ test('--spec prints each scale problem to stderr and still draws', async () => {
   expect(svg).toContain('linearGradient')
 })
 
+test('--spec prints each mark problem to stderr and still draws', async () => {
+  const specFile = write(
+    'markProblems.json',
+    JSON.stringify({
+      type: 'MsaView',
+      data: { msa: MSA },
+      features: [{ row: 'seq1', start: 2, end: 5, name: 'SH3' }],
+      marks: [{ kind: 'features', height: { band: 2 } }],
+    }),
+  )
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+  const svg = await render({ specFile })
+  const lines = warn.mock.calls.map(call => String(call[0]))
+  warn.mockRestore()
+  expect(lines).toEqual([
+    expect.stringMatching(/^marks\[0\]\.height\.band: band is a fraction/),
+  ])
+  expect(svg).toContain('SH3')
+})
+
 test('--props draws what MSAViewer draws from the same props', async () => {
   const propsFile = write(
     'props.json',

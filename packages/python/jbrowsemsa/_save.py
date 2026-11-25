@@ -54,6 +54,7 @@ def props(view: Any) -> dict[str, Any]:
         "encodings": view.encodings,
         "rowPanels": view.row_panels,
         "rowTransform": view.row_transform,
+        "marks": view.marks,
         "relativeTo": _optional(view.relative_to),
         "region": view.region,
         "selection": view.selection,

@@ -36,6 +36,7 @@ def test_save_writes_every_prop_the_front_end_sends():
         allowed_gappyness=50,
         relative_to="Mouse",
         row_transform={"sort": [{"field": "host"}]},
+        marks=[{"kind": "features", "height": {"band": 1}}],
         region={"start": 1, "end": 3},
         selection={"start": 1, "end": 2},
         tree_area_width=150,

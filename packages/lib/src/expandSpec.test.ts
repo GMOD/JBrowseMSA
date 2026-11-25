@@ -19,6 +19,18 @@ test('a long-form snapshot passes through unchanged', () => {
   expect(expandSpec(snapshot)).toEqual(snapshot)
 })
 
+test('marks pass through as written, an empty list included', () => {
+  const marks = [
+    {
+      kind: 'features',
+      filter: [{ field: 'type', oneOf: ['modified_base'] }],
+      height: { band: 1 },
+    },
+  ]
+  expect(expandSpec({ query: 'a', marks })).toEqual({ relativeTo: 'a', marks })
+  expect(expandSpec({ marks: [] })).toEqual({ marks: [] })
+})
+
 test('expanding twice gives what expanding once does', () => {
   const spec = {
     query: 'Human',

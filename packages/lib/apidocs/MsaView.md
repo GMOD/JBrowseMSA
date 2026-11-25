@@ -274,6 +274,17 @@ id of view, randomly generated if not provided
 id: ElementId
 ```
 
+#### property: marks
+
+the feature marks the alignment panel draws over its cells, in drawing order:
+`{kind: "features", filter?, encoding?, height?}` draws the spans of the
+features passing every `filter`. Unset draws one mark over every feature, and
+`[]` draws none. See docs/layers.md
+
+```js
+marks: types.frozen<AlignmentMarkSpec[] | undefined>()
+```
+
 #### property: msaFilehandle
 
 filehandle object for the MSA (which could contain a tree e.g. with stockholm
@@ -798,6 +809,16 @@ actuallyShowDomains: boolean
 adapterTrackModels: BasicTrack[]
 ```
 
+#### getter: alignmentMarks
+
+the marks the alignment panel draws: one over every feature while `marks` is
+unset, else each `features` record with the members `markProblems` refuses left
+out
+
+```js
+alignmentMarks: AlignmentMark[]
+```
+
 #### getter: alignmentNames
 
 ```js
@@ -921,10 +942,10 @@ categoryFields: Map<string, string[]>
 
 #### getter: cellFill
 
-what colors the alignment's cells: the residue scheme, the domains covering
-them, or nothing, which leaves the scheme to the letters. Domains own the fill
-only while some are drawn, so a file whose annotations all start hidden keeps
-its residue colors
+what colors the alignment's cells: the residue scheme, the feature marks
+covering them, or nothing, which leaves the scheme to the letters. The marks own
+the fill only while one draws a feature, so a file whose annotations all start
+hidden keeps its residue colors
 
 ```js
 cellFill: 'domain' | 'none' | 'residue'
@@ -990,10 +1011,10 @@ colorRecordProblems: { record: string; key: string; problems: ScaleProblem[]; }[
 #### getter: colorRecords
 
 every record that reads a field through a color object: each color encoding,
-each strip's `fill`, each features panel's or features track's `fill` naming a
-field, each bar, point or text panel's `color`, and each other column track's
-`encoding.color` reading the track's own values, with where it sits in the
-snapshot and the table its field is read from
+each strip's `fill`, each features panel's, features track's or alignment mark's
+`fill` naming a field, each bar, point or text panel's `color`, and each other
+column track's `encoding.color` reading the track's own values, with where it
+sits in the snapshot and the table its field is read from
 
 ```js
 colorRecords: ColorRecord[]
@@ -1145,11 +1166,12 @@ domainLegendItems: LegendItem[]
 
 #### getter: domainUnderline
 
-whether the overlay marks each domain with a bar under its row instead of
-filling the row behind the letters: whenever the domains do not own the cell
-fill (`cellFill`), a filled box would paint over the residue colors the user
-picked. Sub-row layout already stacks the boxes clear of the letters, and with
-the letters too small to draw the filled box is the only thing left to read.
+whether an alignment mark with no `height` draws each span as a bar under its
+row in place of filling the row behind the letters: whenever the marks do not
+own the cell fill (`cellFill`), a filled box would paint over the residue colors
+the user picked. Sub-row layout already stacks the boxes clear of the letters,
+and with the letters too small to draw the filled box is the only thing left to
+read.
 
 ```js
 domainUnderline: boolean
@@ -1466,6 +1488,74 @@ mappedStructures: {
 ;[]
 ```
 
+#### getter: markBands
+
+each alignment mark's spans per row, out of `markedBands`
+
+```js
+markBands: Map<string, DomainBand[]>[]
+```
+
+#### getter: markBandsByStart
+
+each alignment mark's spans per row ordered by start column, for the letters
+over a mark as tall as the row
+
+```js
+markBandsByStart: Map<string, DomainBand[]>[]
+```
+
+#### getter: markDomainLegendItems
+
+the rows of `domainLegendItems` for the accessions an alignment mark naming no
+fill draws: every one while such a mark has no filter
+
+```js
+markDomainLegendItems: LegendItem[]
+```
+
+#### getter: markedBands
+
+the bands some alignment mark draws, packed into one set of lanes per row
+between the marks, which the sub-row layout stacks and the pointer hits;
+`domainBands` itself while a mark has no filter
+
+```js
+markedBands: Map<string, DomainBand[]>
+```
+
+#### getter: markFeatures
+
+the features each of `alignmentMarks` draws, out of those drawn: the ones
+passing every test of its `filter`
+
+```js
+markFeatures: Annotation[][]
+```
+
+#### getter: markProblems
+
+why a `marks` record draws other than it says: a `kind` the alignment panel does
+not draw, a `height` of no pixels or a `band` outside (0, 1], a filter naming no
+field or no test. The mark draws with that member left out, and a record of
+another kind draws nothing.
+
+```js
+markProblems: MarkProblem[]
+```
+
+#### getter: markStyles
+
+each alignment mark's fill per feature and its label channel, resolved as a
+features panel resolves its own: the mark's `encoding.fill`, else the
+`featureFill` encoding, else the accession palette, with a feature's own `color`
+first, and its `encoding.text`, else the `featureLabel` encoding. A mark that
+names neither reuses `featureColors` and `featureLabels`.
+
+```js
+markStyles: { colors: Map<Annotation, { fill: string; stroke: string; }>; labels: Map<Annotation, string> | undefined; }[]
+```
+
 #### getter: maxDepthToLeaf
 
 max topological depth to a tip, used to scale cladogram x-positions
@@ -1501,8 +1591,9 @@ maxTipLabelWidth: number
 
 #### getter: mouseOverDomains
 
-domain annotations under the mouse, hit-tested against the exact visible column
-span each box is drawn at (so it matches the overlay across gaps)
+the features an alignment mark draws under the mouse, hit-tested against the
+exact visible column span each box is drawn at (so it matches the overlay across
+gaps)
 
 ```js
 mouseOverDomains: Annotation[]
@@ -1665,6 +1756,15 @@ row are ignored.
 
 ```js
 resolvedHighlights: ResolvedHighlight[]
+```
+
+#### getter: resolvedMarks
+
+each alignment mark with its spans per row, its colors and its labels, in
+drawing order
+
+```js
+resolvedMarks: ResolvedMark[]
 ```
 
 #### getter: resolvedResidueColor
@@ -2975,6 +3075,15 @@ setLoadingMSA: (arg: boolean) => void
 
 ```js
 setLoadingTree: (arg: boolean) => void
+```
+
+#### action: setMarks
+
+replace the feature marks the alignment panel draws, or unset them, which draws
+one mark over every feature
+
+```js
+setMarks: (marks?: AlignmentFeaturesSpec[] | undefined) => void
 ```
 
 #### action: setMouseClickPos

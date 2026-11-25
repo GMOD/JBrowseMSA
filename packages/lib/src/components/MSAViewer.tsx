@@ -23,6 +23,7 @@ import Loading from './Loading.tsx'
 import type { MsaViewModel } from '../model.ts'
 import type { ResidueColor } from '../residueColor.ts'
 import type {
+  AlignmentMarkSpec,
   Cell,
   Clade,
   ColumnTrackSpec,
@@ -144,6 +145,14 @@ export interface MSAViewerProps {
    * bands them under a label per value (see docs/layers.md)
    */
   rowTransform?: RowTransform
+  /**
+   * the feature marks the alignment panel draws over its cells, in drawing
+   * order: `{kind: 'features', filter?, encoding?: {fill?, text?}, height?}`
+   * draws the spans of the features passing every `filter`, `height` pixels
+   * tall or `{band}` of the row. Unset draws one mark over every feature, and
+   * `[]` draws none (see docs/layers.md)
+   */
+  marks?: AlignmentMarkSpec[]
   /** draw the phylogenetic tree (default true); false leaves a labels-only gutter */
   drawTree?: boolean
   /** fixed width (px) of the tree/label area; unset fits it to the labels and the tree */
@@ -487,6 +496,12 @@ const syncedProps = [
     p => p.rowTransform,
     (m, v) => {
       m.setRowTransform(v)
+    },
+  ),
+  synced(
+    p => p.marks,
+    (m, v) => {
+      m.setMarks(v)
     },
   ),
 ]

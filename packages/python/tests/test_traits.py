@@ -42,6 +42,7 @@ def test_defaults_leave_every_prop_to_the_viewer():
         "encodings": [],
         "row_panels": [],
         "row_transform": None,
+        "marks": None,
         "relative_to": None,
         "region": None,
         "selection": None,

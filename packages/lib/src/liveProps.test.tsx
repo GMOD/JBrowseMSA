@@ -202,6 +202,17 @@ test('the data layers follow their props', () => {
   expect(model.mappedStructures.map(m => m.structure.id)).toEqual(['1ABC'])
 })
 
+test('marks follow their prop, an empty list drawing none and no prop the default', () => {
+  const marks = [{ kind: 'features', height: { band: 1 } }]
+  const model = show({ marks })
+  expect(model.marks).toEqual(marks)
+  show({ marks: [] })
+  expect(model.resolvedMarks).toEqual([])
+  show({})
+  expect(model.marks).toBeUndefined()
+  expect(model.alignmentMarks).toEqual([{ index: 0 }])
+})
+
 test('highlightColumns draws 1-based columns as highlights, one per run', () => {
   const model = show({
     highlights: [{ start: 2, end: 2, label: 'site' }],

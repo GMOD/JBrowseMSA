@@ -38,7 +38,11 @@ export interface RecordScaleProblem extends ScaleProblem {
 }
 
 /** a problem as one line, `encodings[0].scale.domainMax: ...` */
-export function problemLine({ record, slot, message }: RecordScaleProblem) {
+export function problemLine({
+  record,
+  slot,
+  message,
+}: Pick<RecordScaleProblem, 'record' | 'slot' | 'message'>) {
   return `${record}.${slot}: ${message}`
 }
 
