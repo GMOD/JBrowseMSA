@@ -240,6 +240,30 @@ export interface RowFeaturesSpec {
 }
 
 /**
+ * A test a feature's field passes, read as `featureFill` reads it: `oneOf`
+ * lists the values kept, and `range` the inclusive numeric bounds, either end
+ * `null` for open. A feature with no value for the field fails both.
+ */
+export type FeatureFilter = RowFilter
+
+/**
+ * The span mark in the alignment panel, over the features passing every
+ * `filter`: filled and labeled through `encoding` as a features panel is, and
+ * `height` pixels tall or `{band}` a fraction of the row height. A span as tall
+ * as the row covers its cells, and a shorter one is a bar at the foot of the
+ * row. See docs/layers.md
+ */
+export interface AlignmentFeaturesSpec {
+  kind: 'features'
+  filter?: FeatureFilter[]
+  encoding?: FeatureEncodingSpec
+  height?: number | { band: number }
+}
+
+/** a mark the alignment panel draws over its cells, in `marks` */
+export type AlignmentMarkSpec = AlignmentFeaturesSpec
+
+/**
  * How overlapping spans share a row's or a track's height: `identity` packs
  * them into lanes, and `strandpile` packs each strand on its own, the forward
  * spans above the reverse ones

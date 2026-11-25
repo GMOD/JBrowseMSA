@@ -32,8 +32,16 @@ export function passesFilters(
   fields: Record<string, string> | undefined,
   filters: RowFilter[],
 ) {
+  return valuesPassFilters(field => fields?.[field], filters)
+}
+
+/** whether the values `valueOf` reads pass every test, a missing one failing */
+export function valuesPassFilters(
+  valueOf: (field: string) => string | undefined,
+  filters: RowFilter[],
+) {
   return filters.every(filter => {
-    const value = fields?.[filter.field] ?? ''
+    const value = valueOf(filter.field) ?? ''
     return (
       value !== '' &&
       ('oneOf' in filter

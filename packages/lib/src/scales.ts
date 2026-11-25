@@ -12,7 +12,7 @@ import { paletteNamed } from './ggplotPalettes.ts'
 import { compareGroupKeys } from './groupKeys.ts'
 
 import type { LegendItem } from './legendSpec.ts'
-import type { Annotation } from './types.ts'
+import type { Annotation, FeatureFilter } from './types.ts'
 
 export type ScaleType = 'ordinal' | 'linear' | 'log' | 'threshold' | 'identity'
 
@@ -472,14 +472,15 @@ export interface ScaleUse {
 /**
  * A record that reads a field through a color object, with where it sits in
  * the snapshot (`encodings[0]`, `rowPanels[2].encoding.fill`). A features
- * column track carries its spans in place of the feature table, and a bar,
+ * column track carries its spans in place of the feature table, an alignment
+ * mark the `filter` its features pass, and a bar,
  * strip, text or arc track carries the values its color reads, with its name
  * standing as the field.
  */
 export type ColorRecord = { record: string; channel: ColorChannel } & (
   | { table: 'rows' }
   | { table: 'nodes' }
-  | { table: 'features'; annotations?: Annotation[] }
+  | { table: 'features'; annotations?: Annotation[]; filter?: FeatureFilter[] }
   | { table: 'columns'; values: (string | undefined)[] }
 )
 

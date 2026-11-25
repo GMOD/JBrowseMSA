@@ -4,12 +4,16 @@ import { adjustColorForContrast, contrastTextFn, nonEmpty } from '../../util.ts'
 import { getVisibleLeaves } from '../getVisibleLeaves.ts'
 import { cellFillRect } from '../pixelSnap.ts'
 import { domainBandCursor } from './domainBandCursor.ts'
-import { renderBoxFeatureCanvasBlock } from './renderBoxFeatureCanvasBlock.ts'
+import {
+  markCoversCells,
+  renderBoxFeatureCanvasBlock,
+} from './renderBoxFeatureCanvasBlock.ts'
 import { tileColorFn } from './tileColor.ts'
 import { visibleColRange } from './visibleColRange.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { MsaViewModel } from '../../model.ts'
+import type { Annotation } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
 import type { Theme } from '@mui/material'
 
@@ -35,7 +39,7 @@ export function renderMSABlock({
   blockSizeYOverride?: number
   rasterTiles?: boolean
   /**
-   * draw the domain overlay too, over the cell colors and under the letters,
+   * draw the alignment marks too, over the cell colors and under the letters,
    * which is the one order every cell fill reads right in
    */
   domains?: boolean
@@ -81,7 +85,7 @@ export function renderMSABlock({
     xEnd,
     visibleLeaves,
     referenceSeq,
-    // when the domains fill the cells the background comes from
+    // when the marks fill the cells the background comes from
     // renderBoxFeatureCanvasBlock, so only the letters are drawn here
     drawTiles: cellFill !== 'domain',
     // ...and when the caller has already laid the raster down, the tiles are
@@ -144,18 +148,7 @@ function drawTilesAndText({
   letters: boolean
   pass: 'tiles' | 'letters' | 'both'
 }) {
-  const {
-    cellFill,
-    columns,
-    colWidth,
-    rowHeight,
-    fontSize,
-    relativeTo,
-    subFeatureRows,
-    domainUnderline,
-    domainBandsByStart,
-    featureColors,
-  } = model
+  const { cellFill, columns, colWidth, rowHeight, fontSize, relativeTo } = model
 
   const fillsCells = cellFill !== 'none'
   const tiles = drawTiles && fillsCells
@@ -174,11 +167,17 @@ function drawTilesAndText({
     // edge and the baseline lands fontSize/4 below the row center, where the
     // tree puts its tip labels
     const baselineOffset = rowHeight / 2 - fontSize / 4
-    // with the tiles coming from the domain overlay instead, letters sit either
-    // on a domain box or on the plain background; sub-row layout stacks the boxes
-    // above the letters and letter-color mode shrinks them to a bar under the
-    // row, so neither leaves anything behind a letter
-    const overDomains = !drawTiles && !subFeatureRows && !domainUnderline
+    // a letter under a mark as tall as the row sits on that mark's span, the
+    // last one drawn where several cover it; a bar or a sub-row leaves the
+    // letter on its cell
+    const covers =
+      letters && model.actuallyShowDomains
+        ? model.resolvedMarks.flatMap((mark, k) =>
+            markCoversCells(model, mark)
+              ? [{ bands: model.markBandsByStart[k]!, colors: mark.colors }]
+              : [],
+          )
+        : []
 
     for (let i = 0, l1 = visibleLeaves.length; i < l1; i++) {
       const node = visibleLeaves[i]!
@@ -188,8 +187,11 @@ function drawTilesAndText({
       if (str) {
         const tileY = y - rowHeight
         const textY = y - baselineOffset
-        const bandAt = domainBandCursor(
-          overDomains ? domainBandsByStart.get(name) : undefined,
+        const spanFillAt = coveringFill(
+          covers.map(({ bands, colors }) => ({
+            bandAt: domainBandCursor(bands.get(name)),
+            colors,
+          })),
         )
 
         for (let j = 0, l2 = str.length; j < l2; j++) {
@@ -208,10 +210,10 @@ function drawTilesAndText({
           }
 
           if (letters) {
-            const covering = bandAt(col)
+            const covering = spanFillAt(col)
             ctx.fillStyle = covering
-              ? // on top of a domain box: contrast against the box fill
-                contrastText(featureColors.get(covering.annotation)?.fill)
+              ? // on top of a span: contrast against its fill
+                contrastText(covering.fill)
               : isMatchingReference
                 ? // the dot sits on the faint reference-match wash, which is
                   // the theme's background with a little of its text color in it
@@ -237,6 +239,25 @@ function drawTilesAndText({
         }
       }
     }
+  }
+}
+
+// the fill of the span drawn last over a column, from one cursor per mark in
+// drawing order; columns are visited in increasing order
+function coveringFill(
+  cursors: {
+    bandAt: ReturnType<typeof domainBandCursor>
+    colors: Map<Annotation, { fill: string }>
+  }[],
+) {
+  return (col: number) => {
+    let covering: { fill: string | undefined } | undefined
+    for (let k = cursors.length - 1; k >= 0 && !covering; k--) {
+      const { bandAt, colors } = cursors[k]!
+      const band = bandAt(col)
+      covering = band ? { fill: colors.get(band.annotation)?.fill } : undefined
+    }
+    return covering
   }
 }
 

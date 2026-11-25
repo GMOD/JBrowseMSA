@@ -1,3 +1,5 @@
+import { markRowTall } from '../msa/renderBoxFeatureCanvasBlock.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
 export const MINIMAP_BAR_HEIGHT = 12
@@ -21,9 +23,10 @@ export function getMinimapLayout(model: MsaViewModel) {
 }
 
 /**
- * The domain overlay's boxes scaled onto the minimap bar, in the colors the
- * alignment draws them, so the overview shows the domains the alignment does.
- * Empty unless the domains fill the cells.
+ * The boxes of the alignment marks as tall as the row, scaled onto the
+ * minimap bar in the colors and the order the alignment draws them, so the
+ * overview shows the domains the alignment does. Empty unless the marks fill
+ * the cells.
  *
  * The rows share the bar's height in lanes at least a pixel tall, and a lane
  * keeps one rect per distinct pixel span and color, so an alignment of 200k
@@ -34,10 +37,11 @@ export function minimapDomainRects(
   width: number,
   height: number,
 ) {
-  const { cellFill, domainBands, featureColors, leaves, numColumns } = model
+  const { cellFill, leaves, numColumns } = model
   if (cellFill !== 'domain' || numColumns <= 0 || leaves.length === 0) {
     return []
   }
+  const marks = model.resolvedMarks.filter(mark => markRowTall(model, mark))
   const colUnit = width / numColumns
   const laneCount = Math.min(leaves.length, Math.max(1, Math.floor(height)))
   const laneHeight = height / laneCount
@@ -46,14 +50,16 @@ export function minimapDomainRects(
     []
   leaves.forEach((leaf, row) => {
     const lane = Math.floor((row * laneCount) / leaves.length)
-    for (const band of domainBands.get(leaf.data.name) ?? []) {
-      const x = Math.round(band.startCol * colUnit)
-      const w = Math.max(1, Math.round(band.endCol * colUnit) - x)
-      const fill = featureColors.get(band.annotation)?.fill ?? 'grey'
-      const key = `${x},${w},${fill}`
-      if (!lanes[lane]!.has(key)) {
-        lanes[lane]!.add(key)
-        rects.push({ x, y: lane * laneHeight, w, h: laneHeight, fill })
+    for (const { bands, colors } of marks) {
+      for (const band of bands.get(leaf.data.name) ?? []) {
+        const x = Math.round(band.startCol * colUnit)
+        const w = Math.max(1, Math.round(band.endCol * colUnit) - x)
+        const fill = colors.get(band.annotation)?.fill ?? 'grey'
+        const key = `${x},${w},${fill}`
+        if (!lanes[lane]!.has(key)) {
+          lanes[lane]!.add(key)
+          rects.push({ x, y: lane * laneHeight, w, h: laneHeight, fill })
+        }
       }
     }
   })

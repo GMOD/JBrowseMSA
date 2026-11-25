@@ -32,6 +32,15 @@ import {
   parseTree,
 } from 'msa-parsers'
 
+import {
+  alignmentMarks,
+  bandsByStart,
+  bandsPassing,
+  featurePasses,
+  markAnnotations,
+  markProblems,
+  markedBands,
+} from './alignmentMarks.ts'
 import { blockFasta } from './blockFasta.ts'
 import { calculateBlocks } from './calculateBlocks.ts'
 import { clustalXColumnColors } from './clustalX.ts'
@@ -208,6 +217,7 @@ import { writeNewick } from './writeNewick.ts'
 import { parseWuss } from './wuss.ts'
 import { takeZoomSnapshot, zoomSnapshotCovers } from './zoomSnapshot.ts'
 
+import type { AlignmentMark, ResolvedMark } from './alignmentMarks.ts'
 import type { ColumnStats } from './columnStats.ts'
 import type { ValueScale } from './components/axis.ts'
 import type { ScrollZoomAxis } from './constants.ts'
@@ -224,6 +234,7 @@ import type {
   SharedScale,
 } from './scales.ts'
 import type {
+  AlignmentMarkSpec,
   Annotation,
   Arc,
   BasicTrack,
@@ -430,13 +441,14 @@ function annotationRowName(
 }
 
 // a feature-table or column-track record's values, read without the row
-// table or the tree
+// table or the tree. An alignment mark reads the features its filter passes.
 function rowIndependentScaleUse(
   record: ColorRecord,
   allAnnotations: Annotation[],
   shownAnnotations: Annotation[],
 ): ScaleUse {
   const { field } = record.channel
+  const filter = record.table === 'features' ? record.filter : undefined
   return {
     spec: record.channel,
     field,
@@ -449,8 +461,14 @@ function rowIndependentScaleUse(
             shown: featureValues(record.annotations, field),
           }
         : {
-            values: featureValues(allAnnotations, field),
-            shown: featureValues(shownAnnotations, field),
+            values: featureValues(
+              markAnnotations(allAnnotations, filter),
+              field,
+            ),
+            shown: featureValues(
+              markAnnotations(shownAnnotations, filter),
+              field,
+            ),
           }),
   }
 }
@@ -934,6 +952,15 @@ function stateModelFactory({
          * docs/layers.md
          */
         rowTransform: types.frozen<RowTransform | undefined>(),
+        /**
+         * #property
+         * the feature marks the alignment panel draws over its cells, in
+         * drawing order: `{kind: "features", filter?, encoding?, height?}`
+         * draws the spans of the features passing every `filter`. Unset draws
+         * one mark over every feature, and `[]` draws none. See
+         * docs/layers.md
+         */
+        marks: types.frozen<AlignmentMarkSpec[] | undefined>(),
       }),
     )
     .volatile(() => ({
@@ -1595,12 +1622,33 @@ function stateModelFactory({
 
       /**
        * #getter
+       * the marks the alignment panel draws: one over every feature while
+       * `marks` is unset, else each `features` record with the members
+       * `markProblems` refuses left out
+       */
+      get alignmentMarks(): AlignmentMark[] {
+        return alignmentMarks(self.marks)
+      },
+
+      /**
+       * #getter
+       * why a `marks` record draws other than it says: a `kind` the
+       * alignment panel does not draw, a `height` of no pixels or a `band`
+       * outside (0, 1], a filter naming no field or no test. The mark draws
+       * with that member left out, and a record of another kind draws nothing.
+       */
+      get markProblems() {
+        return markProblems(self.marks ?? [])
+      },
+
+      /**
+       * #getter
        * every record that reads a field through a color object: each color
-       * encoding, each strip's `fill`, each features panel's or features
-       * track's `fill` naming a field, each bar, point or text panel's
-       * `color`, and each other column track's `encoding.color` reading the
-       * track's own values, with where it sits in the snapshot and the table
-       * its field is read from
+       * encoding, each strip's `fill`, each features panel's, features
+       * track's or alignment mark's `fill` naming a field, each bar, point or
+       * text panel's `color`, and each other column track's `encoding.color`
+       * reading the track's own values, with where it sits in the snapshot and
+       * the table its field is read from
        */
       get colorRecords(): ColorRecord[] {
         return [
@@ -1664,6 +1712,19 @@ function stateModelFactory({
                     },
                   ]
                 : []
+          }),
+          ...this.alignmentMarks.flatMap((mark): ColorRecord[] => {
+            const fill = fieldChannel(mark.encoding?.fill)
+            return fill
+              ? [
+                  {
+                    record: `marks[${mark.index}].encoding.fill`,
+                    channel: fill,
+                    table: 'features',
+                    ...(mark.filter ? { filter: mark.filter } : {}),
+                  },
+                ]
+              : []
           }),
         ]
       },
@@ -3781,10 +3842,21 @@ function stateModelFactory({
       },
       /**
        * #getter
-       * what colors the alignment's cells: the residue scheme, the domains
-       * covering them, or nothing, which leaves the scheme to the letters.
-       * Domains own the fill only while some are drawn, so a file whose
-       * annotations all start hidden keeps its residue colors
+       * the features each of `alignmentMarks` draws, out of those drawn: the
+       * ones passing every test of its `filter`
+       */
+      get markFeatures() {
+        const shown = this.filteredAnnotations
+        return self.alignmentMarks.map(mark =>
+          markAnnotations(shown, mark.filter),
+        )
+      },
+      /**
+       * #getter
+       * what colors the alignment's cells: the residue scheme, the feature
+       * marks covering them, or nothing, which leaves the scheme to the
+       * letters. The marks own the fill only while one draws a feature, so a
+       * file whose annotations all start hidden keeps its residue colors
        */
       get cellFill(): 'residue' | 'domain' | 'none' {
         const { channel, field } = self.resolvedResidueColor
@@ -3792,7 +3864,7 @@ function stateModelFactory({
           ? 'none'
           : self.actuallyShowDomains &&
               field === 'feature' &&
-              this.filteredAnnotations.length > 0
+              this.markFeatures.some(features => features.length > 0)
             ? 'domain'
             : 'residue'
       },
@@ -4304,6 +4376,14 @@ function stateModelFactory({
       },
       /**
        * #action
+       * replace the feature marks the alignment panel draws, or unset them,
+       * which draws one mark over every feature
+       */
+      setMarks(marks?: AlignmentMarkSpec[]) {
+        self.marks = marks
+      },
+      /**
+       * #action
        * replace the alignment<->structure correspondence (see docs/layers.md)
        */
       setResidueMappings(mappings: ResidueMapping[]) {
@@ -4438,6 +4518,29 @@ function stateModelFactory({
             color: d.color ?? this.fillPalette[d.accession]!,
             ...(self.featureOff(d.accession) ? { hidden: true } : {}),
           }))
+      },
+      /**
+       * #getter
+       * the rows of `domainLegendItems` for the accessions an alignment mark
+       * naming no fill draws: every one while such a mark has no filter
+       */
+      get markDomainLegendItems(): LegendItem[] {
+        const filters = self.alignmentMarks
+          .filter(mark => mark.encoding?.fill === undefined)
+          .map(mark => mark.filter)
+        const items = this.domainLegendItems
+        const drawn = filters.includes(undefined)
+          ? undefined
+          : new Set(
+              self.allAnnotations
+                .filter(a => filters.some(f => !!f && featurePasses(a, f)))
+                .map(a => a.accession),
+            )
+        return drawn
+          ? items.filter(
+              item => item.value !== undefined && drawn.has(item.value),
+            )
+          : items
       },
       /**
        * #getter
@@ -4599,18 +4702,28 @@ function stateModelFactory({
             })
           }
         }
-        // the overlay draws the domain key; with no columns it draws nothing,
-        // and a features panel taking the same colors lists them instead
+        // each alignment mark lists its own scale, or the domain key where it
+        // names no fill; with no columns the marks draw nothing, and a
+        // features panel taking the same colors lists them instead
         if (self.actuallyShowDomains && self.numColumns > 0) {
-          add(
-            featureFillEncoding?.key,
-            featureFillEncoding?.title,
-            featureFillEncoding
-              ? featureFillEncoding.items
-              : this.domainLegendItems,
-            featureFillEncoding?.note,
-            true,
-          )
+          for (const mark of self.alignmentMarks) {
+            const written = mark.encoding?.fill
+            const fill = fieldChannel(written)
+            if (fill) {
+              const scale = this.scaleOf(fill, 'features')
+              add(scale.key, scale.title, scale.items, scale.note)
+            } else if (written === undefined) {
+              add(
+                featureFillEncoding?.key,
+                featureFillEncoding?.title,
+                featureFillEncoding
+                  ? featureFillEncoding.items
+                  : this.markDomainLegendItems,
+                featureFillEncoding?.note,
+                true,
+              )
+            }
+          }
         }
         for (const encoding of this.resolvedEncodings) {
           if (encoding.channel !== 'featureFill') {
@@ -4726,12 +4839,12 @@ function stateModelFactory({
 
       /**
        * #getter
-       * whether the overlay marks each domain with a bar under its row instead
-       * of filling the row behind the letters: whenever the domains do not own
-       * the cell fill (`cellFill`), a filled box would paint over the residue
-       * colors the user picked. Sub-row layout already stacks
-       * the boxes clear of the letters, and with the letters too small to draw
-       * the filled box is the only thing left to read.
+       * whether an alignment mark with no `height` draws each span as a bar
+       * under its row in place of filling the row behind the letters:
+       * whenever the marks do not own the cell fill (`cellFill`), a filled box
+       * would paint over the residue colors the user picked. Sub-row layout
+       * already stacks the boxes clear of the letters, and with the letters
+       * too small to draw the filled box is the only thing left to read.
        */
       get domainUnderline() {
         return (
@@ -4792,21 +4905,93 @@ function stateModelFactory({
        * letter renderer walks columns and needs the band covering each one)
        */
       get domainBandsByStart() {
-        return new Map(
-          [...this.domainBands].map(
-            ([name, bands]) =>
-              [
-                name,
-                bands.toSorted((a, b) => a.startCol - b.startCol),
-              ] as const,
-          ),
+        return bandsByStart(this.domainBands)
+      },
+
+      /**
+       * #getter
+       * the bands some alignment mark draws, packed into one set of lanes per
+       * row between the marks, which the sub-row layout stacks and the
+       * pointer hits; `domainBands` itself while a mark has no filter
+       */
+      get markedBands() {
+        return markedBands(this.domainBands, self.alignmentMarks)
+      },
+
+      /**
+       * #getter
+       * each alignment mark's spans per row, out of `markedBands`
+       */
+      get markBands() {
+        const bands = this.markedBands
+        return self.alignmentMarks.map(mark => bandsPassing(bands, mark.filter))
+      },
+
+      /**
+       * #getter
+       * each alignment mark's spans per row ordered by start column, for the
+       * letters over a mark as tall as the row
+       */
+      get markBandsByStart() {
+        return this.markBands.map(bands =>
+          bands === this.domainBands
+            ? this.domainBandsByStart
+            : bandsByStart(bands),
         )
       },
 
       /**
        * #getter
-       * domain annotations under the mouse, hit-tested against the exact visible
-       * column span each box is drawn at (so it matches the overlay across gaps)
+       * each alignment mark's fill per feature and its label channel,
+       * resolved as a features panel resolves its own: the mark's
+       * `encoding.fill`, else the `featureFill` encoding, else the accession
+       * palette, with a feature's own `color` first, and its `encoding.text`,
+       * else the `featureLabel` encoding. A mark that names neither reuses
+       * `featureColors` and `featureLabels`.
+       */
+      get markStyles() {
+        return self.alignmentMarks.map((mark, i) => {
+          const written = mark.encoding?.fill
+          const fill = fieldChannel(written)
+          const constant = constantColor(written)
+          const features = self.markFeatures[i]!
+          const label = mark.encoding?.text?.field
+          return {
+            colors: fill
+              ? featureColorMap(
+                  features,
+                  { field: fill.field, ...this.scaleOf(fill, 'features') },
+                  () => UNSCALED_FEATURE,
+                )
+              : constant === undefined
+                ? this.featureColors
+                : featureColorMap(features, undefined, () => constant),
+            labels: label
+              ? featureLabelMap(features, label)
+              : this.featureLabels,
+          }
+        })
+      },
+
+      /**
+       * #getter
+       * each alignment mark with its spans per row, its colors and its labels,
+       * in drawing order
+       */
+      get resolvedMarks(): ResolvedMark[] {
+        const { markBands, markStyles } = this
+        return self.alignmentMarks.map((mark, i) => ({
+          ...mark,
+          bands: markBands[i]!,
+          ...markStyles[i]!,
+        }))
+      },
+
+      /**
+       * #getter
+       * the features an alignment mark draws under the mouse, hit-tested
+       * against the exact visible column span each box is drawn at (so it
+       * matches the overlay across gaps)
        */
       get mouseOverDomains(): Annotation[] {
         const { mouseCol } = self
@@ -4814,7 +4999,7 @@ function stateModelFactory({
         if (name === undefined || mouseCol === undefined) {
           return noDomains
         }
-        const hits = (this.domainBands.get(name) ?? [])
+        const hits = (this.markedBands.get(name) ?? [])
           .filter(b => mouseCol >= b.startCol && mouseCol < b.endCol)
           .map(b => b.annotation)
         return hits.length > 0 ? hits : noDomains
