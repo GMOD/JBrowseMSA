@@ -327,11 +327,11 @@ function CladeLabelsSVG({
   theme: Theme
   offsetY: number
 }) {
-  const { fontSize } = model
   const boxes = cladeLabelBoxes(model)
   return boxes.length === 0 ? null : (
     <g id="clade-labels">
       {boxes.map(box => {
+        const { fontSize } = box
         const top = box.top - offsetY
         const x = box.horizontal ? box.left : box.left + fontSize
         const y = box.horizontal

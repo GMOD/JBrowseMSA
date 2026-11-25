@@ -69,7 +69,9 @@ export function cladeGutterWidth(clades: Pick<Clade, 'mark' | 'label'>[]) {
 /**
  * The box each gutter label takes, in unscrolled tree-area px: from the
  * label's column to the right edge of the gutter, across the clade's rows. The
- * live view sets DOM text in it, and the SVG export a `<text>`.
+ * live view sets DOM text in it, and the SVG export a `<text>`. The label
+ * draws at the rows' font up to labelFitFontSize, the size cladeGutterWidth
+ * measured it at, so taller rows leave it whole.
  */
 export function cladeLabelBoxes(
   model: Pick<
@@ -89,6 +91,7 @@ export function cladeLabelBoxes(
     fontSize,
   } = model
   const gutterLeft = effectiveTreeAreaWidth - gutterWidth
+  const labelFontSize = Math.min(fontSize, labelFitFontSize)
   return gutterWidth === 0
     ? []
     : resolvedClades.flatMap((clade, index) => {
@@ -106,7 +109,8 @@ export function cladeLabelBoxes(
             top: rows[0] * rowHeight,
             width: effectiveTreeAreaWidth - left - bracketGap,
             height: cladeHeight(clade, rowHeight),
-            horizontal: cladeLabelHorizontal(clade, rowHeight, fontSize),
+            fontSize: labelFontSize,
+            horizontal: cladeLabelHorizontal(clade, rowHeight, labelFontSize),
           },
         ]
       })

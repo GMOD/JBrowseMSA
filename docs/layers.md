@@ -571,8 +571,9 @@ color at full strength, and takes the theme's text color without one.
 
 The bracket gutter is at the right of the tree area, between the tip labels and
 the first row panel or the alignment, as wide as the bar plus the widest label
-at the tree font, to a limit of 140px, past which a label is cut with an
-ellipsis. A label reads across the rows where they are taller than the font, and
+at the font of a 16px row, to a limit of 140px, past which a label is cut with
+an ellipsis. A label draws at the tree font up to that size, so taller rows keep
+it whole. A label reads across the rows where they are taller than its font, and
 runs up the bar where they are not. A `highlight` record carrying a `label`
 draws it the same way, with no bar.
 

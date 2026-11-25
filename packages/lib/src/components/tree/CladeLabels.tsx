@@ -15,7 +15,6 @@ import type { MsaViewModel } from '../../model.ts'
  */
 const CladeLabels = observer(function ({ model }: { model: MsaViewModel }) {
   const theme = useTheme()
-  const { fontSize } = model
   return (
     <>
       {cladeLabelBoxes(model).map(box => (
@@ -31,7 +30,7 @@ const CladeLabels = observer(function ({ model }: { model: MsaViewModel }) {
             display: 'flex',
             alignItems: 'center',
             color: box.color ?? theme.palette.text.primary,
-            fontSize,
+            fontSize: box.fontSize,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',

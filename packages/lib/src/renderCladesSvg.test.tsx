@@ -187,3 +187,21 @@ test('a facet without a tree exports a label per band beside its rows', async ()
   expect(ys[0]).toBeLessThan(2 * model.rowHeight)
   expect(ys[1]).toBeGreaterThan(2 * model.rowHeight)
 })
+
+test('taller rows leave a label the gutter holds whole', async () => {
+  const clade: Clade = {
+    mrca: ['C', 'D'],
+    tips: 2,
+    mark: 'bracket',
+    label: 'HG003_father',
+  }
+  for (const rowHeight of [16, 18, 22, 40]) {
+    const { svg } = await exportWith([clade], rowHeight)
+    const [label] = labels(svg)
+    expect(label!.text).toBe('HG003_father')
+    expect(label!.attrs).toContain('font-size="13"')
+  }
+  // below the fit size the label follows the rows' font down
+  const { svg } = await exportWith([clade], 12)
+  expect(labels(svg)[0]!.attrs).toContain('font-size="9"')
+})
