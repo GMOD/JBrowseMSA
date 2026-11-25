@@ -420,6 +420,9 @@ The name of a row to read every other row against. With one set, the viewer:
 
 - draws a residue matching the reference row's residue in its column as a dot on
   a grey cell, so only the differences keep their color
+- draws a gap matching the reference row's gap as that gap on a grey cell, so in
+  a column where the reference has `-`, a row holding `-` reads apart from a row
+  holding `.`
 - repeats the reference row as a track pinned above the alignment, so it stays
   in view while the rows under it scroll; the row keeps its place in the tree
 - numbers the position ruler and the track tooltips in the reference row's own
@@ -1036,10 +1039,12 @@ The color object of the residue mark, `{channel, field, scale}`:
 
 Under `field: "feature"` the domains fill the cells only while the overlay draws
 a span, so an alignment with no annotations keeps its residue colors and a
-loaded GFF fills the cells its spans cover. A span takes the color the overlay
-draws it in: its GFF `color=`, a `featureFill` encoding, or the accession
-palette. Under `field: "residue"` or the `color` channel, the scale keeps the
-residue colors and each domain draws as a bar under its row.
+loaded GFF fills the cells its spans cover. Once one span is drawn, every cell
+no span covers draws on the plain background, without its residue color or the
+grey cell of a `relativeTo` match. A span takes the color the overlay draws it
+in: its GFF `color=`, a `featureFill` encoding, or the accession palette. Under
+`field: "residue"` or the `color` channel, the scale keeps the residue colors
+and each domain draws as a bar under its row.
 
 The letters a `domain` lists take the `range` color at their own index, and
 every other letter is uncolored, the rule a `domain` and `range` in `encodings`

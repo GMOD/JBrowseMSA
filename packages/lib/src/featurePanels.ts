@@ -99,13 +99,21 @@ export function featureColorMap(
     strokes.set(fill, stroke)
     return stroke
   }
+  const fills = new Map<string | undefined, string>()
+  const fillOf = (value: string | undefined) => {
+    let fill = fills.get(value)
+    if (fill === undefined) {
+      fill = encoding?.colorOf(value) ?? UNSCALED_FEATURE
+      fills.set(value, fill)
+    }
+    return fill
+  }
   return new Map(
     annotations.map(annotation => {
       const fill =
         annotation.color ??
         (encoding
-          ? (encoding.colorOf(featureField(annotation, encoding.field)) ??
-            UNSCALED_FEATURE)
+          ? fillOf(featureField(annotation, encoding.field))
           : unencoded(annotation))
       return [annotation, { fill, stroke: strokeOf(fill) }]
     }),

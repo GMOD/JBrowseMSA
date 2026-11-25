@@ -535,6 +535,11 @@ export function declarationKey({
   ])
 }
 
+/** the declaration a record's color object resolves under */
+export function colorRecordKey({ channel, table }: ColorRecord) {
+  return declarationKey({ spec: channel, field: channel.field, table })
+}
+
 /**
  * Resolves each declaration once over the union of its records' values, so a
  * value two fields share takes one color in both

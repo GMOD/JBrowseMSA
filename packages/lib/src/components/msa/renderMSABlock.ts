@@ -229,7 +229,7 @@ function drawTilesAndText({
                         theme.palette.background.default,
                       )
             ctx.fillText(
-              isMatchingReference ? '.' : letter,
+              isMatchingReference && !isGap(letter) ? '.' : letter,
               x + halfColWidth,
               textY,
             )
@@ -238,6 +238,10 @@ function drawTilesAndText({
       }
     }
   }
+}
+
+function isGap(letter: string) {
+  return letter === '-' || letter === '.'
 }
 
 function drawInsertionIndicators({
