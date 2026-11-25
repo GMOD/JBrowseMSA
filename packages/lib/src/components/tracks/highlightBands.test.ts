@@ -14,7 +14,7 @@ function span(
   label: string,
   startCol: number,
   endCol: number,
-  extra: { mark?: HighlightMark; transient?: boolean } = {},
+  extra: { mark?: HighlightMark } = {},
 ): ResolvedHighlight {
   return {
     label,
@@ -22,7 +22,6 @@ function span(
     endCol,
     rowIndices: [],
     mark: 'bracket',
-    transient: false,
     key: label,
     ...extra,
   }
@@ -43,10 +42,9 @@ test('a nested bracket takes the next lane, and adjacent ones share a lane', () 
   expect(bands.find(b => b.key === 'S2')?.nextStartCol).toBeUndefined()
 })
 
-test('bands and transient highlights stay out of the strip', () => {
+test('bands stay out of the strip', () => {
   const bands = packHighlightBands([
     span('band', 0, 5, { mark: 'band' }),
-    span('hover', 0, 5, { transient: true }),
     span('kept', 0, 5),
   ])
   expect(bands.map(b => b.key)).toEqual(['kept'])

@@ -25,17 +25,14 @@ export function opaqueColor(color: string) {
 }
 
 /**
- * The persisted bracket-mark highlights as bands packed into lanes by their
+ * The bracket-mark highlights as bands packed into lanes by their
  * spans alone, so the strip keeps its height at every zoom. A label that does
  * not fit before the next bracket in its lane is left to the tooltip.
  */
 export function packHighlightBands(highlights: ResolvedHighlight[]) {
   const spans = highlights.flatMap(
-    ({ startCol, endCol, label, color, mark, transient, key }) =>
-      startCol === undefined ||
-      endCol === undefined ||
-      mark !== 'bracket' ||
-      transient
+    ({ startCol, endCol, label, color, mark, key }) =>
+      startCol === undefined || endCol === undefined || mark !== 'bracket'
         ? []
         : [{ key, startCol, endCol: endCol + 1, label, color }],
   )

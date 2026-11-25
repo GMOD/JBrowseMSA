@@ -360,7 +360,11 @@ For a transient highlight, such as one following a hover in a structure viewer
 or a genome browser, call `model.applyHighlight(owner, list)` and
 `model.clearHighlight(owner)`. They take the same shape, draw over the persisted
 highlights, and stay out of the snapshot. `clearHighlight(owner)` removes only
-that owner's highlights, so two sources can highlight at once.
+that owner's highlights, so two sources can highlight at once. A transient
+`"mark": "bracket"` joins the Highlights strip, which grows a lane where it
+overlaps another, so a highlight that follows the pointer is better left a band.
+A host that rebuilds its brackets on every load passes them this way to keep
+them out of the shared link.
 
 `region` takes the same coordinates and names where the view opens:
 `{"row": "Human", "start": 170, "end": 290}` zooms onto those residues and

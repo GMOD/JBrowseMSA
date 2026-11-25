@@ -115,6 +115,20 @@ test('a transient highlight resolves like a persisted one, and stays out of the 
   expect(getSnapshot(model)).not.toHaveProperty('transientHighlights')
 })
 
+test('a transient highlight is a band unless it asks for a bracket', () => {
+  const model = makeModel([])
+  model.applyHighlight('hover', [{ start: 2, end: 4, label: 'hover' }])
+  expect(model.resolvedHighlights.map(h => h.mark)).toEqual(['band'])
+  expect(model.tracks.some(t => t.model.kind === 'highlights')).toBe(false)
+  model.applyHighlight('load', [
+    { start: 2, end: 4, label: 'insertion', mark: 'bracket' },
+  ])
+  expect(
+    model.highlightTrackModels.flatMap(t => t.model.bands?.map(b => b.label)),
+  ).toEqual(['insertion'])
+  expect(getSnapshot(model)).not.toHaveProperty('highlights')
+})
+
 test('only bracket-mark highlights make a highlight strip', () => {
   const banded = makeModel([{ start: 2, end: 4, label: 'band' }])
   expect(banded.tracks.some(t => t.model.kind === 'highlights')).toBe(false)

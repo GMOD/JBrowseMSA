@@ -192,7 +192,6 @@ export function renderHighlights({
     label,
     color,
     mark,
-    transient,
     key,
   } of resolvedHighlights) {
     if (startCol === undefined || endCol === undefined) {
@@ -203,7 +202,7 @@ export function renderHighlights({
     if (x + spanWidth <= 0 || x >= width) {
       continue
     }
-    if (stripShown && mark === 'bracket' && !transient) {
+    if (stripShown && mark === 'bracket') {
       const hovered = key === hoveredHighlight
       if (hovered) {
         ctx.fillStyle = highlightHoverWash
