@@ -783,7 +783,7 @@ no tint. Each field lists its own legend.
 | `branch`       | the color of a tree edge whose tips all share one value       | `rowData`                 |
 | `nodePoint`    | the fill of the bubble on each internal node of the tree      | the tree, field `support` |
 | `rowLabel`     | the text of each tip label in the tree                        | `rowData`                 |
-| `featureFill`  | the fill of each span of the annotation overlay               | the `gff`                 |
+| `featureFill`  | the fill of each span a feature mark draws with no own `fill` | the `gff`                 |
 | `featureLabel` | the text drawn inside a span                                  | the `gff`                 |
 
 A `scheme` is one of `ggplot` (the default), `set1`, `dark2`, `okabeito` and
@@ -982,7 +982,8 @@ legend lists that scale's values under the field's name. A feature carrying a
 GFF3 `color=` attribute keeps that color whatever the scale says, and `255,0,0`
 reads as `rgb(255,0,0)`, the convention JBrowse and IGV honor. A `featureLabel`
 draws inside its span wherever the text fits, and it is a data channel, so it
-draws whether or not the residue letters do.
+draws whether or not the residue letters do. A mark in [`marks`](#marks) naming
+its own `fill` or `text` reads that in place of these channels.
 
 ### The tree channels
 
@@ -1019,9 +1020,9 @@ The color object of the residue mark, `{channel, field, scale}`:
 
 - `channel` is what the color paints: `fill` (the default) colors the cell, and
   `color` colors the letter and leaves the cell plain.
-- `field` is what a cell reads: `feature` (the default) takes the color the
-  annotation overlay gives the span covering the cell, and `residue` takes the
-  residue's color through `scale`. The `color` channel reads the residue.
+- `field` is what a cell reads: `feature` (the default) leaves the cells to the
+  feature [`marks`](#marks), and `residue` paints every cell from its residue
+  through `scale`. The `color` channel reads the residue.
 - `scale` holds `scheme`, a built-in scheme name (`maeditor` where unset), or
   `domain` and `range`, a color per residue letter. A `domain` wins over
   `scheme`.
@@ -1041,14 +1042,19 @@ The color object of the residue mark, `{channel, field, scale}`:
 
 [Open this snapshot in the app][live-layers-residuecolor].
 
-Under `field: "feature"` the domains fill the cells only while the overlay draws
-a span, so an alignment with no annotations keeps its residue colors and a
-loaded GFF fills the cells its spans cover. Once one span is drawn, every cell
-no span covers draws on the plain background, without its residue color or the
-grey cell of a `relativeTo` match. A span takes the color the overlay draws it
-in: its GFF `color=`, a `featureFill` encoding, or the accession palette. Under
-`field: "residue"` or the `color` channel, the scale keeps the residue colors
-and each domain draws as a bar under its row.
+Under `field: "feature"` the residue scale paints no cell while a mark draws a
+feature, and a mark with no `height` is as tall as the row, so a loaded GFF
+fills the cells its spans cover. Every cell no span covers then draws on the
+plain background, without its residue color or the grey cell of a `relativeTo`
+match. An alignment with no annotations, or with no feature any mark draws,
+keeps its residue colors. A span takes its color from the mark: its GFF
+`color=`, the mark's own `encoding.fill`, a `featureFill` encoding, or the
+accession palette.
+
+Under `field: "residue"` every cell takes its residue color, and a mark with no
+`height` draws each span as a bar under its row. A mark whose `height` is as
+tall as the row draws over the residue colors and the `relativeTo` wash. The
+`color` channel draws the marks as `field: "residue"` does.
 
 The letters a `domain` lists take the `range` color at their own index, and
 every other letter is uncolored, the rule a `domain` and `range` in `encodings`
@@ -1082,6 +1088,122 @@ React: `residueColor={{ scale: { domain: ['K'], range: ['#1f77b4'] } }}` on
 `MSAViewer`, or `model.setResidueColor(color)`. R:
 `scale_residue_color(c(K = "#1f77b4"))`. Python:
 `residue_color={"scale": {"domain": ["K"], "range": ["#1f77b4"]}}`.
+
+## marks
+
+The feature marks the alignment panel draws over its cells, in drawing order.
+Each record is `{kind: "features", filter?, encoding?, height?}` and draws the
+spans of the features passing every test of its `filter`, with the span mark a
+`features` panel and a `features` track draw: an arrow where a feature carries a
+strand, a box otherwise. The cells draw first, then each mark in list order,
+then the letters.
+
+Left out, `marks` is one mark over every feature, which is the overlay a view
+without the property draws. `[]` draws no feature in the alignment, and the
+`features` panels and tracks still draw theirs.
+
+```json
+{
+  "type": "MsaView",
+  "data": {
+    "msa": ">ref\nACGTTCGATCGGA\n>read1\nACGTTCGATCGGA\n>read2\nACGTTCGTTCGGA"
+  },
+  "relativeTo": "ref",
+  "residueColor": { "field": "residue", "scale": { "scheme": "jbrowse_dna" } },
+  "features": [
+    { "row": "ref", "start": 2, "end": 10, "name": "exon 1", "type": "exon" },
+    {
+      "row": "read1",
+      "start": 6,
+      "end": 6,
+      "type": "modified_base",
+      "probability": 94
+    },
+    {
+      "row": "read2",
+      "start": 10,
+      "end": 10,
+      "type": "modified_base",
+      "probability": 12
+    }
+  ],
+  "marks": [
+    {
+      "kind": "features",
+      "filter": [{ "field": "type", "oneOf": ["modified_base"] }],
+      "height": { "band": 1 },
+      "encoding": {
+        "fill": {
+          "field": "probability",
+          "scale": {
+            "type": "linear",
+            "domainMin": 0,
+            "domainMax": 100,
+            "range": ["#0000ff", "#ff0000"]
+          },
+          "legend": { "title": "modification %" }
+        }
+      }
+    },
+    {
+      "kind": "features",
+      "filter": [{ "field": "type", "oneOf": ["exon"] }],
+      "height": 3
+    }
+  ]
+}
+```
+
+[Open this snapshot in the app][live-layers-marks].
+
+The reads keep their base colors and the `relativeTo` wash, each modification
+call fills its cell from blue to red by its probability, and the exon on the
+reference draws as a bar under its row.
+
+| Field      | Meaning                                                                                              |
+| ---------- | ---------------------------------------------------------------------------------------------------- |
+| `kind`     | `features`, the kind the alignment panel draws                                                       |
+| `filter`   | `[{field, oneOf}]` or `[{field, range: [min, max]}]` over fields of the features, every test passing |
+| `encoding` | `{fill: {field, scale, legend}, text: {field}}`, or `fill: {value}`, as a `features` panel takes     |
+| `height`   | pixels, or `{band}`, a fraction of the row height above 0 and at most 1                              |
+
+A filter reads a field the way `featureFill` does: `type`, `name`, any GFF
+attribute, or any field of a `features` record. A feature with no value for the
+field fails the test, and `range` reads numbers, with `null` for an open end. A
+feature passing two marks draws in each. A feature passing none is not drawn in
+the alignment and shows no tooltip there. The filter dialog and a click on a
+legend row take features out before any mark reads them.
+
+`encoding.fill` reads a field of the feature table through a color object, or
+holds one color as `{"value": "#bbbbbb"}`. A mark with no `fill` takes the
+`featureFill` encoding, else the accession palette, and a mark with no `text`
+takes the `featureLabel` encoding. A feature's own `color` wins over each. A
+mark's scale lists a legend while the mark is drawn, and a mark, a panel and a
+track declaring the same scale share one legend and one set of colors. A mark
+with no `fill` lists the domain key for the features it draws.
+
+A span as tall as the row covers its cells, and a letter on it contrasts against
+the span's fill, the last such span drawn where several cover the cell. A
+shorter span is a bar at the foot of the row, and over residue colors a strip of
+the page background parts it from the cells. A height in pixels taller than the
+row draws as tall as the row. `{"band": 0.8}` is the `height` Vega-Lite and
+jbrowse-components give a rect mark. An explicit `height` draws as written at
+every zoom. A mark with no `height` follows `residueColor`: as tall as the row
+under `field: "feature"`, a bar under `field: "residue"` or the `color` channel
+while the letters are drawn, and as tall as the row once they are too small to
+draw. Under **Sub-row layout** the spans of every mark in a row stack in one set
+of lanes and `height` is not read. **Show annotations** turns every mark on and
+off.
+
+`model.markProblems` lists a `kind` other than `features`, a `band` outside 0 to
+1, a height of 0 or less, and a filter naming no field or no test, each with its
+`record` (`marks[1]`), its `slot` and a message. The mark draws with that member
+left out, a record of another kind draws nothing, and
+`react-msaview-cli export-svg` prints each problem to stderr beside the scale
+problems.
+
+React: `marks={[{ kind: 'features', height: { band: 1 } }]}` on `MSAViewer`, or
+`model.setMarks(marks)`. Python: `marks=[{"kind": "features", "height": 3}]`.
 
 ## rowPanels
 
@@ -1540,6 +1662,8 @@ react-msaview-cli residue-mappings --msa spike.afa --row SARS-CoV-2 \
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22height%22%3A340%2C%22treeAreaWidth%22%3A215%2C%22colWidth%22%3A1.8%2C%22rowHeight%22%3A24%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22clustalx_protein_dynamic%22%7D%7D%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22featureFill%22%2C%22field%22%3A%22description%22%2C%22scale%22%3A%7B%22scheme%22%3A%22set1%22%7D%7D%2C%7B%22channel%22%3A%22featureLabel%22%2C%22field%22%3A%22description%22%7D%5D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.aln%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase.nh%22%7D%2C%22gffFilehandle%22%3A%7B%22uri%22%3A%22data%2Fkinase-domains.gff%22%7D%7D%7D
 [live-layers-residuecolor]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Ehuman%5CnMKAANSE%5Cn%3Emouse%5CnMKA-NSE%22%7D%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22domain%22%3A%5B%22K%22%2C%22R%22%2C%22D%22%2C%22E%22%5D%2C%22range%22%3A%5B%22%231f77b4%22%2C%22%231f77b4%22%2C%22%23d62728%22%2C%22%23d62728%22%5D%7D%7D%7D%7D
+[live-layers-marks]:
+  https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22data%22%3A%7B%22msa%22%3A%22%3Eref%5CnACGTTCGATCGGA%5Cn%3Eread1%5CnACGTTCGATCGGA%5Cn%3Eread2%5CnACGTTCGTTCGGA%22%7D%2C%22relativeTo%22%3A%22ref%22%2C%22residueColor%22%3A%7B%22field%22%3A%22residue%22%2C%22scale%22%3A%7B%22scheme%22%3A%22jbrowse_dna%22%7D%7D%2C%22features%22%3A%5B%7B%22row%22%3A%22ref%22%2C%22start%22%3A2%2C%22end%22%3A10%2C%22name%22%3A%22exon%201%22%2C%22type%22%3A%22exon%22%7D%2C%7B%22row%22%3A%22read1%22%2C%22start%22%3A6%2C%22end%22%3A6%2C%22type%22%3A%22modified_base%22%2C%22probability%22%3A94%7D%2C%7B%22row%22%3A%22read2%22%2C%22start%22%3A10%2C%22end%22%3A10%2C%22type%22%3A%22modified_base%22%2C%22probability%22%3A12%7D%5D%2C%22marks%22%3A%5B%7B%22kind%22%3A%22features%22%2C%22filter%22%3A%5B%7B%22field%22%3A%22type%22%2C%22oneOf%22%3A%5B%22modified_base%22%5D%7D%5D%2C%22height%22%3A%7B%22band%22%3A1%7D%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22probability%22%2C%22scale%22%3A%7B%22type%22%3A%22linear%22%2C%22domainMin%22%3A0%2C%22domainMax%22%3A100%2C%22range%22%3A%5B%22%230000ff%22%2C%22%23ff0000%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22modification%20%25%22%7D%7D%7D%7D%2C%7B%22kind%22%3A%22features%22%2C%22filter%22%3A%5B%7B%22field%22%3A%22type%22%2C%22oneOf%22%3A%5B%22exon%22%5D%7D%5D%2C%22height%22%3A3%7D%5D%7D%7D
 [live-layers-rowpanels]:
   https://gmod.org/JBrowseMSA/demo/#data=%7B%22msaview%22%3A%7B%22type%22%3A%22MsaView%22%2C%22treeAreaWidth%22%3A260%2C%22colWidth%22%3A3%2C%22rowHeight%22%3A14%2C%22residueColor%22%3A%7B%22scale%22%3A%7B%22scheme%22%3A%22clustalx_protein_dynamic%22%7D%7D%2C%22turnedOffTracks%22%3A%7B%22property-conservation%22%3Atrue%7D%2C%22msaFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.afa%22%7D%2C%22treeFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem.nwk%22%7D%2C%22treeMetadataFilehandle%22%3A%7B%22uri%22%3A%22data%2Ftem%2Ftem-rowdata.json%22%7D%2C%22height%22%3A830%2C%22encodings%22%3A%5B%7B%22channel%22%3A%22tipLabel%22%2C%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%5D%2C%22rowPanels%22%3A%5B%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22phenotype%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22broad-spectrum%22%2C%22extended-spectrum%22%2C%22inhibitor-resistant%20broad-spectrum%22%2C%22inhibitor-resistant%20extended-spectrum%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23e15759%22%2C%22%2359a14f%22%2C%22%23b07aa1%22%5D%7D%7D%7D%2C%22width%22%3A14%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20104%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22104%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20164%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22164%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20238%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22238%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20240%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22240%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%2069%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%2269%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20244%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22244%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20276%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22276%22%7D%2C%7B%22kind%22%3A%22strip%22%2C%22encoding%22%3A%7B%22fill%22%3A%7B%22field%22%3A%22Ambler%20265%22%2C%22scale%22%3A%7B%22domain%22%3A%5B%22C%22%2C%22D%22%2C%22E%22%2C%22G%22%2C%22H%22%2C%22I%22%2C%22K%22%2C%22L%22%2C%22M%22%2C%22N%22%2C%22R%22%2C%22S%22%2C%22T%22%2C%22V%22%5D%2C%22range%22%3A%5B%22%234e79a7%22%2C%22%23f28e2b%22%2C%22%23e15759%22%2C%22%2376b7b2%22%2C%22%2359a14f%22%2C%22%23edc948%22%2C%22%23b07aa1%22%2C%22%23ff9da7%22%2C%22%239c755f%22%2C%22%23bab0ac%22%2C%22%2386bcb6%22%2C%22%23d37295%22%2C%22%23a0cbe8%22%2C%22%238cd17d%22%5D%7D%2C%22legend%22%3A%7B%22title%22%3A%22residue%22%7D%7D%7D%2C%22width%22%3A12%2C%22header%22%3A%22265%22%7D%5D%7D%7D
 [live-layers-featurespanel]:

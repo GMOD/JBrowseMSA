@@ -256,7 +256,9 @@ commit.
   table and stored in a field, under `viewer-not-analysis-tool`.
 - **A top-level `scales` map.** See the declaration rule above.
 - **`opacity` and `size` channels on the span mark.** No figure has asked.
-  `size` on a `point` row panel takes a number, one diameter per record.
+  `size` on a `point` row panel takes a number, one diameter per record. An
+  `opacity` channel would sit in a `marks` record's `encoding`, for a figure
+  that fades calls of low confidence.
 - **A per-cell color matrix.** See `data-layers.md`.
 
 ### One color object for the residue mark
@@ -268,11 +270,13 @@ property and the shared-URL key alike.
 - `channel` names what the color paints: `fill`, the default, colors the cell,
   and `color` colors the letter and leaves the cell plain.
 - `field` names what a cell reads: `residue`, its letter through `scale`, or
-  `feature`, the default, the color the annotation overlay gives the span
-  covering it. Under `feature` the residue scale fills the cells wherever the
-  overlay draws no span, so an alignment with no annotations keeps its scheme
-  and a loaded GFF takes the cells it covers. The `color` channel reads the
-  residue, and the spans draw as bars under the rows.
+  `feature`, the default, which leaves the cells to the alignment panel's
+  feature marks ([panels-and-marks](panels-and-marks.md)). Under `feature` the
+  residue scale paints no cell while a mark draws a feature, and a mark with no
+  `height` is as tall as the row, so an alignment with no annotations keeps its
+  scheme and a loaded GFF takes the cells its spans cover. Under `residue` and
+  the `color` channel a mark with no `height` draws as a bar under the row, and
+  one whose `height` is as tall as the row draws over the residue colors.
 - `scale` holds `scheme`, a built-in scheme name with `maeditor` where unset, or
   `domain` and `range`, a color per residue letter. A `domain` wins over
   `scheme` and leaves every letter it does not list uncolored, so clearing it
@@ -286,12 +290,14 @@ letter takes a different color in each column. They are no ordinal scale, and
 the scale samples. `dynamicColorSchemeName` is the test for one, and is
 undefined while a `domain` wins.
 
-The domains own the fill as `field: "feature"`, the table the overlay reads, and
-the color of a span stays with `featureFill`, a GFF `color=` and the accession
-palette, which color it under every layout: a filled box, a bar under the row, a
-sub-row, a panel. A feature field named on the residue channel, such as
-`field: "type"` through its own scale, was declined, because it would give one
-span two colors, one in the cell and another in its bar.
+The marks own the fill as `field: "feature"`, and the color of a span stays with
+the mark: a GFF `color=`, the mark's own `encoding.fill`, `featureFill` and the
+accession palette, which color it under every layout: a filled box, a bar under
+the row, a sub-row, a panel. A feature field named on the residue channel, such
+as `field: "type"` through its own scale, was declined, because it would give
+one span two colors, one in the cell and another in its bar. A feature set
+filled over the residue colors is a mark with `height: {band: 1}` under
+`field: "residue"`, which keeps one color per span.
 
 The prop replaces `colorScheme` and `residueEncoding`. `preProcessSnapshot`
 reads the four keys a snapshot held before into `residueColor`

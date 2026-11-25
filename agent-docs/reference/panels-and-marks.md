@@ -84,26 +84,30 @@ What the layout gives the API:
   URLs, and the track machinery (`turnedOffTracks`, `heightKey`, `trackHeights`,
   `hideGaps`) is column-only. A single `panels` list with an `axis` field would
   deprecate a property to gain a name.
+- **The body has a list too.** `marks` holds the feature marks the alignment
+  draws over its cells, with the record fields the other two lists use: `kind`,
+  `encoding` keyed by channel, `height`, plus a `filter` over the feature table.
+  See the decision below.
 
 ## What the figures need
 
-| Mark                             | ggtree / gggenes                 | react-msaview today                                                  |
-| -------------------------------- | -------------------------------- | -------------------------------------------------------------------- |
-| Phylogram, scale bar             | `ggtree`                         | `renderTree`, `TreeRuler`                                            |
-| Collapsed clade + tip count      | `collapse`                       | `renderCollapsedTriangles`, seeded by `clades` `mark: "collapse"`    |
-| Tip labels                       | `geom_tiplab`                    | `renderTreeLabels` (`renderTreeCanvas.ts:287`)                       |
-| Tip labels colored by a field    | `aes(color=)`                    | missing; `treeMetadata` holds the data and no channel reads it       |
-| Support values on internal nodes | `geom_nodelab`                   | missing; parsed and never drawn                                      |
-| Clade highlight rectangle        | `geom_hilight`                   | `clades` with `mark: "highlight"` (`renderTreeCanvas.ts`)            |
-| Clade bracket + label            | `geom_cladelab`                  | `clades` with `mark: "bracket"` (`cladeBrackets.ts`)                 |
-| Bracket over a run of tips       | `geom_strip`                     | a `bracket` record over `range`                                      |
-| Branches colored by a group      | `groupClade`, `aes(color=group)` | missing                                                              |
-| Tree overview inset              | `viewClade`, `geom_zoom_clade`   | `showTreeOverview` (`renderTreeOverview.ts`)                         |
-| Tip-aligned categorical matrix   | `gheatmap`                       | missing                                                              |
-| Legend for a categorical scale   | `scale_*_manual`                 | `AnnotationLegend`, keyed to domain accessions only                  |
-| Strand arrow spans per row       | `geom_gene_arrow`                | `drawFeatureSpans.ts`, over columns or over residue positions        |
-| Arrow filled by a field, labeled | `aes(fill=)`                     | `featureFill` and `featureLabel`, or a `features` panel's `encoding` |
-| Rows aligned on one gene         | `make_alignment_dummies`         | the `align` transform on a `features` panel                          |
+| Mark                             | ggtree / gggenes                 | react-msaview today                                               |
+| -------------------------------- | -------------------------------- | ----------------------------------------------------------------- |
+| Phylogram, scale bar             | `ggtree`                         | `renderTree`, `TreeRuler`                                         |
+| Collapsed clade + tip count      | `collapse`                       | `renderCollapsedTriangles`, seeded by `clades` `mark: "collapse"` |
+| Tip labels                       | `geom_tiplab`                    | `renderTreeLabels` (`renderTreeCanvas.ts:287`)                    |
+| Tip labels colored by a field    | `aes(color=)`                    | missing; `treeMetadata` holds the data and no channel reads it    |
+| Support values on internal nodes | `geom_nodelab`                   | missing; parsed and never drawn                                   |
+| Clade highlight rectangle        | `geom_hilight`                   | `clades` with `mark: "highlight"` (`renderTreeCanvas.ts`)         |
+| Clade bracket + label            | `geom_cladelab`                  | `clades` with `mark: "bracket"` (`cladeBrackets.ts`)              |
+| Bracket over a run of tips       | `geom_strip`                     | a `bracket` record over `range`                                   |
+| Branches colored by a group      | `groupClade`, `aes(color=group)` | missing                                                           |
+| Tree overview inset              | `viewClade`, `geom_zoom_clade`   | `showTreeOverview` (`renderTreeOverview.ts`)                      |
+| Tip-aligned categorical matrix   | `gheatmap`                       | missing                                                           |
+| Legend for a categorical scale   | `scale_*_manual`                 | `AnnotationLegend`, keyed to domain accessions only               |
+| Strand arrow spans per row       | `geom_gene_arrow`                | `drawFeatureSpans.ts`, over columns or over residue positions     |
+| Arrow filled by a field, labeled | `aes(fill=)`                     | `featureFill` and `featureLabel`, or a record's own `encoding`    |
+| Rows aligned on one gene         | `make_alignment_dummies`         | the `align` transform on a `features` panel                       |
 
 ## Decisions
 
@@ -214,6 +218,71 @@ block over the alignment. It lacks a scale, so a thousand blocks cannot share a
 legend. A `features` panel over `x: "column"` with the letters hidden covers
 that case, and the per-cell color matrix stays declined for the reasons
 `data-layers.md` gives.
+
+### The alignment panel's feature marks are records too
+
+```json
+"marks": [
+  {
+    "kind": "features",
+    "filter": [{ "field": "type", "oneOf": ["modified_base"] }],
+    "height": { "band": 1 },
+    "encoding": {
+      "fill": {
+        "field": "probability",
+        "scale": { "type": "linear", "domainMin": 0, "domainMax": 100 }
+      }
+    }
+  },
+  {
+    "kind": "features",
+    "filter": [{ "field": "type", "oneOf": ["exon"] }],
+    "height": 3
+  }
+]
+```
+
+The alignment panel draws two marks: the residue mark, a cell and its letter,
+and the span mark. A row panel and a column track each had a record for the span
+mark with its own `encoding`, and the alignment had none: its channels sat in
+top-level `featureFill` and `featureLabel`, and its geometry followed
+`residueColor.field`. A host could not fill one feature set over the residue
+colors, which base modifications over DNA reads need, or draw two feature sets
+differently. `marks` is the alignment's list of span-mark records, the shape
+`columnTracks` and `rowPanels` take.
+
+- **Unset is the overlay.** `marks` left out resolves to `[{kind: "features"}]`,
+  which reuses `domainBands`, `featureColors` and `featureLabels` by reference,
+  so a view without the property draws as before and a row-table change
+  re-resolves nothing. `[]` draws no feature in the alignment.
+- **`filter`** keeps the features passing every `{field, oneOf}` or
+  `{field, range}` test, the shape of a `rowTransform` filter, read off the
+  feature table as `featureFill` reads it. A feature may pass several marks and
+  draws in each. The filter dialog and legend-click hides apply first.
+- **`encoding`** resolves as a `features` panel's does, falling back to
+  `featureFill`, `featureLabel` and the accession palette. A field fill is a
+  color record, `marks[i].encoding.fill`, whose values are the features its
+  filter passes, so its legend lists only those.
+- **`height`** is pixels or `{band}` of the row, the `height: {band: 0.8}`
+  Vega-Lite and jbrowse-components give a rect mark. A row-tall span is a box
+  over its cells and sets the ink of the letters on it; a shorter one is a bar
+  at the row's foot. Unset follows the rule `domainUnderline` states, which is
+  the only place `residueColor.field` still reaches the span mark. Under the
+  sub-row layout every mark's spans in a row pack into one set of lanes
+  (`markedBands`), which is also what the pointer hits.
+- **Draw order** is the residue cells, each mark in list order, then the
+  letters, on screen and in the SVG export.
+
+`residueColor` stays the residue mark's color object, outside the list, and a
+`kind: "residue"` record was declined. The residue fill is only useful as the
+bottom layer and the letters as the top, so a list position for them would be a
+way to draw a figure wrong. `marks` lists what may sit between them.
+
+What could join the list later: an `opacity` channel on the span mark, which
+[scales-and-guides](scales-and-guides.md) lists as declined until a figure asks
+for it, and a `point` kind for single sites, drawn as a dot. `markProblems`
+reports any other `kind` and the record draws nothing, so an older viewer
+reading a newer link draws the rest.
 
 ### The `align` transform
 

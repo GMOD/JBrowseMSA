@@ -16,9 +16,9 @@ export interface ResidueScale {
 /**
  * The residue mark's color object. `channel` is what the color paints: `fill`
  * (the default) the cell, `color` the letter. `field` is what a cell reads:
- * `residue`, its letter through `scale`, or `feature` (the default), the color
- * the annotation overlay gives the span covering it, wherever the overlay
- * draws a span. The `color` channel reads the residue. See docs/layers.md
+ * `residue`, its letter through `scale`, or `feature` (the default), which
+ * leaves the cells to the feature `marks` while one draws a feature. The
+ * `color` channel reads the residue. See docs/layers.md
  */
 export interface ResidueColor {
   channel?: 'fill' | 'color'

@@ -61,8 +61,8 @@ export interface MSAViewerProps {
   /**
    * the residue mark's color object, `{channel, field, scale}`: `channel` is
    * `fill` (default), the cell, or `color`, the letter; `field` is `feature`
-   * (default), the domain covering a cell where the overlay draws one, or
-   * `residue`; `scale` is `{scheme}`, a built-in scheme name, or
+   * (default), which leaves the cells to the feature `marks` while one draws
+   * a feature, or `residue`; `scale` is `{scheme}`, a built-in scheme name, or
    * `{domain, range}`, a color per residue letter that leaves every other
    * letter uncolored (see docs/layers.md)
    */

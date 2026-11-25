@@ -626,6 +626,58 @@ export const linkSpecs = [
     }),
   },
   {
+    name: 'layers-marks',
+    // the marks section's inline snapshot
+    url: fileSnap({
+      data: {
+        msa: '>ref\nACGTTCGATCGGA\n>read1\nACGTTCGATCGGA\n>read2\nACGTTCGTTCGGA',
+      },
+      relativeTo: 'ref',
+      residueColor: { field: 'residue', scale: { scheme: 'jbrowse_dna' } },
+      features: [
+        { row: 'ref', start: 2, end: 10, name: 'exon 1', type: 'exon' },
+        {
+          row: 'read1',
+          start: 6,
+          end: 6,
+          type: 'modified_base',
+          probability: 94,
+        },
+        {
+          row: 'read2',
+          start: 10,
+          end: 10,
+          type: 'modified_base',
+          probability: 12,
+        },
+      ],
+      marks: [
+        {
+          kind: 'features',
+          filter: [{ field: 'type', oneOf: ['modified_base'] }],
+          height: { band: 1 },
+          encoding: {
+            fill: {
+              field: 'probability',
+              scale: {
+                type: 'linear',
+                domainMin: 0,
+                domainMax: 100,
+                range: ['#0000ff', '#ff0000'],
+              },
+              legend: { title: 'modification %' },
+            },
+          },
+        },
+        {
+          kind: 'features',
+          filter: [{ field: 'type', oneOf: ['exon'] }],
+          height: 3,
+        },
+      ],
+    }),
+  },
+  {
     name: 'layers-selection',
     // the selection section's inline snapshot
     url: fileSnap({
