@@ -19,7 +19,7 @@ import type { TreeOrder } from '../types.ts'
 /**
  * #stateModel Tree
  */
-export function TreeModelF() {
+export function TreeModelF(defaults: { labelsAlignRight?: boolean } = {}) {
   return types
     .model({
       /**
@@ -30,7 +30,10 @@ export function TreeModelF() {
        * #property
        * right-align the labels
        */
-      labelsAlignRight: stripDefault(types.boolean, defaultLabelsAlignRight),
+      labelsAlignRight: stripDefault(
+        types.boolean,
+        defaults.labelsAlignRight ?? defaultLabelsAlignRight,
+      ),
 
       /**
        * #property

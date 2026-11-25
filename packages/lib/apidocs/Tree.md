@@ -53,7 +53,10 @@ drawTree: stripDefault(types.boolean, true)
 right-align the labels
 
 ```js
-labelsAlignRight: stripDefault(types.boolean, false)
+labelsAlignRight: stripDefault(
+  types.boolean,
+  defaults.labelsAlignRight ?? false,
+)
 ```
 
 #### property: overviewHeight

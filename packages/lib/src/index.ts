@@ -39,7 +39,11 @@ export { defineMsaElement } from './element.ts'
 export { useMsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MountedViewer } from './mount.tsx'
-export { type MsaViewModel, default as MSAModelF } from './model.ts'
+export {
+  type MsaViewDefaults,
+  type MsaViewModel,
+  default as MSAModelF,
+} from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
 export type { HierarchyNode, LaidOutNode, TreeScale } from './hierarchy.ts'
 export type {

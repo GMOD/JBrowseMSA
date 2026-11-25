@@ -293,6 +293,20 @@ model.applyHighlight('protein3d', [{ row: 'human', start: 58, end: 58 }])
 model.clearHighlight('protein3d')
 ```
 
+A host that composes `MSAModelF` into its own model can set its own default for
+`colWidth`, `rowHeight` and `labelsAlignRight`. The snapshot leaves out a value
+equal to the host's default and keeps any other, the library's default included,
+so a session that sets `rowHeight: 16` reopens at 16. `resetZoom`, `fit` and the
+wheel zoom's stop at the default cell size use the host's numbers.
+
+```ts
+const TView = types.compose(
+  'TView',
+  MSAModelF({ defaults: { rowHeight: 12, labelsAlignRight: true } }),
+  types.model({ type: types.literal('TView') }),
+)
+```
+
 ## Using react-msaview in a plain HTML file with UMD bundle
 
 `mount` renders `MSAViewer` into an element and takes the same props. `update`

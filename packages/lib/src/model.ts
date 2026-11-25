@@ -497,6 +497,16 @@ type RowPanelScale =
   | TextPanelScale
 
 /**
+ * A composing host's own default for each property named, in place of the
+ * library's. See `defaults` on the factory below
+ */
+export interface MsaViewDefaults {
+  colWidth?: number
+  rowHeight?: number
+  labelsAlignRight?: boolean
+}
+
+/**
  * #stateModel MsaView
  *
  * The main MSAView state model. Holds the loaded alignment, tree, and optional
@@ -524,14 +534,22 @@ type RowPanelScale =
  * `hostRestoresData`, which empties `unshareableData` at any limit:
  * jbrowse-plugin-tview sets the limit to 0 and rebuilds the alignment from
  * reads.
+ *
+ * `defaults` replaces the library's default for each property it names, so a
+ * snapshot leaves out the host's default and keeps any other value, the
+ * library's own included. `resetZoom`, `fit` and the zoom detent read the
+ * `colWidth` and `rowHeight` given here.
  */
 function stateModelFactory({
   maxInlineSnapshotBytes = defaultMaxInlineSnapshotBytes,
-}: { maxInlineSnapshotBytes?: number } = {}) {
+  defaults = {},
+}: { maxInlineSnapshotBytes?: number; defaults?: MsaViewDefaults } = {}) {
+  const homeColWidth = defaults.colWidth ?? defaultColWidth
+  const homeRowHeight = defaults.rowHeight ?? defaultRowHeight
   return types
     .compose(
       DialogQueueSessionMixin(),
-      TreeModelF(),
+      TreeModelF(defaults),
       MSAModelF(),
       types.model('MsaView', {
         /**
@@ -613,7 +631,10 @@ function stateModelFactory({
          * #property
          * height of each row, px
          */
-        rowHeight: stripDefault(types.number, defaultRowHeight),
+        rowHeight: stripDefault(
+          types.number,
+          defaults.rowHeight ?? defaultRowHeight,
+        ),
 
         /**
          * #property
@@ -631,7 +652,10 @@ function stateModelFactory({
          * #property
          * width of columns, px
          */
-        colWidth: stripDefault(types.number, defaultColWidth),
+        colWidth: stripDefault(
+          types.number,
+          defaults.colWidth ?? defaultColWidth,
+        ),
 
         /**
          * #property
@@ -3963,8 +3987,8 @@ function stateModelFactory({
        * restore the default column width and row height
        */
       resetZoom() {
-        self.setColWidth(defaultColWidth)
-        self.setRowHeight(defaultRowHeight)
+        self.setColWidth(homeColWidth)
+        self.setRowHeight(homeRowHeight)
       },
       /**
        * #action
@@ -4014,13 +4038,12 @@ function stateModelFactory({
           // other sits there too, or one would hold while the other grows
           const canHold =
             axis !== 'both' ||
-            (self.colWidth === defaultColWidth &&
-              self.rowHeight === defaultRowHeight)
+            (self.colWidth === homeColWidth && self.rowHeight === homeRowHeight)
           if (axis !== 'vertical') {
             const { value, held } = detentZoom(
               self.colWidth,
               scaleFactor,
-              defaultColWidth,
+              homeColWidth,
               self.zoomHeld.col,
               minColWidth,
               canHold,
@@ -4032,7 +4055,7 @@ function stateModelFactory({
             const { value, held } = detentZoom(
               self.rowHeight,
               scaleFactor,
-              defaultRowHeight,
+              homeRowHeight,
               self.zoomHeld.row,
               minRowHeight,
               canHold,
@@ -5460,8 +5483,8 @@ function stateModelFactory({
         // and columns out of proportion
         transaction(() => {
           for (let pass = 0; pass < 2; pass++) {
-            this.fitHorizontally(defaultColWidth)
-            this.fitVertically(defaultRowHeight)
+            this.fitHorizontally(homeColWidth)
+            this.fitVertically(homeRowHeight)
           }
         })
       },

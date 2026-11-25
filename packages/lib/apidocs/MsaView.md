@@ -32,6 +32,11 @@ rebuilds the documents itself declares that through `hostRestoresData`, which
 empties `unshareableData` at any limit: jbrowse-plugin-tview sets the limit to 0
 and rebuilds the alignment from reads.
 
+`defaults` replaces the library's default for each property it names, so a
+snapshot leaves out the host's default and keeps any other value, the library's
+own included. `resetZoom`, `fit` and the zoom detent read the `colWidth` and
+`rowHeight` given here.
+
 ## Overview
 
 The main MSAView state model. Holds the loaded alignment, tree, and optional
@@ -145,7 +150,7 @@ columnTracks: stripDefault(
 width of columns, px
 
 ```js
-colWidth: stripDefault(types.number, 12)
+colWidth: stripDefault(types.number, defaults.colWidth ?? 12)
 ```
 
 #### property: currentAlignment
@@ -320,7 +325,7 @@ rotated: stripDefault(types.array(types.string), [])
 height of each row, px
 
 ```js
-rowHeight: stripDefault(types.number, 16)
+rowHeight: stripDefault(types.number, defaults.rowHeight ?? 16)
 ```
 
 #### property: rowPanels
