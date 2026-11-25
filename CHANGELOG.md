@@ -4,6 +4,12 @@ Generated from the commit history by [git-cliff](https://git-cliff.org);
 `scripts/release.js` prepends the new section as it tags. Releases up to v3.1.3
 were written by hand and are kept at the bottom.
 
+## [11.2.0](https://github.com/GMOD/JBrowseMSA/compare/v11.1.0...v11.2.0) (2026-11-25)
+
+### Other Changes
+
+- Add consensusInGaps and keepReferenceColumns ([3ee1c8b](https://github.com/GMOD/JBrowseMSA/commit/3ee1c8bdf289c6442c8550d5ffb2c87e4cec0571))
+
 ## [11.1.0](https://github.com/GMOD/JBrowseMSA/compare/v11.0.0...v11.1.0) (2026-11-25)
 
 ### Other Changes
