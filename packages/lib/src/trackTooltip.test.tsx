@@ -102,6 +102,15 @@ test('hovering a bar track reports that track alone', () => {
   expect(document.body.textContent).not.toContain('Property conservation:')
 })
 
+test('a reference row with coordinates names the column in them', () => {
+  act(() => {
+    model.drawRelativeTo('a')
+    model.setRowCoordinates([{ row: 'a', name: 'chr1', start: 1000 }])
+  })
+  hoverColumn('conservation', 3)
+  expect(document.body.textContent).toContain('Column 4 (chr1:1,003)')
+})
+
 test('hovering the property conservation track reports its own score', () => {
   hoverColumn('property-conservation', 3)
   const { textContent } = document.body

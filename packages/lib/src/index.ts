@@ -39,6 +39,7 @@ export { defineMsaElement } from './element.ts'
 export { useMsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MsaSvgFigure } from './useMsaSvgFigure.ts'
 export type { MountedViewer } from './mount.tsx'
+export type { RulerTick } from './components/tracks/rulerTicks.ts'
 export { type MsaViewModel, default as MSAModelF } from './model.ts'
 export type { MSAFormat, MSAParserType } from 'msa-parsers'
 export type { HierarchyNode, LaidOutNode, TreeScale } from './hierarchy.ts'
@@ -138,6 +139,7 @@ export type {
   RowSort,
   RowStripSpec,
   RowTextSpec,
+  RowCoordinates,
   RowResidue,
   RowTransform,
   SpanSpec,

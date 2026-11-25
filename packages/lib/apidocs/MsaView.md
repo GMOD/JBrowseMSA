@@ -312,6 +312,21 @@ same tree, with the clades on either side of the node swapped
 rotated: stripDefault(types.array(types.string), [])
 ```
 
+#### property: rowCoordinates
+
+the coordinate system each row's residues are numbered in,
+`{row, start, name?}`: residue 1 of `row` is position `start` of the sequence
+`name`. The position ruler numbers the `relativeTo` row's, and the tooltips and
+the Go to box read every row's. Layer positions stay residues of the row. See
+docs/layers.md
+
+```js
+rowCoordinates: stripDefault(
+    types.array(types.frozen<RowCoordinates>()),
+    [],
+  )
+```
+
 #### property: rowHeight
 
 height of each row, px
@@ -1063,6 +1078,15 @@ fully conserved, 0 = no conservation.
 conservation: number[]
 ```
 
+#### getter: coordinateRuler
+
+the position ruler's ticks and widest label in the `relativeTo` row's
+coordinates, undefined where that row has none
+
+```js
+coordinateRuler: { ticks: RulerTick[]; labelWidth: number; } | undefined
+```
+
 #### getter: dataInitialized
 
 ```js
@@ -1691,6 +1715,14 @@ own units
 rootToTipLength: number
 ```
 
+#### getter: rowCoordinatesByRow
+
+`rowCoordinates` keyed by row, the last record naming a row winning
+
+```js
+rowCoordinatesByRow: Map<string, RowCoordinates>
+```
+
 #### getter: rowData
 
 the row table: extra fields per row, keyed by row name, which the `encodings`
@@ -2269,6 +2301,15 @@ the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 globalColToVisibleCol: (globalCol: number) => number | undefined
 ```
 
+#### method: residueAtPosition
+
+the 1-based residue of a row at a position in its coordinates, which is the
+position itself for a row without them
+
+```js
+residueAtPosition: (rowName: string, position: number) => number
+```
+
 #### method: rowDataOf
 
 one row's fields, the single reader of the row table
@@ -2283,6 +2324,15 @@ the text a row's tip label draws: its `rowLabelField` value, else the row name
 
 ```js
 rowLabelOf: (name: string) => string
+```
+
+#### method: rowPositionLabel
+
+a residue of a row as the tooltips print it: `name:position` in the row's
+coordinates, or `row:residue` for a row without them
+
+```js
+rowPositionLabel: (rowName: string, residue: number) => string
 ```
 
 #### method: rowResidue
@@ -2937,6 +2987,14 @@ replace the alignment<->structure correspondence (see docs/layers.md)
 
 ```js
 setResidueMappings: (mappings: ResidueMapping[]) => void
+```
+
+#### action: setRowCoordinates
+
+replace the coordinate systems the rows are numbered in (see docs/layers.md)
+
+```js
+setRowCoordinates: (records: RowCoordinates[]) => void
 ```
 
 #### action: setRowData

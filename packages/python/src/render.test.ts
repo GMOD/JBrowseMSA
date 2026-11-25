@@ -45,6 +45,7 @@ const defaults: Traits = {
   clades: [],
   column_tracks: [],
   residue_mappings: [],
+  row_coordinates: [],
   row_data: {},
   encodings: [],
   row_panels: [],

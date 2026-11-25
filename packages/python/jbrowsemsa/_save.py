@@ -49,6 +49,7 @@ def props(view: Any) -> dict[str, Any]:
         "clades": view.clades,
         "columnTracks": view.column_tracks,
         "residueMappings": view.residue_mappings,
+        "rowCoordinates": view.row_coordinates,
         "rowData": view.row_data,
         "encodings": view.encodings,
         "rowPanels": view.row_panels,

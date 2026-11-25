@@ -100,6 +100,9 @@ class MSAView(anywidget.AnyWidget):
     clades = traitlets.List(traitlets.Dict()).tag(sync=True)
     column_tracks = _ColumnTracks(traitlets.Dict()).tag(sync=True)
     residue_mappings = traitlets.List(traitlets.Dict()).tag(sync=True)
+    # the coordinates each row's residues are numbered in, {"row", "start",
+    # "name"}: residue 1 of the row is position "start" of "name"
+    row_coordinates = traitlets.List(traitlets.Dict()).tag(sync=True)
     # extra fields per row name, and what the viewer's marks read from that
     # table or from the features the GFF carries
     row_data = traitlets.Dict(traitlets.Dict()).tag(sync=True)

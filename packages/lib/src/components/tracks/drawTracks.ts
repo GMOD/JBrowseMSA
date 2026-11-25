@@ -16,11 +16,13 @@ import {
   highlightMarkerHalfWidth,
   opaqueColor,
 } from './highlightBands.ts'
+import { rulerFontSize, rulerStep } from './rulerTicks.ts'
 
 import type { ColumnCounts } from '../../columnCounts.ts'
 import type { MsaViewModel } from '../../model.ts'
 import type { Arc, BasicTrack, ColumnSpan, HighlightBand } from '../../types.ts'
 import type { RenderCtx } from '../renderCtx.ts'
+import type { RulerTick } from './rulerTicks.ts'
 import type { Theme } from '@mui/material'
 
 // `values` are each bar's fraction of the track height, and `colors` the color
@@ -216,16 +218,6 @@ function drawTextTrackContent({
   }
 }
 
-// the smallest 1/2/5 x 10^n column step that leaves room for a label
-export function rulerStep(colWidth: number, minPixels = 55) {
-  let step = 1
-  const mantissas = [1, 2, 5]
-  for (let i = 0; step * colWidth < minPixels; i++) {
-    step = mantissas[i % 3]! * 10 ** Math.floor(i / 3)
-  }
-  return step
-}
-
 // The 0-based visible columns in [xStart, end) to label, given each one's
 // 1-based file column number: the first visible column, then each column whose
 // number reaches a new multiple of the step, which is every step-th column
@@ -260,7 +252,6 @@ export function rulerCols(
   return cols
 }
 
-const RULER_FONT_SIZE = 10
 const TICK_HEIGHT = 4
 
 function drawColumnRuler({
@@ -290,7 +281,7 @@ function drawColumnRuler({
     colWidth,
   })
   const end = Math.min(xEnd, numColumns)
-  setFontSize(ctx, RULER_FONT_SIZE)
+  setFontSize(ctx, rulerFontSize)
   ctx.textAlign = 'center'
   ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = textColor
@@ -308,6 +299,46 @@ function drawColumnRuler({
     ctx.moveTo(x, trackHeight - TICK_HEIGHT)
     ctx.lineTo(x, trackHeight)
     ctx.stroke()
+  }
+}
+
+// The ticks whose label reaches into the block, so a label straddling two
+// blocks draws whole across them
+function drawCoordinateRuler({
+  ctx,
+  ticks,
+  labelWidth,
+  textColor,
+  colWidth,
+  trackHeight,
+  offsetX,
+  blockSize,
+}: {
+  ctx: RenderCtx
+  ticks: RulerTick[]
+  labelWidth: number
+  textColor: string
+  colWidth: number
+  trackHeight: number
+  offsetX: number
+  blockSize: number
+}) {
+  setFontSize(ctx, rulerFontSize)
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillStyle = textColor
+  ctx.strokeStyle = textColor
+  ctx.lineWidth = 1
+  const reach = labelWidth / 2
+  for (const { col, label } of ticks) {
+    const x = (col + 0.5) * colWidth
+    if (x + reach >= offsetX && x - reach <= offsetX + blockSize) {
+      ctx.fillText(label, x, trackHeight - TICK_HEIGHT - 2)
+      ctx.beginPath()
+      ctx.moveTo(x, trackHeight - TICK_HEIGHT)
+      ctx.lineTo(x, trackHeight)
+      ctx.stroke()
+    }
   }
 }
 
@@ -550,25 +581,37 @@ export function drawTrackBlock({
       break
     }
     case 'ruler': {
-      const { relativeTo, numColumns } = model
+      const { relativeTo, numColumns, coordinateRuler } = model
       const fileColumn = (col: number) => model.visibleColToGlobalCol(col) + 1
-      drawColumnRuler({
-        ctx,
-        numColumns,
-        fileColumn,
-        // with relativeTo set, number by the reference row's residues
-        label: relativeTo
-          ? col => {
-              const pos = model.visibleColToSeqPosOneBased(relativeTo, col)
-              return pos === undefined ? undefined : `${pos}`
-            }
-          : col => `${fileColumn(col)}`,
-        textColor,
-        colWidth,
-        trackHeight,
-        offsetX,
-        blockSize: blockSizeX,
-      })
+      if (coordinateRuler) {
+        drawCoordinateRuler({
+          ctx,
+          ...coordinateRuler,
+          textColor,
+          colWidth,
+          trackHeight,
+          offsetX,
+          blockSize: blockSizeX,
+        })
+      } else {
+        drawColumnRuler({
+          ctx,
+          numColumns,
+          fileColumn,
+          // with relativeTo set, number by the reference row's residues
+          label: relativeTo
+            ? col => {
+                const pos = model.visibleColToSeqPosOneBased(relativeTo, col)
+                return pos === undefined ? undefined : `${pos}`
+              }
+            : col => `${fileColumn(col)}`,
+          textColor,
+          colWidth,
+          trackHeight,
+          offsetX,
+          blockSize: blockSizeX,
+        })
+      }
       break
     }
     case 'strip': {

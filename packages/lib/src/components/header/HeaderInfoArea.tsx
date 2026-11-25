@@ -4,6 +4,8 @@ import { makeStyles } from '@jbrowse/core/util/tss-react'
 import { Typography } from '@mui/material'
 import { observer } from 'mobx-react'
 
+import { formatPosition } from '../../rowCoordinates.ts'
+
 import type { MsaViewModel } from '../../model.ts'
 
 const useStyles = makeStyles()({
@@ -34,6 +36,9 @@ const HeaderInfoArea = observer(function ({ model }: { model: MsaViewModel }) {
   const mid = Math.floor(mouseOverRowName.length / 2)
   const pos = model.visibleColToSeqPosOneBased(mouseOverRowName, mouseCol)
   const letter = model.visibleColToRowLetter(mouseOverRowName, mouseCol)
+  const coordinates = model.rowCoordinatesByRow.get(mouseOverRowName)
+  const at = pos === undefined ? '' : formatPosition(coordinates, pos)
+  const where = coordinates?.name ? ` ${coordinates.name}:${at}` : `:${at}`
   return (
     <Typography
       component="div"
@@ -44,7 +49,8 @@ const HeaderInfoArea = observer(function ({ model }: { model: MsaViewModel }) {
         {mouseOverRowName.slice(0, mid)}
       </span>
       <span className={classes.nameRest}>
-        {mouseOverRowName.slice(mid)}:{pos} ({letter})
+        {mouseOverRowName.slice(mid)}
+        {where} ({letter})
       </span>
     </Typography>
   )

@@ -553,6 +553,19 @@ export const linkSpecs = [
     }),
   },
   {
+    name: 'layers-row-coordinates',
+    // the rowCoordinates section's inline snapshot: a reference row numbered
+    // from base 146,993,531 of chrX, and a read with a three-base insertion
+    url: fileSnap({
+      data: {
+        msa: '>reference\nACGTACGTACGT---ACGTACGTACGTACGTACGT\n>read\nACGTACGTACGTTTTACGTACGTACGTACGTACGT',
+      },
+      relativeTo: 'reference',
+      rowCoordinates: [{ row: 'reference', name: 'chrX', start: 146993531 }],
+      turnedOffTracks: { 'position-ruler': false },
+    }),
+  },
+  {
     name: 'layers-rowdata',
     // the rowData section's inline snapshot: two rows and the JSON string
     // data.treeMetadata holds
