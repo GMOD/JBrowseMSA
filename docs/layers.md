@@ -1127,9 +1127,11 @@ row the table gives no value leaves its cell empty.
 Each header draws in the band the tree's scale bar and the minimap share, turned
 on its side, and it exports with the figure. The band is as tall as the minimap,
 so a longer header is clipped to it and the full name is the column's tooltip. A
-panel with an axis, a `bar`, a `point` or a `features` panel under
-`x: "position"`, draws the axis at the foot of the band and writes its header
-across above it.
+header that fits the panel's width, such as `n` over a 28px column, writes
+across instead. A header draws at the rows' font up to that of a 16px row, since
+the band keeps its height at every row height. A panel with an axis, a `bar`, a
+`point` or a `features` panel under `x: "position"`, draws the axis at the foot
+of the band and writes its header across above it.
 
 A panel's scale carries a legend of its own, titled by the field, and every
 panel and encoding declaring the same members over one field lists it once.
@@ -1255,8 +1257,10 @@ A `bar` panel draws one bar per row from the panel's left edge to the value of a
 numeric `rowData` field, and a `point` panel draws a dot at that value. The
 value runs along the panel's width through `encoding.x.scale`, and the header
 band draws that scale's axis with the `header` above it as its title. A `text`
-panel prints a `rowData` field in the panel's width, cut in the middle where it
-runs longer.
+panel prints a `rowData` field in the panel's width at the rows' font, or at the
+largest smaller font its widest value fits, down to that of a 16px row. A value
+longer than that is cut in the middle, and one with no room for a character
+shows an ellipsis.
 
 ```json
 "rowPanels": [

@@ -6,6 +6,7 @@
 import { createJBrowseTheme } from '@jbrowse/core/ui/theme'
 import { expect, test } from 'vitest'
 
+import { textPanelFontSize } from './components/rowpanels/renderTextPanel.ts'
 import { renderToSvg } from './renderToSvg.tsx'
 import { createTestModel, installSvgTestEnv } from './svgTestUtil.ts'
 
@@ -130,4 +131,50 @@ test('a text panel prints its field, with no axis', async () => {
   ].map(m => m[1])
   expect(texts).toEqual(['2.3.4.4b', '2.3.2.1a'])
   expect(svg).not.toContain('rowpanel-axis-0')
+})
+
+test('a narrow text panel keeps its numbers on rows taller than 16px', async () => {
+  installSvgTestEnv()
+  const model = createTestModel({
+    id: 'textpanel-tall-rows',
+    data: {
+      msa,
+      treeMetadata: JSON.stringify({
+        duck: { copies: 123 },
+        chicken: { copies: 2_000_000 },
+        goose: { copies: 30 },
+      }),
+    },
+    rowHeight: 22,
+    rowPanels: [
+      {
+        kind: 'text',
+        width: 28,
+        header: 'n',
+        encoding: { text: { field: 'copies' } },
+      },
+    ],
+  })
+  const svg = await renderToSvg(model, {
+    theme: createJBrowseTheme(),
+    exportType: 'entire',
+  })
+  const texts = [
+    ...group(svg, 'rowpanel-0').matchAll(/<text[^>]*>([^<]*)<\/text>/g),
+  ].map(m => m[1])
+  // the value too long for the panel at the smallest font it takes is cut
+  expect(texts).toEqual(['123', '2…0', '30'])
+  const header = /<text([^>]*)>n<\/text>/.exec(svg)
+  expect(header![1]).not.toContain('rotate')
+  expect(header![1]).toContain('font-size="13"')
+})
+
+test('a text panel takes the rows font where its texts fit, and shrinks to the 16px-row font', () => {
+  // the widest text measures 20px at the 13px font of a 16px row
+  const panel = { width: 64, widestText: 20 }
+  expect(textPanelFontSize(panel, 9)).toBe(9)
+  expect(textPanelFontSize(panel, 18)).toBe(18)
+  expect(textPanelFontSize({ width: 28, widestText: 20 }, 18)).toBe(15)
+  expect(textPanelFontSize({ width: 10, widestText: 20 }, 18)).toBe(13)
+  expect(textPanelFontSize({ width: 10, widestText: 20 }, 9)).toBe(9)
 })

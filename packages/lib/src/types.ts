@@ -400,6 +400,8 @@ export interface ResolvedTextPanel extends ResolvedPanelBase {
   field: string
   colorField?: string
   texts: Map<string, string>
+  // the widest text at labelFitFontSize, px
+  widestText: number
   colors: Map<string, string>
   hiddenRows: Set<string>
 }

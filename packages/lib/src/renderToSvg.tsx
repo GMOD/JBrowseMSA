@@ -15,6 +15,7 @@ import { visibleColRange } from './components/msa/visibleColRange.ts'
 import {
   drawHeaderAxis,
   headerAxisHeight,
+  headerFontSize,
   headerRunsAcross,
 } from './components/rowpanels/headerLayout.ts'
 import { renderRowPanel } from './components/rowpanels/renderRowPanel.ts'
@@ -267,8 +268,9 @@ function RowPanelHeadersSVG({
         const { axis } = panel
         const left = effectiveTreeAreaWidth + panel.offsetX
         const y = bandHeight - 4 - (axis ? headerAxisHeight : 0)
-        const across = !!axis || headerRunsAcross(panel.width)
-        const size = across ? fontSize : Math.min(fontSize, panel.width)
+        const headerFont = headerFontSize(fontSize)
+        const across = headerRunsAcross(panel, headerFont)
+        const size = across ? headerFont : Math.min(headerFont, panel.width)
         const center = left + panel.width / 2
         const x = across ? center : center + size / 3
         const room = across ? panel.width : y - LEGEND_PAD

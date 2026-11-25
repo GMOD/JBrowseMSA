@@ -5054,11 +5054,13 @@ function stateModelFactory({
             }
           } else if (panel.kind === 'text') {
             const { text, color } = panel.encoding
+            const texts = rowTexts(rowData, text.field)
             return {
               kind: panel.kind,
               field: text.field,
               header: panel.header ?? text.field,
-              texts: rowTexts(rowData, text.field),
+              texts,
+              widestText: widestLabel([...texts.values()], labelFitFontSize),
               ...colorPart(color),
             }
           } else if (panel.kind === 'features') {
