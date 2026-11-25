@@ -818,6 +818,8 @@ export interface ResolvedHighlight {
   start?: number
   end?: number
   mark: HighlightMark
+  // set by host code through applyHighlight, outside the snapshot
+  transient: boolean
   // the same for the same record across recomputes, which a position in the
   // list is not once a span lands on hidden columns
   key: string

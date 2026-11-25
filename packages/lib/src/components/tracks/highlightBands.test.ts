@@ -22,6 +22,7 @@ function span(
     endCol,
     rowIndices: [],
     mark: 'bracket',
+    transient: false,
     key: label,
     ...extra,
   }

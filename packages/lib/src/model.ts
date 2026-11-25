@@ -3284,6 +3284,7 @@ function stateModelFactory({
               start,
               end,
               mark: mark ?? 'band',
+              transient,
               key: JSON.stringify([row, rows, start, end, label, transient]),
             }
             if (rows) {
