@@ -134,6 +134,10 @@ export function featureSpanMarks<T extends SpanBand>({
       fill: string
     }[] = []
 
+    // Culling a row's bands to the block's columns before this loop, by binary
+    // search over `domainBandsByStart`, measured no faster at 200,000
+    // one-residue features on 300 rows: re-sorting each block's bands into
+    // paint order cost what the skipped bands saved.
     for (const band of bands) {
       const [xStart, xEnd] = xOf(band)
       const w = xEnd - xStart

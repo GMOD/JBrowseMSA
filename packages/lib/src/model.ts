@@ -146,6 +146,7 @@ import {
 } from './rowTransform.ts'
 import { colorProblems, valueScaleProblems } from './scaleProblems.ts'
 import {
+  colorRecordKey,
   constantColor,
   declarationKey,
   fieldChannel,
@@ -414,6 +415,32 @@ function annotationRowName(
   }
   const underscored = id.replaceAll(':', '_')
   return rowNames.has(underscored) ? underscored : id
+}
+
+// a feature-table or column-track record's values, read without the row
+// table or the tree
+function rowIndependentScaleUse(
+  record: ColorRecord,
+  allAnnotations: Annotation[],
+  shownAnnotations: Annotation[],
+): ScaleUse {
+  const { field } = record.channel
+  return {
+    spec: record.channel,
+    field,
+    table: record.table,
+    ...(record.table === 'columns'
+      ? { values: record.values }
+      : record.table === 'features' && record.annotations
+        ? {
+            values: featureValues(record.annotations, field),
+            shown: featureValues(record.annotations, field),
+          }
+        : {
+            values: featureValues(allAnnotations, field),
+            shown: featureValues(shownAnnotations, field),
+          }),
+  }
 }
 
 const seqPosIndexCache = new WeakMap<object, Map<string, Int32Array>>()
@@ -3654,9 +3681,9 @@ function stateModelFactory({
             : 'residue'
       },
       get annotationsByRow() {
-        const { rowNamesSet } = self
+        const tips = new Set(tipNames(self.tree))
         return groupBy(this.filteredAnnotations, r =>
-          annotationRowName(r.id, rowNamesSet),
+          annotationRowName(r.id, tips),
         )
       },
     }))
@@ -4328,7 +4355,10 @@ function stateModelFactory({
        * which leaves each span the color its accession takes in `fillPalette`
        */
       get featureFillEncoding() {
-        return this.encodingFor('featureFill')
+        const encoding = this.colorEncodings.find(
+          e => e.channel === 'featureFill',
+        )
+        return encoding ? this.resolveEncoding(encoding) : undefined
       },
 
       /**
@@ -4824,20 +4854,28 @@ function stateModelFactory({
        * table or the encodings, never per row per frame.
        */
       get resolvedEncodings(): ResolvedEncoding[] {
-        const hidden = self.activeHiddenCategories
-        return this.colorEncodings.map(encoding => {
-          const table = encodingTable(encoding)
-          const scale = this.scaleOf(encoding, table)
-          return {
-            channel: encoding.channel,
-            field: encoding.field,
-            ...scale,
-            colorOf: unhiddenColorOf(
-              scale.colorOf,
-              hidden.get(table)?.get(encoding.field),
-            ),
-          }
-        })
+        return this.colorEncodings.map(encoding =>
+          this.resolveEncoding(encoding),
+        )
+      },
+
+      /**
+       * #method
+       * one color encoding with its scale resolved, less the values a legend
+       * click hid
+       */
+      resolveEncoding(encoding: ColorEncoding): ResolvedEncoding {
+        const table = encodingTable(encoding)
+        const scale = this.scaleOf(encoding, table)
+        return {
+          channel: encoding.channel,
+          field: encoding.field,
+          ...scale,
+          colorOf: unhiddenColorOf(
+            scale.colorOf,
+            self.activeHiddenCategories.get(table)?.get(encoding.field),
+          ),
+        }
       },
 
       /**
@@ -4872,31 +4910,67 @@ function stateModelFactory({
         const nodes = preorder(tree).filter(
           node => node !== tree && node.children.length > 0,
         )
-        const valuesOf = (record: ColorRecord) => {
-          const { field } = record.channel
-          return record.table === 'rows'
-            ? { values: rows.map(row => row?.[field]) }
-            : record.table === 'nodes'
-              ? { values: nodes.map(node => nodeField(node, field)) }
-              : record.table === 'columns'
-                ? { values: record.values }
-                : record.annotations
+        const { rowTableKeys } = this
+        return new Map([
+          ...this.rowIndependentScales,
+          ...resolveShared(
+            self.colorRecords
+              .filter(record => rowTableKeys.has(colorRecordKey(record)))
+              .map((record): ScaleUse =>
+                record.table === 'rows' || record.table === 'nodes'
                   ? {
-                      values: featureValues(record.annotations, field),
-                      shown: featureValues(record.annotations, field),
+                      spec: record.channel,
+                      field: record.channel.field,
+                      table: record.table,
+                      values:
+                        record.table === 'rows'
+                          ? rows.map(row => row?.[record.channel.field])
+                          : nodes.map(node =>
+                              nodeField(node, record.channel.field),
+                            ),
                     }
-                  : {
-                      values: featureValues(self.allAnnotations, field),
-                      shown: featureValues(self.typeFilteredAnnotations, field),
-                    }
-        }
+                  : rowIndependentScaleUse(
+                      record,
+                      self.allAnnotations,
+                      self.typeFilteredAnnotations,
+                    ),
+              ),
+          ),
+        ])
+      },
+
+      /**
+       * #getter
+       * the declaration keys a row-table or node-table record reads through
+       */
+      get rowTableKeys() {
+        return new Set(
+          self.colorRecords
+            .filter(
+              record => record.table === 'rows' || record.table === 'nodes',
+            )
+            .map(colorRecordKey),
+        )
+      },
+
+      /**
+       * #getter
+       * the declarations no row-table or node-table record shares, resolved
+       * apart from the rest, so a change of the row table or the tree leaves
+       * them and the feature colors read through them as they are
+       */
+      get rowIndependentScales() {
+        const { rowTableKeys } = this
         return resolveShared(
-          self.colorRecords.map((record): ScaleUse => ({
-            spec: record.channel,
-            field: record.channel.field,
-            table: record.table,
-            ...valuesOf(record),
-          })),
+          self.colorRecords
+            .filter(record => !rowTableKeys.has(colorRecordKey(record)))
+            .map(record =>
+              rowIndependentScaleUse(
+                record,
+                self.allAnnotations,
+                self.typeFilteredAnnotations,
+              ),
+            ),
         )
       },
 
@@ -4905,9 +4979,14 @@ function stateModelFactory({
        * the shared scale a record's color object resolves to
        */
       scaleOf(channel: ColorChannel, table: ScaleTable): SharedScale {
-        return this.resolvedScales.get(
-          declarationKey({ spec: channel, field: channel.field, table }),
-        )!
+        const key = declarationKey({
+          spec: channel,
+          field: channel.field,
+          table,
+        })
+        return (
+          this.rowIndependentScales.get(key) ?? this.resolvedScales.get(key)!
+        )
       },
 
       /**

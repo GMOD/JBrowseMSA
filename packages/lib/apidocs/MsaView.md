@@ -1713,6 +1713,16 @@ one to encode
 rowFields: string[]
 ```
 
+#### getter: rowIndependentScales
+
+the declarations no row-table or node-table record shares, resolved apart from
+the rest, so a change of the row table or the tree leaves them and the feature
+colors read through them as they are
+
+```js
+rowIndependentScales: Map<string, SharedScale>
+```
+
 #### getter: rowLabelField
 
 the `rowData` field drawn as each tip's label: the one a `rowLabel` encoding
@@ -1787,6 +1797,14 @@ rowPanelsWidth: number
 
 ```js
 rows: [string, string][]
+```
+
+#### getter: rowTableKeys
+
+the declaration keys a row-table or node-table record reads through
+
+```js
+rowTableKeys: Set<string>
 ```
 
 #### getter: rowTints
@@ -2267,6 +2285,14 @@ the column is hidden (in blanks). This is the inverse of visibleColToGlobalCol.
 
 ```js
 globalColToVisibleCol: (globalCol: number) => number | undefined
+```
+
+#### method: resolveEncoding
+
+one color encoding with its scale resolved, less the values a legend click hid
+
+```js
+resolveEncoding: (encoding: ColorEncoding) => ResolvedEncoding
 ```
 
 #### method: rowDataOf
