@@ -1,4 +1,4 @@
-import { minFeatureLabelHeight } from '../../constants.ts'
+import { minFeatureLabelHeight, minOutlinedSpanWidth } from '../../constants.ts'
 
 import type { HierarchyNode } from '../../hierarchy.ts'
 import type { Annotation } from '../../types.ts'
@@ -55,6 +55,7 @@ export interface SpanShape<T extends SpanBand> {
   band: T
   fill: string
   stroke: string
+  stroked: boolean
   box?: { x: number; y: number; w: number; h: number }
   outline?: [number, number][]
 }
@@ -143,13 +144,15 @@ export function featureSpanMarks<T extends SpanBand>({
       const { fill, stroke } = colors.get(band.annotation)!
       const { strand } = band.annotation
       const head = strand === undefined ? 0 : Math.min(headLen, w)
+      const stroked = w >= minOutlinedSpanWidth
       shapes.push(
         strand === undefined
-          ? { band, fill, stroke, box: { x: xStart, y: t, w, h } }
+          ? { band, fill, stroke, stroked, box: { x: xStart, y: t, w, h } }
           : {
               band,
               fill,
               stroke,
+              stroked,
               outline: geneArrow({ x: xStart, t, w, h, head, rise, strand }),
             },
       )
@@ -206,12 +209,16 @@ export function drawFeatureSpans<T extends SpanBand>({
     },
   })
   for (const { shapes, labels, fontSize } of rows) {
-    for (const { fill, stroke, box, outline } of shapes) {
+    for (const { fill, stroke, stroked, box, outline } of shapes) {
       ctx.fillStyle = fill
-      ctx.strokeStyle = stroke
+      if (stroked) {
+        ctx.strokeStyle = stroke
+      }
       if (box) {
         ctx.fillRect(box.x, box.y, box.w, box.h)
-        ctx.strokeRect(box.x, box.y, box.w, box.h)
+        if (stroked) {
+          ctx.strokeRect(box.x, box.y, box.w, box.h)
+        }
       } else if (outline) {
         ctx.beginPath()
         ctx.moveTo(...outline[0]!)
@@ -220,7 +227,9 @@ export function drawFeatureSpans<T extends SpanBand>({
         }
         ctx.closePath()
         ctx.fill()
-        ctx.stroke()
+        if (stroked) {
+          ctx.stroke()
+        }
       }
     }
     if (labels.length > 0) {

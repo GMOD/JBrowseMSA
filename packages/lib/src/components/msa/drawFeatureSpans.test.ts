@@ -173,3 +173,36 @@ test('a nested feature is drawn before the label of the one it sits in', () => {
     ),
   ).toEqual(['box@0', 'box@100', 'box@150', 'text:S', 'text:RBD', 'text:RBM'])
 })
+
+function strokesOf(start: number, end: number, strand?: number) {
+  let strokes = 0
+  const ctx = {
+    beginPath() {},
+    closePath() {},
+    fill() {},
+    moveTo() {},
+    lineTo() {},
+    fillRect() {},
+    stroke: () => strokes++,
+    strokeRect: () => strokes++,
+  } as unknown as RenderCtx
+  const a = annotation(start, end, strand)
+  drawFeatureSpans({
+    ctx,
+    rows: [{ y: 0, bands: [{ annotation: a, lane: 0, laneCount: 1 }] }],
+    layout,
+    xOf: b => [b.annotation.start, b.annotation.end],
+    colors: new Map([[a, { fill: '#fff', stroke: '#000' }]]),
+    contrastText: () => '#000',
+    xMin: -1000,
+    xMax: 1000,
+  })
+  return strokes
+}
+
+test('a span narrower than the outline would cover draws filled only', () => {
+  expect(strokesOf(100, 100.6)).toBe(0)
+  expect(strokesOf(100, 102, 1)).toBe(0)
+  expect(strokesOf(100, 104)).toBe(1)
+  expect(strokesOf(100, 120, 1)).toBe(1)
+})

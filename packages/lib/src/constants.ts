@@ -87,6 +87,10 @@ export const zoomFrameMaxLetters = 2000
 // sub-row band or a features panel over small rows
 export const minFeatureLabelHeight = 9
 
+// A feature span narrower than this many pixels draws no outline, whose 1px
+// stroke would cover most of it
+export const minOutlinedSpanWidth = 4
+
 export function fontSizeFor(rowHeight: number) {
   return Math.min(Math.max(6, rowHeight - 3), 18)
 }
