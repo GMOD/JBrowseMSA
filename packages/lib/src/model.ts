@@ -5784,4 +5784,8 @@ function stateModelFactory({
 export default stateModelFactory
 
 export type MsaViewStateModel = ReturnType<typeof stateModelFactory>
-export type MsaViewModel = Instance<MsaViewStateModel>
+// `type` is any view type name, so a host that composes MSAModelF() under its
+// own name hands its model to `MSAView` as it is
+export type MsaViewModel = Omit<Instance<MsaViewStateModel>, 'type'> & {
+  type: string
+}
